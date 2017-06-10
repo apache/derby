@@ -711,30 +711,45 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
              );
 
 	goodStatement( conn, "drop table t" );
-	goodStatement( conn, "create table t( A_6852 int generated always as identity(start with 7 increment by 2 cycle))" );
+	goodStatement( conn, "create table t( A_6852 int generated always as identity(start with 7 increment by 2 cycle), b_6852 int)" );
 		//SELECT from sys.syscolumns with cycle option
+        // ADDING AUTOINCREMENTCYCLE Derby-6905
+
 	assertResults
             (
              conn,
-             "select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME ='A_6852'",
+             "select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC, AUTOINCREMENTCYCLE from sys.syscolumns where COLUMNNAME ='A_6852'",
              new String[][]
              {
-                 { "7", "7", "2" },
+                 { "7", "7", "2", "true" },
+             },
+             false
+             );
+
+	assertResults
+            (
+             conn,
+             "select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC, AUTOINCREMENTCYCLE from sys.syscolumns where COLUMNNAME ='B_6852'",
+             new String[][]
+             {
+                 { null, null, null, "false" },
              },
              false
              );
 
 	goodStatement( conn, "drop table t" );
 		//SELECT from sys.syscolumns without cycle option
-	goodStatement( conn, "create table T_6852( A_6852 int generated always as identity(start with 7 increment by 2))" );
+        // ADDING AUTOINCREMENTCYCLE Derby-6905
+
+        goodStatement( conn, "create table T_6852( A_6852 int generated always as identity(start with 7 increment by 2))" );
 
 	assertResults
             (
              conn,
-             "select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME ='A_6852'",
+             "select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC,  AUTOINCREMENTCYCLE  from sys.syscolumns where COLUMNNAME ='A_6852'",
              new String[][]
              {
-                 { "7", "7", "2" },
+                 { "7", "7", "2", "false" },
              },
              false
              );
