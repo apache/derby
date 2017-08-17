@@ -1855,8 +1855,7 @@ public final class DataTypeDescriptor implements Formatable
             case Types.DECIMAL:
                 return
                 (getPrecision() <= typeId.getMaximumPrecision()) &&
-                (getScale() <= typeId.getMaximumScale()) &&
-                (getMaximumWidth() <= typeId.getMaximumMaximumWidth());
+                (getScale() <= typeId.getMaximumScale());
             default: break;
         }
         return true;
