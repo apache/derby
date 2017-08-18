@@ -182,6 +182,88 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
             new String[] {"VARCHAR", "INTEGER"});
     }
 
+    public void testDerby6956() throws Exception
+    {
+        Statement stmt = createStatement();
+
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST6956 " +
+                "(STRINGCOLUMN varchar(255), "+
+                " INTEGERCOLUMN integer, "+
+                " SHORTCOLUMN varchar(255), "+
+                " LONGCOLUMN bigint, "+
+                " DOUBLECOLUMN double, "+
+                " FLOATCOLUMN double, "+
+                " DECIMALCOLUMN decimal(31, 6), "+
+                " BOOLEANCOLUMN smallint, "+
+                " DATECOLUMN timestamp, "+
+                " DATETIMECOLUMN timestamp, "+
+                " ID integer, "+
+                " LASTMODTIME timestamp, "+
+                " PRIMARY KEY (ID))");
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST_TEMP6956 "+
+                "AS SELECT * FROM DERBYTEST6956 WITH NO DATA");
+
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST6956_A " +
+                "(STRINGCOLUMN varchar(255), "+
+                " INTEGERCOLUMN integer, "+
+                " SHORTCOLUMN varchar(255), "+
+                " LONGCOLUMN bigint, "+
+                " DOUBLECOLUMN double, "+
+                " FLOATCOLUMN double, "+
+                " DECIMALCOLUMN decimal(29, 6), "+
+                " BOOLEANCOLUMN smallint, "+
+                " DATECOLUMN timestamp, "+
+                " DATETIMECOLUMN timestamp, "+
+                " ID integer, "+
+                " LASTMODTIME timestamp, "+
+                " PRIMARY KEY (ID))");
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST_TEMP6956_A "+
+                "AS SELECT * FROM DERBYTEST6956_A WITH NO DATA");
+
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST6956_B " +
+                "(STRINGCOLUMN varchar(255), "+
+                " INTEGERCOLUMN integer, "+
+                " SHORTCOLUMN varchar(255), "+
+                " LONGCOLUMN bigint, "+
+                " DOUBLECOLUMN double, "+
+                " FLOATCOLUMN double, "+
+                " DECIMALCOLUMN decimal(31,31), "+
+                " BOOLEANCOLUMN smallint, "+
+                " DATECOLUMN timestamp, "+
+                " DATETIMECOLUMN timestamp, "+
+                " ID integer, "+
+                " LASTMODTIME timestamp, "+
+                " PRIMARY KEY (ID))");
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST_TEMP6956_B "+
+                "AS SELECT * FROM DERBYTEST6956_B WITH NO DATA");
+
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST6956_C " +
+                "(STRINGCOLUMN varchar(255), "+
+                " INTEGERCOLUMN integer, "+
+                " SHORTCOLUMN varchar(255), "+
+                " LONGCOLUMN bigint, "+
+                " DOUBLECOLUMN double, "+
+                " FLOATCOLUMN double, "+
+                " DECIMALCOLUMN decimal(31,0), "+
+                " BOOLEANCOLUMN smallint, "+
+                " DATECOLUMN timestamp, "+
+                " DATETIMECOLUMN timestamp, "+
+                " ID integer, "+
+                " LASTMODTIME timestamp, "+
+                " PRIMARY KEY (ID))");
+        stmt.executeUpdate(
+            "CREATE TABLE DERBYTEST_TEMP6956_C "+
+                "AS SELECT * FROM DERBYTEST6956_C WITH NO DATA");
+
+    }
+
     /**
      * Test error when base table does not exist.
      * @throws Exception
