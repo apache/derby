@@ -170,6 +170,8 @@ public class FilteredIssueLister {
         }
         reportDisqualifiedIssues =
                 Boolean.getBoolean(REPORT_DISQUALIFICATIONS_PROP);
+
+        printReleases();
     }
 
     /** Constructor for testing, where the Derby versions can be specified
@@ -292,6 +294,10 @@ public class FilteredIssueLister {
             DerbyVersion dv = allVersions[i];
             if (dv.isReleased()) {
                 releases.add(dv);
+            }
+            else
+            {
+                System.out.println(dv.toString() + " was NOT released.");
             }
         }
         Collections.sort(releases, new Comparator() {

@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.11.1.1</previousReleaseID>
+<previousReleaseID>10.13.1.1</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -47,7 +47,7 @@ with real information.
 <buildInfo>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Mac OSX 10.7.5.</machine>
+  <machine>Mac OSX 10.11.5.</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
   <antVersion>Apache Ant(TM) version 1.9.2 compiled on July 8 2013.</antVersion>
@@ -59,7 +59,7 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>All classes were compiled by the javac from the 1.8.0-b132 JDK, Java HotSpot(TM) 64-Bit Server VM (build 25.0-b70, mixed mode).</compilers>
+  <compilers>All classes were compiled by the javac from the 1.8.0_101 JDK, Java HotSpot(TM) 64-Bit Server VM (build 25.101-b13, mixed mode).</compilers>
 
 </buildInfo>
 
@@ -85,10 +85,10 @@ Derby functionality includes:
 </ul>
 
 <p>
-Support for Java SE 6 and Java SE 7 is being sunsetted. The 10.13 release family will not support those platforms. The 10.12 release family supports the following Java and JDBC versions:
+Support for Java SE 8 is being sunsetted and will not be supported by the next (10.15) release family. The 10.14 release family supports the following Java and JDBC versions:
 </p>
 <ul>
-  <li>Java SE 6 and higher with JDBC 4.0, 4.1, and 4.2.</li>
+  <li>Java SE 8 and higher with JDBC 4.2.</li>
   <li>Java SE 8 compact profile 2.</li>
 </ul>
 </overview>
@@ -101,13 +101,7 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>ALTER TABLE and identity columns</b> - The ALTER TABLE command can be used to add identity columns now. See the section on this statement in the Derby Reference Manual.</li>
-
-<li><b>Cache-monitoring MBean</b> - An MBean has been added for monitoring internal Derby caches. See the description of <i>CacheManagerMBean</i> in the "Introduction to the Derby MBeans" section of the Derby Server and Administration Guide.</li>
-
-<li><b>Optional Tool for Handling JSON Data</b> - An optional tool has been added for packing query results into JSON documents and for unpacking JSON documents into tabular result sets. See the section on the <i>simpleJson</i> optional tool in the Derby Tools and Utilities Guide.</li>
-
-<li><b>Statistics aggregates</b> - SQL Standard VAR_POP(), VAR_SAMP(), STDDEV_POP(), and STDDEV_SAMP() aggregates have been added. See the "Aggregates (set functions)" section in the Derby Reference Manual.</li>
+<li><b>ALTER TABLE cycling</b> - The ALTER TABLE command can now change the cycling behavior of auto-increment columns. See the section on this statement in the Derby Reference Manual.</li>
 
 </ul>
 

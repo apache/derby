@@ -367,13 +367,19 @@ public class ReleaseNotesGenerator extends GeneratorBase {
             "), Derby release " + releaseID + " introduces the following " +
             "new features " +
             "and incompatibilities. These merit your special attention.";
+        String noDetailedReleaseNotes = "No issues required detailed release notes.";
+        boolean deltaStatementPrinted = false;
 
-        addParagraph(issuesSection, deltaStatement);
         Element toc = createList(issuesSection);
 
         for (Iterator i=bugList.iterator(); i.hasNext(); ) {
             JiraIssue issue = (JiraIssue) i.next();
             if (issue.hasReleaseNote()) {
+                if (!deltaStatementPrinted)
+                {
+                    addParagraph(issuesSection, deltaStatement);
+                    deltaStatementPrinted = true;
+                }
                 Node summaryText = null;
                 Element details = null;
                 try {
@@ -405,6 +411,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
                 missingReleaseNotes.add(issue);
             }
         }
+        if (!deltaStatementPrinted) { addParagraph(issuesSection, noDetailedReleaseNotes); }
     }
 
     //////////////////////////////////
