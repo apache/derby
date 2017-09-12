@@ -1051,7 +1051,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		Statement s=createStatement();
 		ResultSet rs;
 
-		s.execute("alter table cycle1 alter column rec21 CYCLE");
+		s.execute("alter table cycle1 alter column rec21 set CYCLE");
 
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC, AUTOINCREMENTCYCLE " +
 				"       from sys.syscolumns where COLUMNNAME = 'REC21'");
@@ -1097,8 +1097,8 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("42X01",s,"alter table restartt1 alter column c12 restart with cycle");
 
         // c12 is not an autoincrement column:
-		assertStatementError("42837",s,"alter table restartt1 alter column c12 cycle");
-		assertStatementError("42837",s,"alter table restartt1 alter column c12 no cycle");
+		assertStatementError("42837",s,"alter table restartt1 alter column c12 set cycle");
+		assertStatementError("42837",s,"alter table restartt1 alter column c12 set no cycle");
 
         // Demonstrate that we can change column rec11 from NO CYCLE to CYCLE
         // and back to NO CYCLE, verifying by looking at SYSCOLUMNS:
@@ -1107,14 +1107,14 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		String[][]expectedRows = new String[][]{{"REC11","false"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
-        s.execute("alter table restartt1 alter column rec11 cycle");
+        s.execute("alter table restartt1 alter column rec11 set cycle");
 
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTCYCLE " +
                           "       from sys.syscolumns where COLUMNNAME = 'REC11'");
 		expectedRows = new String[][]{{"REC11","true"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
-        s.execute("alter table restartt1 alter column rec11 no cycle");
+        s.execute("alter table restartt1 alter column rec11 set no cycle");
 
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTCYCLE " +
                           "       from sys.syscolumns where COLUMNNAME = 'REC11'");

@@ -13733,6 +13733,7 @@ columnAlterClause(String columnName) throws StandardException :
 	long				autoIncrementRestartWith = 1;
 	DataTypeDescriptor	typeDescriptor = null;
 	int                 alterKind;
+    TableElementNode    identityAlteration;
 }
 {
 	LOOKAHEAD( {getToken(2).kind == DATA} )
@@ -13744,6 +13745,19 @@ columnAlterClause(String columnName) throws StandardException :
                                  null,
                                  typeDescriptor,
                                  null,
+                                 getContextManager());
+	}
+|
+	<RESTART> <WITH> autoIncrementRestartWith = exactNumber()
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementRestartWith;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE;
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
                                  getContextManager());
 	}
 |
@@ -13760,57 +13774,10 @@ columnAlterClause(String columnName) throws StandardException :
                                  getContextManager());
 	}
 |
-	LOOKAHEAD( {getToken(2).kind == INCREMENT} )
-	<SET> <INCREMENT> <BY> autoIncrementIncrement = exactNumber()
+	LOOKAHEAD( {(getToken(1).kind == SET) && (getToken(2).kind != _DEFAULT) && (getToken(2).kind != NOT)} )
+	<SET> identityAlteration = columnAlterIdentityClause(columnName)
 	{
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
-        return
-            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
-                                 columnName,
-                                 null,
-                                 null,
-                                 autoIncrementInfo,
-                                 getContextManager());
-	}
-|
-	<CYCLE> 
-	{
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 1;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
-        return
-            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
-                                 columnName,
-                                 null,
-                                 null,
-                                 autoIncrementInfo,
-                                 getContextManager());
-	}
-|
-	<NO> <CYCLE> 
-	{
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 0;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
-        return
-            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
-                                 columnName,
-                                 null,
-                                 null,
-                                 autoIncrementInfo,
-                                 getContextManager());
-	}
-|
-	<RESTART> <WITH> autoIncrementRestartWith = exactNumber()
-	{
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementRestartWith;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE;
-        return
-            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
-                                 columnName,
-                                 null,
-                                 null,
-                                 autoIncrementInfo,
-                                 getContextManager());
+        return identityAlteration;
 	}
 |
 	LOOKAHEAD( {getToken(1).kind == WITH || getToken(1).kind == _DEFAULT ||
@@ -13871,6 +13838,64 @@ columnAlterClause(String columnName) throws StandardException :
             null,
             null,
             getContextManager());
+	}
+}
+
+/*
+ * Various variants of the ALTER TABLE ALTER COLUMN SET statement.
+ *
+ * By the time we get here, we've parsed
+ *    ALTER TABLE tablename ALTER [COLUMN] columnname SET
+ *		INCREMENT BY increment_value
+ *      [NO] CYCLE
+ */
+TableElementNode
+columnAlterIdentityClause(String columnName) throws StandardException :
+{
+	ValueNode	defaultNode;
+	long[]				autoIncrementInfo = new long[5];
+	long				autoIncrementIncrement = 1;
+	long				autoIncrementCycle=0;
+	int                 alterKind;
+}
+{
+	<INCREMENT> <BY> autoIncrementIncrement = exactNumber()
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
+	}
+|
+	<CYCLE> 
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 1;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
+	}
+|
+	<NO> <CYCLE> 
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 0;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
 	}
 }
 
