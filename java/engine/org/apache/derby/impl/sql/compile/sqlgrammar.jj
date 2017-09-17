@@ -13874,6 +13874,7 @@ columnAlterIdentityClause(String columnName) throws StandardException :
 |
 	<CYCLE> 
 	{
+        checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, "ALTER TABLE ... SET CYCLE");
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 1;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
         return
@@ -13887,6 +13888,7 @@ columnAlterIdentityClause(String columnName) throws StandardException :
 |
 	<NO> <CYCLE> 
 	{
+        checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, "ALTER TABLE ... SET NO CYCLE");
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 0;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
         return
