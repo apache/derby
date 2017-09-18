@@ -80,6 +80,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 import org.apache.derby.impl.sql.compile.StatementNode;
@@ -94,6 +95,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 class AlterTableConstantAction extends DDLSingleTableConstantAction
  implements RowLocationRetRowSource
 {
+    private static final int RANGE_TOP = 0;
+    private static final int RANGE_BOTTOM = 1;
 
     // copied from constructor args and stored locally.
     private	    SchemaDescriptor			sd;
@@ -2230,6 +2233,43 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 {
                     currentValue = dd.peekAtIdentity( td.getSchemaName(), td.getName() );
                 }
+                
+                if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE)
+                {
+                    if (columnInfo[ix].autoincCycle)
+                    {
+                        // ALTER TABLE ALTER COLUMN $columnName SET CYCLE
+                        if (currentValue == null)
+                        {
+                            //
+                            // If the current value is NULL, then the sequence generator
+                            // is exhausted and it must have been a NO CYCLE generator,
+                            // which we are changing to CYCLE.
+                            // According to the 2016 SQL Standard, section 4.27.2
+                            // (Operations involving sequence generators),
+                            // the next value of the sequence generator should be the minimum value
+                            // (for an ascending sequence generator) or the maximum value
+                            // (for a descending sequence generator). See DERBY-6961.
+                            // This logic will have to change in the future if we
+                            // let users configure the maximum and minimum values of identity columns.
+                            //
+                            int topOrBottom = (columnInfo[ix].autoincInc > 0) ? RANGE_BOTTOM : RANGE_TOP;
+                            currentValue = getRangeBound(columnInfo[ix].dataType, topOrBottom);
+                        }
+                    }
+                    else
+                    {
+                        // ALTER TABLE ALTER COLUMN $columnName SET NO CYCLE
+                        //
+                        // If we are just about to issue the rollover value,
+                        // set it to NULL in order to prevent cycling.
+                        int topOrBottom = (columnInfo[ix].autoincInc > 0) ? RANGE_BOTTOM : RANGE_TOP;
+                        Long rolloverValue = getRangeBound(columnInfo[ix].dataType, topOrBottom);
+
+                        if ((currentValue != null) && (currentValue.equals(rolloverValue)))
+                        { currentValue = null; }
+                    }
+                }
 
                 DropTableConstantAction.dropIdentitySequence( dd, td, activation );
 
@@ -2256,7 +2296,41 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             }
         }
 	}
-	
+
+    /**
+     * Get the ran max or min range bound for an autoincrement column.
+     *
+     * @param dtd The type of the autoincrement column.
+     * @param topOrBottom RANGE_TOP or RANGE_BOTTOM
+     *
+     * @returns the top or bottom of the range
+     */
+    private long getRangeBound(DataTypeDescriptor dtd, int topOrBottom)
+        throws StandardException
+    {
+        TypeId typeId = dtd.getTypeId();
+        boolean bottom = (topOrBottom == RANGE_BOTTOM);
+        if (typeId == TypeId.SMALLINT_ID)
+        {
+            return (bottom ? Long.valueOf(Short.MIN_VALUE) : Long.valueOf(Short.MAX_VALUE));
+        }
+        else if (typeId == TypeId.INTEGER_ID)
+        {
+            return (bottom ? Long.valueOf(Integer.MIN_VALUE) : Long.valueOf(Integer.MAX_VALUE));
+        }
+        else // must be BIGINT
+        {
+            // but verify this is BIGINT in case someone adds
+            // a new numeric type in the future
+            if (typeId != TypeId.BIGINT_ID)
+            {
+                throw StandardException.newException( SQLState.NOT_IMPLEMENTED );
+            }
+
+            return (bottom ? Long.MIN_VALUE : Long.MAX_VALUE);
+        }
+    }
+  
 	/**
 	 * Change an identity from ALWAYS to BY DEFAULT (or vice versa)
 	 * 

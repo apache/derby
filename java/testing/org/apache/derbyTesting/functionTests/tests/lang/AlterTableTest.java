@@ -44,6 +44,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
     private static final String CANNOT_ALTER_NON_IDENTITY_COLUMN = "42Z29";
     private static final String CANNOT_MODIFY_ALWAYS_IDENTITY_COLUMN = "42Z23";
     private static final String DUPLICATE_KEY = "23505";
+    private static final String EXHAUSTED_IDENTITY_COLUMN = "2200H";
 
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -399,7 +400,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // Generated identity values cannot grow beyond the limits of
         // the data type.
         s.execute("insert into t0 values 1,2,3,4");
-        assertStatementError("2200H", s,
+        assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s,
                 "alter table t0 add column id smallint generated always as "
                 + "identity (start with 30000, increment by 1000)");
         rollback();
@@ -414,7 +415,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                     { "2", "31000" },
                     { "3", "32000" },
                 });
-        assertStatementError("2200H", s, "insert into t0(c1) values 4");
+        assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s, "insert into t0(c1) values 4");
         rollback();
 
         // Drop an identity column that was added with ALTER TABLE.
@@ -710,7 +711,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // Generated identity values cannot grow beyond the limits of
         // the data type.
         s.execute("insert into t0 values 1,2,3,4");
-        assertStatementError("2200H", s,
+        assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s,
                 "alter table t0 add column id smallint generated always as "
                 + "identity (start with 30000, increment by 1000)");
         rollback();
@@ -725,7 +726,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                     { "2", "31000" },
                     { "3", "32000" },
                 });
-        assertStatementError("2200H", s, "insert into t0(c1) values 4");
+        assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s, "insert into t0(c1) values 4");
         rollback();
 
         // Drop an identity column that was added with ALTER TABLE.
@@ -893,7 +894,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // Generated identity values cannot grow beyond the limits of
         // the data type.
         s.execute("insert into t0 values 1,2,3,4");
-        assertStatementError("2200H", s,
+        assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s,
                 "alter table t0 add column id smallint generated always as "
                 + "identity (start with 30000, increment by 1000)");
         rollback();
@@ -908,7 +909,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                     { "2", "31000" },
                     { "3", "32000" },
                 });
-        assertStatementError("2200H", s, "insert into t0(c1) values 4");
+        assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s, "insert into t0(c1) values 4");
         rollback();
 
         // Drop an identity column that was added with ALTER TABLE.
@@ -4847,4 +4848,321 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         goodStatement(conn, "drop table source_6882");
     }
     
+    /**
+     * Test the cycling behavior fixed by DERBY-6961:
+     * Exhausted identity columns should revive at the
+     * correct end of the legal range.
+     */
+    public void test_6961_setCycle() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // SMALLINT
+        vet_6961_cycling
+          (
+           conn,
+           "t_nc_smallint_asc",
+           "(\n" +
+           "  a smallint generated always as identity (start with 32766 no cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"32766", "1"},
+             {"32767", "2"},
+             {"-32768", "3"},
+           }
+           );
+        vet_6961_cycling
+          (
+           conn,
+           "t_nc_smallint_desc",
+           "(\n" +
+           "  a smallint generated always as identity (start with -32767 increment by -1 no cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"-32767", "1"},
+             {"-32768", "2"},
+             {"32767", "3"},
+           }
+           );
+
+        // INT
+        vet_6961_cycling
+          (
+           conn,
+           "t_nc_int_asc",
+           "(\n" +
+           "  a int generated always as identity (start with 2147483646 no cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"2147483646", "1"},
+             {"2147483647", "2"},
+             {"-2147483648", "3"},
+           }
+           );
+        vet_6961_cycling
+          (
+           conn,
+           "t_nc_int_desc",
+           "(\n" +
+           "  a int generated always as identity (start with -2147483647 increment by -1 no cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"-2147483647", "1"},
+             {"-2147483648", "2"},
+             {"2147483647", "3"},
+           }
+           );
+        
+        // BIGINT
+        vet_6961_cycling
+          (
+           conn,
+           "t_nc_bigint_asc",
+           "(\n" +
+           "  a bigint generated always as identity (start with 9223372036854775806 no cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"9223372036854775806", "1"},
+             {"9223372036854775807", "2"},
+             {"-9223372036854775808", "3"},
+           }
+           );
+        vet_6961_cycling
+          (
+           conn,
+           "t_nc_bigint_desc",
+           "(\n" +
+           "  a bigint generated always as identity (start with -9223372036854775807 increment by -1 no cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"-9223372036854775807", "1"},
+             {"-9223372036854775808", "2"},
+             {"9223372036854775807", "3"},
+           }
+           );
+    }
+    private void vet_6961_cycling
+      (
+       Connection conn,
+       String tableName,
+       String tableDefinition,
+       String[][] expectedFinalResults
+       )
+      throws Exception
+    {
+        goodStatement(conn, "create table " + tableName + " " + tableDefinition);
+        goodStatement(conn, "insert into " + tableName + "(b) values (1)");
+        goodStatement(conn, "insert into " + tableName + "(b) values (2)");
+
+        String nextInsert = "insert into " + tableName + "(b) values (3)";
+
+        // at first the insert fails because the sequence is exhausted
+        try (PreparedStatement ps = conn.prepareStatement(nextInsert))
+        {
+            assertPreparedStatementError
+              (
+               EXHAUSTED_IDENTITY_COLUMN,
+               ps
+               );
+        }
+
+        // now change the cycling behavior
+        goodStatement(conn, "alter table " + tableName + " alter column a set cycle");
+
+        // the insert should succeed
+        goodStatement(conn, nextInsert);
+
+        // verify the results
+        assertResults
+          (conn, "select * from " + tableName + " order by b", expectedFinalResults, false);
+    }
+
+    /**
+     * Test the cycling behavior fixed by DERBY-6961:
+     * Identity columns which are about to rollover
+     * should be arrested if the column is set to NO CYCLE.
+     */
+    public void test_6961_setNoCycle() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // SMALLINT
+        vet_6961_noCycling
+          (
+           conn,
+           "t_c_smallint_asc",
+           "(\n" +
+           "  a smallint generated always as identity (start with 32766 cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"32766", "1"},
+             {"32767", "2"},
+           }
+           );
+        vet_6961_noCycling
+          (
+           conn,
+           "t_c_smallint_desc",
+           "(\n" +
+           "  a smallint generated always as identity (start with -32767 increment by -1 cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"-32767", "1"},
+             {"-32768", "2"},
+           }
+           );
+
+        // INT
+        vet_6961_noCycling
+          (
+           conn,
+           "t_c_int_asc",
+           "(\n" +
+           "  a int generated always as identity (start with 2147483646 cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"2147483646", "1"},
+             {"2147483647", "2"},
+           }
+           );
+        vet_6961_noCycling
+          (
+           conn,
+           "t_c_int_desc",
+           "(\n" +
+           "  a int generated always as identity (start with -2147483647 increment by -1 cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"-2147483647", "1"},
+             {"-2147483648", "2"},
+           }
+           );
+        
+        // BIGINT
+        vet_6961_noCycling
+          (
+           conn,
+           "t_c_bigint_asc",
+           "(\n" +
+           "  a bigint generated always as identity (start with 9223372036854775806 cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"9223372036854775806", "1"},
+             {"9223372036854775807", "2"},
+           }
+           );
+        vet_6961_noCycling
+          (
+           conn,
+           "t_c_bigint_desc",
+           "(\n" +
+           "  a bigint generated always as identity (start with -9223372036854775807 increment by -1 cycle),\n" +
+           "  b int\n" +
+           ")\n",
+           new String[][]
+           {
+             {"-9223372036854775807", "1"},
+             {"-9223372036854775808", "2"},
+           }
+           );
+    }
+
+    private void vet_6961_noCycling
+      (
+       Connection conn,
+       String tableName,
+       String tableDefinition,
+       String[][] expectedFinalResults
+       )
+      throws Exception
+    {
+        goodStatement(conn, "create table " + tableName + " " + tableDefinition);
+        goodStatement(conn, "insert into " + tableName + "(b) values (1)");
+        goodStatement(conn, "insert into " + tableName + "(b) values (2)");
+
+        // we are now at the rollover point.
+        // change the cycling behavior
+        goodStatement(conn, "alter table " + tableName + " alter column a set no cycle");
+
+        // the insert should now fail
+        String nextInsert = "insert into " + tableName + "(b) values (3)";
+        try (PreparedStatement ps = conn.prepareStatement(nextInsert))
+        {
+            assertPreparedStatementError
+              (
+               EXHAUSTED_IDENTITY_COLUMN,
+               ps
+               );
+        }
+
+        // verify the results
+        assertResults
+          (conn, "select * from " + tableName + " order by b", expectedFinalResults, false);
+    }
+
+    /**
+     * Test that rolling back an ALTER TABLE...SET NO CYCLE
+     * command allows the identity column to continue cycling.
+     */
+    public void test_6961_rollback() throws Exception
+    {
+        Connection conn = getConnection();
+        boolean originalAutocommit = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+
+        goodStatement
+          (
+           conn,
+           "create table t_c_6961_rollback\n" +
+           "(a int generated always as identity (start with 2147483646 cycle), b int)"
+           );
+        conn.commit();
+
+        goodStatement(conn, "insert into t_c_6961_rollback(b) values (1)");
+        goodStatement(conn, "insert into t_c_6961_rollback(b) values (2)");
+        conn.commit();
+
+        goodStatement(conn, "alter table t_c_6961_rollback alter column a set no cycle");
+        conn.rollback();
+
+        goodStatement(conn, "insert into t_c_6961_rollback(b) values (3)");
+
+        assertResults
+          (
+           conn,
+           "select * from t_c_6961_rollback order by b",
+           new String[][]
+           {
+             {"2147483646", "1"},
+             {"2147483647", "2"},
+             {"-2147483648", "3"},
+           },
+           false
+           );
+        conn.commit();
+        
+        conn.setAutoCommit(originalAutocommit);
+    }
 }
