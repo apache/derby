@@ -8,7 +8,7 @@
 =========================================================================
 
 Apache Derby
-Copyright 2004-2015 The Apache Software Foundation
+Copyright 2004-2017 The Apache Software Foundation
 
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
@@ -40,18 +40,6 @@ International Business Machines Corporation in accordance with the NIST
 Software Acknowledgment and Redistribution document at
 http://www.itl.nist.gov/div897/ctg/sql_form.htm
 
-
-
-=========================================================================
-
-
-Derby uses the  SerialBlob and SerialClob implementations from the Apache
-Harmony project. The following notice covers the Harmony sources:
-
-Portions of Harmony were originally developed by
-Intel Corporation and are licensed to the Apache Software
-Foundation under the "Software Grant and Corporate Contribution
-License Agreement", informally known as the "Intel Harmony CLA".
 
 
 =========================================================================
