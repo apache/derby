@@ -3188,8 +3188,6 @@ you should not have to do this.
 
       <exec executable="svn">
         <arg value="copy"/>
-        <arg value="-r"/>
-        <arg value="${startingRevision}"/>
         <arg value="${sourceURL}"/>
         <arg value="${targetURL}"/>
         <arg value="-m"/>
