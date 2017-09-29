@@ -100,7 +100,8 @@ public final class PageKey
 
 	public String toString() {
 		//return "Page(" + pageNumber + "," + container.toString() + ")";
-		return "Could not read page " + pageNumber + " from segment " + container.getSegmentId() + "of container " + container.getContainerId();
+		return "Could not read page " + pageNumber + " from segment " 
+			+ container.getSegmentId() + "of container " + container.getContainerId();
 	}
 
 }
