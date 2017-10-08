@@ -3576,12 +3576,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
                 {"2", "VC10", "12", "VARCHAR", "10", null, null, "1"}
         };
-        JDBC.assertFullResultSet(rs[0], expRS, true);
+        JDBC.assertUnorderedResultSet(rs[0], expRS, true);
         // set buffer_length expected for ODBC; for most of the simple 
         // tables/rows in our test it's "4" so set in verifyBRIResults
         expRS[0][5] = "4";
         expRS[1][5] = "20";
-        JDBC.assertFullResultSet(rs[1], expRS, true);
+        JDBC.assertUnorderedResultSet(rs[1], expRS, true);
         
         // test DERBY-2610 for fun; can't pass in null table name      
         try {
@@ -3597,10 +3597,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         expRS = new String [][] {
                 {"2", "TABLEID", "1", "CHAR", "36", null, null, "1"}
         };
-        JDBC.assertFullResultSet(rs[0], expRS, true);
+        JDBC.assertUnorderedResultSet(rs[0], expRS, true);
         // set buffer_length expected for ODBC
         expRS[0][5] = "72";
-        JDBC.assertFullResultSet(rs[1], expRS, true);
+        JDBC.assertUnorderedResultSet(rs[1], expRS, true);
         
         getConnection().setAutoCommit(true);
         
