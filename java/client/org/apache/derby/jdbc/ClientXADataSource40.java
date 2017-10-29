@@ -21,6 +21,9 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.ShardingKeyBuilder;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import javax.sql.XADataSource;
 
 /**
@@ -35,5 +38,12 @@ import javax.sql.XADataSource;
 public class ClientXADataSource40 extends ClientXADataSource
     implements XADataSource /* compile-time check for 4.1 extension */
 {
-   private static final long serialVersionUID = -3463444509507830926L;
+    private static final long serialVersionUID = -3463444509507830926L;
+
+    /** Added by Java 9 */
+    public ShardingKeyBuilder createShardingKeyBuilder()
+        throws SQLException
+    {
+        throw new java.sql.SQLFeatureNotSupportedException();
+    }
 }

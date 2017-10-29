@@ -21,13 +21,26 @@
 
 package org.apache.derbyBuild.javadoc;
 
-import com.sun.tools.doclets.Taglet;
-import com.sun.javadoc.*;
+import jdk.javadoc.doclet.Taglet;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.TextTree;
+import com.sun.source.doctree.UnknownBlockTagTree;
+import com.sun.source.doctree.UnknownInlineTagTree;
+import com.sun.source.util.SimpleDocTreeVisitor;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import javax.lang.model.element.Element;
 
-public class DiskLayoutTaglet implements Taglet {
-    private String NAME = "derby.diskLayout";
-    private String ROWNAME = "Disk Layout";
+public class DiskLayoutTaglet implements Taglet
+{
+    private static final String NAME = "derby.diskLayout";
+    private static final String ROWNAME = "Disk Layout";
+    private static final EnumSet<Location> allowedSet = EnumSet.allOf(Location.class);
+
+    private static final DerbyDocTreeVisitor dummyVisitor = new DerbyDocTreeVisitor();
+  
     /**
      * Returns the name of this taglet
      * @return NAME
@@ -36,53 +49,10 @@ public class DiskLayoutTaglet implements Taglet {
         return NAME;
     }
 
-    /**
-     * disk_layout not expected to be used in field documentation.
-     * @return false
-     */
-    public boolean inField() {
-        return false;
-    }
-
-    /**
-     * disk_layout not expected to be used in constructor documentation.
-     * @return false
-     */
-    public boolean inConstructor() {
-        return false;
-    }
-
-    /**
-     * disk_layout not expected to be used in constructor documentation.
-     * @return false
-     */
-    public boolean inMethod() {
-        return false;
-    }
-
-    /**
-     * disk_layout can be used in overview documentation.
-     * @return true
-     */
-    public boolean inOverview() {
-        return true;
-    }
-
-    /**
-     * disk_layout can be used in package documentation.
-     * @return true
-     */
-    public boolean inPackage() {
-        return true;
-    }
-
-    /**
-     * disk_layout can be used in type documentation.
-     * @return true
-     */
-    public boolean inType() {
-        return true;
-    }
+    @Override
+    public Set<Taglet.Location> getAllowedLocations() {
+        return allowedSet;
+     }
 
     /**
      * disk_layout is not an inline tag.
@@ -93,45 +63,60 @@ public class DiskLayoutTaglet implements Taglet {
     }
 
     /**
-     * Register this Taglet.
-     * @param tagletMap
-     */
-    public static void register(Map<String, Taglet> tagletMap) {
-       DiskLayoutTaglet tag = new DiskLayoutTaglet();
-       Taglet t = (Taglet) tagletMap.get(tag.getName());
-       if (t != null) {
-           tagletMap.remove(tag.getName());
-       }
-       tagletMap.put(tag.getName(), tag);
-    }
-
-    /**
      * Embed the contents of the disk_layout tag as a row
      * in the disk format table. Close the table.
      * @param tag The tag to embed to the disk format the table.
      */
-    public String toString(Tag tag) {
+    public String toString(DocTree tag) {
         return "<tr><td>" + ROWNAME + "</td>"
-               + "<td>" + tag.text() + "</td></tr></table>\n";
+          + "<td>" + getText(tag) + "</td></tr></table>\n";
     }
 
     /**
      * Embed multiple disk_layout tags as cells in the disk format table.
      * Close the table.
      * @param tags An array of tags to add to the disk format table.
+     * @param element the element to which the enclosing comment belongs
      */
-    public String toString(Tag[] tags) {
-        if (tags.length == 0) {
+    public String toString(List<? extends DocTree> tags, Element element)
+    {
+        if ((tags == null) || (tags.size() == 0)) {
             return null;
         }
         String result = "<tr><td>" + ROWNAME + "</td><td>" ;
-        for (int i = 0; i < tags.length; i++) {
+        for (int i = 0; i < tags.size(); i++) {
             if (i > 0) {
                 result += "";
             }
-            result += tags[i].text() + "</td></tr>";
+            result += getText(tags.get(i)) + "</td></tr>";
         }
         return result + "</table></dt>\n";
     }
+
+    static class DerbyDocTreeVisitor extends SimpleDocTreeVisitor<String, Void>
+    {
+        @Override
+        public String visitUnknownBlockTag(UnknownBlockTagTree node, Void p)
+        {
+            for (DocTree dt : node.getContent()) { return dt.accept(this, null); }
+            return "";
+        }
+
+        @Override
+        public String visitUnknownInlineTag(UnknownInlineTagTree node, Void p)
+        {
+            for (DocTree dt : node.getContent()) { return dt.accept(this, null); }
+            return "";
+        }
+
+        @Override
+        public String visitText(TextTree node, Void p) { return node.getBody(); }
+
+        @Override
+        protected String defaultAction(DocTree node, Void p) { return ""; }
+    }
+
+    static String getText(DocTree dt) { return dummyVisitor.visit(dt, null); }
+
 }
 

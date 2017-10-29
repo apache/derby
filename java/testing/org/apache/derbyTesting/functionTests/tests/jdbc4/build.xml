@@ -68,7 +68,7 @@
         </javac>
     </target>	
 
-    <target name="compile_jdbc42" if="vmLevelIsAtLeast1.8">
+    <target name="compile_jdbc42">
         <javac
           source="${min.version}"
           target="${min.version}"
@@ -96,10 +96,6 @@
         </copy>
     </target>
     
-    <target name="compile" depends="checkVMLevel,compile_jdbc4,compile_jdbc42"/>
-
-    <target name="checkVMLevel">
-      <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
-    </target>
+    <target name="compile" depends="compile_jdbc4,compile_jdbc42"/>
 
 </project>

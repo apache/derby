@@ -143,24 +143,12 @@
     <property name="showenv.done" value="true"/>
   </target>
 
-  <!--  Make sure compiler level is Java 6 level or higher -->
+  <!--  Make sure compiler level is Java 8 level or higher -->
   <target name="checkCompilerLevel">
 
-    <available property="compilerAtCorrectLevel" classname="java.sql.SQLType"/>
-    <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 8 or later."/>
-
-    <antcall target="checkVMLevel"/>
+    <available property="compilerAtCorrectLevel" classname="java.sql.ShardingKey"/>
+    <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 9 or later."/>
     
-  </target>
-
-  <!-- checkVMLevel:
-       This target determines to some degree the JVM version used to run ant.
-       The resulting properties will indicate the VM level, and may for instance
-       be checked before running junit tests requiring a certain JVM version.
-  -->
-  <target name="checkVMLevel">
-    <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
-    <available classname="java.sql.ShardingKey" property="vmLevelIsAtLeast1.9" value="true"/>
   </target>
 
 <!-- ==================================================================== -->
@@ -1057,7 +1045,6 @@
     <antcall target="exclude-from-javadoc">
       <param name="more_exclusions" value="derbydocs_exclusions.ant"/>
     </antcall>
-    <antcall target="exclude-java8-from-javadoc"/>
 
     <javadoc
         additionalparam="-J-mx500M"
@@ -1133,15 +1120,6 @@
     </concat>
   </target>
 
-  <!--
-     Exclude Java 8 support from the javadoc if using Java 7 or earlier.
-  -->
-  <target name="exclude-java8-from-javadoc" depends="checkVMLevel" unless="vmLevelIsAtLeast1.8">
-    <antcall target="exclude-from-javadoc">
-      <param name="more_exclusions" value="derbydocs_java8_exclusions.ant"/>
-    </antcall>
-  </target>
-
   <target name="toolsdocs">
 
     <delete dir="${out.javadoc.dir}/tools"/>
@@ -1205,7 +1183,6 @@
     <antcall target="exclude-from-javadoc">
       <param name="more_exclusions" value="derbydocs_exclusions.ant"/>
     </antcall>
-    <antcall target="exclude-java8-from-javadoc"/>
 
     <javadoc
        additionalparam="-J-mx500M"
@@ -1309,7 +1286,7 @@
 
 <!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
 
-  <target name="derbyjar" depends="checkVMLevel,initjars">
+  <target name="derbyjar" depends="initjars">
 
     <echo level="info" message="Beginning derby.jar ${sanity.name} build"/>
 
@@ -1634,7 +1611,7 @@
 
 <!-- - - - - - - - - - - - - - derbyclient.jar target - - - - - - - - -->
 
- <target name="derbyclientjar" depends="checkVMLevel,setsanityname,initjars">
+ <target name="derbyclientjar" depends="setsanityname,initjars">
 
     <echo level="info" message="Beginning derbyclient.jar ${sanity.name} build"/>
 
@@ -1713,7 +1690,7 @@
 
 
   <!-- Add extra classes to jar file if building for Java 8 -->
-  <target name="derbyclientjar.1.8" if="vmLevelIsAtLeast1.8">
+  <target name="derbyclientjar.1.8">
     <concat destfile="${derby.jar.dir}/lists/dnc.properties" append="true">
       <fileset file="${basedir}/tools/jar/dnc.1.8.properties" />
     </concat>
@@ -2462,7 +2439,7 @@
          </junit>
   </target>
 	  
-  <target name="junit-jdbc4" depends="checkVMLevel,junit-init">
+  <target name="junit-jdbc4" depends="junit-init">
     <antcall target="junit-jdbc4-workhorse"/>
   </target>
 
@@ -2496,7 +2473,7 @@
   </target>
 
   <!-- low memory suite runs with 16MB heap  -->
-  <target name="junit-lowmem"  depends="checkVMLevel,junit-init" if="vmLevelIsAtLeast1.5">
+  <target name="junit-lowmem"  depends="junit-init">
   	 <junit printsummary="on"
            fork="yes" forkmode="perTest"
            jvm="${derby.junit.jvm}" maxmemory="16m"
@@ -2523,8 +2500,8 @@
       </junit>	
   </target>
 
-  <!-- Runs Derby's JMX tests if the required VM level (1.5 or higher) is detected -->
-  <target name="junit-jmx" depends="checkVMLevel,junit-init" if="vmLevelIsAtLeast1.5">
+  <!-- Runs Derby's JMX tests -->
+  <target name="junit-jmx" depends="junit-init">
     <junit  printsummary="on"
             fork="yes" forkmode="once"
             showoutput="yes"

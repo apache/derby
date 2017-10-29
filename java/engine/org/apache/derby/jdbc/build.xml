@@ -33,7 +33,7 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="jdbc" depends="checkVMLevel,compile_jdbc4,compile_jdbc42"/>
+  <target name="jdbc" depends="compile_jdbc4,compile_jdbc42"/>
 
   <target name="compile_jdbc4" >
     <javac
@@ -54,7 +54,7 @@
     </javac>
   </target>
 
-  <target name="compile_jdbc42" if="vmLevelIsAtLeast1.8">
+  <target name="compile_jdbc42" >
     <javac
       source="${min.version}"
       target="${min.version}"
@@ -71,10 +71,6 @@
         <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target> 
-
-  <target name="checkVMLevel">
-    <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
-  </target>
 
 </project>
 

@@ -86,11 +86,7 @@
 </target> 
   
 <!-- default target  -->
-  <target name="client" depends="checkVMLevel, compile, compile_jdbc42"/>
-
-  <target name="checkVMLevel">
-    <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
-  </target>
+  <target name="client" depends="compile, compile_jdbc42"/>
 
 </project>
 

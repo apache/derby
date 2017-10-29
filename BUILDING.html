@@ -42,11 +42,7 @@ limitations under the License.
   <li><a href="#Testing Derby">Testing Derby</a></li>
   </ul>
 </li>
-<li><a href="#Customized Build">Customized Build</a>
-  <ul>
-  <li><a href="#Advanced Build">Advanced Build</a></li>
-  </ul>
-</li>
+<li><a href="#Customized Build">Customized Build</a></li>
 </ul>
 
 <br/><br/><br/><hr color="blue"/>
@@ -84,7 +80,7 @@ If you are reading these instructions, chances
 
     <TR>
       <TD><b><i>Java Development Kit</i></b></TD>
-      <TD>You need to install a Java 8 JDK. Probably, your machine
+      <TD>You need to install a Java 9 JDK. Probably, your machine
       already has this JDK. If not, Oracle and IBM supply free JDKs for many machines.</TD>
     </TR>
 
@@ -135,7 +131,7 @@ test harness also:
 Before building Derby, cd
 to the root of your Derby source distribution. That is the top level
 directory which contains the LICENSE and NOTICE files. In addition,
-make sure that the version of Java which you are using is Java 8. You can verify this by checking the output of the following command:
+make sure that the version of Java which you are using is Java 9. You can verify this by checking the output of the following command:
 </p>
 
 <blockquote>
@@ -172,8 +168,7 @@ ant -quiet clobber
     <TR>
       <TD><b><i>buildsource</i></b></TD>
       <TD>This target compiles all source files needed for the Derby
-      product. Don't be alarmed by all of the compiler warnings. We'll
-      show you how to tidy those up <a href="#Customized Build">later on</a>.
+      product.
       </TD>
       <TD>
 <blockquote>
@@ -402,128 +397,6 @@ junit=/local0/junit.jar
 
 <br/>
 <br/>
-<blockquote>
-
-<h3><a name="Advanced Build">Advanced Build</a></h3>
-
-<p>
-Derby is supposed to run in the following environment:
-</p>
-
-<TABLE border="2">
-  <TBODY>
-
-    <TR>
-      <TD><b>Platform</b></TD>
-      <TD><b>JDBC Level</b></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>Java 8</i></b></TD>
-      <TD><b><i>JDBC 4.2</i></b></TD>
-    </TR>
-
-  </TBODY>
-</TABLE>
-
-<br/>
-<p>
-The default Derby build does NOT necessarily verify that the compile-time contract is
-satisfied for this platform. To get compile-time checks, you
-need to make sure that the following variable is set correctly. To
-see the value which the Derby build uses for this variable, build
-Derby after setting the
-following debug variable in your <i>ant.properties</i>:
-</p>
-
-<blockquote>
-<pre><b><font color="blue" size="+2">
-printCompilerProperties=true
-</font></b></pre>
-</blockquote>
-
-<br/>
-<p>
-Here is the variable which determines whether the Derby build
-enforces compile-time contracts for the supported platform:
-</p>
-
-<TABLE border="2">
-  <TBODY>
-
-    <TR>
-      <TD><b>Platform</b></TD>
-      <TD><b>Compiler Variable</b></TD>
-      <TD><b>Description</b></TD>
-      <TD><b>Default Value</b></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>Java 8</i></b></TD>
-      <TD><b><i>java18compile.classpath</i></b></TD>
-      <TD>The set of libraries in the Java 8 JDK. The build fails if
-      your environment isn't a Java 8 JDK.</TD>
-      <TD>The set of system jars in your JDK if your environment is
-      JDK 8. Otherwise,
-      the build fails.</TD>
-    </TR>
-
-  </TBODY>
-</TABLE>
-
-<br/>
-<p>
-The preceding variable is mandatory for the Derby build.
-You can also force the setting of the preceding variable by setting the following optional
-library variable in <i>ant.properties</i>:
-</p>
-
-<TABLE border="2">
-  <TBODY>
-
-    <TR>
-      <TD><b>Compiler Variable</b></TD>
-      <TD><b>Description</b></TD>
-      <TD><b>Default Value</b></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>j18lib</i></b></TD>
-      <TD>If you set this variable to be the directory which contains
-      your Java 8 jars, then the Derby build will set
-      <i>java18compile.classpath</i> to be the list of jars in that directory.
-      </TD>
-      <TD>Optional variable. No default value.</TD>
-    </TR>
-
-  </TBODY>
-</TABLE>
-
-<br/>
-<p>
-Here, for instance, are some sample settings of classpath
-variables (you should omit the \ continuation markers, which are
-included in these examples
-simply to improve readability):
-</p>
-
-<blockquote>
-<pre><b><font color="blue" size="+2">
-java18compile.classpath =
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/charsets.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/deploy.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/htmlconverter.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/javaws.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/jce.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/jfr.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/jfxswt.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/jsse.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/management-agent.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/plugin.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/resources.jar: \
-    /Library/Java/JavaVirtualMachines/jdk1.8.0.jdk/Contents/Home/jre/lib/rt.jar
-</font></b></pre>
-</blockquote>
 
 </blockquote>
 
