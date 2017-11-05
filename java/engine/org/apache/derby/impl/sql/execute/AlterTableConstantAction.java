@@ -2303,7 +2303,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      * @param dtd The type of the autoincrement column.
      * @param topOrBottom RANGE_TOP or RANGE_BOTTOM
      *
-     * @returns the top or bottom of the range
+     * @return the top or bottom of the range
      */
     private long getRangeBound(DataTypeDescriptor dtd, int topOrBottom)
         throws StandardException
