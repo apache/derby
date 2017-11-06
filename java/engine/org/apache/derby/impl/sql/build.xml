@@ -92,7 +92,7 @@
       source="${min.version}"
       target="${min.version}"
       nowarn="on"
-      debug="${debug}"
+      debug="${debug}" debuglevel="${debuglevel}"
       depend="${depend}"
       deprecation="${deprecation}"
       optimize="${optimize}"

@@ -392,6 +392,29 @@ junit=/local0/junit.jar
       </TD>
     </TR>
 
+    <TR>
+      <TD><b><i>debuglevel</i></b></TD>
+      <TD>Setting this property will overwrite the debug level of the
+      javac compilation. By default, sane (debug) builds compile with debug level
+      "lines,source,vars", that is, all debugging information. In
+      contrast, insane (production) builds compile with debug level
+        "lines,source", that is, just enough debugging information to
+      annotate stack traces with line numbers. If you set this
+      variable to "none" and do an insane (production) build, then no
+      debugging information will be produced and the jar files will be
+      as slim as possible.
+      </TD>
+      <TD><blockquote><i>lines,source,vars</i></blockquote></TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+sane=false
+debuglevel=none
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
   </TBODY>
 </TABLE>
 
