@@ -438,12 +438,10 @@ public final class	DataDictionaryImpl
     private boolean indexStatsUpdateLogging;
     private String indexStatsUpdateTracing;
 
-	//systemSQLNameNumber is the number used as the last digit during the previous call to getSystemSQLName.
-	//If it is 9 for a given calendarForLastSystemSQLName, we will restart the counter to 0
-	//and increment the calendarForLastSystemSQLName by 10ms.
-	private int systemSQLNameNumber;
-	private GregorianCalendar calendarForLastSystemSQLName = new GregorianCalendar();
-	private long timeForLastSystemSQLName;
+    // Used for generating system names which are strictly increasing
+    // within a VM instance. This ordering is purely in order to preserve
+    // deterministic results in the regression tests.
+    private int systemSQLNameSeed = 0;
 	
 	/**
 	 * List of procedures in SYSCS_UTIL schema with PUBLIC access
@@ -10067,83 +10065,31 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
-	  *	Returns a unique system generated name of the form SQLyymmddhhmmssxxn
-	  *	  yy - year, mm - month, dd - day of month, hh - hour, mm - minute, ss - second,
-	  *	  xx - the first 2 digits of millisec because we don't have enough space to keep the exact millisec value,
-	  *	  n - number between 0-9
-	  *
-	  *	  The number at the end is to handle more than one system generated name request came at the same time.
-	  *	  In that case, the timestamp will remain the same, we will just increment n at the end of the name.
-	  *
-	  *	  Following is how we get around the problem of more than 10 system generated name requestes at the same time:
-	  *	  When the database boots up, we start a counter with value -1 for the last digit in the generated name.
-	  *	  We also keep the time in millisec to keep track of when the last system name was generated. At the
-	  *	  boot time, it will be default to 0L. In addition, we have a calendar object for the time in millisec
-	  *	  That calendar object is used to fetch yy, mm, dd, etc for the string SQLyymmddhhmmssxxn
-	  *
-	  *	  When the first request for the system generated name comes, time of last system generated name will be less than
-	  *	  the current time. We initialize the counter to 0, set the time of last system generated name to the
-	  *	  current time truncated off to lower 10ms time. The first name request is the only time we know for sure the
-	  *	  time of last system generated name will be less than the current time. After this first request, the next request
-	  *	  could be at any time. We go through the following algorithm for every generated name request.
-	  *
-	  *	  First check if the current time(truncated off to lower 10ms) is greater than the timestamp for last system generated name
-	  *
-	  *	    If yes, then we change the timestamp for system generated name to the current timestamp and reset the counter to 0
-	  *	    and generate the name using the current timestamp and 0 as the number at the end of the generated name.
-	  *
-	  *	    If no, then it means this request for generated name has come at the same time as last one.
-	  *	    Or it may come at a time less than the last generated name request. This could be because of seasonal time change
-	  *	    or somebody manually changing the time on the computer. In any case,
-	  *	    if the counter is less than 10(meaning this is not yet our 11th request for generated name at a given time),
-	  *	    we use that in the generated name. But if the counter has reached 10(which means, this is the 11th name request
-	  *	    at the same time), then we increment the system generated name timestamp by 10ms and reset the counter to 0
-	  *	    (notice, at this point, the timestamp for system generated names is not in sync with the real current time, but we
-	  *	    need to have this mechanism to get around the problem of more than 10 generated name requests at a same physical time).
+	  *	Returns a unique system generated name.
 	  *
 	  *	@return	system generated unique name
 	  */
 	public String getSystemSQLName()
 	{
-		StringBuffer generatedSystemSQLName = new StringBuffer("SQL");
-			synchronized (this) {
-				//get the current timestamp
-				long timeNow = (System.currentTimeMillis()/10L)*10L;
+        // We don't worry about race conditions when accessing
+        // the seed. It does not contribute anything to the uniqueness
+        // of the identifiers. It is merely there to guarantee deterministic
+        // ordering of names in the regression tests.
+        int seed = systemSQLNameSeed++;
+        if (seed < 0)
+        {
+          seed = 0;
+          systemSQLNameSeed = seed;
+        }
+        String expandedSeed = String.format("%010d", seed);
 
-				//if the current timestamp is greater than last constraint name generation time, then we reset the counter and
-				//record the new timestamp
-				if (timeNow > timeForLastSystemSQLName) {
-					systemSQLNameNumber = 0;
-					calendarForLastSystemSQLName.setTimeInMillis(timeNow);
-					timeForLastSystemSQLName = timeNow;
-				} else { 
-					//the request has come at the same time as the last generated name request
-					//or it has come at a time less than the time the last generated name request. This can happen
-					//because of seasonal time change or manual update of computer time.
-          
-					//get the number that was last used for the last digit of generated name and increment it by 1.
-					systemSQLNameNumber++;
-					if (systemSQLNameNumber == 10) { //we have already generated 10 names at the last system generated timestamp value
-						//so reset the counter
-						systemSQLNameNumber = 0;
-						timeForLastSystemSQLName = timeForLastSystemSQLName + 10L;
-						//increment the timestamp for system generated names by 10ms
-                        calendarForLastSystemSQLName.setTimeInMillis(timeForLastSystemSQLName);
-					}
-				}
-
-				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.YEAR)));
-				//have to add 1 to the month value returned because the method give 0-January, 1-February and so on and so forth
-				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.MONTH)+1));
-				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.DAY_OF_MONTH)));
-				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.HOUR_OF_DAY)));
-				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.MINUTE)));
-				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.SECOND)));
-				//because we don't have enough space to store the entire millisec value, just store the higher 2 digits.
-				generatedSystemSQLName.append(twoDigits((int) (calendarForLastSystemSQLName.get(Calendar.MILLISECOND)/10)));
-				generatedSystemSQLName.append(systemSQLNameNumber);
-			}
-		return generatedSystemSQLName.toString();
+        //
+        // Final string has the form:
+        //
+        //   SQL0123456789-a816c00e-015f-ac0f-670f-0000033bdb30
+        //
+        
+        return "SQL" + expandedSeed + "-" + uuidFactory.createUUID().toString();
 	}
 
 	private static String twoDigits(int val) {

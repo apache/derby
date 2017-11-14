@@ -120,11 +120,15 @@ public class Sed
         searchStrings.addElement("Directory .*connect.wombat.seg0");
         //DERBY-4588 - filter out specific class and object id
         searchStrings.addElement("with class loader .*,");
-        
-        // Filter for constraint names - bug 5622 - our internal constraint names are too long. To be db2 compatible, we have reworked them.
+
+        //
+        // Original comment:
+        // "Filter for constraint names - bug 5622 - our internal constraint names are too long.
+        // To be db2 compatible, we have reworked them."
+        // The db2-compatibility caused name collisions and was removed with DERBY-6977.
+        //
         StringBuffer constraintNameFilter = new StringBuffer(); 
-        constraintNameFilter.append("SQL[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]");
-        searchStrings.addElement(constraintNameFilter.toString());
+        constraintNameFilter.append("SQL[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-");
         // Filter for uuids
         StringBuffer uuidFilter = new StringBuffer();
         uuidFilter.append("[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-");
@@ -132,6 +136,11 @@ public class Sed
         uuidFilter.append("[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-");
         uuidFilter.append("[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-");
         uuidFilter.append("[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]");
+
+        // generated constraint names now end in a UUID (see DERBY-6977)
+        constraintNameFilter.append(uuidFilter.toString());
+
+        searchStrings.addElement(constraintNameFilter.toString());
         searchStrings.addElement(uuidFilter.toString());
         // Filter for timestamps
         StringBuffer timestampFilter = new StringBuffer();

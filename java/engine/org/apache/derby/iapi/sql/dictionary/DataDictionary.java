@@ -1973,10 +1973,7 @@ public interface DataDictionary
 	public int getCacheMode();
 
 	/**
-	  *	Returns a unique system generated name of the form SQLyymmddhhmmssxxn
-	  *	  yy - year, mm - month, dd - day of month, hh - hour, mm - minute, ss - second,
-	  *	  xx - the first 2 digits of millisec because we don't have enough space to keep the exact millisec value,
-	  *	  n - number between 0-9
+	  *	Returns a unique system generated name.
 	  *
 	  *	@return	system generated unique name
 	  */

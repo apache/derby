@@ -90,8 +90,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 s.executeUpdate("insert into test select * from template");
 
                 s.executeUpdate("create view showstats as "
-                                + "select cast (conglomeratename as varchar(20)) indexname, "
-                                + "cast (statistics as varchar(40)) stats, "
+                                + "select cast (conglomeratename as varchar(60)) indexname, "
+                                + "cast (statistics as varchar(60)) stats, "
                                 + "creationtimestamp createtime, "
                                 + "colcount ncols "
                                 + "from sys.sysstatistics, sys.sysconglomerates "

@@ -40,32 +40,27 @@ import junit.framework.AssertionFailedError;
  * The base level for the Derby tests is JSR 169.
  */
 public class JDBC {
+
+    private static final int GENERATED_NAME_LENGTH = 50;
     
     /**
      * Helper class whose <code>equals()</code> method returns
-     * <code>true</code> for all strings on this format: SQL061021105830900
+     * <code>true</code> for all strings on this format: SQL0123456789-a816c00e-015f-ac0f-670f-0000033bdb30
      */
     public static class GeneratedId {
         public boolean equals(Object o) {
             String tmpstr = (String)o;
-            boolean b = true;
-            if (!(o instanceof String))
-                b = false;
-            if (!(tmpstr.startsWith("SQL")))
-                b = false;
-            if (tmpstr.length() != 18)
-                b = false;
-            for (int i=3 ; i<18 ; i++)
+            if (!(o instanceof String)) { return false; }
+            if (!(tmpstr.startsWith("SQL"))) { return false; }
+            if (tmpstr.length() != GENERATED_NAME_LENGTH) { return false; }
+            for (int i=3 ; i < GENERATED_NAME_LENGTH ; i++)
             {
-                if (Character.isDigit(tmpstr.charAt(i)))
-                    continue;
-                else
-                {
-                    b = false;
-                    break;
-                }
+                char currentChar = tmpstr.charAt(i);
+                if (Character.digit(currentChar, 16) >= 0) { continue; }
+                if (currentChar == '-') { continue; }
+                return false;
             }
-            return b;
+            return true;
         }
         public String toString() {
             return "xxxxGENERATED-IDxxxx";

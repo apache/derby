@@ -1,6 +1,6 @@
------= Start dblook (net server) Test. =-
+-= Start dblook (net server) Test. =-
 Creating database 'wombat' from ddl script 'dblook_makeDB.sql'
------
+--
 *******************************************
 Dumping DDL for all objects, using
 Network Server:
@@ -8,9 +8,9 @@ Network Server:
 File dblook.log was empty.
 Creating database 'wombat_new' from ddl script 'wombat.sql'
 Dumping system tables for 'wombat_new'
------=================---------------
+----------------=================---------------
 System Tables for: wombat_new
------=================---------------
+----------------=================---------------
 ========== SYSALIASES ==========
 <systemid>
 "proc "In Quotes with spaces"
@@ -21,7 +21,7 @@ P
 false
 inoutparams3(INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 2
 <systemname>
------
+----
 <systemid>
 F_DEFINERS_RIGHTS
 APP
@@ -31,7 +31,7 @@ F
 false
 wibble() RETURNS INTEGER LANGUAGE JAVA PARAMETER STYLE JAVA  EXTERNAL SECURITY DEFINER NO SQL CALLED ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 F_DETERMINISTIC
 APP
@@ -41,7 +41,7 @@ F
 false
 wibble() RETURNS INTEGER LANGUAGE JAVA PARAMETER STYLE JAVA  DETERMINISTIC NO SQL CALLED ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 F_NOT_DETERMINISTIC
 APP
@@ -51,7 +51,7 @@ F
 false
 wibble() RETURNS INTEGER LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL CALLED ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 GATP2
 FOO
@@ -61,7 +61,7 @@ F
 false
 getAllTableProperties("SCH" VARCHAR(128),"TBL" VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA RETURNS NULL ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 GATP
 APP
@@ -71,7 +71,7 @@ F
 false
 getAllTableProperties("SCH" VARCHAR(128),"TBL" VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 OP4
 BAR
@@ -81,7 +81,7 @@ P
 false
 inoutparams4(OUT "A" DECIMAL(4,2),IN "B" VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
 <systemname>
------
+----
 <systemid>
 PROC1
 APP
@@ -91,7 +91,7 @@ P
 false
 inoutparams3(INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4
 <systemname>
------
+----
 <systemid>
 PROC2
 Foo Bar
@@ -101,7 +101,7 @@ P
 false
 sqlControl(OUT "E1" VARCHAR(128),OUT "E2" VARCHAR(128),OUT "E3" VARCHAR(128),OUT "E4" VARCHAR(128),OUT "E5" VARCHAR(128),OUT "E6" VARCHAR(128),OUT "E7" VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
 <systemname>
------
+----
 <systemid>
 P_DEFINERS_RIGHTS
 APP
@@ -111,7 +111,7 @@ P
 false
 wibble() LANGUAGE JAVA PARAMETER STYLE JAVA  EXTERNAL SECURITY DEFINER MODIFIES SQL DATA
 <systemname>
------
+----
 <systemid>
 P_DETERMINISTIC
 APP
@@ -121,7 +121,7 @@ P
 false
 wibble() LANGUAGE JAVA PARAMETER STYLE JAVA  DETERMINISTIC MODIFIES SQL DATA
 <systemname>
------
+----
 <systemid>
 P_NOT_DETERMINISTIC
 APP
@@ -131,7 +131,7 @@ P
 false
 wibble() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
 <systemname>
------
+----
 <systemid>
 SQQLCONTROL_1
 FOO
@@ -141,7 +141,7 @@ P
 false
 sqlControl(OUT "E1" VARCHAR(128),OUT "E2" VARCHAR(128),OUT "E3" VARCHAR(128),OUT "E4" VARCHAR(128),OUT "E5" VARCHAR(128),OUT "E6" VARCHAR(128),OUT "E7" VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
 <systemname>
------
+----
 <systemid>
 SYNONYM1
 APP
@@ -151,7 +151,7 @@ S
 false
 "APP"."T1"
 <systemname>
------
+----
 <systemid>
 SYNONYM2
 BAR
@@ -161,7 +161,7 @@ S
 false
 "BAR"."MULTI WORD NAME"
 <systemname>
------
+----
 <systemid>
 SYNONYM3
 BAR
@@ -171,7 +171,7 @@ S
 false
 "APP"."T11"
 <systemname>
------
+----
 <systemid>
 VARARGSDERBYSTYLE
 APP
@@ -181,7 +181,7 @@ F
 false
 foo("A" INTEGER ... ) RETURNS INTEGER LANGUAGE JAVA PARAMETER STYLE DERBY NO SQL CALLED ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 VARARGSDERBYSTYLE
 APP
@@ -191,7 +191,7 @@ P
 false
 foo(IN "A" INTEGER ... ) LANGUAGE JAVA PARAMETER STYLE DERBY NO SQL
 <systemname>
------
+----
 <systemid>
 VARARGSTABLEFUNCTION
 APP
@@ -201,7 +201,7 @@ F
 false
 foo("A" INTEGER ... ) RETURNS TABLE ( "B" INTEGER ) LANGUAGE JAVA PARAMETER STYLE DERBY_JDBC_RESULT_SET NO SQL CALLED ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 func "'
 schema "'
@@ -211,7 +211,7 @@ F
 false
 toString("col with quotes ""'" INTEGER) RETURNS VARCHAR(20) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA CALLED ON NULL INPUT
 <systemname>
------
+----
 <systemid>
 proc "'
 schema "'
@@ -221,7 +221,7 @@ P
 false
 sleep(IN "col with quotes ""'" BIGINT) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
 <systemname>
------
+----
 <systemid>
 procTwo
 APP
@@ -231,34 +231,34 @@ P
 false
 inoutparams3(INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 2
 <systemname>
------
+----
 ========== SYSCHECKS ==========
 <systemname>
 (i > 0)
 (2)
------
+----
 "ck2
 ("""iq2" > 0)
 (2)
------
+----
 NOTEVIL
 (vc != 'evil')
 (3)
------
+----
 c"k1
 ("i""q2" > 4)
 (2)
------
+----
 chkOne
 (k < 0)
 (2)
------
+----
 ck2"
 ("iq2""" > 4)
 (2)
------
+----
 ========== SYSCOLUMNS ==========
------ Columns for Tables ---
+--- Columns for Tables ---
 "tquoteTwo
 "iq1
 1
@@ -269,7 +269,7 @@ null
 null
 null
 false
------
+----
 "tquoteTwo
 "iq2
 2
@@ -280,7 +280,7 @@ null
 null
 null
 false
------
+----
 'Single' and "double" quoted table name
 'Single' and "double" quoted column name
 1
@@ -291,7 +291,7 @@ null
 null
 null
 false
------
+----
 MULTI WORD NAME
 C
 1
@@ -302,7 +302,7 @@ null
 null
 null
 false
------
+----
 REMOVED
 X
 1
@@ -313,7 +313,7 @@ null
 null
 null
 false
------
+----
 T10
 K
 2
@@ -324,7 +324,7 @@ null
 null
 null
 false
------
+----
 T10
 UK
 3
@@ -335,7 +335,7 @@ null
 null
 null
 false
------
+----
 T10
 VACH
 1
@@ -346,7 +346,7 @@ null
 null
 null
 false
------
+----
 T11
 LOLA
 2
@@ -357,7 +357,7 @@ null
 null
 null
 false
------
+----
 T11
 MYCHAR
 1
@@ -368,7 +368,7 @@ null
 null
 null
 false
------
+----
 T1
 C
 2
@@ -379,7 +379,7 @@ null
 null
 null
 false
------
+----
 T1
 C
 2
@@ -390,7 +390,7 @@ null
 null
 null
 false
------
+----
 T1
 D
 3
@@ -401,7 +401,7 @@ null
 null
 null
 false
------
+----
 T1
 F
 4
@@ -412,7 +412,7 @@ null
 null
 null
 false
------
+----
 T1
 I
 1
@@ -423,7 +423,7 @@ null
 null
 null
 false
------
+----
 T1
 P1
 1
@@ -434,7 +434,7 @@ null
 null
 null
 false
------
+----
 T2
 B
 2
@@ -445,7 +445,7 @@ null
 null
 null
 false
------
+----
 T2
 C
 3
@@ -456,7 +456,7 @@ null
 null
 null
 false
------
+----
 T2
 P1
 1
@@ -467,7 +467,7 @@ null
 null
 null
 false
------
+----
 T3
 B
 2
@@ -478,7 +478,7 @@ null
 null
 null
 false
------
+----
 T3
 ID
 3
@@ -489,7 +489,7 @@ null
 2
 4
 false
------
+----
 T3
 P1
 1
@@ -500,7 +500,7 @@ VARCHAR(10)
 null
 null
 false
------
+----
 T3_2
 B
 2
@@ -511,7 +511,7 @@ null
 null
 null
 false
------
+----
 T3_2
 ID
 3
@@ -522,7 +522,7 @@ GENERATED_BY_DEFAULT
 2
 4
 false
------
+----
 T3_2
 P1
 1
@@ -533,7 +533,7 @@ VARCHAR(10)
 null
 null
 false
------
+----
 T4
 I
 1
@@ -544,7 +544,7 @@ INTEGER
 null
 null
 false
------
+----
 T4
 J
 2
@@ -555,7 +555,7 @@ null
 null
 null
 false
------
+----
 T4
 K
 3
@@ -566,7 +566,7 @@ null
 1
 1
 false
------
+----
 T4_2
 I
 1
@@ -577,7 +577,7 @@ INTEGER
 null
 null
 false
------
+----
 T4_2
 J
 2
@@ -588,7 +588,7 @@ null
 null
 null
 false
------
+----
 T4_2
 K
 3
@@ -599,7 +599,7 @@ GENERATED_BY_DEFAULT
 1
 1
 false
------
+----
 T5
 COST
 1
@@ -610,7 +610,7 @@ null
 null
 null
 false
------
+----
 T6
 LETTER
 2
@@ -621,7 +621,7 @@ null
 null
 null
 false
------
+----
 T6
 NUM
 1
@@ -632,7 +632,7 @@ null
 null
 null
 false
------
+----
 T7
 DEUX
 2
@@ -643,7 +643,7 @@ null
 null
 null
 false
------
+----
 T7
 UN
 1
@@ -654,7 +654,7 @@ null
 null
 null
 false
------
+----
 T8
 FKCHAR
 2
@@ -665,7 +665,7 @@ null
 null
 null
 false
------
+----
 T8
 SOMEINT
 1
@@ -676,7 +676,7 @@ null
 null
 null
 false
------
+----
 T8T1T4
 C1
 1
@@ -687,7 +687,7 @@ CHAR(4)
 null
 null
 false
------
+----
 T8T1T4
 C2
 2
@@ -698,7 +698,7 @@ CHAR(4)
 null
 null
 false
------
+----
 T9
 CH
 2
@@ -709,7 +709,7 @@ null
 null
 null
 false
------
+----
 T9
 FKINT
 1
@@ -720,7 +720,7 @@ null
 null
 null
 false
------
+----
 T_GENCOL_1
 A
 1
@@ -731,7 +731,7 @@ null
 null
 null
 false
------
+----
 T_GENCOL_1
 B
 2
@@ -742,7 +742,7 @@ GENERATED ALWAYS AS ( 1 )
 null
 null
 false
------
+----
 T_GENCOL_1
 C
 3
@@ -753,7 +753,7 @@ null
 null
 null
 false
------
+----
 T_GENCOL_2
 A
 1
@@ -764,7 +764,7 @@ null
 null
 null
 false
------
+----
 T_GENCOL_2
 B
 2
@@ -775,7 +775,7 @@ INTEGER
 null
 null
 false
------
+----
 T_GENCOL_2
 C
 3
@@ -786,7 +786,7 @@ null
 null
 null
 false
------
+----
 T_GENCOL_3
 A
 1
@@ -797,7 +797,7 @@ null
 null
 null
 false
------
+----
 T_GENCOL_3
 B
 2
@@ -808,7 +808,7 @@ GENERATED ALWAYS AS ( a + c )
 null
 null
 false
------
+----
 T_GENCOL_3
 C
 3
@@ -819,7 +819,7 @@ null
 null
 null
 false
------
+----
 V"3
 I
 1
@@ -830,7 +830,7 @@ null
 null
 null
 false
------
+----
 V1
 DEE
 2
@@ -841,7 +841,7 @@ null
 null
 null
 false
------
+----
 V1
 DOKIE
 3
@@ -852,7 +852,7 @@ null
 null
 null
 false
------
+----
 V1
 DOO
 1
@@ -863,7 +863,7 @@ null
 null
 null
 false
------
+----
 V1
 DUM
 1
@@ -874,7 +874,7 @@ null
 null
 null
 false
------
+----
 V1
 DWA
 2
@@ -885,7 +885,7 @@ null
 null
 null
 false
------
+----
 V2
 C
 2
@@ -896,7 +896,7 @@ null
 null
 null
 false
------
+----
 V2
 P1
 1
@@ -907,7 +907,7 @@ null
 null
 null
 false
------
+----
 X
 X
 1
@@ -918,7 +918,7 @@ null
 null
 null
 false
------
+----
 tWithKeys
 C
 1
@@ -929,7 +929,7 @@ null
 null
 null
 false
------
+----
 tWithKeys
 I
 2
@@ -940,7 +940,7 @@ null
 null
 null
 false
------
+----
 tWithKeys
 VC
 3
@@ -951,7 +951,7 @@ null
 null
 null
 false
------
+----
 tee""Hee
 N
 1
@@ -962,7 +962,7 @@ null
 null
 null
 false
------
+----
 tquote"One
 i"q1
 1
@@ -973,7 +973,7 @@ null
 null
 null
 false
------
+----
 tquote"One
 i"q2
 2
@@ -984,7 +984,7 @@ INTEGER
 null
 null
 false
------
+----
 tquoteThree"
 iq1"
 1
@@ -995,7 +995,7 @@ null
 null
 null
 false
------
+----
 tquoteThree"
 iq2"
 2
@@ -1006,7 +1006,7 @@ null
 null
 null
 false
------
+----
 viewTwo
 LOLA
 2
@@ -1017,7 +1017,7 @@ null
 null
 null
 false
------
+----
 viewTwo
 MYCHAR
 1
@@ -1028,8 +1028,8 @@ null
 null
 null
 false
------
------ Columns for Statements ---
+----
+--- Columns for Statements ---
 ========== SYSCONGLOMERATES ==========
 "Quoted"Schema"
 tee""Hee
@@ -1039,7 +1039,7 @@ true
 UNIQUE BTREE (1)
 true
 <systemid>
------
+----
 "Quoted"Schema"
 tee""Hee
 <systemnumber>
@@ -1048,7 +1048,7 @@ true
 BTREE (1 DESC)
 false
 <systemid>
------
+----
 "Quoted"Schema"
 tee""Hee
 <systemnumber>
@@ -1057,7 +1057,7 @@ false
 null
 false
 <systemid>
------
+----
 'Single' and "double" quoted schema name
 'Single' and "double" quoted table name
 <systemnumber>
@@ -1066,7 +1066,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 "tquoteTwo
 <systemnumber>
@@ -1075,7 +1075,7 @@ true
 BTREE (1)
 true
 <systemid>
------
+----
 APP
 "tquoteTwo
 <systemnumber>
@@ -1084,7 +1084,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 REMOVED
 <systemnumber>
@@ -1093,7 +1093,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 T11
 <systemnumber>
@@ -1102,7 +1102,7 @@ true
 BTREE (1, 2)
 true
 <systemid>
------
+----
 APP
 T11
 <systemnumber>
@@ -1111,7 +1111,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 T1
 <systemnumber>
@@ -1120,7 +1120,7 @@ true
 BTREE (4, 1)
 false
 <systemid>
------
+----
 APP
 T1
 <systemnumber>
@@ -1129,7 +1129,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 T2
 <systemnumber>
@@ -1138,7 +1138,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 T8T1T4
 <systemnumber>
@@ -1147,7 +1147,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 T_GENCOL_1
 <systemnumber>
@@ -1156,7 +1156,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 T_GENCOL_2
 <systemnumber>
@@ -1165,7 +1165,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 T_GENCOL_3
 <systemnumber>
@@ -1174,7 +1174,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 X
 <systemnumber>
@@ -1183,7 +1183,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 tquote"One
 <systemnumber>
@@ -1192,7 +1192,7 @@ true
 UNIQUE BTREE (1)
 true
 <systemid>
------
+----
 APP
 tquote"One
 <systemnumber>
@@ -1201,7 +1201,7 @@ false
 null
 false
 <systemid>
------
+----
 APP
 tquoteThree"
 <systemnumber>
@@ -1210,7 +1210,7 @@ true
 UNIQUE BTREE (1)
 true
 <systemid>
------
+----
 APP
 tquoteThree"
 <systemnumber>
@@ -1219,7 +1219,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 MULTI WORD NAME
 <systemnumber>
@@ -1228,7 +1228,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 T1
 <systemnumber>
@@ -1237,7 +1237,7 @@ true
 UNIQUE BTREE (1)
 true
 <systemid>
------
+----
 BAR
 T1
 <systemnumber>
@@ -1246,7 +1246,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 T3
 <systemnumber>
@@ -1255,7 +1255,7 @@ true
 BTREE (1 DESC, 3 DESC)
 false
 <systemid>
------
+----
 BAR
 T3
 <systemnumber>
@@ -1264,7 +1264,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 T3_2
 <systemnumber>
@@ -1273,7 +1273,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 T4
 <systemnumber>
@@ -1282,7 +1282,7 @@ true
 UNIQUE BTREE (3)
 false
 <systemid>
------
+----
 BAR
 T4
 <systemnumber>
@@ -1291,7 +1291,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 T4_2
 <systemnumber>
@@ -1300,7 +1300,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 T8
 <systemnumber>
@@ -1309,7 +1309,7 @@ true
 BTREE (2)
 true
 <systemid>
------
+----
 BAR
 T8
 <systemnumber>
@@ -1318,7 +1318,7 @@ true
 UNIQUE BTREE (1)
 true
 <systemid>
------
+----
 BAR
 T8
 <systemnumber>
@@ -1327,7 +1327,7 @@ false
 null
 false
 <systemid>
------
+----
 BAR
 tWithKeys
 <systemnumber>
@@ -1336,7 +1336,7 @@ true
 UNIQUE BTREE (1)
 true
 <systemid>
------
+----
 BAR
 tWithKeys
 <systemnumber>
@@ -1345,7 +1345,7 @@ true
 BTREE (1 DESC)
 false
 <systemid>
------
+----
 BAR
 tWithKeys
 <systemnumber>
@@ -1354,7 +1354,7 @@ false
 null
 false
 <systemid>
------
+----
 FOO
 T10
 <systemnumber>
@@ -1363,7 +1363,7 @@ true
 UNIQUE BTREE (2)
 true
 <systemid>
------
+----
 FOO
 T10
 <systemnumber>
@@ -1372,7 +1372,7 @@ true
 UNIQUE BTREE (3)
 true
 <systemid>
------
+----
 FOO
 T10
 <systemnumber>
@@ -1381,7 +1381,7 @@ false
 null
 false
 <systemid>
------
+----
 FOO
 T9
 <systemnumber>
@@ -1390,7 +1390,7 @@ true
 BTREE (1)
 true
 <systemid>
------
+----
 FOO
 T9
 <systemnumber>
@@ -1399,7 +1399,7 @@ true
 UNIQUE BTREE (2, 1)
 true
 <systemid>
------
+----
 FOO
 T9
 <systemnumber>
@@ -1408,7 +1408,7 @@ false
 null
 false
 <systemid>
------
+----
 Foo Bar
 T5
 <systemnumber>
@@ -1417,7 +1417,7 @@ true
 UNIQUE BTREE (1)
 false
 <systemid>
------
+----
 Foo Bar
 T5
 <systemnumber>
@@ -1426,7 +1426,7 @@ false
 null
 false
 <systemid>
------
+----
 Foo Bar
 T6
 <systemnumber>
@@ -1435,7 +1435,7 @@ false
 null
 false
 <systemid>
------
+----
 Foo Bar
 T7
 <systemnumber>
@@ -1444,7 +1444,7 @@ false
 null
 false
 <systemid>
------
+----
 ========== SYSCONSTRAINTS ==========
 "ck2
 "tquoteTwo
@@ -1453,7 +1453,7 @@ C
 APP
 E
 0
------
+----
 "effkay1
 "tquoteTwo
 "effkay1
@@ -1461,7 +1461,7 @@ F
 APP
 E
 0
------
+----
 <systemname>
 T10
 <systemname>
@@ -1469,7 +1469,7 @@ P
 FOO
 E
 1
------
+----
 <systemname>
 T10
 <systemname>
@@ -1477,7 +1477,7 @@ U
 FOO
 E
 0
------
+----
 <systemname>
 T8
 <systemname>
@@ -1485,7 +1485,7 @@ F
 BAR
 E
 0
------
+----
 <systemname>
 T8
 <systemname>
@@ -1493,7 +1493,7 @@ P
 BAR
 E
 0
------
+----
 <systemname>
 tWithKeys
 <systemname>
@@ -1501,7 +1501,7 @@ C
 BAR
 E
 0
------
+----
 <systemname>
 tWithKeys
 <systemname>
@@ -1509,7 +1509,7 @@ P
 BAR
 E
 1
------
+----
 NOTEVIL
 tWithKeys
 NOTEVIL
@@ -1517,7 +1517,7 @@ C
 BAR
 E
 0
------
+----
 <systemname>
 T11
 <systemname>
@@ -1525,7 +1525,7 @@ F
 APP
 E
 0
------
+----
 UNQ
 T1
 UNQ
@@ -1533,7 +1533,7 @@ U
 BAR
 E
 0
------
+----
 c"k1
 tquote"One
 c"k1
@@ -1541,7 +1541,7 @@ C
 APP
 E
 0
------
+----
 chkOne
 T10
 chkOne
@@ -1549,7 +1549,7 @@ C
 FOO
 E
 0
------
+----
 ck2"
 tquoteThree"
 ck2"
@@ -1557,7 +1557,7 @@ C
 APP
 E
 0
------
+----
 fkOne
 T9
 fkOne
@@ -1565,7 +1565,7 @@ F
 FOO
 E
 0
------
+----
 pee"kay1
 tquote"One
 pee"kay1
@@ -1573,7 +1573,7 @@ P
 APP
 E
 1
------
+----
 pkTwo
 T9
 pkTwo
@@ -1581,7 +1581,7 @@ P
 FOO
 E
 1
------
+----
 <systemname>
 tee""Hee
 <systemname>
@@ -1589,7 +1589,7 @@ P
 "Quoted"Schema"
 E
 0
------
+----
 unqkay1"
 tquoteThree"
 unqkay1"
@@ -1597,354 +1597,354 @@ U
 APP
 E
 0
------
+----
 ========== SYSDEPENDS ==========
 "effkay1
 <Constraint>APP."effkay1 -> <Constraint>APP.pee"kay1
 Constraint
 pee"kay1
 Constraint
------
+----
 <systemname>
 <Constraint>APP.<sysname> -> <Constraint>FOO.pkTwo
 Constraint
 pkTwo
 Constraint
------
+----
 <systemname>
 <Constraint>BAR.<sysname> -> <Constraint>BAR.<sysname>
 Constraint
 <systemname>
 Constraint
------
+----
 fkOne
 <Constraint>FOO.fkOne -> <Constraint>FOO.<sysname>
 Constraint
 <systemname>
 Constraint
------
+----
 <systemid>
 <StoredPreparedStatement>"Quoted"Schema".<sysname> -> <Table>"Quoted"Schema".tee""Hee
 StoredPreparedStatement
 tee""Hee
 Table
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <ColumnsInTable>BAR.T4
 StoredPreparedStatement
 T4
 ColumnsInTable
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <ColumnsInTable>BAR.tWithKeys
 StoredPreparedStatement
 tWithKeys
 ColumnsInTable
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Conglomerate>APP.<sysname>
 StoredPreparedStatement
 <systemid>
 Conglomerate
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Conglomerate>BAR.IX3
 StoredPreparedStatement
 <systemid>
 Conglomerate
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Table>APP.REMOVED
 StoredPreparedStatement
 REMOVED
 Table
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Table>APP.X
 StoredPreparedStatement
 X
 Table
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Table>BAR.T3
 StoredPreparedStatement
 T3
 Table
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Table>BAR.tWithKeys
 StoredPreparedStatement
 tWithKeys
 Table
------
+----
 <systemid>
 <StoredPreparedStatement>BAR.<sysname> -> <Table>BAR.T8
 StoredPreparedStatement
 T8
 Table
------
+----
 <systemid>
 <StoredPreparedStatement>Foo Bar.<sysname> -> <Table>BAR.T1
 StoredPreparedStatement
 T1
 Table
------
+----
 <systemid>
 <Trigger>"Quoted"Schema"."trig"One" -> <StoredPreparedStatement>"Quoted"Schema".<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 <systemid>
 <Trigger>"Quoted"Schema"."trig"One" -> <Table>"Quoted"Schema".tee""Hee
 Trigger
 tee""Hee
 Table
------
+----
 <systemid>
 <Trigger>APP.TRIGFOUR -> <Conglomerate>APP.<sysname>
 Trigger
 <systemid>
 Conglomerate
------
+----
 <systemid>
 <Trigger>APP.TRIGFOUR -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 <systemid>
 <Trigger>APP.TRIGFOUR -> <Table>APP.REMOVED
 Trigger
 REMOVED
 Table
------
+----
 <systemid>
 <Trigger>APP.TRIGFOUR -> <Table>APP.X
 Trigger
 X
 Table
------
+----
 <systemid>
 <Trigger>APP.TRIGONE -> <ColumnsInTable>BAR.T4
 Trigger
 T4
 ColumnsInTable
------
+----
 <systemid>
 <Trigger>APP.TRIGONE -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 <systemid>
 <Trigger>APP.TRIGONE -> <Table>BAR.T3
 Trigger
 T3
 Table
------
+----
 <systemid>
 <Trigger>APP.TRIGWHEN -> <Table>APP.T1
 Trigger
 T1
 Table
------
+----
 <systemid>
 <Trigger>APP.TrigThree -> <ColumnsInTable>BAR.tWithKeys
 Trigger
 tWithKeys
 ColumnsInTable
------
+----
 <systemid>
 <Trigger>APP.TrigThree -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 <systemid>
 <Trigger>APP.TrigThree -> <Table>BAR.tWithKeys
 Trigger
 tWithKeys
 Table
------
+----
 <systemid>
 <Trigger>BAR.REFTRIG -> <StoredPreparedStatement>BAR.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 <systemid>
 <Trigger>BAR.REFTRIG -> <Table>BAR.T8
 Trigger
 T8
 Table
------
+----
 <systemid>
 <Trigger>Foo Bar.TRIG2 -> <StoredPreparedStatement>Foo Bar.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 <systemid>
 <Trigger>Foo Bar.TRIG2 -> <Table>BAR.T1
 Trigger
 T1
 Table
------
+----
 V1
 <View>APP.V1 -> <ColumnsInTable>APP.T1
 View
 T1
 ColumnsInTable
------
+----
 V1
 <View>APP.V1 -> <ColumnsInTable>BAR.T3
 View
 T3
 ColumnsInTable
------
+----
 V2
 <View>APP.V2 -> <ColumnsInTable>BAR.T1
 View
 T1
 ColumnsInTable
------
+----
 viewTwo
 <View>BAR.viewTwo -> <ColumnsInTable>APP.T11
 View
 T11
 ColumnsInTable
------
+----
 V1
 <View>FOO.V1 -> <ColumnsInTable>Foo Bar.T6
 View
 T6
 ColumnsInTable
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Conglomerate>BAR.<sysname>
 StoredPreparedStatement
 <systemid>
 Conglomerate
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Conglomerate>BAR.<sysname>
 StoredPreparedStatement
 <systemid>
 Conglomerate
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
 StoredPreparedStatement
 T1
 Table
------
+----
 <systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
 StoredPreparedStatement
 T1
 Table
------
+----
 <systemid>
 <Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 <systemid>
 <Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
------
+----
 ========== SYSFILES ==========
 <systemid>
 FOO
 FOOJAR
 <systemnumber>
------
+----
 ========== SYSFOREIGNKEYS ==========
 <systemname>
 <systemid>
 <systemname>
 U
 R
------
+----
 "effkay1
 <systemid>
 pee"kay1
 R
 R
------
+----
 fkOne
 <systemid>
 <systemname>
 R
 S
------
+----
 <systemname>
 <systemid>
 pkTwo
 R
 R
------
+----
 ========== SYSKEYS ==========
 <systemname>
 <systemid>
------
+----
 <systemname>
 <systemid>
------
+----
 <systemname>
 <systemid>
------
+----
 <systemname>
 <systemid>
------
+----
 <systemname>
 <systemid>
------
+----
 UNQ
 <systemid>
------
+----
 pee"kay1
 <systemid>
------
+----
 pkTwo
 <systemid>
------
+----
 unqkay1"
 <systemid>
------
+----
 ========== SYSSCHEMAS ==========
 "Quoted"Schema"
 "Quoted"Schema"
 APP
------
+----
 'Single' and "double" quoted schema name
 'Single' and "double" quoted schema name
 APP
------
+----
 APP
 APP
 APP
------
+----
 BAR
 BAR
 APP
------
+----
 FOO
 FOO
 APP
------
+----
 Foo Bar
 Foo Bar
 APP
------
+----
 schema "'
 schema "'
 APP
------
+----
 ========== SYSSTATEMENTS ==========
 <systemid>
 <systemname>
@@ -1955,7 +1955,7 @@ insert into "APP"."REMOVED" select * from new org.apache.derby.catalog.TriggerOl
 <systemid>
 APP
 null
------
+----
 <systemid>
 <systemname>
 APP
@@ -1965,7 +1965,7 @@ select c from "BAR"."tWithKeys"
 <systemid>
 APP
 null
------
+----
 <systemid>
 <systemname>
 APP
@@ -1975,7 +1975,7 @@ update "BAR"."T4" set j=8 where i=2
 <systemid>
 APP
 null
------
+----
 <systemid>
 <systemname>
 APP
@@ -1985,7 +1985,7 @@ values 1
 <systemid>
 APP
 null
------
+----
 <systemid>
 <systemid>
 APP
@@ -1995,7 +1995,7 @@ VALUES exists (select * from new org.apache.derby.catalog.TriggerOldTransitionRo
 <systemid>
 APP
 null
------
+----
 <systemid>
 <systemname>
 "Quoted"Schema"
@@ -2005,7 +2005,7 @@ values(8)
 <systemid>
 APP
 null
------
+----
 <systemid>
 <systemname>
 BAR
@@ -2015,7 +2015,7 @@ select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLDTABLE
 <systemid>
 APP
 null
------
+----
 <systemid>
 <systemname>
 Foo Bar
@@ -2025,218 +2025,218 @@ values (1), (2)
 <systemid>
 APP
 null
------
+----
 ========== SYSTABLES ==========
 "tquoteTwo
 "tquoteTwo
 T
 APP
 R
------
+----
 'Single' and "double" quoted table name
 'Single' and "double" quoted table name
 T
 'Single' and "double" quoted schema name
 R
------
+----
 MULTI WORD NAME
 MULTI WORD NAME
 T
 BAR
 R
------
+----
 REMOVED
 REMOVED
 T
 APP
 R
------
+----
 SYNONYM1
 SYNONYM1
 A
 APP
 R
------
+----
 SYNONYM2
 SYNONYM2
 A
 BAR
 R
------
+----
 SYNONYM3
 SYNONYM3
 A
 BAR
 R
------
+----
 T10
 T10
 T
 FOO
 R
------
+----
 T11
 T11
 T
 APP
 R
------
+----
 T1
 T1
 T
 APP
 R
------
+----
 T1
 T1
 T
 BAR
 R
------
+----
 T2
 T2
 T
 APP
 R
------
+----
 T3
 T3
 T
 BAR
 R
------
+----
 T3_2
 T3_2
 T
 BAR
 R
------
+----
 T4
 T4
 T
 BAR
 R
------
+----
 T4_2
 T4_2
 T
 BAR
 R
------
+----
 T5
 T5
 T
 Foo Bar
 R
------
+----
 T6
 T6
 T
 Foo Bar
 R
------
+----
 T7
 T7
 T
 Foo Bar
 R
------
+----
 T8T1T4
 T8T1T4
 T
 APP
 R
------
+----
 T8
 T8
 T
 BAR
 R
------
+----
 T9
 T9
 T
 FOO
 R
------
+----
 T_GENCOL_1
 T_GENCOL_1
 T
 APP
 R
------
+----
 T_GENCOL_2
 T_GENCOL_2
 T
 APP
 R
------
+----
 T_GENCOL_3
 T_GENCOL_3
 T
 APP
 R
------
+----
 V"3
 V"3
 V
 APP
 R
------
+----
 V1
 V1
 V
 APP
 R
------
+----
 V1
 V1
 V
 FOO
 R
------
+----
 V2
 V2
 V
 APP
 R
------
+----
 X
 X
 T
 APP
 R
------
+----
 tWithKeys
 tWithKeys
 T
 BAR
 R
------
+----
 tee""Hee
 tee""Hee
 T
 "Quoted"Schema"
 R
------
+----
 tquote"One
 tquote"One
 T
 APP
 R
------
+----
 tquoteThree"
 tquoteThree"
 T
 APP
 R
------
+----
 viewTwo
 viewTwo
 V
 BAR
 R
------
+----
 ========== SYSTRIGGERS ==========
 <systemid>
 "trig"One"
@@ -2256,7 +2256,7 @@ false
 null
 null
 null
------
+----
 <systemid>
 REFTRIG
 BAR
@@ -2275,7 +2275,7 @@ false
 OLDTABLE
 null
 null
------
+----
 <systemid>
 TRIG2
 Foo Bar
@@ -2294,7 +2294,7 @@ false
 null
 null
 null
------
+----
 <systemid>
 TRIGFOUR
 APP
@@ -2313,7 +2313,7 @@ true
 OLD
 NEW
 null
------
+----
 <systemid>
 TRIGONE
 APP
@@ -2332,7 +2332,7 @@ false
 null
 null
 null
------
+----
 <systemid>
 TRIGWHEN
 APP
@@ -2351,7 +2351,7 @@ false
 OLD
 null
 exists (select * from old where i > 4)
------
+----
 <systemid>
 TrigThree
 APP
@@ -2370,69 +2370,69 @@ false
 null
 null
 null
------
+----
 ========== SYSVIEWS ==========
 V"3
 create view "V""3"(i) as values (8), (28), (78)
 N
 APP
------
+----
 V1
 create view v1 (dum, dee, dokie) as select a.d, a.c, b.p1 from t1 as a, bar.t3 as b
 N
 APP
------
+----
 V1
 create view v1 (doo, dwa) as select num, letter from "Foo Bar".t6
 N
 FOO
------
+----
 V2
 create view v2 as select * from bar.t1
 N
 APP
------
+----
 viewTwo
 create view bar."viewTwo" as select * from app.t11
 N
 APP
------
+----
 ========== SYSROLES ==========
 "eve"
 APP
 _SYSTEM
 Y
 Y
------
+----
 "eve"
 B
 APP
 N
 N
------
+----
 A
 APP
 _SYSTEM
 Y
 Y
------
+----
 A
 B
 APP
 N
 N
------
+----
 B
 APP
 _SYSTEM
 Y
 Y
------
+----
 B
 WHOMEVER
 APP
 N
 N
------
+----
 Database 'wombat_new' deleted.
 [ Done. ]
