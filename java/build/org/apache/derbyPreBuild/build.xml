@@ -25,14 +25,16 @@
   <property name="properties.dir" value="tools/ant/properties"/>
   <!-- Significant dirs -->
   <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler flags -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
 
 <!-- Targets -->
   <target name="build" depends="compile"/>
 
   <target name="compile">
     <javac
-      source="1.6"
-      target="1.6"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="true"
       depend="${depend}"
@@ -43,7 +45,7 @@
       srcdir="${derby.build.src.dir}"
       destdir="${out.dir}"
       includeantruntime="false">
-      <include name="org/apache/derbyPreBuild/**"/>
+      <include name="org/apache/derbyPreBuild/** ../engine/org/apache/derby/iapi/services/info/PropertyNames.java"/>
       <classpath>
         <pathelement path="${ant.core.lib}"/>
       </classpath>

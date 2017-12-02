@@ -40,5 +40,8 @@ public abstract class PropertyNames
     PRODUCT_BETA_VERSION  = "derby.version.beta",
 	PRODUCT_BUILD_NUMBER  = "derby.build.number",
     PRODUCT_WHICH_ZIP_FILE = "derby.product.file";
+
+	public final static int	MAINT_ENCODING = 1000000;
+
 }
 

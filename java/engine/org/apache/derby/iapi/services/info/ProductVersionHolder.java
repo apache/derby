@@ -119,7 +119,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	private static final String ALPHA = "alpha";
 	private static final String BETA = "beta";
 
-	public final static int	MAINT_ENCODING = org.apache.derbyPreBuild.ReleaseProperties.MAINT_ENCODING;
+	public final static int	MAINT_ENCODING = PropertyNames.MAINT_ENCODING;
 	
 	private String productVendorName;
 	private String productName;
