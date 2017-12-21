@@ -219,7 +219,7 @@ public class utilMain {
 
 			// figure out which version this is
             InputStream versionStream = util.getResourceAsStream(
-                    ProductGenusNames.TOOLS_INFO);
+                    "/" + ProductGenusNames.TOOLS_INFO);
 
 			// figure out which version this is
 			ProductVersionHolder ijVersion = 

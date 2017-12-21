@@ -107,6 +107,18 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.lang.RuntimePermission "getProtectionDomain";
 };
 
+grant codeBase "${derbyTesting.codejar}derbyshared.jar" {
+//These are the ones that matters:
+//-----------------------------------------------------------------------------
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+//-----------------------------------------------------------------------------
+
+// getProtectionDomain is an optional permission needed for printing classpath 
+// information to derby.log
+  permission java.lang.RuntimePermission "getProtectionDomain";
+};
+
 
 grant codeBase "${derbyTesting.codejar}derbyclient.jar" {
 //These are the ones that matters:

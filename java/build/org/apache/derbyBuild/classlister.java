@@ -428,11 +428,21 @@ public class classlister {
 			//System.out.println("Skipping JAVAX " + className);
 		    return;
 		}
-                if (className.startsWith("sun.") && skipSun)
-                {
-                        //System.out.println("Skipping Sun " + className);
-                    return;
-                }
+        if (className.startsWith("sun.") && skipSun)
+        {
+          //System.out.println("Skipping Sun " + className);
+          return;
+        }
+
+        if (isSharedCode(className)) { return; }
+
+        // exclude sysinfo from the network server jar
+        if (
+            className.startsWith("org.apache.derby.impl.tools.sysinfo.") &&
+            (foundClasses.get("org.apache.derby.impl.drda.NetworkServerControlImpl") != null)
+            )
+        { return; }
+                             
 		if (className.startsWith("org.") && skipOrg)
 		{
 		    // Allow opensource org.apache.derby classes
@@ -691,6 +701,16 @@ public class classlister {
 		       name.startsWith("db2j.") ||
 		       name.startsWith("org.apache.derby");
 	}
+    private boolean isSharedCode(String className)
+    {
+      return
+        (
+         className.startsWith("org.apache.derby.shared")
+         || className.startsWith("org.apache.derby.iapi.error")
+         || className.startsWith("org.apache.derby.iapi.reference")
+         || className.startsWith("org.apache.derby.iapi.services.info")
+         );
+    }
 
 
 	protected void showAllItems()

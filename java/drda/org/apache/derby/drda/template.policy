@@ -96,6 +96,22 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.lang.RuntimePermission "getFileStoreAttributes";
 };
 
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derby.install.url}derbyshared.jar" {
+//
+// Permissions needed for JMX based management and monitoring, which is only
+// available for JVMs supporting "platform management", that is J2SE 5.0 or better.
+//
+  // Gives permission for jmx to be used against Derby but
+  // only if JMX authentication is not being used.
+  // In that case the application would need to create
+  // a whole set of fine-grained permissions to allow specific
+  // users access to MBeans and actions they perform.
+  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "monitor";  
+};
 
 
 grant codeBase "${derby.install.url}derbynet.jar"

@@ -144,6 +144,34 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 };
 
 //
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.codejar}derbyshared.jar" {
+  // These permissions are needed by AssertFailure to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+
+  // DERBY-2302: derbyclient.jar needs to be able to read the user.dir property in order to
+  // do tracing in that directory. Also, it needs read/write permissions in user.dir in order
+  // to create the trace files in that directory.
+  permission java.util.PropertyPermission "user.dir", "read";
+  permission java.io.FilePermission "${user.dir}${/}-", "read, write"; 
+
+  //
+  // Permissions needed for JMX based management and monitoring, which is only
+  // available for JVMs supporting "platform management", that is J2SE 5.0 or better.
+  //
+  // Gives permission for jmx to be used against Derby but
+  // only if JMX authentication is not being used.
+  // In that case the application would need to create
+  // a whole set of fine-grained permissions to allow specific
+  // users access to MBeans and actions they perform.
+  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "monitor";  
+};
+
+//
 // Permissions for the network server (derbynet.jar)
 //
 grant codeBase "${derbyTesting.codejar}derbynet.jar" {

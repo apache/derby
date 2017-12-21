@@ -4242,7 +4242,7 @@ public final class NetworkServerControlImpl {
                             throws UnknownHostException, IOException {
                         InputStream versionStream =
                             getClass().getResourceAsStream(
-                                ProductGenusNames.NET_INFO);
+                                "/" + ProductGenusNames.NET_INFO);
                         return ProductVersionHolder.
                                 getProductVersionHolderFromMyEnv(versionStream);
                     }

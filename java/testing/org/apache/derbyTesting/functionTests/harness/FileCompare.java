@@ -33,6 +33,8 @@ import java.io.*;
 import java.util.StringTokenizer;
 import java.util.Properties;
 
+import org.apache.derby.iapi.services.info.ProductGenusNames;
+
 public class FileCompare
 {
 
@@ -109,7 +111,7 @@ public class FileCompare
         else {
 			// if this is using product jars, use product_master first
 			Class c = FileCompare.class; // get our class loader
-			InputStream is = c.getResourceAsStream("/org/apache/derby/info/DBMS.properties");
+			InputStream is = c.getResourceAsStream("/" + ProductGenusNames.DBMS_INFO);
 			Properties dbprop = new Properties();
 			dbprop.load(is);
 			is.close();

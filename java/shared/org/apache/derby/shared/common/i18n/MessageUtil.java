@@ -1,5 +1,5 @@
 /*
-   Derby - Class org.apache.derby.common.i18n.MessageUtil
+   Derby - Class org.apache.derby.shared.common.i18n.MessageUtil
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with

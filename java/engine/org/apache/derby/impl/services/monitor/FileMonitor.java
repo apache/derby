@@ -118,7 +118,7 @@ public final class FileMonitor extends BaseMonitor
             daemonGroup = createDaemonGroup();
 		}
 
-		InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.DBMS_INFO);
+		InputStream versionStream = getClass().getResourceAsStream("/" + ProductGenusNames.DBMS_INFO);
 
 		engineVersion = ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
 

@@ -530,7 +530,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	}
 	// SECURITY PERMISSION - IP4
 	private Properties loadProperties(String productGenus) {
-		String resourceName = "/org/apache/derby/info/" + productGenus+".properties";
+		String resourceName = "/org/apache/derby/info/" + productGenus+"/info.properties";
 			
 		InputStream is = getClass().getResourceAsStream(resourceName);
 		if (is==null) {

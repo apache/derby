@@ -140,7 +140,7 @@ public class DerbyEclipsePlugin{
 	 * @exception	Exception if there is an error
 	 */
 	private void getProps() throws Exception{
-		InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.DBMS_INFO);
+		InputStream versionStream = getClass().getResourceAsStream("/" + ProductGenusNames.DBMS_INFO);
 		Properties prop=new Properties();
 		prop.load(versionStream);
 

@@ -334,7 +334,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * <P>
 	 * Jar files:
 	 * <BR>
-	 * derbyTesting.codejar - URL of derby.jar,
+	 * derbyTesting.codejar - URL of derby.jar, derbyshared.jar,
 	 * derbynet.jar and derbytools.jar, all assumed to be in the
 	 * same location.
 	 * <BR>

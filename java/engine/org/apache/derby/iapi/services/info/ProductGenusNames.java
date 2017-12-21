@@ -43,28 +43,23 @@ package org.apache.derby.iapi.services.info;
   */
 public interface ProductGenusNames
 {
-
 	/**Genus name for dbms products.*/
-	public static String DBMS = "DBMS";
-	public static String DBMS_INFO = "/org/apache/derby/info/DBMS.properties";
+	public static String DBMS_INFO = "org/apache/derby/info/engine/info.properties";
 
 	/**Genus name for tools products.*/
-	public static String TOOLS = "tools";
-	public static String TOOLS_INFO = "/org/apache/derby/info/tools.properties";
+	public static String TOOLS_INFO = "org/apache/derby/info/tools/info.properties";
 
 	/**Genus name for net products.*/
-	public static String NET = "net";
-	public static String NET_INFO = "/org/apache/derby/info/net.properties";
+	public static String NET_INFO = "org/apache/derby/info/net/info.properties";
 
 	/**Genus name for network client */
-	public static String DNC = "dnc";
-	public static String DNC_INFO = "/org/apache/derby/info/dnc.properties";
+	public static String CLIENT_INFO = "org/apache/derby/info/client/info.properties";
 
+	/**Genus name for shared code */
+	public static String SHARED_INFO = "org/apache/derby/info/shared/info.properties";
 
 	/**Genus name for optional tools */
-	public static String OPTIONALTOOLS = "optionaltools";
-	public static String OPTIONAL_TOOLS_INFO = "/org/apache/derby/optional/optionaltools.properties";
-
+	public static String OPTIONAL_INFO = "org/apache/derby/optional/info.properties";
 }
 
 

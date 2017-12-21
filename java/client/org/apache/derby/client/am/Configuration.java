@@ -148,7 +148,7 @@ public class Configuration {
                 new PrivilegedExceptionAction<ProductVersionHolder>() {
 
                     public ProductVersionHolder run() throws IOException {
-                        InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.DNC_INFO);
+                        InputStream versionStream = getClass().getResourceAsStream("/" + ProductGenusNames.CLIENT_INFO);
 
                         return ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
                     }

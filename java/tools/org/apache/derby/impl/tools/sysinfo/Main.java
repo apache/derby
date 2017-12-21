@@ -451,7 +451,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     for (int i = 0; i < stringLocales.length; i++) {
 
       String localeResource =
-         "/org/apache/derby/info/locale_" + stringLocales[i] + ".properties";
+         "/org/apache/derby/info/locale_" + stringLocales[i] + "/info.properties";
       
       final Properties finalp = p;
       final String finalLocaleResource = localeResource;
@@ -460,15 +460,16 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         	InputStream is = AccessController.doPrivileged
             (new PrivilegedAction<InputStream>() {
                   public InputStream run() {
+                    Class loadingClass = Main.class;
   		            InputStream locis =
-  		            	finalp.getClass().getResourceAsStream (finalLocaleResource);
+  		            	loadingClass.getResourceAsStream (finalLocaleResource);
   					return locis;
                   }
               }
            );      
       	
         if (is == null) {
-//           localAW.println("resource is null: " + localeResource);
+          //localAW.println("resource is null: " + localeResource);
         }
         else {
 
@@ -540,7 +541,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
       String hdr="org.apache.derbyTesting.*:";
       Properties p = new Properties ();
-      String tstingResource ="/org/apache/derby/info/tsting.properties";
+      String tstingResource ="/org/apache/derby/info/tsting/info.properties";
 
       final Properties finalp = p;
       final String finalTstingResource = tstingResource;
@@ -548,8 +549,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
           InputStream is = AccessController.doPrivileged
                   (new PrivilegedAction<InputStream>() {
                       public InputStream run() {
+                          Class loadingClass = Main.class;
                           InputStream is =
-                                  finalp.getClass().getResourceAsStream (finalTstingResource);
+                                  loadingClass.getResourceAsStream (finalTstingResource);
                           return is;
                       }
                   });
@@ -865,29 +867,15 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	** Code related to loading info fromjar files.
 	*/
 
-    private static final String infoNames[] = {
-
-                                    "org/apache/derby/info/" +
-                                    org.apache.derby.iapi.services.info.ProductGenusNames.DBMS +
-                                    ".properties",
-
-
-                                    "org/apache/derby/info/" +
-                                    org.apache.derby.iapi.services.info.ProductGenusNames.TOOLS +
-                                    ".properties",
-
-                                    "org/apache/derby/info/" +
-                                    org.apache.derby.iapi.services.info.ProductGenusNames.NET +
-                                    ".properties",
-
-                                   "org/apache/derby/info/" +
-                                    org.apache.derby.iapi.services.info.ProductGenusNames.DNC +
-                                    ".properties",
-
-                                   "org/apache/derby/optional/" +
-                                    org.apache.derby.iapi.services.info.ProductGenusNames.OPTIONALTOOLS +
-                                    ".properties",
-                                };
+    private static final String infoNames[] =
+    {
+        org.apache.derby.iapi.services.info.ProductGenusNames.DBMS_INFO,
+        org.apache.derby.iapi.services.info.ProductGenusNames.TOOLS_INFO,
+        org.apache.derby.iapi.services.info.ProductGenusNames.NET_INFO,
+        org.apache.derby.iapi.services.info.ProductGenusNames.CLIENT_INFO,
+        org.apache.derby.iapi.services.info.ProductGenusNames.SHARED_INFO,
+        org.apache.derby.iapi.services.info.ProductGenusNames.OPTIONAL_INFO,
+    };
 
     /**
      *  Get all the info we can obtain from the local execution context

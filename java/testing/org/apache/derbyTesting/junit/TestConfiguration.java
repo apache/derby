@@ -38,6 +38,8 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+
 /**
  * Class which holds information about the configuration of a Test.
  * 
@@ -154,8 +156,10 @@ public final class TestConfiguration {
         
         final   File dsh = new File("system");
 
+        String absolutePath = PrivilegedFileOpsForTests.getAbsolutePath(dsh);
+
         BaseTestCase.setSystemProperty(
-                "derby.system.home", dsh.getAbsolutePath());
+                "derby.system.home", absolutePath);
      }
     
     /**

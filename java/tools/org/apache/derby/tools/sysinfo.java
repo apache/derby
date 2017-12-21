@@ -60,7 +60,7 @@ public class sysinfo {
 		The genus name for the Apache Derby code. Use this to determine the version of the
 		Apache Derby embedded code in derby.jar.
 	*/
-	public static final String DBMS="DBMS";
+	public static final String DBMS="engine";
 
 	/**
 	 *	The genus name for the tools code. Use this to determine the version of 
@@ -78,7 +78,7 @@ public class sysinfo {
 	 *	The genus name for the client code. Use this to determine the version of 
 		code in derbyclient.jar
 	 */
-	public static final String CLIENT="dnc";
+	public static final String CLIENT="client";
 
 	/**
 	 *	The genus name for the optional tools code. Use this to determine the version of 
