@@ -329,6 +329,7 @@ org.apache.derbyTesting.functionTests.tests.lang.DummyBinary.class
 org.apache.derbyTesting.functionTests.tests.lang.DummyOptTrace.class
 org.apache.derbyTesting.functionTests.tests.lang.DummyReader.class
 org.apache.derbyTesting.functionTests.tests.lang.DynamicLikeOptimizationTest.class
+org.apache.derbyTesting.functionTests.tests.lang.EnumeratorTableFunction.class
 org.apache.derbyTesting.functionTests.tests.lang.ErrorCodeTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ErrorMessageTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ExistsWithSubqueriesTest.class
@@ -475,6 +476,7 @@ org.apache.derbyTesting.functionTests.tests.lang.UserLobTest.class
 org.apache.derbyTesting.functionTests.tests.lang.VTITest.class
 org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.class
 org.apache.derbyTesting.functionTests.tests.lang.VarargsTest.class
+org.apache.derbyTesting.functionTests.tests.lang.VetJigsawTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ViewsTest.class
 org.apache.derbyTesting.functionTests.tests.lang.WISCInsert.class
 org.apache.derbyTesting.functionTests.tests.lang.WarehouseVTI.class
@@ -485,6 +487,7 @@ org.apache.derbyTesting.functionTests.tests.lang.XMLOptimizerTraceTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLTypeAndOpsTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLXXETest.class
 org.apache.derbyTesting.functionTests.tests.lang.XplainStatisticsTest.class
+org.apache.derbyTesting.functionTests.tests.lang.ZipFileTableFunction.class
 org.apache.derbyTesting.functionTests.tests.lang._Suite.class
 org.apache.derbyTesting.functionTests.tests.lang.concateTests.class
 org.apache.derbyTesting.functionTests.tests.lang.dbManagerLimits.class

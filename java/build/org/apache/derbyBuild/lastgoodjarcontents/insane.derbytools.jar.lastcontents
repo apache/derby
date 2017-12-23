@@ -1,7 +1,3 @@
-org.apache.derby.iapi.reference.Attribute.class
-org.apache.derby.iapi.services.info.ProductGenusNames.class
-org.apache.derby.iapi.services.info.ProductVersionHolder.class
-org.apache.derby.iapi.services.info.PropertyNames.class
 org.apache.derby.iapi.tools.ToolUtils.class
 org.apache.derby.iapi.tools.i18n.LocalizedInput.class
 org.apache.derby.iapi.tools.i18n.LocalizedOutput.class
@@ -62,7 +58,6 @@ org.apache.derby.impl.tools.planexporter.CreateXMLFile.class
 org.apache.derby.impl.tools.planexporter.TreeNode.class
 org.apache.derby.impl.tools.sysinfo.Main.class
 org.apache.derby.impl.tools.sysinfo.ZipInfoProperties.class
-org.apache.derby.shared.common.reference.SQLState.class
 org.apache.derby.tools.JDBCDisplayUtil.class
 org.apache.derby.tools.PlanExporter.class
 org.apache.derby.tools.SignatureChecker.class

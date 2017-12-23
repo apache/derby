@@ -42,12 +42,4 @@ org.apache.derby.impl.drda.StandardEXTDTAReaderInputStream.class
 org.apache.derby.impl.drda.Utf8CcsidManager.class
 org.apache.derby.impl.drda.XADatabase.class
 org.apache.derby.impl.drda.memCheck.class
-org.apache.derby.impl.tools.sysinfo.Main.class
-org.apache.derby.impl.tools.sysinfo.ZipInfoProperties.class
 org.apache.derby.mbeans.drda.NetworkServerMBean.class
-org.apache.derby.shared.common.error.MessageUtils.class
-org.apache.derby.shared.common.error.ShutdownException.class
-org.apache.derby.shared.common.reference.MessageId.class
-org.apache.derby.shared.common.sanity.AssertFailure.class
-org.apache.derby.shared.common.sanity.SanityManager.class
-org.apache.derby.tools.sysinfo.class
