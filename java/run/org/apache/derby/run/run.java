@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.tools.run
+   Derby - Class org.apache.derby.run.run
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.tools;
+package org.apache.derby.run;
 
 import java.io.IOException;
 

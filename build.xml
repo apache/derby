@@ -48,7 +48,7 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,engine,storeless,tools,drda,client,optional,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,engine,storeless,tools,drda,client,optional,runner,build,versioninfo,localeinfo,binscripts"
       description="Compile the product source (does not build the tests)."
   />
   <target
@@ -542,6 +542,10 @@
 	
   <target name="optional" depends="engine">
     <ant dir="${derby.optional.src.dir}"/>
+  </target>
+	
+  <target name="runner" depends="optional">
+    <ant dir="${derby.run.src.dir}"/>
   </target>
 	
   <target name="storeless" depends="engine">
@@ -1742,7 +1746,7 @@
     <antcall target="meta-inf-common"/>
     
     <manifest file="${derby.jar.dir}/lists/smfcmd.mf">
-      <attribute name="Main-Class" value="org.apache.derby.iapi.tools.run"/>
+      <attribute name="Main-Class" value="org.apache.derby.run.run"/>
       <attribute name="Class-Path" value="derby.jar derbyclient.jar derbytools.jar derbynet.jar derbyoptionaltools.jar derbyshared.jar"/>
     </manifest> 
  	
@@ -1752,7 +1756,7 @@
          update="true"
     	 manifest="${derby.jar.dir}/lists/smfcmd.mf">
       <fileset dir="${out.dir}"
-               includes="org/apache/derby/iapi/tools/run.class"/>
+               includes="org/apache/derby/run/run.class"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>

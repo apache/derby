@@ -31,7 +31,7 @@ import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 /**
- * Basic tests for exercising the {@code org.apache.derby.iapi.tools.run}
+ * Basic tests for exercising the {@code org.apache.derby.run.run}
  * class found in {@code derbyrun.jar}.
  */
 public class derbyrunjartest extends BaseTestCase {
@@ -58,7 +58,7 @@ public class derbyrunjartest extends BaseTestCase {
     }
 
     /**
-     * Invoke {@code org.apache.derby.iapi.tools.run} in a sub-process.
+     * Invoke {@code org.apache.derby.run.run} in a sub-process.
      *
      * @param toolArgs the arguments to pass to derbyrun.jar
      * @param output expected lines of output
@@ -66,7 +66,7 @@ public class derbyrunjartest extends BaseTestCase {
      */
     private void runtool(String[] toolArgs, String[] output, int exitCode)
             throws Exception {
-        String runClassName = org.apache.derby.iapi.tools.run.class.getName();
+        String runClassName = org.apache.derby.run.run.class.getName();
         URL result = SecurityManagerSetup.getURL(runClassName);
         String derbyrunloc = null;
 
