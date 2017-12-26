@@ -30,7 +30,7 @@ import org.apache.derby.impl.store.access.btree.index.*;
 import org.apache.derby.iapi.types.SQLLongint;
 
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.i18n.MessageService;

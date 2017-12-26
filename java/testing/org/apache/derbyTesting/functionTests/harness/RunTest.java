@@ -42,7 +42,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class RunTest

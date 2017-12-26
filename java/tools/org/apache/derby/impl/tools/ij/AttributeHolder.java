@@ -22,7 +22,7 @@
 
 package org.apache.derby.impl.tools.ij;
 
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import java.util.Locale;
 import java.util.Vector;

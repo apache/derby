@@ -37,7 +37,7 @@ import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -29,7 +29,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import javax.net.SocketFactory;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.shared.common.reference.MessageId;
 

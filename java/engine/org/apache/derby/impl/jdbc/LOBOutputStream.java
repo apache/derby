@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.ExceptionUtil;
 

@@ -23,7 +23,7 @@ package org.apache.derby.impl.services.locks;
 
 import org.apache.derby.iapi.services.context.ContextService;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.locks.Lockable;

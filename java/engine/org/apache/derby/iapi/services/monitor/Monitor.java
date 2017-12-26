@@ -26,10 +26,10 @@ import java.security.AccessControlException;
 import java.util.Locale;
 import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
@@ -770,7 +770,7 @@ public class Monitor {
         // Verify that we have permission to execute this method.
         SecurityUtil.checkDerbyInternalsPrivilege();
         
-		boolean fullUpgrade = Boolean.valueOf(startParams.getProperty(org.apache.derby.iapi.reference.Attribute.UPGRADE_ATTR)).booleanValue();
+		boolean fullUpgrade = Boolean.valueOf(startParams.getProperty(Attribute.UPGRADE_ATTR)).booleanValue();
 
 		ProductVersionHolder engineVersion = Monitor.getMonitor().getEngineVersion();
 

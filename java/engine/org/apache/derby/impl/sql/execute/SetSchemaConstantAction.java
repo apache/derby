@@ -40,7 +40,7 @@ import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  *	This class describes actions that are ALWAYS performed for a

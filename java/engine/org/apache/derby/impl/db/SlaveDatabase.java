@@ -22,8 +22,8 @@
 package org.apache.derby.impl.db;
 
 import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.context.ContextManager;

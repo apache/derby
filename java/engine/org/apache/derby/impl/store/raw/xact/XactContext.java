@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.raw.xact;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 // This is the recommended super-class for all contexts.
 import org.apache.derby.iapi.services.context.ContextImpl;

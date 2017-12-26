@@ -28,7 +28,7 @@ import java.io.File;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.security.Securable;

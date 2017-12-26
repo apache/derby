@@ -28,7 +28,7 @@ import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
   ResultSetStatistics implemenation for DeleteVTIResultSet.

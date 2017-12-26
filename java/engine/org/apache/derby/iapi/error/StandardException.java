@@ -26,7 +26,7 @@ import java.security.PrivilegedActionException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -147,7 +147,7 @@ public class StandardException extends Exception
 		Return the 5 character SQL State.
 		If you need teh identifier that was used to create the
 		message, then use getMessageId(). getMessageId() will return the
-		string that corresponds to the field in org.apache.derby.iapi.reference.SQLState.
+		string that corresponds to the field in org.apache.derby.shared.common.reference.SQLState.
 	*/
 	public final String getSQLState()
 	{
@@ -176,7 +176,7 @@ public class StandardException extends Exception
     }
 
 	/**
-		Convert a message identifer from org.apache.derby.iapi.reference.SQLState to
+		Convert a message identifer from org.apache.derby.shared.common.reference.SQLState to
 		a SQLState five character string.
 	 *	@param messageID - the sql state id of the message from Derby
 	 *	@return String 	 - the 5 character code of the SQLState ID to returned to the user 
@@ -189,7 +189,7 @@ public class StandardException extends Exception
 	}
 
 	/**
-		Get the severity given a message identifier from org.apache.derby.iapi.reference.SQLState.
+		Get the severity given a message identifier from org.apache.derby.shared.common.reference.SQLState.
 	*/
 	public static int getSeverityFromIdentifier(String messageID) {
 

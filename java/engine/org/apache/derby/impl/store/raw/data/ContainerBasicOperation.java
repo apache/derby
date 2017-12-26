@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.store.raw.ContainerKey;
 

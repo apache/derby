@@ -30,7 +30,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.Types;
 import java.util.*;
 import org.apache.derby.iapi.jdbc.EngineConnection;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
 /**

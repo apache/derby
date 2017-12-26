@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.access.btree.index;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 

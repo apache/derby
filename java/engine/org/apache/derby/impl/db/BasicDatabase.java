@@ -53,7 +53,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.FileResource;
@@ -157,7 +157,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 			String localeID = 
                 startParams.getProperty(
-                    org.apache.derby.iapi.reference.Attribute.TERRITORY);
+                    org.apache.derby.shared.common.reference.Attribute.TERRITORY);
 
 			if (localeID == null) {
 				localeID = Locale.getDefault().toString();

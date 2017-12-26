@@ -27,8 +27,8 @@ import org.apache.derby.iapi.services.crypto.CipherProvider;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.util.Properties;

@@ -24,7 +24,7 @@ package org.apache.derby.impl.load;
 import java.io.IOException;
 import java.sql.SQLException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
 

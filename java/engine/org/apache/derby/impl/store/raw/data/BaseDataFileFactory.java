@@ -71,9 +71,9 @@ import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
 
 import org.apache.derby.iapi.util.InterruptStatus;

@@ -27,7 +27,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;

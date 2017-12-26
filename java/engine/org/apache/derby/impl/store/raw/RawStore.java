@@ -62,8 +62,8 @@ import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 

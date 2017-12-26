@@ -27,7 +27,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import org.apache.derby.iapi.jdbc.EngineConnection;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**

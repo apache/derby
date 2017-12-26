@@ -23,7 +23,7 @@ package org.apache.derby.impl.store.access.btree;
 
 import java.util.Properties;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 

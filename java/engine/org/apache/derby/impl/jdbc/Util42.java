@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.Types;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * <p>

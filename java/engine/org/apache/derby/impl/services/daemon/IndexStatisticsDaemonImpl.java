@@ -34,7 +34,7 @@ import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;

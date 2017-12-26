@@ -46,7 +46,7 @@ import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import java.io.*;

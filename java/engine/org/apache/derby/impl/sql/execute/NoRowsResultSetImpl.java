@@ -26,7 +26,7 @@ import java.sql.Timestamp;
 import org.w3c.dom.Element;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.shared.common.sanity.SanityManager;

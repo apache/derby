@@ -23,7 +23,7 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.catalog.TypeDescriptor;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.shared.common.sanity.SanityManager;

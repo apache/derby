@@ -31,8 +31,8 @@ import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;

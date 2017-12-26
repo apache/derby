@@ -22,8 +22,8 @@
 package org.apache.derby.impl.jdbc.authentication;
 
 import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;

@@ -27,7 +27,7 @@ import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
@@ -67,7 +67,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.services.io.FileUtil;
 
 import org.apache.derby.io.WritableStorageFactory;

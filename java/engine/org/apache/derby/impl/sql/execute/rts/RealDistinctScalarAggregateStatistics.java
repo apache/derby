@@ -25,7 +25,7 @@ import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
   ResultSetStatistics implemenation for DistinctScalarAggregateResultSet.

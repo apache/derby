@@ -27,7 +27,7 @@ import org.apache.derby.iapi.util.PropertyUtil;
 import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.iapi.services.io.FormatableProperties;

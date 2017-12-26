@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.jdbc.authentication;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.error.StandardException;

@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.access;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.error.StandardException;

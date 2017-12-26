@@ -48,7 +48,7 @@ import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 

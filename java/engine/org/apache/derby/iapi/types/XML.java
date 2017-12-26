@@ -32,7 +32,7 @@ import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

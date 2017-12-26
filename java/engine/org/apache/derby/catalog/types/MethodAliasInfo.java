@@ -23,7 +23,7 @@ package org.apache.derby.catalog.types;
 
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.catalog.AliasInfo;
 import java.io.IOException;
 import java.io.ObjectInput;

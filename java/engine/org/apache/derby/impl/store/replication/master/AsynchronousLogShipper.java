@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 

@@ -31,7 +31,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.impl.store.raw.data.BaseDataFileFactory;
 
 import org.apache.derby.iapi.services.io.InputStreamUtil;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.io.StorageFile;
 

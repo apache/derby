@@ -110,7 +110,7 @@ import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RunTimeStatisticsImpl;
 import org.apache.derby.impl.sql.execute.rts.RealWindowResultSetStatistics;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.util.Properties;
 

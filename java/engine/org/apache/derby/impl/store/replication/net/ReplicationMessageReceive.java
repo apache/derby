@@ -31,7 +31,7 @@ import java.security.PrivilegedExceptionAction;
 import javax.net.ServerSocketFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.iapi.util.InterruptStatus;

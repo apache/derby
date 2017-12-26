@@ -31,7 +31,7 @@ import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
 /**

@@ -26,7 +26,7 @@ import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.ClassFormatOutput;
 import org.apache.derby.iapi.services.classfile.ClassHolder;
 import org.apache.derby.iapi.services.classfile.ClassMember;

@@ -29,7 +29,7 @@ import org.apache.derby.iapi.types.SQLDecimal;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;

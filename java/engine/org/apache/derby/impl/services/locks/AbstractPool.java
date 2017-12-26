@@ -39,7 +39,7 @@ import org.apache.derby.iapi.reference.Property;
 import java.io.Serializable;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.locks.LockOwner;
 
 /**

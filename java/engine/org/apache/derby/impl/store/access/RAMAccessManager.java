@@ -65,8 +65,8 @@ import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 import org.apache.derby.catalog.UUID;
 
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.Attribute;
 
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;

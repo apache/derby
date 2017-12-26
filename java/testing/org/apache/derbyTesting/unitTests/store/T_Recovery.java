@@ -26,7 +26,7 @@ import org.apache.derbyTesting.unitTests.harness.T_Fail;
 
 import org.apache.derby.iapi.store.raw.*;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.impl.store.raw.log.LogCounter;
 
@@ -56,7 +56,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import java.io.*;

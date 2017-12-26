@@ -27,7 +27,7 @@ import java.io.ObjectInput;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 

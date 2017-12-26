@@ -22,7 +22,7 @@
 package org.apache.derby.impl.store.replication.slave;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.util.NoSuchElementException;

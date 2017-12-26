@@ -28,7 +28,7 @@ import java.io.Serializable;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
 /**

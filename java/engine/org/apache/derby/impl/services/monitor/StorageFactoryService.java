@@ -22,7 +22,7 @@
 package org.apache.derby.impl.services.monitor;
 
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 
@@ -38,7 +38,7 @@ import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageRandomAccessFile;
 
-import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
 
 import java.io.BufferedReader;

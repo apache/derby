@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.io.ArrayUtil;
