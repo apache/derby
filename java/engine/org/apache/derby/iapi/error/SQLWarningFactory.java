@@ -25,6 +25,7 @@ import java.sql.SQLWarning;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 
 // for javadoc 
 import org.apache.derby.shared.common.reference.SQLState;

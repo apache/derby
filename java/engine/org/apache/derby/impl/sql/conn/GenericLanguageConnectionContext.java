@@ -32,7 +32,7 @@ import java.util.WeakHashMap;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ContextId;
 import org.apache.derby.iapi.reference.Limits;

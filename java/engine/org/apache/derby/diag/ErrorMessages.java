@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;

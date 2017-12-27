@@ -22,7 +22,7 @@
 package org.apache.derby.impl.store.raw.data;
 
 
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 

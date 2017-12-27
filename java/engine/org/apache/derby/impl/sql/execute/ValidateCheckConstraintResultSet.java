@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;

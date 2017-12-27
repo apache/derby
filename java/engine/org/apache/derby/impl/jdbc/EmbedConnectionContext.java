@@ -31,7 +31,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.SQLException;

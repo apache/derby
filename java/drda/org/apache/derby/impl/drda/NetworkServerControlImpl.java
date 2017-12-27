@@ -64,7 +64,7 @@ import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.DRDAServerStarter;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;

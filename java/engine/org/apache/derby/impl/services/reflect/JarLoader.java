@@ -46,7 +46,7 @@ import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.util.IdUtil;
 
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.io.StorageFile;
 

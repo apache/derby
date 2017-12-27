@@ -28,7 +28,7 @@ import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 /**
 	A context that shuts the system down if it gets an StandardException
 	with a severity greater than or equal to ExceptionSeverity.SYSTEM_SEVERITY

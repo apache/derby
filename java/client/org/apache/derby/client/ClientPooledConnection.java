@@ -38,7 +38,7 @@ import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.net.NetXAConnection;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.jdbc.BasicClientDataSource40;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.reference.SQLState;

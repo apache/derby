@@ -37,7 +37,7 @@ import java.util.Arrays;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.iapi.services.info.JVMInfo;
 
 /**

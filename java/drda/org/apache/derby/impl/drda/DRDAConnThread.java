@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import org.apache.derby.catalog.SystemProcedures;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.EngineLOB;

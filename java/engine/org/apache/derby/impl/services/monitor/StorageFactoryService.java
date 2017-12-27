@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.services.monitor;
 
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.i18n.MessageService;

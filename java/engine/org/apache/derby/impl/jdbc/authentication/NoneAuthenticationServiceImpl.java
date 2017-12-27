@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.jdbc.authentication;
 
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;

@@ -34,7 +34,7 @@ import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 
 /**
 The context associated with the transaction.

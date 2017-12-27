@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Hashtable;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC40Translation;
+import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // Under JDBC 2, we must new up our parameter meta data as column meta data instances

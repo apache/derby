@@ -46,7 +46,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 
 import org.apache.derby.iapi.services.context.ContextImpl;
 
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.SQLState;
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -24,7 +24,7 @@ package org.apache.derby.impl.jdbc;
 import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -42,7 +42,7 @@ import org.apache.derby.iapi.security.SecurityUtil;
 
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.impl.db.SlaveDatabase;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;

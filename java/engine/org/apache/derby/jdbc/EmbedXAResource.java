@@ -33,8 +33,8 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.transaction.xa.XAException;
 
-import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;

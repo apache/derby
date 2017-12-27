@@ -25,7 +25,7 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.iapi.reference.ContextId;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 
 import org.apache.derby.iapi.error.StandardException;
 

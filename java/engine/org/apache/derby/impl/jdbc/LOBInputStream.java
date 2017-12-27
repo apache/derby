@@ -26,12 +26,12 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.PositionedStream;
-import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
  * This input stream is built on top of {@link LOBStreamControl}.

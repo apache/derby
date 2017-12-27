@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.reference.JDBC40Translation;
+import org.apache.derby.shared.common.reference.JDBC40Translation;
 
 import java.sql.Timestamp;
 import java.sql.Types;

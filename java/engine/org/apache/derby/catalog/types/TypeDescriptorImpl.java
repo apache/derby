@@ -27,7 +27,7 @@ import java.io.ObjectOutput;
 import java.sql.Types;
 
 import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.reference.JDBC40Translation;
+import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.types.StringDataValue;

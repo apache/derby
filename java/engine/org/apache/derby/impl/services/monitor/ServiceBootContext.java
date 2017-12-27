@@ -23,7 +23,7 @@ package org.apache.derby.impl.services.monitor;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextImpl;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 
 /**
 	A context that is used during a service boot to

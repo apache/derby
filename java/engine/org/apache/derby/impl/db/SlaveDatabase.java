@@ -42,7 +42,7 @@ import java.security.AccessController;
 
 import java.sql.SQLException;
 import java.util.Properties;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.impl.store.replication.ReplicationLogger;
 
 /**

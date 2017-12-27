@@ -25,7 +25,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import java.io.PrintWriter;
 import java.lang.Runnable;

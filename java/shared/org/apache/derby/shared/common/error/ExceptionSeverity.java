@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.error.ExceptionSeverity
+   Derby - Class org.apache.derby.shared.common.error.ExceptionSeverity
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with

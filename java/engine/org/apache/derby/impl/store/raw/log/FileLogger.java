@@ -22,7 +22,7 @@
 package org.apache.derby.impl.store.raw.log;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 
 import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.impl.store.raw.log.LogRecord;

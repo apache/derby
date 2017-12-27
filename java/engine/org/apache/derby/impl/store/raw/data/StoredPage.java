@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.zip.CRC32;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;

@@ -26,6 +26,7 @@ import java.security.PrivilegedActionException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.i18n.MessageService;

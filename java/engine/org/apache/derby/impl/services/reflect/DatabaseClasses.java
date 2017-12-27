@@ -31,7 +31,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;

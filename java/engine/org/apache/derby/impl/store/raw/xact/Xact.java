@@ -52,7 +52,7 @@ import org.apache.derby.iapi.store.raw.log.Logger;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.access.RowSource;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 
 import org.apache.derby.iapi.types.DataValueFactory;
 

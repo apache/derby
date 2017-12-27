@@ -59,7 +59,7 @@ import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;

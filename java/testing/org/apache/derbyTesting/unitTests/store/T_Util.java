@@ -48,7 +48,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import java.io.*;
 import java.util.Properties;
 import org.apache.derby.iapi.types.SQLChar;

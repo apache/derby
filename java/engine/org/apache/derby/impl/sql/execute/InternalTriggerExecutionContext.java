@@ -29,7 +29,7 @@ import java.util.Vector;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.ConnectionContext;

@@ -25,7 +25,7 @@ import org.apache.derby.iapi.services.diag.Performance;
 
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 

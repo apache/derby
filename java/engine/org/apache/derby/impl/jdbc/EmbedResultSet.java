@@ -51,7 +51,7 @@ import org.apache.derby.iapi.types.VariableSizeDataValue;
 import org.apache.derby.iapi.sql.ResultDescription;
 
 import org.apache.derby.iapi.services.io.LimitInputStream;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /* can't import these due to name overlap:

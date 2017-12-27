@@ -71,7 +71,7 @@ public interface Property {
 		Indicates the minimum level of severity for errors that are reported to the error stream.
 		Default to 0 in a "sane" server, and SESSION_SEVERITY in the insane (and product) server.
 
-		@see org.apache.derby.iapi.error.ExceptionSeverity#SESSION_SEVERITY
+		@see org.apache.derby.shared.common.error.ExceptionSeverity#SESSION_SEVERITY
 	*/
 	String LOG_SEVERITY_LEVEL = "derby.stream.error.logSeverityLevel";
     

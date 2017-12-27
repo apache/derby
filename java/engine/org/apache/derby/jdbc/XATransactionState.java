@@ -33,14 +33,14 @@ import org.apache.derby.impl.jdbc.EmbedConnection;
 import javax.transaction.xa.XAResource;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.shared.common.reference.SQLState;
 import java.util.HashMap;
 import javax.transaction.xa.XAException;
-import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /** 

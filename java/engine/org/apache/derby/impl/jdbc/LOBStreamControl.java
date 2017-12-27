@@ -38,7 +38,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.io.StorageFile;
-import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**

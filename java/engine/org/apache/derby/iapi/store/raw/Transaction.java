@@ -35,7 +35,7 @@ import java.util.Properties;
 
 import org.apache.derby.iapi.services.property.PersistentSet;
 
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 /**
 */
 

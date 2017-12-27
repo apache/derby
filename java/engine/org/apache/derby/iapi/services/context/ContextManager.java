@@ -29,13 +29,13 @@ import org.apache.derby.iapi.error.PassThroughException;
 import org.apache.derby.shared.common.error.ShutdownException;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.services.info.JVMInfo;
 
