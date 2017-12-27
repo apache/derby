@@ -84,6 +84,7 @@ import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
 import org.apache.derby.security.SystemPermission;
 import org.apache.derby.shared.common.error.MessageUtils;
+import org.apache.derby.shared.common.drda.NaiveTrustManager;
 
 /** 
     
@@ -2666,7 +2667,9 @@ public final class NetworkServerControlImpl {
                                         
                                         switch(getSSLMode()) {
                                         case SSL_BASIC:
-                                            SSLSocket s1 = (SSLSocket)NaiveTrustManager.getSocketFactory().
+                                           Properties sslProperties = getSSLProperties();
+                                           SSLSocket s1 = (SSLSocket)
+                                             NaiveTrustManager.getSocketFactory(sslProperties).
                                                 createSocket(hostAddress, portNumber);
                                             //DERBY-6764(analyze impact of poodle security alert on 
                                             // Derby client - server ssl support)
@@ -2726,6 +2729,24 @@ public final class NetworkServerControlImpl {
             consolePropertyMessage("DRDA_NoInputStream.I", true);
             throw e;
         }
+    }
+
+    /**
+     * Retrieve the settings of the SSL properties
+     */
+    private Properties getSSLProperties()
+    {
+        Properties retval = new Properties();
+        
+        String keyStoreProp = PropertyUtil.getSystemProperty(NaiveTrustManager.SSL_KEYSTORE);
+        if (keyStoreProp != null)
+        { retval.setProperty(NaiveTrustManager.SSL_KEYSTORE, keyStoreProp); }
+
+        String keyStorePasswordProp = PropertyUtil.getSystemProperty(NaiveTrustManager.SSL_KEYSTORE_PASSWORD);
+        if (keyStoreProp != null)
+        { retval.setProperty(NaiveTrustManager.SSL_KEYSTORE_PASSWORD, keyStorePasswordProp); }
+
+        return retval;
     }
 
     //DERBY-6764(analyze impact of poodle security alert on 

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.client.net.NaiveTrustManager
+   Derby - Class org.apache.derby.shared.common.drda.NaiveTrustManager
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,33 +19,30 @@
 
 */
 
-package org.apache.derby.client.net;
+package org.apache.derby.shared.common.drda;
 
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Properties;
 import javax.net.SocketFactory;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.net.ssl.KeyManagerFactory;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
 
 
 /**
  * This is a naive trust manager we use when we don't want server
  * authentication. Any certificate will be accepted. 
  **/
-class NaiveTrustManager
+public class NaiveTrustManager
     implements X509TrustManager
 {
-
+    public static final String SSL_KEYSTORE = "javax.net.ssl.keyStore";
+    public static final String SSL_KEYSTORE_PASSWORD = "javax.net.ssl.keyStorePassword";
+    
     /**
      * We don't want more than one instence of this TrustManager
      */
@@ -60,14 +57,14 @@ class NaiveTrustManager
      * Utility routine which is not part of the X509TrustManager
      * interface.
      **/
-    static SocketFactory getSocketFactory()
-        throws NoSuchAlgorithmException,
-               KeyManagementException,
-               NoSuchProviderException,
-               KeyStoreException,
-               UnrecoverableKeyException,
-               CertificateException,
-               IOException
+    public static SocketFactory getSocketFactory(Properties sslProperties)
+        throws java.security.NoSuchAlgorithmException,
+               java.security.KeyManagementException,
+               java.security.NoSuchProviderException,
+               java.security.KeyStoreException,
+               java.security.UnrecoverableKeyException,
+               java.security.cert.CertificateException,
+               java.io.IOException
     {
         if (thisManager == null) {
             thisManager = new TrustManager [] {new NaiveTrustManager()};
@@ -76,8 +73,8 @@ class NaiveTrustManager
         SSLContext ctx = SSLContext.getInstance("TLS");
         
         if (ctx.getProvider().getName().equals("SunJSSE") &&
-            (System.getProperty("javax.net.ssl.keyStore") != null) &&
-            (System.getProperty("javax.net.ssl.keyStorePassword") != null)) {
+            (sslProperties.getProperty(SSL_KEYSTORE) != null) &&
+            (sslProperties.getProperty(SSL_KEYSTORE_PASSWORD) != null)) {
             
             // SunJSSE does not give you a working default keystore
             // when using your own trust manager. Since a keystore is
@@ -85,10 +82,8 @@ class NaiveTrustManager
             // peerAuthentication, we have to provide one working the
             // same way as the default one.
 
-            String keyStore = 
-                System.getProperty("javax.net.ssl.keyStore");
-            String keyStorePassword =
-                System.getProperty("javax.net.ssl.keyStorePassword");
+            String keyStore = sslProperties.getProperty(SSL_KEYSTORE);
+            String keyStorePassword = sslProperties.getProperty(SSL_KEYSTORE_PASSWORD);
             
             KeyStore ks = KeyStore.getInstance("JKS");
             ks.load(new FileInputStream(keyStore),
@@ -108,7 +103,7 @@ class NaiveTrustManager
         }
 
         return ctx.getSocketFactory();
-     }
+    }
     
     /** 
      * Checks wether the we trust the client. Since this trust manager

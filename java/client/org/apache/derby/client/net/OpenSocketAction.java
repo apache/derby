@@ -32,10 +32,12 @@ import java.security.NoSuchProviderException;
 import java.security.PrivilegedExceptionAction;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Properties;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.shared.common.drda.NaiveTrustManager;
 
 class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
     private String server_;
@@ -63,7 +65,8 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
         SocketFactory sf;
         switch (clientSSLMode_) {
         case BasicClientDataSource40.SSL_BASIC:
-            sf = NaiveTrustManager.getSocketFactory();
+            Properties sslProperties = getSSLProperties();
+            sf = NaiveTrustManager.getSocketFactory(sslProperties);
             break;
         case BasicClientDataSource40.
                 SSL_PEER_AUTHENTICATION:
@@ -116,6 +119,24 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
             return sSocket;
         } else
             return sf.createSocket(server_, port_);
+    }
+
+    /**
+     * Retrieve the settings of the SSL properties
+     */
+    private Properties getSSLProperties()
+    {
+        Properties retval = new Properties();
+        
+        String keyStoreProp = System.getProperty(NaiveTrustManager.SSL_KEYSTORE);
+        if (keyStoreProp != null)
+        { retval.setProperty(NaiveTrustManager.SSL_KEYSTORE, keyStoreProp); }
+
+        String keyStorePasswordProp = System.getProperty(NaiveTrustManager.SSL_KEYSTORE_PASSWORD);
+        if (keyStoreProp != null)
+        { retval.setProperty(NaiveTrustManager.SSL_KEYSTORE_PASSWORD, keyStorePasswordProp); }
+
+        return retval;
     }
 
 }
