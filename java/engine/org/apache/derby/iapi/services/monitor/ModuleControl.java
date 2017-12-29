@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.services.monitor;
 
 import java.util.Properties;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 	ModuleControl is <B>optionally</B> implemented by a module's factory class.

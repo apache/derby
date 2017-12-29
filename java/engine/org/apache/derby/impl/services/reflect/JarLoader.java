@@ -21,8 +21,8 @@
 
 package org.apache.derby.impl.services.reflect;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -47,7 +47,7 @@ import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.util.IdUtil;
 
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.io.StorageFile;
 
 

@@ -32,10 +32,10 @@ import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.shared.common.i18n.MessageService;
+import org.apache.derby.shared.common.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 

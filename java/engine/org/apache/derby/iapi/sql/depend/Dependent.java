@@ -23,7 +23,7 @@ package org.apache.derby.iapi.sql.depend;
 
 import	org.apache.derby.catalog.Dependable;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 

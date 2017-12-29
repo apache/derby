@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * This interface provides a representation of the ordering of rows in a

@@ -30,7 +30,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.store.access.TransactionController;

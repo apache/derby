@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.security.SystemPermission
+   Derby - Class org.apache.derby.shared.common.security.SystemPermission
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.security;
+package org.apache.derby.shared.common.security;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -210,7 +210,7 @@ final public class SystemPermission extends BasicPermission {
      * @param actions the specified actions string
      * @return a set of all the specified actions
      */
-    static Set<String> parseActions(String actions) {
+    public static Set<String> parseActions(String actions) {
         HashSet<String> actionSet = new HashSet<String>();
         for (String s : actions.split(",", -1)) {
             actionSet.add(s.trim().toLowerCase(Locale.ENGLISH));
@@ -225,7 +225,7 @@ final public class SystemPermission extends BasicPermission {
      * @param actions the list of actions
      * @return comma-separated string with the actions
      */
-    static String buildActionsString(Iterable<String> actions) {
+    public static String buildActionsString(Iterable<String> actions) {
         StringBuilder sb = new StringBuilder();
 
         for (String action : actions) {

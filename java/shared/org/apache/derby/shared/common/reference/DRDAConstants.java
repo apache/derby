@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.DRDAConstants
+   Derby - Class org.apache.derby.shared.common.reference.DRDAConstants
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +24,7 @@
  * </p>
  */
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 
 public	interface	DRDAConstants
 {

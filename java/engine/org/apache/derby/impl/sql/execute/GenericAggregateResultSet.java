@@ -26,8 +26,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.apache.derby.iapi.error.SQLWarningFactory;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.SQLWarningFactory;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.sql.Activation;

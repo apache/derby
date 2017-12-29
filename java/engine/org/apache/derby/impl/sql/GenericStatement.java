@@ -23,13 +23,13 @@ package org.apache.derby.impl.sql;
 
 import java.sql.Timestamp;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.sql.compile.CompilerContext;

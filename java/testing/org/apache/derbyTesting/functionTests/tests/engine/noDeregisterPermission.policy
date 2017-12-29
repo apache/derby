@@ -37,7 +37,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
   
   // unit tests (e.g. store/T_RecoverFullLog) set this property 
   // (called from derbyTesting.jar through code in derby.jar)
@@ -104,9 +104,9 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   // In that case the application would need to create
   // a whole set of fine-grained permissions to allow specific
   // users access to MBeans and actions they perform.
-  permission org.apache.derby.security.SystemPermission "jmx", "control";
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
-  permission org.apache.derby.security.SystemPermission "server", "monitor";  
+  permission org.apache.derby.shared.common.security.SystemPermission "jmx", "control";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "server", "monitor";  
  
   // These permissions are needed by AssertFailure to dump the thread stack
   // traces upon failure.
@@ -134,7 +134,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
   permission java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "write";
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)
@@ -153,7 +153,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_lax${/}-", "read,write";
 
     // Needed for NetworkServerMBean access (see JMX section above)
-  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "server", "control,monitor";
 
   // For NetworkServerControlApiTest:
   // Needed by FileUtil#limitAccessToOwner
@@ -261,9 +261,9 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   
   // Test code needs this as well for the platform MBeanServer
   // tests where the testing code is in the stack frame.
-  permission org.apache.derby.security.SystemPermission "jmx", "control";
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
-  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "jmx", "control";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "server", "control,monitor";
 
   // useful for debugging
   //permission java.lang.RuntimePermission "getProtectionDomain";
@@ -347,9 +347,9 @@ grant codeBase "${derbyTesting.codeclasses}" {
   
   // Test code needs this as well for the platform MBeanServer
   // tests where the testing code is in the stack frame.
-  permission org.apache.derby.security.SystemPermission "jmx", "control";
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
-  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "jmx", "control";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "server", "control,monitor";
 
   // Needed by FileUtil#limitAccessToOwner
   permission java.lang.RuntimePermission "accessUserInformation";
@@ -360,7 +360,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // test that Derby handles the lack of the permission gracefully.
   //permission java.sql.SQLPermission "deregisterDriver";
 
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

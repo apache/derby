@@ -24,7 +24,7 @@ package org.apache.derby.impl.sql.compile;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.RowOrdering;

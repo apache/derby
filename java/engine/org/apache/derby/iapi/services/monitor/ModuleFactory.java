@@ -21,9 +21,9 @@
 
 package org.apache.derby.iapi.services.monitor;
 
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.stream.InfoStreams;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.stream.InfoStreams;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.services.loader.InstanceGetter;
 

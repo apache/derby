@@ -29,7 +29,7 @@ import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
 import java.io.ObjectOutput;

@@ -69,7 +69,6 @@ org.apache.derby.iapi.jdbc.EngineLOB.class
 org.apache.derby.iapi.jdbc.EnginePreparedStatement.class
 org.apache.derby.iapi.jdbc.EngineResultSet.class
 org.apache.derby.iapi.jdbc.EngineStatement.class
-org.apache.derby.iapi.jdbc.ExceptionFactory.class
 org.apache.derby.iapi.jdbc.FailedProperties40.class
 org.apache.derby.iapi.jdbc.JDBCBoot.class
 org.apache.derby.iapi.jdbc.ResourceAdapter.class
@@ -119,14 +118,10 @@ org.apache.derby.iapi.services.diag.DiagnosticUtil.class
 org.apache.derby.iapi.services.diag.Diagnosticable.class
 org.apache.derby.iapi.services.diag.DiagnosticableGeneric.class
 org.apache.derby.iapi.services.diag.Performance.class
-org.apache.derby.iapi.services.i18n.BundleFinder.class
-org.apache.derby.iapi.services.i18n.LocaleFinder.class
-org.apache.derby.iapi.services.i18n.MessageService.class
 org.apache.derby.iapi.services.io.AccessibleByteArrayOutputStream.class
 org.apache.derby.iapi.services.io.ApplicationObjectInputStream.class
 org.apache.derby.iapi.services.io.ArrayInputStream.class
 org.apache.derby.iapi.services.io.ArrayOutputStream.class
-org.apache.derby.iapi.services.io.ArrayUtil.class
 org.apache.derby.iapi.services.io.CloneableStream.class
 org.apache.derby.iapi.services.io.CloseFilterInputStream.class
 org.apache.derby.iapi.services.io.CompressedNumber.class
@@ -192,9 +187,6 @@ org.apache.derby.iapi.services.property.PropertyFactory.class
 org.apache.derby.iapi.services.property.PropertySetCallback.class
 org.apache.derby.iapi.services.property.PropertyUtil.class
 org.apache.derby.iapi.services.property.PropertyValidation.class
-org.apache.derby.iapi.services.stream.HeaderPrintWriter.class
-org.apache.derby.iapi.services.stream.InfoStreams.class
-org.apache.derby.iapi.services.stream.PrintWriterGetHeader.class
 org.apache.derby.iapi.services.timer.TimerFactory.class
 org.apache.derby.iapi.services.uuid.UUIDFactory.class
 org.apache.derby.iapi.sql.Activation.class
@@ -1382,10 +1374,10 @@ org.apache.derby.mbeans.CacheManagerMBean.class
 org.apache.derby.mbeans.JDBCMBean.class
 org.apache.derby.mbeans.Management.class
 org.apache.derby.mbeans.ManagementMBean.class
+org.apache.derby.mbeans.Version.class
 org.apache.derby.mbeans.VersionMBean.class
 org.apache.derby.osgi.EmbeddedActivator.class
 org.apache.derby.security.DatabasePermission.class
-org.apache.derby.security.SystemPermission.class
 org.apache.derby.vti.AwareVTI.class
 org.apache.derby.vti.DeferModification.class
 org.apache.derby.vti.ForeignTableVTI.class

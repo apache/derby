@@ -30,7 +30,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.raw.log.LogInstant;

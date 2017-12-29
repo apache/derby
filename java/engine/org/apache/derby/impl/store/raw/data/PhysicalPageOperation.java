@@ -29,7 +29,7 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.Undoable;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.io.IOException;
 import org.apache.derby.iapi.services.io.LimitObjectInput;

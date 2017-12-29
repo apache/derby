@@ -22,7 +22,7 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.lang.RuntimePermission "createClassLoader";
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.util.PropertyPermission "user.dir", "read";
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 
   // The next two properties are used to determine if the VM is 32 or 64 bit.
   //
@@ -84,9 +84,9 @@ grant codeBase "${derby.install.url}derby.jar"
   // to create a whole set of fine-grained permissions to allow specific users
   // access to MBeans and actions they perform.
   //
-  permission org.apache.derby.security.SystemPermission "jmx", "control";
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
-  permission org.apache.derby.security.SystemPermission "server", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "jmx", "control";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "server", "monitor";
 
   // getProtectionDomain is an optional permission needed for printing
   // classpath information to derby.log
@@ -118,8 +118,8 @@ grant codeBase "${derby.install.url}derbyshared.jar" {
   // In that case the application would need to create
   // a whole set of fine-grained permissions to allow specific
   // users access to MBeans and actions they perform.
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
-  permission org.apache.derby.security.SystemPermission "server", "monitor";  
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "server", "monitor";  
 };
 
 
@@ -156,9 +156,9 @@ grant codeBase "${derby.install.url}derbynet.jar"
 
   // Needed for NetworkServerMBean access (see JMX section above)
   //
-  permission org.apache.derby.security.SystemPermission "server",
+  permission org.apache.derby.shared.common.security.SystemPermission "server",
       "control,monitor";
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 
   // Needed by sysinfo. The file permission is needed to check the existence of
   // jars on the classpath. You can limit this permission to just the locations

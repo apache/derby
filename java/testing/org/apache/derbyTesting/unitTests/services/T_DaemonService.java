@@ -25,7 +25,7 @@ import org.apache.derbyTesting.unitTests.harness.T_Fail;
 import org.apache.derbyTesting.unitTests.harness.T_MultiThreadedIterations;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.daemon.*;
 
 import java.security.AccessController;
@@ -59,7 +59,7 @@ public class T_DaemonService extends T_MultiThreadedIterations
 	*/
 
 	protected String getModuleToTestProtocolName() {
-		return org.apache.derby.iapi.reference.Module.DaemonFactory;
+		return org.apache.derby.shared.common.reference.Module.DaemonFactory;
 	}
 
 	/**
@@ -71,12 +71,12 @@ public class T_DaemonService extends T_MultiThreadedIterations
 
 		DaemonFactory daemonFactory;
 		try {
-			daemonFactory = (DaemonFactory)startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
+			daemonFactory = (DaemonFactory)startSystemModule(org.apache.derby.shared.common.reference.Module.DaemonFactory);
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
 		}
 		if (daemonFactory == null)
-			throw T_Fail.testFailMsg("cannot find daemon factory " + org.apache.derby.iapi.reference.Module.DaemonFactory);
+			throw T_Fail.testFailMsg("cannot find daemon factory " + org.apache.derby.shared.common.reference.Module.DaemonFactory);
 			
 		try
 		{

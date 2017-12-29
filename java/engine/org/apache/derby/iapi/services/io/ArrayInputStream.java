@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.EOFException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.shared.common.util.ArrayUtil;
 
 import java.io.UTFDataFormatException;
 

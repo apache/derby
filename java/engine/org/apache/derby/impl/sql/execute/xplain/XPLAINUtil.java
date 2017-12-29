@@ -24,7 +24,7 @@ package org.apache.derby.impl.sql.execute.xplain;
 import java.util.Properties;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.impl.sql.catalog.XPLAINScanPropsDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINSortPropsDescriptor;
 /**

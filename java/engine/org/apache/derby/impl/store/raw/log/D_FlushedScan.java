@@ -25,7 +25,7 @@ import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 import org.apache.derby.iapi.services.diag.Diagnosticable;
 import org.apache.derby.iapi.services.diag.DiagnosticableGeneric;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 public class D_FlushedScan
 extends DiagnosticableGeneric

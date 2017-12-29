@@ -31,7 +31,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
@@ -47,7 +47,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.StreamStorable;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;

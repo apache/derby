@@ -21,12 +21,12 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.util.PropertyUtil;
 import org.apache.derby.iapi.util.StringUtil;
 
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;

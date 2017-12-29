@@ -28,11 +28,11 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.db.DatabaseContext;
 
-import org.apache.derby.iapi.services.i18n.LocaleFinder;
+import org.apache.derby.shared.common.i18n.LocaleFinder;
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.util.StringUtil;
 

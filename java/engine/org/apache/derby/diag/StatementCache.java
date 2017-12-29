@@ -30,8 +30,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;

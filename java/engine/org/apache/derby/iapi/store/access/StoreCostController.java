@@ -25,7 +25,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.RowLocation;
 
-import org.apache.derby.iapi.error.StandardException; 
+import org.apache.derby.shared.common.error.StandardException; 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**

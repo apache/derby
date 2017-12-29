@@ -22,7 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;

@@ -27,7 +27,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 

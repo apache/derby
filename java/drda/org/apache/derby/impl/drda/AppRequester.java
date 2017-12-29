@@ -20,7 +20,7 @@
  */
 
 package org.apache.derby.impl.drda;
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 import org.apache.derby.shared.common.error.MessageUtils;
 import org.apache.derby.shared.common.sanity.SanityManager;
 

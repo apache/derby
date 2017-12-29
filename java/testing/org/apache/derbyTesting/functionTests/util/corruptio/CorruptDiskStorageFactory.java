@@ -22,7 +22,7 @@
 package org.apache.derbyTesting.functionTests.util.corruptio;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFactory;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 
 /**
  * This class provides proxy implementation of the StorageFactory

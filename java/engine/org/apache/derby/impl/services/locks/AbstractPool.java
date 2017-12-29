@@ -27,14 +27,14 @@ import org.apache.derby.iapi.services.locks.C_LockFactory;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Limit;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.Matchable;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import java.io.Serializable;
 import java.util.Dictionary;

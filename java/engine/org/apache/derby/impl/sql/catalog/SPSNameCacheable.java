@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;

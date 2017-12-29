@@ -98,7 +98,6 @@ org.apache.derby.client.net.EbcdicCcsidManager.class
 org.apache.derby.client.net.EncodedInputStream.class
 org.apache.derby.client.net.FdocaConstants.class
 org.apache.derby.client.net.FdocaSimpleDataArray.class
-org.apache.derby.client.net.NaiveTrustManager.class
 org.apache.derby.client.net.NetAgent.class
 org.apache.derby.client.net.NetCallableStatement.class
 org.apache.derby.client.net.NetConfiguration.class

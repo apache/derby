@@ -29,8 +29,8 @@ import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.i18n.MessageService;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.jdbc.EmbeddedXADataSourceInterface;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 

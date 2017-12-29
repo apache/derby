@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;

@@ -20,7 +20,7 @@
 */
 package org.apache.derby.client.net;
 
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 import org.apache.derby.client.am.Version;
 
 public class NetConfiguration {

@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 /**
  * A stream that will throw an exception if its methods are invoked after it

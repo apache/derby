@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.services.compiler;
 
 import org.apache.derby.iapi.services.loader.GeneratedClass;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.util.ByteArray;
 
 /**

@@ -27,7 +27,7 @@ import java.util.Vector;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.shared.common.sanity.SanityManager;

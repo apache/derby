@@ -33,11 +33,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import org.apache.derby.vti.VTITemplate;
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Limits;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.util.StringUtil;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 

@@ -20,7 +20,7 @@
  */
 
 package org.apache.derby.iapi.sql.execute.xplain;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 /**
  * This is the factory interface of the XPLAINFactory facility. It extends the 
  * possibilities and provides a convenient protocol to explain queries 

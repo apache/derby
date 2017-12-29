@@ -26,12 +26,12 @@ import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.util.concurrent.atomic.AtomicInteger;

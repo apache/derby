@@ -29,7 +29,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.timer.TimerFactory;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
@@ -111,7 +111,7 @@ final class GenericStatementContext
 	*/
 	GenericStatementContext(LanguageConnectionContext lcc) 
 	{
-		super(lcc.getContextManager(), org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
+		super(lcc.getContextManager(), org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
 		this.lcc = lcc;
 
 		if (SanityManager.DEBUG)

@@ -23,7 +23,7 @@ package org.apache.derbyTesting.unitTests.lang;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 
 import org.apache.derby.iapi.sql.Activation;

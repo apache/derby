@@ -31,10 +31,10 @@ import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 
-import org.apache.derby.iapi.reference.ContextId;
+import org.apache.derby.shared.common.reference.ContextId;
 import org.apache.derby.shared.common.reference.SQLState;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
@@ -43,7 +43,7 @@ import org.apache.derby.iapi.services.io.CounterOutputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.UTF8Util;
-import org.apache.derby.iapi.services.i18n.LocaleFinder;
+import org.apache.derby.shared.common.i18n.LocaleFinder;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.iapi.db.DatabaseContext;

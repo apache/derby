@@ -21,11 +21,11 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.catalog.UUID;
 import java.sql.Timestamp;

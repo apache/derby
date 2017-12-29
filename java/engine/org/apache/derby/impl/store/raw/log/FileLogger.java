@@ -52,8 +52,8 @@ import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;

@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 /**
  * Writer implementation for <code>Clob</code>.

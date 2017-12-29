@@ -22,7 +22,7 @@
 package org.apache.derby.impl.jdbc.authentication;
 
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -34,7 +34,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import java.util.Properties;
 import java.util.Enumeration;

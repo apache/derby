@@ -28,8 +28,8 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 
-import org.apache.derby.iapi.services.info.ProductGenusNames;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Configuration {

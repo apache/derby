@@ -25,7 +25,7 @@ import java.sql.SQLWarning;
 import java.sql.Timestamp;
 import org.w3c.dom.Element;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;

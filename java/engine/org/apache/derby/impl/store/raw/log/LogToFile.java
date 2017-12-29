@@ -23,10 +23,10 @@ package org.apache.derby.impl.store.raw.log;
 
 import org.apache.derby.iapi.services.diag.Performance;
 
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.daemon.DaemonService;
@@ -41,10 +41,10 @@ import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.shared.common.error.ErrorStringBuilder;
 import org.apache.derby.shared.common.error.ShutdownException;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -281,7 +281,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      * at any time booted in this mode, this value is written out
      * into the log control file. This will help prevent us from 
      * wasting time to resolve issues in such cases. 
-     * @see org.apache.derby.iapi.reference.Property#DURABILITY_PROPERTY
+     * @see org.apache.derby.shared.common.reference.Property#DURABILITY_PROPERTY
      * This value is written as part of the log control file flags byte.
      */
     private static final byte IS_DURABILITY_TESTMODE_NO_SYNC_FLAG = 0x2;
@@ -3209,7 +3209,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         		
 		//if user does not set the right value for the log buffer size,
 		//default value is used instead.
-		logBufferSize =  PropertyUtil.getSystemInt(org.apache.derby.iapi.reference.Property.LOG_BUFFER_SIZE, 
+		logBufferSize =  PropertyUtil.getSystemInt(org.apache.derby.shared.common.reference.Property.LOG_BUFFER_SIZE, 
 												   LOG_BUFFER_SIZE_MIN, 
 												   LOG_BUFFER_SIZE_MAX, 
 												   DEFAULT_LOG_BUFFER_SIZE);
@@ -3665,12 +3665,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		String cpInterval;
 		if(set == null)
 		{
-			lsInterval=PropertyUtil.getSystemProperty(org.apache.derby.iapi.reference.Property.LOG_SWITCH_INTERVAL);
-			cpInterval=PropertyUtil.getSystemProperty(org.apache.derby.iapi.reference.Property.CHECKPOINT_INTERVAL);
+			lsInterval=PropertyUtil.getSystemProperty(org.apache.derby.shared.common.reference.Property.LOG_SWITCH_INTERVAL);
+			cpInterval=PropertyUtil.getSystemProperty(org.apache.derby.shared.common.reference.Property.CHECKPOINT_INTERVAL);
 		}else
 		{
-			lsInterval = PropertyUtil.getServiceProperty(set, org.apache.derby.iapi.reference.Property.LOG_SWITCH_INTERVAL);
-			cpInterval = PropertyUtil.getServiceProperty(set, org.apache.derby.iapi.reference.Property.CHECKPOINT_INTERVAL);
+			lsInterval = PropertyUtil.getServiceProperty(set, org.apache.derby.shared.common.reference.Property.LOG_SWITCH_INTERVAL);
+			cpInterval = PropertyUtil.getServiceProperty(set, org.apache.derby.shared.common.reference.Property.CHECKPOINT_INTERVAL);
 		}
 
 		/* log switch interval */
@@ -5181,7 +5181,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	/**	
 	 *	redo a checkpoint during rollforward recovery
      * 
-     * @throws org.apache.derby.iapi.error.StandardException 
+     * @throws org.apache.derby.shared.common.error.StandardException 
      */
 	public void checkpointInRFR(LogInstant cinstant, long redoLWM,
 								long undoLWM, DataFactory df)

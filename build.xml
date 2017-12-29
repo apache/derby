@@ -1724,7 +1724,7 @@
     <delete file="${derby.jar.dir}/derbyshared.jar"/>
     <jar destfile="${derby.jar.dir}/derbyshared.jar"
          basedir="${out.dir}"
-         includes="org/apache/derby/iapi/error/**,org/apache/derby/iapi/reference/**,org/apache/derby/iapi/services/info/**,org/apache/derby/shared/common/**,org/apache/derby/info/*.class,org/apache/derby/info/shared/info.properties"
+         includes="org/apache/derby/shared/common/**,org/apache/derby/info/shared/info.properties"
          compress="true"
          filesonly="true"
     	 manifest="${derby.jar.dir}/lists/smfshared.mf"/>

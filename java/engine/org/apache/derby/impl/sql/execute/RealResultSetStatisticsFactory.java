@@ -25,8 +25,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;

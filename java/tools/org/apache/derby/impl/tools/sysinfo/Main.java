@@ -50,9 +50,9 @@ import java.security.ProtectionDomain;
 import java.security.CodeSource;
 import java.security.AccessController;
 
-import org.apache.derby.iapi.services.info.PropertyNames;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.PropertyNames;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.ProductGenusNames;
 
 import org.apache.derby.iapi.tools.i18n.*;
 
@@ -869,12 +869,12 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
     private static final String infoNames[] =
     {
-        org.apache.derby.iapi.services.info.ProductGenusNames.DBMS_INFO,
-        org.apache.derby.iapi.services.info.ProductGenusNames.TOOLS_INFO,
-        org.apache.derby.iapi.services.info.ProductGenusNames.NET_INFO,
-        org.apache.derby.iapi.services.info.ProductGenusNames.CLIENT_INFO,
-        org.apache.derby.iapi.services.info.ProductGenusNames.SHARED_INFO,
-        org.apache.derby.iapi.services.info.ProductGenusNames.OPTIONAL_INFO,
+        org.apache.derby.shared.common.info.ProductGenusNames.DBMS_INFO,
+        org.apache.derby.shared.common.info.ProductGenusNames.TOOLS_INFO,
+        org.apache.derby.shared.common.info.ProductGenusNames.NET_INFO,
+        org.apache.derby.shared.common.info.ProductGenusNames.CLIENT_INFO,
+        org.apache.derby.shared.common.info.ProductGenusNames.SHARED_INFO,
+        org.apache.derby.shared.common.info.ProductGenusNames.OPTIONAL_INFO,
     };
 
     /**

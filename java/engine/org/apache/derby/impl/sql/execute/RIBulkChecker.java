@@ -22,7 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.LanguageProperties;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -103,7 +103,7 @@ public class RIBulkChecker
      *                              supporting index
      * @param pkCID                 conglomerate id of the referenced primary
      *                              key or unique index.
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      *
      */
     public RIBulkChecker

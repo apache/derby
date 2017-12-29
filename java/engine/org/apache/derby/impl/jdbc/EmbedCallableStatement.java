@@ -29,7 +29,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.shared.common.sanity.SanityManager;

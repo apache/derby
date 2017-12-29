@@ -23,7 +23,7 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.io.EOFException;
 import java.io.IOException;

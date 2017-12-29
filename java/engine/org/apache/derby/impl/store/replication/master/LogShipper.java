@@ -23,7 +23,7 @@ package org.apache.derby.impl.store.replication.master;
 
 import java.io.IOException;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  *

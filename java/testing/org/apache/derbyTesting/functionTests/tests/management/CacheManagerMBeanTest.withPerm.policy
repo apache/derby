@@ -26,7 +26,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar"
   //
   permission java.lang.RuntimePermission "createClassLoader";
   permission java.lang.RuntimePermission "setSecurityManager";
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.util.PropertyPermission "user.dir", "read";
 
@@ -39,7 +39,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar"
   //
   permission javax.management.MBeanTrustPermission "register";
 
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
 };
 
 //
@@ -67,7 +67,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission javax.management.MBeanPermission "-#-[-]", "queryNames";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
 
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

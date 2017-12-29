@@ -29,7 +29,7 @@ import java.io.StreamCorruptedException;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassFactoryContext;
 import org.apache.derby.iapi.types.Resetable;

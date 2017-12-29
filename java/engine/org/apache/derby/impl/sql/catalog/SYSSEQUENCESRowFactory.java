@@ -31,7 +31,7 @@ import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -109,7 +109,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory
      * @param td     a sequence descriptor
      * @param parent unused
      * @return Row suitable for inserting into SYSSEQUENCES.
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      *          thrown on failure
      */
 
@@ -194,7 +194,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory
      * @param parentTupleDescriptor unused
      * @param dd                    dataDictionary
      * @return a  descriptor equivalent to a SYSSEQUENCES row
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      *          thrown on failure
      */
     public TupleDescriptor buildDescriptor

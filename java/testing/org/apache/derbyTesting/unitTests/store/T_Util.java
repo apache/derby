@@ -25,7 +25,7 @@ import org.apache.derby.iapi.store.raw.*;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 // impl imports are the preferred way to create unit tests.
 import org.apache.derbyTesting.unitTests.harness.T_MultiThreadedIterations;
@@ -36,7 +36,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.*;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.Qualifier;

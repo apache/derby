@@ -28,7 +28,6 @@ org.apache.derby.impl.drda.EbcdicCcsidManager.class
 org.apache.derby.impl.drda.FailingEXTDTAInputStream.class
 org.apache.derby.impl.drda.FdocaConstants.class
 org.apache.derby.impl.drda.LayerBStreamedEXTDTAReaderInputStream.class
-org.apache.derby.impl.drda.NaiveTrustManager.class
 org.apache.derby.impl.drda.NetworkServerControlImpl.class
 org.apache.derby.impl.drda.NetworkServerMBeanImpl.class
 org.apache.derby.impl.drda.PiggyBackedSessionData.class

@@ -59,19 +59,19 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.DRDAServerStarter;
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Module;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Module;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.services.info.Version;
+import org.apache.derby.shared.common.i18n.MessageService;
+import org.apache.derby.shared.common.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
+import org.apache.derby.mbeans.Version;
 import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -82,7 +82,7 @@ import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.security.SystemPermission;
 import org.apache.derby.shared.common.error.MessageUtils;
 import org.apache.derby.shared.common.drda.NaiveTrustManager;
 
@@ -1216,7 +1216,7 @@ public final class NetworkServerControlImpl {
      * <li> the given user needs to be covered by a grant:
      *      principal org.apache.derby.authentication.SystemPrincipal "..." {}
      * <li> that lists a shutdown permission:
-     *      permission org.apache.derby.security.SystemPermission "shutdown";
+     *      permission org.apache.derby.shared.common.security.SystemPermission "shutdown";
      * </ul>
      * or it will fail with a SQLException detailing the cause.
      *

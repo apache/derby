@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.Limits
+   Derby - Class org.apache.derby.shared.common.reference.Limits
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 
 public interface Limits
 {

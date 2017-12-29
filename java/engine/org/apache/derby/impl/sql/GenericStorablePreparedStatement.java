@@ -43,7 +43,7 @@ import org.apache.derby.iapi.sql.StorablePreparedStatement;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -54,7 +54,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 
 import org.apache.derby.iapi.services.monitor.Monitor;

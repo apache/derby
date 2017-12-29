@@ -22,7 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;

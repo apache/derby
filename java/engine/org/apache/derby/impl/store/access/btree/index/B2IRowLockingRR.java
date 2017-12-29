@@ -23,7 +23,7 @@ package org.apache.derby.impl.store.access.btree.index;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException; 
+import org.apache.derby.shared.common.error.StandardException; 
 
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.types.RowLocation;

@@ -37,7 +37,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.ScanController;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.types.RowLocation;
 

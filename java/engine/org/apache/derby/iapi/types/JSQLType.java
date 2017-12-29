@@ -23,7 +23,7 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.io.IOException;
 import java.io.ObjectInput;

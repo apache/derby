@@ -29,6 +29,8 @@ import java.io.IOException;
 
 import java.util.Arrays;
 
+import org.apache.derby.shared.common.util.ArrayUtil;
+
 /**
  * A formatable holder for an array of formatables.
  * Used to avoid serializing arrays.

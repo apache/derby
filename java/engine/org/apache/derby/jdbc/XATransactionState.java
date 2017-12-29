@@ -34,7 +34,7 @@ import javax.transaction.xa.XAResource;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.shared.common.reference.SQLState;

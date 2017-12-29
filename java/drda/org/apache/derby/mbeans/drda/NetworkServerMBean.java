@@ -44,7 +44,7 @@ package org.apache.derby.mbeans.drda;
  * For more information on Managed Beans, refer to the JMX specification.</p>
  *
  * @see org.apache.derby.drda.NetworkServerControl
- * @see org.apache.derby.security.SystemPermission
+ * @see org.apache.derby.shared.common.security.SystemPermission
  * @see <a href="../package-summary.html"><code>org.apache.derby.mbeans</code></a>
  */
 public interface NetworkServerMBean {

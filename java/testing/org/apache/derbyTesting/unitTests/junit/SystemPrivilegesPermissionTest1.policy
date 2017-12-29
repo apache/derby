@@ -69,7 +69,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 grant codeBase "${derbyTesting.codejar}derby.jar" {
   // System Privileges framework needs to run "doAsPrivileged"
   //permission javax.security.auth.AuthPermission "doAsPrivileged";
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 
   // System Privileges framework needs to resolve relative directory names,
   // which requires a property-read permission

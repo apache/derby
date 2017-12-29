@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.access.heap;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 

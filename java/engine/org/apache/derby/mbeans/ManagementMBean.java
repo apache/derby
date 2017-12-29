@@ -67,7 +67,7 @@ public interface ManagementMBean {
      * Require <code>SystemPermission("jmx", "control")</code> if a security
      * manager is installed.
      * 
-     * @see org.apache.derby.security.SystemPermission
+     * @see org.apache.derby.shared.common.security.SystemPermission
      */
     public void startManagement();
     
@@ -78,7 +78,7 @@ public interface ManagementMBean {
      * Require <code>SystemPermission("jmx", "control")</code> if a security
      * manager is installed.
      * 
-     * @see org.apache.derby.security.SystemPermission
+     * @see org.apache.derby.shared.common.security.SystemPermission
      */
     public void stopManagement();
 }

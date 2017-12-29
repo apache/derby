@@ -23,7 +23,7 @@ package org.apache.derby.impl.store.access.sort;
 
 import java.util.Vector;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.SortInfo;

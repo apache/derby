@@ -32,8 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.PublicAPI;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.DiskHashtable;

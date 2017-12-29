@@ -38,8 +38,8 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.store.access.TransactionInfo;
@@ -65,7 +65,7 @@ import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -180,7 +180,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
 		DaemonFactory daemonFactory =
-			(DaemonFactory)startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
+			(DaemonFactory)startSystemModule(org.apache.derby.shared.common.reference.Module.DaemonFactory);
 		rawStoreDaemon = daemonFactory.createNewDaemon("rawStoreDaemon");
 		xactFactory = (TransactionFactory)
 					bootServiceModule(
@@ -1368,7 +1368,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // properties.
 
             CipherFactoryBuilder cb = (CipherFactoryBuilder)
-                startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
+                startSystemModule(org.apache.derby.shared.common.reference.Module.CipherFactoryBuilder);
 
             // create instance of the cipher factory with the
             // specified encryption properties.

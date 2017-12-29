@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -60,7 +60,7 @@ class CreateSequenceNode extends DDLStatementNode
      * @param minValue Smallest value returned by the sequence generator
      * @param cycle True if the generator should wrap around, false otherwise
      * @param cm Context manager
-     * @throws org.apache.derby.iapi.error.StandardException on error
+     * @throws org.apache.derby.shared.common.error.StandardException on error
      */
     CreateSequenceNode
         (
@@ -233,7 +233,7 @@ class CreateSequenceNode extends DDLStatementNode
     /**
      * Create the Constant information that will drive the guts of Execution.
      *
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      *          Thrown on failure
      */
     @Override

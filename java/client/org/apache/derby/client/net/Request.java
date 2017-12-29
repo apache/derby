@@ -28,7 +28,7 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

@@ -24,9 +24,9 @@ package org.apache.derby.impl.jdbc;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.io.StorageFile;
 

@@ -24,8 +24,8 @@ package org.apache.derby.impl.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.iapi.tools.i18n.*;
 
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.ProductGenusNames;
 
 import java.util.List;
 import java.util.Stack;

@@ -23,7 +23,7 @@ package org.apache.derby.iapi.store.access;
 
 import org.apache.derby.iapi.types.Orderable;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.io.ObjectInput;
 import java.io.IOException;

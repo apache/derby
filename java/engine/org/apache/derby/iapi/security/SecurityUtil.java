@@ -37,7 +37,7 @@ import javax.security.auth.Subject;
 
 import org.apache.derby.authentication.SystemPrincipal;
 import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -47,7 +47,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.security.SystemPermission;
 
 /**
  * This class provides helper functions for security-related features.

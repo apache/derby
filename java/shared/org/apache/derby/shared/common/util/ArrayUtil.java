@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.io.ArrayUtil
+   Derby - Class org.apache.derby.shared.common.util.ArrayUtil
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.services.io;
+package org.apache.derby.shared.common.util;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;

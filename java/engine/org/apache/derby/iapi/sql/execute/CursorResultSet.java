@@ -23,7 +23,7 @@ package org.apache.derby.iapi.sql.execute;
 
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * The CursorResultSet interface is used to provide additional

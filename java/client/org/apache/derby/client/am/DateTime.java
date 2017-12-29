@@ -21,7 +21,7 @@
 package org.apache.derby.client.am;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 
 import java.nio.charset.Charset;
 import java.sql.Date;

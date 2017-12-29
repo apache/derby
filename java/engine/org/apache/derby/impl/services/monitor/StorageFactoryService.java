@@ -24,14 +24,14 @@ package org.apache.derby.impl.services.monitor;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageFactory;
@@ -39,7 +39,7 @@ import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageRandomAccessFile;
 
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import java.io.BufferedReader;
 import java.io.File;

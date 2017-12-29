@@ -25,9 +25,9 @@ import org.apache.derby.iapi.services.cache.*;
 
 import org.apache.derbyTesting.unitTests.harness.T_Fail;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class T_CacheUser implements Runnable {

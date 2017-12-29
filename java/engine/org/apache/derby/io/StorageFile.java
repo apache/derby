@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * This interface abstracts file naming. Any method in this interface

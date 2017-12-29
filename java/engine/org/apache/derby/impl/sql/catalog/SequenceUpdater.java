@@ -26,15 +26,15 @@ import java.util.HashMap;
 
 import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;

@@ -22,22 +22,22 @@
 package org.apache.derby.iapi.services.context;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 
-import org.apache.derby.iapi.error.ErrorStringBuilder;
-import org.apache.derby.iapi.error.PassThroughException;
+import org.apache.derby.shared.common.error.ErrorStringBuilder;
+import org.apache.derby.shared.common.error.PassThroughException;
 import org.apache.derby.shared.common.error.ShutdownException;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.services.i18n.LocaleFinder;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.i18n.LocaleFinder;
+import org.apache.derby.shared.common.info.JVMInfo;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 import java.util.Locale;
-import org.apache.derby.iapi.reference.ContextId;
+import org.apache.derby.shared.common.reference.ContextId;
 
 /**
  *
@@ -297,7 +297,7 @@ public class ContextManager
 			
 			if (!shutdown)		// Do this only during normal processing.
 			{	
-				ContextImpl sc = (ContextImpl) getContext(org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
+				ContextImpl sc = (ContextImpl) getContext(org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
 				// Output the SQL statement that failed in the log file.
 				if (sc != null)
 				{					

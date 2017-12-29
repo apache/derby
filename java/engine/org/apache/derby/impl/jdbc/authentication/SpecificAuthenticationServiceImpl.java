@@ -22,9 +22,9 @@
 package org.apache.derby.impl.jdbc.authentication;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.shared.common.reference.ClassName;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.authentication.UserAuthenticator;
@@ -76,15 +76,15 @@ public class SpecificAuthenticationServiceImpl
 
 		specificAuthenticationScheme = PropertyUtil.getPropertyFromSet(
 					properties,
-					org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
+					org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
 		if (
 			 ((specificAuthenticationScheme != null) &&
 			  (specificAuthenticationScheme.length() != 0) &&
 
 			  (!((StringUtil.SQLEqualsIgnoreCase(specificAuthenticationScheme,
-					  org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_BUILTIN)) ||
+					  org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_BUILTIN)) ||
 			  (specificAuthenticationScheme.equalsIgnoreCase(
-                                                             org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_LDAP))  ))))
+                                                             org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_LDAP))  ))))
 			return true;
 		else
 			return false;

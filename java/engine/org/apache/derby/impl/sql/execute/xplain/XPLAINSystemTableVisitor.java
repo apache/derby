@@ -32,8 +32,8 @@ import java.util.Stack;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;

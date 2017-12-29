@@ -24,8 +24,8 @@ package org.apache.derby.impl.store.replication.master;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;

@@ -30,7 +30,7 @@ import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 
 /**
 	A set of static methods to supply easier access to contexts.

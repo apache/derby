@@ -24,7 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.*;
 
 import org.apache.derby.tools.ij;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derbyTesting.functionTests.util.Formatters;
 
 /**

@@ -25,7 +25,7 @@ import org.apache.derby.impl.store.raw.data.FileContainer;
 
 import org.apache.derby.iapi.store.raw.ContainerKey;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.impl.store.raw.data.BaseDataFileFactory;

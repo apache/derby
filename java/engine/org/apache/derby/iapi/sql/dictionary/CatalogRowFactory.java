@@ -24,9 +24,9 @@ package org.apache.derby.iapi.sql.dictionary;
 import java.util.Properties;
 
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.execute.ExecRow;

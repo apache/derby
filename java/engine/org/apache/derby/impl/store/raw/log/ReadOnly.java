@@ -44,7 +44,7 @@ import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionId;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
@@ -330,7 +330,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	/**	
 	 *	Perform a checkpoint during rollforward recovery.
      * 
-     * @throws org.apache.derby.iapi.error.StandardException 
+     * @throws org.apache.derby.shared.common.error.StandardException 
      */
 	public void checkpointInRFR(LogInstant cinstant, long redoLWM, long undoLWM,
 								DataFactory df) throws StandardException

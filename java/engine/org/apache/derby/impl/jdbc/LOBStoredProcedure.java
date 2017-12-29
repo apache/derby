@@ -26,7 +26,7 @@ import java.sql.Clob;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.jdbc.InternalDriver;
 

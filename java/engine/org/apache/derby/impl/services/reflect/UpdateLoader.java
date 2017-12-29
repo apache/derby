@@ -24,9 +24,9 @@ package org.apache.derby.impl.services.reflect;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
 import org.apache.derby.iapi.services.locks.LockFactory;
@@ -37,15 +37,15 @@ import org.apache.derby.iapi.services.loader.JarReader;
 import org.apache.derby.iapi.services.property.PersistentSet;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import java.io.InputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Module;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.reference.Module;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockOwner;
 

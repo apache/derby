@@ -42,7 +42,7 @@ import org.apache.derby.iapi.sql.StatementType;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 

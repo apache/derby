@@ -38,7 +38,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.Parser;
 
@@ -67,8 +67,8 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.EngineType;
+import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.shared.common.reference.EngineType;
 
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -108,7 +108,7 @@ public class GenericLanguageConnectionFactory
 	/*
 	  for caching prepared statements 
 	*/
-	private int cacheSize = org.apache.derby.iapi.reference.Property.STATEMENT_CACHE_SIZE_DEFAULT;
+	private int cacheSize = org.apache.derby.shared.common.reference.Property.STATEMENT_CACHE_SIZE_DEFAULT;
 	private CacheManager singleStatementCache;
 
 	/*
@@ -260,7 +260,7 @@ public class GenericLanguageConnectionFactory
 		String wantCacheProperty = null;
 
 		wantCacheProperty =
-			PropertyUtil.getPropertyFromSet(startParams, org.apache.derby.iapi.reference.Property.STATEMENT_CACHE_SIZE);
+			PropertyUtil.getPropertyFromSet(startParams, org.apache.derby.shared.common.reference.Property.STATEMENT_CACHE_SIZE);
 
 		if (SanityManager.DEBUG)
 			SanityManager.DEBUG("StatementCacheInfo", "Cacheing implementation chosen if null or 0<"+wantCacheProperty);
@@ -269,7 +269,7 @@ public class GenericLanguageConnectionFactory
 			try {
 			    cacheSize = Integer.parseInt(wantCacheProperty);
 			} catch (NumberFormatException nfe) {
-				cacheSize = org.apache.derby.iapi.reference.Property.STATEMENT_CACHE_SIZE_DEFAULT; 
+				cacheSize = org.apache.derby.shared.common.reference.Property.STATEMENT_CACHE_SIZE_DEFAULT; 
 			}
 		}
 
@@ -291,12 +291,12 @@ public class GenericLanguageConnectionFactory
 		//booted DVF (DVF got booted by BasicDatabase's boot method. 
 		//BasicDatabase also set the correct Locale in the DVF. There after,
 		//DVF with correct Locale is available to rest of the Derby code.
-		dvf = (DataValueFactory) bootServiceModule(create, this, org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
-		javaFactory = (JavaFactory) startSystemModule(org.apache.derby.iapi.reference.Module.JavaFactory);
+		dvf = (DataValueFactory) bootServiceModule(create, this, org.apache.derby.shared.common.reference.ClassName.DataValueFactory, startParams);
+		javaFactory = (JavaFactory) startSystemModule(org.apache.derby.shared.common.reference.Module.JavaFactory);
 		uuidFactory = getMonitor().getUUIDFactory();
-		classFactory = (ClassFactory) getServiceModule(this, org.apache.derby.iapi.reference.Module.ClassFactory);
+		classFactory = (ClassFactory) getServiceModule(this, org.apache.derby.shared.common.reference.Module.ClassFactory);
 		if (classFactory == null)
- 			classFactory = (ClassFactory) findSystemModule(org.apache.derby.iapi.reference.Module.ClassFactory);
+ 			classFactory = (ClassFactory) findSystemModule(org.apache.derby.shared.common.reference.Module.ClassFactory);
 
 		//set the property validation module needed to do propertySetCallBack
 		//register and property validation
@@ -310,7 +310,7 @@ public class GenericLanguageConnectionFactory
 		// If the system supports statement caching boot the CacheFactory module.
 		int cacheSize = statementCacheSize(startParams);
 		if (cacheSize > 0) {
-			CacheFactory cacheFactory = (CacheFactory) startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+			CacheFactory cacheFactory = (CacheFactory) startSystemModule(org.apache.derby.shared.common.reference.Module.CacheFactory);
 			singleStatementCache = cacheFactory.newCacheManager(this,
 												"StatementCache",
 												cacheSize/4,
@@ -419,7 +419,7 @@ public class GenericLanguageConnectionFactory
 
 	protected void setValidation() throws StandardException {
 		pf = (PropertyFactory) findServiceModule(this,
-			org.apache.derby.iapi.reference.Module.PropertyFactory);
+			org.apache.derby.shared.common.reference.Module.PropertyFactory);
 		pf.addPropertySetNotification(this);
 	}
 

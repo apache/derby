@@ -26,7 +26,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * Context that provides the correct ClassFactory for the

@@ -32,7 +32,7 @@ import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.catalog.UUID;
 
 import java.util.Iterator;

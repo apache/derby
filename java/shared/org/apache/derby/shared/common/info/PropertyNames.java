@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.info.PropertyNames
+   Derby - Class org.apache.derby.shared.common.info.PropertyNames
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.services.info;
+package org.apache.derby.shared.common.info;
 
 /**
   This class defines the names of the properties to use when

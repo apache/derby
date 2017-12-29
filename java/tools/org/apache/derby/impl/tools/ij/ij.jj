@@ -41,7 +41,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.iapi.tools.i18n.LocalizedInput;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 
 import java.lang.reflect.*;
 import java.security.AccessController;

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.info.ProductVersionHolder
+   Derby - Class org.apache.derby.shared.common.info.ProductVersionHolder
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
 */
 
-package org.apache.derby.iapi.services.info;
+package org.apache.derby.shared.common.info;
 
 import java.io.InputStream;
 import java.io.IOException;

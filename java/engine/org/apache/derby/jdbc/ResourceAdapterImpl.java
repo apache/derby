@@ -21,7 +21,7 @@
 
 package org.apache.derby.jdbc;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
@@ -30,7 +30,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;

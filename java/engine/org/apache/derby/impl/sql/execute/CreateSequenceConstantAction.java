@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -88,7 +88,7 @@ class CreateSequenceConstantAction extends DDLConstantAction {
     /**
      * This is the guts of the Execution-time logic for CREATE SEQUENCE.
      *
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      *          Thrown on failure
      * @see org.apache.derby.iapi.sql.execute.ConstantAction#executeConstantAction
      */

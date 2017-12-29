@@ -24,11 +24,11 @@ package org.apache.derby.impl.drda;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.security.SystemPermission;
 
 /**
  * <p>
@@ -458,9 +458,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     *  Gets the value of a specific network server setting (property). 
     *  Most server-related property keys have the prefix 
     *  <code>derby.drda.</code> and may be found in the 
-    *  org.apache.derby.iapi.reference.Property class.
+    *  org.apache.derby.shared.common.reference.Property class.
     * 
-    *  @see org.apache.derby.iapi.reference.Property
+    *  @see org.apache.derby.shared.common.reference.Property
     *  @param property the name of the server property
     *  @return the value of the given server property
     */

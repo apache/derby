@@ -29,9 +29,9 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 
 /**
  * This interface defines methods associated with a TypeId that are used

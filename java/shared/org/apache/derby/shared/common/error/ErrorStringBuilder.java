@@ -19,9 +19,9 @@
 
  */
 
-package org.apache.derby.iapi.error;
+package org.apache.derby.shared.common.error;
 
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
+import org.apache.derby.shared.common.stream.PrintWriterGetHeader;
 
 import java.io.StringWriter;
 import java.io.PrintWriter;

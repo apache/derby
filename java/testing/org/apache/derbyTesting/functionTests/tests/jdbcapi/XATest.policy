@@ -51,7 +51,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
   
   // unit tests (e.g. store/T_RecoverFullLog) set this property 
   // (called from derbyTesting.jar through code in derby.jar)
@@ -105,7 +105,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)
@@ -238,7 +238,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // on Java SE 8 and later.
   permission java.sql.SQLPermission "deregisterDriver";
 
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

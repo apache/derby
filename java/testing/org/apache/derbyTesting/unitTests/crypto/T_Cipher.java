@@ -28,7 +28,7 @@ import org.apache.derby.iapi.services.crypto.*;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.security.AccessController;
 import java.security.Key;
@@ -86,7 +86,7 @@ public class T_Cipher extends T_Generic
 	*/
 
 	public String getModuleToTestProtocolName() {
-		return org.apache.derby.iapi.reference.Module.CipherFactoryBuilder;
+		return org.apache.derby.shared.common.reference.Module.CipherFactoryBuilder;
 	}
 
     protected String getAlgorithm()
@@ -209,7 +209,7 @@ public class T_Cipher extends T_Generic
         REPORT("encryption provider used : " + provider);
 
         CipherFactoryBuilder cb =  (CipherFactoryBuilder)
-            startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
+            startSystemModule(org.apache.derby.shared.common.reference.Module.CipherFactoryBuilder);
 
         factory = cb.createCipherFactory(true, props, false);
 

@@ -24,7 +24,7 @@ package org.apache.derby.iapi.store.raw;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Transaction;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 	An RePreparable operation is an operation that changed the state of the 

@@ -46,7 +46,7 @@ import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientTypes;
 import org.apache.derby.client.am.Utils;
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // For performance, should we worry about the ordering of our DDM command parameters

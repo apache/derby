@@ -24,8 +24,8 @@ package org.apache.derby.impl.sql.compile;
 
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.ClassBuilder;
 import org.apache.derby.iapi.services.compiler.JavaFactory;

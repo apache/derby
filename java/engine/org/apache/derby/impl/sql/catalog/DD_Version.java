@@ -24,7 +24,7 @@ package org.apache.derby.impl.sql.catalog;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -34,7 +34,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 import org.apache.derby.iapi.util.IdUtil;
 
 import java.io.IOException;

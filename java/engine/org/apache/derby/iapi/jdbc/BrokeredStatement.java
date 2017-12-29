@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.jdbc;
 
+import org.apache.derby.shared.common.error.ExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.Connection;

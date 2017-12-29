@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.jdbc.ExceptionFactory
+   Derby - Class org.apache.derby.shared.common.error.ExceptionFactory
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.jdbc;
+package org.apache.derby.shared.common.error;
 
 import java.sql.SQLException;
 

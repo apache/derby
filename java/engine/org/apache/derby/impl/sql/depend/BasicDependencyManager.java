@@ -31,7 +31,7 @@ import java.util.Map;
 
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -193,7 +193,7 @@ public class BasicDependencyManager implements DependencyManager {
         // Add the dependency to the StatementContext, so that
         // it can be cleared on a pre-execution error.
         StatementContext sc = (StatementContext) cm.getContext(
-                org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
+                org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
         sc.addDependency(dy);
     }
 

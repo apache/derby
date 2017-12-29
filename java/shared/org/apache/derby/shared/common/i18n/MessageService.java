@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.i18n.MessageService
+   Derby - Class org.apache.derby.shared.common.i18n.MessageService
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,10 +19,10 @@
 
  */
 
-package org.apache.derby.iapi.services.i18n;
+package org.apache.derby.shared.common.i18n;
 
 import org.apache.derby.shared.common.error.ShutdownException;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 
 import java.util.Locale;
 import java.util.MissingResourceException;

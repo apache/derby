@@ -23,11 +23,11 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
-import org.apache.derby.iapi.reference.ContextId;
+import org.apache.derby.shared.common.reference.ContextId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.services.context.ContextService;
 
@@ -37,7 +37,7 @@ import org.apache.derby.iapi.services.io.FormatIdInputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 

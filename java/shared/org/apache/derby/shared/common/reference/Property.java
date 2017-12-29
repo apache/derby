@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.Property
+   Derby - Class org.apache.derby.shared.common.reference.Property
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 
 /**
 	List of all properties understood by the system. It also has some other static fields.
@@ -667,7 +667,7 @@ public interface Property {
      * requirements will be selected. This functionality is not present for
      * sub sub protocol classes yet.
      * 
-     * See org.apache.derby.iapi.services.info.JVMInfo.JDK_ID
+     * See org.apache.derby.shared.common.info.JVMInfo.JDK_ID
      */
     String MODULE_ENV_JDK_PREFIX = "derby.env.jdk.";
 

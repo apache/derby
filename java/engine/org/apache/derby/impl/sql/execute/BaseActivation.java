@@ -35,13 +35,13 @@ import java.util.Vector;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.GeneratedByteCode;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
@@ -312,7 +312,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
      * execution of the statement. The default implementation does nothing.
      * Sub-classes should override this method if they need to perform
      * operations before each execution.
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      */
     protected void reinit() throws StandardException {
         // Do nothing by default. Overridden by sub-classes that need it.

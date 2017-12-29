@@ -28,7 +28,7 @@ import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
 import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.io.ObjectOutput;

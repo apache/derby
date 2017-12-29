@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 
 /**
  * <p>

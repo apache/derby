@@ -21,7 +21,7 @@
 
 package org.apache.derby.client.net;
 
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 
 class DssConstants {
     static final int MAX_DSS_LEN = DRDAConstants.DATA_STREAM_STRUCTURE_MAX_LENGTH;

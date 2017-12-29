@@ -32,9 +32,9 @@ import org.apache.derby.iapi.sql.StatementType;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.sql.Activation;
 

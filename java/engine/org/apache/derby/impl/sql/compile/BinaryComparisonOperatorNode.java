@@ -22,8 +22,8 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.ClassName;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.types.DataTypeDescriptor;

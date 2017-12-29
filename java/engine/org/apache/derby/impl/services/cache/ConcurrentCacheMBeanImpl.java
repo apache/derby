@@ -24,7 +24,7 @@ package org.apache.derby.impl.services.cache;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import org.apache.derby.mbeans.CacheManagerMBean;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.security.SystemPermission;
 
 /**
  * This class provides monitoring capabilities for ConcurrentCache through

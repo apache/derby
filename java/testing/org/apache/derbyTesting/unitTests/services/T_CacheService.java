@@ -34,7 +34,7 @@ import org.apache.derby.iapi.services.daemon.*;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 public class T_CacheService extends T_Generic implements CacheableFactory {
 
@@ -52,7 +52,7 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 		DaemonFactory df;
 		try {
 			cf = (CacheFactory) startSystemModule(getModuleToTestProtocolName());
-			df = (DaemonFactory) startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
+			df = (DaemonFactory) startSystemModule(org.apache.derby.shared.common.reference.Module.DaemonFactory);
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
 		}
@@ -60,7 +60,7 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 			throw T_Fail.testFailMsg(getModuleToTestProtocolName() + " module not started.");
 		}
 		if (df == null)
-			throw T_Fail.testFailMsg(org.apache.derby.iapi.reference.Module.DaemonFactory + " module not started.");
+			throw T_Fail.testFailMsg(org.apache.derby.shared.common.reference.Module.DaemonFactory + " module not started.");
 	
 
 		try {
@@ -129,7 +129,7 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 
 	  */
 	protected String getModuleToTestProtocolName() {
-		return org.apache.derby.iapi.reference.Module.CacheFactory;
+		return org.apache.derby.shared.common.reference.Module.CacheFactory;
 	}
 
 

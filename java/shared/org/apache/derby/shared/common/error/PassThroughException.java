@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.i18n.BundleFinder
+   Derby - Class org.apache.derby.shared.common.error.PassThroughException
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,20 +19,23 @@
 
  */
 
-package org.apache.derby.iapi.services.i18n;
-
-import java.util.ResourceBundle;
+package org.apache.derby.shared.common.error;
 
 /**
+ * Unchecked exception class that can be used to pass checked exceptions out
+ * of methods that are not declared to throw any checked exception.
  */
-public interface BundleFinder {
+public final class PassThroughException extends RuntimeException {
 
-	/**
-		Return the bundle to be used. The msgIdf is passed
-		in to allow it to be a factor in determing the resource name
-		of the messages file.
+    /**
+     * Wrap a {@code Throwable} in this unchecked exception to allow it
+     * to pass through methods that are not declared to raise this kind of
+     * condition.
+     *
+     * @param cause the {@code Throwable} to pass through
+     */
+    public PassThroughException(Throwable cause) {
+        super(cause);
+    }
 
-		@param msgId Message being searched for.
-	*/
-	ResourceBundle getBundle(String msgId);
 }

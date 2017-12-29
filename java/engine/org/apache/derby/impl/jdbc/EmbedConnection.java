@@ -25,7 +25,7 @@ import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.context.ContextManager;
@@ -43,9 +43,9 @@ import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.impl.db.SlaveDatabase;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.SQLWarningFactory;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.error.SQLWarningFactory;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.XATransactionController;
@@ -96,7 +96,7 @@ import javax.transaction.xa.XAException;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.jdbc.FailedProperties40;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.InterruptStatus;
@@ -1455,7 +1455,7 @@ public class EmbedConnection implements EngineConnection
     /**
      * Gets the EngineType of the connected database.
      *
-     * @return 0 if there is no database, the engine type otherwise. @see org.apache.derby.iapi.reference.EngineType
+     * @return 0 if there is no database, the engine type otherwise. @see org.apache.derby.shared.common.reference.EngineType
      */
     public int getEngineType()
     {

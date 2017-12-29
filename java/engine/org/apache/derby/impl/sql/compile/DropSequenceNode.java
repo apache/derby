@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;

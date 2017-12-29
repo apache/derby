@@ -28,7 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import junit.framework.Test;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;

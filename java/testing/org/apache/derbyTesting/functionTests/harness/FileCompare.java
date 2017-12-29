@@ -33,7 +33,7 @@ import java.io.*;
 import java.util.StringTokenizer;
 import java.util.Properties;
 
-import org.apache.derby.iapi.services.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.ProductGenusNames;
 
 public class FileCompare
 {

@@ -25,11 +25,11 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.iapi.types.RowLocation;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 

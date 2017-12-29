@@ -75,7 +75,7 @@ public class ReleaseProperties extends Task
         "# See the License for the specific language governing permissions and" + LS +
         "# limitations under the License." + LS + LS;
     
-	public final static int	MAINT_ENCODING = org.apache.derby.iapi.services.info.PropertyNames.MAINT_ENCODING;
+	public final static int	MAINT_ENCODING = org.apache.derby.shared.common.info.PropertyNames.MAINT_ENCODING;
     private final static int MAINT_LENGTH = 7;
 
     private final   static  String  DRDA_MAINT = "drdamaint";

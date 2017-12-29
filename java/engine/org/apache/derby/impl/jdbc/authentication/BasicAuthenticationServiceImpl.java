@@ -28,7 +28,7 @@ import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
 
@@ -80,12 +80,12 @@ public final class BasicAuthenticationServiceImpl
 
 		String authenticationProvider = PropertyUtil.getPropertyFromSet(
 					properties,
-					org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
+					org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
 
 		if ( (authenticationProvider != null) &&
 			 (authenticationProvider.length() != 0) &&
 			 (!(StringUtil.SQLEqualsIgnoreCase(authenticationProvider,
-				  org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_BUILTIN))))
+				  org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_BUILTIN))))
 			return false;
 		else
 			return true;	// Yep, we're on!
@@ -185,7 +185,7 @@ public final class BasicAuthenticationServiceImpl
 		// be retrieved at the datbase level only).
 		//
         String userNameProperty =
-          org.apache.derby.iapi.reference.Property.USER_PROPERTY_PREFIX.concat(
+          org.apache.derby.shared.common.reference.Property.USER_PROPERTY_PREFIX.concat(
                         userName);
 
 		// check if user defined at the database level

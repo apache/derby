@@ -21,11 +21,11 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.CloneableStream;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.iapi.store.raw.RecordHandle;
 

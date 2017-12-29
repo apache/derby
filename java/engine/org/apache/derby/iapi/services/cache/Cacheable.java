@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.cache;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 	Any object that implements this interface can be cached using the services of

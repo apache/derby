@@ -23,7 +23,7 @@ package org.apache.derby.iapi.store.access.xa;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 
-import org.apache.derby.iapi.error.StandardException; 
+import org.apache.derby.shared.common.error.StandardException; 
 
 import javax.transaction.xa.Xid;
 

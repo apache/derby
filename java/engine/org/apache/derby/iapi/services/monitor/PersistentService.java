@@ -23,8 +23,8 @@ package org.apache.derby.iapi.services.monitor;
 
 import org.apache.derby.io.StorageFactory;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Property;
 
 import java.util.Properties;
 import java.util.Enumeration;

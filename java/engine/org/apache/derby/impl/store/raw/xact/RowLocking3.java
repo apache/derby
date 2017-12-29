@@ -33,7 +33,7 @@ import org.apache.derby.iapi.store.raw.RowLock;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 
 /**

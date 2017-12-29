@@ -34,7 +34,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 	Protocol unit test for the LockManager.
@@ -59,7 +59,7 @@ public class T_LockFactory extends T_MultiIterations
 
 	protected String getModuleToTestProtocolName() {
 
-		return org.apache.derby.iapi.reference.Module.LockFactory;
+		return org.apache.derby.shared.common.reference.Module.LockFactory;
 	}
 
 	/**

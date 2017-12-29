@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.SQLException;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.UTF8Util;

@@ -42,7 +42,7 @@ import org.apache.derby.iapi.services.property.PropertySetCallback;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.ConglomerateFactory;
@@ -440,7 +440,7 @@ public abstract class RAMAccessManager
         // Get a cache factory to create the conglomerate cache.
 		CacheFactory cf = 
             (CacheFactory) startSystemModule(
-                 org.apache.derby.iapi.reference.Module.CacheFactory);
+                 org.apache.derby.shared.common.reference.Module.CacheFactory);
 
         // Now create the conglomerate cache.
 
@@ -1051,7 +1051,7 @@ public abstract class RAMAccessManager
 		// If this module has already been booted by the JDBC layer, this will 
 		// have no effect at all.
 		bootServiceModule(
-            create, this, org.apache.derby.iapi.reference.Module.PropertyFactory, 
+            create, this, org.apache.derby.shared.common.reference.Module.PropertyFactory, 
             startParams);
 
         // Create the in-memory conglomerate directory
@@ -1167,7 +1167,7 @@ public abstract class RAMAccessManager
         // set up the property validation
         pf = (PropertyFactory) 
             findServiceModule(
-                this, org.apache.derby.iapi.reference.Module.PropertyFactory);
+                this, org.apache.derby.shared.common.reference.Module.PropertyFactory);
 
         // set up the transaction properties.  On J9, over NFS, runing on a
         // power PC coprossor, the directories were created fine, but create

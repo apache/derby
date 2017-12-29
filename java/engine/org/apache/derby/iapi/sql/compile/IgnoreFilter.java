@@ -23,7 +23,7 @@ package org.apache.derby.iapi.sql.compile;
 
 import java.util.List;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * Filter which fails all Visitables.

@@ -23,7 +23,7 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.io.Storable;
 
 import java.io.InputStream;

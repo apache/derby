@@ -24,7 +24,7 @@ package org.apache.derby.iapi.util;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;

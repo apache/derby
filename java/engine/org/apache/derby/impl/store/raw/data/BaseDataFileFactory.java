@@ -24,7 +24,7 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.iapi.security.SecurityUtil;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 
 import org.apache.derby.database.Database;
 import org.apache.derby.iapi.services.cache.CacheFactory;
@@ -41,10 +41,10 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.services.diag.Performance;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -72,7 +72,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
 
@@ -425,7 +425,7 @@ public class BaseDataFileFactory
 
 		CacheFactory cf = (CacheFactory) 
             startSystemModule(
-                org.apache.derby.iapi.reference.Module.CacheFactory);
+                org.apache.derby.shared.common.reference.Module.CacheFactory);
 
         // Initialize the page cache
 	    int pageCacheSize = getIntParameter(

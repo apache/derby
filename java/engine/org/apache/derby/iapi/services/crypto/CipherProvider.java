@@ -23,7 +23,7 @@ package org.apache.derby.iapi.services.crypto;
 
 import java.security.Key;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 	A CipherProvider is a wrapper for a Cipher class in JCE.

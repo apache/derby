@@ -30,9 +30,9 @@ import org.apache.derby.vti.VTITemplate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.shared.common.error.PublicAPI;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 
 /**

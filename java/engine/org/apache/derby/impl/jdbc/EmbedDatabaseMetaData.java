@@ -21,8 +21,8 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
@@ -33,12 +33,12 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.impl.sql.execute.GenericConstantActionFactory;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 
 import java.util.Properties;
 

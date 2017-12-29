@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.ClassName
+   Derby - Class org.apache.derby.shared.common.reference.ClassName
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
  */
 
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 
 
 /**
@@ -70,7 +70,7 @@ public interface ClassName
 	String RunTimeStatistics = "org.apache.derby.iapi.sql.execute.RunTimeStatistics";
 
 	String Storable = "org.apache.derby.iapi.services.io.Storable";
-	String StandardException = "org.apache.derby.iapi.error.StandardException";
+	String StandardException = "org.apache.derby.shared.common.error.StandardException";
 
 	String LanguageConnectionContext = "org.apache.derby.iapi.sql.conn.LanguageConnectionContext";
 	String ConstantAction = "org.apache.derby.iapi.sql.execute.ConstantAction";

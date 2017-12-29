@@ -26,7 +26,7 @@ import java.util.Map;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.Activation;
@@ -66,7 +66,7 @@ public interface LanguageConnectionContext extends Context {
 	 * this is the ID we expect these contexts
 	 * to be stored into a context manager under.
 	 */
-	public static final String CONTEXT_ID = org.apache.derby.iapi.reference.ContextId.LANG_CONNECTION;
+	public static final String CONTEXT_ID = org.apache.derby.shared.common.reference.ContextId.LANG_CONNECTION;
 
 	public	static	final	int	OUTERMOST_STATEMENT = 1;
 

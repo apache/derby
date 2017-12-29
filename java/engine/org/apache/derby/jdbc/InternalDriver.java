@@ -52,7 +52,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
@@ -60,13 +60,13 @@ import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Module;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Module;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.services.io.FormatableProperties;
 import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
@@ -77,7 +77,7 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.impl.jdbc.*;
 import org.apache.derby.mbeans.JDBCMBean;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.security.SystemPermission;
 
 /**
  * Factory class and API for JDBC objects.
@@ -438,7 +438,7 @@ public class InternalDriver implements ModuleControl, Driver {
      * <li> the given user needs to be covered by a grant:
      *      principal org.apache.derby.authentication.SystemPrincipal "..." {}
      * <li> that lists a shutdown permission:
-     *      permission org.apache.derby.security.SystemPermission "shutdown";
+     *      permission org.apache.derby.shared.common.security.SystemPermission "shutdown";
      * </ul>
      * or it will fail with a SQLException detailing the cause.
      *

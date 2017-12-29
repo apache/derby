@@ -48,21 +48,21 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.shared.common.error.ErrorStringBuilder;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.error.ShutdownException;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Module;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Module;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.i18n.BundleFinder;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.i18n.BundleFinder;
+import org.apache.derby.shared.common.i18n.MessageService;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.iapi.services.io.AccessibleByteArrayOutputStream;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
@@ -76,8 +76,8 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
+import org.apache.derby.shared.common.stream.InfoStreams;
+import org.apache.derby.shared.common.stream.PrintWriterGetHeader;
 import org.apache.derby.iapi.services.timer.TimerFactory;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.io.StorageFactory;
@@ -334,7 +334,7 @@ abstract class BaseMonitor
 		}
 
 		try {
-			systemStreams = (InfoStreams) Monitor.startSystemModule("org.apache.derby.iapi.services.stream.InfoStreams");
+			systemStreams = (InfoStreams) Monitor.startSystemModule("org.apache.derby.shared.common.stream.InfoStreams");
 
 			if (SanityManager.DEBUG) {
 				SanityManager.SET_DEBUG_STREAM(systemStreams.stream().getPrintWriter());

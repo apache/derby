@@ -41,7 +41,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.transaction.TransactionControl;

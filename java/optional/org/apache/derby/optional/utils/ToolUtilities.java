@@ -26,8 +26,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.PublicAPI;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 

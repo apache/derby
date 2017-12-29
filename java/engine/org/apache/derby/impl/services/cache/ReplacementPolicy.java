@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.services.cache;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * Interface that must be implemented by classes that provide a replacement

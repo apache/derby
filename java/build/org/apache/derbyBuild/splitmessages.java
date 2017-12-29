@@ -24,7 +24,7 @@ package org.apache.derbyBuild;
 import java.io.*;
 import java.util.*;
 
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class splitmessages {

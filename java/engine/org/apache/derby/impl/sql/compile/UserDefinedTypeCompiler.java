@@ -22,7 +22,7 @@
 package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.shared.common.reference.ClassName;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.loader.ClassFactory;

@@ -33,7 +33,7 @@ import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.services.monitor.DerbyObservable;
 import org.apache.derby.iapi.services.monitor.DerbyObserver;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.raw.AuxObject;
 import org.apache.derby.iapi.store.raw.ContainerHandle;

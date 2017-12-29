@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;

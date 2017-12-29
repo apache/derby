@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.StringTokenizer;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // Note:

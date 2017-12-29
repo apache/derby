@@ -24,20 +24,20 @@ package org.apache.derby.impl.jdbc;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
-import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.shared.common.error.ErrorStringBuilder;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.ExceptionFactory;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.error.ExceptionFactory;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.types.TypeId;
 
 /**

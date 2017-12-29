@@ -23,7 +23,7 @@ package org.apache.derby.impl.storeless;
 import java.io.Serializable;
 import java.util.Properties;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.Storable;

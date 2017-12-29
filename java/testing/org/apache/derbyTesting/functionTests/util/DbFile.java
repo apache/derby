@@ -21,7 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.util;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.FileResource;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

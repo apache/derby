@@ -22,7 +22,7 @@
 package org.apache.derby.impl.store.access.sort;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 

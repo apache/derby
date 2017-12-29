@@ -28,9 +28,9 @@ import java.util.Properties;
 import java.util.Hashtable;
 import org.apache.derby.io.WritableStorageFactory;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.error.PassThroughException;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.error.PassThroughException;
+import org.apache.derby.shared.common.reference.Property;
 
 /**
 */

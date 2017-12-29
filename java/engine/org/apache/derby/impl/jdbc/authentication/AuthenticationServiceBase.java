@@ -22,12 +22,12 @@
 package org.apache.derby.impl.jdbc.authentication;
 
 import org.apache.derby.authentication.UserAuthenticator;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -195,7 +195,7 @@ public abstract class AuthenticationServiceBase
 			// _only_ if we're on a database context of course :)
 
 			PropertyFactory pf = (PropertyFactory)
-				getServiceModule(this, org.apache.derby.iapi.reference.Module.PropertyFactory);
+				getServiceModule(this, org.apache.derby.shared.common.reference.Module.PropertyFactory);
 			if (pf != null)
 				pf.addPropertySetNotification(this);
 
@@ -392,7 +392,7 @@ public abstract class AuthenticationServiceBase
     {
 
         // user password properties need to be remapped. nothing else needs remapping.
-		if ( key.startsWith(org.apache.derby.iapi.reference.Property.USER_PROPERTY_PREFIX) ) { return true; }
+		if ( key.startsWith(org.apache.derby.shared.common.reference.Property.USER_PROPERTY_PREFIX) ) { return true; }
 
         String      stringValue = (String) value;
         boolean     settingToNativeLocal = Property.AUTHENTICATION_PROVIDER_NATIVE_LOCAL.equals( stringValue );
@@ -490,7 +490,7 @@ public abstract class AuthenticationServiceBase
 	{
 		// We only care for "derby.user." property changes
 		// at the moment.
-		if (!key.startsWith(org.apache.derby.iapi.reference.Property.USER_PROPERTY_PREFIX)) return null;
+		if (!key.startsWith(org.apache.derby.shared.common.reference.Property.USER_PROPERTY_PREFIX)) return null;
 		// We do not hash 'derby.user.<userName>' password if
 		// the configured authentication service is LDAP as the
 		// same property could be used to store LDAP user full DN (X500).
@@ -498,10 +498,10 @@ public abstract class AuthenticationServiceBase
 		// not system, service or application properties.
 
 		String authService =
-			(String)p.get(org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
+			(String)p.get(org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
 
 		if ((authService != null) &&
-			 (StringUtil.SQLEqualsIgnoreCase(authService, org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_LDAP)))
+			 (StringUtil.SQLEqualsIgnoreCase(authService, org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_LDAP)))
 			return null;
 
 		// Ok, we can hash this password in the db
@@ -531,7 +531,7 @@ public abstract class AuthenticationServiceBase
 		//
 		String requireAuthentication = PropertyUtil.getPropertyFromSet(
 					properties,
-					org.apache.derby.iapi.reference.Property.REQUIRE_AUTHENTICATION_PARAMETER
+					org.apache.derby.shared.common.reference.Property.REQUIRE_AUTHENTICATION_PARAMETER
 														);
 		if ( Boolean.valueOf(requireAuthentication).booleanValue() ) { return true; }
 

@@ -30,9 +30,9 @@ import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTimeoutException;
 import java.sql.SQLTransactionRollbackException;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.ExceptionFactory;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.error.ExceptionFactory;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 

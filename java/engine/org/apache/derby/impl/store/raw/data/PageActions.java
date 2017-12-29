@@ -24,7 +24,7 @@ package org.apache.derby.impl.store.raw.data;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 

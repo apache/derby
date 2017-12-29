@@ -36,11 +36,11 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Locale;
 import org.apache.derby.vti.VTITemplate;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Limits;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**

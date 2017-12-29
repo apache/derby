@@ -35,7 +35,7 @@ import javax.transaction.xa.XAException;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.error.ExceptionUtil;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -51,7 +51,7 @@ import org.apache.derby.impl.jdbc.TransactionResourceImpl;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 /**
  * Implements XAResource

@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.shared.common.reference.ClassName;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**

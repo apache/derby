@@ -39,7 +39,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.*;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
@@ -55,7 +55,7 @@ import org.apache.derby.impl.store.raw.log.LogCounter;
 
 import org.apache.derby.iapi.types.SQLChar;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 

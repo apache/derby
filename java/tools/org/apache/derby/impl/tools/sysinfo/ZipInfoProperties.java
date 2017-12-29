@@ -25,8 +25,8 @@ package org.apache.derby.impl.tools.sysinfo;
 
 import java.util.Properties;
 import java.io.OutputStream;
-import org.apache.derby.iapi.services.info.PropertyNames;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.PropertyNames;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 
 public class ZipInfoProperties // extends Properties
 {

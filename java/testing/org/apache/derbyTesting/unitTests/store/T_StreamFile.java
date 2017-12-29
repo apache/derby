@@ -35,7 +35,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.raw.*;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
@@ -44,7 +44,7 @@ import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;

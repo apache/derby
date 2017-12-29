@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.stream.PrintWriterGetHeader
+   Derby - Class org.apache.derby.shared.common.reference.ContextId
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,26 +19,12 @@
 
  */
 
-package org.apache.derby.iapi.services.stream;
+package org.apache.derby.shared.common.reference;
 
-/**
- * Get a header to prepend to a line of output. 
- * A HeaderPrintWriter requires an object which implements
- * this interface to construct headers for output lines.
- *
- * @see org.apache.derby.iapi.services.stream.HeaderPrintWriter
- */
+public interface ContextId {
 
-public interface PrintWriterGetHeader
-{
-	/**
-	 *	getHeader
-	 *
-	 *  @return	The header for an output line. 
-	 *
-	 *  @see org.apache.derby.iapi.services.stream.HeaderPrintWriter
-	 **/
 
-	public String getHeader();
+	String LANG_CONNECTION = "LanguageConnectionContext";
+	String LANG_STATEMENT = "StatementContext";
+
 }
-	

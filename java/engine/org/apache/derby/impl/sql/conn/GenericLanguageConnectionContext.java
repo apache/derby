@@ -33,10 +33,10 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.ContextId;
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.ContextId;
+import org.apache.derby.shared.common.reference.Limits;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.cache.Cacheable;
@@ -47,7 +47,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.iapi.sql.ParameterValueSet;
@@ -333,7 +333,7 @@ public class GenericLanguageConnectionContext
      String dbname)
          throws StandardException
     {
-        super(cm, org.apache.derby.iapi.reference.ContextId.LANG_CONNECTION);
+        super(cm, org.apache.derby.shared.common.reference.ContextId.LANG_CONNECTION);
         acts = new ArrayList<Activation>();
         tran = tranCtrl;
 
@@ -2994,7 +2994,7 @@ public class GenericLanguageConnectionContext
      */
     public StatementContext getStatementContext()
     {   
-        return (StatementContext) getContextManager().getContext(org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
+        return (StatementContext) getContextManager().getContext(org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
     }
 
     /**

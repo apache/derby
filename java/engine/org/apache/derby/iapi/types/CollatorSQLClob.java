@@ -23,7 +23,7 @@ package org.apache.derby.iapi.types;
 
 import java.sql.Clob;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.text.RuleBasedCollator;

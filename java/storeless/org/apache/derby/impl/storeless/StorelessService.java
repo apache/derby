@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.EngineType;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.EngineType;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.io.StorageFactory;
 

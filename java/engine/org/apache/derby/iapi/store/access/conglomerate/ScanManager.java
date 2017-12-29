@@ -24,7 +24,7 @@ package org.apache.derby.iapi.store.access.conglomerate;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.raw.Page;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 

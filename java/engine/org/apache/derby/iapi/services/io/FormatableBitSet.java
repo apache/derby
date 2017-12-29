@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.services.io;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.shared.common.util.ArrayUtil;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;

@@ -21,7 +21,7 @@
 
 package org.apache.derby.diag;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.store.access.TransactionInfo;
@@ -33,7 +33,7 @@ import org.apache.derby.vti.VTIEnvironment;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.sql.ResultSetMetaData;

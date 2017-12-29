@@ -26,7 +26,7 @@ import java.security.PrivilegedAction;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import org.apache.derby.iapi.db.DatabaseContext;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;

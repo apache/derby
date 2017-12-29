@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.types;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * This class provides a simple regular expression parser for standard format dates, times, and timestamps

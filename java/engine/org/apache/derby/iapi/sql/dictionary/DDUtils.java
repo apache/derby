@@ -23,9 +23,9 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.sql.StatementType;
 
 /**

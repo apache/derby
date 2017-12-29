@@ -21,8 +21,8 @@
 
 package org.apache.derby.tools;
 
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.impl.tools.sysinfo.Main;
 
 /**

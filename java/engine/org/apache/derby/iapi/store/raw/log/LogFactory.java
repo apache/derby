@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.store.raw.log;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
@@ -31,7 +31,7 @@ import org.apache.derby.iapi.store.raw.ScanHandle;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import java.io.File;
 
 public interface LogFactory extends Corruptable {

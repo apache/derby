@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.services.locks;
 
 import org.apache.derby.iapi.util.Matchable;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 import java.util.Enumeration;
 

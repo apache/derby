@@ -36,7 +36,7 @@ import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -163,7 +163,7 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 	 */
 	public void boot(boolean create, Properties properties) throws StandardException {
 
-        CacheFactory cf = (CacheFactory) startSystemModule( org.apache.derby.iapi.reference.Module.CacheFactory );
+        CacheFactory cf = (CacheFactory) startSystemModule( org.apache.derby.shared.common.reference.Module.CacheFactory );
 
 		/*
 		** The initial and maximum cache sizes are based on experiments

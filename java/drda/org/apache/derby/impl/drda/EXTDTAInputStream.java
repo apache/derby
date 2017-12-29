@@ -30,7 +30,7 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.impl.jdbc.Util;
 

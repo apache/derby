@@ -28,7 +28,7 @@ import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.SpaceInfo;

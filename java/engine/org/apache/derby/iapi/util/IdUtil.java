@@ -24,14 +24,14 @@ package org.apache.derby.iapi.util;
 import org.apache.derby.shared.common.reference.Attribute;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.shared.common.error.StandardException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Vector;
 import java.util.HashSet;
 import java.util.Properties;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 
 /**
   Utility class for parsing and producing string representations of

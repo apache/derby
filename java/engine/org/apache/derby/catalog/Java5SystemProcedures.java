@@ -26,8 +26,8 @@ import java.security.PrivilegedAction;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
-import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.PublicAPI;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;

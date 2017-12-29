@@ -27,7 +27,7 @@ public  abstract    class   ToolUtils
 	//
 	// Methods to copy arrays. We'd like to use java.util.copyOf(), but
     // we have to run on Java 5. The same methods also appear in
-    // org.apache.derby.iapi.services.io.ArrayUtil. They are repeated here
+    // org.apache.derby.shared.common.util.ArrayUtil. They are repeated here
     // in order to avoid sealing issues.
 	//
 	///////////////////////////////////////////////////////////////////

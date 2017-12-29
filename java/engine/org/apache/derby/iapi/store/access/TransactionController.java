@@ -28,7 +28,7 @@ import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.services.io.Storable;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.raw.Loggable;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -67,7 +67,7 @@ resources obtained from it will result in an error.
 </UL>
 Transactions are obtained from an AccessFactory.
 @see AccessFactory#getTransaction
-@see org.apache.derby.iapi.error.StandardException
+@see org.apache.derby.shared.common.error.StandardException
 @see PersistentSet
 
 

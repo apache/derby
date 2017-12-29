@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.conn;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 //this class is for temporary tables. The information kept here is necessary to implement the rollback

@@ -21,8 +21,8 @@
 
 package org.apache.derby.impl.services.stream;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.PrintWriterGetHeader;
 
 import java.io.PrintWriter;
 import java.io.Writer;

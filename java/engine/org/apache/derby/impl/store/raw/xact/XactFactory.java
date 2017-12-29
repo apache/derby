@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.raw.xact;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.context.ContextService;
@@ -57,7 +57,7 @@ import org.apache.derby.iapi.store.raw.xact.TransactionId;
 
 import org.apache.derby.iapi.types.DataValueFactory;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.util.InterruptStatus;
 
@@ -130,7 +130,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         dataValueFactory =  (DataValueFactory)
             findServiceModule(
                 this,
-                org.apache.derby.iapi.reference.ClassName.DataValueFactory);
+                org.apache.derby.shared.common.reference.ClassName.DataValueFactory);
         */
             // if datafactory has not been booted yet, try now.  This can
             // happen in the unit tests.  Usually it is booted before store
@@ -139,7 +139,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
                 bootServiceModule(
                     create, 
                     this,
-                    org.apache.derby.iapi.reference.ClassName.DataValueFactory, 
+                    org.apache.derby.shared.common.reference.ClassName.DataValueFactory, 
                     properties);
 		
 
@@ -147,7 +147,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		lockFactory = 
             (LockFactory) bootServiceModule(false, this,
-				org.apache.derby.iapi.reference.Module.LockFactory, properties);
+				org.apache.derby.shared.common.reference.Module.LockFactory, properties);
 
 		
         // adding entries to locking policy table which means we support that

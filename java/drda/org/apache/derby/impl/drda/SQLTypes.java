@@ -23,7 +23,7 @@ package org.apache.derby.impl.drda;
 
 import java.sql.SQLException;
 import java.sql.Types;
-import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.shared.common.reference.DRDAConstants;
 
 class SQLTypes {
 

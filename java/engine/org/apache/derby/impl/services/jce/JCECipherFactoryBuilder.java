@@ -23,7 +23,7 @@ package org.apache.derby.impl.services.jce;
 
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherFactoryBuilder;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import java.util.Properties;
 
 

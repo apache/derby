@@ -26,7 +26,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.LockFactory;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.conglomerate.MethodFactory;
@@ -46,7 +46,7 @@ import java.util.Dictionary;
   <blockquote><pre>
 	// Get the current validation factory.
 	PropertyFactory af;
-	af = (PropertyFactory) Monitor.findServiceModule(this, org.apache.derby.iapi.reference.Module.PropertyFactory);
+	af = (PropertyFactory) Monitor.findServiceModule(this, org.apache.derby.shared.common.reference.Module.PropertyFactory);
   </pre></blockquote>
 **/
 

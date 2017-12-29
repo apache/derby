@@ -22,14 +22,14 @@
 package org.apache.derby.impl.services.stream;
 
 import java.util.Date;
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
+import org.apache.derby.shared.common.stream.PrintWriterGetHeader;
 
 /**
  * Get a header to prepend to a line of output. *
  * A HeaderPrintWriter requires an object which implements
  * this interface to construct line headers.
  *
- * @see org.apache.derby.iapi.services.stream.HeaderPrintWriter
+ * @see org.apache.derby.shared.common.stream.HeaderPrintWriter
  */
 
 class BasicGetLogHeader implements PrintWriterGetHeader

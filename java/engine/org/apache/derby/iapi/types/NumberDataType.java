@@ -25,12 +25,12 @@ import java.math.BigDecimal;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 

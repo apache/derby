@@ -30,9 +30,9 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Limits;
+import org.apache.derby.shared.common.error.PublicAPI;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.vti.VTITemplate;
 

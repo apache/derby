@@ -24,7 +24,7 @@ package org.apache.derby.impl.sql.execute;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;

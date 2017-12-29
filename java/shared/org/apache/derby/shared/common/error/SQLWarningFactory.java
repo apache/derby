@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.error.SQLWarningFactory
+   Derby - Class org.apache.derby.shared.common.error.SQLWarningFactory
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,11 +19,11 @@
 
  */
 
-package org.apache.derby.iapi.error;
+package org.apache.derby.shared.common.error;
 
 import java.sql.SQLWarning;
 
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 

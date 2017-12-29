@@ -30,8 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import java.io.PrintWriter;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.Qualifier;

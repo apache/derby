@@ -22,11 +22,11 @@
 package org.apache.derby.iapi.services.property;
 
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 import org.apache.derby.iapi.store.access.TransactionController;

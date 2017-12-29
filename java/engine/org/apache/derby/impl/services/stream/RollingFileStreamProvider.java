@@ -1,6 +1,6 @@
 /*
 
- Derby - Class org.apache.derby.iapi.services.stream.RollingFileStreamProvider
+ Derby - Class org.apache.derby.shared.common.stream.RollingFileStreamProvider
 
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,7 @@ package org.apache.derby.impl.services.stream;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 /**

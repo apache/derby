@@ -35,7 +35,7 @@ import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -176,7 +176,7 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
      * @param td     a permission descriptor
      * @param parent unused
      * @return Row suitable for inserting into SYSPERMS.
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      *          thrown on failure
      */
     public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent)
@@ -252,7 +252,7 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
      * @param parentTupleDescriptor unused
      * @param dd                    dataDictionary
      * @return a  descriptor equivalent to a SYSPERMS row
-     * @throws org.apache.derby.iapi.error.StandardException
+     * @throws org.apache.derby.shared.common.error.StandardException
      *          thrown on failure
      */
     public TupleDescriptor buildDescriptor

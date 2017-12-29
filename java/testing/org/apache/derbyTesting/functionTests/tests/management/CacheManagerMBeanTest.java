@@ -29,7 +29,7 @@ import java.util.Set;
 import javax.management.ObjectName;
 import javax.management.RuntimeMBeanException;
 import junit.framework.Test;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.security.SystemPermission;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;

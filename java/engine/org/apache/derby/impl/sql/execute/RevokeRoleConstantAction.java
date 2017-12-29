@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.util.Iterator;
 import java.util.List;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;

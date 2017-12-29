@@ -21,10 +21,10 @@
 
 package org.apache.derby.impl.db;
 
-import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.shared.common.error.PublicAPI;
 
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.EngineType;
+import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.shared.common.reference.EngineType;
 import org.apache.derby.iapi.util.DoubleProperties;
 import org.apache.derby.iapi.util.IdUtil;
 
@@ -41,7 +41,7 @@ import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.DatabaseContext;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -180,7 +180,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
             bootServiceModule(
                 create, 
                 this,
-				org.apache.derby.iapi.reference.ClassName.DataValueFactory, 
+				org.apache.derby.shared.common.reference.ClassName.DataValueFactory, 
                 startParams);
 
 		bootStore(create, startParams);
@@ -746,7 +746,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 			startParams.put(Property.BOOT_DB_CLASSPATH, classpath);
 			cfDB = (ClassFactory) bootServiceModule(create, this,
-					org.apache.derby.iapi.reference.Module.ClassFactory, startParams);
+					org.apache.derby.shared.common.reference.Module.ClassFactory, startParams);
 	}
 
 
@@ -769,7 +769,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	protected void bootValidation(boolean create, Properties startParams)
 		throws StandardException {
 		pf = (PropertyFactory) bootServiceModule(create, this,
-			org.apache.derby.iapi.reference.Module.PropertyFactory, startParams);
+			org.apache.derby.shared.common.reference.Module.PropertyFactory, startParams);
 	}
 
 	protected void bootStore(boolean create, Properties startParams)
@@ -809,7 +809,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		{
 			resourceAdapter = 
 				bootServiceModule(create, this,
-										 org.apache.derby.iapi.reference.Module.ResourceAdapter,
+										 org.apache.derby.shared.common.reference.Module.ResourceAdapter,
 										 allParams);
 		}
 		catch (StandardException mse)

@@ -30,7 +30,7 @@ import org.apache.derby.iapi.services.property.PersistentSet;
 
 import org.apache.derby.iapi.store.access.TransactionInfo;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.DatabaseInstant;
 import java.util.Properties;

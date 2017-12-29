@@ -23,12 +23,12 @@ package org.apache.derby.impl.store.access.btree;
 
 import org.apache.derby.iapi.store.access.ScanInfo;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import java.util.Properties;
 
 /**

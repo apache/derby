@@ -24,7 +24,7 @@ package org.apache.derby.impl.services.cache;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.shared.common.sanity.SanityManager;
 

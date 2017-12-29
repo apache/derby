@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.context;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * Contexts are created and used to manage the execution

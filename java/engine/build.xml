@@ -52,7 +52,6 @@
  
   <target name="engine"
           description="Build Derby engine">
-    <ant dir="${derby.engine.dir}/iapi/reference"/>
     <ant dir="${derby.engine.dir}/authentication"/>
     <ant dir="${derby.engine.dir}/security"/>
     <ant dir="${derby.engine.dir}/io"/>

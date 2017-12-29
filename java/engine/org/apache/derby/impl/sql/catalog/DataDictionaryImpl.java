@@ -57,11 +57,11 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.EngineType;
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.EngineType;
+import org.apache.derby.shared.common.reference.Limits;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.cache.CacheFactory;
 import org.apache.derby.iapi.services.cache.CacheManager;
@@ -666,7 +666,7 @@ public final class	DataDictionaryImpl
 		 * Get the table descriptor cache.
 		 */
 		CacheFactory cf =
-				(CacheFactory) startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+				(CacheFactory) startSystemModule(org.apache.derby.shared.common.reference.Module.CacheFactory);
 		OIDTdCache =
 			cf.newCacheManager(this,
 				"TableDescriptorOIDCache",
@@ -936,7 +936,7 @@ public final class	DataDictionaryImpl
         if( permissionsCache == null)
         {
             CacheFactory cf =
-              (CacheFactory) startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+              (CacheFactory) startSystemModule(org.apache.derby.shared.common.reference.Module.CacheFactory);
             LanguageConnectionContext lcc = getLCC();
             TransactionController tc = lcc.getTransactionExecute();
             permissionsCacheSize = PropertyUtil.getServiceInt( tc,

@@ -27,7 +27,7 @@ import java.util.Arrays;
 
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;

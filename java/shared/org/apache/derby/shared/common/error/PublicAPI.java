@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.error.PublicAPI
+   Derby - Class org.apache.derby.shared.common.error.PublicAPI
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,10 +19,9 @@
 
  */
 
-package org.apache.derby.iapi.error;
+package org.apache.derby.shared.common.error;
 
 import java.sql.SQLException;
-import org.apache.derby.iapi.jdbc.ExceptionFactory;
 
 /**
 	Class that wraps StandardExceptions in a SQLException.

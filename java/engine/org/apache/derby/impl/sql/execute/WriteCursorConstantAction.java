@@ -27,8 +27,8 @@ import java.io.ObjectOutput;
 import java.util.Properties;
 
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.shared.common.sanity.SanityManager;

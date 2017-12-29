@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.catalog.ReferencedColumns;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;

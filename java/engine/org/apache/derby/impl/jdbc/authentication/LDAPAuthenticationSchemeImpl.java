@@ -145,7 +145,7 @@ extends JNDIAuthenticationSchemeBase
 			if (useUserPropertyAsDN)
 				userDN =
 					authenticationService.getProperty(
-						org.apache.derby.iapi.reference.Property.USER_PROPERTY_PREFIX);
+						org.apache.derby.shared.common.reference.Property.USER_PROPERTY_PREFIX);
 
 			if (userDN == (String) null) {
 				userDN = getDNFromUID(userName);
@@ -232,14 +232,14 @@ extends JNDIAuthenticationSchemeBase
 			// name.
 			//
 			String ldapServer = authenticationService.getProperty(
-						org.apache.derby.iapi.reference.Property.AUTHENTICATION_SERVER_PARAMETER);
+						org.apache.derby.shared.common.reference.Property.AUTHENTICATION_SERVER_PARAMETER);
 
 			if (ldapServer == (String) null) {
 
 				// we do expect a LDAP Server name to be configured
 				Monitor.logTextMessage(
 					MessageId.AUTH_NO_LDAP_HOST_MENTIONED,
-						 org.apache.derby.iapi.reference.Property.AUTHENTICATION_SERVER_PARAMETER);
+						 org.apache.derby.shared.common.reference.Property.AUTHENTICATION_SERVER_PARAMETER);
 
 				this.providerURL = dfltLDAPURL + "/";
 

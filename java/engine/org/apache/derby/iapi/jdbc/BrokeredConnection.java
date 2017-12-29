@@ -39,8 +39,9 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Properties;
 import java.util.concurrent.Executor;
-import org.apache.derby.iapi.error.SQLWarningFactory;
+import org.apache.derby.shared.common.error.SQLWarningFactory;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.error.ExceptionFactory;
 
 /**
  * This is a rudimentary connection that delegates

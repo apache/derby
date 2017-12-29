@@ -24,7 +24,7 @@ package org.apache.derby.mbeans;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import org.apache.derby.iapi.reference.Module;
+import org.apache.derby.shared.common.reference.Module;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 /** 

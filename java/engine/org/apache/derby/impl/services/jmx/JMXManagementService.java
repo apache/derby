@@ -17,7 +17,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
- */
+ */   
 
 package org.apache.derby.impl.services.jmx;
 
@@ -38,9 +38,9 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.info.Version;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.mbeans.Version;
 import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
@@ -48,7 +48,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.mbeans.ManagementMBean;
 import org.apache.derby.mbeans.VersionMBean;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.security.SystemPermission;
 
 /** 
  * This class implements the ManagementService interface and provides a simple

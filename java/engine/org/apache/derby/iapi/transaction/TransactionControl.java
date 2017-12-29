@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**

@@ -33,7 +33,7 @@ import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Loggable;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.shared.common.sanity.SanityManager;

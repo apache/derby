@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.impl.jdbc.Util;

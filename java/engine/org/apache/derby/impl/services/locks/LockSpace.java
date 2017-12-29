@@ -27,7 +27,7 @@ import org.apache.derby.iapi.services.locks.Limit;
 
 import org.apache.derby.iapi.util.Matchable;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.util.ArrayDeque;
 import java.util.Enumeration;

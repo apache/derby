@@ -21,7 +21,7 @@
 package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.catalog.SequencePreallocator;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**

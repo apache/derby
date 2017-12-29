@@ -26,7 +26,7 @@ import org.apache.derby.iapi.services.diag.Diagnosticable;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -39,7 +39,7 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 import org.apache.derbyTesting.unitTests.harness.T_MultiIterations;
 import org.apache.derbyTesting.unitTests.harness.T_Fail;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import java.util.Properties;
 

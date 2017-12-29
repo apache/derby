@@ -30,7 +30,7 @@ import java.security.CodeSource;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.Properties;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.impl.drda.NetworkServerControlImpl;
 

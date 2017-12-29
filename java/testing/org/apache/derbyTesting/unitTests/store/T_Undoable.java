@@ -29,7 +29,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;

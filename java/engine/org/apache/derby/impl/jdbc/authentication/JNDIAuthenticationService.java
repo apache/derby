@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.jdbc.authentication;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.iapi.jdbc.AuthenticationService;
@@ -79,11 +79,11 @@ public class JNDIAuthenticationService
 
 		authenticationProvider = PropertyUtil.getPropertyFromSet(
 					properties,
-						org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
+						org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
 
 		 if ( (authenticationProvider != null) &&
 			   (StringUtil.SQLEqualsIgnoreCase(authenticationProvider,
-				  	org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_LDAP)))
+				  	org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_LDAP)))
 			return true;
 
 		return false;

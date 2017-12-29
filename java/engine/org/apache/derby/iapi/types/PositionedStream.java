@@ -22,7 +22,7 @@ package org.apache.derby.iapi.types;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * This interface describes a stream that is aware of its own position and can

@@ -23,8 +23,8 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.Properties;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.ClassName;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -153,7 +153,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
                 return ( (targetTableName!=null) ? targetTableName : targetVTI.getTableName() ).toString() + "\n"
                     + targetProperties + "\n"
                     + super.toString();
-            } catch (org.apache.derby.iapi.error.StandardException e) {
+            } catch (org.apache.derby.shared.common.error.StandardException e) {
                 return "tableName: <not_known>\n"
                     + targetProperties + "\n"
                     + super.toString();

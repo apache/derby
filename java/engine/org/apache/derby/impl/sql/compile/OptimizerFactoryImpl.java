@@ -22,7 +22,7 @@
 package org.apache.derby.impl.sql.compile;
 
 import java.util.Properties;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.compile.CostEstimate;

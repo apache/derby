@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.stream.HeaderPrintWriter
+   Derby - Class org.apache.derby.shared.common.stream.HeaderPrintWriter
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.services.stream;
+package org.apache.derby.shared.common.stream;
 
 import java.io.PrintWriter;
 

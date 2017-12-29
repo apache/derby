@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * The Parser interface is intended to work with Jack-generated parsers (now JavaCC).

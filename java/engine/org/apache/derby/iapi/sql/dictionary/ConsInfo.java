@@ -23,7 +23,7 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.services.io.Formatable;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  *	This interface describes the columns in a referenced constraint. Added

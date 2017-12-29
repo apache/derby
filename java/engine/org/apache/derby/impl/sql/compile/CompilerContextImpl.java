@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.compiler.JavaFactory;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;

@@ -24,8 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.shared.common.reference.SQLState;

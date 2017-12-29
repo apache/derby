@@ -26,7 +26,7 @@ import org.apache.derby.iapi.services.diag.DiagnosticableGeneric;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 import org.apache.derby.iapi.store.raw.xact.TransactionId;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 

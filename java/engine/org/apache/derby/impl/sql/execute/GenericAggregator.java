@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.lang.reflect.Constructor;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.shared.common.sanity.SanityManager;

@@ -24,7 +24,7 @@ package org.apache.derby.impl.sql.execute;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.sql.Activation;
@@ -36,7 +36,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.impl.jdbc.authentication.BasicAuthenticationServiceImpl;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 /**
  *  This class performs actions that are ALWAYS performed for a

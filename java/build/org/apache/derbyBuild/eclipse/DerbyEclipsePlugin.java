@@ -26,8 +26,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
-import org.apache.derby.iapi.services.info.PropertyNames;
+import org.apache.derby.shared.common.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.PropertyNames;
 
 /**
  * This class provides the functionality to create the build related

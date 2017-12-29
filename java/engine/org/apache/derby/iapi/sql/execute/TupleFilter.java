@@ -23,7 +23,7 @@ package org.apache.derby.iapi.sql.execute;
 
 import org.apache.derby.iapi.types.BooleanDataValue;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * 	A TupleFilter is used to qualify rows from a tuple stream.

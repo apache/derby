@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.sql.compile;
 
 import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.sql.StatementUtil;
 import org.apache.derby.iapi.sql.compile.CompilerContext;

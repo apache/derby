@@ -27,10 +27,10 @@ import java.security.PrivilegedAction;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
-import org.apache.derby.iapi.services.stream.InfoStreams;
+import org.apache.derby.shared.common.stream.InfoStreams;
 
 // static methods
 // set up automatically first time it's used

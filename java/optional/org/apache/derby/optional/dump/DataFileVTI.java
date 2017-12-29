@@ -52,7 +52,7 @@ import java.util.Properties;
 
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherProvider;
 import org.apache.derby.iapi.services.io.ArrayInputStream;

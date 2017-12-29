@@ -34,9 +34,9 @@ import java.io.PrintWriter;
 import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -44,7 +44,7 @@ import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;

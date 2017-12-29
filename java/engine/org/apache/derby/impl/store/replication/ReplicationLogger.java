@@ -24,8 +24,8 @@ package org.apache.derby.impl.store.replication;
 
 import java.util.Date;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.shared.common.error.ErrorStringBuilder;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 

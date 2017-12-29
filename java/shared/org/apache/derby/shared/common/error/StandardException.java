@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.error.StandardException
+   Derby - Class org.apache.derby.shared.common.error.StandardException
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.error;
+package org.apache.derby.shared.common.error;
 
 import java.lang.reflect.InvocationTargetException;
 import java.security.PrivilegedActionException;
@@ -28,8 +28,8 @@ import java.sql.SQLWarning;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.util.ArrayUtil;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**

@@ -21,8 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;

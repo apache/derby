@@ -24,7 +24,7 @@ grant codeBase "${derby.install.url}derby.jar"
   // These permissions are needed for everyday, embedded Derby usage.
   //
   permission java.lang.RuntimePermission "createClassLoader";
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 
   // Next, the permission to read "derby.*" properties is granted to
   // derby.jar. This is necessary for the engine to read derby properties.
@@ -109,8 +109,8 @@ grant codeBase "${derby.install.url}derbyshared.jar" {
   // In that case the application would need to create
   // a whole set of fine-grained permissions to allow specific
   // users access to MBeans and actions they perform.
-  permission org.apache.derby.security.SystemPermission "engine", "monitor";
-  permission org.apache.derby.security.SystemPermission "server", "monitor";  
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.shared.common.security.SystemPermission "server", "monitor";  
 };
 
 
@@ -148,7 +148,7 @@ grant codeBase "${derby.install.url}derbynet.jar"
       "read, write";
 
   // Needed to start the monitoring MBeans
-  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 
   // JMX: Uncomment this permission to allow the ping operation of the
   //      NetworkServerMBean to connect to the Network Server.

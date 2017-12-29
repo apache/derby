@@ -29,7 +29,7 @@ import java.security.PrivilegedAction;
 
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.catalog.types.IndexDescriptorImpl;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.io.Formatable;

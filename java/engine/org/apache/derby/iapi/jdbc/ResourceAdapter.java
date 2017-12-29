@@ -25,7 +25,7 @@ import javax.transaction.xa.XAException;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 	The resource adapter is the clearing house for managing connections,

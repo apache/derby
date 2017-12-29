@@ -22,7 +22,7 @@
 package org.apache.derby.vti;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

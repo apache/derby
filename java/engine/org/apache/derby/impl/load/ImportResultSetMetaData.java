@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import org.apache.derby.vti.VTIMetaDataTemplate;
 
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 
 class ImportResultSetMetaData extends VTIMetaDataTemplate {
 

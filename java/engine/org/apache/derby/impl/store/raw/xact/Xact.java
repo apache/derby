@@ -65,14 +65,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Dictionary;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 
@@ -2878,7 +2878,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 	/**	
 	 * Perform a checkpoint during rollforward recovery.
      * 
-     * @throws org.apache.derby.iapi.error.StandardException 
+     * @throws org.apache.derby.shared.common.error.StandardException 
      */
 	public void checkpointInRollForwardRecovery(LogInstant cinstant,
 												long redoLWM, long undoLWM)

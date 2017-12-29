@@ -1348,7 +1348,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // being reported. We can use getCause because we always run with
         // Java SE 6 or later.
         Throwable cause = getLastSQLException(sqle).getCause();
-        assertEquals("org.apache.derby.iapi.error.StandardException",
+        assertEquals("org.apache.derby.shared.common.error.StandardException",
                      cause.getClass().getName());
         cause = cause.getCause();
         assertTrue("Exception not a DerbyIOException",

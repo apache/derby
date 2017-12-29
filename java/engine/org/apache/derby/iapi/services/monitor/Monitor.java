@@ -25,18 +25,18 @@ import java.io.PrintWriter;
 import java.security.AccessControlException;
 import java.util.Locale;
 import java.util.Properties;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.iapi.reference.EngineType;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.EngineType;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.security.SecurityUtil;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.i18n.MessageService;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.loader.InstanceGetter;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 
 /**
 	<P><B>Services</B><BR>

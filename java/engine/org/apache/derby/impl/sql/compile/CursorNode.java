@@ -24,7 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
@@ -625,7 +625,7 @@ public class CursorNode extends DMLStatementNode
 			MethodBuilder constructor = acb.getConstructor();
 			constructor.pushThis();
 			constructor.push(indexOfSessionTableNamesInSavedObjects);
-			constructor.putField(org.apache.derby.iapi.reference.ClassName.BaseActivation, "indexOfSessionTableNamesInSavedObjects", "int");
+			constructor.putField(org.apache.derby.shared.common.reference.ClassName.BaseActivation, "indexOfSessionTableNamesInSavedObjects", "int");
 			constructor.endStatement();
     }
 

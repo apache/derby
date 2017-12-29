@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.info.Version
+   Derby - Class org.apache.derby.mbeans.Version
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,13 +19,14 @@
 
 */
 
-package org.apache.derby.iapi.services.info;
+package org.apache.derby.mbeans;
 
 import java.security.AccessControlException;
 import java.security.AccessController;
 
 import org.apache.derby.mbeans.VersionMBean;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.info.ProductVersionHolder;
+import org.apache.derby.shared.common.security.SystemPermission;
 
 /**
  * This implementation of VersionMBean instruments a

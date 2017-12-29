@@ -35,7 +35,7 @@ import org.apache.derby.iapi.store.raw.Corruptable;
 
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
 	This module is intended to be used only within the RawStore. RawStore functionality

@@ -531,7 +531,7 @@ public class classlister {
     // for more information.
     //
     if (
-        className.startsWith("org.apache.derby.iapi.reference.DRDAConstants") ||
+        className.startsWith("org.apache.derby.shared.common.reference.DRDAConstants") ||
         className.startsWith("org.apache.derby.shared.common.sanity.SanityState") ||
         className.startsWith("org.apache.derbyPreBuild.ReleaseProperties")
         )
@@ -550,14 +550,14 @@ public class classlister {
 		}
 
 		/*
-			org.apache.derby.iapi.reference.ClassName &
+			org.apache.derby.shared.common.reference.ClassName &
 			RegisteredFormatIds has a list of all registered classes, If we pull this in then
 			we will pull in the complete set of classes. So we add this to our list but don't
 			dependency check it.
 		*/
 		boolean dontCheckDependencies = false;
 		/*
-		if (className.equals("org.apache.derby.iapi.reference.ClassName") ||
+		if (className.equals("org.apache.derby.shared.common.reference.ClassName") ||
 			className.equals("org.apache.derby.iapi.services.io.RegisteredFormatIds")) {
 			dontCheckDependencies = true;
 		}
@@ -706,9 +706,9 @@ public class classlister {
       return
         (
          className.startsWith("org.apache.derby.shared")
-         || className.startsWith("org.apache.derby.iapi.error")
-         || className.startsWith("org.apache.derby.iapi.reference")
-         || className.startsWith("org.apache.derby.iapi.services.info")
+         || className.startsWith("org.apache.derby.shared.common.error")
+         || className.startsWith("org.apache.derby.shared.common.reference")
+         || className.startsWith("org.apache.derby.shared.common.info")
          );
     }
 

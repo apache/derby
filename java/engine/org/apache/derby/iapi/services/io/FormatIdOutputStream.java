@@ -23,7 +23,7 @@ package org.apache.derby.iapi.services.io;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

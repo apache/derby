@@ -23,7 +23,7 @@ package org.apache.derby.iapi.sql.compile;
 
 import java.sql.SQLWarning;
 import java.util.List;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.compiler.JavaFactory;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.loader.ClassFactory;

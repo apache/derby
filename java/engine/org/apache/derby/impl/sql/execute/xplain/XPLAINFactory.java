@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.execute.xplain;
 
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINFactoryIF;

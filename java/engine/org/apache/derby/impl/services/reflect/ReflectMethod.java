@@ -23,7 +23,7 @@ package org.apache.derby.impl.services.reflect;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;

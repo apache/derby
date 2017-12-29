@@ -22,12 +22,12 @@
 package org.apache.derby.iapi.db;
 
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
-import org.apache.derby.iapi.services.i18n.LocaleFinder;
+import org.apache.derby.shared.common.i18n.LocaleFinder;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Date;

@@ -20,7 +20,7 @@
  */
 package org.apache.derby.iapi.transaction;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * An interface that must be implemented by a object that

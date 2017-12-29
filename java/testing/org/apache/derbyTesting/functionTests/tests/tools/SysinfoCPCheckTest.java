@@ -29,7 +29,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Locale;
 import junit.framework.Test;
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;

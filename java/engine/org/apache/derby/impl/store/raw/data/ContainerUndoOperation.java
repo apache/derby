@@ -34,7 +34,7 @@ import org.apache.derby.iapi.store.raw.Undoable;
 import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.io.InputStream;
 import java.io.ObjectOutput;

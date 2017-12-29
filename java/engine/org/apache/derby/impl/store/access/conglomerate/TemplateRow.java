@@ -22,10 +22,10 @@
 package org.apache.derby.impl.store.access.conglomerate;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.util.ArrayUtil;
 import org.apache.derby.iapi.services.io.Storable;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.iapi.store.access.RowUtil;
 

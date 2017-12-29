@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.io.InputStream;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.sql.Activation;

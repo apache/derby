@@ -25,12 +25,12 @@ import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.monitor.PersistentService;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.reference.EngineType;
+import org.apache.derby.shared.common.reference.EngineType;
 
 import java.util.Hashtable;
 import java.util.Vector;

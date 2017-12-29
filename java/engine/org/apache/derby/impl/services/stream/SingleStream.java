@@ -21,15 +21,15 @@
 
 package org.apache.derby.impl.services.stream;
 
-import org.apache.derby.iapi.services.stream.InfoStreams;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
+import org.apache.derby.shared.common.stream.InfoStreams;
+import org.apache.derby.shared.common.stream.HeaderPrintWriter;
+import org.apache.derby.shared.common.stream.PrintWriterGetHeader;
 
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import java.io.BufferedOutputStream;
@@ -49,7 +49,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
 import java.lang.reflect.InvocationTargetException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
@@ -109,7 +109,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 	 */
 
 	/**
-	 * @see org.apache.derby.iapi.services.stream.InfoStreams#stream
+	 * @see org.apache.derby.shared.common.stream.InfoStreams#stream
 	 */
 	public HeaderPrintWriter stream() {
 		return theStream;

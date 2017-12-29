@@ -29,7 +29,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 /**
  * Copied from the Harmony project's implementation of javax.sql.rowset.serial.SerialBlob

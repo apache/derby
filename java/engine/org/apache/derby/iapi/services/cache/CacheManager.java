@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.cache;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 
 import org.apache.derby.iapi.util.Matchable;

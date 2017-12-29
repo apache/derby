@@ -35,7 +35,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RawToBinaryFormatStream;
 import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import org.apache.derby.shared.common.reference.SQLState;
 

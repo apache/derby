@@ -26,7 +26,7 @@ import org.apache.derby.iapi.store.raw.*;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 

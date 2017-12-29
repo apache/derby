@@ -23,7 +23,7 @@ package org.apache.derby.impl.services.locks;
 
 import org.apache.derby.iapi.services.diag.Diagnosticable;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;

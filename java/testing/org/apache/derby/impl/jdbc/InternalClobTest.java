@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.types.Resetable;
 import org.apache.derbyTesting.functionTests.util.streams.ByteAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;

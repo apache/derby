@@ -27,11 +27,11 @@ import org.apache.derbyTesting.unitTests.harness.T_Fail;
 import org.apache.derby.iapi.types.*;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 
 import java.util.Properties;
 

@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.sql.conn;
 
 import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.compiler.JavaFactory;
 import org.apache.derby.iapi.services.context.ContextManager;

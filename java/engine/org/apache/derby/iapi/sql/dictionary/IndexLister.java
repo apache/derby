@@ -21,8 +21,8 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.util.ArrayUtil;
 
 
 

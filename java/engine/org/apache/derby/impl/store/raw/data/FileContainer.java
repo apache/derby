@@ -21,9 +21,9 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.shared.common.reference.Property;
 
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.iapi.services.cache.Cacheable;
@@ -38,7 +38,7 @@ import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.util.InterruptDetectedException;
 
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.Page;
