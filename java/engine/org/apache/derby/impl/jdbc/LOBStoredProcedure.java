@@ -28,7 +28,7 @@ import java.sql.SQLException;
 import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.shared.common.reference.Limits;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 
 /**
  * Contains the stored procedures that will be used in the

@@ -33,7 +33,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 
 import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;

@@ -70,6 +70,8 @@ org.apache.derby.iapi.jdbc.EnginePreparedStatement.class
 org.apache.derby.iapi.jdbc.EngineResultSet.class
 org.apache.derby.iapi.jdbc.EngineStatement.class
 org.apache.derby.iapi.jdbc.FailedProperties40.class
+org.apache.derby.iapi.jdbc.InternalDriver.class
+org.apache.derby.iapi.jdbc.JDBC.class
 org.apache.derby.iapi.jdbc.JDBCBoot.class
 org.apache.derby.iapi.jdbc.ResourceAdapter.class
 org.apache.derby.iapi.security.Securable.class
@@ -1361,8 +1363,6 @@ org.apache.derby.jdbc.EmbeddedDriver.class
 org.apache.derby.jdbc.EmbeddedXADataSource.class
 org.apache.derby.jdbc.EmbeddedXADataSource40.class
 org.apache.derby.jdbc.EmbeddedXADataSourceInterface.class
-org.apache.derby.jdbc.InternalDriver.class
-org.apache.derby.jdbc.JDBC.class
 org.apache.derby.jdbc.ReferenceableDataSource.class
 org.apache.derby.jdbc.ResourceAdapterImpl.class
 org.apache.derby.jdbc.XAStatementControl.class

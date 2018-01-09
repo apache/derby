@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.MessageId;

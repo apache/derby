@@ -52,7 +52,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 
 /**
  * <p>

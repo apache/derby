@@ -24,10 +24,13 @@ package org.apache.derby.iapi.jdbc;
 import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.sql.DriverManager;
 import java.util.Properties;
 import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.Property;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
@@ -50,6 +53,27 @@ public class JDBCBoot {
 		bootProperties.put(name, value);
 	}
 
+   /*
+	** Find the appropriate driver for our JDBC level and boot it.
+	*  This is package protected so that AutoloadedDriver can call it.
+	*/
+	public static void boot() {
+        PrintWriter pw = DriverManager.getLogWriter();
+
+        if (pw == null) {
+            pw = new PrintWriter(System.err, true);
+        }
+
+        try {
+            new JDBCBoot().boot(Attribute.PROTOCOL, pw);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace( pw );
+            if ( t instanceof RuntimeException ) { throw (RuntimeException) t; }
+        }
+	}
+
 	/**
 		Boot a system requesting a JDBC driver but only if there is
 		no current JDBC driver that is handling the required protocol.
@@ -57,17 +81,25 @@ public class JDBCBoot {
 	*/
 	public void boot(String protocol, final PrintWriter logging) {
 
-		if (org.apache.derby.jdbc.InternalDriver.activeDriver() == null)
-		{
+        //
+        // Synchronization added as part of DERBY-6945. Further improvement
+        // on DERBY-4480. Moving the boot method out of EmbeddedDriver
+        // somehow created a race condition during simultaneous getConnection() calls.
+        //
+        synchronized(NETWORK_SERVER_AUTOSTART_CLASS_NAME)
+        {
+            if (InternalDriver.activeDriver() == null)
+            {
 
-			// request that the InternalDriver (JDBC) service and the
-			// authentication service be started.
-			//
-			addProperty("derby.service.jdbc", "org.apache.derby.jdbc.InternalDriver");
-			addProperty("derby.service.authentication", AuthenticationService.MODULE);
+                // request that the InternalDriver (JDBC) service and the
+                // authentication service be started.
+                //
+                addProperty("derby.service.jdbc", InternalDriver.class.getName());
+                addProperty("derby.service.authentication", AuthenticationService.MODULE);
 
-			boot( bootProperties, logging);
-		}
+                boot( bootProperties, logging);
+            }
+        }
 	}
     
     /**

@@ -1,7 +1,7 @@
 
 /*
 
-   Derby - Class org.apache.derby.jdbc.InternalDriver
+   Derby - Class org.apache.derby.iapi.jdbc.InternalDriver
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
 
  */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.iapi.jdbc;
 
 import java.security.AccessController;
 import java.security.AccessControlException;
@@ -53,17 +53,13 @@ import java.util.logging.Logger;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import org.apache.derby.shared.common.error.StandardException;
-import org.apache.derby.iapi.jdbc.AuthenticationService;
-import org.apache.derby.iapi.jdbc.BrokeredConnection;
-import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
-import org.apache.derby.iapi.jdbc.ConnectionContext;
-import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.Module;
 import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.security.SecurityUtil;
+import org.apache.derby.jdbc.AutoloadedDriver;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.shared.common.i18n.MessageService;
@@ -816,30 +812,9 @@ public class InternalDriver implements ModuleControl, Driver {
     /**
      * Return a new BrokeredConnection for this implementation.
      */
-    BrokeredConnection newBrokeredConnection(
+    public BrokeredConnection newBrokeredConnection(
             BrokeredConnectionControl control) throws SQLException {
         return new BrokeredConnection(control);
-    }
-
-    /**
-     * Create and return an EmbedPooledConnection from the received instance of
-     * EmbeddedDataSource.
-     */
-    protected PooledConnection getNewPooledConnection(
-            BasicEmbeddedDataSource40 eds, String user, String password,
-            boolean requestPassword) throws SQLException {
-        return new EmbedPooledConnection(eds, user, password, requestPassword);
-    }
-
-    /**
-     * Create and return an EmbedXAConnection from the received instance of
-     * BasicEmbeddedDataSource40.
-     */
-    protected XAConnection getNewXAConnection(
-            BasicEmbeddedDataSource40 eds, ResourceAdapter ra,
-            String user, String password, boolean requestPassword)
-            throws SQLException {
-        return new EmbedXAConnection(eds, ra, user, password, requestPassword);
     }
 
     private static final String[] BOOLEAN_CHOICES = {"false", "true"};
@@ -982,7 +957,7 @@ public class InternalDriver implements ModuleControl, Driver {
      * @param deregister whether or not {@code AutoloadedDriver} should
      * deregister itself
      */
-    static void setDeregister(boolean deregister) {
+    public static void setDeregister(boolean deregister) {
         InternalDriver.deregister = deregister;
     }
 
@@ -992,7 +967,7 @@ public class InternalDriver implements ModuleControl, Driver {
      *
      * @return the deregister value
      */
-    static boolean getDeregister() {
+    public static boolean getDeregister() {
         return InternalDriver.deregister;
     }
 

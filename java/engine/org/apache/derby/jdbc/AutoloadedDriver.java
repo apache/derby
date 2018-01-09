@@ -40,6 +40,8 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.JDBCBoot;
 import org.apache.derby.impl.jdbc.Util;
 
 
@@ -206,7 +208,7 @@ public class AutoloadedDriver implements Driver
 	** Retrieve the driver which is specific to our JDBC level.
 	** We defer real work to this specific driver.
 	*/
-	static	Driver getDriverModule() throws SQLException {
+	public static	Driver getDriverModule() throws SQLException {
 
 		if ( _engineForcedDown && (_autoloadedDriver == null))
 		{
@@ -214,7 +216,7 @@ public class AutoloadedDriver implements Driver
             throw Util.generateCsSQLException( SQLState.CORE_JDBC_DRIVER_UNREGISTERED );
 		}
 
-		if ( !isBooted() ) { EmbeddedDriver.boot(); }
+		if ( !isBooted() ) { JDBCBoot.boot(); }
 
 		return _driverModule;
 	}
@@ -223,7 +225,7 @@ public class AutoloadedDriver implements Driver
 	** Record which driver module actually booted.
 	*  @param driver the driver register to DriverManager is not AutoloadedDriver
 	**/
-	static	void	registerDriverModule( Driver driver )
+	public static	void	registerDriverModule( Driver driver )
 	{
 		_driverModule = driver;
 		_engineForcedDown = false;
@@ -245,7 +247,7 @@ public class AutoloadedDriver implements Driver
 	*  This happens when the engine is forcibly shut down.
 	*  
 	**/
-	static	void	unregisterDriverModule()
+	public static	void	unregisterDriverModule()
 	{
 		_engineForcedDown = true;
         try {

@@ -68,7 +68,7 @@ import org.apache.derby.impl.sql.catalog.XPLAINSortPropsDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINStatementDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINStatementTimingsDescriptor;
 import org.apache.derby.impl.sql.execute.JarUtil;
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;

@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;

@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import junit.framework.Test;
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;

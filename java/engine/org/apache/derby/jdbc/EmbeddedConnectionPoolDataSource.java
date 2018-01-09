@@ -145,8 +145,8 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
          * instantiating EmbeddedConnectionPoolDataSource) instead of
          * the newer one (EmbeddedConnectionPoolDataSource40).
          */
-        return findDriver().getNewPooledConnection(
-            this, user, password, requestPassword);
+        findDriver();
+        return new EmbedPooledConnection(this, user, password, requestPassword);
     }
 
 }

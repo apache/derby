@@ -66,7 +66,9 @@ public class ConcurrentAutoloadTest extends BaseJDBCTestCase {
             public void run() {
                 try {
                     DriverManager.getConnection(url, user, pw);
+                    println("Successfully connected!");
                 } catch (Throwable t) {
+                    println("Failed to connect!");
                     errors.add(t);
                 }
             }

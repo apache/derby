@@ -70,7 +70,7 @@ import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 
 /**
  * This class translates DRDA protocol from an application requester to JDBC

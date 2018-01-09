@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import org.apache.derby.jdbc.AutoloadedDriver;
 import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 
 /**
  * A wrapper around the methods added by JDBC 4.1.

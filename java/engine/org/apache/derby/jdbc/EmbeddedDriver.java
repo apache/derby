@@ -91,14 +91,14 @@ import org.apache.derby.impl.jdbc.Util;
 public class EmbeddedDriver  implements Driver {
 
 	static {
-		EmbeddedDriver.boot();
+		JDBCBoot.boot();
 	}
 
 	// Boot from the constructor as well to ensure that
 	// Class.forName(...).newInstance() reboots Derby 
 	// after a shutdown inside the same JVM.
 	public EmbeddedDriver() {
-		EmbeddedDriver.boot();
+		JDBCBoot.boot();
 	}
 
 	/*
@@ -181,28 +181,6 @@ public class EmbeddedDriver  implements Driver {
 		throws SQLException
 	{
 		return AutoloadedDriver.getDriverModule();
-	}
-
-
-   /*
-	** Find the appropriate driver for our JDBC level and boot it.
-	*  This is package protected so that AutoloadedDriver can call it.
-	*/
-	static void boot() {
-        PrintWriter pw = DriverManager.getLogWriter();
-
-        if (pw == null) {
-            pw = new PrintWriter(System.err, true);
-        }
-
-        try {
-            new JDBCBoot().boot(Attribute.PROTOCOL, pw);
-        }
-        catch (Throwable t)
-        {
-            t.printStackTrace( pw );
-            if ( t instanceof RuntimeException ) { throw (RuntimeException) t; }
-        }
 	}
 
     ////////////////////////////////////////////////////////////////////

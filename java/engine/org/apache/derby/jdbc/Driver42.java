@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.BrokeredConnection42;
+import org.apache.derby.iapi.jdbc.InternalDriver;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
