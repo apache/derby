@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class org.apache.derby.jdbc.Driver42
+   Derby - Class org.apache.derby.iapi.jdbc.Driver42
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,16 +19,12 @@
  
  */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.iapi.jdbc;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.jdbc.BrokeredConnection;
-import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
-import org.apache.derby.iapi.jdbc.BrokeredConnection42;
-import org.apache.derby.iapi.jdbc.InternalDriver;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;

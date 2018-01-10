@@ -63,6 +63,7 @@ org.apache.derby.iapi.jdbc.BrokeredStatementControl.class
 org.apache.derby.iapi.jdbc.CharacterStreamDescriptor.class
 org.apache.derby.iapi.jdbc.ConnectionContext.class
 org.apache.derby.iapi.jdbc.DRDAServerStarter.class
+org.apache.derby.iapi.jdbc.Driver42.class
 org.apache.derby.iapi.jdbc.EngineCallableStatement.class
 org.apache.derby.iapi.jdbc.EngineConnection.class
 org.apache.derby.iapi.jdbc.EngineLOB.class
@@ -1352,7 +1353,6 @@ org.apache.derby.jdbc.AutoloadedDriver.class
 org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedXADataSource40.class
-org.apache.derby.jdbc.Driver42.class
 org.apache.derby.jdbc.EmbedPooledConnection.class
 org.apache.derby.jdbc.EmbedXAConnection.class
 org.apache.derby.jdbc.EmbedXAResource.class
