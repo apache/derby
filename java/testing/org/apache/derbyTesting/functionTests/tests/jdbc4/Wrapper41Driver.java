@@ -25,7 +25,7 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-import org.apache.derby.jdbc.AutoloadedDriver;
+import org.apache.derby.iapi.jdbc.AutoloadedDriver;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.iapi.jdbc.InternalDriver;
 

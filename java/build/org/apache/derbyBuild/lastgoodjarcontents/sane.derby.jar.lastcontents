@@ -1349,7 +1349,7 @@ org.apache.derby.io.StorageFactory.class
 org.apache.derby.io.StorageFile.class
 org.apache.derby.io.StorageRandomAccessFile.class
 org.apache.derby.io.WritableStorageFactory.class
-org.apache.derby.jdbc.AutoloadedDriver.class
+org.apache.derby.iapi.jdbc.AutoloadedDriver.class
 org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedXADataSource40.class

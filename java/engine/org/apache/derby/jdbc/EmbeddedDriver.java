@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
+import org.apache.derby.iapi.jdbc.AutoloadedDriver;
 import org.apache.derby.iapi.jdbc.JDBCBoot;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.impl.jdbc.Util;

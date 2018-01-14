@@ -1,4 +1,3 @@
-
 /*
 
    Derby - Class org.apache.derby.iapi.jdbc.InternalDriver
@@ -59,7 +58,6 @@ import org.apache.derby.shared.common.reference.Module;
 import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.security.SecurityUtil;
-import org.apache.derby.jdbc.AutoloadedDriver;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.shared.common.i18n.MessageService;

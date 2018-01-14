@@ -175,6 +175,7 @@ final class JarLoader extends SecureClassLoader {
         // not make assumptions about this check reducing the
         // number of classes it has to check for.
         if (className.startsWith("org.apache.derby.")
+                && !isDerbyDriver(className)
                 && !className.startsWith("org.apache.derby.jdbc.")
                 && !className.startsWith("org.apache.derby.vti.")
                 && !className.startsWith("org.apache.derby.agg.")
@@ -204,6 +205,18 @@ final class JarLoader extends SecureClassLoader {
 		}
 	}
 
+    /**
+     * Return true if the class is a Derby driver class which
+     * must be accessible to java.sql.DriverManager.
+     */
+    private boolean isDerbyDriver(String className)
+    {
+        return
+          (
+           className.startsWith("org.apache.derby.iapi.jdbc.AutoloadedDriver")
+           );
+    }
+  
 	/**
 		
 	*/

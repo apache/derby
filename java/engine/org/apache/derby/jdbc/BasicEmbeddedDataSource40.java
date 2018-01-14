@@ -41,6 +41,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.jdbc.AutoloadedDriver;
 import org.apache.derby.iapi.jdbc.InternalDriver;
 import org.apache.derby.impl.jdbc.Util;
 

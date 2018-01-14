@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.AutoloadedDriver
+   Derby - Class org.apache.derby.iapi.jdbc.AutoloadedDriver
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.iapi.jdbc;
 
 import java.sql.DriverManager;
 import java.sql.Driver;
@@ -40,8 +40,6 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.jdbc.InternalDriver;
-import org.apache.derby.iapi.jdbc.JDBCBoot;
 import org.apache.derby.impl.jdbc.Util;
 
 
