@@ -31,7 +31,7 @@ import java.util.Properties;
 
 import java.sql.*;
 import java.io.*;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.client.ClientDataSourceInterface;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;

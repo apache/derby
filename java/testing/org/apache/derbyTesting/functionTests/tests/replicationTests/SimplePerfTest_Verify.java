@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import org.apache.derby.jdbc.BasicClientDataSource40;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.client.ClientDataSourceInterface;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;

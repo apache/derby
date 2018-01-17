@@ -23,6 +23,8 @@ package org.apache.derby.jdbc;
 
 import javax.sql.ConnectionPoolDataSource;
 
+import org.apache.derby.client.ClientDataSourceInterface;
+
 /**
  * Specifies Derby extensions to the {@code java.sqlx.ConnectionPoolDataSource}.
  */

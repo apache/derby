@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.ClientDataSourceInterface
+   Derby - Class org.apache.derby.client.ClientDataSourceInterface
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
 */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.client;
 
 import javax.sql.DataSource;
 import org.apache.derby.client.am.SqlException;

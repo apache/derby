@@ -43,8 +43,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import org.apache.derby.client.net.NetXAResource;
-import org.apache.derby.jdbc.BasicClientDataSource40;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.client.BasicClientDataSource;
+import org.apache.derby.client.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -187,10 +187,10 @@ public abstract class ClientConnection
     public int xaHostVersion_ = 0;
 
     private int loginTimeout_;
-    public BasicClientDataSource40 dataSource_;
+    public BasicClientDataSource dataSource_;
     public String serverNameIP_;
     public int portNumber_;
-    private int clientSSLMode_ = BasicClientDataSource40.SSL_OFF;
+    private int clientSSLMode_ = BasicClientDataSource.SSL_OFF;
 
     Hashtable<String, String> clientCursorNameCache_ =
             new Hashtable<String, String>();
@@ -207,7 +207,7 @@ public abstract class ClientConnection
             LogWriter logWriter,
             String user,
             String password,
-            BasicClientDataSource40 dataSource)
+            BasicClientDataSource dataSource)
             throws SqlException {
 
         this.user_ = user;
@@ -219,7 +219,7 @@ public abstract class ClientConnection
             String user,
             String password,
             boolean isXAConn,
-            BasicClientDataSource40 dataSource)
+            BasicClientDataSource dataSource)
             throws SqlException {
 
         this.user_ = user;
@@ -230,7 +230,7 @@ public abstract class ClientConnection
     // For jdbc 2 connections
     private void initConnection(
             LogWriter logWriter,
-            BasicClientDataSource40 dataSource)
+            BasicClientDataSource dataSource)
             throws SqlException {
 
         if (logWriter != null) {
@@ -270,7 +270,7 @@ public abstract class ClientConnection
         portNumber_ = dataSource.getPortNumber();
 
         clientSSLMode_ = 
-            BasicClientDataSource40.getSSLModeFromString(dataSource.getSsl());
+            BasicClientDataSource.getSSLModeFromString(dataSource.getSsl());
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
@@ -283,7 +283,7 @@ public abstract class ClientConnection
     protected ClientConnection(
             LogWriter logWriter,
             boolean isXAConn,
-            BasicClientDataSource40 dataSource)
+            BasicClientDataSource dataSource)
             throws SqlException {
 
         if (logWriter != null) {
@@ -305,7 +305,7 @@ public abstract class ClientConnection
         portNumber_ = dataSource.getPortNumber();
 
         clientSSLMode_ = 
-            BasicClientDataSource40.getSSLModeFromString(dataSource.getSsl());
+            BasicClientDataSource.getSSLModeFromString(dataSource.getSsl());
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
@@ -349,14 +349,14 @@ public abstract class ClientConnection
         databaseName_ = databaseName;
 
         // Extract common properties.
-        user_ = BasicClientDataSource40.getUser(properties);
+        user_ = BasicClientDataSource.getUser(properties);
         retrieveMessageText_ =
-            BasicClientDataSource40.getRetrieveMessageText(properties);
+            BasicClientDataSource.getRetrieveMessageText(properties);
 
         loginTimeout_ = driverManagerLoginTimeout;
         serverNameIP_ = serverName;
         portNumber_ = portNumber;
-        clientSSLMode_ = BasicClientDataSource40.getClientSSLMode(properties);
+        clientSSLMode_ = BasicClientDataSource.getClientSSLMode(properties);
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,

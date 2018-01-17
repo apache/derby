@@ -24,7 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import junit.framework.Test;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.client.ClientDataSourceInterface;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;

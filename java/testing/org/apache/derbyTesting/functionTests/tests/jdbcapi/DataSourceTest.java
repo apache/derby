@@ -31,7 +31,7 @@ import java.util.Hashtable;
 import javax.sql.DataSource;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestSuite;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.client.ClientDataSourceInterface;
 import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;

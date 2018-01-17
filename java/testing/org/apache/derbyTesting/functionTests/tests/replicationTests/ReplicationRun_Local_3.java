@@ -22,7 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.client.ClientDataSourceInterface;
 import org.apache.derbyTesting.junit.JDBC;
 
 

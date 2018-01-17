@@ -51,6 +51,7 @@ org.apache.derby.iapi.db.OptimizerTrace.class
 org.apache.derby.iapi.db.PropertyInfo.class
 org.apache.derby.iapi.db.TriggerExecutionContext.class
 org.apache.derby.iapi.jdbc.AuthenticationService.class
+org.apache.derby.iapi.jdbc.AutoloadedDriver.class
 org.apache.derby.iapi.jdbc.BrokeredCallableStatement.class
 org.apache.derby.iapi.jdbc.BrokeredCallableStatement42.class
 org.apache.derby.iapi.jdbc.BrokeredConnection.class
@@ -1349,7 +1350,6 @@ org.apache.derby.io.StorageFactory.class
 org.apache.derby.io.StorageFile.class
 org.apache.derby.io.StorageRandomAccessFile.class
 org.apache.derby.io.WritableStorageFactory.class
-org.apache.derby.iapi.jdbc.AutoloadedDriver.class
 org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedXADataSource40.class

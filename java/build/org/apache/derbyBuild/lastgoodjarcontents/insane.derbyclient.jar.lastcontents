@@ -1,4 +1,6 @@
+org.apache.derby.client.BasicClientDataSource.class
 org.apache.derby.client.ClientDataSourceFactory.class
+org.apache.derby.client.ClientDataSourceInterface.class
 org.apache.derby.client.ClientPooledConnection.class
 org.apache.derby.client.ClientXAConnection.class
 org.apache.derby.client.ClientXid.class
@@ -144,7 +146,6 @@ org.apache.derby.jdbc.ClientConnectionPoolDataSource40.class
 org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface.class
 org.apache.derby.jdbc.ClientDataSource.class
 org.apache.derby.jdbc.ClientDataSource40.class
-org.apache.derby.jdbc.ClientDataSourceInterface.class
 org.apache.derby.jdbc.ClientDriver.class
 org.apache.derby.jdbc.ClientDriver40.class
 org.apache.derby.jdbc.ClientXADataSource.class

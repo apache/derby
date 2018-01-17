@@ -52,7 +52,7 @@ import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.StatementCacheInteractor;
 import org.apache.derby.client.am.Utils;
-import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.client.BasicClientDataSource;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 
@@ -77,7 +77,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * org.apache.derby.client.ClientPooledConnection}
      */
     public ClientPooledConnection newClientPooledConnection(
-            BasicClientDataSource40 ds,
+            BasicClientDataSource ds,
             LogWriter logWriter,
             String user,
             String password) throws SQLException {
@@ -87,7 +87,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return an instance of {@link org.apache.derby.client.ClientXAConnection}
      */
-    public ClientXAConnection newClientXAConnection(BasicClientDataSource40 ds,
+    public ClientXAConnection newClientXAConnection(BasicClientDataSource ds,
         LogWriter logWriter,String user, String password) throws SQLException
     {
         return new ClientXAConnection(ds, logWriter, user, password);
@@ -288,7 +288,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      */
     public ClientConnection newNetConnection(
             LogWriter logWriter, String user, String password,
-            BasicClientDataSource40 dataSource,
+            BasicClientDataSource dataSource,
             int rmId,
             boolean isXAConn) throws SqlException {
 
@@ -320,7 +320,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     public ClientConnection newNetConnection(
             LogWriter logWriter,String user,
             String password,
-            BasicClientDataSource40 dataSource,
+            BasicClientDataSource dataSource,
             int rmId,boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
 

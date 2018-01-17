@@ -29,7 +29,7 @@ import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.LogWriter;
-import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.client.BasicClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.jdbc.ClientDriver;
@@ -65,7 +65,7 @@ public class NetXAConnection {
             LogWriter logWriter,
             String user,
             String password,
-            BasicClientDataSource40 dataSource,
+            BasicClientDataSource dataSource,
             int rmId,
             boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
@@ -229,7 +229,7 @@ public class NetXAConnection {
             LogWriter logWriter,
             String user,
             String password,
-            BasicClientDataSource40 dataSource,
+            BasicClientDataSource dataSource,
             int rmId,
             boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {

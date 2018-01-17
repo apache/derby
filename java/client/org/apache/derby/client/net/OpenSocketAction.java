@@ -36,7 +36,7 @@ import java.util.Properties;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.client.BasicClientDataSource;
 import org.apache.derby.shared.common.drda.NaiveTrustManager;
 
 class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
@@ -64,15 +64,15 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
         
         SocketFactory sf;
         switch (clientSSLMode_) {
-        case BasicClientDataSource40.SSL_BASIC:
+        case BasicClientDataSource.SSL_BASIC:
             Properties sslProperties = getSSLProperties();
             sf = NaiveTrustManager.getSocketFactory(sslProperties);
             break;
-        case BasicClientDataSource40.
+        case BasicClientDataSource.
                 SSL_PEER_AUTHENTICATION:
             sf = (SocketFactory)SSLSocketFactory.getDefault();
             break;
-        case BasicClientDataSource40.SSL_OFF:
+        case BasicClientDataSource.SSL_OFF:
             sf = SocketFactory.getDefault();
             break;
         default: 
@@ -80,8 +80,8 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
             sf = SocketFactory.getDefault();
             break;
         }
-        if (clientSSLMode_ == BasicClientDataSource40.SSL_BASIC ||
-            clientSSLMode_ == BasicClientDataSource40.SSL_PEER_AUTHENTICATION){
+        if (clientSSLMode_ == BasicClientDataSource.SSL_BASIC ||
+            clientSSLMode_ == BasicClientDataSource.SSL_PEER_AUTHENTICATION){
         	//DERBY-6764(analyze impact of poodle security alert on Derby 
         	// client - server ssl support)
         	//If SSLv3 and/or SSLv2Hello is one of the enabled protocols,  

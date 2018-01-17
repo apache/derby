@@ -44,6 +44,7 @@ import org.apache.derby.client.net.NetConnection;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.client.BasicClientDataSource;
 
 /**
  * The client JDBC driver (type 4) for Derby.
@@ -127,7 +128,7 @@ public class ClientDriver implements Driver {
             String server = tokenizeServerName(urlTokenizer, url);    // "/server"
             int port = tokenizeOptionalPortNumber(urlTokenizer, url); // "[:port]/"
             if (port == 0) {
-                port = BasicClientDataSource40.propertyDefault_portNumber;
+                port = BasicClientDataSource.propertyDefault_portNumber;
             }
 
             // database is the database name and attributes.  This will be
@@ -140,7 +141,7 @@ public class ClientDriver implements Driver {
             int traceLevel;
             try {
                 traceLevel =
-                    BasicClientDataSource40.getTraceLevel(augmentedProperties);
+                    BasicClientDataSource.getTraceLevel(augmentedProperties);
             } catch (NumberFormatException e) {
                 // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
                 throw new SqlException(null, 
@@ -152,13 +153,13 @@ public class ClientDriver implements Driver {
             // This log writer may be narrowed to the connection-level
             // This log writer will be passed to the agent constructor.
             LogWriter dncLogWriter =
-                BasicClientDataSource40.computeDncLogWriterForNewConnection(
+                BasicClientDataSource.computeDncLogWriterForNewConnection(
                     DriverManager.getLogWriter(),
-                    BasicClientDataSource40.getTraceDirectory(
+                    BasicClientDataSource.getTraceDirectory(
                         augmentedProperties),
-                    BasicClientDataSource40.getTraceFile(
+                    BasicClientDataSource.getTraceFile(
                         augmentedProperties),
-                    BasicClientDataSource40.getTraceFileAppend(
+                    BasicClientDataSource.getTraceFileAppend(
                         augmentedProperties),
                     traceLevel,
                     "_driver",
@@ -254,7 +255,7 @@ public class ClientDriver implements Driver {
                 Attribute.USERNAME_ATTR,
                 properties.getProperty(
                     Attribute.USERNAME_ATTR,
-                    BasicClientDataSource40.propertyDefault_user));
+                    BasicClientDataSource.propertyDefault_user));
 
         driverPropertyInfo[1] =
                 new DriverPropertyInfo(Attribute.PASSWORD_ATTR,
@@ -420,7 +421,7 @@ public class ClientDriver implements Driver {
             attributeString = url.substring(attributeIndex);
         }
 
-        return BasicClientDataSource40.tokenizeAttributes(
+        return BasicClientDataSource.tokenizeAttributes(
             attributeString, properties);
     }
     

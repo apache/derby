@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import javax.transaction.xa.XAException;
-import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.client.BasicClientDataSource;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -145,61 +145,61 @@ public class LogWriter {
         {
             return null;
         } else if (instance instanceof ClientConnection && loggingEnabled(
-                BasicClientDataSource40.TRACE_CONNECTION_CALLS)) {
+                BasicClientDataSource.TRACE_CONNECTION_CALLS)) {
             return "ClientConnection";
         } else if (instance instanceof ClientResultSet && loggingEnabled(
-                BasicClientDataSource40.TRACE_RESULT_SET_CALLS)) {
+                BasicClientDataSource.TRACE_RESULT_SET_CALLS)) {
             return "ClientResultSet";
         } else if (instance instanceof ClientCallableStatement &&
                    loggingEnabled(
-                       BasicClientDataSource40.TRACE_STATEMENT_CALLS)) {
+                       BasicClientDataSource.TRACE_STATEMENT_CALLS)) {
             return "ClientCallableStatement";
         } else if (instance instanceof ClientPreparedStatement &&
                    loggingEnabled(
-                       BasicClientDataSource40.TRACE_STATEMENT_CALLS)) {
+                       BasicClientDataSource.TRACE_STATEMENT_CALLS)) {
             return "ClientPreparedStatement";
         } else if (instance instanceof ClientStatement && loggingEnabled(
-                BasicClientDataSource40.TRACE_STATEMENT_CALLS)) {
+                BasicClientDataSource.TRACE_STATEMENT_CALLS)) {
             return "ClientStatement";
         }
         // Not yet externalizing Blob tracing, except for trace_all
         else if (instance instanceof ClientBlob && loggingEnabled(
-                BasicClientDataSource40.TRACE_ALL)) // add a trace level for
+                BasicClientDataSource.TRACE_ALL)) // add a trace level for
                                                       // lobs !!
         {
             return "ClientBlob";
         }
         // Not yet externalizing ClientClob tracing, except for trace_all
         else if (instance instanceof ClientClob && loggingEnabled(
-                BasicClientDataSource40.TRACE_ALL)) // add a trace level for
+                BasicClientDataSource.TRACE_ALL)) // add a trace level for
                                                       // bobs !!
         {
             return "ClientClob";
         }
         // Not yet externalizing dbmd catalog call tracing, except for trace_all
         else if (instance instanceof ClientDatabaseMetaData && loggingEnabled(
-                BasicClientDataSource40.TRACE_ALL)) // add a trace level for
+                BasicClientDataSource.TRACE_ALL)) // add a trace level for
                                                       // dbmd ??
         {
             return "ClientDatabaseMetaData";
         }
         // we don't use instanceof javax.transaction.XAResource to avoid dependency on j2ee.jar
-        else if (loggingEnabled(BasicClientDataSource40.TRACE_XA_CALLS) &&
+        else if (loggingEnabled(BasicClientDataSource.TRACE_XA_CALLS) &&
                 instance.getClass().getName().startsWith("org.apache.derby.client.net.NetXAResource")) {
             return "NetXAResource";
-        } else if (loggingEnabled(BasicClientDataSource40.TRACE_ALL) &&
+        } else if (loggingEnabled(BasicClientDataSource.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.client.ClientPooledConnection")) {
             return "ClientPooledConnection";
-        } else if (loggingEnabled(BasicClientDataSource40.TRACE_ALL) &&
+        } else if (loggingEnabled(BasicClientDataSource.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.jdbc.ClientConnectionPoolDataSource")) {
             return "ClientConnectionPoolDataSource";
-        } else if (loggingEnabled(BasicClientDataSource40.TRACE_ALL) &&
+        } else if (loggingEnabled(BasicClientDataSource.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.client.ClientXAConnection")) {
             return "ClientXAConnection";
-        } else if (loggingEnabled(BasicClientDataSource40.TRACE_ALL) &&
+        } else if (loggingEnabled(BasicClientDataSource.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.jdbc.ClientDataSource")) {
             return "ClientDataSource";
-        } else if (loggingEnabled(BasicClientDataSource40.TRACE_ALL) &&
+        } else if (loggingEnabled(BasicClientDataSource.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.jdbc.ClientXADataSource")) {
             return "ClientXADataSource";
         } else {
@@ -342,7 +342,7 @@ public class LogWriter {
     // ---------------------------tracing exceptions and warnings-----------------
 
     void traceDiagnosable(SqlException e) {
-        if (!loggingEnabled(BasicClientDataSource40.TRACE_DIAGNOSTICS)) {
+        if (!loggingEnabled(BasicClientDataSource.TRACE_DIAGNOSTICS)) {
             return;
         }
         synchronized (printWriter_) {
@@ -352,7 +352,7 @@ public class LogWriter {
         }
     }
     public void traceDiagnosable(SQLException e) {
-        if (!loggingEnabled(BasicClientDataSource40.TRACE_DIAGNOSTICS)) {
+        if (!loggingEnabled(BasicClientDataSource.TRACE_DIAGNOSTICS)) {
             return;
         }
         synchronized (printWriter_) {
@@ -363,7 +363,7 @@ public class LogWriter {
     }
 
     void traceDiagnosable(XAException e) {
-        if (!loggingEnabled(BasicClientDataSource40.TRACE_DIAGNOSTICS)) {
+        if (!loggingEnabled(BasicClientDataSource.TRACE_DIAGNOSTICS)) {
             return;
         }
         synchronized (printWriter_) {
@@ -379,7 +379,7 @@ public class LogWriter {
             ColumnMetaData columnMetaData) {
 
         if (!loggingEnabled(
-                BasicClientDataSource40.TRACE_PARAMETER_META_DATA) ||
+                BasicClientDataSource.TRACE_PARAMETER_META_DATA) ||
                 columnMetaData == null) {
             return;
         }
@@ -403,7 +403,7 @@ public class LogWriter {
             ColumnMetaData columnMetaData) {
 
         if (!loggingEnabled(
-                BasicClientDataSource40.TRACE_RESULT_SET_META_DATA) ||
+                BasicClientDataSource.TRACE_RESULT_SET_META_DATA) ||
                 columnMetaData == null) {
             return;
         }
@@ -482,12 +482,12 @@ public class LogWriter {
     // Including protocol manager levels, and driver configuration
 
     // Jdbc 2
-    void traceConnectEntry(BasicClientDataSource40 dataSource) {
+    void traceConnectEntry(BasicClientDataSource dataSource) {
         if (loggingEnabled(
-                BasicClientDataSource40.TRACE_DRIVER_CONFIGURATION)) {
+                BasicClientDataSource.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc2();
         }
-        if (loggingEnabled(BasicClientDataSource40.TRACE_CONNECTS)) {
+        if (loggingEnabled(BasicClientDataSource.TRACE_CONNECTS)) {
             traceConnectsEntry(dataSource);
         }
     }
@@ -498,32 +498,32 @@ public class LogWriter {
                                   String database,
                                   Properties properties) {
         if (loggingEnabled(
-                BasicClientDataSource40.TRACE_DRIVER_CONFIGURATION)) {
+                BasicClientDataSource.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc1();
         }
-        if (loggingEnabled(BasicClientDataSource40.TRACE_CONNECTS)) {
+        if (loggingEnabled(BasicClientDataSource.TRACE_CONNECTS)) {
             traceConnectsEntry(server, port, database, properties);
         }
     }
 
     void traceConnectResetEntry(
             Object instance, LogWriter logWriter,
-            String user, BasicClientDataSource40 ds) {
+            String user, BasicClientDataSource ds) {
 
         traceEntry(instance, "reset", logWriter, user, "<escaped>", ds);
-        if (loggingEnabled(BasicClientDataSource40.TRACE_CONNECTS)) {
+        if (loggingEnabled(BasicClientDataSource.TRACE_CONNECTS)) {
             traceConnectsResetEntry(ds);
         }
     }
 
     void traceConnectExit(ClientConnection connection) {
-        if (loggingEnabled(BasicClientDataSource40.TRACE_CONNECTS)) {
+        if (loggingEnabled(BasicClientDataSource.TRACE_CONNECTS)) {
             traceConnectsExit(connection);
         }
     }
 
     public void traceConnectResetExit(ClientConnection connection) {
-        if (loggingEnabled(BasicClientDataSource40.TRACE_CONNECTS)) {
+        if (loggingEnabled(BasicClientDataSource.TRACE_CONNECTS)) {
             traceConnectsResetExit(connection);
         }
     }
@@ -531,7 +531,7 @@ public class LogWriter {
 
     // ---------------------- tracing connects -----------------------------------
 
-    private void traceConnectsResetEntry(BasicClientDataSource40 dataSource) {
+    private void traceConnectsResetEntry(BasicClientDataSource dataSource) {
         try {
             traceConnectsResetEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
@@ -542,7 +542,7 @@ public class LogWriter {
         }
     }
 
-    private void traceConnectsEntry(BasicClientDataSource40 dataSource) {
+    private void traceConnectsEntry(BasicClientDataSource dataSource) {
         try {
             traceConnectsEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
@@ -672,10 +672,10 @@ public class LogWriter {
     /**
      * Obtain a set of Properties for the client data source.
      */
-    private Properties getProperties(BasicClientDataSource40 cds)
+    private Properties getProperties(BasicClientDataSource cds)
     throws SqlException {
         
-        Properties properties = BasicClientDataSource40.getProperties(cds);
+        Properties properties = BasicClientDataSource.getProperties(cds);
 
         if (properties.getProperty(Attribute.PASSWORD_ATTR) != null) {
             properties.setProperty(Attribute.PASSWORD_ATTR, "********");

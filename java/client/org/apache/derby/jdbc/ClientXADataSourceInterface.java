@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import javax.sql.XADataSource;
 
+import org.apache.derby.client.ClientDataSourceInterface;
+
 /**
  * Specifies Derby extensions to the {@code java.sqlx.XADataSource}.
  */
