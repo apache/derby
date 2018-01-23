@@ -39,7 +39,6 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
-import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
@@ -128,7 +127,7 @@ public class ClientPooledConnection implements PooledConnection {
             //on the listeners
             
             physicalConnection_ =
-            ClientDriver.getFactory().newNetConnection(
+            ClientAutoloadedDriver.getFactory().newNetConnection(
                     logWriter_,
                     user,
                     password,
@@ -325,11 +324,11 @@ public class ClientPooledConnection implements PooledConnection {
             logicalConnection_.closeWithoutRecyclingToPool();
         }
         if (this.statementCache == null) {
-            logicalConnection_ = ClientDriver.getFactory().newLogicalConnection(
+            logicalConnection_ = ClientAutoloadedDriver.getFactory().newLogicalConnection(
                                                         physicalConnection_,
                                                         this);
         } else {
-            logicalConnection_ = ClientDriver.getFactory().
+            logicalConnection_ = ClientAutoloadedDriver.getFactory().
                     newCachingLogicalConnection(
                             physicalConnection_, this, statementCache);
         }

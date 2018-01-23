@@ -49,7 +49,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Iterator;
 import org.apache.derby.client.ClientPooledConnection;
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -1805,7 +1805,7 @@ public class ClientPreparedStatement extends ClientStatement
     private ClientParameterMetaData getParameterMetaDataX()
             throws SqlException {
         ClientParameterMetaData pm =
-            ClientDriver.getFactory().
+            ClientAutoloadedDriver.getFactory().
             newParameterMetaData(getColumnMetaDataX());
         return pm;
     }
@@ -1815,7 +1815,7 @@ public class ClientPreparedStatement extends ClientStatement
         return 
             parameterMetaData_ != null ?
             parameterMetaData_ : 
-            ClientDriver.getFactory().newColumnMetaData(agent_.logWriter_, 0);
+            ClientAutoloadedDriver.getFactory().newColumnMetaData(agent_.logWriter_, 0);
     }
 
     // ------------------------ box car and callback methods --------------------------------
@@ -2246,7 +2246,7 @@ public class ClientPreparedStatement extends ClientStatement
         // and the values 0 and 0xffff are reserved as special values. So
         // that imposes an upper limit on the batch size we can support:
         if (batchSize > 65534)
-            throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
+            throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
                 new Object[] { 65534 }, updateCounts, null );
 
@@ -2258,11 +2258,11 @@ public class ClientPreparedStatement extends ClientStatement
         }
 
         if (!supportsQueryBatchRequest && sqlMode_ == isQuery__) {
-            throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
+            throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
             new ClientMessageId(SQLState.CANNOT_BATCH_QUERIES), (Object [])null, updateCounts, null);
         }
         if (supportsQueryBatchRequest && sqlMode_ != isQuery__) {
-            throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
+            throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.QUERY_BATCH_ON_NON_QUERY_STATEMENT), 
                 (Object [])null, updateCounts, null);
         }
@@ -2311,7 +2311,7 @@ public class ClientPreparedStatement extends ClientStatement
                         chainAutoCommit || (i != batchSize - 1));  // more statements to chain
             } else if (outputRegistered_) // make sure no output parameters are registered
             {
-                throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
+                throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.OUTPUT_PARAMS_NOT_ALLOWED),
                     (Object [])null, updateCounts, null );
             } else {

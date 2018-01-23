@@ -1665,7 +1665,7 @@
 
     <!-- declare the client driver for autoloading by the JDBC 4 DriverManager -->
     <antcall target="declare-autoloadable-driver">
-      <param name="driver.name" value="org.apache.derby.jdbc.ClientDriver"/>
+      <param name="driver.name" value="org.apache.derby.client.ClientAutoloadedDriver"/>
     </antcall>
 
     <delete file="${derby.jar.dir}/derbyclient.jar"/>

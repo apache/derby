@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import org.apache.derby.iapi.jdbc.AutoloadedDriver;
 import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.iapi.jdbc.InternalDriver;
 
 /**
@@ -45,6 +46,7 @@ public  class   Wrapper41Driver
     private AutoloadedDriver    _embedded;
     private InternalDriver      _driver40;
     private ClientDriver      _netclient;
+    private ClientAutoloadedDriver      _netautoloaded;
     
     ///////////////////////////////////////////////////////////////////////
     //
@@ -57,6 +59,8 @@ public  class   Wrapper41Driver
         if ( wrapped instanceof AutoloadedDriver ) { _embedded = (AutoloadedDriver) wrapped; }
         else if ( wrapped instanceof InternalDriver ) { _driver40 = (InternalDriver) wrapped; }
         else if ( wrapped instanceof ClientDriver ) { _netclient = (ClientDriver) wrapped; }
+        else if ( wrapped instanceof ClientAutoloadedDriver )
+        { _netautoloaded = (ClientAutoloadedDriver) wrapped; }
         else { throw nothingWrapped( wrapped ); }
     }
     
@@ -71,6 +75,7 @@ public  class   Wrapper41Driver
         if ( _embedded != null ) { return _embedded.getParentLogger(); }
         else if ( _driver40 != null ) { return _driver40.getParentLogger(); }
         else if ( _netclient != null ) { return _netclient.getParentLogger(); }
+        else if ( _netautoloaded != null ) { return _netautoloaded.getParentLogger(); }
         else { throw nothingWrapped( null ); }
     }
 

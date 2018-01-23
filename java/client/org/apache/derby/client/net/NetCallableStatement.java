@@ -23,7 +23,7 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.ClientCallableStatement;
 import org.apache.derby.client.am.MaterialPreparedStatement;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.client.ClientPooledConnection;
 
 class NetCallableStatement extends NetPreparedStatement
@@ -72,7 +72,7 @@ class NetCallableStatement extends NetPreparedStatement
                          int concurrency,
                          int holdability,
                          ClientPooledConnection cpc) throws SqlException {
-        this(ClientDriver.getFactory().newCallableStatement(netAgent,
+        this(ClientAutoloadedDriver.getFactory().newCallableStatement(netAgent,
                 netConnection, sql, type, concurrency, holdability,cpc),
                 netAgent,
                 netConnection);

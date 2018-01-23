@@ -397,7 +397,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
     private String  getClientDriverName()
     {
-        return "org.apache.derby.jdbc.ClientDriver";
+        return "org.apache.derby.client.ClientAutoloadedDriver";
     }
     
     /**

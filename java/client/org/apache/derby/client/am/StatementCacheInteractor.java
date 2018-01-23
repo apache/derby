@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.client.am.stmtcache.StatementKeyFactory;
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -259,7 +259,7 @@ public final class StatementCacheInteractor {
             StatementKey stmtKey) throws SQLException {
 
         LogicalPreparedStatement logicalPs =
-                ClientDriver.getFactory().newLogicalPreparedStatement(
+                ClientAutoloadedDriver.getFactory().newLogicalPreparedStatement(
                                                     ps, stmtKey, this);
         this.openLogicalStatements.add(logicalPs);
         return logicalPs;
@@ -278,7 +278,7 @@ public final class StatementCacheInteractor {
             StatementKey stmtKey) throws SQLException {
 
         LogicalCallableStatement logicalCs =
-                ClientDriver.getFactory().newLogicalCallableStatement(
+                ClientAutoloadedDriver.getFactory().newLogicalCallableStatement(
                                                     cs, stmtKey, this);
         this.openLogicalStatements.add(logicalCs);
         return logicalCs;

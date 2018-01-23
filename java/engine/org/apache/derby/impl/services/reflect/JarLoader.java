@@ -214,6 +214,7 @@ final class JarLoader extends SecureClassLoader {
         return
           (
            className.startsWith("org.apache.derby.iapi.jdbc.AutoloadedDriver")
+           || className.startsWith("org.apache.derby.iapi.client.ClientAutoloadedDriver")
            );
     }
   

@@ -27,7 +27,7 @@ import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.client.am.MaterialStatement;
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 
 class NetStatement implements MaterialStatement {
 
@@ -94,7 +94,7 @@ class NetStatement implements MaterialStatement {
 
     // Called by abstract Connection.createStatement().newStatement() for jdbc 2 statements with scroll attributes
     NetStatement(NetAgent netAgent, NetConnection netConnection, int type, int concurrency, int holdability) throws SqlException {
-        this(ClientDriver.getFactory().newStatement(
+        this(ClientAutoloadedDriver.getFactory().newStatement(
                  netAgent,
                  netConnection,
                  type,

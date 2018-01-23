@@ -55,7 +55,6 @@ import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.jdbc.ClientDriver;
 
 /**
  * This data source is suitable for client/server use of Derby,
@@ -897,7 +896,7 @@ public class BasicClientDataSource
     }
 
     // tokenize "property=value;property=value..." and returns new properties
-    //object This method is used both by ClientDriver to parse the url and
+    //object This method is used both by ClientAutoloadedDriver to parse the url and
     //ClientDataSource.setConnectionAttributes
     public static Properties tokenizeAttributes(
         String attributeString, Properties properties) throws SqlException {
@@ -1477,7 +1476,7 @@ public class BasicClientDataSource
     private Connection getConnectionX(LogWriter dncLogWriter,
                                       String user, String password)
             throws SqlException {
-        return ClientDriver.getFactory().newNetConnection(
+        return ClientAutoloadedDriver.getFactory().newNetConnection(
                 dncLogWriter, user, password, this, -1, false);
 
     }
@@ -1601,7 +1600,7 @@ public class BasicClientDataSource
             String user,
             String password) throws SQLException {
 
-            return ClientDriver.getFactory().newClientPooledConnection(ds,
+            return ClientAutoloadedDriver.getFactory().newClientPooledConnection(ds,
                     dncLogWriter, user, password);
     }
 
@@ -1649,7 +1648,7 @@ public class BasicClientDataSource
         BasicClientDataSource ds, String user, String password)
         throws SQLException
     {
-        return ClientDriver.getFactory().newClientXAConnection(ds,
+        return ClientAutoloadedDriver.getFactory().newClientXAConnection(ds,
                 dncLogWriter, user, password);
     }
 

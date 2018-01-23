@@ -35,7 +35,7 @@ import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.client.am.StatementCallbackInterface;
 import org.apache.derby.client.am.ClientTypes;
 import org.apache.derby.client.am.Utils;
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -132,7 +132,7 @@ class NetStatementReply extends NetPackageReply
             if (nullSqlca && peekNumOfColumns() == 0) {
                 netSqlca = parseSQLDARD(columnMetaData, true); // true means to skip the rest of SQLDARD bytes
             } else {
-                columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
+                columnMetaData = ClientAutoloadedDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
                 netSqlca = parseSQLDARD(columnMetaData, false); // false means do not skip SQLDARD bytes.
             }
 
@@ -159,7 +159,7 @@ class NetStatementReply extends NetPackageReply
             ColumnMetaData columnMetaData = null;
 
             if (columnMetaData == null) {
-                columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
+                columnMetaData = ClientAutoloadedDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
             }
 
             NetSqlca netSqlca = parseSQLDARD(columnMetaData, false);  // false means do not skip SQLDARD bytes
@@ -485,7 +485,7 @@ class NetStatementReply extends NetPackageReply
             peekCP = parseTypdefsOrMgrlvlovrs();
 
             if (peekCP == CodePoint.SQLDARD) {
-                ColumnMetaData columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
+                ColumnMetaData columnMetaData = ClientAutoloadedDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
                 NetSqlca netSqlca = parseSQLDARD(columnMetaData, false);  // false means do not skip SQLDARD bytes
 
                 //For java stored procedure, we got the resultSetMetaData from server,
@@ -908,7 +908,7 @@ class NetStatementReply extends NetPackageReply
             statement.cachedCursor_.resetDataBuffer();
             ((NetCursor) statement.cachedCursor_).extdtaData_.clear();
             try {
-                rs = (NetResultSet)ClientDriver.getFactory().newNetResultSet
+                rs = (NetResultSet)ClientAutoloadedDriver.getFactory().newNetResultSet
                         (netAgent_,
                         (NetStatement) statement.getMaterialStatement(),
                         statement.cachedCursor_,
@@ -929,7 +929,7 @@ class NetStatementReply extends NetPackageReply
             }
         } else {
             try {
-                rs = (NetResultSet)ClientDriver.getFactory().newNetResultSet
+                rs = (NetResultSet)ClientAutoloadedDriver.getFactory().newNetResultSet
                         (netAgent_,
                         (NetStatement) statement.getMaterialStatement(),
                         new NetCursor(netAgent_, qryprctyp),
@@ -1908,7 +1908,7 @@ class NetStatementReply extends NetPackageReply
     // reply data in the response to an EXCSQLSTT command that invodes a stored
     // procedure
     private ColumnMetaData parseSQLCINRDarray() throws DisconnectException {
-        ColumnMetaData columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
+        ColumnMetaData columnMetaData = ClientAutoloadedDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
 
         parseSQLDHROW(columnMetaData);
 

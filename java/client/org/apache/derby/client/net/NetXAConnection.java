@@ -32,7 +32,7 @@ import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.BasicClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
 
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 
 public class NetXAConnection {    
     private NetConnection netCon;
@@ -234,7 +234,7 @@ public class NetXAConnection {
             boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
 
-        return (NetConnection)ClientDriver.getFactory().newNetConnection
+        return (NetConnection)ClientAutoloadedDriver.getFactory().newNetConnection
             (logWriter, user, password,dataSource, rmId, isXAConn,cpc);
     }
 }

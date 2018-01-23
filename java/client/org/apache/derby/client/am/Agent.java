@@ -24,7 +24,7 @@ package org.apache.derby.client.am;
 import java.io.PrintWriter;
 import java.sql.BatchUpdateException;
 import java.sql.Types;
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -324,7 +324,7 @@ public abstract class Agent {
             }
         }
         if (accumulatedExceptions != null) {
-            throw ClientDriver.getFactory().newBatchUpdateException(logWriter_,
+            throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(logWriter_,
                 new ClientMessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
                 null, updateCounts, accumulatedExceptions);
         }

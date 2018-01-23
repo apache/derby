@@ -61,7 +61,7 @@ public class Configuration {
         return dncPackageConsistencyToken.clone();
     }
 
-    // for ClientDriver.jdbcCompliant()
+    // for ClientAutoloadedDriver.jdbcCompliant()
     public final static boolean jdbcCompliant = true;
 
     private final static String[] dncCompatibleJREVersions =
@@ -109,7 +109,7 @@ public class Configuration {
     // -----------------------Load resource bundles for the driver asap-----------
 
     /**
-     * Used by ClientDriver to accumulate load exceptions
+     * Used by ClientAutoloadedDriver to accumulate load exceptions
      */
     private static SqlException exceptionsOnLoadResources = null;
 

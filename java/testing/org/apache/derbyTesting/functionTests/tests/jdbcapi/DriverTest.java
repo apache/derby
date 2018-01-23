@@ -168,7 +168,7 @@ public class DriverTest extends BaseJDBCTestCase {
         // Test that the driver class is the expected one. Currently, the same
         // driver class is used regardless of JDBC version.
         println( "Driver is a " + driver.getClass().getName() );
-        assertEquals(usingEmbedded() ? "AutoloadedDriver" : "ClientDriver",
+        assertEquals(usingEmbedded() ? "AutoloadedDriver" : "ClientAutoloadedDriver",
                      driver.getClass().getSimpleName());
 
         // test that null connection URLs raise a SQLException per JDBC 4.2 spec clarification

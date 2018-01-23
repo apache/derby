@@ -1,4 +1,5 @@
 org.apache.derby.client.BasicClientDataSource.class
+org.apache.derby.client.ClientAutoloadedDriver.class
 org.apache.derby.client.ClientDataSourceFactory.class
 org.apache.derby.client.ClientDataSourceInterface.class
 org.apache.derby.client.ClientPooledConnection.class

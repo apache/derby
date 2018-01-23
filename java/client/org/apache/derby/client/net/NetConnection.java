@@ -48,7 +48,7 @@ import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.shared.common.reference.Attribute;
-import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.ClientConnection;
@@ -159,7 +159,7 @@ public class NetConnection extends ClientConnection {
     //it sends RDBAFLRM followed by SQLCARD with null SQLException.
     //Client will parse the SQLCARD and set connectionNull to true if the
     //SQLCARD is empty. If connectionNull=true, connect method in 
-    //ClientDriver will in turn return null connection.
+    //ClientAutoloadedDriver will in turn return null connection.
     private boolean connectionNull = false;
 
     private void setDeferredResetPassword(String password) {
@@ -1053,7 +1053,7 @@ public class NetConnection extends ClientConnection {
 
 
     protected ClientDatabaseMetaData newDatabaseMetaData_() {
-            return ClientDriver.getFactory().newNetDatabaseMetaData(netAgent_, this);
+            return ClientAutoloadedDriver.getFactory().newNetDatabaseMetaData(netAgent_, this);
     }
 
     //-------------------private helper methods--------------------------------
