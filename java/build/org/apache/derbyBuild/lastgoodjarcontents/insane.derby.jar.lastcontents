@@ -65,6 +65,9 @@ org.apache.derby.iapi.jdbc.CharacterStreamDescriptor.class
 org.apache.derby.iapi.jdbc.ConnectionContext.class
 org.apache.derby.iapi.jdbc.DRDAServerStarter.class
 org.apache.derby.iapi.jdbc.Driver42.class
+org.apache.derby.iapi.jdbc.EmbeddedConnectionPoolDataSourceInterface.class
+org.apache.derby.iapi.jdbc.EmbeddedDataSourceInterface.class
+org.apache.derby.iapi.jdbc.EmbeddedXADataSourceInterface.class
 org.apache.derby.iapi.jdbc.EngineCallableStatement.class
 org.apache.derby.iapi.jdbc.EngineConnection.class
 org.apache.derby.iapi.jdbc.EngineLOB.class
@@ -515,6 +518,7 @@ org.apache.derby.impl.jdbc.EmbedConnection.class
 org.apache.derby.impl.jdbc.EmbedConnectionContext.class
 org.apache.derby.impl.jdbc.EmbedDatabaseMetaData.class
 org.apache.derby.impl.jdbc.EmbedParameterSetMetaData.class
+org.apache.derby.impl.jdbc.EmbedPooledConnection.class
 org.apache.derby.impl.jdbc.EmbedPreparedStatement.class
 org.apache.derby.impl.jdbc.EmbedPreparedStatement42.class
 org.apache.derby.impl.jdbc.EmbedResultSet.class
@@ -522,6 +526,8 @@ org.apache.derby.impl.jdbc.EmbedResultSet42.class
 org.apache.derby.impl.jdbc.EmbedResultSetMetaData.class
 org.apache.derby.impl.jdbc.EmbedSavepoint.class
 org.apache.derby.impl.jdbc.EmbedStatement.class
+org.apache.derby.impl.jdbc.EmbedXAConnection.class
+org.apache.derby.impl.jdbc.EmbedXAResource.class
 org.apache.derby.impl.jdbc.EncryptedLOBFile.class
 org.apache.derby.impl.jdbc.InternalClob.class
 org.apache.derby.impl.jdbc.LOBFile.class
@@ -531,6 +537,7 @@ org.apache.derby.impl.jdbc.LOBStoredProcedure.class
 org.apache.derby.impl.jdbc.LOBStreamControl.class
 org.apache.derby.impl.jdbc.PositionedStoreStream.class
 org.apache.derby.impl.jdbc.ReaderToAscii.class
+org.apache.derby.impl.jdbc.ResourceAdapterImpl.class
 org.apache.derby.impl.jdbc.SQLExceptionFactory.class
 org.apache.derby.impl.jdbc.StoreStreamClob.class
 org.apache.derby.impl.jdbc.TemporaryClob.class
@@ -539,6 +546,8 @@ org.apache.derby.impl.jdbc.UTF8Reader.class
 org.apache.derby.impl.jdbc.UpdatableBlobStream.class
 org.apache.derby.impl.jdbc.Util.class
 org.apache.derby.impl.jdbc.Util42.class
+org.apache.derby.impl.jdbc.XAStatementControl.class
+org.apache.derby.impl.jdbc.XATransactionState.class
 org.apache.derby.impl.jdbc.authentication.AuthenticationServiceBase.class
 org.apache.derby.impl.jdbc.authentication.BasicAuthenticationServiceImpl.class
 org.apache.derby.impl.jdbc.authentication.JNDIAuthenticationSchemeBase.class
@@ -1350,23 +1359,14 @@ org.apache.derby.io.WritableStorageFactory.class
 org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedDataSource40.class
 org.apache.derby.jdbc.BasicEmbeddedXADataSource40.class
-org.apache.derby.jdbc.EmbedPooledConnection.class
-org.apache.derby.jdbc.EmbedXAConnection.class
-org.apache.derby.jdbc.EmbedXAResource.class
 org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource.class
 org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40.class
-org.apache.derby.jdbc.EmbeddedConnectionPoolDataSourceInterface.class
 org.apache.derby.jdbc.EmbeddedDataSource.class
 org.apache.derby.jdbc.EmbeddedDataSource40.class
-org.apache.derby.jdbc.EmbeddedDataSourceInterface.class
 org.apache.derby.jdbc.EmbeddedDriver.class
 org.apache.derby.jdbc.EmbeddedXADataSource.class
 org.apache.derby.jdbc.EmbeddedXADataSource40.class
-org.apache.derby.jdbc.EmbeddedXADataSourceInterface.class
 org.apache.derby.jdbc.ReferenceableDataSource.class
-org.apache.derby.jdbc.ResourceAdapterImpl.class
-org.apache.derby.jdbc.XAStatementControl.class
-org.apache.derby.jdbc.XATransactionState.class
 org.apache.derby.mbeans.CacheManagerMBean.class
 org.apache.derby.mbeans.JDBCMBean.class
 org.apache.derby.mbeans.Management.class

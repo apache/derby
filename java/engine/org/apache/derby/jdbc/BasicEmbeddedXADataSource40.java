@@ -23,7 +23,9 @@ package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
 import javax.sql.XAConnection;
+import org.apache.derby.iapi.jdbc.EmbeddedXADataSourceInterface;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
+import org.apache.derby.impl.jdbc.EmbedXAConnection;
 
 /**
  *

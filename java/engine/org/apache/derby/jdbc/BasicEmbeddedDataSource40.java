@@ -43,6 +43,8 @@ import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.jdbc.AutoloadedDriver;
 import org.apache.derby.iapi.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.EmbeddedDataSourceInterface;
+import org.apache.derby.iapi.jdbc.EmbeddedXADataSourceInterface;
 import org.apache.derby.impl.jdbc.Util;
 
 /**
@@ -735,7 +737,7 @@ public class BasicEmbeddedDataSource40
      * @return user connection
      * @throws SQLException
      */
-    final Connection getConnection(String username,
+    public final Connection getConnection(String username,
                                    String password,
                                    boolean requestPassword)
             throws SQLException {

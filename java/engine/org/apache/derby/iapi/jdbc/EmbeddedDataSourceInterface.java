@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.EmbeddedDataSourceInterface
+   Derby - Class org.apache.derby.iapi.jdbc.EmbeddedDataSourceInterface
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,10 @@
 
  */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.iapi.jdbc;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Methods that extend the API of
@@ -52,5 +55,20 @@ public interface EmbeddedDataSourceInterface extends javax.sql.DataSource {
 
    public void setAttributesAsPassword(boolean attributesAsPassword);
    public boolean getAttributesAsPassword();
+
+   /**
+     * Get a user connection.
+     *
+     * @param username the user name
+     * @param password the password
+     * @param requestPassword {@code true} if the password came from the
+     *        getConnection() call with user and password arguments..
+     * @return user connection
+     * @throws SQLException
+     */
+    public Connection getConnection(String username,
+                                   String password,
+                                   boolean requestPassword)
+      throws SQLException;
 
 }

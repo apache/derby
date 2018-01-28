@@ -23,6 +23,9 @@ package org.apache.derby.jdbc;
 import java.sql.SQLException;
 import javax.sql.PooledConnection;
 
+import org.apache.derby.iapi.jdbc.EmbeddedConnectionPoolDataSourceInterface;
+import org.apache.derby.impl.jdbc.EmbedPooledConnection;
+
 /**
  * This data source is suitable for an application using embedded Derby,
  * running on Java 8 Compact Profile 2 or higher.

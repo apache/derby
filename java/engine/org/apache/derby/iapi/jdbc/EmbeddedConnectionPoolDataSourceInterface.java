@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.EmbeddedXADataSourceInterface
+   Derby - Class org.apache.derby.iapi.jdbc.EmbeddedConnectionPoolDataSourceInterface
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,26 +19,12 @@
 
  */
 
-package org.apache.derby.jdbc;
-
-import java.sql.ShardingKeyBuilder;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-
-import org.apache.derby.iapi.jdbc.ResourceAdapter;
+package org.apache.derby.iapi.jdbc;
 
 
 /**
- * Common interface of Derby embedded XA data sources.
+ * Common interface of Derby embedded connection pooling data sources.
  */
-public interface EmbeddedXADataSourceInterface extends EmbeddedDataSourceInterface, javax.sql.XADataSource
-{
-    public ResourceAdapter getResourceAdapter();
-
-    /** Added by Java 9 */
-    public default ShardingKeyBuilder createShardingKeyBuilder()
-        throws SQLException
-    {
-        throw new java.sql.SQLFeatureNotSupportedException();
-    }
+public interface EmbeddedConnectionPoolDataSourceInterface
+    extends EmbeddedDataSourceInterface, javax.sql.ConnectionPoolDataSource {
 }

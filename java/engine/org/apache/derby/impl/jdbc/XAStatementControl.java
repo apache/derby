@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.XAStatementControl
+   Derby - Class org.apache.derby.impl.jdbc.XAStatementControl
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredStatementControl;

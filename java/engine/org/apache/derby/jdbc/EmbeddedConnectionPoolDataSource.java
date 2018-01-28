@@ -24,6 +24,8 @@ package org.apache.derby.jdbc;
 import java.sql.SQLException;
 import javax.sql.PooledConnection;
 
+import org.apache.derby.iapi.jdbc.EmbeddedConnectionPoolDataSourceInterface;
+import org.apache.derby.impl.jdbc.EmbedPooledConnection;
 
 /**
    <P>

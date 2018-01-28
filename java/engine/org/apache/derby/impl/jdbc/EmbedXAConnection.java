@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.EmbedXAConnection
+   Derby - Class org.apache.derby.impl.jdbc.EmbedXAConnection
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,10 +19,12 @@
 
  */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
+import org.apache.derby.iapi.jdbc.EmbeddedDataSourceInterface;
+import org.apache.derby.iapi.jdbc.EmbeddedXADataSourceInterface;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
@@ -41,11 +43,11 @@ import javax.sql.XAConnection;
 
 /** 
  */
-class EmbedXAConnection extends EmbedPooledConnection implements XAConnection {
+public class EmbedXAConnection extends EmbedPooledConnection implements XAConnection {
 
         private EmbedXAResource xaRes;
 
-   EmbedXAConnection(BasicEmbeddedDataSource40 ds,
+    public EmbedXAConnection(EmbeddedDataSourceInterface ds,
                       ResourceAdapter ra,
                       String u,
                       String p,

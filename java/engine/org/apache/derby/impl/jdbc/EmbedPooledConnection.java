@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.EmbedPooledConnection
+   Derby - Class org.apache.derby.impl.jdbc.EmbedPooledConnection
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.shared.common.reference.Property;
@@ -34,7 +34,7 @@ import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedCallableStatement;
-
+import org.apache.derby.iapi.jdbc.EmbeddedDataSourceInterface;
 
 import java.sql.Connection;
 import java.security.AccessController;
@@ -67,7 +67,7 @@ import javax.sql.StatementEventListener;
 	</UL>
 
  */
-class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
+public class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
 {
     /** the connection string */
     private String connString;
@@ -102,7 +102,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	BrokeredConnection currentConnectionHandle;
 
 	// set up once by the data source
-    final BasicEmbeddedDataSource40 dataSource;
+    final EmbeddedDataSourceInterface dataSource;
 	private final String username;
 	private final String password;
 	/**
@@ -120,7 +120,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
         return isActive;
     }
     
-    EmbedPooledConnection(BasicEmbeddedDataSource40 ds, String u, String p,
+    public EmbedPooledConnection(EmbeddedDataSourceInterface ds, String u, String p,
             boolean requestPassword) throws SQLException
 	{
 		dataSource = ds;
