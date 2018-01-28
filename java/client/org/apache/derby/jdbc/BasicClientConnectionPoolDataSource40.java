@@ -28,6 +28,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.client.ClientConnectionPoolDataSourceInterface;
 
 /**
  * This data source is suitable for client/server use of Derby,

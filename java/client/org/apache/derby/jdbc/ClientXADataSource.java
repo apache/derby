@@ -27,6 +27,8 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLException;
 import javax.sql.XAConnection;
 
+import org.apache.derby.client.ClientXADataSourceInterface;
+
 /**
  * <p>
  * This datasource is suitable for a client/server use of Derby,

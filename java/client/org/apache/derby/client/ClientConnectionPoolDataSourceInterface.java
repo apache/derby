@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface
+   Derby - Class org.apache.derby.client.ClientConnectionPoolDataSourceInterface
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,11 +19,9 @@
 
 */
 
-package org.apache.derby.jdbc;
+package org.apache.derby.client;
 
 import javax.sql.ConnectionPoolDataSource;
-
-import org.apache.derby.client.ClientDataSourceInterface;
 
 /**
  * Specifies Derby extensions to the {@code java.sqlx.ConnectionPoolDataSource}.

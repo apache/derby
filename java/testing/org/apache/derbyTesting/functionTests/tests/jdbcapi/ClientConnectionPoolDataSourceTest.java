@@ -30,7 +30,7 @@ import java.sql.Statement;
 import javax.sql.PooledConnection;
 
 import junit.framework.Test;
-import org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface;
+import org.apache.derby.client.ClientConnectionPoolDataSourceInterface;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
