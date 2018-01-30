@@ -26,7 +26,7 @@ package org.apache.derby.client.net;
 import java.io.PrintWriter;
 import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.LogWriter;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.client.BasicClientDataSource;
 
 // This class traces communication buffers for both sends and receives.
 // The value of the hex bytes are traced along with the ascii and ebcdic translations.
@@ -197,7 +197,7 @@ public class NetLogWriter extends LogWriter {
                                                String className,
                                                String methodName,
                                                int tracepoint) {
-        if (!loggingEnabled(ClientDataSource.TRACE_PROTOCOL_FLOWS)) {
+        if (!loggingEnabled(BasicClientDataSource.TRACE_PROTOCOL_FLOWS)) {
             return;
         }
         synchronized (printWriter_) {

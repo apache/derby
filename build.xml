@@ -48,7 +48,7 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,engine,storeless,tools,drda,client,optional,runner,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,engine,storeless,client,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts"
       description="Compile the product source (does not build the tests)."
   />
   <target

@@ -33,9 +33,7 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="jdbc" depends="compile_jdbc4,compile_jdbc42"/>
-
-  <target name="compile_jdbc4" >
+  <target name="jdbc">
     <javac
       source="${min.version}"
       target="${min.version}"
@@ -46,31 +44,12 @@
         optimize="${optimize}"
         proceed="${proceed}"
         verbose="${verbose}"
-        srcdir="${derby.engine.src.dir}"
+        srcdir="${derby.tools.src.dir}"
         destdir="${out.dir}">
         <include name="${derby.dir}/jdbc/*.java"/>
-        <exclude name="${derby.dir}/jdbc/*42.java"/>
         <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
-
-  <target name="compile_jdbc42" >
-    <javac
-      source="${min.version}"
-      target="${min.version}"
-        nowarn="on"
-        debug="${debug}" debuglevel="${debuglevel}"
-        depend="${depend}"
-        deprecation="${deprecation}"
-        optimize="${optimize}"
-        proceed="${proceed}"
-        verbose="${verbose}"
-        srcdir="${derby.engine.src.dir}"
-        destdir="${out.dir}">
-        <include name="${derby.dir}/jdbc/*42.java"/>
-        <compilerarg value="-Xlint:unchecked"/>
-    </javac>
-  </target> 
 
 </project>
 

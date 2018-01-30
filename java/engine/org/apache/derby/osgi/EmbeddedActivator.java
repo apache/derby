@@ -30,7 +30,7 @@ import org.osgi.framework.BundleContext;
 public final class EmbeddedActivator implements BundleActivator {
 
 	public void start(BundleContext context) {
-		new org.apache.derby.jdbc.EmbeddedDriver();
+		new org.apache.derby.iapi.jdbc.AutoloadedDriver();
 	}
 
 	public void stop(BundleContext context) {
