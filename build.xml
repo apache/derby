@@ -1410,22 +1410,7 @@
       <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
       <attribute name="Bundle-ManifestVersion" value="2"/>
       	<attribute name="Sealed" value="true"/>
-    	<section name="org/apache/derby/iapi/services/context/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/iapi/services/info/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
     	<section name="org/apache/derby/jdbc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/info/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/iapi/services/i18n/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-        <section name="org/apache/derby/iapi/tools/i18n/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
     	<section name="org/apache/derby/loc/">
@@ -1580,15 +1565,9 @@
       <attribute name="Main-Class" value="org.apache.derby.drda.NetworkServerControl"/>
       <attribute name="Class-Path" value="derby.jar derbyshared.jar"/>
       	<attribute name="Sealed" value="true"/>
-    	<section name="org/apache/derby/impl/drda/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
     	<section name="org/apache/derby/loc/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
-        <section name="org/apache/derby/shared/common/error/">
-          <attribute name="Sealed" value="false"/>
-        </section>
     </manifest> 
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
@@ -1654,13 +1633,6 @@
       <attribute name="Bundle-SymbolicName" value="derbyclient"/>
       <attribute name="DynamicImport-Package" value="*"/>
       <attribute name="Export-Package" value="org.apache.derby.jdbc"/> 
-      <section name="org/apache/derby/shared/common/error/">
-        <attribute name="Sealed" value="false"/>
-      </section>
-      <!-- See DERBY-4669. -->
-      <section name="org/apache/derby/shared/common/sanity/">
-        <attribute name="Sealed" value="false"/>
-      </section>
     </manifest> 
 
     <!-- declare the client driver for autoloading by the JDBC 4 DriverManager -->
