@@ -625,6 +625,7 @@ class TableScanResultSet extends ScanResultSet
             if (past2FutureTbl != null)
             {
                 past2FutureTbl.close();
+                past2FutureTbl = null;
             }
 	    }
 		else

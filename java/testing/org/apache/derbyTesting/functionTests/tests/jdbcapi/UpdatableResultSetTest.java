@@ -26,6 +26,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.Date;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -716,5 +718,41 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
         Statement stmt = createStatement();
         return stmt.executeQuery("select " + colName +
                 " from UpdateTestTableResultSet where sno = " + key);
+    }
+
+    public void testDerby6981()
+        throws SQLException
+    {
+        Statement stmt = createStatement();
+        stmt.executeUpdate("CREATE TABLE TEST1 " +
+            "(ID int PRIMARY KEY NOT NULL,LASTUPDATE timestamp)");
+        PreparedStatement ps = prepareStatement(
+            "SELECT id, LASTUPDATE FROM test1 WHERE id = ? " +
+                    "FOR UPDATE OF id, LASTUPDATE ",
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+
+        long newDate = new Date().getTime();
+
+        for (int i = 0; i < 3; i++)
+        {
+            ps.setInt(1, 3);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next())
+            {
+                rs.moveToInsertRow();
+                rs.updateInt(1, 3);
+                rs.updateTimestamp(2, new Timestamp(newDate));
+                rs.insertRow();
+            }
+            else
+            {
+                rs.updateInt(1, 3);
+                rs.updateTimestamp(2, new Timestamp(newDate));
+                rs.updateRow();
+            }
+            rs.close();
+        }
+        stmt.close();
+        ps.close();
     }
 }
