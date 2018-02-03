@@ -1413,9 +1413,6 @@
     	<section name="org/apache/derby/jdbc/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
-    	<section name="org/apache/derby/loc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
     </manifest> 
 
     <antcall target="make-locale-classpath-manifest">
@@ -1565,9 +1562,6 @@
       <attribute name="Main-Class" value="org.apache.derby.drda.NetworkServerControl"/>
       <attribute name="Class-Path" value="derby.jar derbyshared.jar"/>
       	<attribute name="Sealed" value="true"/>
-    	<section name="org/apache/derby/loc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
     </manifest> 
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
