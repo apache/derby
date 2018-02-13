@@ -181,7 +181,8 @@ public class VetJigsawTest extends BaseJDBCTestCase
              conn,
              "insert into zipClasses\n" +
              "  select directory, '" + fullJarFileName + "', name\n" +
-             "  from table(zipFile('" + fullJarFileName + "')) t\n"
+             "  from table(zipFile('" + fullJarFileName + "')) t\n" +
+             "  where name like '%.class'"
              );
     }
     private String vetContents() throws Exception
@@ -210,8 +211,8 @@ public class VetJigsawTest extends BaseJDBCTestCase
     }
     private void examinePackage(StringBuilder buffer, String packageName) throws Exception
     {
-        buffer.append(packageName + " straddles more than one jar file:\n");
-
+        boolean packageHasClasses = false;
+ 
         String packageContents =
           "select zipFileName, className\n" +
           "from zipClasses\n" +
@@ -226,6 +227,7 @@ public class VetJigsawTest extends BaseJDBCTestCase
                 {
                     String zipFileName = rs.getString(1);
                     String className = rs.getString(2);
+                    packageHasClasses = true;
 
                     buffer
                       .append("    ")
@@ -235,7 +237,11 @@ public class VetJigsawTest extends BaseJDBCTestCase
                       .append("\n");
                 }
             }
+        }
 
+        if (packageHasClasses)
+        {
+            buffer.insert(0, packageName + " straddles more than one jar file:\n");
             buffer.append("\n");
         }
     }

@@ -88,6 +88,7 @@ org.apache.derby.iapi.services.cache.CacheableFactory.class
 org.apache.derby.iapi.services.cache.ClassSize.class
 org.apache.derby.iapi.services.cache.ClassSizeCatalog.class
 org.apache.derby.iapi.services.cache.ClassSizeCatalogImpl.class
+org.apache.derby.iapi.services.cache.SizedCacheable.class
 org.apache.derby.iapi.services.classfile.AttributeEntry.class
 org.apache.derby.iapi.services.classfile.Attributes.class
 org.apache.derby.iapi.services.classfile.CONSTANT_Double_info.class
@@ -96,9 +97,11 @@ org.apache.derby.iapi.services.classfile.CONSTANT_Index_info.class
 org.apache.derby.iapi.services.classfile.CONSTANT_Integer_info.class
 org.apache.derby.iapi.services.classfile.CONSTANT_Long_info.class
 org.apache.derby.iapi.services.classfile.CONSTANT_Utf8_info.class
+org.apache.derby.iapi.services.classfile.ClassEnumeration.class
 org.apache.derby.iapi.services.classfile.ClassFormatOutput.class
 org.apache.derby.iapi.services.classfile.ClassHolder.class
 org.apache.derby.iapi.services.classfile.ClassInput.class
+org.apache.derby.iapi.services.classfile.ClassInvestigator.class
 org.apache.derby.iapi.services.classfile.ClassMember.class
 org.apache.derby.iapi.services.classfile.ConstantPoolEntry.class
 org.apache.derby.iapi.services.classfile.MemberTable.class
@@ -134,6 +137,7 @@ org.apache.derby.iapi.services.io.CloseFilterInputStream.class
 org.apache.derby.iapi.services.io.CompressedNumber.class
 org.apache.derby.iapi.services.io.CounterOutputStream.class
 org.apache.derby.iapi.services.io.DataInputUtil.class
+org.apache.derby.iapi.services.io.DebugByteTeeOutputStream.class
 org.apache.derby.iapi.services.io.DerbyIOException.class
 org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream.class
 org.apache.derby.iapi.services.io.ErrorInfo.class
@@ -155,7 +159,9 @@ org.apache.derby.iapi.services.io.Limit.class
 org.apache.derby.iapi.services.io.LimitInputStream.class
 org.apache.derby.iapi.services.io.LimitObjectInput.class
 org.apache.derby.iapi.services.io.LimitReader.class
+org.apache.derby.iapi.services.io.NullOutputStream.class
 org.apache.derby.iapi.services.io.RegisteredFormatIds.class
+org.apache.derby.iapi.services.io.SQLExceptionWrapper.class
 org.apache.derby.iapi.services.io.Storable.class
 org.apache.derby.iapi.services.io.StoredFormatIds.class
 org.apache.derby.iapi.services.io.StreamStorable.class
@@ -210,6 +216,7 @@ org.apache.derby.iapi.sql.StatementUtil.class
 org.apache.derby.iapi.sql.StorablePreparedStatement.class
 org.apache.derby.iapi.sql.compile.ASTVisitor.class
 org.apache.derby.iapi.sql.compile.AccessPath.class
+org.apache.derby.iapi.sql.compile.C_NodeTypes.class
 org.apache.derby.iapi.sql.compile.CodeGeneration.class
 org.apache.derby.iapi.sql.compile.CompilerContext.class
 org.apache.derby.iapi.sql.compile.CostEstimate.class
@@ -330,6 +337,7 @@ org.apache.derby.iapi.sql.execute.xplain.XPLAINable.class
 org.apache.derby.iapi.store.access.AccessFactory.class
 org.apache.derby.iapi.store.access.AccessFactoryGlobals.class
 org.apache.derby.iapi.store.access.BackingStoreHashtable.class
+org.apache.derby.iapi.store.access.BinaryOrderable.class
 org.apache.derby.iapi.store.access.ColumnOrdering.class
 org.apache.derby.iapi.store.access.ConglomPropertyQueryable.class
 org.apache.derby.iapi.store.access.ConglomerateController.class
@@ -389,6 +397,7 @@ org.apache.derby.iapi.store.raw.RePreparable.class
 org.apache.derby.iapi.store.raw.RecordHandle.class
 org.apache.derby.iapi.store.raw.RowLock.class
 org.apache.derby.iapi.store.raw.ScanHandle.class
+org.apache.derby.iapi.store.raw.ScannedTransactionHandle.class
 org.apache.derby.iapi.store.raw.StreamContainerHandle.class
 org.apache.derby.iapi.store.raw.Transaction.class
 org.apache.derby.iapi.store.raw.UndoHandler.class
@@ -477,6 +486,7 @@ org.apache.derby.iapi.util.InterruptDetectedException.class
 org.apache.derby.iapi.util.InterruptStatus.class
 org.apache.derby.iapi.util.JBitSet.class
 org.apache.derby.iapi.util.Matchable.class
+org.apache.derby.iapi.util.Operator.class
 org.apache.derby.iapi.util.PropertyUtil.class
 org.apache.derby.iapi.util.StringUtil.class
 org.apache.derby.iapi.util.UTF8Util.class
@@ -582,8 +592,10 @@ org.apache.derby.impl.services.bytecode.BCMethodDescriptor.class
 org.apache.derby.impl.services.bytecode.CodeChunk.class
 org.apache.derby.impl.services.bytecode.Conditional.class
 org.apache.derby.impl.services.bytecode.GClass.class
+org.apache.derby.impl.services.bytecode.OpcodeDebug.class
 org.apache.derby.impl.services.bytecode.Type.class
 org.apache.derby.impl.services.bytecode.VMTypeIdCacheable.class
+org.apache.derby.impl.services.bytecode.d_BCValidate.class
 org.apache.derby.impl.services.cache.BackgroundCleaner.class
 org.apache.derby.impl.services.cache.CacheEntry.class
 org.apache.derby.impl.services.cache.ClockPolicy.class
@@ -806,6 +818,7 @@ org.apache.derby.impl.sql.compile.InListOperatorNode.class
 org.apache.derby.impl.sql.compile.IndexToBaseRowNode.class
 org.apache.derby.impl.sql.compile.InsertNode.class
 org.apache.derby.impl.sql.compile.IntersectOrExceptNode.class
+org.apache.derby.impl.sql.compile.IsNode.class
 org.apache.derby.impl.sql.compile.IsNullNode.class
 org.apache.derby.impl.sql.compile.JavaToSQLValueNode.class
 org.apache.derby.impl.sql.compile.JavaValueNode.class
@@ -1040,6 +1053,7 @@ org.apache.derby.impl.sql.execute.MatchingClauseConstantAction.class
 org.apache.derby.impl.sql.execute.MaterializedResultSet.class
 org.apache.derby.impl.sql.execute.MaxMinAggregator.class
 org.apache.derby.impl.sql.execute.MergeConstantAction.class
+org.apache.derby.impl.sql.execute.MergeJoinResultSet.class
 org.apache.derby.impl.sql.execute.MergeResultSet.class
 org.apache.derby.impl.sql.execute.MiscResultSet.class
 org.apache.derby.impl.sql.execute.MultiProbeTableScanResultSet.class
@@ -1172,6 +1186,7 @@ org.apache.derby.impl.store.access.btree.BranchControlRow.class
 org.apache.derby.impl.store.access.btree.BranchRow.class
 org.apache.derby.impl.store.access.btree.ControlRow.class
 org.apache.derby.impl.store.access.btree.LeafControlRow.class
+org.apache.derby.impl.store.access.btree.LevelInfo.class
 org.apache.derby.impl.store.access.btree.OpenBTree.class
 org.apache.derby.impl.store.access.btree.SearchParameters.class
 org.apache.derby.impl.store.access.btree.WaitError.class
@@ -1191,6 +1206,7 @@ org.apache.derby.impl.store.access.btree.index.B2ITableLocking3.class
 org.apache.derby.impl.store.access.btree.index.B2IUndo.class
 org.apache.derby.impl.store.access.btree.index.B2I_10_3.class
 org.apache.derby.impl.store.access.btree.index.B2I_v10_2.class
+org.apache.derby.impl.store.access.conglomerate.BinaryOrderableWrapper.class
 org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil.class
 org.apache.derby.impl.store.access.conglomerate.GenericConglomerate.class
 org.apache.derby.impl.store.access.conglomerate.GenericConglomerateController.class
@@ -1213,6 +1229,7 @@ org.apache.derby.impl.store.access.heap.HeapScan.class
 org.apache.derby.impl.store.access.heap.HeapScanInfo.class
 org.apache.derby.impl.store.access.heap.Heap_v10_2.class
 org.apache.derby.impl.store.access.heap.OpenHeap.class
+org.apache.derby.impl.store.access.heap.TableStats.class
 org.apache.derby.impl.store.access.sort.ExternalSortFactory.class
 org.apache.derby.impl.store.access.sort.MergeInserter.class
 org.apache.derby.impl.store.access.sort.MergeScan.class
@@ -1356,17 +1373,6 @@ org.apache.derby.io.StorageFactory.class
 org.apache.derby.io.StorageFile.class
 org.apache.derby.io.StorageRandomAccessFile.class
 org.apache.derby.io.WritableStorageFactory.class
-org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40.class
-org.apache.derby.jdbc.BasicEmbeddedDataSource40.class
-org.apache.derby.jdbc.BasicEmbeddedXADataSource40.class
-org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource.class
-org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40.class
-org.apache.derby.jdbc.EmbeddedDataSource.class
-org.apache.derby.jdbc.EmbeddedDataSource40.class
-org.apache.derby.jdbc.EmbeddedDriver.class
-org.apache.derby.jdbc.EmbeddedXADataSource.class
-org.apache.derby.jdbc.EmbeddedXADataSource40.class
-org.apache.derby.jdbc.ReferenceableDataSource.class
 org.apache.derby.mbeans.CacheManagerMBean.class
 org.apache.derby.mbeans.JDBCMBean.class
 org.apache.derby.mbeans.Management.class

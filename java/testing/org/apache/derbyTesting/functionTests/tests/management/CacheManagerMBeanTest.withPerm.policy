@@ -93,3 +93,7 @@ grant codeBase "${derbyTesting.antjunit}" {
     // This permission is needed when running the tests using ant 1.7
     permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
+
+grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
+};

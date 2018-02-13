@@ -50,22 +50,25 @@ import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 public class ClassLoaderBootTest extends BaseJDBCTestCase {
 
     private static URL derbyClassLocation; 
+    private static URL embeddedDataSourceClassLocation; 
 	static {
-        // find the location of derby jar file or location 
-        // of classes. 
+        // find the location of derby jar file and derbytools jar file
+        derbyClassLocation = getClassLocation("org.apache.derby.database.Database");
+        embeddedDataSourceClassLocation = getClassLocation("org.apache.derby.jdbc.EmbeddedDataSource");
+	}
+    private static URL getClassLocation(String className)
+    {
         CodeSource cs;
         try {
-            Class cls = Class.forName("org.apache.derby.database.Database");
+            Class cls = Class.forName(className);
             cs = cls.getProtectionDomain().getCodeSource();
         } catch (ClassNotFoundException e) {
             cs = null;
         }
 
-        if(cs == null )
-            derbyClassLocation = null;        
-        else 
-            derbyClassLocation = cs.getLocation();
-	}
+        if(cs == null ) { return null; }
+        else { return cs.getLocation(); }
+    }
         
 
     private ClassLoader loader_1;
@@ -111,7 +114,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
      */
     protected void setUp() throws Exception
     {
-        URL[] urls = new URL[]{derbyClassLocation};
+        URL[] urls = new URL[]{derbyClassLocation, embeddedDataSourceClassLocation};
         mainLoader = getThreadLoader();
 
         loader_1 = createDerbyClassLoader(urls);

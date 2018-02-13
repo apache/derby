@@ -104,7 +104,7 @@ public class BasicClientDataSource
 
     private final static long serialVersionUID = 1894299584216955554L;
     public final static String className__ =
-            "org.apache.derby.jdbc.BasicClientDataSource";
+            "org.apache.derby.client.BasicClientDataSource";
 
     // ---------------------------- traceLevel -------------------------------
     //

@@ -204,6 +204,7 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
   // ij needs permission to read the sql files in this jar
   permission java.io.FilePermission "${derbyTesting.testjarpath}", "read";
   
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 
 //

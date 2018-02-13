@@ -84,6 +84,10 @@ public class DerbyVersion
     /** 10.9.1.0 (June 25, 2012/ SVN 1344872) */
     public static final DerbyVersion _10_9_1_0 = new DerbyVersion(10,9,1,0);
 
+
+    /** The release which introduced Jigsaw modules */
+    public static final DerbyVersion FIRST_JIGSAW_VERSION = new DerbyVersion(10,15,0,0);
+  
     private final int major;
     private final int minor;
     private final int fixpack;

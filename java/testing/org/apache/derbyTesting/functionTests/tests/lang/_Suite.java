@@ -262,6 +262,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(Derby5866TriggerOrderTest.suite());
         suite.addTest(NoDBInternalsPermissionTest.suite());
         suite.addTest(ClassLoadingTest.suite());
+        suite.addTest(VetJigsawTest.suite());
         return suite;
 	}
 }

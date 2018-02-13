@@ -80,3 +80,8 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar"
   permission java.security.SecurityPermission "getPolicy";
   permission java.lang.RuntimePermission "setIO"; 
 };
+
+grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
+};
+

@@ -112,3 +112,8 @@ grant {
 grant {
   permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
 };
+
+grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
+};
+

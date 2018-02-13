@@ -1293,7 +1293,7 @@
 
   <target
       name="buildjars"
-      depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyoptionaltoolsjar,derbysharedjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar,jardriftcheck"
+      depends="initjars,derbysharedjar,derbyjar,derbynetjar,derbyclientjar,derbytoolsjar,derbyoptionaltoolsjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar,jardriftcheck"
       description="Build all of the Derby jar files."
   />
 
@@ -1327,17 +1327,6 @@
       <arg value="${derby.jar.dir}/lists/org/apache/derby/modules.properties"/>
       <classpath>
         <pathelement path="${out.dir}"/>
-      </classpath>
-    </java>
-
-    <echo level="info" message=" creating derby.jar class list "/>
-    <java classname="org.apache.derbyBuild.classlister" fork="yes">
-      <jvmarg value="-DcloudscapeOnly=true"/>
-      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derby.list"/>
-      <arg value="${derby.jar.dir}/lists/otherDerbyClasses.properties"/> 
-      <arg value="${derby.jar.dir}/lists/org/apache/derby/modules.properties"/>
-      <classpath>
-        <pathelement path="${out.dir}"/> 
       </classpath>
     </java>
 
@@ -1378,16 +1367,42 @@
 
     <jar destfile="${derby.jar.dir}/derby.jar"
          basedir="${out.dir}"
-	 includesfile="${derby.jar.dir}/lists/derby.list"
+         includes="org/apache/derby/agg/**,
+                   org/apache/derby/authentication/**,
+                   org/apache/derby/catalog/**,
+                   org/apache/derby/database/**,
+                   org/apache/derby/diag/**,
+                   org/apache/derby/io/**,
+                   org/apache/derby/jdbc/load/**,
+                   org/apache/derby/mbeans/*.class,
+                   org/apache/derby/osgi/**,
+                   org/apache/derby/security/**,
+                   org/apache/derby/vti/**,
+                   org/apache/derby/iapi/db/**,
+                   org/apache/derby/iapi/jdbc/**,
+                   org/apache/derby/iapi/security/**,
+                   org/apache/derby/iapi/services/**,
+                   org/apache/derby/iapi/sql/**,
+                   org/apache/derby/iapi/store/**,
+                   org/apache/derby/iapi/types/**,
+                   org/apache/derby/iapi/transaction/**,
+                   org/apache/derby/iapi/util/**,
+                   org/apache/derby/impl/db/**,
+                   org/apache/derby/impl/io/**,
+                   org/apache/derby/impl/jdbc/**,
+                   org/apache/derby/impl/load/**,
+                   org/apache/derby/impl/optional/**,
+                   org/apache/derby/impl/services/**,
+                   org/apache/derby/impl/sql/**,
+                   org/apache/derby/impl/store/**,
+                   org/apache/derby/loc/m?_en.properties,
+                   org/apache/derby/loc/m??_en.properties,
+                   org/apache/derby/impl/sql/catalog/metadata_net.properties,
+                   org/apache/derby/info/engine/info.properties"
+         excludes="**/D_*,**/odbcmeta.done"
          compress="true"
          filesonly="true"
          manifest="${derby.jar.dir}/lists/smf.mf">
-      <fileset dir="${out.dir}"
-               includes="org/apache/derby/loc/m?_en.properties,
-                         org/apache/derby/loc/m??_en.properties,
-                         org/apache/derby/impl/jdbc/metadata.properties,
-                         org/apache/derby/impl/sql/catalog/metadata_net.properties,
-                         org/apache/derby/info/engine/info.properties"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**,
                          org/apache/derby/modules.properties"/>
@@ -1433,17 +1448,6 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <echo level="info" message=" creating tools.list "/>
-    <java classname="org.apache.derbyBuild.classlister" fork="yes">
-      <jvmarg value="-Ddb2jtools=true"/>
-      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derbytools.list"/>
-      <arg value="${basedir}/tools/jar/tools.properties"/>
-      <classpath>
-        <pathelement path="${out.dir}"/>
-      </classpath>
-    </java>
-    <replace file="${derby.jar.dir}/lists/derbytools.list" token="$$$$" value="$$"/>
-
     <echo level="info" message=" creating new tools.properties file "/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
@@ -1460,17 +1464,25 @@
         <param name="manifest.mode" value="replace"/>
     </antcall>
 
+    <manifest file="${derby.jar.dir}/lists/smftools.mf">
+      <attribute name="Class-Path" value="derby.jar derbyclient.jar derbynet.jar"/>
+    </manifest> 
+ 	
     <delete file="${derby.jar.dir}/derbytools.jar"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          basedir="${out.dir}"
-         includesfile="${derby.jar.dir}/lists/derbytools.list"
+         includes="org/apache/derby/tools/**,
+                   org/apache/derby/iapi/tools/**,
+                   org/apache/derby/impl/tools/**,
+                   org/apache/derby/jdbc/**,
+                   org/apache/derby/loc/sysinfoMessages.properties,
+                   org/apache/derby/loc/toolsmessages.properties,
+                   org/apache/derby/info/tools/info.properties"
+         excludes="org/apache/derby/impl/tools/ij/SimpleCharStream.class,
+                   org/apache/derby/impl/tools/ij/mt*.class"
          manifest="${derby.jar.dir}/lists/smftools.mf"
          compress="true"
          filesonly="true">
-      <fileset dir="${out.dir}"
-               includes="org/apache/derby/loc/sysinfoMessages.properties,
-                         org/apache/derby/loc/toolsmessages.properties,
-                         org/apache/derby/info/tools/info.properties"/>
 	  <fileset dir="${derby.tools.src.dir}"
                includes="org/apache/derby/impl/tools/planexporter/resources/*.xsl"/>
       <fileset dir="${derby.jar.dir}/lists"
@@ -1536,16 +1548,6 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <echo level="info" message=" creating net.list"/> 
-    <java classname="org.apache.derbyBuild.classlister" fork="yes">
-      <jvmarg value="-Ddb2jdrda=true"/>
-      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derbynet.list"/>
-      <arg value="${basedir}/tools/jar/net.properties"/>
-      <classpath>
-        <pathelement path="${out.dir}"/>
-      </classpath>
-    </java>
-
     <echo level="info" message=" creating new net.properties file "/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
@@ -1567,14 +1569,14 @@
     <delete file="${derby.jar.dir}/derbynet.jar"/>
     <jar destfile="${derby.jar.dir}/derbynet.jar"
          basedir="${out.dir}"
-         includesfile="${derby.jar.dir}/lists/derbynet.list"
+         includes="org/apache/derby/drda/**,
+                   org/apache/derby/impl/drda/**,
+                   org/apache/derby/loc/drda/**,
+                   org/apache/derby/mbeans/drda/**,
+                   org/apache/derby/info/net/info.properties"
          compress="true"
          filesonly="true"
     	 manifest="${derby.jar.dir}/lists/smfnet.mf">
-      <fileset dir="${out.dir}"
-               includes="org/apache/derby/loc/drda/**,
-                         org/apache/derby/info/net/info.properties,
-                         org/apache/derby/drda/server.policy"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
@@ -1591,20 +1593,6 @@
     <delete>
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
-
-    <copy file="${basedir}/tools/jar/dnc.properties"
-          tofile="${derby.jar.dir}/lists/dnc.properties"/>
-    <antcall target="derbyclientjar.1.8"/>
-
-    <java classname="org.apache.derbyBuild.classlister" fork="yes">
-      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/dnc.list"/>
-      <arg value="${derby.jar.dir}/lists/dnc.properties"/>
-      <classpath>
-        <pathelement path="${out.dir}"/> 
-      </classpath>
-    </java>
-
-    <echo level="info" message=" creating new dnc.properties file "/>
 
     <mkdir dir="${out.dir}/org/apache/derby/info/"/>
     <antcall target="infowriter">
@@ -1637,16 +1625,15 @@
     <delete file="${derby.jar.dir}/derbyclient.jar"/>
 
     <jar destfile="${derby.jar.dir}/derbyclient.jar"
+         basedir="${out.dir}"
          compress="true"
          filesonly="true"
          update="true"
+         includes="org/apache/derby/client/**,
+                   org/apache/derby/info/client/info.properties,
+                   org/apache/derby/loc/clientmessages*.properties"
+         excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties"
     	 manifest="${derby.jar.dir}/lists/smfclient.mf">
-      <fileset dir="${out.dir}"
-               includesfile="${derby.jar.dir}/lists/dnc.list"/>
-      <fileset dir="${out.dir}"
-               includes="org/apache/derby/info/client/info.properties,
-                         org/apache/derby/loc/clientmessages*.properties"
-               excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
@@ -1690,7 +1677,8 @@
     <delete file="${derby.jar.dir}/derbyshared.jar"/>
     <jar destfile="${derby.jar.dir}/derbyshared.jar"
          basedir="${out.dir}"
-         includes="org/apache/derby/shared/common/**,org/apache/derby/info/shared/info.properties"
+         includes="org/apache/derby/shared/common/**,
+                   org/apache/derby/info/shared/info.properties"
          compress="true"
          filesonly="true"
     	 manifest="${derby.jar.dir}/lists/smfshared.mf"/>

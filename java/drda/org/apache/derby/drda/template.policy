@@ -180,3 +180,9 @@ grant codeBase "${derby.install.url}derbynet.jar"
   permission java.io.FilePermission "<<ALL FILES>>", "read";
 };
 
+grant codeBase "${derby.install.url}derbytools.jar"
+{
+  // Needed by DataSources
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
+};
+

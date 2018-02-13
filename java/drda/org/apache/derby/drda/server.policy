@@ -195,6 +195,8 @@ grant codeBase "${derby.install.url}derbytools.jar"
   permission java.io.FilePermission "<<ALL FILES>>", "read";
   permission java.io.FilePermission "java.runtime.version", "read";
   permission java.io.FilePermission "java.fullversion", "read";
+
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 
 grant codeBase "${derby.install.url}derbyclient.jar"

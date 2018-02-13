@@ -51,6 +51,8 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
     public static final String JAR_CLIENT = "derbyclient.jar";
     public static final String JAR_ENGINE = "derby.jar";
     public static final String JAR_NET = "derbynet.jar";
+    public static final String JAR_SHARED = "derbyshared.jar";
+    public static final String JAR_TOOLS = "derbytools.jar";
     public static final String JAR_TESTING = "derbyTesting.jar";
     private static final String[] REQUIRED_JARS = {
         JAR_ENGINE, JAR_NET, JAR_CLIENT
@@ -66,6 +68,13 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
     private final String derbyEngineJarPath;
     /** Path to derbynet.jar. */
     private final String derbyNetJarPath;
+
+    /** Shared jar (10.15 onward) */
+    private final String derbySharedJarPath;
+
+    /** Tools jar (needed for DataSources from 10.15 onward */
+    private final String derbyToolsJarPath;
+    
     /**
      * Production classpath, i.e. all JAR files found except for
      * derbyTesting.jar.
@@ -93,6 +102,8 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
         this.derbyClientJarPath = getPath(root, JAR_CLIENT);
         this.derbyEngineJarPath = getPath(root, JAR_ENGINE);
         this.derbyNetJarPath = getPath(root, JAR_NET);
+        this.derbySharedJarPath = getPath(root, JAR_SHARED);
+        this.derbyToolsJarPath = getPath(root, JAR_TOOLS);
     }
 
     /** Returns the absolute path to the JAR if it exists, otherwise null. */
@@ -123,12 +134,32 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
 
     /** Returns the path to {@code derbyclient.jar}. */
     public String getDerbyClientJarPath() {
-        return derbyClientJarPath;
-    }
+        String retval = derbyClientJarPath;
+        if (version.atLeast(DerbyVersion.FIRST_JIGSAW_VERSION))
+        {
+            retval =
+              retval +
+              File.pathSeparator + getDerbySharedJarPath() +
+              File.pathSeparator + getDerbyToolsJarPath()
+              ;
+        }
+
+        return retval;
+   }
 
     /** Returns the path to {@code derby.jar}. */
     public String getDerbyEngineJarPath() {
-        return derbyEngineJarPath;
+        String retval = derbyEngineJarPath;
+        if (version.atLeast(DerbyVersion.FIRST_JIGSAW_VERSION))
+        {
+            retval =
+              retval +
+              File.pathSeparator + getDerbySharedJarPath() +
+              File.pathSeparator + getDerbyToolsJarPath()
+              ;
+        }
+
+        return retval;
     }
 
     /** Returns the path to {@code derbynet.jar}. */
@@ -136,10 +167,20 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
         return derbyEngineJarPath;
     }
 
+    /** Returns the path to {@code derbyshared.jar}. */
+    public String getDerbySharedJarPath() {
+        return derbySharedJarPath;
+    }
+
+    /** Returns the path to {@code derbytools.jar}. */
+    public String getDerbyToolsJarPath() {
+        return derbyToolsJarPath;
+    }
+
     /** Returns a classpath with the network server production JARs. */
     public String getServerClasspath() {
         return
-            this.derbyNetJarPath + File.pathSeparator + this.derbyEngineJarPath;
+            this.derbyNetJarPath + File.pathSeparator + getDerbyEngineJarPath();
     }
 
     /** Returns a classpath with all production JARs. */

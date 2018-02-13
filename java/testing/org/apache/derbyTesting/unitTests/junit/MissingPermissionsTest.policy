@@ -161,3 +161,7 @@ grant {
   permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
   permission java.lang.RuntimePermission "${jacoco.active}shutdownHooks";
 };
+
+grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
+};

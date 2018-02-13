@@ -94,7 +94,7 @@ public class Derby {
             return true;
         }
 
-        return hasCorrectJar("/derbyclient.jar",
+        return hasCorrectJar("/derbytools.jar",
                 JDBC.vmSupportsJNDI() ?
                 "org.apache.derby.jdbc.ClientDataSource" :
                 "org.apache.derby.jdbc.BasicClientDataSource40");

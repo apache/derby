@@ -141,14 +141,3 @@ org.apache.derby.client.net.StatementReplyInterface.class
 org.apache.derby.client.net.StatementRequestInterface.class
 org.apache.derby.client.net.Typdef.class
 org.apache.derby.client.net.Utf8CcsidManager.class
-org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40.class
-org.apache.derby.jdbc.BasicClientDataSource40.class
-org.apache.derby.jdbc.BasicClientXADataSource40.class
-org.apache.derby.jdbc.ClientConnectionPoolDataSource.class
-org.apache.derby.jdbc.ClientConnectionPoolDataSource40.class
-org.apache.derby.jdbc.ClientDataSource.class
-org.apache.derby.jdbc.ClientDataSource40.class
-org.apache.derby.jdbc.ClientDriver.class
-org.apache.derby.jdbc.ClientDriver40.class
-org.apache.derby.jdbc.ClientXADataSource.class
-org.apache.derby.jdbc.ClientXADataSource40.class

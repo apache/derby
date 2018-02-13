@@ -134,6 +134,7 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar"
   permission java.io.FilePermission "<<ALL FILES>>", "read";
   permission java.io.FilePermission "java.runtime.version", "read";
   permission java.io.FilePermission "java.fullversion", "read";
+  permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
