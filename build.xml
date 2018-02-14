@@ -1316,10 +1316,6 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
-      <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
-    </concat>
-
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
     <java classname="org.apache.derbyBuild.propertyconfig" fork="yes">
       <arg value="${out.dir}/org/apache/derby/modules.properties"/>
@@ -1448,7 +1444,7 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <echo level="info" message=" creating new tools.properties file "/>
+    <echo level="info" message=" creating new tools info.properties file "/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="Apache Derby Tools"/>
@@ -1501,7 +1497,7 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <echo level="info" message=" creating new tools.properties file "/>
+    <echo level="info" message=" creating new optionaltools info.properties file "/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="Apache Derby Optional Tools"/>
@@ -1548,7 +1544,7 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <echo level="info" message=" creating new net.properties file "/>
+    <echo level="info" message=" creating new net info.properties file "/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="Apache Derby Network Server"/>
@@ -1639,13 +1635,6 @@
     </jar>
   </target>
 
-
-  <!-- Add extra classes to jar file if building for Java 8 -->
-  <target name="derbyclientjar.1.8">
-    <concat destfile="${derby.jar.dir}/lists/dnc.properties" append="true">
-      <fileset file="${basedir}/tools/jar/dnc.1.8.properties" />
-    </concat>
-  </target>
 
 <!-- - - - - - - - - - - - - - derbyshared.jar target - - - - - - - - - - - -->
 
