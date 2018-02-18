@@ -50,28 +50,97 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="engine"
+  <target name="engine" depends="parser"
           description="Build Derby engine">
-    <ant dir="${derby.engine.dir}/authentication"/>
-    <ant dir="${derby.engine.dir}/security"/>
-    <ant dir="${derby.engine.dir}/io"/>
-    <ant dir="${derby.engine.dir}/iapi"/>
-    <ant dir="${derby.engine.dir}/mbeans"/>
-    <ant dir="${derby.engine.dir}/database"/>
 
-    <ant dir="${derby.engine.dir}/vti"/>
-    <ant dir="${derby.engine.dir}/agg"/>
-    <ant dir="${derby.engine.dir}/impl"/>
-    <ant dir="${derby.engine.dir}/osgi"/>
-    <ant dir="${derby.engine.dir}/catalog"/>   
-    <ant dir="${derby.engine.dir}/diag"/>
-      	<copy todir="${out.dir}/${derby.dir}">
-          <fileset dir="${derby.engine.dir}">
-            <include name="modules.properties"/>
-          </fileset>
-        </copy>
+  	<javac
+      source="${min.version}"
+      target="${min.version}"
+      nowarn="on"
+      debug="${debug}" debuglevel="${debuglevel}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
+      destdir="${out.dir}">
+      <compilerarg value="-Xlint:unchecked"/>
+      <classpath>
+		    <pathelement location="${osgi}"/>
+      </classpath>
+    </javac>
+
+    <ant dir="${derby.build.src.dir}"/>
+    <ant dir="${derby.locales.dir}"/>
+
+    <copy todir="${out.dir}/${derby.dir}">
+       <fileset dir="${derby.engine.dir}">
+         <include name="modules.properties"/>
+       </fileset>
+    </copy>
+
+    <copy
+      file="${derby.engine.src.dir}/org/apache/derby/impl/jdbc/metadata.properties"
+      tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
+
+    <copy
+      file="${derby.engine.src.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"
+      tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>
+
   </target>
 	
+  <target name="parser" >
+    <ant antfile="${src.dir}/build.xml" target="genParser">
+      <property name="msg" value="Generating SQL parser..."/>
+      <property name="srcroot" value="engine"/>
+      <property name="directory" value="${derby.dir}/impl/sql/compile"/>
+      <property name="rmfiles" value="implparser_rm.files"/>
+      <property name="jjfile" value="sqlgrammar.jj"/>
+      <property name="chkfile" value="SQLParser.java"/>
+      <property name="constantsfile" value="SQLParserConstants"/>
+    </ant>
+
+    <!--
+      The following files were generated:
+
+      CharStream.java
+      ParseException.java
+      SQLParser.java
+      SQLParserConstants.java
+      SQLParserTokenManager.java
+      Token.java
+      TokenMgrError.java
+
+      3 of those files are checked into the codeline:
+
+      CharStream.java
+      ParseException.java
+      Token.java
+
+      We don't want generated code to clash with the checked-in versions. So
+      we delete the conflicting classes here.
+    -->
+    <delete>
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+        <include name="CharStream.java"/>
+        <include name="ParseException.java"/>
+        <include name="Token.java"/>
+      </fileset>
+    </delete>
+
+    <!-- Reduce the visibility of these files from public to package. -->
+    <replaceregexp match="^public (class|interface)" replace="\1" flags="m">
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+        <include name="SQLParser.java"/>
+        <include name="SQLParserConstants.java"/>
+        <include name="SQLParserTokenManager.java"/>
+        <include name="TokenMgrError.java"/>
+      </fileset>
+    </replaceregexp>
+
+  </target>
+
 	
 <!--             ============= End Targets ==============                -->
 

@@ -33,6 +33,7 @@
 
   <!-- Significant dirs -->
   <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/drdadirs.properties"/>
 
   <!-- Compiler settings -->
   <property file="${properties.dir}/defaultcompiler.properties"/>
@@ -51,9 +52,36 @@
 <!--             ============ Begin Targets ==============                -->
  
   <target name="drda" >
-    <ant dir="${derby.drda.dir}/impl/drda"/>
-    <ant dir="${derby.drda.dir}/drda"/>
-    <ant dir="${derby.drda.dir}/loc/drda"/>
+  	<javac
+      source="${min.version}"
+      target="${min.version}"
+      nowarn="on"
+      debug="${debug}" debuglevel="${debuglevel}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.drda.src.dir}"
+      destdir="${out.dir}">
+      <compilerarg value="-Xlint:unchecked"/>
+      <classpath>
+        <pathelement location="${servlet24}"/>
+      </classpath>
+    </javac>
+
+    <copy
+       todir="${out.dir}/${derby.dir}/drda/"
+       file="${derby.drda.dir}/drda/server.policy"
+    />
+
+    <copy todir="${drdaloc.dir}" flatten="true">
+      <fileset dir="${derby.drda.locales.dir}">
+        <include name="messages*.properties"/>
+        <include name="servlet*.properties"/>
+      </fileset>
+    </copy>
+
     <antcall target="odbcMeta"/>
   </target>
 

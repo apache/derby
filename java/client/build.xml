@@ -60,33 +60,13 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.client.src.dir}"
-      includes="**/*.java"
-      excludes="**/*42.java"
       destdir="${out.dir}">
       <compilerarg value="-Xlint"/>
    </javac>
 </target> 
 
-<target name="compile_jdbc42">
-    <javac
-      source="${min.version}"
-      target="${min.version}"
-      nowarn="on"
-      debug="${debug}" debuglevel="${debuglevel}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.client.src.dir}"
-      includes="**/*42.java" 
-      destdir="${out.dir}">
-      <compilerarg value="-Xlint"/>
-   </javac>
-</target> 
-  
 <!-- default target  -->
-  <target name="client" depends="compile, compile_jdbc42"/>
+  <target name="client" depends="compile"/>
 
 </project>
 

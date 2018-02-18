@@ -48,12 +48,12 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,engine,storeless,client,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,shared,engine,storeless,client,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts"
       description="Compile the product source (does not build the tests)."
   />
   <target
       name="all"
-      depends="buildsource,demo,testing,pptesting,runmessagecheck"
+      depends="buildsource,demo,testing,runmessagecheck"
       description="Compile all of the source, including tests as well as production code."
   />
 
@@ -558,7 +558,6 @@
   
   <target name="drda" depends="engine">
     <ant dir="${derby.drda.src.dir}"/>
-    <ant dir="${derby.tools.src.dir}" target="tools_run"/>
   </target>
 
   <target name="client" depends="engine,shared">
@@ -590,11 +589,6 @@
 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang" target="build-test-jars" />
 
-  </target>
-
-  <!-- Build the package private tests -->
-  <target name="pptesting" depends="testing">
-    <ant dir="${derby.testing.src.dir}/org/apache/derby"/>
   </target>
 
   <!-- Run the MessageBundleTest -->
@@ -1395,7 +1389,7 @@
                    org/apache/derby/loc/m??_en.properties,
                    org/apache/derby/impl/sql/catalog/metadata_net.properties,
                    org/apache/derby/info/engine/info.properties"
-         excludes="**/D_*,**/odbcmeta.done"
+         excludes="**/D_*,**/odbcmeta.done,**/*Test.class,**/_Suite.class"
          compress="true"
          filesonly="true"
          manifest="${derby.jar.dir}/lists/smf.mf">
@@ -1628,7 +1622,9 @@
          includes="org/apache/derby/client/**,
                    org/apache/derby/info/client/info.properties,
                    org/apache/derby/loc/clientmessages*.properties"
-         excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties"
+         excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties,
+                   **/*Test.class,
+                   **/_Suite.class"
     	 manifest="${derby.jar.dir}/lists/smfclient.mf">
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>

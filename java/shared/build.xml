@@ -62,44 +62,11 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${generated.src.dir}"
+      srcdir="${generated.src.dir}:${derby.shared.src.dir}"
       destdir="${out.dir}">
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
 
-  	<javac
-      source="${min.version}"
-      target="${min.version}"
-      nowarn="on"
-      debug="${debug}" debuglevel="${debuglevel}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.shared.src.dir}"
-      includes="org/apache/derby/shared/**"
-      destdir="${out.dir}">
-      <include name="org/apache/derby/shared/**"/>
-  	  <exclude name="org/apache/derby/shared/common/sanity/ThreadDump.java"/>
-      <compilerarg value="-Xlint:unchecked"/>
-    </javac>
-  	
-  	<javac
-  	      source="${min.version}"
-  	      target="${min.version}"
-  	      nowarn="on"
-  	      debug="${debug}" debuglevel="${debuglevel}"
-  	      depend="${depend}"
-  	      deprecation="${deprecation}"
-  	      optimize="${optimize}"
-  	      proceed="${proceed}"
-  	      verbose="${verbose}"
-  	      srcdir="${derby.shared.src.dir}"
-  	      destdir="${out.dir}">
-  	    <include name="org/apache/derby/shared/common/sanity/ThreadDump.java"/>
-      <compilerarg value="-Xlint:unchecked"/>
-  	    </javac>
 </target>
   
 

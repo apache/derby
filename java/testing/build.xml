@@ -56,6 +56,195 @@
   <target name="testing" 
           description="Build Derby testing files">
 
+    <javac
+      source="${min.version}"
+      target="${min.version}"
+      nowarn="on"
+      debug="${debug}" debuglevel="${debuglevel}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <compilerarg value="-Xlint"/>
+      <classpath>
+        <pathelement path="${junit}"/>
+        <pathelement path="${out.dir}"/>
+      	<pathelement path="${junit}"/>
+        <pathelement path="${lucene_core}"/>
+        <pathelement path="${lucene_a_co}"/>
+        <pathelement path="${lucene_qp}"/>
+        <pathelement path="${json_simple}"/>
+      </classpath>
+   </javac>
+
+   <copy todir="${out.dir}/${derby.testing.functest.dir}/harness">
+     <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness" 
+       includes="*.properties"/> 
+   </copy>
+
+   <copy todir="${out.dir}/${derby.testing.functest.dir}/master">
+     <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/master"/>
+   </copy>
+
+   <copy todir="${out.dir}/${derby.testing.functest.dir}/multi/stress">
+     <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress" 
+       includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress/copyfiles.ant"/> 
+   </copy>
+
+   <copy todir="${out.dir}/${derby.testing.suites.dir}">
+     <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/suites" includes="*.runall,*.properties,*.exclude,*.policy"/>
+   </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/v1">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v1"
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v1/copyfiles.ant"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/v2">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v2"
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v2/copyfiles.ant"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/ImportExport">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ImportExport"
+        includes="*.del,*.txt,*.dat"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/ResultSetStream">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ResultSetStream"
+        includes="*.asc,*.del,*.txt,*.utf,*.gif"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/ConnectionMethods">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ConnectionMethods"
+        includes="*.txt"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/serializedDataSources">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/serializedDataSources"
+        includes="*.ser"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/Derby6587">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/Derby6587"
+        includes="*.csv"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/compatibility">
+        <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/compatibility"
+          includes="*.policy"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/demo">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/demo"
+               includes="*.sql,*.properties"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/derbynet">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/derbynet" 
+        includes="*.inc,*.policy,*.properties,*.sql,*.tests,*.key"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/engine">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/engine"
+        includes="*.sql,*.properties,*.subsql,*.policy,*.jar,*.tstlog,xmlTestFiles/*"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/i18n">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/i18n" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/i18n/copyfiles.ant"/>  
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/i18n/data">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/i18n/data" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/i18n/data/copyfiles.ant"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/jdbc4">
+        <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4"
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4/copyfiles.ant"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/jdbcapi">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbcapi" 
+        includes="*.gif,*.properties,*.sql,*.utf,*.policy"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/lang">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang" 
+        includes="*.sql,*.properties,*.subsql,*.policy,*.jar,*.dat,*.tstlog,*.trace,xmlTestFiles/*"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/largedata">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/largedata" 
+        includes="*.sql,*.properties,*.subsql,*.policy,*.jar,*.dat,*.tstlog,xmlTestFiles/*"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/management">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/management"
+               includes="jmx.*,*.policy"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/memorydb">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/memorydb"
+               includes="*.sql,*.properties"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/nist">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/nist" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/nist/copyfiles.ant"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/perf">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/perf" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/perf/copyfiles.ant"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/replicationTests">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/replicationTests" includes="*.policy"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/store">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/store" 
+        includes="*.sql,*.properties,*.subsql,*.policy,*.jar,*.view,*banner,*.data"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/storetests">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/storetests" 
+        includes="*.sql,*.properties,*.policy"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/tools">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/tools" 
+        includes="*.jar,*.sql,*.properties,*.policy"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/unit">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/unit" 
+        includes="*.properties,*.policy"/>  
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/util">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util" 
+        includes="*.sql,*.properties,*.policy"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.system.dir}/mailjdbc/schema">
+	   <fileset dir="${derby.testing.src.dir}/${derby.testing.system.dir}/mailjdbc/schema"/>
+	</copy>
+	<copy todir="${out.dir}/${derby.testing.system.dir}/mailjdbc/">
+	   <fileset dir="${derby.testing.src.dir}/${derby.testing.system.dir}/mailjdbc" 
+	            includes="*.properties"/>  
+    </copy>
+
+	<copy todir="${out.dir}/${derby.testing.system.dir}/oe/schema">
+	   <fileset dir="${derby.testing.src.dir}/${derby.testing.system.dir}/oe/schema"/>
+    </copy>
+
+    <copy todir="${out.dir}/${derby.testing.unittest.dir}">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.unittest.dir}" 
+        includes="**/*.policy"/>  
+    </copy>
+
+    <antcall target="build-test-jars"/>
+
+<!-- 
     <ant dir="${derby.testing.src.dir}/${derby.testing.junit.dir}"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData"/> 
@@ -91,6 +280,36 @@
     <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/optimizer"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/sttest"/>
   	<ant dir="${derby.testing.src.dir}/${derby.testing.perf.dir}"/> 
+-->
+  </target>
+
+  <target name="build-test-jars" description="Build jar files used in tests.">
+
+    <property name="lang-test-dir" value="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang"/>
+
+    <delete dir="${lang-test-dir}/nast"/>
+    <mkdir dir="${lang-test-dir}/nast"/>
+
+    <echo level="info" message="Running script to create the nast database"/>
+    <java classname="org.apache.derby.tools.ij"
+          output="${lang-test-dir}/nast.out"
+          failonerror="true"
+          dir="${lang-test-dir}" fork="true">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+      </classpath>
+      <arg value="${lang-test-dir}/nast_init.sql"/>
+    </java>
+
+    <echo level="info" message="Putting the nast database into a jar file"/>
+    <jar destfile="${lang-test-dir}/nast1.jar"
+         basedir="${lang-test-dir}/nast" />
+
+    <!--  Comment out these lines if you have trouble generating the jar file  -->
+    <delete dir="${lang-test-dir}/nast"/>
+    <delete file="${lang-test-dir}/nast.out"/>
+    <delete file="${lang-test-dir}/derby.log"/>
+
   </target>
 
 <!--             ============= End Targets ==============                -->

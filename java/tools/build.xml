@@ -44,6 +44,8 @@
   <!-- Compile-time classpath properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
+  <property name="ijConstants.src" value="${generated.src.dir}/${derby.dir}/impl/tools/ij/ijConstants.java"/>
+  <property name="ijTokenManager.src" value="${generated.src.dir}/${derby.dir}/impl/tools/ij/ijTokenManager.java"/>
 
   <!-- Release and Version info -->
   <property file="${properties.dir}/release.properties"/>
@@ -55,17 +57,86 @@
 
   </target>
 
-  <target name="tools_base">
-    <ant dir="${derby.tools.dir}/jdbc"/>
-    <ant dir="${derby.tools.dir}/iapi/tools"/>
-    <ant dir="${derby.tools.dir}/impl/tools"/>
-    <ant dir="${derby.tools.dir}/tools"/>
-    <ant dir="${derby.tools.dir}/loc"/>
+  <target name="tools_base" depends="parser">
+
+    <javac
+      source="${min.version}"
+      target="${min.version}"
+      nowarn="on"
+      debug="${debug}" debuglevel="${debuglevel}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.tools.src.dir}:${generated.src.dir}"
+      destdir="${out.dir}">
+      <compilerarg value="-Xlint"/>
+   </javac>
+
+    <copy todir="${loc.dir}" flatten="true">
+      <fileset dir="${derby.tools.locales.dir}">
+        <include name="sysinfoMessages*.properties"/>
+        <include name="toolsmessages*.properties"/>
+      </fileset>
+    </copy>
+
   </target>
 
-  <target name="tools_run">
-    <ant dir="${derby.tools.dir}/iapi/tools" target="compile_tools_iapi_run"/>
+  <target name="parser">
+    <ant antfile="${src.dir}/build.xml" target="genParser">
+      <property name="msg" value="Generating ij parser..."/>
+      <property name="srcroot" value="tools"/>
+      <property name="directory" value="${derby.dir}/impl/tools/ij"/>
+      <property name="rmfiles" value="ijimplparser_rm.files"/>
+      <property name="jjfile" value="ij.jj"/>
+      <property name="chkfile" value="ij.java"/>
+      <property name="constantsfile" value="ijConstants"/>
+    </ant>
+    <ant antfile="${src.dir}/build.xml" target="genParser">
+      <property name="msg" value="Generating mtGrammar parser..."/>
+      <property name="srcroot" value="tools"/>
+      <property name="directory" value="${derby.dir}/impl/tools/ij"/>
+      <property name="rmfiles" value="mtparser_rm.files"/>
+      <property name="jjfile" value="mtGrammar.jj"/>
+      <property name="chkfile" value="mtGrammar.java"/>
+      <property name="constantsfile" value="mtGrammarConstants"/>
+    </ant>
+
+    <!--
+      The following files were just generated:
+
+      CharStream.java
+      ij.java
+      ijConstants.java
+      ijTokenManager.java
+      mtGrammar.java
+      mtGrammarConstants.java
+      mtGrammarTokenManager.java
+      ParseException.java
+      SimpleCharStream.java
+      Token.java
+      TokenMgrError.java
+
+      1 of those files is checked into the codeline:
+
+      ParseException.java
+
+      We don't want generated code to clash with the checked-in versions. So
+      we delete the conflicting class here.
+    -->
+    <delete>
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/tools/ij">
+        <include name="ParseException.java"/>
+      </fileset>
+    </delete>
+
+    <!-- reduce the visibility of these files from public to package protection -->
+    <replaceregexp file="${ijConstants.src}" match="public interface" replace="interface"/>
+    <replaceregexp file="${ijTokenManager.src}" match="public class" replace="class"/>
+
   </target>
+
 
 <!--             ============= End Targets ==============                -->
 
