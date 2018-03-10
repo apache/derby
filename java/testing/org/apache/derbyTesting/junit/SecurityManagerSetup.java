@@ -54,6 +54,24 @@ public final class SecurityManagerSetup extends TestSetup {
     /** Constant used to indicate that no security policy is to be installed. */
     static final String NO_POLICY = "<NONE>";
 
+    // codebase variables used in derby_tests.policy
+    public static final String DERBY_ENGINE = "derbyTesting.engine";
+    public static final String DERBY_CLIENT = "derbyTesting.client";
+    public static final String DERBY_SHARED = "derbyTesting.shared";
+    public static final String DERBY_NETSERVER = "derbyTesting.netserver";
+    public static final String DERBY_TOOLS = "derbyTesting.tools";
+    public static final String DERBY_OPTIONAL_TOOLS = "derbyTesting.optionaltools";
+    public static final String DERBY_TESTING = "derbyTesting.testing";
+
+    public static final String TESTING_JUNIT = "derbyTesting.junit";
+    public static final String TESTING_ANTJUNIT = "derbyTesting.antjunit";
+    public static final String TESTING_ANT = "derbyTesting.ant";
+
+    public static final String LUCENE_CORE = "derbyTesting.lucene.core";
+    public static final String JAXP = "derbyTesting.jaxpjar";
+    public static final String PACKAGE_PRIVATE_CLASSES = "derbyTesting.ppcodeclasses";
+  
+  
     /**
      * Does the JVM support Subjects for
      * authorization through Java security manager.
@@ -244,13 +262,14 @@ public final class SecurityManagerSetup extends TestSetup {
 
 	private static void installSecurityManager(String policyFile, final SecurityManager sm)
 			 {
-	    
 		if (externalSecurityManagerInstalled)
 			return;
 		
 		Properties set = new Properties(classPathSet);
 		setSecurityPolicy(set, policyFile);
-
+		for (Enumeration e = set.propertyNames(); e.hasMoreElements();) {
+			String key = (String) e.nextElement();
+		}
 		SecurityManager currentsm = System.getSecurityManager();
 		if (currentsm != null) {
 			// SecurityManager installed, see if it has the same settings.
@@ -356,25 +375,18 @@ public final class SecurityManagerSetup extends TestSetup {
 
 		//We need the junit classes to instantiate this class, so the
 		//following should not cause runtime errors.
-        URL junit = getURL(junit.framework.Test.class);
-        if (junit != null)
-            classPathSet.setProperty("derbyTesting.junit", junit.toExternalForm());
+        setCodebase(TESTING_JUNIT, getURL(junit.framework.Test.class));
 	
         // Load indirectly so we don't need ant-junit.jar at compile time.
-        URL antjunit = getURL("org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner");
-        if (antjunit != null)
-            classPathSet.setProperty("derbyTesting.antjunit", antjunit.toExternalForm());
+        setCodebase(TESTING_ANTJUNIT, "org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner");
 
-        URL ant = getURL("org.apache.tools.ant.Task");
-        if (ant != null) {
-            classPathSet.setProperty("derbyTesting.ant", ant.toExternalForm());
-        }
+        setCodebase(TESTING_ANT, "org.apache.tools.ant.Task");
 
         // variables for lucene jar files
         URL luceneCore = getURL( "org.apache.lucene.store.FSDirectory" );
         if ( luceneCore != null )
         {
-            classPathSet.setProperty( "derbyTesting.lucene.core", luceneCore.toExternalForm() );
+            setCodebase(LUCENE_CORE, luceneCore);
             classPathSet.setProperty( "derbyTesting.lucene.core.jar.file", luceneCore.getFile() );
         }
 
@@ -391,9 +403,7 @@ public final class SecurityManagerSetup extends TestSetup {
          * jar file.  We can then grant the JAXP impl the permissions
          * needed for reading the DTD files.
          */
-        String jaxp = XML.getJAXPParserLocation();
-        if (jaxp != null)
-            classPathSet.setProperty("derbyTesting.jaxpjar", jaxp);
+        setCodebase(JAXP, XML.getJAXPParserLocation());
 
 		URL testing = getURL(SecurityManagerSetup.class);
         URL ppTesting = null;
@@ -404,44 +414,70 @@ public final class SecurityManagerSetup extends TestSetup {
         }
 		boolean isClasspath = testing.toExternalForm().endsWith("/");
 		if (isClasspath) {
-			classPathSet.setProperty("derbyTesting.codeclasses",
-					testing.toExternalForm());
             // ppTesting can be null, for instance if 'classes.pptesting' is
             // not on the classpath.
-            if (ppTesting != null) {
-                classPathSet.setProperty("derbyTesting.ppcodeclasses",
-                    ppTesting.toExternalForm());
-            }
+            setCodebase(PACKAGE_PRIVATE_CLASSES, ppTesting);
             isJars = false;
-			return false;
 		}
-		classPathSet.setProperty("derbyTesting.testjar", stripJar(testing));
+        else
+        {
+            isJars = true;
+        }
+        
+        setCodebase(DERBY_TESTING, testing);
         if (testing.getProtocol().equals("file")) {
            File f = new File(testing.getPath());
-           classPathSet.setProperty("derbyTesting.testjarpath",
-                                               f.getAbsolutePath());
+           classPathSet.setProperty("derbyTesting.testjarpath", f.getAbsolutePath());
         }
-        isJars = true;
-		
-		URL derby = getURL("org.apache.derby.jdbc.BasicEmbeddedDataSource40");
-        if (derby != null)
-		    classPathSet.setProperty("derbyTesting.codejar", stripJar(derby));
 
-		// if we attempt to check on availability of the ClientDataSource with 
-		// JSR169, attempts will be made to load classes not supported in
-		// that environment, such as javax.naming.Referenceable. See DERBY-2269.
-		if (!JDBC.vmSupportsJSR169()) {
-           URL client = getURL(
-                    JDBC.vmSupportsJNDI() ?
-                    "org.apache.derby.jdbc.ClientDataSource" :
-                    "org.apache.derby.jdbc.BasicClientDataSource40");
+        setCodebase(DERBY_ENGINE, "org.apache.derby.database.Database");
+        setCodebase(DERBY_CLIENT, "org.apache.derby.client.ClientAutoloadedDriver");
+        setCodebase(DERBY_SHARED, "org.apache.derby.shared.common.error.MessageUtils");
+        setCodebase(DERBY_NETSERVER, "org.apache.derby.drda.NetworkServerControl");
+        setCodebase(DERBY_TOOLS, "org.apache.derby.tools.ij");
+        setCodebase(DERBY_OPTIONAL_TOOLS, "org.apache.derby.optional.utils.ToolUtilities");
 
-		    if(client != null)
-		        classPathSet.setProperty("derbyTesting.clientjar", stripJar(client));
-        }
 		return false;
 	}
-    
+
+    /**
+     * Set the System property which identifies the
+     * location of a codebase referenced by derby_tests.policy.
+     *
+     * @param codebaseProperty Name of codebase variable.
+     * @param className Name of class used to locate the codebase URL.
+     */
+    private static void setCodebase
+      (
+       String codebaseProperty,
+       String className
+       )
+    {
+        if (className != null)
+        {
+            setCodebase(codebaseProperty, getURL(className));
+        }
+    }
+
+    /**
+     * Set the System property which identifies the
+     * location of a codebase referenced by derby_tests.policy.
+     *
+     * @param codebaseProperty Name of codebase variable.
+     * @param codebaseURL URL of codebase
+     */
+    private static void setCodebase
+      (
+       String codebaseProperty,
+       URL codebaseURL
+       )
+    {
+        if (codebaseURL != null)
+        {
+            classPathSet.setProperty(codebaseProperty, codebaseURL.toExternalForm());
+        }
+    }
+  
     /**
      * Return the policy file system properties for use
      * by the old test harness. This ensures a consistent
@@ -454,18 +490,6 @@ public final class SecurityManagerSetup extends TestSetup {
         return classPathSet;
     }
 	
-	/**
-	 * Strip off the last token which will be the jar name.
-	 * The returned string includes the trailing slash.
-	 * @param url
-	 * @return the jar name from the URL as a String
-	 */
-	private static String stripJar(URL url)
-	{
-		String ef = url.toExternalForm();
-		return ef.substring(0, ef.lastIndexOf('/') + 1);
-	}
-    
     /**
      * Get the URL of the code base from a class name.
      * If the class cannot be loaded, null is returned.

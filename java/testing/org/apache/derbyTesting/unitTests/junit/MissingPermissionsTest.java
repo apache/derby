@@ -230,10 +230,12 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
         final List<String> args = new ArrayList<String>();
         args.add("-Djava.security.manager");
         args.add("-Djava.security.policy=extin/MissingPermissionsTest2.policy");
-        args.add("-DderbyTesting.codejar="
-                    + getSystemProperty("derbyTesting.codejar"));
-        args.add("-DderbyTesting.testjar="
-                    + getSystemProperty("derbyTesting.testjar"));
+        args.add("-DderbyTesting.engine="
+                    + getSystemProperty("derbyTesting.engine"));
+        args.add("-DderbyTesting.tools="
+                    + getSystemProperty("derbyTesting.tools"));
+        args.add("-DderbyTesting.testing="
+                    + getSystemProperty("derbyTesting.testing"));
         args.add("-DderbyTesting.junit="
                     + getSystemProperty("derbyTesting.junit"));
         String antjunit = getSystemProperty("derbyTesting.antjunit");
@@ -368,10 +370,12 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             args.add("-Djava.security.manager");
             args.add(
                 "-Djava.security.policy=extin/MissingPermissionsTest.policy");
-            args.add("-DderbyTesting.codejar="
-                    + getSystemProperty("derbyTesting.codejar"));
-            args.add("-DderbyTesting.testjar="
-                    + getSystemProperty("derbyTesting.testjar"));
+            args.add("-DderbyTesting.engine="
+                    + getSystemProperty("derbyTesting.engine"));
+            args.add("-DderbyTesting.tools="
+                    + getSystemProperty("derbyTesting.tools"));
+            args.add("-DderbyTesting.testing="
+                    + getSystemProperty("derbyTesting.testing"));
             args.add("-DderbyTesting.junit="
                     + getSystemProperty("derbyTesting.junit"));
             String antjunit = getSystemProperty("derbyTesting.antjunit");

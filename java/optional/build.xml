@@ -65,8 +65,11 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.optional.src.dir}:${generated.src.dir}"
-      destdir="${out.dir}">
+      destdir="${out.optional.dir}">
       <classpath>
+        <pathelement path="${out.shared.dir}"/>
+        <pathelement path="${out.engine.dir}"/>
+        <pathelement path="${out.tools.dir}"/>
         <pathelement path="${lucene_core}"/>
         <pathelement path="${lucene_a_co}"/>
         <pathelement path="${lucene_qp}"/>

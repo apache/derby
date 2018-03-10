@@ -63,15 +63,18 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.drda.src.dir}"
-      destdir="${out.dir}">
+      destdir="${out.drda.dir}">
       <compilerarg value="-Xlint:unchecked"/>
       <classpath>
         <pathelement location="${servlet24}"/>
+        <pathelement location="${out.engine.dir}"/>
+        <pathelement location="${out.shared.dir}"/>
+        <pathelement location="${out.tools.dir}"/>
       </classpath>
     </javac>
 
     <copy
-       todir="${out.dir}/${derby.dir}/drda/"
+       todir="${out.drda.dir}/${derby.dir}/drda/"
        file="${derby.drda.dir}/drda/server.policy"
     />
 
@@ -103,7 +106,7 @@
     <delete file="${metadata.out.dir}/metadata.properties"/>
     <copy file="${derby.metadata.src.dir}/metadata.properties" tofile="${metadata.out.dir}/metadata.properties"/>
     <java classname="org.apache.derbyBuild.ODBCMetadataGenerator"
-          classpath="${out.dir}"
+          classpath="${out.build.dir}:${out.engine.dir}"
           dir="${metadata.out.dir}"
           fork="yes"
           failonerror="true">
@@ -120,7 +123,7 @@
     <uptodate property="odbcgen.done"
               targetfile="${odbc.donefile}" >
       <srcfiles dir="${metadata.out.dir}" includes="metadata.properties" />
-      <srcfiles dir="${out.dir}/org/apache/derbyBuild" includes="ODBCMetadataGenerator.class,odbcgen_fragments.properties" />
+      <srcfiles dir="${out.build.dir}/org/apache/derbyBuild" includes="ODBCMetadataGenerator.class,odbcgen_fragments.properties" />
     </uptodate>
   </target>
 
@@ -128,7 +131,7 @@
     <available classname="org.apache.derbyBuild.ODBCMetadataGenerator"
                property="odbcgen.available">
       <classpath>
-        <pathelement path="${out.dir}"/>
+        <pathelement path="${out.build.dir}"/>
       </classpath>
     </available>
   </target>

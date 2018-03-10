@@ -15,7 +15,7 @@
 //   limitations under the License.
 //
 
-grant codeBase "${derbyTesting.codejar}derby.jar"
+grant codeBase "${derbyTesting.engine}"
 {
   // These permissions are needed for everyday, embedded Derby usage.
   //
@@ -111,7 +111,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar"
 //
 // Permissions for the tests (derbyTesting.jar)
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   // Allow tests to install and uninstall the security manager and
   // to refresh the policy
   permission java.util.PropertyPermission "java.security.policy", "read,write";
@@ -162,6 +162,6 @@ grant {
   permission java.lang.RuntimePermission "${jacoco.active}shutdownHooks";
 };
 
-grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+grant codeBase "${derbyTesting.tools}" {
   permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };

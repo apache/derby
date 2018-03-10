@@ -42,7 +42,7 @@
 //
 // Permissions for the tests (derbyTesting.jar)
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   // Allow tests to install and uninstall the security manager and
   // to refresh the policy
   permission java.util.PropertyPermission "java.security.policy", "read,write";
@@ -57,26 +57,6 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   
 };
 
-
-//
-// Permissions for running the test on the class files
-//
-grant codeBase "${derbyTesting.codeclasses}" {
-  // Allow tests to install and uninstall the security manager and
-  // to refresh the policy
-  permission java.util.PropertyPermission "java.security.policy", "read,write";
-  permission java.lang.RuntimePermission "setSecurityManager";
-  permission java.security.SecurityPermission "getPolicy";
-
-  // derbyTesting.junit.TestConfiguration... modifies System properties
-  permission java.util.PropertyPermission "*", "read,write";
-
-//These are the ones that matters:
-//-----------------------------------------------------------------------------
-  permission java.lang.RuntimePermission "getStackTrace";
-  permission java.lang.RuntimePermission "modifyThreadGroup";
-//-----------------------------------------------------------------------------
-};
 
 grant codeBase "${derbyTesting.junit}" {
     // This permission is needed when running the tests using ant 1.7
@@ -95,8 +75,8 @@ grant codeBase "${derbyTesting.antjunit}" {
 };
 
 
-grant codeBase "${derbyTesting.codejar}derby.jar" {
-//These are the ones that matters:
+grant codeBase "${derbyTesting.engine}" {
+//These are the ones that matter:
 //-----------------------------------------------------------------------------
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";
@@ -107,8 +87,8 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.lang.RuntimePermission "getProtectionDomain";
 };
 
-grant codeBase "${derbyTesting.codejar}derbyshared.jar" {
-//These are the ones that matters:
+grant codeBase "${derbyTesting.shared}" {
+//These are the ones that matter:
 //-----------------------------------------------------------------------------
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";
@@ -120,8 +100,8 @@ grant codeBase "${derbyTesting.codejar}derbyshared.jar" {
 };
 
 
-grant codeBase "${derbyTesting.codejar}derbyclient.jar" {
-//These are the ones that matters:
+grant codeBase "${derbyTesting.client}" {
+//These are the ones that matter:
 //-----------------------------------------------------------------------------
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";

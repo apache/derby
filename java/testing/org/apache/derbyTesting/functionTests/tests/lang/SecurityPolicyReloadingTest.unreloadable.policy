@@ -44,7 +44,7 @@
 //
 // Permissions for the embedded engine (derby.jar)
 //
-grant codeBase "${derbyTesting.codejar}derby.jar" {
+grant codeBase "${derbyTesting.engine}" {
   permission java.util.PropertyPermission "derby.*", "read";
 permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
       "write"; 
@@ -93,7 +93,7 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
 //
 // Permissions for the network server (derbynet.jar)
 //
-grant codeBase "${derbyTesting.codejar}derbynet.jar" {
+grant codeBase "${derbyTesting.netserver}" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
@@ -111,7 +111,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
 //
 // Permissions for the network client (derbyclient.jar)
 //
-grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
+grant codeBase "${derbyTesting.client}" {
   permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
   permission java.net.SocketPermission "localhost", "connect,resolve";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
@@ -138,7 +138,7 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
 // Ideally this would be more secure, for now the
 // focus is on getting the engine & network server secure.
 //
-grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+grant codeBase "${derbyTesting.tools}" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
@@ -156,51 +156,12 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
 // We are liberal here, it's not a goal to make the test harness
 // or tests secure.
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
-
-  // When running with useprocess=false need to install and uninstall
-  // the security manager and allow setIO to change the system err and out
-  // streams. Currently the nist suite runs with useprocess=false.
-  permission java.lang.RuntimePermission "setSecurityManager";
-  permission java.security.SecurityPermission "getPolicy";
-  permission java.lang.RuntimePermission "setIO"; 
-};
-
-//
-// super-set of the jar permissions for running out of the classes directory
-//
-grant codeBase "${derbyTesting.codeclasses}" {
-  // Access all properties using System.getProperties
-  permission java.util.PropertyPermission "*", "read, write";
-  
-  permission java.util.PropertyPermission "derby.*", "read";
-  permission java.lang.RuntimePermission "createClassLoader";
-  permission java.security.SecurityPermission "getPolicy";
-   
-  permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
-  permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";
-  permission java.io.FilePermission "${derby.system.home}", "read";
-  permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
-
-  // combination of client and server side.
-  permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
-  permission java.net.SocketPermission "localhost", "accept,connect,resolve";
-  permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
-  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
-  
-  // Access all files under ${user.dir}to write the test directory structure
-  // Also covers extin, extout and extinout locations
-  permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
-    
-  // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
-  // JDK14 has the JCE  preloaded
-  permission java.security.SecurityPermission "insertProvider.SunJCE";
-  permission java.security.SecurityPermission "insertProvider.IBMJCE";
 
   // When running with useprocess=false need to install and uninstall
   // the security manager and allow setIO to change the system err and out

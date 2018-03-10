@@ -66,7 +66,7 @@ grant principal org.apache.derby.authentication.SystemPrincipal * {
 //
 // Permissions for the tests (derbyTesting.jar)
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   // Allow tests to install and uninstall the security manager and
   // to refresh the policy
   permission java.util.PropertyPermission "java.security.policy", "read,write";
@@ -86,7 +86,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 //
 // Permissions for the embedded engine (derby.jar)
 //
-grant codeBase "${derbyTesting.codejar}derby.jar" {
+grant codeBase "${derbyTesting.engine}" {
   // System Privileges framework needs to run "doAsPrivileged"
   //permission javax.security.auth.AuthPermission "doAsPrivileged";
   permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
@@ -104,39 +104,6 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   // getProtectionDomain is an optional permission needed for printing classpath 
   // information to derby.log
   permission java.lang.RuntimePermission "getProtectionDomain";
-};
-
-//
-// Permissions for running the test on the class files
-//
-grant codeBase "${derbyTesting.codeclasses}" {
-  // Allow tests to install and uninstall the security manager and
-  // to refresh the policy
-  permission java.util.PropertyPermission "java.security.policy", "read,write";
-  permission java.lang.RuntimePermission "setSecurityManager";
-  permission java.security.SecurityPermission "getPolicy";
-
-  // Allow setIO to change the system err and out streams
-  //permission java.lang.RuntimePermission "setIO"; 
-
-  // derbyTesting.junit.TestConfiguration... modifies System properties
-  permission java.util.PropertyPermission "*", "read,write";
-
-  // System Privileges test needs to run "doAsPrivileged"
-  permission javax.security.auth.AuthPermission "doAsPrivileged";
-
-  // System Privileges framework needs to run "doAsPrivileged"
-  //permission javax.security.auth.AuthPermission "doAsPrivileged";
-
-  // System Privileges framework needs to resolve relative directory names,
-  // which requires a property-read permission
-  permission java.util.PropertyPermission "user.dir", "read";
-
-  // System Privileges framework needs to canonicalize directory names,
-  // which requires file-read permission
-  // Because this unit test involves some relative and absolute sample paths,
-  // we liberally grant read access to all files.
-  permission java.io.FilePermission "<<ALL FILES>>", "read";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
@@ -163,6 +130,6 @@ grant codeBase "${derbyTesting.antjunit}" {
     permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
 
-grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+grant codeBase "${derbyTesting.tools}" {
   permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };

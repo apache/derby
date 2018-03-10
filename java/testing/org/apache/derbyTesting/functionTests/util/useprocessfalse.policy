@@ -18,7 +18,7 @@
 //
 // policy file for running with useprocess=false
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   // When running with useprocess=false need to install and uninstall
   // the security manager and allow setIO to change the system err and out
   // streams. Currently the nist suite runs with useprocess=false.
@@ -26,10 +26,3 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission java.lang.RuntimePermission "setIO"; 
 };
 
-grant codeBase "${derbyTesting.codeclasses}" {
-
-  // the security manager and allow setIO to change the system err and out
-  // streams. Currently the nist suite runs with useprocess=false.
-  permission java.lang.RuntimePermission "setSecurityManager";
-  permission java.lang.RuntimePermission "setIO"; 
-};

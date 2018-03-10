@@ -179,7 +179,7 @@ public class JarDriftTest {
         // sanity=[false|true] except for some header/timestamp info).
         String fs = File.separator;
         String sanityFileName = 
-                topOfTree + fs + "generated" + fs + "java" + fs + "org" + fs +
+                topOfTree + fs + "generated" + fs + "java" + fs + "shared" + fs + "org" + fs +
                 "apache" + fs + "derby" + fs + "shared" + fs + "common" + fs +
                 "sanity" + fs + "state.properties";
         File sanityFile = new File(sanityFileName);

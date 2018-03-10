@@ -125,13 +125,15 @@ public class splitmessages {
 	public static void main(String[] args) throws Exception {
 
 		Properties p = new Properties();
+        int idx = 0;
 
-		File dir = new File(args[0]);
-
-		File source = new File(args[1]);
+		File engineClassesDir = new File(args[idx++]);
+		File clientClassesDir = new File(args[idx++]);
+		File localesDir = new File(args[idx++]);
+		File source = new File(args[idx++]);
         
 		String s = source.getName();
-		// loose the suffix
+		// lose the suffix
 		s = s.substring(0, s.lastIndexOf('.'));
 		// now get the locale
 		String locale = s.substring(s.indexOf('_'));
@@ -170,7 +172,7 @@ public class splitmessages {
 			if (c[i].size() == 0)
 				continue;
 			OutputStream fos = new BufferedOutputStream(
-				new FileOutputStream(new File(dir, "m"+i+locale+".properties")), 16 * 1024);
+				new FileOutputStream(new File(localesDir, "m"+i+locale+".properties")), 16 * 1024);
 
             
 			c[i].store(fos, (String) null);
@@ -180,7 +182,7 @@ public class splitmessages {
 			if (addBase) {
 				// add duplicate english file as the base
 				fos = new BufferedOutputStream(
-					new FileOutputStream(new File(dir, "m"+i+".properties")), 16 * 1024);
+					new FileOutputStream(new File(engineClassesDir, "m"+i+"_en.properties")), 16 * 1024);
 				c[i].store(fos, (String) null);
 				fos.flush();
 				fos.close();
@@ -195,7 +197,7 @@ public class splitmessages {
         // there and what we added from the engine properties file) into
         // the Derby locales directory
         OutputStream clientOutStream = new BufferedOutputStream(
-            new FileOutputStream(new File(dir, clientPropsFileName)), 
+            new FileOutputStream(new File(clientClassesDir, clientPropsFileName)), 
             16 * 1024);
 
         clientProps.store(clientOutStream, (String)null);
@@ -206,7 +208,7 @@ public class splitmessages {
         {
             // Save the English messages as the base
             clientOutStream = new BufferedOutputStream(
-                new FileOutputStream(new File(dir, "clientmessages.properties")), 
+                new FileOutputStream(new File(clientClassesDir, "clientmessages.properties")), 
                 16 * 1024);
 
             clientProps.store(clientOutStream, (String)null);

@@ -72,7 +72,8 @@
       srcdir="${derby.storeless.src.dir}"
       destdir="${out.storeless.dir}">
       <classpath>
-      	  <pathelement path="${out.dir}"/>
+      	  <pathelement path="${out.engine.dir}"/>
+      	  <pathelement path="${out.shared.dir}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>

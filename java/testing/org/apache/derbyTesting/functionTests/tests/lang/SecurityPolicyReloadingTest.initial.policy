@@ -18,7 +18,7 @@
 // * specific language governing permissions and limitations
 // * under the License.
 // *
-grant codeBase "${derbyTesting.codejar}derby.jar"
+grant codeBase "${derbyTesting.engine}"
 {
 //
 // These permissions are needed for everyday, embedded Derby usage.
@@ -55,7 +55,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar"
   permission java.lang.RuntimePermission "getFileStoreAttributes";
 };
 
-grant codeBase "${derbyTesting.codejar}derbynet.jar"
+grant codeBase "${derbyTesting.netserver}"
 {
 //
 // This permission lets the Network Server manage connections from clients.
@@ -65,7 +65,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar"
   permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar"
+grant codeBase "${derbyTesting.testing}"
 {
   // Read all properties
   permission java.util.PropertyPermission "*", "read,write";
@@ -113,7 +113,7 @@ grant {
   permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
 };
 
-grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+grant codeBase "${derbyTesting.tools}" {
   permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 

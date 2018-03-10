@@ -36,7 +36,7 @@
   <target name="build" depends="compile"/>
 
   <target name="compile">
-    <copy file="${derby.build.src.dir}/org/apache/derbyBuild/odbcgen_fragments.properties" tofile="${out.dir}/org/apache/derbyBuild/odbcgen_fragments.properties"/>
+    <copy file="${derby.build.src.dir}/org/apache/derbyBuild/odbcgen_fragments.properties" tofile="${out.build.dir}/org/apache/derbyBuild/odbcgen_fragments.properties"/>
 
     <javac
       source="${min.version}"
@@ -49,10 +49,12 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.build.src.dir}"
-      destdir="${out.dir}">
+      destdir="${out.build.dir}">
       <classpath>
         <pathelement path="${java.home}/../lib/tools.jar"/>
         <pathelement path="${ant.core.lib}"/>
+        <pathelement path="${out.shared.dir}"/>
+        <pathelement path="${out.engine.dir}"/>
       </classpath>
       <include name="org/apache/derbyBuild/**"/>
       <compilerarg value="-Xlint:unchecked"/>

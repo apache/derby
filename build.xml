@@ -48,7 +48,7 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,shared,engine,storeless,client,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,shared,client,engine,storeless,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts"
       description="Compile the product source (does not build the tests)."
   />
   <target
@@ -61,9 +61,8 @@
 <!--                       Initialize targets                             -->
 <!-- ==================================================================== -->
 
-  <target name="init" unless="init.done" depends="install_junit,setCompilerProperties">
+  <target name="init" unless="init.done" depends="makeOutDirs,install_junit,setCompilerProperties">
     <tstamp/>
-    <mkdir dir="${out.dir}"/>
     <antcall target="make-generated-dirs"/>
     <antcall target="make-release-dirs"/>
 
@@ -81,11 +80,32 @@
     <property name="init.done" value="true"/>
   </target>
 
+  <target name="makeOutDirs">
+    <mkdir dir="${out.dir}"/>
+
+    <mkdir dir="${out.build.dir}"/>
+    <mkdir dir="${out.client.dir}"/>
+    <mkdir dir="${out.demo.dir}"/>
+    <mkdir dir="${out.drda.dir}"/>
+    <mkdir dir="${out.engine.dir}"/>
+    <mkdir dir="${out.optional.dir}"/>
+    <mkdir dir="${out.run.dir}"/>
+    <mkdir dir="${out.shared.dir}"/>
+    <mkdir dir="${out.storeless.dir}"/>
+    <mkdir dir="${out.stubs.dir}"/>
+    <mkdir dir="${out.testing.dir}"/>
+    <mkdir dir="${out.tools.dir}"/>
+    <mkdir dir="${out.locales.dir}"/>
+  </target>
+
    <target name="make-generated-dirs">
 
     <mkdir dir="${generated.dir}"/>
     <mkdir dir="${generated.bin.dir}"/>
     <mkdir dir="${generated.src.dir}"/>
+    <mkdir dir="${generated.src.engine.dir}"/>
+    <mkdir dir="${generated.src.shared.dir}"/>
+    <mkdir dir="${generated.src.tools.dir}"/>
     <mkdir dir="${generated.sanity.dir}"/>
     <mkdir dir="${generated.ij.dir}"/>
     <mkdir dir="${generated.sql.dir}"/>
@@ -196,69 +216,79 @@
   <target name="ckversioninfo">
     <condition property="versioninfo.available">
       <and>
-        <available file="${out.dir}/org/apache/derby/info/engine/info.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/tools/info.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/net/info.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/client/info.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/shared/info.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/tsting/info.properties"/>
+        <available file="${out.engine.dir}/org/apache/derby/info/engine/info.properties"/>
+        <available file="${out.tools.dir}/org/apache/derby/info/tools/info.properties"/>
+        <available file="${out.drda.dir}/org/apache/derby/info/net/info.properties"/>
+        <available file="${out.client.dir}/org/apache/derby/info/client/info.properties"/>
+        <available file="${out.shared.dir}/org/apache/derby/info/shared/info.properties"/>
+        <available file="${out.testing.dir}/org/apache/derby/info/tsting/info.properties"/>
       </and>
     </condition>
   </target>
 
   <target name="writeversioninfo" unless="versioninfo.available">
-    <mkdir dir="${out.dir}/org/apache/derby/info/"/>
-    <mkdir dir="${out.dir}/org/apache/derby/info/engine"/>
-    <mkdir dir="${out.dir}/org/apache/derby/info/tools"/>
-    <mkdir dir="${out.dir}/org/apache/derby/info/net"/>
-    <mkdir dir="${out.dir}/org/apache/derby/info/client"/>
-    <mkdir dir="${out.dir}/org/apache/derby/info/shared"/>
-    <mkdir dir="${out.dir}/org/apache/derby/info/tsting"/>
+    <mkdir dir="${out.engine.dir}/org/apache/derby/info/"/>
+    <mkdir dir="${out.engine.dir}/org/apache/derby/info/engine"/>
+
+    <mkdir dir="${out.tools.dir}/org/apache/derby/info"/>
+    <mkdir dir="${out.tools.dir}/org/apache/derby/info/tools"/>
+
+    <mkdir dir="${out.drda.dir}/org/apache/derby/info"/>
+    <mkdir dir="${out.drda.dir}/org/apache/derby/info/net"/>
+
+    <mkdir dir="${out.client.dir}/org/apache/derby/info"/>
+    <mkdir dir="${out.client.dir}/org/apache/derby/info/client"/>
+
+    <mkdir dir="${out.shared.dir}/org/apache/derby/info"/>
+    <mkdir dir="${out.shared.dir}/org/apache/derby/info/shared"/>
+
+    <mkdir dir="${out.testing.dir}/org/apache/derby/info"/>
+    <mkdir dir="${out.testing.dir}/org/apache/derby/info/tsting"/>
 
     <antcall target="infowriter">
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="Apache Derby Embedded Engine"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="codeline"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/engine/info.properties"/>
+      <param name="info.file" value="${out.engine.dir}/org/apache/derby/info/engine/info.properties"/>
     </antcall>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="Apache Derby Tools"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="codeline"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/tools/info.properties"/>
+      <param name="info.file" value="${out.tools.dir}/org/apache/derby/info/tools/info.properties"/>
     </antcall>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="Apache Derby Network Server"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="codeline"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/net/info.properties"/>
+      <param name="info.file" value="${out.drda.dir}/org/apache/derby/info/net/info.properties"/>
     </antcall>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="Apache Derby Network Client"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="codeline"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/client/info.properties"/>
+      <param name="info.file" value="${out.client.dir}/org/apache/derby/info/client/info.properties"/>
     </antcall>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="Apache Derby Shared Utilities"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="codeline"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/shared/info.properties"/>
+      <param name="info.file" value="${out.shared.dir}/org/apache/derby/info/shared/info.properties"/>
     </antcall>
   </target>
 
   <target name="cleanversion">
-    <delete file="${out.dir}/org/apache/derby/info/engine/info.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/tools/info.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/net/info.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/client/info.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/shared/info.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/tsting/info.properties"/>
+    <delete file="${out.engine.dir}/org/apache/derby/info/engine/info.properties"/>
+    <delete file="${out.tools.dir}/org/apache/derby/info/tools/info.properties"/>
+    <delete file="${out.drda.dir}/org/apache/derby/info/net/info.properties"/>
+    <delete file="${out.client.dir}/org/apache/derby/info/client/info.properties"/>
+    <delete file="${out.shared.dir}/org/apache/derby/info/shared/info.properties"/>
+    <delete file="${out.testing.dir}/org/apache/derby/info/tsting/info.properties"/>
   </target>
 
   <!-- Set the ant variables which identify the compiler classpaths. -->
@@ -326,7 +356,7 @@
     <taskdef
       name="writeAndCheckinReleaseProperties"
       classname="org.apache.derbyPreBuild.ReleaseProperties"
-      classpath="${out.dir}"
+      classpath="${out.build.dir}"
     />
 
     <property name="releasePropertyFile" value="${properties.dir}/release.properties"/>
@@ -355,12 +385,12 @@
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="_${locale.iname}"/>
       <param name="info.ename" value="${locale.ename}"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/locale_${locale.iname}/info.properties"/>
+      <param name="info.file" value="${out.locales.dir}/org/apache/derby/info/locale_${locale.iname}/info.properties"/>
     </antcall>
   </target>
 
   <target name="localeinfowriter">
-    <mkdir dir="${out.dir}/org/apache/derby/info/locale_${locale.iname}"/>
+    <mkdir dir="${out.locales.dir}/org/apache/derby/info/locale_${locale.iname}"/>
     <propertyfile file="${info.file}" comment="${copyright.comment}">
       <entry key="derby.locale.version.major" value="${major}"/>
       <entry key="derby.locale.version.minor" value="${minor}"/>
@@ -466,46 +496,46 @@
   <target name="checklocaleinfo">
     <condition property="localeinfo.available">
       <and>
-        <available file="${out.dir}/org/apache/derby/info/locale_cs.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_de_DE.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_es.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_fr.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_hu.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_it.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_pl.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_ru.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_cs.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_de_DE.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_es.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_fr.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_hu.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_it.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_pl.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_ru.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
+        <available file="${out.locales.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
       </and>
     </condition>
   </target>
 
   <target name="cleanlocale">
-    <delete file="${out.dir}/org/apache/derby/info/locale_cs.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_de_DE.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_es.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_fr.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_hu.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_it.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_pl.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_ru.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
-    <delete file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_cs.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_de_DE.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_es.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_fr.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_hu.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_it.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_pl.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_ru.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
+    <delete file="${out.locales.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
   </target>
 
   <target name="checkmessages" depends="checkmessages-done"
           unless="checkmessages.done">
     <java classname="org.apache.derbyBuild.MessageVetter"
-          classpath="${out.dir}"
+          classpath="${out.build.dir}"
           failonerror="true">
-      <arg file="${out.dir}/org/apache/derby/loc"/>
-      <arg file="${out.dir}/org/apache/derby/loc/drda"/>
+      <arg file="${out.engine.dir}/org/apache/derby/loc"/>
+      <arg file="${out.drda.dir}/org/apache/derby/loc/drda"/>
     </java>
     <touch file="${generated.dir}/checkmessages.done"/>
   </target>
@@ -514,9 +544,9 @@
     <uptodate property="checkmessages.done"
               targetfile="${generated.dir}/checkmessages.done">
       <srcresources>
-        <fileset dir="${out.dir}/org/apache/derby/loc"
+        <fileset dir="${out.engine.dir}/org/apache/derby/loc"
                  includes="*.properties"/>
-        <fileset dir="${out.dir}/org/apache/derby/loc/drda"
+        <fileset dir="${out.drda.dir}/org/apache/derby/loc/drda"
                  includes="*.properties"/>
       </srcresources>
     </uptodate>
@@ -560,11 +590,11 @@
     <ant dir="${derby.drda.src.dir}"/>
   </target>
 
-  <target name="client" depends="engine,shared">
+  <target name="client" depends="shared">
     <ant dir="${derby.client.src.dir}"/>
   </target>
 
-  <target name="prebuild">
+  <target name="prebuild" depends="makeOutDirs">
     <mkdir dir="${out.dir}"/>
     <ant dir="${derby.build.src.dir}/org/apache/derbyPreBuild"/>
   </target>
@@ -596,7 +626,7 @@
     <java   fork="true" 
        classname="org.apache.derbyBuild.MessageBundleTest"
      failonerror="true"
-       classpath="${out.dir}"
+       classpath="${out.build.dir}:${out.shared.dir}:${out.engine.dir}"
      />
   </target>
 
@@ -607,7 +637,7 @@
        fork="true" 
        classname="org.apache.derbyBuild.JarDriftTest"
        failonerror="true"
-       classpath="${out.dir}">
+       classpath="${out.build.dir}">
       <arg value="refresh"/>
     </java>
   </target>
@@ -619,7 +649,7 @@
        fork="true" 
        classname="org.apache.derbyBuild.JarDriftTest"
        failonerror="true"
-       classpath="${out.dir}"
+       classpath="${out.build.dir}"
      />
   </target>
 
@@ -707,25 +737,25 @@
   <target name="genParser" depends="chkparser" unless="parser.done">
     <echo level="info" message="  ${msg}"/>
     <delete>
-      <fileset dir="${generated.src.dir}/${directory}" includes="${rmfiles}"/>
+      <fileset dir="${outroot}/${directory}" includes="${rmfiles}"/>
     </delete>
     <java classname="javacc"
           classpath="${javacc}"
                 dir="${derbysrc.dir}/${srcroot}/${directory}"
                fork="yes"
         failonerror="true">
-      <arg value="-OUTPUT_DIRECTORY=${generated.src.dir}/${directory}"/>
+      <arg value="-OUTPUT_DIRECTORY=${outroot}/${directory}"/>
       <arg value="${jjfile}"/>
     </java>
     <!-- Qualify reference to tokenImage to fix issue with inheritence -->
     <!-- IBM JDK 1.3.1. See DERBY-1078                                 -->
-    <replaceregexp file="${generated.src.dir}/${directory}/${chkfile}" match="tokenImage" 
+    <replaceregexp file="${outroot}/${directory}/${chkfile}" match="tokenImage" 
                    replace="${constantsfile}.tokenImage"/>
   </target>
 
   <target name="chkparser">
     <uptodate property="parser.done"
-              targetfile="${generated.src.dir}/${directory}/${chkfile}" >
+              targetfile="${outroot}/${directory}/${chkfile}" >
       <srcfiles dir="${derbysrc.dir}/${srcroot}/${directory}" includes="${jjfile}" />
     </uptodate>
   </target>
@@ -836,10 +866,10 @@
           fork="yes"
           failonerror="yes">
       <classpath>
-        <pathelement path="${out.dir}"/>
+        <pathelement path="${out.build.dir}:${out.engine.dir}"/>
       </classpath>
       <jvmarg value="-DWS=${workspace}"/>
-      <jvmarg value="-DclassDir=${out.dir}"/>
+      <jvmarg value="-DclassDir=${out.engine.dir}"/>
       <jvmarg value="-Dout=${generated.cache.dir}/ClassSizeCatalogImpl.java"/>
       <jvmarg value="-Dprefix.1=org.apache.derby.iapi.types"/>            
       <jvmarg value="-Dprefix.2=org.apache.derby.impl"/>
@@ -864,9 +894,13 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${generated.src.dir}"
-      destdir="${out.dir}">
+      srcdir="${generated.src.engine.dir}"
+      destdir="${out.engine.dir}">
       <include name="${derby.dir}/iapi/services/cache/ClassSizeCatalogImpl.java"/>
+      <classpath>
+		    <pathelement location="${out.shared.dir}"/>
+		    <pathelement location="${out.engine.dir}"/>
+      </classpath>
     </javac>
 
   </target>
@@ -875,14 +909,14 @@
     <condition property="csc.uptodate">
       <and>
         <uptodate srcfile="${derby.engine.dir}/iapi/types/DataValueDescriptor.java"
-                  targetfile="${out.dir}/org/apache/derby/iapi/types/DataValueDescriptor.class"/>
+                  targetfile="${out.engine.dir}/org/apache/derby/iapi/types/DataValueDescriptor.class"/>
         <uptodate srcfile="${derby.engine.dir}/impl/store/raw/data/RecordId.java"
-                  targetfile="${out.dir}/org/apache/derby/impl/store/raw/data/RecordId.class"/>
+                  targetfile="${out.engine.dir}/org/apache/derby/impl/store/raw/data/RecordId.class"/>
         <uptodate srcfile="${derby.engine.dir}/iapi/store/raw/ContainerKey.java"
-                  targetfile="${out.dir}/org/apache/derby/iapi/store/raw/ContainerKey.class"/>
+                  targetfile="${out.engine.dir}/org/apache/derby/iapi/store/raw/ContainerKey.class"/>
         <uptodate srcfile="${derby.engine.dir}/iapi/services/cache/SizedCacheable.java"
-                  targetfile="${out.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.class"/>
-        <available file="${generated.src.dir}/${derby.dir}/iapi/services/cache/ClassSizeCatalogImpl.java"/>
+                  targetfile="${out.engine.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.class"/>
+        <available file="${generated.src.engine.dir}/${derby.dir}/iapi/services/cache/ClassSizeCatalogImpl.java"/>
       </and>
     </condition>
   </target>
@@ -1005,7 +1039,7 @@
     </antcall>
 
     <javadoc bootclasspath="${bootClasspath}"
-             classpath="${bootClasspath};${osgi};${servlet24};${out.dir};${jars.javadoc}"
+             classpath="${bootClasspath};${osgi};${servlet24};${out.all.dir};${jars.javadoc}"
              sourcepath="${derby.engine.src.dir}:${derby.client.src.dir}:${derby.drda.src.dir}:${derby.shared.src.dir}:${derby.optional.src.dir}:${derby.tools.src.dir}"
              excludepackagenames="org.apache.derby.*"
              breakiterator="true"
@@ -1067,7 +1101,7 @@
         access="private"
         breakiterator="yes"
         useexternalfile="yes"
-        classpath="${out.dir};${jars.javadoc}"
+        classpath="${out.all.dir};${jars.javadoc}"
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Internals"
         doctitle="Apache Derby V${major}.${minor} Internals"
@@ -1158,7 +1192,7 @@
         access="private"
         breakiterator="yes"
         useexternalfile="yes"
-        classpath="${out.dir}"
+        classpath="${out.all.dir};"
         destdir="${out.javadoc.dir}/demo"
         windowtitle="Apache Derby Demos"
         doctitle="Apache Derby Demos"
@@ -1205,7 +1239,7 @@
        access="private"
        breakiterator="yes"
        useexternalfile="yes"
-       classpath="${out.dir};${jars.javadoc};${junit}"
+       classpath="${out.all.dir};${jars.javadoc};${junit}"
        destdir="${out.javadoc.dir}/testing"
        windowtitle="Apache Derby V${major}.${minor} Test Javadoc"
        doctitle="Apache Derby V${major}.${minor} Test Javadoc"
@@ -1245,7 +1279,7 @@
        <java classname="org.apache.derbyBuild.eclipse.DerbyEclipsePlugin">
                <arg value="${derby.jar.dir}/${plugin.tmp.dir}"/>
                <classpath>
-                       <pathelement path="${out.dir}"/>
+                       <pathelement path="${out.build.dir}"/>
                </classpath>
        </java>
 
@@ -1312,11 +1346,11 @@
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
     <java classname="org.apache.derbyBuild.propertyconfig" fork="yes">
-      <arg value="${out.dir}/org/apache/derby/modules.properties"/>
+      <arg value="${out.engine.dir}/org/apache/derby/modules.properties"/>
       <arg value="derby"/>
       <arg value="${derby.jar.dir}/lists/org/apache/derby/modules.properties"/>
       <classpath>
-        <pathelement path="${out.dir}"/>
+        <pathelement path="${out.build.dir}"/>
       </classpath>
     </java>
 
@@ -1331,7 +1365,7 @@
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.productfile" value="derby.jar"/>
-      <param name="info.file" value="${out.dir}//org/apache/derby/info/engine/info.properties"/>
+      <param name="info.file" value="${out.engine.dir}/org/apache/derby/info/engine/info.properties"/>
     </antcall>
 
     <!-- copy boilerplate common to derby jar files -->
@@ -1356,40 +1390,8 @@
     </manifest> 
 
     <jar destfile="${derby.jar.dir}/derby.jar"
-         basedir="${out.dir}"
-         includes="org/apache/derby/agg/**,
-                   org/apache/derby/authentication/**,
-                   org/apache/derby/catalog/**,
-                   org/apache/derby/database/**,
-                   org/apache/derby/diag/**,
-                   org/apache/derby/io/**,
-                   org/apache/derby/jdbc/load/**,
-                   org/apache/derby/mbeans/*.class,
-                   org/apache/derby/osgi/**,
-                   org/apache/derby/security/**,
-                   org/apache/derby/vti/**,
-                   org/apache/derby/iapi/db/**,
-                   org/apache/derby/iapi/jdbc/**,
-                   org/apache/derby/iapi/security/**,
-                   org/apache/derby/iapi/services/**,
-                   org/apache/derby/iapi/sql/**,
-                   org/apache/derby/iapi/store/**,
-                   org/apache/derby/iapi/types/**,
-                   org/apache/derby/iapi/transaction/**,
-                   org/apache/derby/iapi/util/**,
-                   org/apache/derby/impl/db/**,
-                   org/apache/derby/impl/io/**,
-                   org/apache/derby/impl/jdbc/**,
-                   org/apache/derby/impl/load/**,
-                   org/apache/derby/impl/optional/**,
-                   org/apache/derby/impl/services/**,
-                   org/apache/derby/impl/sql/**,
-                   org/apache/derby/impl/store/**,
-                   org/apache/derby/loc/m?_en.properties,
-                   org/apache/derby/loc/m??_en.properties,
-                   org/apache/derby/impl/sql/catalog/metadata_net.properties,
-                   org/apache/derby/info/engine/info.properties"
-         excludes="**/D_*,**/odbcmeta.done,**/*Test.class,**/_Suite.class"
+         basedir="${out.engine.dir}"
+         excludes="**/D_*,**/*.done,**/*Test.class,**/_Suite.class"
          compress="true"
          filesonly="true"
          manifest="${derby.jar.dir}/lists/smf.mf">
@@ -1444,7 +1446,7 @@
       <param name="info.iname" value="Apache Derby Tools"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="derbytools.jar"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/tools/info.properties"/>
+      <param name="info.file" value="${out.tools.dir}/org/apache/derby/info/tools/info.properties"/>
     </antcall>
 
     <!-- copy boilerplate common to derby jar files -->
@@ -1460,14 +1462,7 @@
  	
     <delete file="${derby.jar.dir}/derbytools.jar"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
-         basedir="${out.dir}"
-         includes="org/apache/derby/tools/**,
-                   org/apache/derby/iapi/tools/**,
-                   org/apache/derby/impl/tools/**,
-                   org/apache/derby/jdbc/**,
-                   org/apache/derby/loc/sysinfoMessages.properties,
-                   org/apache/derby/loc/toolsmessages.properties,
-                   org/apache/derby/info/tools/info.properties"
+         basedir="${out.tools.dir}"
          excludes="org/apache/derby/impl/tools/ij/SimpleCharStream.class,
                    org/apache/derby/impl/tools/ij/mt*.class"
          manifest="${derby.jar.dir}/lists/smftools.mf"
@@ -1497,7 +1492,7 @@
       <param name="info.iname" value="Apache Derby Optional Tools"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="derbyoptionaltools.jar"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/optional/info.properties"/>
+      <param name="info.file" value="${out.optional.dir}/org/apache/derby/optional/info.properties"/>
     </antcall>
 
     <!-- copy boilerplate common to derby jar files -->
@@ -1517,8 +1512,7 @@
 
     <delete file="${derby.jar.dir}/derbyoptionaltools.jar"/>
     <jar destfile="${derby.jar.dir}/derbyoptionaltools.jar"
-         basedir="${out.dir}"
-         includes="org/apache/derby/optional/**"
+         basedir="${out.optional.dir}"
          manifest="${derby.jar.dir}/lists/smfoptionaltools.mf"
          compress="true"
          filesonly="true">
@@ -1544,7 +1538,7 @@
       <param name="info.iname" value="Apache Derby Network Server"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="derbynet.jar"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/net/info.properties"/>
+      <param name="info.file" value="${out.drda.dir}/org/apache/derby/info/net/info.properties"/>
     </antcall>
 
     <!-- copy boilerplate common to derby jar files -->
@@ -1558,12 +1552,7 @@
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
     <jar destfile="${derby.jar.dir}/derbynet.jar"
-         basedir="${out.dir}"
-         includes="org/apache/derby/drda/**,
-                   org/apache/derby/impl/drda/**,
-                   org/apache/derby/loc/drda/**,
-                   org/apache/derby/mbeans/drda/**,
-                   org/apache/derby/info/net/info.properties"
+         basedir="${out.drda.dir}"
          compress="true"
          filesonly="true"
     	 manifest="${derby.jar.dir}/lists/smfnet.mf">
@@ -1584,13 +1573,13 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <mkdir dir="${out.dir}/org/apache/derby/info/"/>
+    <mkdir dir="${out.client.dir}/org/apache/derby/info/"/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="Apache Derby Network Client"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="codeline"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/client/info.properties"/>
+      <param name="info.file" value="${out.client.dir}/org/apache/derby/info/client/info.properties"/>
     </antcall>
 
     <!-- copy boilerplate common to derby jar files -->
@@ -1615,13 +1604,10 @@
     <delete file="${derby.jar.dir}/derbyclient.jar"/>
 
     <jar destfile="${derby.jar.dir}/derbyclient.jar"
-         basedir="${out.dir}"
+         basedir="${out.client.dir}"
          compress="true"
          filesonly="true"
          update="true"
-         includes="org/apache/derby/client/**,
-                   org/apache/derby/info/client/info.properties,
-                   org/apache/derby/loc/clientmessages*.properties"
          excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties,
                    **/*Test.class,
                    **/_Suite.class"
@@ -1649,7 +1635,7 @@
       <param name="info.iname" value="Apache Derby Shared Utilities"/>
       <param name="info.ename" value="Apache Derby"/>
       <param name="info.productfile" value="derbyshared.jar"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/shared/info.properties"/>
+      <param name="info.file" value="${out.shared.dir}/org/apache/derby/info/shared/info.properties"/>
     </antcall>
 
     <!-- copy boilerplate common to derby jar files -->
@@ -1661,9 +1647,7 @@
 
     <delete file="${derby.jar.dir}/derbyshared.jar"/>
     <jar destfile="${derby.jar.dir}/derbyshared.jar"
-         basedir="${out.dir}"
-         includes="org/apache/derby/shared/common/**,
-                   org/apache/derby/info/shared/info.properties"
+         basedir="${out.shared.dir}"
          compress="true"
          filesonly="true"
     	 manifest="${derby.jar.dir}/lists/smfshared.mf"/>
@@ -1690,12 +1674,11 @@
     </manifest> 
  	
     <jar destfile="${derby.jar.dir}/derbyrun.jar"
+         basedir="${out.run.dir}"
          compress="true"
          filesonly="true"
          update="true"
     	 manifest="${derby.jar.dir}/lists/smfcmd.mf">
-      <fileset dir="${out.dir}"
-               includes="org/apache/derby/run/run.class"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>
@@ -1788,13 +1771,13 @@
       <param name="info.iname" value="_${locale.iname}"/>
       <param name="info.ename" value="${locale.ename}"/>
       <param name="info.productfile" value="derbyLocale_${locale.iname}.jar"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/locale_${locale.iname}/info.properties"/>
+      <param name="info.file" value="${out.locales.dir}/org/apache/derby/info/locale_${locale.iname}/info.properties"/>
     </antcall>   
 
     <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
          compress="true"
 	 filesonly="true">
-      <fileset dir="${out.dir}"
+      <fileset dir="${out.locales.dir}"
 	       includes="org/apache/derby/info/*_${locale.iname}/info.properties,
 	                 org/apache/derby/loc/*_${locale.iname}.properties"
            excludes="org/apache/derby/loc/clientmessages_${locale.iname}.properties"
@@ -1812,16 +1795,17 @@
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="tsting"/>
       <param name="info.productfile" value="derbyTesting.jar"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/tsting/info.properties"/>
+      <param name="info.file" value="${out.testing.dir}/org/apache/derby/info/tsting/info.properties"/>
     </antcall>
 
     <zip destfile="${derby.jar.dir}/derbyTesting.jar" filesonly="true" compress="true">
-      <fileset dir="${out.dir}" includes="org/apache/derbyTesting/**,SimpleApp*,org/apache/derby/impl/tools/ij/mt*.class,org/apache/derby/impl/tools/ij/SimpleCharStream.class,org/apache/derby/impl/drda/TestProto.class,org/apache/derby/impl/store/access/conglomerate/QualifierUtil.class,org/apache/derby/loc/m*_qq_PP_testOnly*,toursdb/*,org/apache/derby/info/tsting/info.properties"/>
+      <fileset dir="${out.demo.dir}" includes="**"/>
+      <fileset dir="${out.testing.dir}" includes="org/apache/derbyTesting/**,org/apache/derby/info/tsting/**"/>
     </zip>
   </target>
 
   <target name="ckderbytesting">
-    <available file="${out.dir}/org/apache/derbyTesting"
+    <available file="${out.testing.dir}/org/apache/derbyTesting"
                property="derbyTesting.available"/>
   </target>
 
@@ -1830,7 +1814,7 @@
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="tsting"/>
       <param name="info.productfile" value="derbyTesting.jar"/>
-      <param name="info.file" value="${out.dir}/org/apache/derby/info/tsting/info.properties"/>
+      <param name="info.file" value="${out.testing.dir}/org/apache/derby/info/tsting/info.properties"/>
     </antcall>
   </target>
 
@@ -2136,8 +2120,8 @@
     <antcall target="publishedapi"/>
 
     <java classname="org.apache.derbyBuild.maintversion2props">
-        <classpath path="${out.dir}"/>
-        <arg value="${out.dir}/org/apache/derby/info/DBMS.properties"/>
+        <classpath path="${out.build.dir}"/>
+        <arg value="${out.engine.dir}/org/apache/derby/info/DBMS.properties"/>
         <arg value="${snapshot.dir}/maintversion.properties"/>
     </java>
     <property file="${snapshot.dir}/maintversion.properties"/>
@@ -2240,7 +2224,7 @@
     </condition>
 
     <!-- Use classes-directory if not using jars and not overriden by user -->
-    <condition property="derby.junit.classpath" value="${basedir}/classes">
+    <condition property="derby.junit.classpath" value="${out.all.dir}">
         <not>
             <or>
                 <isset property="derby.junit.classpath"/>
@@ -2284,7 +2268,7 @@
   <target name="junit-sysinfo" depends="junit-init">
     <java classname="org.apache.derby.tools.sysinfo"
           output="junit_${derby.junit.timestamp}/sysinfo.txt">
-        <classpath path="${out.dir}"/>
+        <classpath path="${out.all.dir}"/>
     </java>
   </target>
 
@@ -2525,8 +2509,18 @@
 
         <classpath>
             <pathelement location="${out.pptesting.dir}"/>
-            <pathelement location="${out.dir}"/>
             <pathelement location="${javatools.dir}/junit.jar"/>
+            <pathelement location="${out.build.dir}"/>
+            <pathelement location="${out.client.dir}"/>
+            <pathelement location="${out.demo.dir}"/>
+            <pathelement location="${out.drda.dir}"/>
+            <pathelement location="${out.engine.dir}"/>
+            <pathelement location="${out.optional.dir}"/>
+            <pathelement location="${out.run.dir}"/>
+            <pathelement location="${out.shared.dir}"/>
+            <pathelement location="${out.testing.dir}"/>
+            <pathelement location="${out.tools.dir}"/>
+            <pathelement location="${out.locales.dir}"/>
         </classpath>
     </junit>
   </target>
@@ -2950,7 +2944,7 @@ you should not have to do this.
         <taskdef
           name="promptForProperty"
           classname="org.apache.derbyPreBuild.PropertyPrompt"
-          classpath="${out.dir}"
+          classpath="${out.build.dir}"
         />
 
     </target>
@@ -3227,7 +3221,7 @@ you should not have to do this.
         <taskdef
           name="transformReleaseNotes"
           classname="org.apache.derbyBuild.ReleaseNotesTransformer"
-          classpath="${out.dir}"
+          classpath="${out.build.dir}"
         />
         <transformReleaseNotes
             inputFileName="${relnotes.src}"

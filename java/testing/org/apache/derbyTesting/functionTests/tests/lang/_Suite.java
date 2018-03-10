@@ -27,6 +27,7 @@ import org.apache.derbyTesting.functionTests.tests.nist.NistScripts;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -262,7 +263,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(Derby5866TriggerOrderTest.suite());
         suite.addTest(NoDBInternalsPermissionTest.suite());
         suite.addTest(ClassLoadingTest.suite());
-        suite.addTest(VetJigsawTest.suite());
+        if (TestConfiguration.loadingFromJars()) { suite.addTest(VetJigsawTest.suite()); }
         return suite;
 	}
 }

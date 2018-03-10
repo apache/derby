@@ -48,7 +48,7 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.demo.src.dir}"
-      destdir="${out.dir}">
+      destdir="${out.demo.dir}">
       <include name="toursdb/insertMaps.java"/>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
@@ -71,7 +71,10 @@
           failonerror="true"
           dir="${derby.demo.src.dir}/toursdb" fork="true">
       <classpath>
-        <pathelement path="${out.dir}"/>
+        <pathelement path="${out.demo.dir}"/>
+        <pathelement path="${out.tools.dir}"/>
+        <pathelement path="${out.shared.dir}"/>
+        <pathelement path="${out.engine.dir}"/>
       </classpath>
       <sysproperty key="derby.system.home" value="${generated.toursdb.dir}"/>
     </java>
@@ -85,7 +88,9 @@
           failonerror="true"
           dir="${derby.demo.src.dir}/toursdb" fork="true">
       <classpath>
-        <pathelement path="${out.dir}"/>
+        <pathelement path="${out.tools.dir}"/>
+        <pathelement path="${out.shared.dir}"/>
+        <pathelement path="${out.engine.dir}"/>
       </classpath>
       <sysproperty key="derby.system.home" value="${generated.toursdb.dir}"/>
       <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
@@ -102,7 +107,7 @@
   </target>
 
   <target name="copyfiles">
-    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/demo">
+    <copy todir="${out.demo.dir}/${derby.testing.functest.dir}/tests/demo">
       <fileset dir="${derby.demo.src.dir}/toursdb"
                includes="*.sql,*.gif"/>
     </copy>

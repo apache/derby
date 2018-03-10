@@ -44,8 +44,8 @@
   <!-- Compile-time classpath properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
-  <property name="ijConstants.src" value="${generated.src.dir}/${derby.dir}/impl/tools/ij/ijConstants.java"/>
-  <property name="ijTokenManager.src" value="${generated.src.dir}/${derby.dir}/impl/tools/ij/ijTokenManager.java"/>
+  <property name="ijConstants.src" value="${generated.src.tools.dir}/${derby.dir}/impl/tools/ij/ijConstants.java"/>
+  <property name="ijTokenManager.src" value="${generated.src.tools.dir}/${derby.dir}/impl/tools/ij/ijTokenManager.java"/>
 
   <!-- Release and Version info -->
   <property file="${properties.dir}/release.properties"/>
@@ -69,15 +69,27 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.tools.src.dir}:${generated.src.dir}"
-      destdir="${out.dir}">
+      srcdir="${derby.tools.src.dir}:${generated.src.tools.dir}"
+      destdir="${out.tools.dir}">
       <compilerarg value="-Xlint"/>
+      <classpath>
+		    <pathelement location="${out.shared.dir}"/>
+		    <pathelement location="${out.engine.dir}"/>
+		    <pathelement location="${out.client.dir}"/>
+      </classpath>
    </javac>
 
-    <copy todir="${loc.dir}" flatten="true">
+    <copy todir="${loc.tools.dir}" flatten="true">
       <fileset dir="${derby.tools.locales.dir}">
-        <include name="sysinfoMessages*.properties"/>
-        <include name="toolsmessages*.properties"/>
+        <include name="sysinfoMessages.properties"/>
+        <include name="toolsmessages.properties"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${loc.locales.dir}" flatten="true">
+      <fileset dir="${derby.tools.locales.dir}">
+        <include name="sysinfoMessages_*.properties"/>
+        <include name="toolsmessages_*.properties"/>
       </fileset>
     </copy>
 
@@ -86,6 +98,7 @@
   <target name="parser">
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating ij parser..."/>
+      <property name="outroot" value="${generated.src.tools.dir}"/>
       <property name="srcroot" value="tools"/>
       <property name="directory" value="${derby.dir}/impl/tools/ij"/>
       <property name="rmfiles" value="ijimplparser_rm.files"/>
@@ -95,6 +108,7 @@
     </ant>
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating mtGrammar parser..."/>
+      <property name="outroot" value="${generated.src.tools.dir}"/>
       <property name="srcroot" value="tools"/>
       <property name="directory" value="${derby.dir}/impl/tools/ij"/>
       <property name="rmfiles" value="mtparser_rm.files"/>
@@ -126,7 +140,7 @@
       we delete the conflicting class here.
     -->
     <delete>
-      <fileset dir="${generated.src.dir}/${derby.dir}/impl/tools/ij">
+      <fileset dir="${generated.src.tools.dir}/${derby.dir}/impl/tools/ij">
         <include name="ParseException.java"/>
       </fileset>
     </delete>

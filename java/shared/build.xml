@@ -62,8 +62,8 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${generated.src.dir}:${derby.shared.src.dir}"
-      destdir="${out.dir}">
+      srcdir="${generated.src.shared.dir}:${derby.shared.src.dir}"
+      destdir="${out.shared.dir}">
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
 

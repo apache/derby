@@ -65,10 +65,14 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.run.src.dir}:${generated.src.dir}"
-      destdir="${out.dir}">
+      destdir="${out.run.dir}">
       <include name="${derby.dir}/${cur.dir}/**"/>
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
+      <classpath>
+		    <pathelement location="${out.drda.dir}"/>
+		    <pathelement location="${out.tools.dir}"/>
+      </classpath>
     </javac>
 
   </target>

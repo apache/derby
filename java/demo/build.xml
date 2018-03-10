@@ -45,11 +45,18 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="nserverdemo"
-      destdir="${out.dir}"
-      includes="Simple*">
+      destdir="${out.demo.dir}"
+      srcdir="${derby.demo.src.dir}/nserverdemo"
+      includes="nserverdemo/**"
+      excludes="nserverdemo/Simple*">
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
+      <classpath>
+		    <pathelement location="${out.shared.dir}"/>
+		    <pathelement location="${out.drda.dir}"/>
+		    <pathelement location="${out.engine.dir}"/>
+		    <pathelement location="${out.tools.dir}"/>
+      </classpath>
     </javac>
     <javac
       source="${min.version}"
@@ -61,12 +68,17 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="."
-      destdir="${out.dir}"
-      includes="nserverdemo/**"
-      excludes="nserverdemo/Simple*">
+      destdir="${out.demo.dir}"
+      srcdir="${derby.demo.src.dir}/vtis/java"
+     >
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
+      <classpath>
+		    <pathelement location="${out.shared.dir}"/>
+		    <pathelement location="${out.drda.dir}"/>
+		    <pathelement location="${out.engine.dir}"/>
+		    <pathelement location="${out.tools.dir}"/>
+      </classpath>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp) -->
     <javac
@@ -80,12 +92,16 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.demo.src.dir}/simple"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement location="${javasrc.dir}"/>
-      </classpath>
+      destdir="${out.demo.dir}">
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
+      <classpath>
+		    <pathelement location="${out.shared.dir}"/>
+		    <pathelement location="${out.drda.dir}"/>
+		    <pathelement location="${out.engine.dir}"/>
+		    <pathelement location="${out.tools.dir}"/>
+        <pathelement location="${javasrc.dir}"/>
+      </classpath>
     </javac>
     <javac
       source="${min.version}"
@@ -98,7 +114,7 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.demo.src.dir}/workingwithderby"
-      destdir="${out.dir}">
+      destdir="${out.demo.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
       </classpath>
@@ -133,9 +149,13 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.demo.src.dir}/vtis/java"
-      destdir="${out.dir}">
+      destdir="${out.demo.dir}">
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
+      <classpath>
+		    <pathelement location="${out.shared.dir}"/>
+		    <pathelement location="${out.engine.dir}"/>
+      </classpath>
     </javac>
   </target>
 

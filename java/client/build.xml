@@ -60,8 +60,11 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.client.src.dir}"
-      destdir="${out.dir}">
+      destdir="${out.client.dir}">
       <compilerarg value="-Xlint"/>
+      <classpath>
+		    <pathelement location="${out.shared.dir}"/>
+      </classpath>
    </javac>
 </target> 
 

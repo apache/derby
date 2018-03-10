@@ -24,6 +24,6 @@
 // The permissions below are expected to be added to the set of default
 // permissions granted to the test framework.
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
     permission java.lang.RuntimePermission "getProtectionDomain";
 };

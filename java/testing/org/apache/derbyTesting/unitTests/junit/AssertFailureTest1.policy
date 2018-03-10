@@ -42,7 +42,7 @@
 //
 // Permissions for the tests (derbyTesting.jar)
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   // Allow tests to install and uninstall the security manager and
   // to refresh the policy
   permission java.util.PropertyPermission "java.security.policy", "read,write";
@@ -57,21 +57,6 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   
 };
 
-
-//
-// Permissions for running the test on the class files
-//
-grant codeBase "${derbyTesting.codeclasses}" {
-  // Allow tests to install and uninstall the security manager and
-  // to refresh the policy
-  permission java.util.PropertyPermission "java.security.policy", "read,write";
-  permission java.lang.RuntimePermission "setSecurityManager";
-  permission java.security.SecurityPermission "getPolicy";
-
-  // derbyTesting.junit.TestConfiguration... modifies System properties
-  permission java.util.PropertyPermission "*", "read,write";
-
-};
 
 grant codeBase "${derbyTesting.junit}" {
     // This permission is needed when running the tests using ant 1.7

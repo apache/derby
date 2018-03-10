@@ -23,7 +23,7 @@
 // The permissions below are expected to be added to the set of default
 // permissions granted to the test framework.
 //
-grant codeBase "${derbyTesting.codejar}derby.jar" {
+grant codeBase "${derbyTesting.engine}" {
   permission java.net.SocketPermission "127.0.0.1", "connect,accept,listen";
   permission java.net.SocketPermission "localhost", "connect,accept,listen";
 };

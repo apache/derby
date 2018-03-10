@@ -24,7 +24,7 @@
 // The permissions below are expected to be added to the set of default
 // permissions granted to the test framework.
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
   permission java.net.SocketPermission "localhost", "connect,resolve";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
@@ -32,6 +32,6 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 
 // Give write permission for trace files if debugging with 
 // derby.drda.traceAll=true
-grant codeBase "${derbyTesting.codejar}derbynet.jar" {
+grant codeBase "${derbyTesting.netserver}" {
   permission java.io.FilePermission "${user.dir}${/}system${/}-", "read,write";
 };

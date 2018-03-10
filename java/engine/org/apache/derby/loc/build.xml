@@ -32,7 +32,7 @@
   <taskdef
     name="buildMessages"
     classname="org.apache.derbyBuild.MessageBuilder"
-    classpath="${out.dir}"
+    classpath="${out.build.dir}"
   />
   <property name="messageDescriptors" value="${derby.locales.dir}/messages.xml"/>
   <property name="englishMessages" value="${generated.engine.locale.dir}/messages_en.properties"/>
@@ -130,11 +130,15 @@
   </target>
 
   <target name="doSplit" depends="splitprops,verifysplit,noSplit,chksplit" unless="split.done">
-    <mkdir dir="${loc.dir}"/>
+    <mkdir dir="${loc.engine.dir}"/>
+    <mkdir dir="${loc.client.dir}"/>
+    <mkdir dir="${loc.locales.dir}"/>
     <java classname="org.apache.derbyBuild.splitmessages"
-          classpath="${out.dir}"
+          classpath="${out.build.dir}:${out.shared.dir}"
           failonerror="true">
-      <arg value="${loc.dir}"/> 
+      <arg value="${loc.engine.dir}"/> 
+      <arg value="${loc.client.dir}"/> 
+      <arg value="${loc.locales.dir}"/> 
       <arg value="${split.properties}"/>
     </java>
     <touch file="${split.donefile}"/>
@@ -142,7 +146,7 @@
 
   <target name="splitprops">
     <property name="split.properties" value="${msgdir}/${msgfile}.properties"/>
-    <property name="split.donefile" value="${loc.dir}/${msgfile}.done"/>
+    <property name="split.donefile" value="${loc.engine.dir}/${msgfile}.done"/>
   </target>
 
   <target name="chksplit">
@@ -156,7 +160,8 @@
     <available classname="org.apache.derbyBuild.splitmessages"
                property="splitmsgs.available">
       <classpath>
-        <pathelement path="${out.dir}"/>
+        <pathelement path="${out.build.dir}"/>
+        <pathelement path="${out.shared.dir}"/>
       </classpath>
     </available>
   </target>

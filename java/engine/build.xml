@@ -63,10 +63,11 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
-      destdir="${out.dir}">
+      srcdir="${derby.engine.src.dir}:${generated.src.engine.dir}"
+      destdir="${out.engine.dir}">
       <compilerarg value="-Xlint:unchecked"/>
       <classpath>
+		    <pathelement location="${out.shared.dir}"/>
 		    <pathelement location="${osgi}"/>
       </classpath>
     </javac>
@@ -74,7 +75,7 @@
     <ant dir="${derby.build.src.dir}"/>
     <ant dir="${derby.locales.dir}"/>
 
-    <copy todir="${out.dir}/${derby.dir}">
+    <copy todir="${out.engine.dir}/${derby.dir}">
        <fileset dir="${derby.engine.dir}">
          <include name="modules.properties"/>
        </fileset>
@@ -82,17 +83,18 @@
 
     <copy
       file="${derby.engine.src.dir}/org/apache/derby/impl/jdbc/metadata.properties"
-      tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
+      tofile="${out.engine.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
 
     <copy
       file="${derby.engine.src.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"
-      tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>
+      tofile="${out.engine.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>
 
   </target>
 	
   <target name="parser" >
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating SQL parser..."/>
+      <property name="outroot" value="${generated.src.engine.dir}"/>
       <property name="srcroot" value="engine"/>
       <property name="directory" value="${derby.dir}/impl/sql/compile"/>
       <property name="rmfiles" value="implparser_rm.files"/>
@@ -122,7 +124,7 @@
       we delete the conflicting classes here.
     -->
     <delete>
-      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+      <fileset dir="${generated.src.engine.dir}/${derby.dir}/impl/sql/compile">
         <include name="CharStream.java"/>
         <include name="ParseException.java"/>
         <include name="Token.java"/>
@@ -131,7 +133,7 @@
 
     <!-- Reduce the visibility of these files from public to package. -->
     <replaceregexp match="^public (class|interface)" replace="\1" flags="m">
-      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+      <fileset dir="${generated.src.engine.dir}/${derby.dir}/impl/sql/compile">
         <include name="SQLParser.java"/>
         <include name="SQLParserConstants.java"/>
         <include name="SQLParserTokenManager.java"/>

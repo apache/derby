@@ -15,7 +15,7 @@
 //   limitations under the License.
 //
 
-grant codeBase "${derbyTesting.codejar}derby.jar"
+grant codeBase "${derbyTesting.engine}"
 {
   // These permissions are needed for everyday, embedded Derby usage.
   //
@@ -99,7 +99,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar"
 //
 // Permissions for the tests (derbyTesting.jar)
 //
-grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testing}" {
   // Allow tests to install and uninstall the security manager and
   // to refresh the policy
   permission java.util.PropertyPermission "java.security.policy", "read,write";
@@ -117,7 +117,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 };
 
 
-grant codeBase "${derbyTesting.codejar}derbytools.jar"
+grant codeBase "${derbyTesting.tools}"
 {
   // Needed by sysinfo. The file permission is needed to check the existence of
   // jars on the classpath. You can limit this permission to just the locations
