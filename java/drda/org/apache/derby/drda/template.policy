@@ -52,9 +52,13 @@ grant codeBase "${derby.install.url}derby.jar"
   // This permission also lets you import/export data to and from arbitrary
   // locations in your file system.
   //
-  // You may want to restrict this access to specific directories.
+  // NOTE: this permission is commented out. You should NOT grant blanket
+  // permission to the entire filesystem! If you choose to use this
+  // permission to allow the server to access files outside of the
+  // server's home directory, you should name those specific directories
+  // in the permisson (that is, do NOT specify ALL FILES).
   //
-  permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
+  // permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
 
   // Permissions needed for JMX based management and monitoring.
   //
@@ -139,9 +143,11 @@ grant codeBase "${derby.install.url}derbynet.jar"
   //
   // permission java.net.SocketPermission "*", "connect,resolve";
 
-  // Needed by sysinfo. The file permission is needed to check the existence of
-  // jars on the classpath. You can limit this permission to just the locations
-  // which hold your jar files.
+  // Needed by sysinfo. A file permission is needed to check the existence of
+  // jars on the classpath. Note that this permission is commented out! 
+  // You should limit this permission to just the locations which hold
+  // your jar files; do NOT grant blanket permission to read the entire
+  // filesystem.
   //
   // In this template file, this block of permissions is granted to
   // derbynet.jar under the assumption that derbynet.jar is the first jar file
@@ -155,12 +161,12 @@ grant codeBase "${derby.install.url}derbynet.jar"
   //    derbyclient.jar
   //    derbytools.jar
   //
+  // permission java.io.FilePermission "${derby.install.directory}${/}-", "read";
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
   permission java.util.PropertyPermission "java.runtime.version", "read";
   permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
-  permission java.io.FilePermission "<<ALL FILES>>", "read";
 };
 

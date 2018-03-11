@@ -32,17 +32,7 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.io.FilePermission "${derby.system.home}${/}-",
       "read,write,delete";
 
-  // This permission lets you backup and restore databases to and from
-  // arbitrary locations in your file system.
-  //
-  // This permission also lets you import/export data to and from arbitrary
-  // locations in your file system.
-  //
-  // You may want to restrict this access to specific directories.
-  //
-  permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
-
-  // Needed by sysinfo. The file permission is needed to check the existence of
+  // Needed by sysinfo. A file permission is needed to check the existence of
   // jars on the classpath. You can limit this permission to just the locations
   // which hold your jar files. This block is reproduced for all codebases
   // which include the sysinfo classes--the policy file syntax does not let you
@@ -54,9 +44,9 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.util.PropertyPermission "java.runtime.version", "read";
   permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
-  permission java.io.FilePermission "<<ALL FILES>>", "read";
   permission java.io.FilePermission "java.runtime.version", "read";
   permission java.io.FilePermission "java.fullversion", "read";
+  permission java.io.FilePermission "${derby.install.path}${/}-", "read";
 
   // Permissions needed for JMX based management and monitoring.
   //
@@ -143,7 +133,7 @@ grant codeBase "${derby.install.url}derbynet.jar"
       "control,monitor";
   permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 
-  // Needed by sysinfo. The file permission is needed to check the existence of
+  // Needed by sysinfo. A file permission is needed to check the existence of
   // jars on the classpath. You can limit this permission to just the locations
   // which hold your jar files. This block is reproduced for all codebases
   // which include the sysinfo classes--the policy file syntax does not let you
@@ -155,15 +145,15 @@ grant codeBase "${derby.install.url}derbynet.jar"
   permission java.util.PropertyPermission "java.runtime.version", "read";
   permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
-  permission java.io.FilePermission "<<ALL FILES>>", "read";
   permission java.io.FilePermission "java.runtime.version", "read";
   permission java.io.FilePermission "java.fullversion", "read";
+  permission java.io.FilePermission "${derby.install.path}${/}-", "read";
 };
 
 
 grant codeBase "${derby.install.url}derbytools.jar"
 {
-  // Needed by sysinfo. The file permission is needed to check the existence of
+  // Needed by sysinfo. A file permission is needed to check the existence of
   // jars on the classpath. You can limit this permission to just the locations
   // which hold your jar files. This block is for all codebases which include
   // the sysinfo classes--the policy file syntax does not let you grant
@@ -182,7 +172,7 @@ grant codeBase "${derby.install.url}derbytools.jar"
 
 grant codeBase "${derby.install.url}derbyclient.jar"
 {
-  // Needed by sysinfo. The file permission is needed to check the existence of
+  // Needed by sysinfo. A file permission is needed to check the existence of
   // jars on the classpath. You can limit this permission to just the locations
   // which hold your jar files. This block is reproduced for all codebases
   // which include the sysinfo classes--the policy file syntax does not let you
@@ -194,7 +184,7 @@ grant codeBase "${derby.install.url}derbyclient.jar"
   permission java.util.PropertyPermission "java.runtime.version", "read";
   permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
-  permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.io.FilePermission "${derby.install.path}${/}-", "read";
 
   // The following permission must be granted for Connection.abort(Executor) to
   // work.  Note that this permission must also be granted to outer

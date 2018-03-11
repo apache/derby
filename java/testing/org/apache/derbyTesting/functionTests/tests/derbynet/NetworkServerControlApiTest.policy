@@ -186,6 +186,10 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 
   // Needed by NetworkServerTestSetup when probing ports.
   permission java.net.SocketPermission "localhost", "listen";
+  permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
+  permission java.net.SocketPermission "localhost", "accept,connect,listen";
+  permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
 };
 
 //

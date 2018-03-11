@@ -22,6 +22,10 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.io.File;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import javax.net.SocketFactory;
+import java.net.Socket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.AccessController;
@@ -205,6 +209,138 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         	// expected exception
         }
     }
+
+    /*
+     * CVE-2018-1313: Attempt to pass arguments to COMMAND_TESTCONNECTION
+     */
+    public void test_03_ping_args() throws Exception
+    {
+        String response = tryPingDbError("mydatabase", "myuser", "mypassword");
+        //System.out.println(response);
+        // This once said: XJ004:Database 'mydatabase' not found.
+        assertEquals("Usage", response.substring(0,5));
+
+        response = tryPingDbError("some/sorta/db","someone","somecredentials");
+        //System.out.println(response);
+        assertEquals("Usage", response.substring(0,5));
+
+        response = tryPingDbError("\\\\192.168.1.2\\guest\\db1","tata","tata");
+        //System.out.println(response);
+        assertEquals("Usage", response.substring(0,5));
+
+        response = tryPingDbError("my/nocred/db", "", "");
+        //System.out.println(response);
+        assertEquals("Usage", response.substring(0,5));
+
+        response = tryPingDbOK("", "scarface", "evildoer");
+        //System.out.println(response);
+        assertEquals("OK", response.substring(0,2));
+    }
+
+    private Socket privilegedClientSocket(final String host, int port)
+                        throws Exception
+    {
+        try {
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Socket>() {
+                public Socket run() throws Exception {
+                    return SocketFactory.getDefault().createSocket(
+                                InetAddress.getByName(host), port);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            throw (Exception)pae.getCause();
+        }
+    }
+
+    private static String byteArrayToHex(byte[] ba, int l)
+    {
+        if (l < 0) return "STRING OF NEGATIVE LENGTH("+l+")";
+        StringBuilder sb = new StringBuilder(l * 2);
+        for (int i = 0; i < l; i++) sb.append(String.format("%02x", ba[i]));
+        return sb.toString();
+    }
+
+    private String tryPingDbError(String d, String u, String p)
+                    throws Exception
+    {
+        return tryPingDbTest(2, d, u, p); // Result 2: ERROR
+    }
+
+    private String tryPingDbOK(String d, String u, String p)
+                    throws Exception
+    {
+        return tryPingDbTest(0, d, u, p); // Result 0: OK
+    }
+
+    private String tryPingDbTest(int rc, String d, String u, String p)
+                    throws Exception
+    {
+        //System.out.println("database: '"+d+"' (len: "+d.length()+")");
+        //System.out.println("    user: '"+u+"' (len: "+u.length()+")");
+        //System.out.println("password: '"+p+"' (len: "+p.length()+")");
+
+        Socket clientSocket = privilegedClientSocket(
+                TestConfiguration.getCurrent().getHostName(),
+                TestConfiguration.getCurrent().getPort());
+        ByteArrayOutputStream byteArrayOs = new ByteArrayOutputStream();
+        DataOutputStream commandOs = new DataOutputStream(byteArrayOs);
+
+        byte[] msgBytes = "CMD:".getBytes("UTF8");
+        commandOs.write(msgBytes,0,msgBytes.length);
+        commandOs.writeByte((byte) 0); // default version: 02
+        commandOs.writeByte((byte) 2); // default version: 02
+        commandOs.writeByte((byte) 0); // default locale: 0
+        commandOs.writeByte((byte) 0); // default codeset: 0
+        commandOs.writeByte((byte) 4); // COMMAND_TESTCONNECTION
+
+        msgBytes = d.getBytes("UTF8");
+        commandOs.writeByte((byte)(msgBytes.length >> 8 ));
+        commandOs.writeByte((byte) msgBytes.length);
+        commandOs.write(msgBytes,0,msgBytes.length);
+
+        msgBytes = u.getBytes("UTF8");
+        commandOs.writeByte((byte)(msgBytes.length >> 8 ));
+        commandOs.writeByte((byte) msgBytes.length);
+        commandOs.write(msgBytes,0,msgBytes.length);
+
+        msgBytes = p.getBytes("UTF8");
+        commandOs.writeByte((byte)(msgBytes.length >> 8 ));
+        commandOs.writeByte((byte) msgBytes.length);
+        commandOs.write(msgBytes,0,msgBytes.length);
+
+        byteArrayOs.writeTo(clientSocket.getOutputStream());
+        commandOs.flush();
+        byteArrayOs.reset();
+        clientSocket.shutdownOutput();
+
+        byte[]result = new byte[1024];
+        int resultLen = clientSocket.getInputStream().read(result);
+
+        clientSocket.close();
+        
+        //System.out.println( "Result was " + resultLen + " bytes long");
+        //System.out.println( byteArrayToHex(result,resultLen) );
+        
+        if (resultLen < 0)
+            return "DISCONNECT";
+
+        String r = "RPY:";
+        int rl   = r.length();
+        assertTrue(resultLen > rl);
+        String header = new String(result, 0, rl, "UTF8");
+        assertEquals(r, header);
+        assertEquals(rc, result[rl++]); // 0: OK, 2: ERROR, 3: SQLERROR, etc.
+
+        if (rc == 0)
+            return "OK";
+
+        int l = ((result[rl++] & 0xff) << 8) + (result[rl++] & 0xff);
+        String response = new String(result, rl, l, "UTF8");
+
+        return response;
+    }
+
     
     /**
      * Wraps InitAddress.getByName in privilege block.

@@ -21,6 +21,7 @@
 
 package org.apache.derby.drda;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -686,10 +687,14 @@ public class NetworkServerControl{
         // network codesources. Do not let the customer
         // override this
         //
-        String      derbyInstallURL = getCodeSourcePrefix( server );
+        URL    derbyInstallURL = getCodeSourceURL( server );
+        String derbyInstallStr = getCodeSourcePrefix( server, derbyInstallURL );
+        String derbyInstallPth = new File(derbyInstallURL.getFile())
+                                 .getParentFile().getAbsolutePath();
 
-        System.setProperty( Property.DERBY_INSTALL_URL, derbyInstallURL );
-        
+        System.setProperty( Property.DERBY_INSTALL_URL, derbyInstallStr );
+        System.setProperty( Property.DERBY_INSTALL_PATH, derbyInstallPth );
+
         //
         // Now install a SecurityManager, using the Basic policy file.
         //
@@ -790,7 +795,7 @@ public class NetworkServerControl{
      * same directory.
      * </p>
      */
-    private static  String  getCodeSourcePrefix( NetworkServerControlImpl server )
+    private static  URL  getCodeSourceURL( NetworkServerControlImpl server )
         throws Exception
     {
         // Note: This method is expected to run only when no security manager
@@ -801,9 +806,14 @@ public class NetworkServerControl{
             return null;
         }
         URL url = cs.getLocation();
-        if (url == null) {
-            return null;
-        }
+		return url;
+	}
+
+	private static String getCodeSourcePrefix(
+                NetworkServerControlImpl server,
+                URL url )
+		throws Exception
+	{
         // Replace in "file://some", but not in "file:///some".
         String extForm = url.toExternalForm().replaceFirst(
                 "^file://([^/].*)", "file:////$1");

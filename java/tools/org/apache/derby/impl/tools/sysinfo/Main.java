@@ -23,6 +23,8 @@ package org.apache.derby.impl.tools.sysinfo;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -889,6 +891,31 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                                     ".properties",
                                 };
 
+	private static final String jarNames[] = 
+	{
+        "derby.jar",
+        "derbyclient.jar",
+        "derbynet.jar",
+        "derbyoptionaltools.jar",
+        "derbyrun.jar",
+        "derbyshared.jar",
+        "derbyTesting.jar",
+        "derbytools.jar",
+        "derbyLocale_cs.jar",
+        "derbyLocale_de_DE.jar",
+        "derbyLocale_es.jar",
+        "derbyLocale_ja_JP.jar",
+        "derbyLocale_ko_KR.jar",
+        "derbyLocale_pl.jar",
+        "derbyLocale_pt_BR.jar",
+        "derbyLocale_ru.jar",
+        "derbyLocale_fr.jar",
+        "derbyLocale_zh_CN.jar",
+        "derbyLocale_hu.jar",
+        "derbyLocale_zh_TW.jar",
+        "derbyLocale_it.jar"
+	};
+
     /**
      *  Get all the info we can obtain from the local execution context
      *  as to the availability of the Derby classes by attempting to load
@@ -920,9 +947,23 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         {
 			if (classpath != null) {
 				String cp [] = parseClasspath(classpath);
+				List<String> jarNamesList = Arrays.asList(jarNames);
 				Vector<ZipInfoProperties> v = new Vector<ZipInfoProperties>();
 				for (int i = 0; i < cp.length; i++)
 				{
+                    boolean matches = false;
+                    String candidate = cp[i];
+                    for (String jarName : jarNames)
+                    {
+                        if (candidate.endsWith(jarName))
+                        {
+                            matches = true;
+                            break;
+                        }
+                    }
+                    if (!matches)
+                        continue;
+
 					ZipInfoProperties zip = null;
 					try {
 						zip = checkForInfo(cp[i]);

@@ -1820,11 +1820,11 @@ public final class NetworkServerControlImpl {
                     consolePropertyMessage("DRDA_TraceDirectoryChange.I", traceDirectory);
                     break;
                 case COMMAND_TESTCONNECTION:
-                    databaseArg = reader.readCmdString();
-                    userArg = reader.readCmdString();
-                    passwordArg = reader.readCmdString();
+                    databaseArg = reader.readCmdString(); // This is ...
+                    userArg = reader.readCmdString(); // ... no longer ...
+                    passwordArg = reader.readCmdString(); // ... supported.
                     if (databaseArg != null)
-                        connectToDatabase(writer, databaseArg, userArg, passwordArg);
+                        sendMessage(writer, ERROR, "Usage: ping()");
                     else
                         sendOK(writer);
                     break;
@@ -3930,46 +3930,6 @@ public final class NetworkServerControlImpl {
     }
 
     
-
-    /**
-     * Connect to a database to test whether a connection can be made
-     *
-     * @param writer    connection to send message to
-     * @param database  database directory to connect to
-     * @param user      user to use
-     * @param password  password to use
-     */
-    private void connectToDatabase(DDMWriter writer, String database, String user, 
-        String password) throws Exception
-    {
-        Properties p = new Properties();
-        if (user != null)
-            p.put("user", user);
-        if (password != null)
-            p.put("password", password);
-        try {
-            Class.forName(CLOUDSCAPE_DRIVER);
-        }
-        catch (Exception e) {
-            sendMessage(writer, ERROR, e.getMessage());
-            return;
-        }
-        try {
-            //Note, we add database to the url so that we can allow additional
-            //url attributes
-            Connection conn = getDriver().connect(Attribute.PROTOCOL+database, p);
-            // send warnings
-            SQLWarning warn = conn.getWarnings();
-            if (warn != null)
-                sendSQLMessage(writer, warn, SQLWARNING);
-            else
-                sendOK(writer);
-            conn.close();
-            return;
-        } catch (SQLException se) {
-            sendSQLMessage(writer, se, SQLERROR);
-        }
-    }
 
     /**
      * Wrap SQL Error - display to console and raise exception

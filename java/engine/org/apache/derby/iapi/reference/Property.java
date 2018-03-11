@@ -416,6 +416,7 @@ public interface Property {
      * This property is the location of the derby jars.
      **/
     public static final String DERBY_INSTALL_URL = "derby.install.url";
+    public static final String DERBY_INSTALL_PATH = "derby.install.path";
 
     /**
      * This property is private to Derby.
