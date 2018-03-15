@@ -250,45 +250,7 @@
         includes="**/*.policy"/>  
     </copy>
 
-    <antcall target="build-test-jars"/>
-
-<!-- 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.junit.dir}"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.unittest.dir}"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/compatibility"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbcapi"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/store"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/engine"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/storetests"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/tools"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/nist"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/demo"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/derbynet"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/unit"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/i18n"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/perf"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/management"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/memory"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/memorydb"/>
-  	<ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/multi"/>
-  	<ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/upgradeTests"/> 
-  	<ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/replicationTests"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/largedata"/>  
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/master"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.suites.dir}"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/mailjdbc"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/nstest"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/oe"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/optimizer"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/sttest"/>
-  	<ant dir="${derby.testing.src.dir}/${derby.testing.perf.dir}"/> 
--->
+    <!-- <antcall target="build-test-jars"/> -->
   </target>
 
   <target name="build-test-jars" description="Build jar files used in tests.">
