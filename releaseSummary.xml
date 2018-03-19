@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.13.1.1</previousReleaseID>
+<previousReleaseID>10.14.1.0</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -47,10 +47,10 @@ with real information.
 <buildInfo>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Mac OSX 10.11.5.</machine>
+  <machine>Fedora 27</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
-  <antVersion>Apache Ant(TM) version 1.9.2 compiled on July 8 2013.</antVersion>
+  <antVersion>Apache Ant(TM) version 1.9.5 compiled on May 31 2015</antVersion>
 
   <!--
          Say which compilers you used.
@@ -59,7 +59,7 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>All classes were compiled by the javac from the 1.8.0_101 JDK, Java HotSpot(TM) 64-Bit Server VM (build 25.101-b13, mixed mode).</compilers>
+  <compilers>All classes were compiled by the javac from the 1.8.0_151 JDK, OpenJDK 64-Bit Server VM (build 25.151-b12, mixed mode)</compilers>
 
 </buildInfo>
 
@@ -96,14 +96,8 @@ Support for Java SE 8 is being sunsetted and will not be supported by the next (
 <newFeatures>
 
 <p>
-This is a feature release. The following new features were added:
+This is a patch release. No new features have been added.
 </p>
-
-<ul>
-
-<li><b>ALTER TABLE cycling</b> - The ALTER TABLE command can now change the cycling behavior of auto-increment columns. See the section on this statement in the Derby Reference Manual.</li>
-
-</ul>
 
 </newFeatures>
 
