@@ -73,7 +73,7 @@
   <taskdef
     name="generateReleaseNotes"
     classname="org.apache.derbyBuild.ReleaseNotesGenerator"
-    classpath="${out.dir}"
+    classpath="${out.build.dir}"
   />
 
 <!-- Targets -->
@@ -120,41 +120,6 @@
       depends="missing-properties, maven-exec-windows, maven-exec-unix"
       description="Generates the release notes. Takes the following properties: jira.user, jira.password, release.version, relnotes.src.reports, jira.filter.id (optional), reportDisqualifications (optional)">
 
-        <!-- Build the JIRA SOAP client -->
-	<exec executable="${mvn.exec}"
-                dir="${basedir}/tools/release/jirasoap">
-        <!-- comment out the two lines below for debugging -->
-        <arg line="--quiet"/>
-        <arg line="--batch-mode"/>
-        <arg line="-Pbuildclient"/>
-        </exec>
-
-        <!-- Define the task which generates the issue list data for the
-             release notes generator
-        -->
-        <taskdef
-            name="jirasoapclient"
-            classname="org.apache.derbyBuild.jirasoap.FilteredIssueListerAntWrapper"
-            classpath="${jirasoap.generated}/JiraSOAP-LATEST-jar-with-dependencies.jar"
-        />
-
-        <!-- Set default for jira.filter.id (0 to use JQL). -->
-        <condition property="jira.filter.id" value="0">
-          <not>
-              <isset property="${jira.filter.id}" />
-          </not>
-        </condition>
-
-        <!-- Execute the JIRA SOAP client -->
-        <jirasoapclient
-            user="${jira.user}"
-            password="${jira.password}"
-            releaseVersion="${release.version}"
-            filterId="${jira.filter.id}"
-            outputFile="${relnotes.src.buglist}"
-            reportDisqualifications="${reportDisqualifications}"
-        />
-            
      <generateReleaseNotes
        summaryFileName="${relnotes.src.summary}"
        bugListFileName="${relnotes.src.buglist}"
