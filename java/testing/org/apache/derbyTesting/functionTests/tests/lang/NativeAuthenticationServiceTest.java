@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.ArrayList;
 import java.util.Properties;
 import javax.sql.DataSource;
 import junit.framework.Test;
@@ -1581,14 +1582,20 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 SQLException se = (SQLException) t;
                 StringBuffer    buffer = new StringBuffer();
 
+                ArrayList<String> actualSQLStates = new ArrayList<String>();
+
                 //  ok if the sqlstate is one of the expected ones
                 for ( int i = 0; i < expectedSQLStates.length; i++ )
                 {
                     String  expected = expectedSQLStates[ i ];
                     buffer.append( " " + expected );
-                    if ( vetSQLState( se, expected ) ) { return null; }
+                    if ( vetSQLState( se, expected, actualSQLStates ) ) { return null; }
                 }
-                fail( tagError( "SQLState not in expected list: " + buffer.toString() ) );
+                fail
+                  (
+                   tagError
+                   ( "SQLState(s) " + actualSQLStates + " not in expected list: " + buffer.toString() )
+                  );
             }
             else
             {
@@ -1600,20 +1607,24 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         return conn;
     }
     // look for a sql state in a SQLException and its chained exceptions. returns true if found
-    private boolean    vetSQLState( SQLException actual, String expectedSQLState )
+    private boolean    vetSQLState
+      ( SQLException actual, String expectedSQLState, ArrayList<String> actualSQLStates )
         throws Exception
     {
         if ( actual == null ) { return false; }
 
-        if ( expectedSQLState.equals( actual.getSQLState() ) ) { return true; }
+        String actualSQLState = actual.getSQLState();
+        actualSQLStates.add(actualSQLState);
+
+        if ( expectedSQLState.equals( actualSQLState ) ) { return true; }
 
         Throwable   t = actual.getCause();
         if ( t instanceof SQLException )
         {
-            if ( vetSQLState( (SQLException) t, expectedSQLState ) ) { return true; }
+            if ( vetSQLState( (SQLException) t, expectedSQLState, actualSQLStates ) ) { return true; }
         }
 
-        return vetSQLState( actual.getNextException(), expectedSQLState );
+        return vetSQLState( actual.getNextException(), expectedSQLState, actualSQLStates );
     }
 
     // connect but expect a warning that the password is about to expire
