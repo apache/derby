@@ -65,12 +65,12 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.drda.dir}">
       <compilerarg value="-Xlint:unchecked"/>
-      <classpath>
+      <modulepath>
         <pathelement location="${servlet24}"/>
         <pathelement location="${out.engine.dir}"/>
         <pathelement location="${out.shared.dir}"/>
         <pathelement location="${out.tools.dir}"/>
-      </classpath>
+      </modulepath>
     </javac>
 
     <copy

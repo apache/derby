@@ -182,7 +182,7 @@ public class VetJigsawTest extends BaseJDBCTestCase
              "insert into zipClasses\n" +
              "  select directory, '" + fullJarFileName + "', name\n" +
              "  from table(zipFile('" + fullJarFileName + "')) t\n" +
-             "  where name like '%.class'"
+             "  where name like '%.class' and name <> 'module-info.class'"
              );
     }
     private String vetContents() throws Exception

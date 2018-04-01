@@ -1,3 +1,4 @@
+module-info.class
 org.apache.derby.iapi.tools.ToolUtils.class
 org.apache.derby.iapi.tools.i18n.LocalizedInput.class
 org.apache.derby.iapi.tools.i18n.LocalizedOutput.class

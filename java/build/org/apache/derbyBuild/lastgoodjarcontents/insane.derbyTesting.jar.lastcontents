@@ -1,12 +1,14 @@
 SimpleApp.class
-org.apache.derby.impl.tools.ij.SimpleCharStream.class
-org.apache.derby.impl.tools.ij.mtGrammar.class
-org.apache.derby.impl.tools.ij.mtGrammarConstants.class
-org.apache.derby.impl.tools.ij.mtGrammarTokenManager.class
-org.apache.derby.impl.tools.ij.mtTestCase.class
-org.apache.derby.impl.tools.ij.mtTestSuite.class
-org.apache.derby.impl.tools.ij.mtTester.class
-org.apache.derby.impl.tools.ij.mtTime.class
+WwdClientExample.class
+WwdEmbedded.class
+WwdUtils.class
+org.apache.derbyDemo.vtis.core.FlatFileVTI.class
+org.apache.derbyDemo.vtis.example.ApacheServerLogVTI.class
+org.apache.derbyDemo.vtis.example.DerbyJiraReportVTI.class
+org.apache.derbyDemo.vtis.example.LineListVTI.class
+org.apache.derbyDemo.vtis.example.PropertyFileVTI.class
+org.apache.derbyDemo.vtis.example.SubversionLogVTI.class
+toursdb.insertMaps.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamDrainer.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamSaver.class
 org.apache.derbyTesting.functionTests.harness.CopySuppFiles.class
@@ -1035,4 +1037,3 @@ org.apache.derbyTesting.unitTests.store.T_b2i.class
 org.apache.derbyTesting.unitTests.store.commit_method.class
 org.apache.derbyTesting.unitTests.util.BitUtil.class
 org.apache.derbyTesting.unitTests.util.MsgTrace.class
-toursdb.insertMaps.class

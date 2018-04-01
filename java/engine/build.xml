@@ -66,10 +66,10 @@
       srcdir="${derby.engine.src.dir}:${generated.src.engine.dir}"
       destdir="${out.engine.dir}">
       <compilerarg value="-Xlint:unchecked"/>
-      <classpath>
+      <modulepath>
 		    <pathelement location="${out.shared.dir}"/>
 		    <pathelement location="${osgi}"/>
-      </classpath>
+      </modulepath>
     </javac>
 
     <ant dir="${derby.build.src.dir}"/>

@@ -62,9 +62,9 @@
       srcdir="${derby.client.src.dir}"
       destdir="${out.client.dir}">
       <compilerarg value="-Xlint"/>
-      <classpath>
+      <modulepath>
 		    <pathelement location="${out.shared.dir}"/>
-      </classpath>
+      </modulepath>
    </javac>
 </target> 
 

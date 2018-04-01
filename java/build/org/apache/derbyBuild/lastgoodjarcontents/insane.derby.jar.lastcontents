@@ -1,3 +1,4 @@
+module-info.class
 org.apache.derby.agg.Aggregator.class
 org.apache.derby.authentication.SystemPrincipal.class
 org.apache.derby.authentication.UserAuthenticator.class

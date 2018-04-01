@@ -908,10 +908,11 @@
       srcdir="${generated.src.engine.dir}"
       destdir="${out.engine.dir}">
       <include name="${derby.dir}/iapi/services/cache/ClassSizeCatalogImpl.java"/>
-      <classpath>
+      <modulepath>
 		    <pathelement location="${out.shared.dir}"/>
 		    <pathelement location="${out.engine.dir}"/>
-      </classpath>
+		    <pathelement location="${osgi}"/>
+      </modulepath>
     </javac>
 
   </target>

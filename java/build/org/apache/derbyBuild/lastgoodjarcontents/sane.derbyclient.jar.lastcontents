@@ -1,3 +1,4 @@
+module-info.class
 org.apache.derby.client.BasicClientDataSource.class
 org.apache.derby.client.ClientAutoloadedDriver.class
 org.apache.derby.client.ClientConnectionPoolDataSourceInterface.class

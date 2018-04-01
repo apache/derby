@@ -1,3 +1,4 @@
+module-info.class
 org.apache.derby.drda.NetServlet.class
 org.apache.derby.drda.NetworkServerControl.class
 org.apache.derby.impl.drda.AppRequester.class

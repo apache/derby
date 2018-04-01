@@ -1,3 +1,4 @@
+module-info.class
 org.apache.derby.optional.api.LuceneIndexDescriptor.class
 org.apache.derby.optional.api.LuceneUtils.class
 org.apache.derby.optional.api.SimpleJsonUtils.class

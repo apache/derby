@@ -69,10 +69,10 @@
       <include name="${derby.dir}/${cur.dir}/**"/>
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
-      <classpath>
+      <modulepath>
 		    <pathelement location="${out.drda.dir}"/>
 		    <pathelement location="${out.tools.dir}"/>
-      </classpath>
+      </modulepath>
     </javac>
 
   </target>

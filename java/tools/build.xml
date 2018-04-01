@@ -72,11 +72,11 @@
       srcdir="${derby.tools.src.dir}:${generated.src.tools.dir}"
       destdir="${out.tools.dir}">
       <compilerarg value="-Xlint"/>
-      <classpath>
+      <modulepath>
 		    <pathelement location="${out.shared.dir}"/>
 		    <pathelement location="${out.engine.dir}"/>
 		    <pathelement location="${out.client.dir}"/>
-      </classpath>
+      </modulepath>
    </javac>
 
     <copy todir="${loc.tools.dir}" flatten="true">
