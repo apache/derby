@@ -54,6 +54,7 @@ public class VetJigsawTest extends BaseJDBCTestCase
         "derbyrun.jar",
         "derbyshared.jar",
         "derbytools.jar",
+        "derbyTesting.jar",
     };
 
     ////////////////////////////////////////////////
@@ -211,25 +212,28 @@ public class VetJigsawTest extends BaseJDBCTestCase
     }
     private void examinePackage(StringBuilder buffer, String packageName) throws Exception
     {
-        boolean packageHasClasses = false;
  
         String packageContents =
           "select zipFileName, className\n" +
           "from zipClasses\n" +
           "where packageName = '" + packageName + "'\n" +
           "order by zipFileName, className\n";
+        StringBuffer localBuffer = new StringBuffer();
+        int zipsWithClasses = 0;
           
         try (PreparedStatement ps = prepareStatement(packageContents))
         {
+            String lastZipFileName = null;
             try (ResultSet rs = ps.executeQuery())
             {
                 while(rs.next())
                 {
                     String zipFileName = rs.getString(1);
                     String className = rs.getString(2);
-                    packageHasClasses = true;
+                    if ((lastZipFileName != null) && !zipFileName.equals(lastZipFileName))
+                    { zipsWithClasses++; }
 
-                    buffer
+                    localBuffer
                       .append("    ")
                       .append(zipFileName)
                       .append("\t")
@@ -239,10 +243,12 @@ public class VetJigsawTest extends BaseJDBCTestCase
             }
         }
 
-        if (packageHasClasses)
+        if (zipsWithClasses > 1)
         {
-            buffer.insert(0, packageName + " straddles more than one jar file:\n");
-            buffer.append("\n");
+            buffer
+              .append(packageName + " straddles more than one jar file:\n")
+              .append(localBuffer.toString())
+              .append("\n");
         }
     }
 

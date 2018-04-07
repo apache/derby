@@ -105,6 +105,7 @@
     <mkdir dir="${out.storeless.dir}"/>
     <mkdir dir="${out.stubs.dir}"/>
     <mkdir dir="${out.testing.dir}"/>
+    <mkdir dir="${out.pptesting.dir}"/>
     <mkdir dir="${out.tools.dir}"/>
     <mkdir dir="${out.locales.dir}"/>
   </target>
@@ -624,6 +625,7 @@
 
   <target name="testing" depends="buildsource,demo,buildtestinginfo">
     <ant dir="${derby.testing.src.dir}"/>
+    <ant dir="${derby.pptesting.src.dir}"/>
   </target>
 	
   <target name="build-test-jars" description="Build jar files used in tests." depends="buildsource" >

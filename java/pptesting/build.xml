@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to you under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!-- ==================================================================== -->
+<!--                       Apache Derby build file                        -->
+<!-- ==================================================================== -->
+
+<project default="pptesting" basedir="../..">
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <property name="properties.dir" value="tools/ant/properties"/>
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <property file="${properties.dir}/parser.properties"/>
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="pptesting" 
+          description="Build Derby package private tests">
+
+    <javac
+      source="${min.version}"
+      target="${min.version}"
+      nowarn="on"
+      debug="${debug}" debuglevel="${debuglevel}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.pptesting.src.dir}"
+      destdir="${out.pptesting.dir}">
+      <compilerarg value="-Xlint"/>
+      <classpath>
+        <pathelement path="${out.shared.dir}"/>
+        <pathelement path="${out.engine.dir}"/>
+        <pathelement path="${out.client.dir}"/>
+        <pathelement path="${out.drda.dir}"/>
+        <pathelement path="${out.tools.dir}"/>
+        <pathelement path="${out.optional.dir}"/>
+        <pathelement path="${out.run.dir}"/>
+        <pathelement path="${out.testing.dir}"/>
+        <pathelement path="${out.demo.dir}"/>
+
+        <pathelement path="${junit}"/>
+      </classpath>
+   </javac>
+  </target>
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
+</project>
+
