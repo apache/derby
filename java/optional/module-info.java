@@ -20,4 +20,12 @@ module org.apache.derby.optionaltools
     requires static lucene.analyzers.common;
     requires static lucene.core;
     requires static lucene.queryparser;
+
+    //
+    // DERBY PUBLIC API
+    //
+    // VISIBLE TO ALL CLASSES AT RUNTIME.
+    //
+    exports org.apache.derby.optional.api;
+
 }

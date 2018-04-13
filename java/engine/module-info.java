@@ -177,6 +177,9 @@ module org.apache.derby.engine
     exports org.apache.derby.impl.sql to
         org.apache.derby.tests;
 
+    exports org.apache.derby.impl.sql.execute to
+        org.apache.derby.tests;
+
     exports org.apache.derby.impl.sql.catalog to
         org.apache.derby.tests;
 
@@ -187,6 +190,9 @@ module org.apache.derby.engine
         org.apache.derby.tests;
 
     exports org.apache.derby.impl.store.access.conglomerate to
+        org.apache.derby.tests;
+
+    exports org.apache.derby.impl.store.access.heap to
         org.apache.derby.tests;
 
     exports org.apache.derby.impl.store.raw.data to

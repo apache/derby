@@ -25,7 +25,8 @@ module org.apache.derby.client
     // ONLY VISIBLE TO OTHER DERBY MODULES.
     //
     exports org.apache.derby.client to
-        org.apache.derby.tools;
+        org.apache.derby.tools,
+        org.apache.derby.tests;
 
     exports org.apache.derby.client.am to
         org.apache.derby.tests;
