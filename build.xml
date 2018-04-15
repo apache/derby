@@ -623,7 +623,7 @@
     <ant dir="${derby.demo.src.dir}" target="compile-vtidemo"/>
   </target>
 
-  <target name="testing" depends="buildsource,demo,buildtestinginfo">
+  <target name="testing" depends="buildsource,buildtestinginfo">
     <ant dir="${derby.testing.src.dir}"/>
     <ant dir="${derby.pptesting.src.dir}"/>
   </target>
@@ -1813,8 +1813,7 @@
     </antcall>
 
     <zip destfile="${derby.jar.dir}/derbyTesting.jar" filesonly="true" compress="true">
-      <fileset dir="${out.demo.dir}" includes="**"/>
-      <fileset dir="${out.testing.dir}" includes="org/apache/derbyTesting/**,org/apache/derby/info/tsting/**"/>
+      <fileset dir="${out.testing.dir}" includes="org/apache/derbyTesting/**,toursdb/**,SimpleApp.class,org/apache/derby/info/tsting/**"/>
     </zip>
   </target>
 
@@ -2526,7 +2525,6 @@
             <pathelement location="${javatools.dir}/junit.jar"/>
             <pathelement location="${out.build.dir}"/>
             <pathelement location="${out.client.dir}"/>
-            <pathelement location="${out.demo.dir}"/>
             <pathelement location="${out.drda.dir}"/>
             <pathelement location="${out.engine.dir}"/>
             <pathelement location="${out.optional.dir}"/>
@@ -2759,7 +2757,6 @@ you should not have to do this.
             <report verbosity="verbose" depth="method">
                 <sourcepath>
                     <pathelement path="${derby.client.src.dir}" />
-                    <pathelement path="${derby.demo.src.dir}" />
                     <pathelement path="${derby.drda.src.dir}" />
                     <pathelement path="${derby.engine.src.dir}" />
                     <pathelement path="${derby.shared.src.dir}" />

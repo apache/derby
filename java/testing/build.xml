@@ -66,10 +66,11 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
+      srcdir="${derby.testing.src.dir}:${derby.demo.src.dir}:${derby.demo.src.dir}/simple"
+      excludes="nserverdemo/**,scores/**,vtis/**,workingwithderby/**"
       destdir="${out.testing.dir}">
       <compilerarg value="-Xlint"/>
-      <classpath>
+      <modulepath>
         <pathelement path="${out.shared.dir}"/>
         <pathelement path="${out.engine.dir}"/>
         <pathelement path="${out.client.dir}"/>
@@ -78,14 +79,13 @@
         <pathelement path="${out.optional.dir}"/>
         <pathelement path="${out.run.dir}"/>
         <pathelement path="${out.testing.dir}"/>
-        <pathelement path="${out.demo.dir}"/>
 
         <pathelement path="${junit}"/>
         <pathelement path="${lucene_core}"/>
         <pathelement path="${lucene_a_co}"/>
         <pathelement path="${lucene_qp}"/>
         <pathelement path="${json_simple}"/>
-      </classpath>
+      </modulepath>
    </javac>
 
    <copy todir="${out.testing.dir}/${derby.testing.functest.dir}/harness">
@@ -248,6 +248,11 @@
     <copy todir="${out.testing.dir}/${derby.testing.unittest.dir}">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.unittest.dir}" 
         includes="**/*.policy"/>  
+    </copy>
+
+    <copy todir="${out.testing.dir}/${derby.testing.functest.dir}/tests/demo">
+      <fileset dir="${derby.demo.src.dir}/toursdb"
+        includes="*.sql,*.gif"/>
     </copy>
 
     <!-- <antcall target="build-test-jars"/> -->
