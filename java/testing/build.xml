@@ -66,8 +66,8 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}:${derby.demo.src.dir}:${derby.demo.src.dir}/simple"
-      excludes="nserverdemo/**,scores/**,vtis/**,workingwithderby/**"
+      srcdir="${derby.testing.src.dir}:${derby.demo.src.dir}"
+      excludes="nserverdemo/**,scores/**,vtis/**,workingwithderby/**,simple/**"
       destdir="${out.testing.dir}">
       <compilerarg value="-Xlint"/>
       <modulepath>
