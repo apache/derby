@@ -1793,8 +1793,8 @@
 	 filesonly="true">
       <fileset dir="${out.locales.dir}"
 	       includes="org/apache/derby/info/*_${locale.iname}/info.properties,
-	                 org/apache/derby/loc/*_${locale.iname}.properties"
-           excludes="org/apache/derby/loc/clientmessages_${locale.iname}.properties"
+	                 org/apache/derby/loc/**/*_${locale.iname}.properties"
+           excludes="org/apache/derby/loc/**/clientmessages_${locale.iname}.properties"
       />
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/LICENSE,META-INF/NOTICE"/>

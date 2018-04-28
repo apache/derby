@@ -86,7 +86,7 @@
       </fileset>
     </copy>
 
-    <copy todir="${loc.locales.dir}" flatten="true">
+    <copy todir="${loc.locales.dir}/tools" flatten="true">
       <fileset dir="${derby.tools.locales.dir}">
         <include name="sysinfoMessages_*.properties"/>
         <include name="toolsmessages_*.properties"/>

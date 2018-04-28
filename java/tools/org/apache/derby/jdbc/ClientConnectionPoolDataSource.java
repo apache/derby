@@ -44,7 +44,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
     private static final long serialVersionUID = -539234282156481377L;
     /** Message utility used to obtain localized messages. */
     private static final MessageUtil msgUtil =
-            new MessageUtil("org.apache.derby.loc.clientmessages");
+            new MessageUtil(MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME);
     public static final String className__ = "org.apache.derby.jdbc.ClientConnectionPoolDataSource";
 
     /**

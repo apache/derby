@@ -1089,7 +1089,7 @@ class NetStatementReply extends NetPackageReply
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
             new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
             MessageUtil.getCompleteMessage(MessageId.CONN_DRDA_QRYOPEN,
-                SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
+                MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME,
                 (Object [])null)));
     }
 

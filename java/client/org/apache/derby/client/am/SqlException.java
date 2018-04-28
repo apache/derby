@@ -118,7 +118,7 @@ public class SqlException extends Exception implements Diagnosable {
      */
     public static MessageUtil getMessageUtil() {
         if ( msgutil_ == null ) {
-            msgutil_ = new MessageUtil(CLIENT_MESSAGE_RESOURCE_NAME);
+            msgutil_ = new MessageUtil(MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME);
         }
         
         return msgutil_;

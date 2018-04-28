@@ -90,12 +90,6 @@ import org.apache.derby.iapi.tools.i18n.*;
 public final class Main {
 
     /**
-     * Name of file which contains messages for sysinfo.
-     */
-    private final static String MESSAGE_FILE =
-        "org.apache.derby.loc.sysinfoMessages";
-
-    /**
      * Resource for localizing the sysinfo messages.
      *
      * The default LocalizedResource reads messages from the toolsmessages
@@ -108,7 +102,7 @@ public final class Main {
      * <code>main()</code>.
      */
     private final static LocalizedResource LOCALIZED_RESOURCE =
-        new LocalizedResource(MESSAGE_FILE);
+        new LocalizedResource(LocalizedResource.SYSINFO_MESSAGE_FILE);
 
   /**
     Application entry point for SysInfo.   This will print out

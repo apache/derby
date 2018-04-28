@@ -49,7 +49,7 @@ public class BasicClientConnectionPoolDataSource40
 
     /** Message utility used to obtain localized messages. */
     private static final MessageUtil msgUtil =
-            new MessageUtil("org.apache.derby.loc.clientmessages");
+            new MessageUtil(MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME);
 
     public static final String className__ =
             "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40";

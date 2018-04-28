@@ -45,7 +45,8 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	private ResourceBundle res;
 	private Locale locale;
 	private String encode;
-	private final static String MESSAGE_FILE = "org.apache.derby.loc.toolsmessages";
+	public final static String MESSAGE_FILE = "org.apache.derby.loc.tools.toolsmessages";
+	public final static String SYSINFO_MESSAGE_FILE = "org.apache.derby.loc.tools.sysinfoMessages";
     public final static String ENV_CODESET = "derby.ui.codeset";
     public final static String ENV_LOCALE = "derby.ui.locale";
 	private String messageFileName;
