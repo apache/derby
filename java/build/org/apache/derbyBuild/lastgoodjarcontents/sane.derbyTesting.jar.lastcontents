@@ -1,14 +1,3 @@
-SimpleApp.class
-WwdClientExample.class
-WwdEmbedded.class
-WwdUtils.class
-org.apache.derbyDemo.vtis.core.FlatFileVTI.class
-org.apache.derbyDemo.vtis.example.ApacheServerLogVTI.class
-org.apache.derbyDemo.vtis.example.DerbyJiraReportVTI.class
-org.apache.derbyDemo.vtis.example.LineListVTI.class
-org.apache.derbyDemo.vtis.example.PropertyFileVTI.class
-org.apache.derbyDemo.vtis.example.SubversionLogVTI.class
-toursdb.insertMaps.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamDrainer.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamSaver.class
 org.apache.derbyTesting.functionTests.harness.CopySuppFiles.class
@@ -1037,3 +1026,4 @@ org.apache.derbyTesting.unitTests.store.T_b2i.class
 org.apache.derbyTesting.unitTests.store.commit_method.class
 org.apache.derbyTesting.unitTests.util.BitUtil.class
 org.apache.derbyTesting.unitTests.util.MsgTrace.class
+toursdb.insertMaps.class

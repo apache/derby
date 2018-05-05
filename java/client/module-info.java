@@ -20,6 +20,12 @@ module org.apache.derby.client
     requires static java.naming;
 
     //
+    // PUBLISH THE CLIENT MESSAGE LOCALIZATIONS.
+    //
+    provides org.apache.derby.loc.client.spi.clientmessagesProvider
+        with org.apache.derby.loc.client.clientmessagesProviderImpl;
+
+    //
     // DERBY INTERNAL EXPORTS
     //
     // ONLY VISIBLE TO OTHER DERBY MODULES.

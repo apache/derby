@@ -81,6 +81,7 @@ org.apache.derby.jdbc.EmbeddedDriver.class
 org.apache.derby.jdbc.EmbeddedXADataSource.class
 org.apache.derby.jdbc.EmbeddedXADataSource40.class
 org.apache.derby.jdbc.ReferenceableDataSource.class
+org.apache.derby.loc.tools.toolsmessagesProviderImpl.class
 org.apache.derby.tools.JDBCDisplayUtil.class
 org.apache.derby.tools.PlanExporter.class
 org.apache.derby.tools.SignatureChecker.class
