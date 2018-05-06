@@ -1405,7 +1405,7 @@
 
     <jar destfile="${derby.jar.dir}/derby.jar"
          basedir="${out.engine.dir}"
-         excludes="**/D_*,**/*.done,**/*Test.class,**/_Suite.class"
+         excludes="**/D_*,**/*.done,**/*Test.class,**/_Suite.class,**/modules.properties"
          compress="true"
          filesonly="true"
          manifest="${derby.jar.dir}/lists/smf.mf">

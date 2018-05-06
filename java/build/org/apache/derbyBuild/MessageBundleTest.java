@@ -123,8 +123,6 @@ public class MessageBundleTest {
      * This assumes its available on the classpath
      */
     static void loadMessageBundleIds() throws Exception {
-        ResourceBundle bundle;
-        
         // The messages_*.properties files are split into fifty separate
         // message bundle files.  We need to load each one in turn
         int numBundles = 50;

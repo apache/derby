@@ -39,6 +39,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
+import org.apache.derby.shared.common.i18n.MessageService;
 
 public final class LocalizedResource  implements java.security.PrivilegedAction<String> {
 
@@ -169,16 +170,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		if (res != null){
 			return;
 		}
-		if ( locale == null || locale.toString().equals("none") ){
-			res = ResourceBundle.getBundle(messageFileName);
-		}
-		else
-		try {
-			res = ResourceBundle.getBundle(messageFileName,locale);
-		}
-		catch(java.util.MissingResourceException e){
-			res = ResourceBundle.getBundle(messageFileName,Locale.ENGLISH);
-		}
+        res = MessageService.getBundleWithEnDefault(messageFileName, locale);
 	}
 	private void initMaxSizes2(){
 		dateSize = 0;

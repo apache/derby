@@ -37,6 +37,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -45,7 +46,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public class MessageUtils 
 {
-	private static final Locale EN = new Locale("en", "US");
+    private static final Locale EN = new Locale("en", "US");
 	public static final String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
 	/** 
 	 * Pointer to the application requester
@@ -223,36 +224,6 @@ public class MessageUtils
 		return hash;
 	}
 
-	/**
-	 * Method to use instead of ResourceBundle.getBundle(). This method acts like ResourceBundle.
-	 * getBundle() but if the resource is not available in the requested locale, default locale 
-	 * or base class the one for en_US is returned.
-	 */
-	public static ResourceBundle getBundleWithEnDefault(String resource, Locale locale) {
-
-		try {
-			return ResourceBundle.getBundle(resource, locale);
-		} catch (MissingResourceException mre) {
-
-			// This covers the case where neither the
-			// requested locale or the default locale
-			// have a resource.
-
-			return ResourceBundle.getBundle(resource, EN);
-		}
-	}
-
-	/** 
-	 * 
-	 */
-    public static ResourceBundle getBundleForLocale(Locale locale, String msgId) {
-		try {
-			return MessageUtils.getBundleWithEnDefault("org.apache.derby.loc.m"+hashString50(msgId), locale);
-		} catch (MissingResourceException mre) {
-		}
-		return null;
-	}
-
 	public static String formatMessage(ResourceBundle bundle, String messageId, Object[] arguments, boolean lastChance) {
 
 		if (arguments == null)
@@ -366,7 +337,8 @@ public class MessageUtils
         }
 
         try {
-            msg[0] = formatMessage(getBundleForLocale(locale, messageId), messageId, arguments, true);
+            msg[0] = formatMessage
+              (MessageService.getBundleForLocale(locale, messageId), messageId, arguments, true);
             rc[0] = 0;
             return;
         } catch (MissingResourceException mre) {
@@ -374,7 +346,8 @@ public class MessageUtils
             // most likely it does exist in our fake base class _en, so try that.
         } catch (ShutdownException se) {
         }
-        msg[0] = formatMessage(getBundleForLocale(EN, messageId), messageId, arguments, false);
+        msg[0] = formatMessage
+          (MessageService.getBundleForLocale(EN, messageId), messageId, arguments, false);
         rc[0] = 0;
     }
     
@@ -389,14 +362,15 @@ public class MessageUtils
         String locMsg = null;
 
         try {
-            locMsg = formatMessage(getBundleForLocale(locale, messageId), messageId, args, true);
+            locMsg = formatMessage
+              (MessageService.getBundleForLocale(locale, messageId), messageId, args, true);
             return locMsg;
         } catch (MissingResourceException mre) {
             // message does not exist in the requested locale
             // most likely it does exist in our fake base class _en, so try that.
         } catch (ShutdownException se) {
         }
-        locMsg = formatMessage(getBundleForLocale(EN, messageId), messageId, args, false);
+        locMsg = formatMessage(MessageService.getBundleForLocale(EN, messageId), messageId, args, false);
         return locMsg;
     }
 }
