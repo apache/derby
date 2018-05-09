@@ -27,11 +27,14 @@ import java.util.*;
 import org.apache.derby.shared.common.i18n.MessageService;
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class splitmessages {
+public class splitmessages
+{
 	/**
 		arg[0] is the destination directory
 		arg[1] is the source file.
 	*/
+
+    private static final String LOCALE_STUB = "locale";
     
     /** 
      *  This is the list of message ids that are shared between
@@ -140,6 +143,8 @@ public class splitmessages {
 
 		boolean addBase = "_en".equals(locale);
 
+        File localizedEngineMessagesDir = new File(localesDir, LOCALE_STUB + locale);
+        localizedEngineMessagesDir.mkdir();
 
 		InputStream is = new BufferedInputStream(new FileInputStream(source), 64 * 1024);
 
@@ -171,9 +176,12 @@ public class splitmessages {
 		for (int i = 0; i < 50; i++) {
 			if (c[i].size() == 0)
 				continue;
-			OutputStream fos = new BufferedOutputStream(
-				new FileOutputStream(new File(localesDir, "m"+i+locale+".properties")), 16 * 1024);
-
+			OutputStream fos = new BufferedOutputStream
+              (
+				new FileOutputStream
+                (new File(localizedEngineMessagesDir, "m"+i+locale+".properties")),
+                16 * 1024
+               );
             
 			c[i].store(fos, (String) null);
 			fos.flush();

@@ -86,13 +86,62 @@
       </fileset>
     </copy>
 
-    <copy todir="${loc.locales.dir}/tools" flatten="true">
+    <antcall target="copyLocalization">
+      <param name="localization" value="en"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="cs"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="de_DE"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="es"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="hu"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="ja_JP"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="ko_KR"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="qq_PP_testOnly"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="pl"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="pt_BR"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="ru"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="zh_CN"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="zh_TW"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="it"/>
+    </antcall>
+    <antcall target="copyLocalization">
+      <param name="localization" value="fr"/>
+    </antcall>
+
+  </target>
+
+  <target name="copyLocalization">
+    <mkdir dir="${loc.locales.dir}/tools/locale_${localization}"/>
+    <copy todir="${loc.locales.dir}/tools/locale_${localization}">
       <fileset dir="${derby.tools.locales.dir}">
-        <include name="sysinfoMessages_*.properties"/>
-        <include name="toolsmessages_*.properties"/>
+        <include name="sysinfoMessages_${localization}.properties"/>
+        <include name="toolsmessages_${localization}.properties"/>
       </fileset>
     </copy>
-
   </target>
 
   <target name="parser">

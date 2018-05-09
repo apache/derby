@@ -42,6 +42,8 @@ import java.text.MessageFormat;
 public final class MessageService {
 
 	private static final Locale EN = new Locale("en", "US");
+    private static final String LOCALE_STUB = "locale_";
+    private static final String CLIENT_MESSAGES = "clientmessages";
 
 	private static BundleFinder finder;
 
@@ -177,20 +179,93 @@ public final class MessageService {
 		the resource is not available in the requested locale,
 		default locale or base class the one for en_US is returned.
 	*/
+	public static ResourceBundle getBundleWithEnDefault(String resource, Locale locale)
+    {
+        ResourceBundle retval = null;
 
-	public static ResourceBundle getBundleWithEnDefault(String resource, Locale locale) {
+        retval = getBundle(resource, locale);
+
+        if (retval == null)
+        {
+            //
+            // This can happen if the database territory overrides
+            // the default Locale, but the territory isn't supported.
+            // Try the default Locale.
+            //
+            Locale defaultLocale = Locale.getDefault();
+
+            if (!defaultLocale.equals(locale))
+            {
+                retval = getBundle(resource, defaultLocale);
+            }
+        }
+
+        //
+        // Ok, fallback on English, the localization bundled into the base Derby jars.
+        // This throws MissingResourceException if the situation is completely
+        // confused.
+        //
+        if (retval == null)
+        {
+            retval = lookupBundle(resource, EN);
+        }
+
+        return retval;
+	}
+
+	/**
+		Look up a bundle in the correct package. Returns
+        null if the bundle can't be found.
+	*/
+	private static ResourceBundle getBundle(String resource, Locale locale)
+    {
+        ResourceBundle retval = null;
 
 		try {
-			return ResourceBundle.getBundle(resource, locale);
-		} catch (MissingResourceException mre) {
+            retval = lookupBundle(localizeResourceName(resource, locale.toString()), locale);
+		} catch (MissingResourceException mre) {}
 
-			// This covers the case where neither the
-			// requested locale or the default locale
-			// have a resource.
+        // just try the language. it's better than nothing.
+        if (retval == null)
+        {
+            try {
+                retval = lookupBundle(localizeResourceName(resource, locale.getLanguage()), locale);
+            } catch (MissingResourceException mre) {}
+        }
 
-			return ResourceBundle.getBundle(resource, EN);
-		}
+        return retval;
 	}
+  
+	/**
+		Use the JVM to lookup a ResourceBundle
+	*/
+	private static ResourceBundle lookupBundle(String resource, Locale locale)
+    {
+        return ResourceBundle.getBundle(resource, locale);
+	}
+  
+    /**
+        Add a directory level named locale_xx_YY to the resource name
+        if it is not the clientmessages resource bundle. So, for instance,
+        "org.apache.derby.loc.tools.toolsmessages" becomes
+        "org.apache.derby.loc.tools.locale_de_DE.toolsmessages".
+    */
+    private static String localizeResourceName(String original, String localeName)
+    {
+        if ((original == null) || (original.contains(CLIENT_MESSAGES))) { return original; }
+
+        // American English messages are not re-located to a subdirectory
+        if (EN.toString().equals(localeName))
+        { return original; }
+
+        int lastDotIdx = original.lastIndexOf('.');
+        String retval =
+          original.substring(0, lastDotIdx + 1) +
+          LOCALE_STUB + localeName +
+          original.substring(lastDotIdx, original.length());
+
+        return retval;
+    }
 
 	/**
 		Hash function to split messages into 50 files based
