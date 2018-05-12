@@ -28,7 +28,7 @@ import org.apache.derby.loc.client.spi.clientmessagesProvider;
 
 public class clientmessagesProviderImpl implements clientmessagesProvider
 {
-    public ResourceBundle getBundle​(String baseName, Locale locale)
+    public ResourceBundle getBundle(String baseName, Locale locale)
     {
         ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale);
         return bundle;
