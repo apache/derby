@@ -1007,9 +1007,9 @@
 <!-- ==================================================================== -->
 
    <!-- You can override this property in local.properties to fetch from an alternative location -->
-   <property name="javasedoc.url" value="http://docs.oracle.com/javase/8/docs/api"/>
-   <property name="j2eedoc.url" value="http://docs.oracle.com/javaee/7/api"/>
-   <property name="javasedoc.local" value="packageListLoc-se-8"/>
+   <property name="javasedoc.url" value="https://docs.oracle.com/javase/9/docs/api"/>
+   <property name="j2eedoc.url" value="https://docs.oracle.com/javaee/7/api"/>
+   <property name="javasedoc.local" value="packageListLoc-se-9"/>
    <property name="j2eedoc.local" value="packageListLoc-j2ee-7"/>
 
    <target name="packagelist_check">
