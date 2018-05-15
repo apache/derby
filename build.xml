@@ -44,6 +44,8 @@
     </not>
   </condition>
 
+<echoproperties/>
+
 <!-- Targets -->
 
   <target
