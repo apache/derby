@@ -27,6 +27,7 @@
   <property file="${properties.dir}/dirs.properties"/>
   <!-- Product names and release info -->
   <property file="${properties.dir}/release.properties"/>
+  <property name="msgStub" value="messages_"/>
 
 <!-- Define the task which creates the engine's messages_en.properties -->
   <taskdef
@@ -35,7 +36,7 @@
     classpath="${out.build.dir}"
   />
   <property name="messageDescriptors" value="${derby.locales.dir}/messages.xml"/>
-  <property name="englishMessages" value="${generated.engine.locale.dir}/messages_en.properties"/>
+  <property name="englishMessages" value="${generated.engine.locale.dir}/${msgStub}en.properties"/>
 
 <!-- Targets -->
   <target name="locales" depends="init,buildMessages,split"/>
@@ -69,90 +70,117 @@
 
     <antcall target="doSplit">
       <param name="msgdir" value="${generated.engine.locale.dir}"/>
-      <param name="msgfile" value="messages_en"/>
+      <param name="localeSuffix" value="en"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_cs"/>
+      <param name="localeSuffix" value="cs"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_de_DE"/>
+      <param name="localeSuffix" value="de_DE"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_es"/>
+      <param name="localeSuffix" value="es"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_hu"/>
+      <param name="localeSuffix" value="hu"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_ja_JP"/>
+      <param name="localeSuffix" value="ja_JP"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_ko_KR"/>
+      <param name="localeSuffix" value="ko_KR"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_qq_PP_testOnly"/>
+      <param name="localeSuffix" value="qq_PP_testOnly"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_pl"/>
+      <param name="localeSuffix" value="pl"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_pt_BR"/>
+      <param name="localeSuffix" value="pt_BR"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_ru"/>
+      <param name="localeSuffix" value="ru"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_zh_CN"/>
+      <param name="localeSuffix" value="zh_CN"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_zh_TW"/>
+      <param name="localeSuffix" value="zh_TW"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_it"/>
+      <param name="localeSuffix" value="it"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
-      <param name="msgfile" value="messages_fr"/>
+      <param name="localeSuffix" value="fr"/>
     </antcall>
   </target>
 
   <target name="doSplit" depends="splitprops,verifysplit,noSplit,chksplit" unless="split.done">
     <mkdir dir="${loc.engine.dir}"/>
     <mkdir dir="${loc.client.dir}"/>
-    <mkdir dir="${loc.locales.dir}"/>
+
+    <mkdir dir="${generated.src.dir}/${locale.stub}${localeSuffix}"/>
+    <copy overwrite="true"
+          file="${derby.locales.src.dir}/module-info.template"
+          tofile="${generated.src.dir}/${locale.stub}${localeSuffix}/module-info.java">
+      <filterset>
+        <filter token="LOCALE" value="${localeSuffix}"/>
+      </filterset>
+    </copy>
+
+    <mkdir dir="${locale.output.dir}"/>
+    <mkdir dir="${locale.output.dir}/org/apache/derby/loc/${locale.stub}${localeSuffix}"/>
+  	<javac
+      source="${min.version}"
+      target="${min.version}"
+      nowarn="on"
+      debug="${debug}" debuglevel="${debuglevel}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${generated.src.dir}/${locale.stub}${localeSuffix}"
+      destdir="${locale.output.dir}">
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+
     <java classname="org.apache.derbyBuild.splitmessages"
           classpath="${out.build.dir}:${out.shared.dir}"
           failonerror="true">
       <arg value="${loc.engine.dir}"/> 
       <arg value="${loc.client.dir}"/> 
-      <arg value="${loc.locales.dir}"/> 
+      <arg value="${locale.output.dir}/org/apache/derby/loc"/> 
       <arg value="${split.properties}"/>
     </java>
     <touch file="${split.donefile}"/>
   </target>
 
   <target name="splitprops">
-    <property name="split.properties" value="${msgdir}/${msgfile}.properties"/>
-    <property name="split.donefile" value="${loc.engine.dir}/${msgfile}.done"/>
+    <property name="split.properties" value="${msgdir}/${msgStub}${localeSuffix}.properties"/>
+    <property name="locale.output.dir" value="${out.dir}/${locale.stub}${localeSuffix}"/>
+    <property name="split.donefile" value="${loc.engine.dir}/${msgStub}${localeSuffix}.done"/>
   </target>
 
   <target name="chksplit">
     <uptodate property="split.done"
               targetfile="${split.donefile}" >
-      <srcfiles dir="${derby.locales.dir}" includes="${msgfile}.properties" />
+      <srcfiles dir="${derby.locales.dir}" includes="${msgStub}${localeSuffix}.properties" />
     </uptodate>
   </target>
 

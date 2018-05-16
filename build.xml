@@ -109,7 +109,6 @@
     <mkdir dir="${out.testing.dir}"/>
     <mkdir dir="${out.pptesting.dir}"/>
     <mkdir dir="${out.tools.dir}"/>
-    <mkdir dir="${out.locales.dir}"/>
   </target>
 
    <target name="make-generated-dirs">
@@ -395,16 +394,18 @@
 <!-- ==================================================================== -->
 
   <target name="buildlocaleinfo">
+    <property name="locale.output.dir" value="${out.dir}/${locale.stub}${locale.iname}/org/apache/derby/info/${locale.stub}${locale.iname}"/>
+    <mkdir dir="${locale.output.dir}"/>
+
     <antcall target="localeinfowriter">
       <param name="info.buildnumber" value="1"/>
       <param name="info.iname" value="_${locale.iname}"/>
       <param name="info.ename" value="${locale.ename}"/>
-      <param name="info.file" value="${out.locales.dir}/org/apache/derby/info/locale_${locale.iname}/info.properties"/>
+      <param name="info.file" value="${locale.output.dir}/info.properties"/>
     </antcall>
   </target>
 
   <target name="localeinfowriter">
-    <mkdir dir="${out.locales.dir}/org/apache/derby/info/locale_${locale.iname}"/>
     <propertyfile file="${info.file}" comment="${copyright.comment}">
       <entry key="derby.locale.version.major" value="${major}"/>
       <entry key="derby.locale.version.minor" value="${minor}"/>
@@ -510,37 +511,36 @@
   <target name="checklocaleinfo">
     <condition property="localeinfo.available">
       <and>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_cs.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_de_DE.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_es.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_fr.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_hu.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_it.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_pl.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_ru.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
-        <available file="${out.locales.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
+        <available file="${${out.dir}/${locale.stub}cs/org/apache/derby/info/${locale.stub}cs/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}de_DE/org/apache/derby/info/${locale.stub}de_DE/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}es/org/apache/derby/info/${locale.stub}es/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}fr/org/apache/derby/info/${locale.stub}fr/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}hu/org/apache/derby/info/${locale.stub}hu/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}it/org/apache/derby/info/${locale.stub}it/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}ja_JP/org/apache/derby/info/${locale.stub}ja_JP/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}ko_KR/org/apache/derby/info/${locale.stub}ko_KR/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}pl/org/apache/derby/info/${locale.stub}pl/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}pt_BR/org/apache/derby/info/${locale.stub}pt_BR/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}ru/org/apache/derby/info/${locale.stub}ru/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}zh_CN/org/apache/derby/info/${locale.stub}zh_CN/info.properties"/>
+        <available file="${${out.dir}/${locale.stub}zh_TW/org/apache/derby/info/${locale.stub}zh_TW/info.properties"/>
       </and>
     </condition>
   </target>
 
   <target name="cleanlocale">
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_cs.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_de_DE.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_es.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_fr.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_hu.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_it.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_pl.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_ru.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
-    <delete file="${out.locales.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
+    <delete file="${out.dir}/${locale.stub}cs/org/apache/derby/info/${locale.stub}cs/info.properties"/>           <delete file="${out.dir}/${locale.stub}de_DE/org/apache/derby/info/${locale.stub}de_DE/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}es/org/apache/derby/info/${locale.stub}es/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}fr/org/apache/derby/info/${locale.stub}fr/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}hu/org/apache/derby/info/${locale.stub}hu/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}it/org/apache/derby/info/${locale.stub}it/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}ja_JP/org/apache/derby/info/${locale.stub}ja_JP/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}ko_KR/org/apache/derby/info/${locale.stub}ko_KR/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}pl/org/apache/derby/info/${locale.stub}pl/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}pt_BR/org/apache/derby/info/${locale.stub}pt_BR/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}ru/org/apache/derby/info/${locale.stub}ru/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}zh_CN/org/apache/derby/info/${locale.stub}zh_CN/info.properties"/>
+    <delete file="${out.dir}/${locale.stub}zh_TW/org/apache/derby/info/${locale.stub}zh_TW/info.properties"/>
   </target>
 
   <target name="checkmessages" depends="checkmessages-done"
@@ -1782,22 +1782,20 @@
     <echo level="info" message="Building derbyLocale_${locale.iname}.jar"/>
 
     <!-- generate new locale property file -->
+    <property name="locale.output.dir" value="${out.dir}/${locale.stub}${locale.iname}/org/apache/derby/info/${locale.stub}${locale.iname}"/>
     <antcall target="localeinfowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="_${locale.iname}"/>
       <param name="info.ename" value="${locale.ename}"/>
       <param name="info.productfile" value="derbyLocale_${locale.iname}.jar"/>
-      <param name="info.file" value="${out.locales.dir}/org/apache/derby/info/locale_${locale.iname}/info.properties"/>
+      <param name="info.file" value="${locale.output.dir}/info.properties"/>
     </antcall>   
 
     <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
+         basedir="${out.dir}/${locale.stub}${locale.iname}"
          compress="true"
-	 filesonly="true">
-      <fileset dir="${out.locales.dir}"
-	       includes="org/apache/derby/info/*_${locale.iname}/info.properties,
-	                 org/apache/derby/loc/**/*_${locale.iname}.properties"
-           excludes="org/apache/derby/loc/**/clientmessages_${locale.iname}.properties"
-      />
+         filesonly="true"
+      >
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>
@@ -2534,7 +2532,20 @@
             <pathelement location="${out.shared.dir}"/>
             <pathelement location="${out.testing.dir}"/>
             <pathelement location="${out.tools.dir}"/>
-            <pathelement location="${out.locales.dir}"/>
+
+            <pathelement location="${out.dir}/${locale.stub}cs}"/>
+            <pathelement location="${out.dir}/${locale.stub}de_DE}"/>
+            <pathelement location="${out.dir}/${locale.stub}es}"/>
+            <pathelement location="${out.dir}/${locale.stub}fr}"/>
+            <pathelement location="${out.dir}/${locale.stub}hu}"/>
+            <pathelement location="${out.dir}/${locale.stub}it}"/>
+            <pathelement location="${out.dir}/${locale.stub}ja_JP}"/>
+            <pathelement location="${out.dir}/${locale.stub}ko_KR}"/>
+            <pathelement location="${out.dir}/${locale.stub}pl}"/>
+            <pathelement location="${out.dir}/${locale.stub}pt_BR}"/>
+            <pathelement location="${out.dir}/${locale.stub}ru}"/>
+            <pathelement location="${out.dir}/${locale.stub}zh_CN}"/>
+            <pathelement location="${out.dir}/${locale.stub}zh_TW}"/>
         </classpath>
     </junit>
   </target>

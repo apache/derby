@@ -135,8 +135,9 @@
   </target>
 
   <target name="copyLocalization">
-    <mkdir dir="${loc.locales.dir}/tools/locale_${localization}"/>
-    <copy todir="${loc.locales.dir}/tools/locale_${localization}">
+    <property name="locale.output.dir" value="${out.dir}/${locale.stub}${localization}/org/apache/derby/loc/tools/${locale.stub}${localization}"/>
+    <mkdir dir="${locale.output.dir}"/>
+    <copy todir="${locale.output.dir}">
       <fileset dir="${derby.tools.locales.dir}">
         <include name="sysinfoMessages_${localization}.properties"/>
         <include name="toolsmessages_${localization}.properties"/>
