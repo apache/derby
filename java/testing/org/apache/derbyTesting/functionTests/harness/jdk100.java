@@ -59,11 +59,11 @@ public class jdk100 extends jvm {
     }
 
     public void appendOtherFlags(StringBuffer sb) {
-        if (noasyncgc) warn("jdk100 does not support noasyncgc");
+        if (noasyncgc) warn(getName() + " does not support noasyncgc");
         if (verbosegc) sb.append(" -verbose:gc");
         if (noclassgc) sb.append(" -Xnoclassgc");
-        if (ss>=0) warn("jdk100 does not support ss");
-        if (oss>=0) warn("jdk100 does not support oss");
+        if (ss>=0) warn(getName() + " does not support ss");
+        if (oss>=0) warn(getName() + " does not support oss");
         if (ms>=0) {
             sb.append(" -ms");
             sb.append(ms);
@@ -76,8 +76,8 @@ public class jdk100 extends jvm {
             sb.append(" -classpath ");
             sb.append(classpath);
         }
-        if (prof!=null) warn("jdk100 does not support prof");
-        if (verify) warn("jdk100 does not support verify");
+        if (prof!=null) warn(getName() + " does not support prof");
+        if (verify) warn(getName() + " does not support verify");
         if (noverify) warn("jdk100 does not support noverify");
         if (nojit) sb.append(" -Djava.compiler=NONE");
         if (D != null)
