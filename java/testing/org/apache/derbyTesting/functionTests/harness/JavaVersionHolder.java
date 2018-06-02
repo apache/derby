@@ -44,6 +44,12 @@ public class JavaVersionHolder
 	    javaVersion = "1.9.0";
 	}
 
+    // handle JDK 10
+	if (javaVersion.equals( "10" ))
+	{
+	    javaVersion = "10.0.1";
+	}
+
 	// check for jdk12 or higher
 	int i = javaVersion.indexOf('.');
 	int j = javaVersion.indexOf('.', i+1);

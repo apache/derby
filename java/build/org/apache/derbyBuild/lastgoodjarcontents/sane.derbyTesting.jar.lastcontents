@@ -39,6 +39,7 @@ org.apache.derbyTesting.functionTests.harness.j9_22.class
 org.apache.derbyTesting.functionTests.harness.j9_foundation.class
 org.apache.derbyTesting.functionTests.harness.j9_foundation11.class
 org.apache.derbyTesting.functionTests.harness.j9dee15.class
+org.apache.derbyTesting.functionTests.harness.jdk100.class
 org.apache.derbyTesting.functionTests.harness.jdk13.class
 org.apache.derbyTesting.functionTests.harness.jdk14.class
 org.apache.derbyTesting.functionTests.harness.jdk15.class

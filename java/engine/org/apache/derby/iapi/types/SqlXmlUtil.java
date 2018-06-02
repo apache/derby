@@ -725,8 +725,9 @@ public class SqlXmlUtil
         }
 
         @Override
-        public Iterator getPrefixes(String namespaceURI) {
-            return Collections.emptyList().iterator();
+        public Iterator<String> getPrefixes(String namespaceURI) {
+            List<String> emptylist = Collections.emptyList();
+            return emptylist.iterator();
         }
     }
 }
