@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This class is used at COMPILE TIME ONLY.  It is responsible for generating
@@ -937,6 +938,10 @@ public class ODBCMetadataGenerator {
 	 *  if the received column in the received query has
 	 * 	no known target type.
 	 */
+	
+	// DERBY - 6928
+	// Use org.apache.derby.iapi.types.TypeId.SMALLINT_NAME instead of hardcoding "SMALLINT" 
+	
 	private String getCastInfoForCol(String queryName,
 		String colName)
 	{
@@ -950,7 +955,8 @@ public class ODBCMetadataGenerator {
 				colName.equals("SQL_DATA_TYPE") ||
 				colName.equals("SQL_DATETIME_SUB"))
 			{
-				return "SMALLINT";
+				//return "SMALLINT";
+				return TypeId.SMALLINT_NAME;
 			}
 		}
 		else if (queryName.equals("getColumns")) {
@@ -961,29 +967,34 @@ public class ODBCMetadataGenerator {
 				colName.equals("SQL_DATA_TYPE") ||
 				colName.equals("SQL_DATETIME_SUB"))
 			{
-				return "SMALLINT";
+				//return "SMALLINT";
+				return TypeId.SMALLINT_NAME;
 			}
 		}
 		else if (queryName.equals("getProcedureColumns")) {
 			if (colName.equals("DATA_TYPE")) {
-				return "SMALLINT";
+				//return "SMALLINT";
+				return TypeId.SMALLINT_NAME;
 			}
 		}
 		else if (queryName.equals("getVersionColumns")) {
 			if (colName.equals("DATA_TYPE")) {
-				return "SMALLINT";
+				//return "SMALLINT";
+				return TypeId.SMALLINT_NAME;
 			}
 		}
 		else if (queryName.startsWith("getBestRowIdentifier")) {
 			if (colName.equals("DATA_TYPE")) {
-				return "SMALLINT";
+				//return "SMALLINT";
+				return TypeId.SMALLINT_NAME;
 			}
 		}
 		else if (queryName.equals("getIndexInfo")) {
 			if (colName.equals("NON_UNIQUE") ||
 				colName.equals("TYPE"))
 			{
-				return "SMALLINT";
+				//return "SMALLINT";
+				return TypeId.SMALLINT_NAME;
 			}
 		}
 

@@ -958,6 +958,8 @@ public class JDBCDisplayUtil {
 					ShowWarnings(out, rs);
 					numberOfRowsSelected++;
 				}
+				// print number of rows in the result set
+				 indentedPrintLine( out, indentLevel, numberOfRowsSelected + " rows in the result set");
 			} catch (SQLException e) {
 				// REVISIT: might want to check the exception
 				// and for some, not bother with the retry.
