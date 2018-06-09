@@ -149,7 +149,7 @@
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating ij parser..."/>
       <property name="outroot" value="${generated.src.tools.dir}"/>
-      <property name="srcroot" value="tools"/>
+      <property name="srcroot" value="org.apache.derby.tools"/>
       <property name="directory" value="${derby.dir}/impl/tools/ij"/>
       <property name="rmfiles" value="ijimplparser_rm.files"/>
       <property name="jjfile" value="ij.jj"/>
@@ -159,7 +159,7 @@
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating mtGrammar parser..."/>
       <property name="outroot" value="${generated.src.tools.dir}"/>
-      <property name="srcroot" value="tools"/>
+      <property name="srcroot" value="org.apache.derby.tools"/>
       <property name="directory" value="${derby.dir}/impl/tools/ij"/>
       <property name="rmfiles" value="mtparser_rm.files"/>
       <property name="jjfile" value="mtGrammar.jj"/>

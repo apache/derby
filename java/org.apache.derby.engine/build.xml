@@ -95,7 +95,7 @@
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating SQL parser..."/>
       <property name="outroot" value="${generated.src.engine.dir}"/>
-      <property name="srcroot" value="engine"/>
+      <property name="srcroot" value="org.apache.derby.engine"/>
       <property name="directory" value="${derby.dir}/impl/sql/compile"/>
       <property name="rmfiles" value="implparser_rm.files"/>
       <property name="jjfile" value="sqlgrammar.jj"/>
