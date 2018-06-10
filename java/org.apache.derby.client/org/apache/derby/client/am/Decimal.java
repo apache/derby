@@ -350,6 +350,15 @@ public class Decimal {
 
     /**
      * Write a Java <code>java.math.BigDecimal</code> to packed decimal bytes.
+     *
+     * @param buffer Buffer to which to write the packed decimal
+     * @param offset Offset into the buffer at which to write
+     * @param b The BigDecimal to write
+     * @param declaredPrecision Its precision
+     * @param declaredScale Its scale
+     *
+     * @return the number of bytes written
+     * @throws SqlException on error
      */
     public static final int bigDecimalToPackedDecimalBytes(byte[] buffer,
                                                            int offset,

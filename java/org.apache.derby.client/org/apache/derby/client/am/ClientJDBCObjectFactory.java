@@ -46,6 +46,14 @@ public interface ClientJDBCObjectFactory {
      * This method is used to return an instance of the {@link
      * org.apache.derby.client.ClientPooledConnection} class which
      * implements {@code javax.sql.PooledConnection}.
+     *
+     * @param ds The data source
+     * @param logWriter The machinery for writing diagnostic messages
+     * @param user The user name
+     * @param password The corresponding password
+     *
+     * @return a pooled connection
+     * @throws java.sql.SQLException on error
      */
     ClientPooledConnection newClientPooledConnection(
             BasicClientDataSource ds,
@@ -53,10 +61,18 @@ public interface ClientJDBCObjectFactory {
             String user,
             String password) throws SQLException;
     
-        /**
+    /**
      * This method is used to return an instance of
      * ClientXAConnection (or ClientXAConnection40) class which
      * implements {@code javax.sql.XAConnection}.
+     *
+     * @param ds The data source
+     * @param logWriter The machinery for writing diagnostic messages
+     * @param user The user name
+     * @param password The corresponding password
+     *
+     * @return an XA connection
+     * @throws java.sql.SQLException on error
      */
     ClientXAConnection newClientXAConnection(BasicClientDataSource ds,
             LogWriter logWriter,String user,String password)
@@ -80,7 +96,7 @@ public interface ClientJDBCObjectFactory {
      *                    notify the PooledConnection reference of the Error 
      *                    Occurred and the Close events.
      * @return a CallableStatement object
-     * @throws SqlException
+     * @throws SqlException on error
      */
     ClientCallableStatement newCallableStatement(Agent agent,
             ClientConnection connection, String sql,
@@ -91,6 +107,12 @@ public interface ClientJDBCObjectFactory {
      * Returns an instance of LogicalConnection.
      * This method returns an instance of LogicalConnection
      * (or LogicalConnection40) which implements {@code java.sql.Connection}.
+     *
+     * @param physicalConnection The physical connection
+     * @param pooledConnection The pooled connection
+     *
+     * @return a logical connection
+     * @throws SqlException on error
      */
     LogicalConnection newLogicalConnection(
                     ClientConnection physicalConnection,
@@ -134,7 +156,7 @@ public interface ClientJDBCObjectFactory {
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
      * @return a PreparedStatement object
-     * @throws SqlException
+     * @throws SqlException on error
      */
     ClientPreparedStatement newPreparedStatement(Agent agent,
             ClientConnection connection,
@@ -171,7 +193,7 @@ public interface ClientJDBCObjectFactory {
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
      * @return a PreparedSatement object
-     * @throws SqlException
+     * @throws SqlException on error
      */
     ClientPreparedStatement newPreparedStatement(Agent agent,
             ClientConnection connection,String sql,
@@ -210,6 +232,16 @@ public interface ClientJDBCObjectFactory {
      * This method returns an instance of NetConnection (or NetConnection40)
      * class which extends from ClientConnection
      * this implements the java.sql.Connection interface
+     *
+     * @param logWriter Machinery for logging diagnostics
+     * @param driverManagerLoginTimeout Connection timeout
+     * @param serverName Name of server
+     * @param portNumber Server port
+     * @param databaseName Name of database
+     * @param properties Connection properties
+     *
+     * @return a client connection
+     * @throws SqlException on error
      */
     ClientConnection newNetConnection(
             LogWriter logWriter,
@@ -221,6 +253,16 @@ public interface ClientJDBCObjectFactory {
      * This method returns an instance of NetConnection (or
      * NetConnection40) class which extends from ClientConnection.  This
      * implements the {@code java.sql.Connection} interface.
+     *
+     * @param logWriter Machinery for logging diagnostics
+     * @param user User name
+     * @param password Corresponding password
+     * @param dataSource Data source to connect to
+     * @param rmId id
+     * @param isXAConn True if an XA connection is needed
+     *
+     * @return a client connection
+     * @throws SqlException on error
      */
     ClientConnection newNetConnection(
             LogWriter logWriter,
@@ -249,7 +291,8 @@ public interface ClientJDBCObjectFactory {
      *                     NetConnection constructor was called. This is used
      *                     to pass StatementEvents back to the pooledConnection
      *                     object
-     * @throws             SqlException
+     * @return a client connection
+     * @throws             SqlException on error
      */
     ClientConnection newNetConnection(
             LogWriter logWriter,
@@ -261,6 +304,22 @@ public interface ClientJDBCObjectFactory {
      * This method returns an instance of NetResultSet(or
      * NetResultSet40) which extends from ClientResultSet which implements
      * {@code java.sql.ResultSet}.
+     *
+     * @param netAgent The wrapped agent
+     * @param netStatement The wrapped statement
+     * @param cursor The wrapped cursor
+     * @param qryprctyp DRDA variable
+     * @param sqlcsrhld DRDA variable
+     * @param qryattscr DRDA variable
+     * @param qryattsns DRDA variable
+     * @param qryattset DRDA variable
+     * @param qryinsid DRDA variable
+     * @param actualResultSetType Type of result set
+     * @param actualResultSetConcurrency Concurrency level
+     * @param actualResultSetHoldability Whether results are holdable
+     *
+     * @return a result set
+     * @throws SqlException on error
      */
     ClientResultSet newNetResultSet(
             Agent netAgent,
@@ -280,6 +339,11 @@ public interface ClientJDBCObjectFactory {
      * This method provides an instance of NetDatabaseMetaData (or
      * NetDatabaseMetaData40) which extends from ClientDatabaseMetaData
      * which implements {@code java.sql.DatabaseMetaData}.
+     *
+     * @param netAgent Wrapped agent
+     * @param netConnection Wrapped connection
+     *
+     * @return database meta data
      */
     ClientDatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
             ClientConnection netConnection);
@@ -296,7 +360,7 @@ public interface ClientJDBCObjectFactory {
      * @param columnNames       String[]
      * @param columnIndexes     int[]
      * @return a {@code java.sql.Statement} implementation
-     * @throws SqlException
+     * @throws SqlException on error
      *
      */
      ClientStatement newStatement(Agent agent,
@@ -340,6 +404,14 @@ public interface ClientJDBCObjectFactory {
     
     /**
      * Creates a BatchUpdateException depending on the JVM level.
+     *
+     * @param logWriter Machinery for writing log messages
+     * @param msgid Client message handle
+     * @param args Arguments to be plugged into the message
+     * @param updateCounts Update counts to include in message
+     * @param cause Original exception
+     *
+     * @return a batch exception
      */
     public BatchUpdateException newBatchUpdateException
         ( LogWriter logWriter, ClientMessageId msgid, Object[] args, long[] updateCounts, SqlException cause );

@@ -23,13 +23,15 @@ package org.apache.derby.shared.common.stream;
 
 /**
  *
+ * <p>
  * The Basic Services provide InfoStreams for reporting
  * information.
+ * </p>
  * <p>
  * When creating a message for a stream,
  * you can create an initial entry with header information
  * and then append to it as many times as desired.
- * <p>
+ * </p>
  * 
  * @see HeaderPrintWriter
  */

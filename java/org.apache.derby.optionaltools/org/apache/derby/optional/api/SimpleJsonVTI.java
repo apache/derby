@@ -171,6 +171,11 @@ public class SimpleJsonVTI extends VTITemplate
      * <p>
      * Create a SimpleJsonVTI from a JSONArray object.
      * </p>
+     *
+     * @param array a json array
+     *
+     * @return a VTI for reading the json array
+     * @throws SQLException on error
      */
     public  static  SimpleJsonVTI   readArray( JSONArray array )
         throws SQLException

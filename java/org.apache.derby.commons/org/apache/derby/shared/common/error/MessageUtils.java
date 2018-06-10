@@ -210,6 +210,10 @@ public class MessageUtils
      * Hash function to split messages into 50 files based upon the message identifier 
      * or SQLState. We don't use String.hashCode() as it varies between releases and 
      * doesn't provide an even distribution across the 50 files.
+     *
+     * @param key The key to hash
+     *
+     * @return the resulting hash
      */
     public static int hashString50(String key) {
 		int hash = 0;
@@ -288,6 +292,11 @@ public class MessageUtils
      *                   arguments) plus messageId, separated by separator.
      * @param sqlerrp    not used
      * @param errd0      not used
+     * @param errd1      not used
+     * @param errd2      not used
+     * @param errd3      not used
+     * @param errd4      not used
+     * @param errd5      not used
      * @param warn       not used
      * @param sqlState   5-char sql state
      * @param file       not used
@@ -356,6 +365,8 @@ public class MessageUtils
      * @param locale     locale
      * @param messageId  message id
      * @param args       message arguments
+     *
+     * @return the localized message
      */
     public static String getLocalizedMessage(Locale locale, String messageId, Object [] args)
     {

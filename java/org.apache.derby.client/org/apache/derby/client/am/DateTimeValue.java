@@ -95,6 +95,8 @@ public class DateTimeValue {
     /**
      * Create an instance from a {@code java.sql.Date} using the default
      * calendar.
+     *
+     * @param date The wrapped date
      */
     public DateTimeValue(Date date) {
         this(date, Calendar.getInstance());
@@ -103,6 +105,8 @@ public class DateTimeValue {
     /**
      * Create an instance from a {@code java.sql.Time} using the default
      * calendar.
+     *
+     * @param time The wrapped time value
      */
     public DateTimeValue(Time time) {
         this(time, Calendar.getInstance());
@@ -111,6 +115,8 @@ public class DateTimeValue {
     /**
      * Create an instance from a {@code java.sql.Timestamp} using the default
      * calendar.
+     *
+     * @param ts The wrapped timestamp value
      */
     public DateTimeValue(Timestamp ts) {
         this(ts, Calendar.getInstance());
@@ -131,6 +137,8 @@ public class DateTimeValue {
 
     /**
      * Get the year component.
+     *
+     * @return the year component.
      */
     public int getYear() {
         return year;
@@ -138,6 +146,8 @@ public class DateTimeValue {
 
     /**
      * Get the month component. First month is 0 ({@code Calendar.JANUARY}).
+     *
+     * @return the month component
      */
     public int getMonth() {
         return month;
@@ -145,6 +155,8 @@ public class DateTimeValue {
 
     /**
      * Get day of month component. First day of the month is 1.
+     *
+     * @return day of month component
      */
     public int getDayOfMonth() {
         return day;
@@ -152,6 +164,8 @@ public class DateTimeValue {
 
     /**
      * Get hour of day component (24 hour clock).
+     *
+     * @return hour of day component
      */
     public int getHours() {
         return hours;
@@ -159,6 +173,8 @@ public class DateTimeValue {
 
     /**
      * Get minute component.
+     *
+     * @return minute component.
      */
     public int getMinutes() {
         return minutes;
@@ -166,6 +182,8 @@ public class DateTimeValue {
 
     /**
      * Get second component.
+     *
+     * @return second component.
      */
     public int getSeconds() {
         return seconds;
@@ -173,6 +191,8 @@ public class DateTimeValue {
 
     /**
      * Get nanosecond component.
+     *
+     * @return nanosecond component.
      */
     public int getNanos() {
         return nanos;

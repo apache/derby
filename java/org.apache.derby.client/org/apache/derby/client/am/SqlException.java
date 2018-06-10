@@ -299,6 +299,8 @@ public class SqlException extends Exception implements Diagnosable {
      * so the don't have to throw SQLException, which, through the chain of 
      * dependencies would force more and more internal routines to throw
      * SQLException
+     *
+     * @param wrapme The original exception
      */
     public SqlException(SQLException wrapme)
     {
@@ -308,6 +310,8 @@ public class SqlException extends Exception implements Diagnosable {
     
     /**
      * Convert this SqlException into a java.sql.SQLException
+     *
+     * @return a corresponding SQLException
      */
     public SQLException getSQLException()
     {

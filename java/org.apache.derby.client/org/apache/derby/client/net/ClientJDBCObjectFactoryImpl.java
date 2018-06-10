@@ -110,7 +110,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *                    Occurred and the Close events.
      * @return a {@link org.apache.derby.client.am.ClientCallableStatement}
      *         object
-     * @throws SqlException
+     * @throws SqlException on error
      */
     public ClientCallableStatement newCallableStatement(Agent agent,
             ClientConnection connection,
@@ -173,7 +173,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
      * @return a PreparedStatement object
-     * @throws SqlException
+     * @throws SqlException on error
      */
     public ClientPreparedStatement newPreparedStatement(Agent agent,
             ClientConnection connection,
@@ -210,7 +210,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
      * @return a PreparedStatement object
-     * @throws SqlException
+     * @throws SqlException on error
      *
      */
     public ClientPreparedStatement newPreparedStatement(Agent agent,
@@ -315,7 +315,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *                     pass StatementEvents back to the pooledConnection
      *                     object.
      * @return a {@link ClientConnection} object
-     * @throws             SqlException
+     * @throws             SqlException on error
      */
     public ClientConnection newNetConnection(
             LogWriter logWriter,String user,
@@ -368,7 +368,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @param columnNames       String[]
      * @param columnIndexes     int[]
      * @return a ClientStatement implementation
-     * @throws SqlException
+     * @throws SqlException on error
      *
      */
      public ClientStatement newStatement(Agent agent,
@@ -450,7 +450,17 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
 
         return bue;
     }
-    /** This method is overridden on JVM 8 */
+    /**
+     * This method is overridden on JVM 8
+     *
+     * @param message The message to put in the exception
+     * @param sqlState The SQLState to put in the exception
+     * @param errorCode The errorCode to put in the exception
+     * @param updateCounts The array of update counts
+     * @param cause The original exception
+     *
+     * @return a batch update exception
+     */
     protected   BatchUpdateException   newBatchUpdateException
         ( String message, String sqlState, int errorCode, long[] updateCounts, SqlException cause  )
     {

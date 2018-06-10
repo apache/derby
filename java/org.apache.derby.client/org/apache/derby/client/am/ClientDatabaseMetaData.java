@@ -2831,10 +2831,11 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     }
 
     /**
+     * <p>
      * Returns a list of the client info properties supported by the
      * driver. The result set contains the following columns:
+     * </p>
      *
-     * <p>
      * <ol>
      *  <li>NAME String=&gt; The name of the client info property.</li>
      *  <li>MAX_LEN int=&gt; The maximum length of the value for the
@@ -3011,6 +3012,8 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * A "public" version of checkForClosedConnection() that throws
      * SQLException instead of SqlException.  In particular this is used
      * by all the DatabaseMetadata methods
+     *
+     * @throws java.sql.SQLException on error
      */
     protected void checkForClosedConnection() throws SQLException
     {

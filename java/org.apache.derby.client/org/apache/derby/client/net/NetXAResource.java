@@ -170,16 +170,21 @@ public class NetXAResource implements XAResource {
     }
 
     /**
+     * <p>
      * Ends the work performed on behalf of a transaction branch. The resource manager dissociates the XA resource from
      * the transaction branch specified and let the transaction be completed.
-     * <p/>
+     * </p>
+     * <p>
      * If TMSUSPEND is specified in flags, the transaction branch is temporarily suspended in incomplete state. The
      * transaction context is in suspened state and must be resumed via start with TMRESUME specified.
-     * <p/>
+     * </p>
+     * <p>
      * If TMFAIL is specified, the portion of work has failed. The resource manager may mark the transaction as
      * rollback-only
-     * <p/>
+     * </p>
+     * <p>
      * If TMSUCCESS is specified, the portion of work has completed successfully.
+     * </p>
      *
      * @param xid   A global transaction identifier that is the same as what was used previously in the start method.
      * @param flags One of TMSUCCESS, TMFAIL, or TMSUSPEND

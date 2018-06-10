@@ -995,7 +995,7 @@ public class ClientClob extends Lob implements Clob {
     /**
      * Materialize the stream used for input to the database.
      *
-     * @throws SqlException
+     * @throws SqlException on error
      */
     protected void materializeStream()
         throws SqlException {

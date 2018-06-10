@@ -155,7 +155,7 @@ public interface Attribute
 
 	/**
 		The attribute that is used for the database name, from
-		the JDBC notion of jdbc:<subprotocol>:<subname>
+		the JDBC notion of jdbc:$subprotocol:$subname
 	*/
 	String DBNAME_ATTR = "databaseName";
 

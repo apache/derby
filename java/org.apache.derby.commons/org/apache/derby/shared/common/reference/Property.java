@@ -98,7 +98,7 @@ public interface Property {
     
         /**
 		derby.stream.error.style=<b>The error stream error style.</b>
-        <b>rollingFile<b> is the only file currently supported.
+        <b>rollingFile</b> is the only file currently supported.
 		Takes precendence over derby.stream.error.file.
 		Takes precendence over derby.stream.error.method.
 		Takes precendence over derby.stream.error.field
@@ -115,7 +115,7 @@ public interface Property {
 
         /**
 		derby.stream.error.method=
-			<className>.<methodName> returning an OutputStream or Writer object
+			$className.$methodName returning an OutputStream or Writer object
 		Takes precendence over derby.stream.error.field
 	*/
 	
@@ -509,10 +509,13 @@ public interface Property {
 	String PROPERTIES_CONGLOM_ID = "derby.storage.propertiesId";
 
 	/**
+       <p>
 		derby.storage.tempDirectory
-		<BR>
+		</p>
+
+        <p>
 		Sets the temp directory for a database.
-		<P>
+        </p>
 	*/
 	String STORAGE_TEMP_DIRECTORY = "derby.storage.tempDirectory";
 	
@@ -1279,7 +1282,7 @@ public interface Property {
      * work properly if this flag is enabled, it is provided to do performance
      * debugging to see whether the system is I/O bound based on checkpoint
      * synchronous I/O.
-     * <p>
+     * </p>
      *
      **/
 	public static final String STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT = 
@@ -1295,7 +1298,7 @@ public interface Property {
      * work properly if this flag is enabled, it is provided to do performance
      * debugging to see whether the system is I/O bound based on page allocation
      * synchronous I/O.
-     * <p>
+     * </p>
      *
      **/
 	public static final String STORAGE_DATA_NOT_SYNCED_AT_ALLOCATION = 
@@ -1311,7 +1314,7 @@ public interface Property {
      * work properly if this flag is enabled, it is provided to do performance
      * debugging to see whether the system is I/O bound based on log file
      * synchronous I/O.
-     * <p>
+     * </p>
      *
      **/
 	public static final String STORAGE_LOG_NOT_SYNCED = 

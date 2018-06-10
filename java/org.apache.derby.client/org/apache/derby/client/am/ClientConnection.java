@@ -1110,7 +1110,11 @@ public abstract class ClientConnection
      */
     protected abstract boolean serverSupportsLocators();
 
-    /** Return true if the server supports nanoseconds in timestamps */
+    /**
+     * Return true if the server supports nanoseconds in timestamps
+     *
+     * @return whether the server supports nanoseconds in timestamps
+     */
     protected abstract boolean serverSupportsTimestampNanoseconds();
 
     public int getTransactionIsolation() throws SQLException {
@@ -1263,7 +1267,7 @@ public abstract class ClientConnection
      * compilation. This is not part of the java.sql.Connection interface, and
      * is only intended for use with statement caching.
      * @return the name of the current schema
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException on error
      */
     public String getCurrentSchemaName() throws SQLException {
         try {
@@ -2378,19 +2382,26 @@ public abstract class ClientConnection
     abstract protected void reset_(LogWriter logWriter) throws SqlException;
 
     /**
-     * <br>NOTE:</br>The following comments are valid for the changes done as
+     * <p>
+     * <b>NOTE:</b>The following comments are valid for the changes done as
      * part of implementing statement caching only (see DERBY-3313 and linked
      * issues).
+     * </p>
      * <p>
      * We don't reset the isolation level to unknown unconditionally, as this
      * forces us to go to the server all the time. Since the value should now
      * be valid (DERBY-3192), we check if it has been changed from the default.
+     * </p>
      *
+     * @param isDeferredReset True if this is for a deferred reset
      * @param closeStatementsOnClose is used to differentiate between
      *      cases where statement pooling is enabled or not. If {@code true}, it
      *      means statement pooling is disabled and the statements are fully
      *      reset, which includes a re-prepare. If {@code false}, statement
      *      pooling is enabled, and a more lightweight reset procedure is used.
+     * @param xares XA resource
+     *
+     * @throws SqlException on error
      */
     protected void completeReset(boolean isDeferredReset,
                                  boolean closeStatementsOnClose,
@@ -2586,7 +2597,7 @@ public abstract class ClientConnection
      *
      * @return An object that implements the <code>Blob</code> interface
      * @throws SQLException if an object that implements the
-     * </code>Blob</code> interface can not be constructed.
+     * Blob interface can not be constructed.
      *
      */
     
@@ -2637,7 +2648,11 @@ public abstract class ClientConnection
         return blob;
     }
 
-    /** Return true if the connection is aborting */
+    /**
+     * Return true if the connection is aborting
+     *
+     * @return true if we are in the middle of aborting
+     */
     public  boolean isAborting() { return aborting_; }
     
     /** Begin aborting the connection */

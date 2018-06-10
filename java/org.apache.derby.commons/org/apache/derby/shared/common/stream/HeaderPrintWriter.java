@@ -39,11 +39,15 @@ public interface HeaderPrintWriter
 	 * <p>
 	 * All other writes to the stream use the
 	 * PrintStream interface.
+     *
+     * @param message Message to print
 	 */
 	public void printlnWithHeader(String message);
 
 	/**
 	 * Return the header for the stream.
+     *
+     * @return the stream header
 	 */
 	public PrintWriterGetHeader getHeader();
 	
@@ -55,12 +59,15 @@ public interface HeaderPrintWriter
 	 *
 	 * Interleaving calls to a printWriter and its associated HeaderPrintWriter
 	 * is not supported.
-	 * 
+	 *
+     * @return the print machinery
 	 */
 	public PrintWriter getPrintWriter();
 
 	/**
 	 * Gets the name of the wrapped writer or stream
+     *
+     * @return the name of the wrapped writer or stream
 	 */
 	public String getName ();
 
@@ -68,16 +75,28 @@ public interface HeaderPrintWriter
 	 * The routines that mimic java.io.PrintWriter...
 	 */
 	/**
+     * Print a message.
+     *
+     * @param message The message to print
+     *
 	 * @see java.io.PrintWriter#print
 	 */
 	public void print(String message);
 
 	/**
+     * Print a message with a newline.
+     *
+     * @param message The message to print
+     *
 	 * @see java.io.PrintWriter#println
 	 */
 	public void println(String message);
 
 	/**
+     * Print a message with a newline.
+     *
+     * @param message The message to print
+     *
 	 * @see java.io.PrintWriter#println
 	 */
 	public void println(Object message);

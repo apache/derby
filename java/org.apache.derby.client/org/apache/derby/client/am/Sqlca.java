@@ -119,6 +119,8 @@ public abstract class Sqlca {
      * </ul>
      *
      * @see org.apache.derby.impl.drda.DRDAConnThread#getSqlCode(java.sql.SQLException)
+     *
+     * @return the error code
      */
     public synchronized int getErrorCode() {
         // Warning or other non-error, return SQL code.

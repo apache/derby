@@ -41,6 +41,8 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     /**
      * Debug method used to test the setLargeMaxRows() method added by JDBC 4.2.
      * This method is a NOP on a production (insane) build of Derby.
+     *
+     * @param newBase Base value to add to row count for debug purposes
      */
     public  static  void    setFetchedRowBase( long newBase )
     {

@@ -385,11 +385,17 @@ public final class NetworkServerControlImpl {
         }
     }
 
-    /** Get the log writer we're using */
+    /**
+     * Get the log writer we're using
+     *
+     * @return the log writer
+     */
     public  PrintWriter logWriter() { return logWriter; }
 
     /**
      * Get the host where we listen for connections.
+     *
+     * @return the host name
      */
     public  String  getHost() { return hostArg; }
 
@@ -404,6 +410,8 @@ public final class NetworkServerControlImpl {
     /**
      * Return true if the customer forcibly overrode our decision to install a
      * default SecurityManager.
+     *
+     * @return  true if the customer forcibly overrode our decision
      */
     public  boolean runningUnsecure() { return unsecureArg; }
     
@@ -567,7 +575,7 @@ public final class NetworkServerControlImpl {
      * and throw an exception for this error
      *
      * @param msg   error message
-     * @exception Exception
+     * @exception Exception on error
      */
     public void consoleError(String msg)
         throws Exception
@@ -576,22 +584,46 @@ public final class NetworkServerControlImpl {
         throw new Exception(msg);
     }
 
-    /** Return the debug state */
+    /**
+     * Return the debug state
+     *
+     * @return true if we are in debug mode
+     */
     public  boolean debugOutput()   { return debugOutput; }
 
-    /** Return the att_extnam server attribute */
+    /**
+     * Return the att_extnam server attribute
+     *
+     * @return the att_extnam server attribut
+     */
     public  static  String  att_extnam()    { return att_extnam; }
     
-    /** Return the att_srvclsnm server attribute */
+    /**
+     * Return the att_srvclsnm server attribute
+     *
+     * @return the att_srvclsnm server attribute
+     */
     public  static  String  att_srvclsnm()    { return att_srvclsnm; }
     
-    /** Return the att_srvrlslv server attribute */
+    /**
+     * Return the att_srvrlslv server attribute
+     *
+     * @return the att_srvrlslv server attribute
+     */
     public  static  String  att_srvrlslv()    { return att_srvrlslv; }
     
-    /** Return the product id */
+    /**
+     * Return the product id
+     *
+     * @return the product id
+     */
     public  static  String  prdId()    { return prdId; }
 
-    /** Return the bytes of the product id */
+    /**
+     * Return the bytes of the product id
+     *
+     * @return the bytes of the product id
+     */
     public  static  byte[]  prdIdBytes() { return (byte[]) prdIdBytes_.clone(); }
     
     /**
@@ -1051,6 +1083,11 @@ public final class NetworkServerControlImpl {
     
 
 
+    /**
+     * Start the network server.
+     *
+     * @throws Exception on error
+     */
     protected void startNetworkServer() throws Exception
     {
 
@@ -1270,6 +1307,8 @@ public final class NetworkServerControlImpl {
     /*
      Shutdown the server directly (If you have the original object)
      No Network communication needed.
+
+     @throws java.sql.SQLException on error
     */
     public void directShutdown() throws SQLException {
         // DERBY-2109: the public shutdown method now checks privileges
@@ -1292,6 +1331,10 @@ public final class NetworkServerControlImpl {
 
 
     /**
+     * Return true if the server has started.
+     *
+     * @return true if the server has started
+     * @throws Exception on error
      */
     public boolean isServerStarted() throws Exception
     {
@@ -1306,7 +1349,7 @@ public final class NetworkServerControlImpl {
 
     /**
      * Ping opening an new socket and close it.
-     * @throws Exception
+     * @throws Exception on error
      */
     public void ping() throws Exception
     {
@@ -1439,6 +1482,9 @@ public final class NetworkServerControlImpl {
 
     /**
      *@see NetworkServerControl#setTraceDirectory
+     *
+     * @param traceDirectory Where to write traces
+     * @throws Exception on error
      */
     public void sendSetTraceDirectory(String traceDirectory)
         throws Exception
@@ -1457,6 +1503,9 @@ public final class NetworkServerControlImpl {
 
     /**
      *@see NetworkServerControl#getSysinfo
+     *
+     * @return system information
+     * @throws Exception on error
      */
     public String sysinfo()
         throws Exception
@@ -1473,6 +1522,9 @@ public final class NetworkServerControlImpl {
 
     /**
      *@see NetworkServerControl#getRuntimeInfo
+     *
+     * @return the runtime information
+     * @throws Exception on error
      */
     public String runtimeInfo()
     throws Exception 
@@ -1641,7 +1693,7 @@ public final class NetworkServerControlImpl {
      *  from DSS structures.
      *  The protocol for the parameters for each command follows:
      *
-     *  Command: trace <connection id> {on | off}
+     *  Command: trace $connectionID {on | off}
      *  Protocol:
      *      4 bytes     - connection id - connection id of 0 means all sessions
      *      1 byte      - 0 off, 1 on
@@ -2057,7 +2109,9 @@ public final class NetworkServerControlImpl {
     /**
      * Is this the command protocol
      * 
-     * @param  val
+     * @param  val A command string
+     *
+     * @return true if the command is the protocol command
      */
     protected static boolean isCmd(String val)
     {
@@ -2298,6 +2352,7 @@ public final class NetworkServerControlImpl {
      * @param args  array of arguments indicating command to be executed
      *
      * @return the command to be executed
+     * @throws Exception on error
      */
     public int parseArgs(String args[]) throws Exception
     {
@@ -2903,8 +2958,8 @@ public final class NetworkServerControlImpl {
     /** Write string
      *
      * @param msg String to write
+     * @throws Exception on error
      */
-
     protected void writeString(String msg) throws Exception
     {
         byte[] msgBytes = msg.getBytes(DEFAULT_ENCODING);
@@ -3613,6 +3668,7 @@ public final class NetworkServerControlImpl {
      * @param msgProp   message key
      * @param args      arguments to message
      *
+     * @return the localized message
      */
     public String localizeMessage( String msgProp, String[] args )
     {
@@ -3838,6 +3894,8 @@ public final class NetworkServerControlImpl {
     /** 
      * Get the current value of keepAlive to configure how long the server
      * should keep the socket alive for a disconnected client
+     *
+     * @return the current value of keepAlive
      */
     protected boolean getKeepAlive()
     {

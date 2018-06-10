@@ -33,6 +33,8 @@ public interface BundleFinder {
 		of the messages file.
 
 		@param msgId Message being searched for.
+
+        @return the corresponding message bundle
 	*/
 	ResourceBundle getBundle(String msgId);
 }

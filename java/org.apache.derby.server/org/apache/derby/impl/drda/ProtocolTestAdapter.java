@@ -58,7 +58,13 @@ public class ProtocolTestAdapter {
     private final DDMReader reader;
     private final OutputStream out;
 
-    /** Initializes the adapter for use with the given socket. */
+    /**
+     * Initializes the adapter for use with the given socket.
+     *
+     * @param socket The socket
+     *
+     * @throws IOException on error
+     */
     public ProtocolTestAdapter(Socket socket)
             throws IOException {
         this.socket = socket;
@@ -66,7 +72,11 @@ public class ProtocolTestAdapter {
         this.out = socket.getOutputStream();
     }
 
-    /** Closes the resources associated with the adapter. */
+    /**
+     * Closes the resources associated with the adapter.
+     *
+     * @throws IOException on error
+     */
     public void close()
             throws IOException {
         // According to the JavaDoc this will also close the associated streams.
@@ -102,7 +112,13 @@ public class ProtocolTestAdapter {
         return null;
     }
 
-    /** Converts a string to a byte array according to the CCSID manager. */
+    /**
+     * Converts a string to a byte array according to the CCSID manager.
+     *
+     * @param str String to convert
+     *
+     * @return a byte array according to the CCSID manager.
+     */
     public byte[] convertFromJavaString(String str) {
         return ccsidManager.convertFromJavaString(str);
     }

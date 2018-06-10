@@ -33,21 +33,24 @@ import java.util.Enumeration;
  * can only be used for testing conditions that might occur
  * in development code but not in production code.	
  * <b>They are compiled out of production code.</b>
+ * </p>
  * <p>
  * Uses of assertions should not add AssertFailure catches or
  * throws clauses; AssertFailure is under RuntimeException
  * in the java exception hierarchy. Our outermost system block
  * will bring the system down when it detects an assertion
  * failure.
+ * </p>
  * <p>
  * In addition to ASSERTs in code, classes can choose to implement
  * an isConsistent method that would be used by ASSERTs, UnitTests,
  * and any other code wanting to check the consistency of an object.
+ * </p>
  * <p>
  * Assertions are meant to be used to verify the state of the system
  * and bring the system down if the state is not correct. Debug checks
  * are meant to display internal information about a running system.
- * <p>
+ * </p>
  * @see org.apache.derby.shared.common.sanity.AssertFailure
  */
 public class SanityManager {
@@ -84,12 +87,15 @@ public class SanityManager {
 	//
 
 	/**
+     * <p>
 	 * ASSERT checks the condition, and if it is
 	 * false, throws AssertFailure.
 	 * A message about the assertion failing is
 	 * printed.
-	 * <p>
+	 * </p>
 	 * @see org.apache.derby.shared.common.sanity.AssertFailure
+     *
+     * @param mustBeTrue A boolean expression which must evaluate to true
 	 */
 	public static final void ASSERT(boolean mustBeTrue) {
 		if (DEBUG)
@@ -107,11 +113,16 @@ public class SanityManager {
 	}
 
 	/**
+     * <p>
 	 * ASSERT checks the condition, and if it is
 	 * false, throws AssertFailure. The message will
 	 * be printed and included in the assertion.
-	 * <p>
+	 * </p>
+     *
 	 * @see org.apache.derby.shared.common.sanity.AssertFailure
+     *
+     * @param mustBeTrue An expression which must evaluate to true
+     * @param msgIfFail A message to emit if the expression evaluates to false
 	 */
 	public static final void ASSERT(boolean mustBeTrue, String msgIfFail) {
 		if (DEBUG)
@@ -184,18 +195,25 @@ public class SanityManager {
 	}
 
 	/**
+     * <p>
      * The DEBUG calls provide the ability to print information or
      * perform actions based on whether a debug flag is set or not.
      * debug flags are set in configurations and picked up by the
      * sanity manager when the monitor finds them (see CONFIG below).
+     * </p>
 	 * <p>
 	 * The message is output to the trace stream, so it ends up in
 	 * db2j.LOG. It will include a header line of
-	 *   DEBUG <flagname> OUTPUT:
+	 *   DEBUG $flagname OUTPUT:
 	 * before the message.
+     * </p>
 	 * <p>
 	 * If the debugStream stream cannot be found, the message is printed to
 	 * System.out.
+     * </p>
+     *
+     * @param flag The name of a debug flag
+     * @param message A message to print
      */
 	public static final void DEBUG(String flag, String message) {
 		if (DEBUG) {
@@ -206,18 +224,23 @@ public class SanityManager {
 	}
 
 	/**
+     * <p>
 	 * This can be called directly if you want to control
      * what is done once the debug flag has been verified --
 	 * for example, if you are calling a routine that prints to
 	 * the trace stream directly rather than returning a string to
 	 * be printed, or if you want to perform more (or fewer!)
+     * </p>
 	 *
 	 * <p>
      * Calls to this method should be surrounded with
 	 *     if (SanityManager.DEBUG) {
 	 *     }
 	 * so that they can be compiled out completely.
+     * </p>
 	 *
+     * @param flag The name of a debug flag
+     *
 	 * @return true if the flag has been set to "true"; false
 	 * if the flag is not set, or is set to something other than "true".
 	 */
@@ -336,14 +359,21 @@ public class SanityManager {
 	}
 
 	/**
+     * <p>
 	 * The DEBUG_PRINT calls provides a convenient way to print debug
 	 * information to the db2j.LOG file,  The message includes a header
+     * </p>
 	 *<p>
-	 *	DEBUG <flag> OUTPUT: 
+	 *	DEBUG $flag OUTPUT: 
 	 * before the message
+     * </p>
 	 *<p>
 	 * If the debugStream stream cannot be found, the message is printed to
 	 * System.out.
+     * </p>
+     *
+     * @param flag The name of a debug flag
+     * @param message A message to print
 	 *
 	 */
 	static public void DEBUG_PRINT(String flag, String message) {

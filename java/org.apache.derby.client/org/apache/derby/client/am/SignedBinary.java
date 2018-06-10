@@ -45,6 +45,11 @@ public class SignedBinary {
     /**
      * Build a Java short from a 2-byte signed binary representation.
      *
+     * @param buffer The buffer to read from
+     * @param offset The offset to start reading at
+     *
+     * @return the value at that address
+     *
      * @throws IllegalArgumentException if the specified byte order is not recognized.
      */
     public static short getShort(byte[] buffer, int offset) {
@@ -54,6 +59,12 @@ public class SignedBinary {
 
     /**
      * Build a Java int from a 4-byte signed binary representation.
+     *
+     *
+     * @param buffer The buffer to read from
+     * @param offset The offset to start reading at
+     *
+     * @return the value at that address
      *
      * @throws IllegalArgumentException if the specified byte order is not recognized.
      */
@@ -66,6 +77,12 @@ public class SignedBinary {
 
     /**
      * Build a Java long from an 8-byte signed binary representation.
+     *
+     *
+     * @param buffer The buffer to read from
+     * @param offset The offset to start reading at
+     *
+     * @return the value at that address
      *
      * @throws IllegalArgumentException if the specified byte order is not recognized.
      */

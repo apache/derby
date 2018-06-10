@@ -128,6 +128,8 @@ public abstract class JVMInfo
 
 	/**
 		Return Derby's understanding of the virtual machine's environment.
+
+        @return a string description of the virtual machine's version
 	*/
 	public static String derbyVMLevel()
 	{

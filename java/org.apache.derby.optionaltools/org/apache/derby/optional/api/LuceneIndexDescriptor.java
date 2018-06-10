@@ -36,12 +36,25 @@ public interface LuceneIndexDescriptor
     /**
      * Get the names of the fields which are created when text is indexed.
      * These fields can be mentioned later on when querying the index.
+     *
+     * @return an array of field names
      */
     public  String[]    getFieldNames();
     
-    /** Get the Analyzer used to create index terms */
+    /**
+     * Get the Analyzer used to create index terms
+     *
+     * @return the Analyzer
+     *
+     * @throws SQLException on error
+     */
     public Analyzer getAnalyzer()   throws SQLException;
 
-    /** Get the QueryParser used to parse query text */
+    /**
+     * Get the QueryParser used to parse query text
+     *
+     * @return the QueryParser
+     * @throws SQLException on error
+     */
     public  QueryParser getQueryParser()    throws SQLException;
 }

@@ -56,6 +56,8 @@ public class SqlWarning extends SqlException implements Diagnosable {
     
     /**
      * Get the java.sql.SQLWarning for this SqlWarning
+     *
+     * @return the wrapped sql warning
      */
     public SQLWarning getSQLWarning()
     {

@@ -426,6 +426,7 @@ public class ClientAutoloadedDriver implements Driver
     }
     
     /**
+     * <p>
      *This method returns an Implementation
      *of ClientJDBCObjectFactory depending on
      *VM under use
@@ -433,6 +434,9 @@ public class ClientAutoloadedDriver implements Driver
      *ClientJDBCObjectFactoryImpl
      *(or)
      *ClientJDBCObjectFactoryImpl42
+     * </p>
+     *
+     * @return the client-side object factory
      */
     
     public static ClientJDBCObjectFactory getFactory() {

@@ -43,7 +43,7 @@ public class ClientCallableStatement42 extends ClientCallableStatement
      * @param cpc         The PooledConnection object that will be used to 
      *                    notify the PooledConnection reference of the Error 
      *                    Occurred and the Close events.
-     * @throws SqlException
+     * @throws SqlException on error
      */
     public ClientCallableStatement42(Agent agent,
         ClientConnection connection,

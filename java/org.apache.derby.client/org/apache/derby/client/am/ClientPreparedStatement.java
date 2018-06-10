@@ -171,7 +171,7 @@ public class ClientPreparedStatement extends ClientStatement
      *            It is used to pass the Statement closed and the Statement
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
-     * @throws SqlException
+     * @throws SqlException on error
      *
      */
 
@@ -231,7 +231,7 @@ public class ClientPreparedStatement extends ClientStatement
      *            it is used to pass the Statement closed and the Statement
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
-     * @throws SqlException
+     * @throws SqlException on error
      */
     public ClientPreparedStatement(Agent agent,
                              ClientConnection connection,
@@ -3180,6 +3180,8 @@ public class ClientPreparedStatement extends ClientStatement
      * <p>
      * Check for closed statement and extract the SQLException if it is raised.
      * </p>
+     *
+     * @throws java.sql.SQLException on error
      */
     protected void    checkStatus() throws SQLException
     {

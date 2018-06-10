@@ -105,7 +105,11 @@ public abstract class LuceneUtils
     //
     /////////////////////////////////////////////////////////////////
 
-    /** Get the version of the Lucene library on the classpath. */
+    /**
+     * Get the version of the Lucene library on the classpath.
+     *
+     * @return the version of the Lucene library
+     */
     @SuppressWarnings("deprecation")
     public  static  Version currentVersion()
     {
@@ -130,6 +134,9 @@ public abstract class LuceneUtils
      * <p>
      * Get the default Analyzer associated with the database Locale.
      * </p>
+     *
+     * @return the default Analyzer
+     * @throws SQLException on error
      */
     public  static  Analyzer    defaultAnalyzer()
         throws SQLException
@@ -141,6 +148,10 @@ public abstract class LuceneUtils
      * <p>
      * Get the Analyzer associated with the given Locale.
      * </p>
+     *
+     * @param locale The locale whose Analyzer is needed
+     * @return the Analyzer associated with the given Locale.
+     * @throws SQLException on error
      */
     public  static  Analyzer    getAnalyzerForLocale( Locale locale )
         throws SQLException
@@ -168,6 +179,8 @@ public abstract class LuceneUtils
      * <p>
      * Get the StandardAnalyzer for parsing text.
      * </p>
+     *
+     * @return the standard Analyzer
      */
     public  static  Analyzer    standardAnalyzer()
     {
@@ -178,6 +191,12 @@ public abstract class LuceneUtils
      * <p>
      * Get the default, classic QueryParser.
      * </p>
+     *
+     * @param version The Lucene version
+     * @param fieldNames The field names of interest
+     * @param analyzer The Analyzer to use
+     *
+     * @return the corresponding QueryParser
      */
     public  static  QueryParser defaultQueryParser
         (
@@ -194,6 +213,8 @@ public abstract class LuceneUtils
      * Get the default index descriptor. This has a single field named TEXT,
      * a defaultAnalyzer() and a defaultQueryParser().
      * </p>
+     *
+     * @return the default index descriptor
      */
     public  static  LuceneIndexDescriptor   defaultIndexDescriptor()
     {
@@ -206,7 +227,11 @@ public abstract class LuceneUtils
     //
     /////////////////////////////////////////////////////////////////
 
-    /** Store an Analyzer class in the HashMap of Analyzers, keyed by language code */
+    /**
+     * Store an Analyzer class in the HashMap of Analyzers, keyed by language code
+     *
+     * @param analyzerClass An Analyzer class
+     */
     private static  void    storeAnalyzerClass( Class<? extends Analyzer> analyzerClass )
     {
         _analyzerClasses.put( getLanguageCode( analyzerClass ), analyzerClass );
@@ -217,6 +242,10 @@ public abstract class LuceneUtils
      * Get the language code for a Lucene Analyzer. Each of the Analyzers
      * lives in a package whose last leg is the language code.
      * </p>
+     *
+     * @param analyzerClass An Analyzer class
+     *
+     * @return the corresponding language code
      */
     private static  String  getLanguageCode( Class<? extends Analyzer> analyzerClass )
     {
@@ -238,15 +267,27 @@ public abstract class LuceneUtils
     {
         public  DefaultIndexDescriptor()    {}
 
-        /** Return the default array of field names { TEXT_FIELD_NAME }. */
+        /**
+         * Return the default array of field names { TEXT_FIELD_NAME }.
+         *
+         * @return the default array of field names
+         */
         public  String[]    getFieldNames() { return new String[] { TEXT_FIELD_NAME }; }
 
-        /** Return LuceneUtils.defaultAnalyzer() */
+        /**
+         * Return LuceneUtils.defaultAnalyzer()
+         *
+         * @return the default Analyzer
+         *
+         * @throws SQLException on error
+         */
         public Analyzer getAnalyzer()   throws SQLException
         { return LuceneUtils.defaultAnalyzer(); }
 
         /**
          * Return LuceneUtils.defaultQueryParser(  LuceneUtils.currentVersion(), getFieldNames(), getAnalyzer() ).
+         * @return the query parser
+         * @throws SQLException on error
          */
         public  QueryParser getQueryParser()
             throws SQLException

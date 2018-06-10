@@ -33,6 +33,10 @@ public class PublicAPI
 	/**
 		Generates a SQLException for signalling that the
 		operation failed due to a database error.
+
+        @param se The exception to wrap inside a SQLException
+
+        @return a SQLException wrapped around the original exception
 	 */
 	public static SQLException wrapStandardException(StandardException se) {
         se.markAsPublicAPI();

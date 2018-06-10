@@ -33,13 +33,15 @@ import org.apache.derby.client.net.Typdef;
 
 
 /**
+ * <p>
  * High performance converters from date/time byte encodings to JDBC Date, Time and Timestamp objects.
- * <p/>
+ * </p>
+ * <p>
  * Using this class for direct date/time conversions from bytes offers superior performance over the alternative method
  * of first constructing a Java String from the encoded bytes, and then using {@link java.sql.Date#valueOf
  * java.sql.Date.valueOf()}, {@link java.sql.Time#valueOf java.sql.Time.valueOf()} or {@link java.sql.Timestamp#valueOf
  * java.sql.Timestamp.valueOf()}.
- * <p/>
+ * </p>
  */
 public class DateTime {
 
@@ -256,7 +258,7 @@ public class DateTime {
      * @param date    date value
      * @return DateTime.dateRepresentationLength. This is the fixed length in 
      * bytes taken to represent the date value
-     * @throws SqlException
+     * @throws SqlException on error
      */
     public static final int dateToDateBytes(byte[] buffer,
                                             int offset,
@@ -340,7 +342,7 @@ public class DateTime {
      * @param timestamp  timestamp value
      * @param supportsTimestampNanoseconds true if the server supports nanoseconds in timestamps
      * @return DateTime.timestampRepresentationLength. This is the fixed  length in bytes, taken to represent the timestamp value
-     * @throws SqlException
+     * @throws SqlException on error
      */
     public static final int timestampToTimestampBytes(byte[] buffer,
                                                       int offset,
@@ -643,6 +645,8 @@ public class DateTime {
      * and then converted to bytes using UTF8 encoding
      *
      * @param supportsTimestampNanoseconds true if the connection supports nanoseconds in timestamps
+     *
+     * @return the timestamp length
      */
     public static int getTimestampLength( boolean supportsTimestampNanoseconds )
     {

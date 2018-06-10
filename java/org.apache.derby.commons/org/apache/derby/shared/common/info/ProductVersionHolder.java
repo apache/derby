@@ -167,9 +167,11 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	/**
 	  Create a valid ProductVersionHolder. If any of the
 	  parameters provided is invalid, this returns null.
+	  @param productVendorName The name of the vendor
 	  @param productName The name of the product. productName.length()
 	  must be greater than 0. The syntax for a product name is
 	  'productGenus[:productSpecies]'. 
+	  @param productTechnologyName The technology name
 	  @param majorVersion The most significant portion of a 3 
 	  part product version.  Must be non-negative.
 	  @param minorVersion The second portion of a 3 part 
@@ -243,6 +245,10 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 		This is because the this class will either have been loaded from
 		only one of the jars and hence can only access the resource in its own jar.
 		By making code specific to the jar open the resource we are guaranteed it will work.
+
+        @param propertiesStream The version information
+
+        @return the product descriptor
 	*/
 	public static ProductVersionHolder
 	getProductVersionHolderFromMyEnv(InputStream propertiesStream)
@@ -303,6 +309,8 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 
 	/**
 	  Return the product vendor name.
+
+      @return the vendor name
 	  */
 	public String getProductVendorName()
 	{
@@ -312,6 +320,8 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 
 	/**
 	  Return the external product name.
+
+      @return the product name
 	  */
 	public String getProductName()
 	{
@@ -324,14 +334,20 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 
 	/**
 	  Return the major version number.
+
+      @return the major version number
 	  */
 	public int getMajorVersion() {return majorVersion;}
 	/**
 	  Return the minor version number.
+
+      @return the minor version number
 	  */
 	public int getMinorVersion() {return minorVersion;}
 	/**
 	  Return the <B>encoded</B> maintainence version number.
+
+      @return the maintenance version number
 	  */
 	public int getMaintVersion() {return maintVersion;}
 
@@ -339,21 +355,29 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 		Return the drda protocol maintenance version for this minor release.
 		Starts at 0 for each minor release and only incremented 
 		when client behaviour changes based on the server version.
+
+        @return the drda maintenance version number
 	**/
 	public int getDrdaMaintVersion() {return drdaMaintVersion; }
 
 	/**
        Return the fix pack version from the maintenance encoding.
+
+       @return the fix pack version number
 	*/
 	public int getFixPackVersion() { return maintVersion / MAINT_ENCODING; }
 
 
 	/**
 	  Return true if this is a beta product.
+
+      @return true if this is a beta product.
 	  */
 	public boolean isBeta() {return isBeta.booleanValue();}
 	/**
 	  Return true if this is a alpha product.
+
+      @return true if this is a alpha product.
 	  */
 	public boolean isAlpha() {
 		return	   (majorVersion >= 5)
@@ -362,6 +386,8 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	}
 	/**
 	  Return the build number for this product.
+
+      @return the build number for this product.
 	  */
 	public String getBuildNumber() {return buildNumber;}
 
@@ -372,6 +398,8 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
      * nnnnnM -&gt; returns -nnnnn indicates a modified code base
      * nnnnn:mmmmm -&gt; returns -nnnnn
      * anything else -&gt; returns -1
+     *
+     * @return the build number as an integer if possible,
     */
     public int getBuildNumberAsInt(){
     	if (buildNumber == null)
@@ -427,6 +455,8 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	  difference between this and createProductVersionString, is
 	  that this method retruns a String when this ProductVersionHolder
 	  holds invalid version information.
+
+      @return  a string representation of this ProductVersion.
 	 */
 	public String toString()
 	{
@@ -441,6 +471,8 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 
 	/**
 		Return the feature version string, ie. major.minor. (e.g. 5.2)
+
+        @return the feature version string, ie. major.minor. (e.g. 5.2)
 	*/
 	public String getSimpleVersionString() {
 
@@ -449,6 +481,12 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 
 	/**
 		Convert a major and minor number with beta status into a string.
+
+        @param major Major version number
+        @param minor Minor version number
+        @param isBeta Beta flag
+
+        @return a version string encoding the arguments
 	*/
 	public static String simpleVersionString(int major, int minor, boolean isBeta) {
 
@@ -511,7 +549,11 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	/**
 		Returns a short-hand value for the product version string.
 		Used by Sysinfo.
-		Includes the optional <beta> designation
+		Includes the optional beta designation
+
+        @param withBuild If true, include the build number
+
+        @return the build version string
 	*/
     public String getVersionBuildString(boolean withBuild)
     {

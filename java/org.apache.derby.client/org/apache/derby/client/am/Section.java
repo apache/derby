@@ -95,6 +95,8 @@ public class Section {
 
     /**
      * retrieve the package name and consistency token information
+     *
+     * @return the package name and consistency token information
      */
     public byte[] getPKGNAMCBytes() {
         return PKGNAMCBytes != null ?

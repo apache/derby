@@ -37,28 +37,22 @@
 incoming DRDA Requests into embedded JDBC calls and then translates
 results back into DRDA for return to the client. Below is a summary
 of the implementation.</P>
-<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Classes
-Summary</FONT></FONT></P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid; font-size:large">Classes
+Summary</P>
 <P><B>NetworkServerControlImpl</B> - This class implements methods
 used by the public API and main.  It's functions include:</P>
 <UL>
-    <UL>
-        <LI><P>Launching a ConnectionThread to accept incomming
-        connections.</P>
-    </UL>
+        <LI>Launching a ConnectionThread to accept incomming
+        connections.</LI>
 </UL>
 <UL>
-    <UL>
-        <LI><P>Manaintaining  a list of sessions, a queue of Sessions
+        <LI>Manaintaining  a list of sessions, a queue of Sessions
         waiting for free thread and free list of DRDAConnections which are
-        available for reuse.</P>
-    </UL>
+        available for reuse.</LI>
 </UL>
 <UL>
-    <UL>
-        <LI><P>Handling non-DRDA proprietary protocol requests (e.g.
-        turning tracing on/off)</P>
-    </UL>
+        <LI>Handling non-DRDA proprietary protocol requests (e.g.
+        turning tracing on/off)</LI>
 </UL>
 <P><BR><BR>
 </P>
@@ -66,14 +60,12 @@ used by the public API and main.  It's functions include:</P>
 to accept connections. It is responsible for 
 </P>
 <UL>
-    <UL>
-        <LI><P> accepting connections</P>
-        <LI><P>    creating a new Sessions and adding them to the session
-        table.</P>
-        <LI><P>     Starting a DRDAConnThread (either one from the free
+        <LI>accepting connections</LI>
+        <LI>creating a new Sessions and adding them to the session
+        table.</LI>
+        <LI>Starting a DRDAConnThread (either one from the free
         list or a new one) or putting the sessions waiting for a thread if
-        maxThreads is exceeded.</P>
-    </UL>
+        maxThreads is exceeded.</LI>
 </UL>
 <P><B>ApplicationRequester</B> - this contains information about a
 particular application requester(e.g, type, version, level of
@@ -145,7 +137,7 @@ The DRDA protocol requires that the receiver of data translates the
 data into it's format (i.e., the writer writes data in its own
 format).  Data has to be converted from the writer format to the
 local format.</P>
-<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Scheduling</FONT></FONT></P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid; font-size:large">Scheduling</P>
 <P>The scheduling algorithm used is first in first out.  When a
 client session connects to the server, the server checks to see if
 there are any DRDAConnThreads which are free to handle the session. 
@@ -169,8 +161,8 @@ a cursor, each fetch would represent a separate communication.</P>
 <P>A timeout of the timeslice is set on the client socket so that the
 connection thread won't be blocked for more than the timeslice by an
 idle client.</P>
-<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Coordinating
-information between Server and Connection Threads</FONT></FONT></P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid; font-size:large">Coordinating
+information between Server and Connection Threads</P>
 <P>Several commands change information needed by the connection
 threads.  For example, timeslice can be changed.  This is handled by
 keeping a copy of the value in the connection thread.  If the value
@@ -179,8 +171,8 @@ changing the value in the thread's copy.  The result of this is that
 instead of one synchronization point in the server which all threads
 will block on to read, each thread has a copy which it can separately
 sync on.</P>
-<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Command
-Protocol</FONT></FONT></P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid; font-size:large">Command
+Protocol</P>
 <P>The command protocol is used to send commands such as shutdown,
 turn tracing on, etc. to a running network server.    The client
 sends:</P>
@@ -206,8 +198,8 @@ be serialized. This shouldn't be a problem since they should be
 fairly rare.</P>
 <P><BR><BR>
 </P>
-<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>DRDA
-Protocol</FONT></FONT></P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid; font-size:large">DRDA
+Protocol</P>
 <P>The DRDA protocol is described at great length in the DRDA
 Reference manuals.  DRDA Protocol is divided into three layers
 corresponding to the DDM three-tier architecture. For each layer,
@@ -254,7 +246,7 @@ element is zeroed as the required objects are found.  A check is done
 to see if there are any required objects missing and an error message
 is produced indicating the missing codepoints if some have not been
 sent.</P>
-<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Packages</FONT></FONT></P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid; font-size:large">Packages</P>
 <P>In DRDA, dynamic SQL is bound to predefined  packages.  Since
 Derby doesn't support packages, PACKAGE messages will be handled
 entirely in the network server.The network server will just validate

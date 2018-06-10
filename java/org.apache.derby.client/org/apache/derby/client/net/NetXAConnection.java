@@ -58,7 +58,7 @@ public class NetXAConnection {
      *                     NetConnection constructor was called. This is used
      *                     to pass StatementEvents back to the pooledConnection
      *                     object
-     * @throws SqlException
+     * @throws SqlException on error
      * 
      */
     public NetXAConnection(

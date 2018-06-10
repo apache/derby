@@ -202,7 +202,12 @@ public final class Utils {
         return sqlca.getSqlCode();
     }
 
-    /** Squash an array of longs into an array of ints */
+    /**
+     * Squash an array of longs into an array of ints
+     *
+     * @param longs The array of longs to squash
+     * @return a corresponding array of ints
+     */
     public static  int[]   squashLongs( long[] longs )
     {
         int count = (longs == null) ? 0 : longs.length;

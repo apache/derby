@@ -58,6 +58,11 @@ public class MessageUtil
     
     /**
      * Get a message with default locale.
+     *
+     * @param messageID The message handle
+     * @param args The arguments to plug into the message
+     *
+     * @return the message text with arguments plugged in
      */
     public String getTextMessage(String messageID, Object... args) {
         return getCompleteMessage(messageID, args);
@@ -70,6 +75,11 @@ public class MessageUtil
      *
      * If for some reason the message could not be found, we return a
      * default message using the message arguments
+     *
+     * @param messageID The message handle
+     * @param args The arguments to plug into the message
+     *
+     * @return the message text with arguments plugged in
      */
     public String getCompleteMessage(String messageID, Object[] args)
     {
@@ -152,6 +162,8 @@ public class MessageUtil
      * 
      * @param arguments
      *      The arguments to the message
+     *
+     * @return the message text
      */
     public static String getCompleteMessage(String messageId,
         String resourceBundleName, Object[] arguments) 
@@ -188,6 +200,8 @@ public class MessageUtil
      *      If composeDefault is true, then if the message id is not found in
      *      the given bundle, this method composes and returns as helpful a 
      *      message as possible in the format "UNKNOWN : [arg1], [arg2], ..."
+     *
+     * @return the formatted message text
      */
     public static String formatMessage(ResourceBundle bundle, String messageId, 
         Object[] arguments, boolean composeDefault) {
@@ -274,7 +288,9 @@ public class MessageUtil
      *      The message to start with, which often is null
      *
      * @param arguments
-     *      The arguments to the message.  
+     *      The arguments to the message.
+     *
+     * @return formatted message text
      */
     public static String composeDefaultMessage(String message, Object[] arguments)
     {

@@ -96,6 +96,11 @@ public abstract class SimpleJsonUtils
      * <li><i>All other types</i> - Converted to JSON
      * string values via their toString() methods.</li>
      * </ul>
+     *
+     * @param rs A ResultSet to turn into a JSON array
+     *
+     * @return a json array
+     * @throws SQLException on error
      */
     @SuppressWarnings("unchecked")
     public  static  JSONArray   toJSON( ResultSet rs )
@@ -134,6 +139,11 @@ public abstract class SimpleJsonUtils
 
     /**
      * Construct a JSONArray from a Reader.
+     *
+     * @param reader A Reader from which to de-serialize a json array
+     *
+     * @return a json array
+     * @throws SQLException on error
      */
     public static JSONArray readArray( Reader reader )
         throws SQLException
@@ -159,6 +169,12 @@ public abstract class SimpleJsonUtils
      * SQL FUNCTION to convert a JSON document string into a JSONArray.
      * This function is registered by the simpleJson optional tool.
      * </p>
+     *
+     * @param document A json array as a string
+     *
+     * @return a json array
+     *
+     * @throws SQLException on error
      */
     public  static  JSONArray   readArrayFromString( String document )
         throws SQLException
@@ -171,6 +187,12 @@ public abstract class SimpleJsonUtils
     /**
      * Read a JSONArray from an InputStream. Close the stream
      * after reading the JSONArray.
+     *
+     * @param inputStream A stream to read from
+     * @param characterSetName The character set of the stream
+     *
+     * @return a json array
+     * @throws SQLException on error
      */
     public static JSONArray readArrayFromStream
         ( InputStream inputStream, String characterSetName )
@@ -192,6 +214,12 @@ public abstract class SimpleJsonUtils
     /**
      * SQL FUNCTION to read a JSONArray from a File. This function
      * is registered by the simpleJson optional tool.
+     *
+     * @param fileName A file to read
+     * @param characterSetName The character encoding of the file
+     *
+     * @return a json array
+     * @throws SQLException on error
      */
     public static JSONArray readArrayFromFile
         ( String fileName, String characterSetName )
@@ -219,6 +247,12 @@ public abstract class SimpleJsonUtils
     /**
      * SQL FUNCTION to read a JSONArray from an URL address.
      * This function is registered by the simpleJson optional tool.
+     *
+     * @param urlString An url pointing to a json array
+     * @param characterSetName The character encoding of the resource identified by the URL
+     *
+     * @return a json array
+     * @throws SQLException on error
      */
     public static JSONArray readArrayFromURL
         ( String urlString, String characterSetName )
@@ -246,6 +280,10 @@ public abstract class SimpleJsonUtils
 
     /**
      * SQL FUNCTION to convert a JSONArray into a CLOB.
+     *
+     * @param array A json array
+     *
+     * @return a Clob containing the array as a string
      */
     public static Clob arrayToClob( JSONArray array )
     {
@@ -263,6 +301,10 @@ public abstract class SimpleJsonUtils
      * <p>
      * Turns an object into something which is a legal JSON value.
      * </p>
+     *
+     * @param obj An object holding a json value
+     * @return the json value inside the object
+     * @throws SQLException on error
      */
     private static  Object  getLegalJsonValue( Object obj )
         throws SQLException

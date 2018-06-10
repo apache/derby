@@ -184,7 +184,7 @@ public abstract class Lob implements UnitOfWorkListener {
      * #materializedStream(InputStream, String) can be called with subclass
      * specific parameters and the result assigned to the right stream.
      *
-     * @throws SqlException
+     * @throws SqlException on error
      */
     protected abstract void materializeStream() throws SqlException;
 

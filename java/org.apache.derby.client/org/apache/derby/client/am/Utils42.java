@@ -38,6 +38,12 @@ public final class Utils42
      * <p>
      * Get the int type id from java.sql.Types which corresponds to the SQLType.
      * </p>
+     *
+     * @param agent The agent
+     * @param sqlType The SQLType to map
+     *
+     * @return the corresponding type id
+     * @throws SQLException on error
      */
     public  static  int getTypeAsInt( Agent agent, SQLType sqlType )
         throws SQLException

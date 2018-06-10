@@ -40,6 +40,8 @@ public class ErrorStringBuilder
 
 	/**
 	** Construct an error string builder
+    *
+    * @param headerGetter A header getter
 	*/
 	public ErrorStringBuilder(PrintWriterGetHeader headerGetter)
 	{
@@ -119,6 +121,8 @@ public class ErrorStringBuilder
 
 	/**
 	** Get the buffer
+    *
+    * @return an evolving string builder
 	*/
 	public StringBuffer get()
 	{

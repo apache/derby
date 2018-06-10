@@ -41,10 +41,10 @@ package org.apache.derby.shared.common.reference;
 	<PRE>
 		if (se.getMessageId().equals(SQLState.DEADLOCK))
 	</PRE>
-	<BR>
+    <P>
 	A utility static method StandardException.getSQLState(String messageId)
 	exists to convert an field from this class into a five character SQLState.
-	<P>
+	</P>
 
 	<P>
 	The SQL state of an error message dictates the error's severity.
@@ -53,14 +53,17 @@ package org.apache.derby.shared.common.reference;
 	is expected to be 7 characters long and the last character determines
 	the state. If the state is seven characters long then only the first
 	five will be seen by the error reporting code and exception.
-	<BR>
+	</P>
+	<P>
 	If the state is 9 characters long, the last two characters encode
 	an exception category, which Synchronization uses to determine whether
 	the error causes REFRESH to halt or to simply skip the failed transaction.
 	All 5 and 7 character states default to the ENVIRONMENTAL exception
 	category.
-	<BR>
+	</P>
+    <P>
 	Here is the encoding of the SQL state, broken down by severity.
+	</P>
 	<UL>
 	<LI> <B> SYSTEM_SEVERITY </B>
 		xxxxx.M

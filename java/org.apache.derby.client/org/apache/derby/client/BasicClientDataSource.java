@@ -57,15 +57,19 @@ import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
+ * <p>
  * This data source is suitable for client/server use of Derby,
  * running on Java 8 Compact Profile 2 or higher.
- * <p/>
+ * </p>
+ * <p>
  * BasicClientDataSource is similar to ClientDataSource except it
  * can not be used with JNDI, i.e. it does not implement
  * {@code javax.naming.Referenceable}.
- * <p/>
+ * </p>
+ * <p>
  *  * The standard attributes provided are, cf. e.g. table
  * 9.1 in the JDBC 4.2 specification.
+ * </p>
  * <ul>
  *   <li>databaseName</li>
  *   <li>dataSourceName</li>
@@ -73,15 +77,19 @@ import org.apache.derby.shared.common.reference.SQLState;
  *   <li>password</li>
  *   <li>user</li>
  * </ul>
+ * <p>
  * These standard attributes are not supported:
+ * </p>
  * <ul>
  *   <li>networkProtocol</li>
  *   <li>roleName</li>
  * </ul>
+ * <p>
  * The Derby client driver also supports these attributes:
+ * </p>
  * <ul>
- *   <li>loginTimeout</li> @see javax.sql.CommonDataSource set/get
- *   <li>logWriter</li> @see javax.sql.CommonDataSource set/get
+ *   <li>loginTimeout @see javax.sql.CommonDataSource set/get</li>
+ *   <li>logWriter @see javax.sql.CommonDataSource set/get</li>
  *   <li>createDatabase</li>
  *   <li>connectionAttributes</li>
  *   <li>shutdownDatabase</li>
@@ -198,24 +206,30 @@ public class BasicClientDataSource
     }
 
     /**
+     * <p>
      * Creates a simple DERBY data source with default property values
      * for a non-pooling, non-distributed environment.  No particular
      * DatabaseName or other properties are associated with the data
      * source.
-     * <p/>
+     * </p>
+     * <p>
      * Every Java Bean should provide a constructor with no arguments
      * since many beanboxes attempt to instantiate a bean by invoking
      * its no-argument constructor.
+     * </p>
      */
     public BasicClientDataSource() {
         super();
     }
 
     /**
+     * <p>
      * The source security mechanism to use when connecting to a client data
      * source.
-     * <p/>
+     * </p>
+     * <p>
      * Security mechanism options are:
+     * </p>
      * <ul>
      *   <li> USER_ONLY_SECURITY
      *   <li> CLEAR_TEXT_PASSWORD_SECURITY
@@ -224,14 +238,16 @@ public class BasicClientDataSource
      *        user are encrypted
      *   <li> STRONG_PASSWORD_SUBSTITUTE_SECURITY
      * </ul> The default security mechanism is USER_ONLY SECURITY
-     * <p/>
+     * <p>
      * If the application specifies a security mechanism then it will be the
      * only one attempted. If the specified security mechanism is not
      * supported by the conversation then an exception will be thrown and
      * there will be no additional retries.
-     * <p/>
+     * </p>
+     * <p>
      * Both user and password need to be set for all security mechanism except
      * USER_ONLY_SECURITY.
+     * </p>
      */
     public final static short USER_ONLY_SECURITY =
         ClientDataSourceInterface.USER_ONLY_SECURITY;

@@ -57,8 +57,11 @@ public class SQLExceptionFactory {
      * creates jdbc4.0 SQLException and its subclass based on sql state
      * 
      * @param message description of the 
-     * @param sqlState 
+     * @param sqlState the sqlstate
      * @param errCode derby error code
+     * @param args the arguments to plug into the message text
+     *
+     * @return a SQLException with the indicated message
      */
     public SQLException getSQLException (String message, String sqlState, 
                                          int errCode, Object []args) { 

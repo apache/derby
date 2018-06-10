@@ -565,6 +565,7 @@ public class EncryptionManager {
      * @param targetSeed_ random server seed (RDr)
      *
      * @return a password substitute.
+     * @throws SqlException on error
      */
     public byte[] substitutePassword(
                 String userName,

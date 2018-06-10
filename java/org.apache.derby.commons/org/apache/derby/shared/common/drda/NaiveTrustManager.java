@@ -56,6 +56,18 @@ public class NaiveTrustManager
      * Generate a socket factory with this trust manager. Derby
      * Utility routine which is not part of the X509TrustManager
      * interface.
+     *
+     * @param sslProperties Configuration settings for the socket factory
+     *
+     * @return a socket factory
+     *
+     * @throws java.security.NoSuchAlgorithmException on error
+     * @throws java.security.KeyManagementException on error
+     * @throws java.security.NoSuchProviderException on error
+     * @throws java.security.KeyStoreException on error
+     * @throws java.security.UnrecoverableKeyException on error
+     * @throws java.security.cert.CertificateException on error
+     * @throws java.io.IOException on error
      **/
     public static SocketFactory getSocketFactory(Properties sslProperties)
         throws java.security.NoSuchAlgorithmException,

@@ -157,6 +157,8 @@ public class Configuration {
     
     /**
      * Check to see if the jvm version is such that JDBC 4.2 is supported
+     *
+     * @return true if jdbc 4.2 is supported
      */
     
     public static boolean supportsJDBC42() {

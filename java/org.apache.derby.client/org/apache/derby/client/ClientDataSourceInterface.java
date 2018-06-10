@@ -61,10 +61,13 @@ public interface ClientDataSourceInterface extends DataSource {
     public boolean getRetrieveMessageText();
 
     /**
+     * <p>
      * The source security mechanism to use when connecting to a client data
      * source.
-     * <p/>
+     * </p>
+     * <p>
      * Security mechanism options are:
+     * </p>
      * <ul>
      *   <li> USER_ONLY_SECURITY
      *   <li> CLEAR_TEXT_PASSWORD_SECURITY
@@ -73,14 +76,16 @@ public interface ClientDataSourceInterface extends DataSource {
      *        user are encrypted
      *   <li> STRONG_PASSWORD_SUBSTITUTE_SECURITY
      * </ul> The default security mechanism is USER_ONLY SECURITY
-     * <p/>
+     * <p>
      * If the application specifies a security mechanism then it will be the
      * only one attempted. If the specified security mechanism is not
      * supported by the conversation then an exception will be thrown and
      * there will be no additional retries.
-     * <p/>
+     * </p>
+     * <p>
      * Both user and password need to be set for all security mechanism except
      * USER_ONLY_SECURITY.
+     * </p>
      */
     public final static short USER_ONLY_SECURITY =
         (short)NetConfiguration.SECMEC_USRIDONL;

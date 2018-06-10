@@ -49,7 +49,15 @@ public abstract class ArrayUtil
 	//
 	///////////////////////////////////////////////////////////////////
 
-    /** Copy an array of objects; the original array could be null */
+    /**
+     * Copy an array of objects; the original array could be null
+     *
+     * @param <T> The type of the array cells
+     *
+     * @param original The original array to copy
+     *
+     * @return a copy of the array
+     */
     public  static <T> T[] copy( T[] original )
     {
         return (original == null) ?
@@ -57,31 +65,61 @@ public abstract class ArrayUtil
                 Arrays.copyOf(original, original.length);
     }
 
-    /** Copy a (possibly null) array of booleans */
+    /**
+     * Copy a (possibly null) array of booleans
+     *
+     * @param original The original array to copy
+     *
+     * @return a copy of the array
+     */
     public  static  boolean[]   copy( boolean[] original )
     {
         return (original == null) ? null : (boolean[]) original.clone();
     }
 
-    /** Copy a (possibly null) array of bytes */
+    /**
+     * Copy a (possibly null) array of bytes
+     *
+     * @param original The original array to copy
+     *
+     * @return a copy of the array
+     */
     public  static  byte[]   copy( byte[] original )
     {
         return (original == null) ? null : (byte[]) original.clone();
     }
 
-    /** Copy a (possibly null) array of ints */
+    /**
+     * Copy a (possibly null) array of ints
+     *
+     * @param original The original array to copy
+     *
+     * @return a copy of the array
+     */
     public  static  int[]   copy( int[] original )
     {
         return (original == null) ? null : (int[]) original.clone();
     }
 
-    /** Copy a (possibly null) array of longs */
+    /**
+     * Copy a (possibly null) array of longs
+     *
+     * @param original The original array to copy
+     *
+     * @return a copy of the array
+     */
     public  static  long[]   copy( long[] original )
     {
         return (original == null) ? null : (long[]) original.clone();
     }
 
-    /** Copy a (possibly null) 2-dimensional array of ints */
+    /**
+     * Copy a (possibly null) 2-dimensional array of ints
+     *
+     * @param original The original array to copy
+     *
+     * @return a copy of the array
+     */
     public  static  int[][]   copy2( int[][] original )
     {
         if ( original == null ) { return null; }
@@ -98,6 +136,13 @@ public abstract class ArrayUtil
     /**
      * Make the contents of an array available as a read-only list. If the
      * array is null, an empty list will be returned.
+     *
+     *
+     * @param <T> The type of the array cells
+     *
+     * @param array The array to turn into a read-only list
+     *
+     * @return a read-only list
      */
     @SafeVarargs
     public static <T> List<T> asReadOnlyList(T... array) {
@@ -208,6 +253,8 @@ public abstract class ArrayUtil
 	  Reads an array of objects from the stream.
 
 	  @param	in	Input stream
+
+      @return the array of objects
 
 	  @exception java.io.IOException The write caused an IOException. 
 	  @exception java.lang.ClassNotFoundException The Class for an Object we are reading does not exist
@@ -376,6 +423,7 @@ public abstract class ArrayUtil
 	  @return   the array of integers.
 
 	  @exception java.io.IOException The write caused an IOException. 
+	  @exception java.lang.ClassNotFoundException On error
 	  */
 	public static String[] readStringArray(ObjectInput in) 
 		throws IOException, ClassNotFoundException

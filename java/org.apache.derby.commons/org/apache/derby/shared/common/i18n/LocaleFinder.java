@@ -32,6 +32,9 @@ import java.text.DateFormat;
 public interface LocaleFinder {
 
 	/**
+     *
+     * @return the current locale
+     *
 	 * @exception StandardException		Thrown on error
 	 */
 	Locale getCurrentLocale() throws StandardException;
@@ -40,6 +43,8 @@ public interface LocaleFinder {
 	 * Get a formatter for formatting dates. The implementation may cache this
 	 * value, since it never changes for a given Locale.
 	 *
+     * @return the date formatter used for this locale
+     * 
 	 * @exception StandardException		Thrown on error
 	 */
 	DateFormat getDateFormat() throws StandardException;
@@ -47,6 +52,8 @@ public interface LocaleFinder {
 	/**
 	 * Get a formatter for formatting times. The implementation may cache this
 	 * value, since it never changes for a given Locale.
+     *
+     * @return the time formatter used for this locale
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -57,6 +64,8 @@ public interface LocaleFinder {
 	 * Get a formatter for formatting timestamps. The implementation may cache
 	 * this value, since it never changes for a given Locale.
 	 *
+     * @return the timestamp formatter used for this locale
+     *
 	 * @exception StandardException		Thrown on error
 	 */
 	DateFormat getTimestampFormat() throws StandardException;

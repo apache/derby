@@ -363,6 +363,7 @@ public class LogicalConnection implements Connection {
      * correct implementation class of the logical metadata object.
      *
      * @return A logical database metadata object.
+     * @throws java.sql.SQLException on error
      */
     protected LogicalDatabaseMetaData newLogicalDatabaseMetaData()
             throws SQLException {
@@ -638,6 +639,8 @@ public class LogicalConnection implements Connection {
      * <p>
      * <em>NOTE:</em> This method was added for testing purposes. Avoid use in
      * production code if possible.
+     *
+     * @return transaction id
      **/
     public int getTransactionID() {
         if (physicalConnection_ == null) {

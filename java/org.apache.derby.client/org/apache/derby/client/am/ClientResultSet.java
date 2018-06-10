@@ -5386,7 +5386,7 @@ public abstract class ClientResultSet implements ResultSet,
      * result set is actually being closed. Subclasses may override
      * this method if work needs to be done before closing.
      *
-     * @exception SqlException
+     * @exception SqlException on error
      */
     protected abstract void preClose_() throws SqlException;
 
@@ -6438,8 +6438,8 @@ public abstract class ClientResultSet implements ResultSet,
      *
      * @param columnName -
      *            the name of the Clob column
-     * @param x -
-     *            the new column value
+     * @param x the new column value
+     * @param length how many characters to update
      * @exception SQLException
      *                Feature not implemented for now.
      */

@@ -732,7 +732,7 @@ public class ClientBlob extends Lob implements Blob {
     /**
      * Materialize the stream used for input to the database.
      *
-     * @throws SqlException
+     * @throws SqlException on error
      */
     protected void materializeStream() throws SqlException 
     {

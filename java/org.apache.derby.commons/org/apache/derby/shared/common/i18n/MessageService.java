@@ -64,14 +64,21 @@ public final class MessageService {
 	}
 
 	/**
+	  <P>
 	  Transform the message from messageID to the actual error, warning, or
 	  info message using the correct locale.
+	  </P>
 
 	  <P>
 	  The arguments to the messages are passed via an object array, the objects
 	  in the array WILL be changed by this class. The caller should NOT get the
 	  object back from this array.
+	  </P>
 
+      @param messageId The message handle
+      @param arguments The arguments to the message
+
+      @return the text for the message with arguments plugged in
 	 */
     public static String getTextMessage(String messageId, Object... arguments) {
 		try {
@@ -87,6 +94,12 @@ public final class MessageService {
 
 
 	/**
+     * Append a property name onto the end of a message
+     *
+     * @param messageId The handle on the message
+     * @param propertyName The property to append
+     *
+     * @return the resulting new property name
 	 */
 	public static String getProperty(String messageId, String propertyName) {
 
@@ -178,6 +191,11 @@ public final class MessageService {
 		This method acts like ResourceBundle.getBundle() but if
 		the resource is not available in the requested locale,
 		default locale or base class the one for en_US is returned.
+
+        @param resource The name of the message resource
+        @param locale The preferred locale
+
+        @return the best message bundle to localize the messages
 	*/
 	public static ResourceBundle getBundleWithEnDefault(String resource, Locale locale)
     {
@@ -273,6 +291,8 @@ public final class MessageService {
 		String.hashCode() as it varies between releases and
 		doesn't provide an even distribution across the 50 files.
 
+        @param key A key to hash
+        @return the corresponding hash
 	*/
 	public static int hashString50(String key) {
 		int hash = 0;

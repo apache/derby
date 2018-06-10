@@ -263,8 +263,8 @@ public abstract class Cursor {
      * server
      * @return {@code true} if the current row position is a
      * valid row position.
-     * @exception SqlException
-     * @exception DisconnectException
+     * @exception SqlException on error
+     * @exception DisconnectException on error
      */
     protected abstract boolean
         calculateColumnOffsetsForRow_(int row, boolean allowServerFetch)
@@ -300,6 +300,8 @@ public abstract class Cursor {
      * Minion of ResultSet#rowUpdated.
      *
      * @see Cursor#setIsRowUpdated
+     *
+     * @return true if this row was updated
      */
     public final boolean getIsRowUpdated() {
         return isRowUpdated_;
@@ -310,6 +312,8 @@ public abstract class Cursor {
      * Minion of ResultSet#rowDeleted.
      *
      * @see Cursor#setIsUpdataDeleteHole
+     *
+     * @return true if the row was deleted
      */
     public final boolean getIsUpdateDeleteHole() {
         return isUpdateDeleteHole_;

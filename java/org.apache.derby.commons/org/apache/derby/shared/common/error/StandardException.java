@@ -119,6 +119,8 @@ public class StandardException extends Exception
 	/**
 		Yes, report me. Errors that need this method to return
 		false are in the minority.
+
+        @return the report type
 	*/
 	public final int report() {
 		return report;
@@ -126,6 +128,8 @@ public class StandardException extends Exception
 
 	/**
 		Set my report type.
+
+        @param report The report type
 	*/
 	public final void setReport(int report) {
 		this.report = report;
@@ -149,6 +153,8 @@ public class StandardException extends Exception
 		If you need teh identifier that was used to create the
 		message, then use getMessageId(). getMessageId() will return the
 		string that corresponds to the field in org.apache.derby.shared.common.reference.SQLState.
+
+        @return the 5 character SQL state
 	*/
 	public final String getSQLState()
 	{
@@ -191,7 +197,10 @@ public class StandardException extends Exception
 
 	/**
 		Get the severity given a message identifier from org.apache.derby.shared.common.reference.SQLState.
-	*/
+
+        @param messageID The handle on the message
+        @return the severity associated with the message
+    */
 	public static int getSeverityFromIdentifier(String messageID) {
 
 		int lseverity = ExceptionSeverity.NO_APPLICABLE_SEVERITY;
@@ -350,6 +359,9 @@ public class StandardException extends Exception
      *        <b>It is the caller's responsibility to ensure that this message is properly localized.</b>
      *
      * See org.apache.derby.iapi.tools.i18n.LocalizedResource
+     *
+     *
+     * @return a Derby exception
      */
     public static StandardException newPreLocalizedException( String MessageID,
                                                               Throwable t,
@@ -364,7 +376,12 @@ public class StandardException extends Exception
     
 	/**
      * Unpack the exception, looking for a StandardException, which carries
-	 * the Derby messageID and arguments. 
+	 * the Derby messageID and arguments.
+     *
+     * @param se A SQLException
+     *
+     * @return a Derby exception wrapping the contents of the SQLException
+     *
 	 * @see org.apache.derby.impl.jdbc.SQLExceptionFactory
 	 * @see org.apache.derby.impl.jdbc.Util
 	 */
@@ -515,6 +532,10 @@ public class StandardException extends Exception
 		Similar to unexpectedUserException but makes no assumtion about
 		when the execption is being called. The error is wrapped as simply
 		as possible.
+
+        @param t The original error which should be wrapped
+
+        @return a Derby exception which wraps the original error
 	*/
 
 	public static StandardException plainWrapException(Throwable t) {
@@ -559,6 +580,8 @@ public class StandardException extends Exception
 
 	/**
 	** A special exception to close a session.
+    *
+    * @return a "session close" exception
 	*/
 	public static StandardException closeException() {
 		StandardException se = newException(SQLState.CLOSE_REQUEST);
@@ -570,18 +593,22 @@ public class StandardException extends Exception
 	*/
 
 	/**
+        <P>
 		The message stored in the super class Throwable must be set
 		up object creation. At this time we cannot get any information
 		about the object itself (ie. this) in order to determine the
 		natural language message. Ie. we need to class of the objec in
 		order to look up its message, but we can't get the class of the
 		exception before calling the super class message.
+		</P>
 		<P>
 		Thus the message stored by Throwable and obtained by the
 		getMessage() of Throwable (ie. super.getMessage() in this
 		class) is the message identifier. The actual text message
 		is stored in this class at the first request.
+		</P>
 
+        @return the message text
 	*/
 
 	public String getMessage() {
@@ -596,6 +623,8 @@ public class StandardException extends Exception
 	/**
 		Return the message identifier that is used to look up the
 		error message text in the messages.properties file.
+
+        @return the message id
 	*/
 	public final String getMessageId() {
 		return super.getMessage();
@@ -606,6 +635,9 @@ public class StandardException extends Exception
 		Get the error code for an error given a type. The value of
 		the property messageId.type will be returned, e.g.
 		deadlock.sqlstate.
+
+        @param type An error type
+        @return the corresponding error code
 	*/
 	public String getErrorProperty(String type) {
 		return getErrorProperty(getMessageId(), type);
