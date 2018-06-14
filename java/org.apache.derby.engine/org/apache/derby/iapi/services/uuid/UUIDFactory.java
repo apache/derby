@@ -37,18 +37,27 @@ import org.apache.derby.catalog.UUID;
   by the recreateUUID method
  */
 /**
-	
+
+  <p>
   Generates and recreates unique identifiers.
+  </p>
   
+  <p>
   An example of such an identifier is:
+  </p>
+
   <blockquote><pre>
 	E4900B90-DA0E-11d0-BAFE-0060973F0942
-  </blockquote></pre>
+  </pre></blockquote>
+  
+  <p>
   These resemble DCE UUIDs, but use a different implementation.
-  <P>
+  </p>
+  <p>
   The string format is designed to be the same as the string
   format produced by Microsoft's UUIDGEN program, although at
   present the bit fields are probably not the same.
+  </p>
   
  **/
 public interface UUIDFactory 
@@ -62,6 +71,8 @@ public interface UUIDFactory
 
 	/**
 	  Recreate a UUID from a string produced by UUID.toString.
+
+      @param uuidstring       A UUID as a string
 	  @return		The UUID.
 	**/
 	public UUID recreateUUID(String uuidstring);

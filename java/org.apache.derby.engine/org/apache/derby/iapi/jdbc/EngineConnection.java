@@ -37,6 +37,8 @@ public interface EngineConnection extends Connection {
 
     /**
      * Set the DRDA identifier for this connection.
+     *
+     * @param drdaID The DRDA identifier
      */
     public void setDrdaID(String drdaID);
 
@@ -58,12 +60,16 @@ public interface EngineConnection extends Connection {
      *               level == ExecutionContext.UNSPECIFIED_ISOLATION,
      *               the statement won't be prepared with an isolation level.
      * 
-     * 
+     * @throws SQLException on error
      */
     public void setPrepareIsolation(int level) throws SQLException;
 
     /**
-     * Return prepare isolation 
+     * Return prepare isolation
+     *
+     * @return the isolation level
+     * 
+     * @throws SQLException on error
      */
     public int getPrepareIsolation()
         throws SQLException;
@@ -72,6 +78,8 @@ public interface EngineConnection extends Connection {
      * Add a SQLWarning to this Connection object.
      * @param newWarning Warning to be added, will be chained to any
      * existing warnings.
+     * 
+     * @throws SQLException on error
      */
     public void addWarning(SQLWarning newWarning)
         throws SQLException;
@@ -80,6 +88,8 @@ public interface EngineConnection extends Connection {
     * Get the LOB reference corresponding to the locator.
     * @param key the integer that represents the LOB locator value.
     * @return the LOB Object corresponding to this locator.
+    * 
+    * @throws SQLException on error
     */
     public Object getLOBMapping(int key) throws SQLException;
 
@@ -87,7 +97,7 @@ public interface EngineConnection extends Connection {
      * Obtain the name of the current schema, so that the NetworkServer can
      * use it for piggy-backing
      * @return the current schema name
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException on error
      */
     public String getCurrentSchemaName() throws SQLException;
 
@@ -98,6 +108,7 @@ public interface EngineConnection extends Connection {
      * Note that resetting the transaction isolation level is not performed as
      * part of this method. Temporary tables, IDENTITY_VAL_LOCAL and current
      * schema are reset.
+     * @throws java.sql.SQLException on error
      */
     public void resetFromPool() throws SQLException;
 
@@ -109,11 +120,16 @@ public interface EngineConnection extends Connection {
 
     /**
      * Get the name of the current schema.
+     *
+     * @return the current schema name
+     * @throws java.sql.SQLException on error
      */
     public String   getSchema() throws SQLException;
 
     /**
      * Set the default schema for the Connection.
+     * @param schemaName The new default schema
+     * @throws java.sql.SQLException on error
      */
     public void   setSchema(  String schemaName ) throws SQLException;
 

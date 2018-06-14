@@ -88,6 +88,8 @@ public  class   Java5SystemProcedures
      * @param toolName  Name of the tool package.
      * @param register  True if the package should be loaded, false otherwise.
      * @param optionalArgs  Tool-specific configuration parameters.
+     *
+     * @throws SQLException on error
      */
     public  static  void    SYSCS_REGISTER_TOOL
         (

@@ -538,9 +538,17 @@ private static final    String[] TwoByte = {
         /* 477 */       "org.apache.derby.impl.sql.execute.MergeConstantAction",
 };
 
-    /** Return the number of two-byte format ids */
+    /**
+     * Return the number of two-byte format ids
+     * @return the number of two-byte format ids
+     */
     public  static  int countTwoByteIDs() { return TwoByte.length; }
 
-    /** Return the class name bound to an index into TwoByte */
+    /**
+     * Return the class name bound to an index into TwoByte
+     *
+     * @param idx Index into TwoByte
+     * @return the class name located there
+     */
     public  static  String  classNameForTwoByteID( int idx ) { return TwoByte[ idx ]; }
 }

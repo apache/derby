@@ -85,13 +85,27 @@ public	class   ForwardingVTI extends VTITemplate
     //
     ////////////////////////////////////////////////////////////////////////
 
-    /** Poke in another ResultSet to which we forward method calls. */
+    /**
+     * Poke in another ResultSet to which we forward method calls.
+     *
+     * @param wrappedResultSet ResultSet to which to forward method calls
+     */
     public  final   void    wrapResultSet( ResultSet wrappedResultSet ) { _wrappedResultSet = wrappedResultSet; }
 
-    /** Get the wrapped ResultSet. */
+    /**
+     * Get the wrapped ResultSet.
+     *
+     * @return the wrapped ResultSet
+     */
     public  final   ResultSet   getWrappedResultSet() { return _wrappedResultSet; }
 
-    /** This overridable method maps the ForwardVTI's column numbers to those of the wrapped ResultSet */
+    /**
+     * This overridable method maps the ForwardVTI's column numbers to those of the wrapped ResultSet
+     *
+     * @param ourColumnNumber Number of column in this VTI
+     *
+     * @return the corresponding number of the column in the wrapped ResultSet
+     */
     protected int mapColumnNumber( int ourColumnNumber )    { return ourColumnNumber; }
 
     ////////////////////////////////////////////////////////////////////////

@@ -34,6 +34,9 @@ public interface GeneratedByteCode {
 		Initialize the generated class from a context.
 		Called by the class manager just after
 		creating the instance of the new class.
+
+        @param context The context to use
+        @throws StandardException on error
 	*/
 	public void initFromContext(Context context)
 		throws StandardException;
@@ -41,16 +44,22 @@ public interface GeneratedByteCode {
 	/**
 		Set the Generated Class. Call by the class manager just after
 		calling initFromContext.
+
+        @param gc A generated class
 	*/
 	public void setGC(GeneratedClass gc);
 
 	/**
 		Called by the class manager just after calling setGC().
+
+        @throws StandardException on error
 	*/
 	public void postConstructor() throws StandardException;
 
 	/**
 		Get the GeneratedClass object for this object.
+
+        @return a generated class
 	*/
 	public GeneratedClass getGC();
 

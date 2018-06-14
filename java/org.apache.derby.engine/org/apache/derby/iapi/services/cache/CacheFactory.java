@@ -34,7 +34,7 @@ public interface CacheFactory {
 		@param name			The name of the cache
 		@param initialSize	The initial capacity of the cache
 		@param maximumSize  The maximum number of objects the cache will hold
- 
+        @return a cache manager
 	*/
 	
 	public CacheManager newCacheManager(CacheableFactory holderFactory, String name,

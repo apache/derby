@@ -48,6 +48,8 @@ public interface UUID extends java.io.Externalizable
 	/**
 		Produce a string representation of this UUID which
 		is suitable for use as a unique ANSI identifier.
+
+        @return an ANSI identifier
 	 */
 	String toANSIidentifier();
 

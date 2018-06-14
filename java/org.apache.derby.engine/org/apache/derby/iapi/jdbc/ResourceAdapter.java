@@ -164,7 +164,7 @@ import org.apache.derby.shared.common.error.StandardException;
 	<BR> First some ugly pictures.  Some links are not shown to reduce
 	clutter.  Externally visible object is in <B>bold</B>.
   
-	<P><PRE>
+	<PRE>
 * 
 * When user ask for an XAConnection via a XADataSource, the following objects
 * exists 
@@ -392,6 +392,8 @@ public interface ResourceAdapter {
 	/**
 		Let a xaResource get the XAResourceManager to commit or rollback an
 		in-doubt transaction.
+
+        @return the XA resource manager
 	 */
 	XAResourceManager getXAResourceManager();
 
@@ -402,6 +404,8 @@ public interface ResourceAdapter {
 
 	/**
 		Is the Resource Manager active
+
+        @return true if the resource manager is active
 	 */
 	boolean isActive();
 
@@ -418,6 +422,8 @@ public interface ResourceAdapter {
 	 * XAResource instance, and rollback of the global transaction.
 	 * @param xid tranaction id to cancel
 	 * @param messageId error to report when canceling
+     *
+     * @throws XAException on error
 	 */
 	public void cancelXATransaction(XAXactId xid, String messageId) 
 		throws XAException;

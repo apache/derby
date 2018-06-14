@@ -84,6 +84,9 @@ public class ArrayOutputStream extends OutputStream implements Limit {
 
 	/**
 		Set the position of the stream pointer.
+
+        @param newPosition The new postion to set
+        @throws IOException on error
 	*/
 	public void setPosition(int newPosition)
 		throws IOException {

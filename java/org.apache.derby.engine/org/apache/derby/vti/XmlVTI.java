@@ -225,21 +225,49 @@ public  class   XmlVTI  extends StringColumnVTI
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** This is the static method for creating functions from a file name and child tags */
+    /**
+     * This is the static method for creating functions from a file name and child tags
+     *
+     * @param fileName The file containing the XML text
+     * @param rowTag The tag on the outermost element defining the row
+     * @param childTags The nested attributes and elements corresponding to columns in the row
+     *
+     * @return a VTI to turn the XML text into rows
+     * @throws Exception on error
+     */
     public  static  XmlVTI  xmlVTI( String fileName, String rowTag, String... childTags )
         throws Exception
     {
         return xmlVTI( fileName, rowTag, null, asList( childTags ) );
     }
     
-    /** This is the static method for creating functions from an url and child tags */
+    /**
+     * This is the static method for creating functions from an url and child tags
+     *
+     * @param urlString An URL which locates the XML text
+     * @param rowTag The tag on the outermost element defining the row
+     * @param childTags The nested attributes and elements corresponding to columns in the row
+     *
+     * @return a VTI to turn the XML text into rows
+     * @throws Exception on error
+     */
     public  static  XmlVTI  xmlVTIFromURL( String urlString, String rowTag, String... childTags )
         throws Exception
     {
         return xmlVTIFromURL( urlString, rowTag, null, asList( childTags ) );
     }
     
-    /** This is the static method for creating functions from a file name and both parent and child tags */
+    /**
+     * This is the static method for creating functions from a file name and both parent and child tags
+     *
+     * @param fileName Name of file which holds the XML text
+     * @param rowTag The base element for the row
+     * @param parentTags The names of parent tags
+     * @param childTags The names of child tags
+     *
+     * @return a VTI to turn the XML text into rows
+     * @throws Exception on error
+     */
     public  static  XmlVTI  xmlVTI
         ( final String fileName, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
         throws Exception
@@ -260,7 +288,17 @@ public  class   XmlVTI  extends StringColumnVTI
         return xmlVTI( fis, rowTag, parentTags, childTags );
     }
 
-    /** This is the static method for creating functions from an URL and both parent and child tags */
+    /**
+     * This is the static method for creating functions from an URL and both parent and child tags
+     *
+     * @param urlString An URL which locates the XML text
+     * @param rowTag The base element for the row
+     * @param parentTags The names of parent tags
+     * @param childTags The names of child tags
+     *
+     * @return a VTI to turn the XML text into rows
+     * @throws Exception on error
+     */
     public  static  XmlVTI  xmlVTIFromURL
         ( final String urlString, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
         throws Exception
@@ -281,7 +319,17 @@ public  class   XmlVTI  extends StringColumnVTI
         return xmlVTI( is, rowTag, parentTags, childTags );
     }
 
-    /** This is the static method for creating functions from an URL and both parent and child tags */
+    /**
+     * This is the static method for creating functions from an URL and both parent and child tags
+     *
+     * @param xmlResource The XML text as a stream
+     * @param rowTag The base element for the row
+     * @param parentTags The names of parent tags
+     * @param childTags The names of child tags
+     *
+     * @return a VTI to turn the XML text into rows
+     * @throws Exception on error
+     */
     private  static  XmlVTI  xmlVTI
         ( InputStream xmlResource, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
         throws Exception
@@ -297,7 +345,13 @@ public  class   XmlVTI  extends StringColumnVTI
         return new XmlVTI( xmlResource, rowTag, parentTags.size(), allTags );
     }
 
-    /** Factory method to create an ArrayList<String> */
+    /**
+     * Factory method to create an ArrayList&lt;String&gt;
+     *
+     * @param cells The items to put on the list
+     *
+     * @return a list containing those items
+     */
     public  static  ArrayList<String>   asList( String... cells )
     {
         ArrayList<String>   retval = new ArrayList<String>();
@@ -316,6 +370,11 @@ public  class   XmlVTI  extends StringColumnVTI
      * <p>
      * Get the string value of the column in the current row identified by the 1-based columnNumber.
      * </p>
+     *
+     * @param columnNumber The 1-based column index in the row
+     *
+     * @return the column value as a string
+     * @throws SQLException on error
      */
     protected  String  getRawColumn( int columnNumber ) throws SQLException
     {

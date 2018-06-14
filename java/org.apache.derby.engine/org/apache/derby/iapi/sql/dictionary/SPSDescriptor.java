@@ -65,7 +65,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  * (including sps recompilation) clears out the sps
  * cache and invalidates whatever statement held a
  * cached sps.  But it is possible for two statements
- * to do a prepare execute statment <x> at the exact
+ * to do a prepare execute statment at the exact
  * same time, so both try to do an sps.prepare() at the 
  * same time during code generation, so we synchronize
  * most everything except getters on immutable objects

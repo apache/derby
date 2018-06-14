@@ -41,7 +41,7 @@ public interface ColumnOrdering
          * Indicate whether NULL values should be ordered below non-NULL.
          *
          * This function returns TRUE if the user has specified, via the
-         * <null ordering> clause in the ORDER BY clause, that NULL values
+         * nullOrdering clause in the ORDER BY clause, that NULL values
          * of this column should sort lower than non-NULL values.
          *
          * @return whether nulls should sort low

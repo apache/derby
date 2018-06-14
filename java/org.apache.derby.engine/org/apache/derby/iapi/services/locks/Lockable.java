@@ -91,18 +91,26 @@ public interface Lockable {
 		<P>
 		Must only be called by the lock manager. Synchronization will be handled
 		by the lock manager.
+
+        @param lockInfo Latch descriptor
 	*/
 	public void lockEvent(Latch lockInfo);
 
 	/**
 		Return true if the requested qualifier is compatible with the already granted
 		qualifier.
+
+        @param requestedQualifier The desired qualifier
+        @param grantedQualifier The already granted qualifier
+        @return true if the request is compatible
 	*/
 	public boolean requestCompatible(Object requestedQualifier, Object grantedQualifier);
 
 	/**
 		Returns true if any lock request on a Lockable L in a compatibility space CS1 is compatible
 		with any other lock held on L in CS1.
+
+        @return if any lock request is allowed
 
 	*/
 	public boolean lockerAlwaysCompatible();
@@ -112,6 +120,8 @@ public interface Lockable {
 		<P>
 		Must only be called by the lock manager. Synchronization will be handled
 		by the lock manager.
+
+        @param lockInfo Latch descriptor
 	*/
 	public void unlockEvent(Latch lockInfo);
 

@@ -61,22 +61,20 @@ import java.sql.PreparedStatement;
  * </UL>
 
   <P>
-  Format : <encoded length><raw data>
+  Format : &lt;encoded length&gt;&lt;raw data&gt;
   <BR>
   Length is encoded to support Cloudscape 5.x databases where the length was stored as the number of bits.
   The first bit of the first byte indicates if the format is an old (Cloudscape 5.x) style or a new Derby style.
   Derby then uses the next two bits to indicate how the length is encoded.
   <BR>
-  <encoded length> is one of N styles.
+  &lt;encoded length&gt; is one of N styles.
   <UL>
-  <LI> (5.x format zero) 4 byte Java format integer value 0 - either <raw data> is 0 bytes/bits  or an unknown number of bytes.
-  <LI> (5.x format bits) 4 byte Java format integer value &gt;0 (positive) - number of bits in raw data, number of bytes in <raw data>
-  is the minimum number of bytes required to store the number of bits.
-  <LI> (Derby format) 1 byte encoded length (0 &lt;= L &lt;= 31) - number of bytes of raw data - encoded = 0x80 &amp; L
-  <LI> (Derby format) 3 byte encoded length (32 &lt;= L &lt; 64k) - number of bytes of raw data - encoded = 0xA0 <L as Java format unsigned short>
-  <LI> (Derby format) 5 byte encoded length (64k &lt;= L &lt; 2G) - number of bytes of raw data - encoded = 0xC0 <L as Java format integer>
-  <LI> (future) to be determined L &gt;= 2G - encoded 0xE0 <encoding of L to be determined>
-  (0xE0 is an esacape to allow any number of arbitary encodings in the future).
+  <LI> (5.x format zero) 4 byte Java format integer value 0 - either &lt;raw data&gt; is 0 bytes/bits  or an unknown number of bytes.</LI>
+  <LI> (5.x format bits) 4 byte Java format integer value &gt;0 (positive) - number of bits in raw data, number of bytes in &lt;raw data&gt; is the minimum number of bytes required to store the number of bits.</LI>
+  <LI> (Derby format) 1 byte encoded length (0 &lt;= L &lt;= 31) - number of bytes of raw data - encoded = 0x80 &amp; L</LI>
+  <LI> (Derby format) 3 byte encoded length (32 &lt;= L &lt; 64k) - number of bytes of raw data - encoded = 0xA0 &lt;L as Java format unsigned short&gt;</LI>
+  <LI> (Derby format) 5 byte encoded length (64k &lt;= L &lt; 2G) - number of bytes of raw data - encoded = 0xC0 &lt;L as Java format integer&gt;</LI>
+  <LI> (future) to be determined L &gt;= 2G - encoded 0xE0 &lt;encoding of L to be determined&gt;  (0xE0 is an esacape to allow any number of arbitary encodings in the future).</LI>
   </UL>
   <BR>
   When the value was written from a byte array the Derby encoded byte
@@ -406,7 +404,6 @@ abstract class SQLBinary
 	 * delegated to bit 
 	 *
 	 * @exception IOException			io exception
-	 * @exception ClassNotFoundException	class not found
 	*/
 	public final void readExternal(ObjectInput in) throws IOException
 	{

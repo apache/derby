@@ -76,11 +76,11 @@ final public class SystemPrincipal implements Principal, Serializable {
      * As an alternative approach, class <code>SystemPrincipal</code> could
      * implement the non-standard interface
      * <code>com.sun.security.auth.PrincipalComparator</code>, which declares
-     * a method <code>implies(Subject)<code> that would allow for Principals
+     * a method <code>implies(Subject)</code> that would allow for Principals
      * to match Subjects on the basis of normalized Authorization Identifiers.
      * But then we'd be relying upon non-standard Security Runtime behaviour.
      *
-     * @see <a href="http://wiki.apache.org/db-derby/UserIdentifiers">User Names & Authorization Identifiers in Derby</a>
+     * @see <a href="http://wiki.apache.org/db-derby/UserIdentifiers">User Names &amp; Authorization Identifiers in Derby</a>
      */
     private final String name;
 

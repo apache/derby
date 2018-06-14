@@ -71,6 +71,8 @@ public interface ModuleControl {
 		as its contents may change underneath it. At least after the complete boot
 		is completed, the links to all the default sets will be removed.
 
+        @param create True if the database should be created
+        @param properties Configuration properties
 		@exception StandardException Module cannot be started.
 
 		@see Monitor

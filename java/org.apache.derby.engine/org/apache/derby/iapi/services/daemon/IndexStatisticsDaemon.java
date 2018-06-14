@@ -27,21 +27,25 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 /**
+ * <p>
  * Daemon acting as a coordinator for creating and updating index statistics.
+ * </p>
  * <p>
  * There are two modes of operation:
+ * </p>
  * <ul> <li>explicit - generates index statistics due to an explict request from
  *          the user. The entrypoint is <tt>runExplicitly</tt>.</li>
  *      <li>background - generates index statistics as a background task due to
  *          an event that has triggered a statistics update. The entrypoint
  *          is <tt>schedule</tt>.</li>
- * <ul>
+ * </ul>
  * <p>
  * The modes differ in how the operation affects other operations in the running
  * system, and also how errors are dealt with. The background mode will try to
  * affect other operations as little as possible, and errors won't be reported
  * unless they are severe. The explicit mode will do more to make sure the
  * operation succeeds (for instance by using locks), and will report all errors.
+ * </p>
  */
 public interface IndexStatisticsDaemon {
 

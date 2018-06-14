@@ -59,6 +59,8 @@ public  interface   SequencePreallocator
      *
      * @param schemaName Name of schema holding the sequence.
      * @param sequenceName Specific name of the sequence.
+     *
+     * @return the size of the next pre-allocated range
      */
     public  int nextRangeSize
         (

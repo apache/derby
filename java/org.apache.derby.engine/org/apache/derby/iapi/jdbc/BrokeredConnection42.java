@@ -25,7 +25,13 @@ import java.sql.SQLException;
 
 public class BrokeredConnection42 extends BrokeredConnection
 {
-    /** Creates a new instance of BrokeredConnection40 */
+    /**
+     * Creates a new instance of BrokeredConnection40
+     *
+     * @param control The control variable
+     *
+     * @throws SQLException on error
+     */
     public BrokeredConnection42(BrokeredConnectionControl control)
             throws SQLException {
         super(control);

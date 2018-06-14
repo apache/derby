@@ -36,6 +36,8 @@ public class LimitInputStream extends FilterInputStream implements Limit {
 
 	/**
 		Construct a LimitInputStream and call the clearLimit() method.
+
+        @param in InputStream to wrap
 	*/
 	public LimitInputStream(InputStream in) {
 		super(in);

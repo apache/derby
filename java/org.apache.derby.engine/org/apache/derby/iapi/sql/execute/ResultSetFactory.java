@@ -296,23 +296,17 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to determine whether the restriction is satisfied or not.
 			The signature of this method is
-			<verbatim>
-				Boolean restriction() throws StandardException;
-			</verbatim>
+				"Boolean restriction() throws StandardException;"
 		@param projection a reference to a method in the activation
 			that is applied to the activation's "current row" field
 			to project out the expected result row.
 			The signature of this method is
-			<verbatim>
-				ExecRow projection() throws StandardException;
-			</verbatim>
+				"ExecRow projection() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param constantRestriction a reference to a method in the activation
 			that represents a constant expression (eg where 1 = 2).
 			The signature of this method is
-			<verbatim>
-				Boolean restriction() throws StandardException;
-			</verbatim>
+				"Boolean restriction() throws StandardException;
 		@param mapArrayItem	Item # for mapping of source to target columns
         @param cloneMapItem Item # for columns that need cloning
         @param reuseResult  Whether or not to reuse the result row.
@@ -358,9 +352,7 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to project out the expected result row.
 			The signature of this method is
-			<verbatim>
-				ExecRow projection() throws StandardException;
-			</verbatim>
+				"ExecRow projection() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param mapRefItem	Item # for mapping of source to target columns
 		@param reuseResult	Whether or not to reuse the result row.
@@ -636,9 +628,7 @@ public interface ResultSetFactory {
 			create the result set.
 		@param row a reference to a method in the activation
 			that creates the expected row.
-			<verbatim>
-				ExecRow row() throws StandardException;
-			</verbatim>
+				"ExecRow row() throws StandardException;"
 		@param canCacheRow	True if execution can cache the input row
 			after it has gotten it.  If the input row is constructed soley
 			of constants or parameters, it is ok to cache this row rather
@@ -720,17 +710,13 @@ public interface ResultSetFactory {
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
 			means there is no start key.
-			<verbatim>
-				ExecIndexRow startKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow startKeyGetter() throws StandardException;"
 		@param startSearchOperator The start search operator for opening
 			the scan
 		@param stopKeyGetter	a reference to a method in the activation
 			that gets the stop key indexable row for the scan.  Null means
 			there is no stop key.
-			<verbatim>
-				ExecIndexRow stopKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow stopKeyGetter() throws StandardException;"
 		@param stopSearchOperator	The stop search operator for opening
 			the scan
 		@param sameStartStopPosition	Re-use the startKeyGetter for the stopKeyGetter
@@ -862,17 +848,13 @@ public interface ResultSetFactory {
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
 			means there is no start key.
-			<verbatim>
-				ExecIndexRow startKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow startKeyGetter() throws StandardException;"
 		@param startSearchOperator The start search operator for opening
 			the scan
 		@param stopKeyGetter	a reference to a method in the activation
 			that gets the stop key indexable row for the scan.  Null means
 			there is no stop key.
-			<verbatim>
-				ExecIndexRow stopKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow stopKeyGetter() throws StandardException;"
 		@param stopSearchOperator	The stop search operator for opening
 			the scan
 		@param sameStartStopPosition	Re-use the startKeyGetter for the stopKeyGetter
@@ -974,17 +956,13 @@ public interface ResultSetFactory {
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
 			means there is no start key.
-			<verbatim>
-				ExecIndexRow startKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow startKeyGetter() throws StandardException;"
 		@param startSearchOperator The start search operator for opening
 			the scan
 		@param stopKeyGetter	a reference to a method in the activation
 			that gets the stop key indexable row for the scan.  Null means
 			there is no stop key.
-			<verbatim>
-				ExecIndexRow stopKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow stopKeyGetter() throws StandardException;"
 		@param stopSearchOperator	The stop search operator for opening
 			the scan
 		@param sameStartStopPosition	Re-use the startKeyGetter for the stopKeyGetter
@@ -1101,9 +1079,7 @@ public interface ResultSetFactory {
 						rows from an index conglomerate
 		@param resultRowAllocator a reference to a method in the activation
 			that creates a holder for the rows from the scan.
-			<verbatim>
-				ExecRow rowAllocator() throws StandardException;
-			</verbatim>
+				"ExecRow rowAllocator() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param indexName		The name of the index.
 		@param heapColRefItem	A saved item for a bitImpl of columns that
@@ -1200,9 +1176,7 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
 			The signature of this method is
-			<verbatim>
-				Boolean joinClause() throws StandardException;
-			</verbatim>
+				"Boolean joinClause() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param oneRowRightSide	boolean, whether or not the right side returns
 								a single row.  (No need to do 2nd next() if it does.)
@@ -1240,9 +1214,7 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
 			The signature of this method is
-			<verbatim>
-				Boolean joinClause() throws StandardException;
-			</verbatim>
+				"Boolean joinClause() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param oneRowRightSide	boolean, whether or not the right side returns
 								a single row.  (No need to do 2nd next() if it does.)
@@ -1288,9 +1260,7 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
 			The signature of this method is
-			<verbatim>
-				Boolean joinClause() throws StandardException;
-			</verbatim>
+				"Boolean joinClause() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param emptyRowFun a reference to a method in the activation
 							that is called if the right child returns no rows
@@ -1333,9 +1303,7 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
 			The signature of this method is
-			<verbatim>
-				Boolean joinClause() throws StandardException;
-			</verbatim>
+				"Boolean joinClause() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param emptyRowFun a reference to a method in the activation
 							that is called if the right child returns no rows
@@ -1580,17 +1548,13 @@ public interface ResultSetFactory {
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
 			means there is no start key.
-			<verbatim>
-				ExecIndexRow startKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow startKeyGetter() throws StandardException;"
 		@param startSearchOperator The start search operator for opening
 			the scan
 		@param stopKeyGetter	a reference to a method in the activation
 			that gets the stop key indexable row for the scan.  Null means
 			there is no stop key.
-			<verbatim>
-				ExecIndexRow stopKeyGetter() throws StandardException;
-			</verbatim>
+				"ExecIndexRow stopKeyGetter() throws StandardException;"
 		@param stopSearchOperator	The stop search operator for opening
 			the scan
 		@param sameStartStopPosition	Re-use the startKeyGetter for the stopKeyGetter
@@ -1658,8 +1622,8 @@ public interface ResultSetFactory {
 
 
 	/**
-	 * This result sets implements the filtering needed by <result offset
-	 * clause> and <fetch first clause>. It is only ever generated if at least
+	 * This result sets implements the filtering needed by resultOffsetClause
+	 * and fetchFirstClause. It is only ever generated if at least
 	 * one of the two clauses is present.
 	 *
 	 * @param source          The source result set being filtered

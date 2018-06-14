@@ -78,6 +78,8 @@ public class JDBCBoot {
 		Boot a system requesting a JDBC driver but only if there is
 		no current JDBC driver that is handling the required protocol.
 
+        @param protocol The database protocol
+        @param logging The diagnostic log writer
 	*/
 	public void boot(String protocol, final PrintWriter logging) {
 

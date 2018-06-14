@@ -88,11 +88,15 @@ public interface IndexDescriptor
 {
 	/**
 	 * Returns true if the index is unique.
+     *
+     * @return true if the index is unique
 	 */
 	boolean			isUnique();
 	/**
 	 * Returns true if the index is duplicate keys only for null key parts. 
      * This is effective only if isUnique is false.
+     *
+     * @return true if the index is duplicate keys only for null key parts
 	 */
 	boolean			isUniqueWithDuplicateNulls();
 
@@ -109,6 +113,8 @@ public interface IndexDescriptor
 
     /**
      * Returns true if the index is used to support a deferrable constraint.
+     *
+     * @return true if the index is used to support a deferrable constraint
      */
     boolean hasDeferrableChecking();
 
@@ -119,15 +125,24 @@ public interface IndexDescriptor
 	 * The returned array holds the column positions in the
 	 * base table, so, if entry 2 is the number 4, the second
 	 * column in the index is the fourth column in the table.
+     *
+     * @return an array of column positions in the base table
 	 */
 	public int[]	baseColumnPositions();
 
 	/**
+     * <p>
      * Returns the postion of a column.
+     * </p>
      * <p>
 	 * Returns the position of a column within the key (1-based).
 	 * 0 means that the column is not in the key.  Same as the above
 	 * method, but it uses int instead of Integer.
+     * </p>
+     *
+     * @param heapColumnPosition Position of column in heap row
+     *
+     * @return the position of the column in the key
 	 */
 	public int getKeyColumnPosition(int heapColumnPosition);
 
@@ -141,12 +156,16 @@ public interface IndexDescriptor
 	 * non-ordered columns.
 	 *
 	 * For now, all columns in an index must be ordered.
+     *
+     * @return the number of ordered columns
 	 */
 	int				numberOfOrderedColumns();
 
 	/**
 	 * Returns the type of the index.  For now, we only support B-Trees,
 	 * so the value "BTREE" is returned.
+     *
+     * @return the type of the index
 	 */
 	String			indexType();
 
@@ -154,12 +173,17 @@ public interface IndexDescriptor
 	 * Returns array of boolean telling asc/desc info for each index
 	 * key column for convenience of using together with baseColumnPositions
 	 * method.  Both methods return an array with subscript starting from 0.
+     *
+     * @return array of boolean telling asc/desc info for each index key
 	 */
 	public boolean[]	isAscending();
 
 	/**
 	 * Returns true if the specified column is ascending in the index
 	 * (1-based).
+     *
+     * @param keyColumnPosition Key column number
+     * @return true if the specified column is ascending in the index
 	 */
 	boolean			isAscending(Integer keyColumnPosition);
 
@@ -167,6 +191,9 @@ public interface IndexDescriptor
 	 * Returns true if the specified column is descending in the index
 	 * (1-based).  In the current release, only ascending columns are
 	 * supported.
+     *
+     * @param keyColumnPosition Key column number
+     * @return true if the specified column is descending in the index
 	 */
 	boolean			isDescending(Integer keyColumnPosition);
 
@@ -174,6 +201,8 @@ public interface IndexDescriptor
 	 * set the baseColumnPositions field of the index descriptor.  This
 	 * is for updating the field in operations such as "alter table drop
 	 * column" where baseColumnPositions is changed.
+     *
+     * @param baseColumnPositions Positions of base columns
 	 */
 	public void     setBaseColumnPositions(int[] baseColumnPositions);
 
@@ -181,6 +210,8 @@ public interface IndexDescriptor
 	 * set the isAscending field of the index descriptor.  This
 	 * is for updating the field in operations such as "alter table drop
 	 * column" where isAscending is changed.
+     *
+     * @param isAscending Set the direction of each column in the key
 	 */
 	public void     setIsAscending(boolean[] isAscending);
 
@@ -188,6 +219,8 @@ public interface IndexDescriptor
 	 * set the numberOfOrderedColumns field of the index descriptor.  This
 	 * is for updating the field in operations such as "alter table drop
 	 * column" where numberOfOrderedColumns is changed.
+     *
+     * @param numberOfOrderedColumns Number of ordered columns
 	 */
 	public void     setNumberOfOrderedColumns(int numberOfOrderedColumns);
 }

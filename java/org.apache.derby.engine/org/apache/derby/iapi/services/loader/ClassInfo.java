@@ -39,6 +39,8 @@ public class ClassInfo implements InstanceGetter {
 
 	/**
 		Return the name of this class.
+
+        @return the name of this class
 	*/
 	public final String getClassName() {
 		return clazz.getName();
@@ -46,6 +48,8 @@ public class ClassInfo implements InstanceGetter {
 
 	/**
 		Return the class object for this class.
+
+        @return the class object for this class
 
 	*/
 	public final Class getClassObject() {
@@ -62,6 +66,7 @@ public class ClassInfo implements InstanceGetter {
 		@exception InstantiationException Zero arg constructor can not be executed
 		@exception IllegalAccessException Class or zero arg constructor is not public.
 		@exception InvocationTargetException Exception throw in zero-arg constructor.
+        @exception NoSuchMethodException Throws on error
 
 	*/
 	public Object getNewInstance()

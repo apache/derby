@@ -98,6 +98,7 @@ public class FormatableArrayHolder implements Formatable
 	 * Get the held array of formatables, and return
      * it in an array that is an instance of {@code arrayClass}.
 	 *
+     * @param <E> The type of the array cell
      * @param arrayClass the type of array to return
 	 *
 	 * @return an array of formatables

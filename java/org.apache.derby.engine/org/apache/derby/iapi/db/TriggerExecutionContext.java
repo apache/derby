@@ -32,19 +32,19 @@ import org.apache.derby.catalog.UUID;
 public interface TriggerExecutionContext
 {
 	/**
-	 * Return value from </I>getEventType()</I> for
+	 * Return value from <I>getEventType()</I> for
 	 * an update trigger.
 	 */ 
 	public static final int UPDATE_EVENT	= 1;
 
 	/**
-	 * Return value from </I>getEventType()</I> for
+	 * Return value from <I>getEventType()</I> for
 	 * a delete trigger.
 	 */ 
 	public static final int DELETE_EVENT	= 2;
 
 	/**
-	 * Return value from </I>getEventType()</I> for
+	 * Return value from <I>getEventType()</I> for
 	 * an insert trigger.
 	 */ 
 	public static final int INSERT_EVENT	= 3;

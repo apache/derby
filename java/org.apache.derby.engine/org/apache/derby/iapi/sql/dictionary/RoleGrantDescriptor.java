@@ -36,7 +36,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
  *
  * An instance contains information for exactly: One &lt;role
  * definition&gt;, cf. ISO/IEC 9075-2:2003 section 12.4
- * <bold>or</bold> one &lt;grant role statement&gt;, section 12.5.
+ * <b>or</b> one &lt;grant role statement&gt;, section 12.5.
  *
  * A role definition is also modeled as a role grant (hence the class
  * name), but with the special grantor "_SYSTEM", and with a grantee

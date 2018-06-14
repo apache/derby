@@ -28,16 +28,22 @@ public interface Latch {
 
 	/**	
 		Get the compatibility space the latch is held in.
+
+        @return the latch's compatibility space
 	*/
 	public CompatibilitySpace getCompatabilitySpace();
 
 	/**
-		Gte the object the latch is held on.
+		Get the object the latch is held on.
+
+        @return the object the latch is held on
 	*/
 	public Lockable getLockable();
 
 	/**
 		Get the qualifier used when the latch was obtained.
+
+        @return the qualifier used when the latch was obtained
 	*/
 	public Object getQualifier();
 

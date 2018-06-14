@@ -59,6 +59,9 @@ public abstract class CompressedNumber {
 		4 byte - 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx   Represents the value &gt; 16383 &amp;&amp; &lt;= MAX_INT
 		</PRE>
 
+        @param out Where to serialize the int value
+        @param value The value to serialize
+        @return the number of bytes written
 
 		@exception IOException value is negative or an exception was thrown by a method on out.
 	*/
@@ -89,6 +92,10 @@ public abstract class CompressedNumber {
 
 	/**
 		Write a compressed integer directly to an OutputStream.
+
+        @param out Where to serialize the int value
+        @param value The int value to serialize
+        @return the number of bytes written
 		@exception IOException an exception was thrown by a method on in.
 	*/
 	public static final int writeInt(OutputStream out, int value) throws IOException {
@@ -119,6 +126,9 @@ public abstract class CompressedNumber {
 
 	/**
 		Read an integer previously written by writeInt().
+
+        @param in Whence to read an int
+        @return the deserialized int value
 
 		@exception IOException an exception was thrown by a method on in.
 	*/
@@ -177,6 +187,9 @@ public abstract class CompressedNumber {
 
 	/**
 		Read an integer previously written by writeInt().
+
+        @param in Whence to read an int
+        @return the deserialized int value
 
 		@exception IOException an exception was thrown by a method on in.
 	*/
@@ -258,13 +271,10 @@ public abstract class CompressedNumber {
 	}
 
 	/**
-		Skip an integer previously written by writeInt().
-
-		@exception IOException an exception was thrown by a method on in.
-	*/
-
-	/**
 		Return the number of bytes that would be written by a writeInt call
+
+        @param value The int value to be serialized
+        @return the number of bytes which would be written
 	*/
 	public static final int sizeInt(int value) {
 		if (value <= 0x3f) {
@@ -286,6 +296,9 @@ public abstract class CompressedNumber {
 		8 byte - 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx   Represents the value &gt; 0x3fffffff &amp;&amp; &lt;= MAX_LONG
 		</PRE>
 
+        @param out Where to write the long value
+        @param value The long value to write
+        @return the number of bytes written
 
 		@exception IOException value is negative or an exception was thrown by a method on out.
 	*/
@@ -323,6 +336,10 @@ public abstract class CompressedNumber {
 	/**
 		Write a compressed integer only supporting signed values.
 
+        @param out Where to write the long
+        @param value The long to write
+        @return the number of bytes written
+
 		@exception IOException value is negative or an exception was thrown by a method on out.
 	*/
 	public static final int writeLong(OutputStream out, long value) throws IOException {
@@ -359,6 +376,9 @@ public abstract class CompressedNumber {
 
 	/**
 		Read a long previously written by writeLong().
+
+        @param in Whence to read a long value
+        @return the deserialized long value
 
 		@exception IOException an exception was thrown by a method on in.
 	*/
@@ -400,6 +420,9 @@ public abstract class CompressedNumber {
 
 	/**
 		Read a long previously written by writeLong().
+
+        @param in Whence to read the long value
+        @return the deserialized long value
 
 		@exception IOException an exception was thrown by a method on in.
 	*/

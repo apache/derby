@@ -223,6 +223,7 @@ public final class ContextService //OLD extends Hashtable
 		Find the context with the given name in the context service factory
 		loaded for the system.
 
+        @param contextId The handle on the context
 		@return The requested context, null if it doesn't exist.
 	*/
 	public static Context getContext(String contextId)
@@ -245,6 +246,7 @@ public final class ContextService //OLD extends Hashtable
 		This version will not do any debug checking, but return null
 		quietly if it runs into any problems.
 
+        @param contextId The handle on the context
 		@return The requested context, null if it doesn't exist.
 	*/
 	public static Context getContextOrNull(String contextId)
@@ -306,6 +308,8 @@ public final class ContextService //OLD extends Hashtable
      * Break the link between the current Thread and the passed
      * in ContextManager. Called in a pair with setCurrentContextManager,
      * see that method for details.
+     *
+     * @param cm The context manager
      */
 	public void resetCurrentContextManager(ContextManager cm) {
 		ThreadLocal<Object> tcl = threadContextList;
@@ -503,6 +507,8 @@ public final class ContextService //OLD extends Hashtable
      * <LI>A different ContextManager would be pushed during a call on
      * a different embedded JDBC Connection in a procedure or function.
      * </UL>
+     *
+     * @param cm The context manager
 	 */
 	public void setCurrentContextManager(ContextManager cm) {
 
@@ -529,6 +535,8 @@ public final class ContextService //OLD extends Hashtable
 	 * It's up to the caller to track this context manager and set it
 	 * in the context manager list using setCurrentContextManager.
 	 * We don't keep track of it due to this call being made.
+     *
+     * @return a new context manager
 	 */
 	public ContextManager newContextManager()
 	{

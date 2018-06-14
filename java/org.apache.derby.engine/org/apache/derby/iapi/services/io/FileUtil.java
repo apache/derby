@@ -60,9 +60,9 @@ public abstract class FileUtil {
 		dependent. This method removes the directory
 		and all of its contents.
 
+        @param directory The directory to remove
 		@return true if the complete directory was removed, false if it could not be.
 		If false is returned then some of the files in the directory may have been removed.
-
 	*/
 	public static boolean removeDirectory(File directory) {
 
@@ -456,6 +456,9 @@ public abstract class FileUtil {
         expressed as an URL. If the filename is not an URL, then nothing is done.
         Otherwise, an URL like 'file:///tmp/foo.txt' is transformed into the legal
         file name '/tmp/foo.txt'.
+
+        @param originalName The original url
+        @return the stripped url
 	*/
     public static String stripProtocolFromFileName( String originalName )
     {

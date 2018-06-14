@@ -64,6 +64,9 @@ public interface Pushable {
 
 		The  JDBC column numbering scheme (1 based) ise used for projectedColumns.
 
+        @param vtiEnvironment The VTI context
+        @param projectedColumns Columns being projected out
+        @return a boolean value
 
 		@exception SQLException Error processing the request.
 	*/

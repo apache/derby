@@ -139,7 +139,7 @@ public final class RawToBinaryFormatStream extends LimitInputStream {
      * @param maximumLength maximum length of the column data is inserted into
      * @param typeName type name for the column data is inserted into
      * @throws IllegalArgumentException if maximum length is negative, or type
-     *      name is <code>null<code>. This exception should never be exposed
+     *      name is <code>null</code>. This exception should never be exposed
      *      to the user, and seeing it means a programming error exists in the
      *      code. Although a missing type name is not critical, an exception is
      *      is thrown to signal the intended use of this constructor.

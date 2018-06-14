@@ -47,9 +47,10 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.util.IdUtil;
 
 /**
- * This class represents a table descriptor. The external interface to this
- * class is:
  <p>
+  This class represents a table descriptor. The external interface to this
+  class is:
+ </p>
 		<ol>
 		<li>external interface </li>
 		<li>public String	getSchemaName();</li>
@@ -86,8 +87,6 @@ import org.apache.derby.iapi.util.IdUtil;
 		<li>public boolean statisticsExist(ConglomerateDescriptor cd) throws StandardException;</li>
 		<li>public double selectivityForConglomerate(...)throws StandardException;</li>
 		</ol>
-	<p>
-	*
 	*/
 
 public class TableDescriptor extends UniqueSQLObjectDescriptor

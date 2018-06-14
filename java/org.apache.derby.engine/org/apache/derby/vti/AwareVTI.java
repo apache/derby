@@ -35,10 +35,18 @@ public interface AwareVTI
     //
     /////////////////////////////////////////////////////////////////
 
-    /** Get the table function context */
+    /**
+     * Get the table function context
+     *
+     * @return the table function context
+     */
     public  VTIContext  getContext();
 
-    /** Set the table function context */
+    /**
+     * Set the table function context
+     *
+     * @param context The table function context
+     */
     public  void    setContext( VTIContext context );
     
 }

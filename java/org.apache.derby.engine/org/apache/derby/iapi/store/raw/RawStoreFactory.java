@@ -457,7 +457,7 @@ public interface RawStoreFactory extends Corruptable {
         <OL>
         <LI>Create an raw store transaction context
         <LI>Create a new idle transaction and then link it to the context.
-        </UL>
+        </OL>
         Only one user transaction and one nested user transaction can be active
         in a context at any one time.
         After a commit the transaction may be re-used.
@@ -469,21 +469,21 @@ public interface RawStoreFactory extends Corruptable {
         <LI>
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then
-        no action is taken.
+        no action is taken.</li>
         <LI>
         If error is an instance of StandardException that
         has a severity equal to ExceptionSeverity.TRANSACTION_SEVERITY then
         the context's transaction is aborted, and the transaction returned to
-        the idle state.
+        the idle state.</li>
         <LI>
         If error is an instance of StandardException that
         has a severity greater than  ExceptionSeverity.TRANSACTION_SEVERITY
         then the context's transaction is aborted, the transaction closed, and
-        the context is popped off the stack.
+        the context is popped off the stack.</li>
         <LI>
         If error is not an instance of StandardException then the context's
         transaction is aborted, the transaction closed, and the
-        context is popped off the stack.
+        context is popped off the stack.</li>
         </UL>
 
         @param contextMgr is the context manager to use.  An exception will be
@@ -514,9 +514,9 @@ public interface RawStoreFactory extends Corruptable {
         <P>
         Starting a transaction always performs the following steps.
         <OL>
-        <LI>Create an raw store transaction context
-        <LI>Create a new idle transaction and then link it to the context.
-        </UL>
+        <LI>Create an raw store transaction context</LI>
+        <LI>Create a new idle transaction and then link it to the context.</LI>
+        </OL>
         Only one user transaction can be active in a context at any one time.
         After a commit the transaction may be re-used.
         <P>
@@ -527,21 +527,21 @@ public interface RawStoreFactory extends Corruptable {
         <LI>
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then 
-        no action is taken.
+        no action is taken.</LI>
         <LI>
         If error is an instance of StandardException that
         has a severity equal to ExceptionSeverity.TRANSACTION_SEVERITY then
         the context's transaction is aborted, and the transaction returned to 
-        the idle state.
+        the idle state.</LI>
         <LI>
         If error is an instance of StandardException that
         has a severity greater than  ExceptionSeverity.TRANSACTION_SEVERITY 
         then the context's transaction is aborted, the transaction closed, and 
-        the context is popped off the stack.
+        the context is popped off the stack.</LI>
         <LI>
         If error is not an instance of StandardException then the context's
         transaction is aborted, the transaction closed, and the
-        context is popped off the stack.
+        context is popped off the stack.</LI>
         </UL>
 
         @param contextMgr is the context manager to use.  An exception will be
@@ -591,21 +591,21 @@ public interface RawStoreFactory extends Corruptable {
         <P>
         Starting an internal transaction always performs the following steps.
         <OL>
-        <LI>Create an raw store internal transaction context
+        <LI>Create an raw store internal transaction context</LI>
         <LI>Create a new idle internal transaction and then link it to the 
-            context.
-        </UL>
+            context.</LI>
+        </OL>
         <P>
         AN internal transaction is identical to a user transaction with the 
         exception that
         <UL>
-        <LI> Logical operations are not supported
-        <LI> Savepoints are not supported
-        <LI> Containers are not closed when commit() is called.
+        <LI> Logical operations are not supported</LI>
+        <LI> Savepoints are not supported</LI>
+        <LI> Containers are not closed when commit() is called.</LI>
         <LI> Pages are not unlatched (since containers are not closed) when 
-             commit() is called.
+             commit() is called.</LI>
         <LI> During recovery time internal transactions are rolled back before 
-             user transactions.
+             user transactions.</LI>
         </UL>
         Only one internal transaction can be active in a context at any one time.
         After a commit the transaction may be re-used.
@@ -618,16 +618,16 @@ public interface RawStoreFactory extends Corruptable {
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then
         the internal transaction is aborted, the internal transaction is closed,        the context is popped off the stack, and an exception of severity 
-        Transaction exception is re-thrown.
+        Transaction exception is re-thrown.</LI>
         <LI>
         If error is an instance of StandardException that has a severity 
         greater than or equal to ExceptionSeverity.TRANSACTION_SEVERITY then
         the context's internal transaction is aborted, the internal 
-        transaction is closed and the context is popped off the stack.
+        transaction is closed and the context is popped off the stack.</LI>
         <LI>
         If error is not an instance of StandardException then the context's
         internal transaction is aborted, the internal transaction is closed 
-        and the context is popped off the stack.
+        and the context is popped off the stack.</LI>
         </UL>
 
         @exception StandardException Standard Derby error policy
@@ -647,9 +647,9 @@ public interface RawStoreFactory extends Corruptable {
         the transaction.
         Starting a transaction always performs the following steps.
         <OL>
-        <LI>Create an raw store transaction context
-        <LI>Create a new idle transaction and then link it to the context.
-        </UL>
+        <LI>Create an raw store transaction context</LI>
+        <LI>Create a new idle transaction and then link it to the context.</LI>
+        </OL>
         Only one user transaction and one nested user transaction can be active
         in a context at any one time.
         After a commit the transaction may be re-used.
@@ -661,22 +661,22 @@ public interface RawStoreFactory extends Corruptable {
         <LI>
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then
-        no action is taken.
+        no action is taken.</LI>
         <LI>
         If error is an instance of StandardException that
         has a severity equal to ExceptionSeverity.TRANSACTION_SEVERITY then
         the context's transaction is aborted, and the transaction returned to
         the idle state.  If a user transaction exists on the context stack
-        then that transaction is aborted also.
+        then that transaction is aborted also.</LI>
         <LI>
         If error is an instance of StandardException that
         has a severity greater than  ExceptionSeverity.TRANSACTION_SEVERITY
         then the context's transaction is aborted, the transaction closed, and
-        the context is popped off the stack.
+        the context is popped off the stack.</LI>
         <LI>
         If error is not an instance of StandardException then the context's
         transaction is aborted, the transaction closed, and the
-        context is popped off the stack.
+        context is popped off the stack.</LI>
         </UL>
 
         @param parentTransaction parent transaction
@@ -709,9 +709,9 @@ public interface RawStoreFactory extends Corruptable {
         the transaction.
         Starting a transaction always performs the following steps.
         <OL>
-        <LI>Create an raw store transaction context
-        <LI>Create a new idle transaction and then link it to the context.
-        </UL>
+        <LI>Create an raw store transaction context.</LI>
+        <LI>Create a new idle transaction and then link it to the context.</LI>
+        </OL>
         Only one user transaction and one nested user transaction can be active
         in a context at any one time.
         After a commit the transaction may be re-used.
@@ -723,22 +723,22 @@ public interface RawStoreFactory extends Corruptable {
         <LI>
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then
-        no action is taken.
+        no action is taken.</LI>
         <LI>
         If error is an instance of StandardException that
         has a severity equal to ExceptionSeverity.TRANSACTION_SEVERITY then
         the context's transaction is aborted, and the transaction returned to
         the idle state.  If a user transaction exists on the context stack
-        then that transaction is aborted also.
+        then that transaction is aborted also.</LI>
         <LI>
         If error is an instance of StandardException that
         has a severity greater than  ExceptionSeverity.TRANSACTION_SEVERITY
         then the context's transaction is aborted, the transaction closed, and
-        the context is popped off the stack.
+        the context is popped off the stack.</LI>
         <LI>
         If error is not an instance of StandardException then the context's
         transaction is aborted, the transaction closed, and the
-        context is popped off the stack.
+        context is popped off the stack.</LI>
         </UL>
 
         @param parentTransaction parent transaction

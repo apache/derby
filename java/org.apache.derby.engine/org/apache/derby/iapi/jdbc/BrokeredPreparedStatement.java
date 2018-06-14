@@ -708,6 +708,11 @@ public class BrokeredPreparedStatement extends BrokeredStatement
 
 	/**
 		Create a duplicate PreparedStatement to this, including state, from the passed in Connection.
+
+        @param conn The current connection
+        @param oldStatement The old statement
+        @return a new PreparedStatement
+        @throws SQLException on error
 	*/
 	public PreparedStatement createDuplicateStatement(Connection conn, PreparedStatement oldStatement) throws SQLException {
 

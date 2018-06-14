@@ -223,6 +223,8 @@ public class SystemProcedures  {
      *                     the result of getProcedures
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLPROCEDURES (String catalogName, String schemaName, String procName,
 										String options, ResultSet[] rs) throws SQLException
@@ -243,6 +245,8 @@ public class SystemProcedures  {
 	 *                     (not used)
 	 *  @param rs          output parameter, the resultset object containing 
 	 *                     the result of getFunctions
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLFUNCTIONS(String catalogName, 
 									String schemaName, 
@@ -278,6 +282,8 @@ public class SystemProcedures  {
 	 *  @param tableType   SYSIBM.SQLTables TableType   varchar(4000))
 	 *  @param options     SYSIBM.SQLTables Options     varchar(4000))
 	 *  @param rs          output parameter, the resultset object 
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLTABLES (String catalogName, String schemaName, String tableName,
 										String tableType, String options, ResultSet[] rs)
@@ -343,6 +349,8 @@ public class SystemProcedures  {
 	 *  			 If options contains the string 'EXPORTEDKEY=1', call getImportedKeys
 	 *  			 If options contains the string 'IMPORTEDKEY=1', call getExportedKeys
 	 *  			 otherwise, call getCrossReference
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLFOREIGNKEYS (String pkCatalogName, String pkSchemaName, String pkTableName,
 										String fkCatalogName, String fkSchemaName, String fkTableName,
@@ -406,6 +414,8 @@ public class SystemProcedures  {
 	 *			           the result of getProcedureColumns
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLPROCEDURECOLS (String catalogName, String schemaName, String procName,
 										String paramName, String options, ResultSet[] rs)
@@ -433,6 +443,8 @@ public class SystemProcedures  {
 	 * varchar(4000))
 	 * @param rs output parameter, the resultset object containing the
 	 * result of getFunctionColumns(). 
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLFUNCTIONPARAMS(String catalogName,
 										 String schemaName,
@@ -459,6 +471,8 @@ public class SystemProcedures  {
 	 *  	version of this procedure.
 	 *  @param rs          output parameter, the resultset object containing 
      *                     the result of getProcedures
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLCOLUMNS (String catalogName, String schemaName, String tableName,
 										String columnName, String options, ResultSet[] rs)
@@ -480,6 +494,8 @@ public class SystemProcedures  {
 	 *  @param options     SYSIBM.SQLColPrivileges Options     varchar(4000))
 	 *  @param rs          output parameter, the resultset object containing 
      *                     the result of getColumnPrivileges
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLCOLPRIVILEGES (String catalogName, String schemaName, String tableName,
 										String columnName, String options, ResultSet[] rs)
@@ -497,6 +513,8 @@ public class SystemProcedures  {
 	 *  @param options     SYSIBM.SQLTablePrivileges Options     varchar(4000))
 	 *  @param rs          output parameter, the resultset object containing 
      *                     the result of getTablePrivileges
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLTABLEPRIVILEGES (String catalogName, String schemaName, String tableName,
 										String options, ResultSet[] rs)
@@ -516,6 +534,8 @@ public class SystemProcedures  {
 	 *  	version of this procedure.
 	 *  @param rs          output parameter, the resultset object containing 
      *                     the result of getPrimaryKeys
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLPRIMARYKEYS (String catalogName, String schemaName, String tableName, String options, ResultSet[] rs)
 		throws SQLException
@@ -532,6 +552,8 @@ public class SystemProcedures  {
 	 *  	version of this procedure.
 	 *  @param rs        output parameter, the resultset object containing the
      *                   result of getTypeInfo
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLGETTYPEINFO (short dataType, String options, ResultSet[] rs)
 		throws SQLException
@@ -554,6 +576,8 @@ public class SystemProcedures  {
 	 *  	version of this procedure.
 	 *  @param rs          output parameter, the resultset object containing 
      *                     the result of getIndexInfo
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLSTATISTICS (String catalogName, String schemaName, String tableName,
 										short unique, short approximate, String options, ResultSet[] rs)
@@ -583,6 +607,8 @@ public class SystemProcedures  {
 	 *  	version of this procedure.
 	 *  @param rs          output parameter, the resultset object containing 
      *                     the result of the DatabaseMetaData call
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLSPECIALCOLUMNS (short colType, String catalogName, String schemaName, String tableName,
 										short scope, short nullable, String options, ResultSet[] rs)
@@ -616,6 +642,8 @@ public class SystemProcedures  {
 	 *  @param options         SYSIBM.SQLUDTS Options              varchar(4000))
 	 *  @param rs              output parameter, the resultset object containing
      *                         the result of getUDTs, which will be empty
+     *
+     * @throws SQLException on error
 	 */
 	public static void SQLUDTS (String catalogName, String schemaPattern, String typeNamePattern,
 										String udtTypes, String options, ResultSet[] rs)
@@ -654,6 +682,9 @@ public class SystemProcedures  {
 	 *  Map SYSIBM.METADATA to appropriate EmbedDatabaseMetaData methods 
 	 *  for now, using the sps in org.apache.derby.iapi.db.jdbc.datadictionary.metadata_net.properties
 	 *
+     *
+     * @param rs A ResultSet
+     * @throws SQLException on error
 	 */
 	public static void METADATA (ResultSet[] rs)
 		throws SQLException
@@ -719,6 +750,7 @@ public class SystemProcedures  {
      * Will be called as SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY.
      *
      * @param key       The property key.
+     * @return the value mapped to that key
      *
      * @exception SQLException if a database error occurs
      **/
@@ -732,6 +764,12 @@ public class SystemProcedures  {
     /**
      * This method exists so that we can get a property value without performing
      * authorization checks.
+     *
+     * @param key The key name
+     * @param authorizationCheck Authorization handle
+     * @return the value mapped to the key
+     *
+     * @throws SQLException on error
      */
     private static  String  getProperty( String key, Securable authorizationCheck )
         throws SQLException
@@ -780,7 +818,7 @@ public class SystemProcedures  {
      *                      Empty string for index name will raise an 
      *                      exception.
      *
-	 * @exception  SQLException
+	 * @exception  SQLException on error
      **/
     public static void SYSCS_UPDATE_STATISTICS(
     	    String  schemaname,
@@ -832,7 +870,7 @@ public class SystemProcedures  {
      *                      Empty string for index name will raise an 
      *                      exception.
      *
-	 * @exception  SQLException 
+	 * @exception  SQLException on error
      */
     public static void SYSCS_DROP_STATISTICS(
     String  schemaname,
@@ -1252,6 +1290,13 @@ public class SystemProcedures  {
     o defragment requires table level lock in nested user transaction, which
       will conflict with user lock on same table in user transaction.
 
+      @param schema Schema name
+      @param tablename Unqualifed name of table
+      @param purgeRows Whether to purge rows
+      @param defragmentRows Whether to defragment rows
+      @param truncateEnd Whether to truncate
+
+      @throws SQLException on error
     **/
     public static void SYSCS_INPLACE_COMPRESS_TABLE(
     String  schema,
@@ -1469,6 +1514,14 @@ public class SystemProcedures  {
 	 * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
 	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
 	 * IN CODESET VARCHAR(128))
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param fileName Where to dump the table contents
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset The encoding to use
+     *
      * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_EXPORT_TABLE(
@@ -1503,6 +1556,15 @@ public class SystemProcedures  {
      * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param fileName Where to dump the table contents
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset The encoding to use
+     * @param lobsFileName Where to dump the large objects
+     *
      * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(
@@ -1535,6 +1597,13 @@ public class SystemProcedures  {
 	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
 	 * IN CODESET VARCHAR(128))
 	 *
+     *
+     * @param selectStatement The query which materializes results
+     * @param fileName Where to dump the table contents
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset The encoding to use
+     *
      * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_EXPORT_QUERY(
@@ -1565,6 +1634,13 @@ public class SystemProcedures  {
      * IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
+     *
+     * @param selectStatement The query which materializes results
+     * @param fileName Where to dump the table contents
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset The encoding to use
+     * @param lobsFileName Where to dump the large objects
      *
      * @exception SQLException if a database error occurs
      **/
@@ -1598,6 +1674,15 @@ public class SystemProcedures  {
 	 * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
 	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
 	 * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param fileName File to read
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset Encoding
+     * @param replace True if the table should be truncated first
+     *
      * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_IMPORT_TABLE(
@@ -1637,6 +1722,17 @@ public class SystemProcedures  {
 	 * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT
 	 * IN SKIP SMALLINT)
      * @exception SQLException if a database error occurs
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param fileName File to read
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset Encoding
+     * @param replace True if the table should be truncated first
+     * @param skip Number of header lines to skip over
+     *
+     * @throws SQLException on error
      **/
 	public static void SYSCS_IMPORT_TABLE_BULK(
 	String  schemaName,
@@ -1688,6 +1784,15 @@ public class SystemProcedures  {
      * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param fileName File to read
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset Encoding
+     * @param replace True if the table should be truncated first
+     *
      * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(
@@ -1728,6 +1833,17 @@ public class SystemProcedures  {
 	 *                    IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
 	 *                    IN REPLACE SMALLINT)
 	 *
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param insertColumnList Columns to insert
+     * @param columnIndexes Indexes of fields to be imported
+     * @param fileName File to read
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset Encoding
+     * @param replace True if the table should be truncated first
+     *
      * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_IMPORT_DATA(
@@ -1770,6 +1886,17 @@ public class SystemProcedures  {
 	 *                    IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
 	 *                    IN REPLACE SMALLINT, IN SKIP SMALLINT)
 	 *
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param insertColumnList Columns to insert
+     * @param columnIndexes Indexes of fields to be imported
+     * @param fileName File to read
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset Encoding
+     * @param replace True if the table should be truncated first
+     * @param skip The number of header lines to skip over
      * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_IMPORT_DATA_BULK(
@@ -1800,14 +1927,6 @@ public class SystemProcedures  {
 		conn.commit();
 	}
 
-
-
-
-
-
-
-
-
     /**
      * Import data from a given file into the specified table columns 
      * from the  specified columns in the file. Data for large object 
@@ -1824,6 +1943,16 @@ public class SystemProcedures  {
      *               IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
      *               IN REPLACE SMALLINT)
      *
+     *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param insertColumnList Columns to insert
+     * @param columnIndexes Indexes of fields to be imported
+     * @param fileName File to read
+     * @param columnDelimiter Column separator
+     * @param characterDelimiter Quote character
+     * @param codeset Encoding
+     * @param replace True if the table should be truncated first
      * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(
@@ -1861,6 +1990,11 @@ public class SystemProcedures  {
 	 * SYSCS_BULK_INSERT (IN SCHEMANAME VARCHAR(128), IN TABLENAME VARCHAR(128), 
 	 *                    IN VTINAME VARCHAR(32672), IN VTIARG VARCHAR(32672))
 	 *
+     * @param schemaName Name of schema
+     * @param tableName Name of table
+     * @param vtiName VTI which supplies the data
+     * @param vtiArg Its arguments
+     *
      * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_BULK_INSERT(
@@ -1908,6 +2042,8 @@ public class SystemProcedures  {
      * System procedure called thusly:
      *
      * SYSCS_UTIL.SYSCS_RELOAD_SECURITY_POLICY()
+     *
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_RELOAD_SECURITY_POLICY()
         throws SQLException
@@ -1955,6 +2091,7 @@ public class SystemProcedures  {
 	/**
 	 * Cotangent function. SYSFUN.COT
 	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
+     * @param value The input value
 	 * @return 1 / tan(x)
 	 */
 	public static double COT(double value)
@@ -1965,6 +2102,7 @@ public class SystemProcedures  {
 	/**
 	 * Method to return the sign of the given value.
 	 * SYSFUN.SIGN().
+     * @param value The input value
 	 * @return 0, 1 or -1
 	 */
 	public static int SIGN(double value)
@@ -1974,6 +2112,7 @@ public class SystemProcedures  {
 
 	/**
 	 * Pseudo-random number function.
+     * @param seed The input seed
 	 * @return a random number
 	 */
 	public static double RAND(int seed)
@@ -1986,7 +2125,7 @@ public class SystemProcedures  {
      * a specific user - SYSCS_UTIL.SYSCS_SET_USER_ACCESS.
      * 
      * @param userName name of the user in its normal form (not a SQL identifier).
-     * @param connectionPermission
+     * @param connectionPermission Permission to set for user
      * @throws SQLException Error setting the permission
      */
     public static void SYSCS_SET_USER_ACCESS(String userName,
@@ -2045,6 +2184,11 @@ public class SystemProcedures  {
     /**
      * Utility method for SYSCS_SET_USER_ACCESS removes a user from
      * one of the access lists, driven by the property name.
+     *
+     * @param listProperty The name of the list
+     * @param userName The user name
+     * @throws SQLException on error
+     * @throws StandardException on error
      */
     private static void removeFromAccessList(
             String listProperty, String userName)
@@ -2062,7 +2206,10 @@ public class SystemProcedures  {
      * a specific user - SYSCS_UTIL.SYSCS_GET_USER_ACCESS.
      * 
      * @param userName name of the user in its normal form (not a SQL identifier).
-
+     *
+     * @return the authorization level for the user
+     *
+     * @throws SQLException on error
      */
     public static String SYSCS_GET_USER_ACCESS(String userName)
         throws SQLException
@@ -2110,6 +2257,8 @@ public class SystemProcedures  {
     /**
      * Invalidate all the stored statements so they will get recompiled when
      *  executed next time around.
+     *
+     * @throws SQLException on error
      */
     public static void SYSCS_INVALIDATE_STORED_STATEMENTS()
        throws SQLException
@@ -2133,6 +2282,8 @@ public class SystemProcedures  {
      * that the cache is empty after this call, as statements may be kept
      * by currently executing queries, activations that are about to be garbage
      * collected.
+     *
+     * @throws SQLException on error
      */
     public static void SYSCS_EMPTY_STATEMENT_CACHE()
        throws SQLException
@@ -2158,7 +2309,8 @@ public class SystemProcedures  {
 	 /**
      * this procedure switches between the different xplain modes 
      * @param mode either 0 for explain only, or 1 for explain and execute (default)
-     * @throws SQLException
+     * @throws SQLException on error
+     * @throws StandardException on error
      */
     public static void SYSCS_SET_XPLAIN_MODE(int mode)
         throws SQLException, StandardException
@@ -2180,7 +2332,8 @@ public class SystemProcedures  {
      * are being XPLAIN'd only, not executed.
      *
      * @return 0 if XPLAIN mode is off, non-zero if on.
-     * @throws SQLException
+     * @throws SQLException on error
+     * @throws StandardException on error
      */
     public static int SYSCS_GET_XPLAIN_MODE()
         throws SQLException, StandardException
@@ -2201,7 +2354,8 @@ public class SystemProcedures  {
      * textual stream printout. If it is set, statisitcs information is
      * stored in that schema in user tables.
      * @param schemaName May be an empty string.
-     * @throws SQLException
+     * @throws SQLException on error
+     * @throws StandardException on error
      */
     public static void SYSCS_SET_XPLAIN_SCHEMA(String schemaName)
                 throws SQLException, StandardException
@@ -2302,7 +2456,8 @@ public class SystemProcedures  {
     /**
      * This procedure returns the current set XPLAIN_SCHEMA
      * @return schema name, may be blank if no schema currently set.
-     * @throws SQLException
+     * @throws SQLException on error
+     * @throws StandardException on error
      */
     public static String SYSCS_GET_XPLAIN_SCHEMA()
                 throws SQLException, StandardException
@@ -2322,6 +2477,10 @@ public class SystemProcedures  {
 
     /**
      * Create a new user.
+     *
+     * @param userName Name of user
+     * @param password corresponding password
+     * @throws SQLException on error
      */
     public static void SYSCS_CREATE_USER
         (
@@ -2368,6 +2527,13 @@ public class SystemProcedures  {
     /**
      * Create a new user (this entry is called when bootstrapping the credentials of the DBO
      * at database creation time.
+     *
+     *
+     * @param userName Name of user
+     * @param password corresponding password
+     * @param tc Transaction
+     *
+     * @throws SQLException on error
      */
     public static void addUser
         (
@@ -2440,6 +2606,11 @@ public class SystemProcedures  {
   
     /**
      * Reset a user's password.
+     *
+     * @param userName The user's name
+     * @param password The corresponding password
+     *
+     * @throws SQLException on error
      */
     public static void SYSCS_RESET_PASSWORD
         (
@@ -2460,6 +2631,11 @@ public class SystemProcedures  {
 
     /**
      * Reset the password for an already normalized authorization id.
+     *
+     * @param userName The user's name
+     * @param password The corresponding password
+     *
+     * @throws SQLException on error
      */
     private static  void    resetAuthorizationIDPassword
         (
@@ -2495,6 +2671,10 @@ public class SystemProcedures  {
     
     /**
      * Change a user's password.
+     *
+     * @param password The corresponding password
+     *
+     * @throws SQLException on error
      */
     public static void SYSCS_MODIFY_PASSWORD
         (
@@ -2509,6 +2689,10 @@ public class SystemProcedures  {
   
     /**
      * Drop a user.
+     *
+     * @param userName The user's name
+     *
+     * @throws SQLException on error
      */
     public static void SYSCS_DROP_USER
         (
@@ -2553,6 +2737,11 @@ public class SystemProcedures  {
 
     /**
      * Raise an exception if the user doesn't exist. See commentary on DERBY-5648.
+     *
+     * @param dd The data dictionary
+     * @param userName User to check
+     *
+     * @throws StandardException on error
      */
     private static  void    checkLegalUser( DataDictionary dd, String userName )
         throws StandardException
@@ -2566,6 +2755,9 @@ public class SystemProcedures  {
     /**
      * Normalize the user name so that there is only one set of credentials
      * for a given authorization id.
+     *
+     * @param userName User name
+     * @throws SQLException on error
      */
     private static  String  normalizeUserName( String userName )
         throws SQLException
@@ -2578,7 +2770,7 @@ public class SystemProcedures  {
     /**
      * Return the database name
      * @return database name
-     * @throws SQLException
+     * @throws SQLException on error
      */
     public static String SYSCS_GET_DATABASE_NAME()
         throws SQLException
@@ -2595,6 +2787,7 @@ public class SystemProcedures  {
      *
      * @param schemaName    The name of the schema holding the sequence.
      * @param sequenceName    The name of the sequence in that schema.
+     * @return the current value of the sequence generator
      *
      * @exception SQLException if a database error occurs
      **/
@@ -2611,6 +2804,7 @@ public class SystemProcedures  {
      *
      * @param schemaName    The name of the schema holding the table.
      * @param tableName    The name of the table in that schema.
+     * @return the current value of the identity generator
      *
      * @exception SQLException if a database error occurs
      **/

@@ -36,6 +36,8 @@ public final class LimitReader extends Reader implements Limit
 
 	/**
 		Construct a LimitReader and call the clearLimit() method.
+
+        @param reader Reader to wrap
 	*/
 	public LimitReader(Reader reader) 
 	{

@@ -224,9 +224,11 @@ public interface ResultSet
 	void clearCurrentRow();
 	 
     /**
-		Determine if the result set is at one of the positions
-		according to the constants above (ISBEFOREFIRST etc).
-		Only valid and called for scrollable cursors.
+     *	Determine if the result set is at one of the positions
+     *	according to the constants above (ISBEFOREFIRST etc).
+     *	Only valid and called for scrollable cursors.
+     *
+     * @param isType The desired position type
      * @return true if at the requested position.
 	 * @exception StandardException Thrown on error.
      */
@@ -346,6 +348,8 @@ public interface ResultSet
 	/**
 		Return the set of warnings generated during the execution of
 		this result set. The warnings are cleared once this call returns.
+
+        @return the execution warnings
 	*/
 	public SQLWarning getWarnings();
     
@@ -359,6 +363,7 @@ public interface ResultSet
      * @param   tag             Element tag for content
      *
      * @return  the content as an element with the given tag name
+     * @throws Exception on error
 	 */
 	public Element toXML( Element parentNode, String tag ) throws Exception;
 

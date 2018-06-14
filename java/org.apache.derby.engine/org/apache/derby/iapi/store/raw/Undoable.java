@@ -46,16 +46,16 @@ public interface Undoable extends Loggable {
 
 		<P>
 		There are 3 ways to implement a redo-only log record:
-		<NL>
+		<UL>
 		<LI>Make the log record a Loggable instead of an Undoable, this is the
-		cleanest method.
+		cleanest method.</LI>
 		<LI>If you want to extend a log operation class that is an Undoable,
 		you can then either have generateUndo return null - this is preferred -
 		(the log operation's undoMe should never be called, so you can put a
 		null body there if the super class you are extending does not implement
-		a undoMe).
-		<LI>Or, have undoMe do nothing - this is least preferred.
-		</NL>
+		a undoMe).</LI>
+		<LI>Or, have undoMe do nothing - this is least preferred.</LI>
+		</UL>
 
 		<P>Any resource (e.g., latched page) that is needed for the
 		undoable.undoMe() must be acquired in undoable.generateUndo().
@@ -74,18 +74,18 @@ public interface Undoable extends Loggable {
 
 		<P>
 		The sequence of events in a rollback of a undoable operation is
-		<NL>
+		<UL>
 		<LI> The logging system calls undoable.generateUndo.  If this returns
-		null, then there is nothing to undo.
+		null, then there is nothing to undo.</LI>
 		<LI> If generateUndo returns a Compensation operation, then the logging
 		system will log the Compensation log record and call
 		Compenstation.doMe().  (Hopefully, this just calls the undoable's
-		undoMe)
+		undoMe)</LI>
 		<LI> After the Compensation operation has been applied, the logging
 		system will call compensation.releaseResource(). If you do overwrite a
 		super class's releaseResource(), it would be prudent to call
-		super.releaseResource() first.
-		</NL>
+		super.releaseResource() first.</LI>
+		</UL>
 
 		<P> The available() method of in indicates how much data can be read, i.e.
 		how much was originally written.

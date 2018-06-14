@@ -160,6 +160,10 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
      * <p>
      * Construct from the foreign schema and table name and a foreign connection.
      * </p>
+     *
+     * @param foreignSchemaName Name of the foreign schema
+     * @param foreignTableName Name of the foreign table
+     * @param foreignConnection Connection to the foreign database
      */
     public  ForeignTableVTI
         (
@@ -199,6 +203,8 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
      * @param   foreignSchemaName   Case-sensitive name of foreign schema
      * @param   foreignTableName    Case-sensitive name of foreign table
      * @param   connectionURL       URL for connecting to foreign database via DriverManager.getConnection()
+     *
+     * @return a VTI which reads the foreign table
      */
     public  static  ForeignTableVTI readForeignTable
         (
@@ -221,6 +227,8 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
      * Remove the cached connection to the foreign database. This method is called
      * by ForeignDBViews.unloadTool().
      * </p>
+     *
+     * @param connectionURL URL for connecting to foreign database via DriverManager.getConnection()
      */
     public  static  void    dropConnection( String connectionURL )
     {
@@ -232,6 +240,8 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
      * This function is useful for verifying that the connection to the foreign
      * database was dropped when the foreignViews tool was unloaded.
      * </p>
+     *
+     * @return the number of open connections to foreign databases
      */
     public  static  int countConnections()
     {

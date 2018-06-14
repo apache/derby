@@ -42,6 +42,7 @@ public interface LanguageFactory
 	/**
 	 * Get a ParameterValueSet
 	 *
+     * @param ci A class inspector
 	 * @param numParms	The number of parameters in the
 	 *			ParameterValueSet
 	 * @param hasReturnParam	true if this parameter set

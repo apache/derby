@@ -55,6 +55,10 @@ public interface IFastPath {
 		by nextRow().
 		Returns false if the engine must call the VTI's PreparedStatement.executeQuery()
 		method to execute as a regular ResultSet VTI.
+
+        @return true if the VTI starts out as a fast path query
+        @throws StandardException on error
+        @throws SQLException on error
 	*/
 	public boolean executeAsFastPath()
 		throws StandardException, SQLException;
@@ -66,6 +70,12 @@ public interface IFastPath {
 		Returns NEED_RS if the rest of the query must be handled as a regular ResultSet VTI by
 		the engine calling the VTI's PreparedStatement.executeQuery()
 
+        @param row The next row
+
+        @return GOT_ROW, SCAN_COMPLETED, or NEED_RS
+        @throws StandardException on error
+        @throws SQLException on error
+
 	*/
 	public int nextRow(DataValueDescriptor[] row)
 		throws StandardException, SQLException;
@@ -75,6 +85,11 @@ public interface IFastPath {
 		A call from the VTI execution layer back into the supplied VTI.
 		Presents the row just processed as an array of DataValueDescriptors.
 		This only called when the VTI is being executed as a regular ResultSet VTI
+
+        @param rs A ResultSet
+        @param row The row which was just processed
+        @throws StandardException on error
+        @throws SQLException on error
 	*/
 	public void currentRow(ResultSet rs, DataValueDescriptor[] row)
 		throws StandardException, SQLException;
@@ -83,6 +98,9 @@ public interface IFastPath {
     /**
 		Called once the ResultSet returned by executeQuery() has emptied all of its
 		rows (next() has returned false).
+        
+        @throws StandardException on error
+        @throws SQLException on error
      */
     public void rowsDone() throws StandardException, SQLException;
 }

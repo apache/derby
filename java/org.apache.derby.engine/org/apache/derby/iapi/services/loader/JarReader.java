@@ -32,6 +32,11 @@ public interface JarReader {
 
 	/**
 	 * Get the StorageFile for an installed jar file.
+     *
+     * @param schemaName The schema where the jar lives
+     * @param sqlName The unqualified name of the jar
+     * @return the indicated jar file
+     * @throws StandardException on error
 	*/
 	StorageFile getJarFile(String schemaName, String sqlName)
 		throws StandardException;

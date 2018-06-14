@@ -42,7 +42,7 @@ import java.util.Dictionary;
 
   <p>
   An PropertyFactory is typically obtained from the Monitor:
-  <p>
+  </p>
   <blockquote><pre>
 	// Get the current validation factory.
 	PropertyFactory af;
@@ -85,16 +85,18 @@ public interface PropertyFactory
         throws StandardException;
 
 	/**
-	 * validation a single property
+	 * validate a single property
+     *
+     * @param key The property key
+     * @param value The proposed value for the key
+     * @param set The set containing the key/value pair
+     * @throws StandardException if the key/value pair is invalid
 	 */
 	public void validateSingleProperty(String key,
 						  Serializable value,
 						  Dictionary set)
 		throws StandardException;
 
-	/**
-	   
-	 */
 	public Serializable doValidateApplyAndMap(TransactionController tc,
 											 String key, Serializable value,
 											 Dictionary d, boolean dbOnlyProperty)
@@ -108,6 +110,12 @@ public interface PropertyFactory
 	  The caller must run this in a block synchronized on this
 	  to serialize validations with changes to the set of
 	  property callbacks
+
+      @param key The property key
+      @param value The value to be bound to the key
+      @param set The property set for this key
+      @return a serializable
+      @throws StandardException if the key/value pair is invalid
 	  */
 	public Serializable doMap(String key,
 							 Serializable value,

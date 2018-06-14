@@ -41,6 +41,7 @@ public interface Limit {
 		<P> On output classes (e.g. OutputStream) any attempt to write
 		more beyond the limit will result in an EOFException
 
+        @param length The length to set
 		@exception IOException IOException from some underlying stream
         @exception java.io.EOFException The set limit would exceed
 		the available data in the stream.

@@ -53,6 +53,8 @@ public class CounterOutputStream extends OutputStream implements Limit {
 	/**
 		Get count of bytes written to the stream since the last
 		reset() call.
+
+        @return the number of bytes written since the last reset() call
 	*/
 	public int getCount() {
 		return count;

@@ -131,6 +131,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 		Get a reference to the byte array stored in the byte array output
 		stream. Note that the byte array may be longer that getPosition().
 		Bytes beyond and including the current poistion are invalid.
+
+        @return the wrapped byte array
 	*/
 	public byte[] getByteArray()
 	{
@@ -139,6 +141,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 
 	/**
 		Get the number of bytes that was used.
+
+        @return the number of used bytes
 	*/
 	public int getUsed()
 	{
@@ -147,6 +151,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 
 	/**
 		Get the current position in the stream
+
+        @return the current position in the stream
 	*/
 	public int getPosition()
 	{
@@ -155,6 +161,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 
 	/**
 		Get the current position in the stream
+
+        @return the current position in the stream
 	*/
 	public int getBeginPosition()
 	{
@@ -166,6 +174,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 		It is up to the caller to make sure the stream has no gap of garbage in
 		it or useful information is not left out at the end because the stream
 		does not remember anything about the previous position.
+
+        @param newPosition The new position of the stream pointer
 	*/
 	public void setPosition(int newPosition)
 	{
@@ -187,6 +197,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 		Set the begin position of the stream pointer.
 		If the newBeginPosition is larger than the stream itself,
 		then, the begin position is not set.
+
+        @param newBeginPosition The new start position
 	*/
 	public void setBeginPosition(int newBeginPosition)
 	{
@@ -200,6 +212,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 	/**
 		Shrink the buffer left by the amount given. Ie.
 		bytes from 0 to amountToShrinkBy are thrown away
+
+        @param amountToShrinkBy The amount to lop off
 	*/
 	public void discardLeft(int amountToShrinkBy) {
 

@@ -167,7 +167,7 @@ public class StringUtil
 		<BR>
 		For each byte (b) two characaters are generated, the first character
 		represents the high nibble (4 bits) in hexidecimal (<code>b &amp; 0xf0</code>), the second character
-		represents the low nibble (<code>b &ampxs; 0x0f</code>).
+		represents the low nibble (<code>b &amp; 0x0f</code>).
 		<BR>
 		The byte at <code>data[offset]</code> is represented by the first two characters in the returned String.
 
@@ -333,8 +333,8 @@ public class StringUtil
 
 
 	/**
-	 * Normalize a SQL identifer, up-casing if <regular identifer>,
-	 * and handling of <delimited identifer> (SQL 2003, section 5.2).
+	 * Normalize a SQL identifer, up-casing if &lt;regular identifer&gt;,
+	 * and handling of &lt;delimited identifer&gt; (SQL 2003, section 5.2).
 	 * The normal form is used internally in Derby.
 	 *
 	 * @param id syntacically correct SQL identifier

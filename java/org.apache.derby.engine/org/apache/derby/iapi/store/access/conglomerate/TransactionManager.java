@@ -32,10 +32,11 @@ import org.apache.derby.shared.common.error.StandardException;
 
 /**
 
+<p>
 The TransactionManager interface provides methods on the transaction needed
 by an access method implementer, but should not be visible to clients of a
 TransactionController.
-<p>
+</p>
 @see TransactionController
 
 **/

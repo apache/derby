@@ -53,6 +53,8 @@ public class AccessibleByteArrayOutputStream extends ByteArrayOutputStream {
 	 * before any other calls to write to this stream are made.
 	   Or promises to throw away references to the stream before
 	   passing the array reference out of its control.
+
+       @return a byte array
 	 */
 	public byte[] getInternalByteArray() {
 		return buf;
@@ -61,7 +63,9 @@ public class AccessibleByteArrayOutputStream extends ByteArrayOutputStream {
     /**
      * Read the complete contents of the passed input stream
      * into this byte array.
-     * @throws IOException 
+     *
+     * @param in The stream to read
+     * @throws IOException on error
      */
     public void readFrom(InputStream in) throws IOException
     {
@@ -81,6 +85,8 @@ public class AccessibleByteArrayOutputStream extends ByteArrayOutputStream {
      * Note that no copy is made of the byte array from the
      * input stream, it is up to the caller to ensure the correct
      * co-ordination.
+     *
+     * @return an InputStream wrapping the byte array
      */
     public InputStream getInputStream()
     {

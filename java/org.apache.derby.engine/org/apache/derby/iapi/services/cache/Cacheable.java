@@ -32,13 +32,11 @@ import org.apache.derby.shared.common.error.StandardException;
 	<P>
 	A Cacheable object has five states:
 	<OL>
-	<OL>
-	<LI> No identity - The object is only accessable by the cache manager
-	<LI> Identity, clean, unkept - The object has an identity, is clean but is only accessable by the cache manager
-	<LI> Identity, clean, kept - The object has an identity, is clean, and is in use by one or more threads 
-	<LI> Identity, kept, dirty - The object has an identity, is dirty, and is in use by one or more threads 
-	<LI> Identity, unkept, dirty - The object has an identity, is dirty but is only accessable by the cache manager
-	</OL>
+	<LI> No identity - The object is only accessable by the cache manager</LI>
+	<LI> Identity, clean, unkept - The object has an identity, is clean but is only accessable by the cache manager</LI>
+	<LI> Identity, clean, kept - The object has an identity, is clean, and is in use by one or more threads</LI> 
+	<LI> Identity, kept, dirty - The object has an identity, is dirty, and is in use by one or more threads</LI> 
+	<LI> Identity, unkept, dirty - The object has an identity, is dirty but is only accessable by the cache manager</LI>
 	</OL>
 	<BR>
 	While the object is kept it is guaranteed
@@ -79,6 +77,7 @@ public interface Cacheable  {
 		<BR> MT - single thread required - Method must only be called be cache manager
 		and the cache manager will guarantee only one thread can be calling it.
 
+        @param key The handle on the cacheable
 		@return an object reference if the object can take on the identity, null otherwise.
 
 		@exception StandardException Standard Derby Policy
@@ -110,6 +109,8 @@ public interface Cacheable  {
 		<BR> MT - single thread required - Method must only be called be cache manager
 		and the cache manager will guarantee only one thread can be calling it.
 
+        @param key The handle on the cacheable
+        @param createParameter Creation details
 		@return an object reference if the object can take on the identity, null otherwise.
 
 		@exception StandardException If forCreate is true and the object cannot be created.
@@ -134,15 +135,19 @@ public interface Cacheable  {
 
 		<BR> MT - thread safe.
 
+        @return the object identity
+
 	*/
 	public Object getIdentity();
 
 
 	/**
-		Returns true of the object is dirty. 
+		Returns true if the object is dirty. 
 		May be called when the object is kept or unkept.
 
-		<BR> MT - thread safe 
+		<BR> MT - thread safe
+
+        @return true if the object is dirty
 
 	*/
 	public boolean isDirty();
@@ -164,6 +169,7 @@ public interface Cacheable  {
 		responsibility of the object implementing Cacheable to ensure any users of the
 		object do not conflict with the clean call.
 
+        @param forRemove True if the object will be removed
 		@exception StandardException Standard Derby error policy.
 
 	*/

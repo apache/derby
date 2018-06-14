@@ -37,10 +37,17 @@ public abstract class Restriction implements Serializable
 {
     /**
      * Turn this Restriction into a string suitable for use in a WHERE clause.
+     *
+     * @return this Restriction as a string suitable for use in a WHERE clause.
      */
     public abstract String toSQL();
 
-    /** Utility method to parenthesize an expression */
+    /**
+     * Utility method to parenthesize an expression
+     *
+     * @param raw The original string
+     * @return the original string wrapped in parentheses
+     */
     protected String parenthesize( String raw ) { return "( " + raw + " )"; }
     
     /** An AND of two Restrictions */
@@ -52,19 +59,37 @@ public abstract class Restriction implements Serializable
         private Restriction _leftChild;
         private Restriction _rightChild;
 
-        /** AND together two other Restrictions */
+        /**
+         * AND together two other Restrictions
+         *
+         * @param leftChild The first conjunct
+         * @param rightChild The second conjunct
+         */
         public AND( Restriction leftChild, Restriction rightChild )
         {
             _leftChild = leftChild;
             _rightChild = rightChild;
         }
 
-        /** Get the left Restriction */
+        /**
+         * Get the left Restriction
+         *
+         * @return the first conjunct
+         */
         public Restriction getLeftChild() { return _leftChild; }
 
-        /** Get the right Restriction */
+        /**
+         * Get the right Restriction
+         *
+         * @return the second conjunct
+         */
         public Restriction getRightChild() { return _rightChild; }
-        
+
+        /**
+         * Turn this Restriction into WHERE clause text.
+         *
+         * @return this Restriction as WHERE clause text
+         */
         public String toSQL()
         {
             return parenthesize( _leftChild.toSQL() ) + " AND " + parenthesize( _rightChild.toSQL() );
@@ -80,19 +105,37 @@ public abstract class Restriction implements Serializable
         private Restriction _leftChild;
         private Restriction _rightChild;
 
-        /** OR together two other Restrictions */
+        /**
+         * OR together two other Restrictions
+         *
+         * @param leftChild The first disjunct
+         * @param rightChild The second disjunct
+         */
         public OR( Restriction leftChild, Restriction rightChild )
         {
             _leftChild = leftChild;
             _rightChild = rightChild;
         }
 
-        /** Get the left Restriction */
+        /**
+         * Get the left Restriction
+         *
+         * @return the first disjunct
+         */
         public Restriction getLeftChild() { return _leftChild; }
 
-        /** Get the right Restriction */
+        /**
+         * Get the right Restriction
+         *
+         * @return the second disjunct
+         */
         public Restriction getRightChild() { return _rightChild; }
 
+        /**
+         * Turn this Restriction into WHERE clause text.
+         *
+         * @return this Restriction as WHERE clause text
+         */
         public String toSQL()
         {
             return parenthesize( _leftChild.toSQL() ) + " OR " + parenthesize( _rightChild.toSQL() );
@@ -207,6 +250,8 @@ public abstract class Restriction implements Serializable
          * <p>
          * The name of the column being compared.
          * </p>
+         *
+         * @return the name of the column being compared
          */
         public String getColumnName() { return _columnName; }
 
@@ -215,6 +260,8 @@ public abstract class Restriction implements Serializable
          * The type of comparison to perform. This is one of the ORDER_OP constants
          * defined above.
          * </p>
+         *
+         * @return an ORDER_OP representing the type of comparison to perform
          */
         public int getComparisonOperator() { return _comparisonOperator; }
 
@@ -229,9 +276,16 @@ public abstract class Restriction implements Serializable
          * maps to java.lang.String, etc.. This object will be null if the
          * comparison operator is ORDER_OP_ISNULL or ORDER_OP_ISNOTNULL.
          * </p>
+         *
+         * @return the constant with which the column is being compared
          */
         public Object getConstantOperand() { return _constantOperand; }
         
+        /**
+         * Turn this Restriction into WHERE clause text.
+         *
+         * @return this Restriction as WHERE clause text
+         */
         public String toSQL()
         {
             StringBuffer buffer = new StringBuffer();

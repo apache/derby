@@ -59,6 +59,8 @@ public interface DaemonFactory
 	/**
 		Create a new DaemonService with the default daemon timer delay.
 
+        @param name The name to use
+        @return a daemon service
 		@exception StandardException Standard Derby error policy
 	 */
 	public DaemonService createNewDaemon(String name) throws StandardException;

@@ -26,13 +26,15 @@ import java.sql.SQLException;
 
 /**
  *
+ * <p>
  * The AuthenticationService provides a mechanism for authenticating
  * users willing to access JBMS.
+ * </p>
  * <p>
  * There can be different and user defined authentication schemes, as long
  * the expected interface here below is implementing and registered
  * as a module when JBMS starts-up.
- * <p>
+ * </p>
  */
 public interface AuthenticationService 
 {
@@ -42,8 +44,10 @@ public interface AuthenticationService
 	/**
 	 * Authenticate a User inside Derby.
 	 *
+     * @param databaseName The name of the database
 	 * @param info			Connection properties info.
-	 * failure.
+	 * @return true if authentication succeeded
+     * @throws SQLException on error
 	 */
 	public boolean authenticate(String databaseName, Properties info)
 	  throws SQLException;
@@ -53,6 +57,8 @@ public interface AuthenticationService
      * Get the name of the credentials database used to authenticate system-wide operations.
      * This returns null for all implementations except NATIVE authentication.
      * </p>
+     *
+     * @return the name of the system-wide credentials database
      */
     public  String  getSystemCredentialsDatabaseName();
 

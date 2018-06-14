@@ -104,6 +104,8 @@ public final class FormatableBitSet implements Formatable, Cloneable
 
 	/**
 	 * Constructs a Bit with the initial number of bits
+     *
+     * @param numBits The number of bits in the set
 	 */
 	public FormatableBitSet(int numBits)
 	{
@@ -500,6 +502,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * Bit isSet
 	 *
 	 * @param position	the bit to check
+     * @return true if the bit is set
 	 *
 	 */
 	public final boolean isSet(int position)
@@ -515,6 +518,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * Bit get -- alias for isSet()
 	 *
 	 * @param position	the bit to check
+     * @return true if the bit is set
 	 *
 	 */
 	public final boolean get(int position)
@@ -623,6 +627,9 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * Statically calculates how many bits can fit into the number of
 	 * bytes if this Bit object is externalized.  Only valid for this
 	 * implementation of Bit.
+     *
+     * @param numBytes Number of bits in given number of bytes
+     * @return the corresponding bit count
 	 */
 	public static int maxBitsForSpace(int numBytes)
 	{
@@ -749,6 +756,8 @@ public final class FormatableBitSet implements Formatable, Cloneable
     /**
      * Copy the bytes from another FormatableBitSet. Assumes that this bit set
      * is at least as large as the argument's bit set.
+     *
+     * @param that Bit set to copy
      */
     public  void    copyFrom( FormatableBitSet that )
     {

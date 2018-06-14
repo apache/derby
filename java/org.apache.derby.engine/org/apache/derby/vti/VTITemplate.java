@@ -301,6 +301,10 @@ public abstract class VTITemplate   implements ResultSet, AwareVTI
      * <p>
      * Create a SQLException saying that the calling method is not implemented.
      * </p>
+     *
+     * @param methodName Name of method
+     *
+     * @return a SQLFeatureNotSupportedException
      */
     protected SQLException    notImplemented( String methodName )
     {
@@ -312,6 +316,11 @@ public abstract class VTITemplate   implements ResultSet, AwareVTI
      * Get an array of descriptors for the return table shape declared for this
      * AwareVTI by its CREATE FUNCTION statement.
      * </p>
+     *
+     * @param currentConnection The current connection to Derby
+     *
+     * @return an array of descriptors of the columns returned by this VTI.
+     * @throws SQLException on error
      */
     public  ColumnDescriptor[]  getReturnTableSignature( Connection currentConnection )
         throws SQLException

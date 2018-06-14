@@ -309,7 +309,7 @@ public interface TransactionController
             null, // default collation order for all columns
 			null, // default properties
 			0); // not temporary
-	</blockquote></pre>
+	</pre></blockquote>
 
     Each implementation of a conglomerate takes a possibly different set
     of properties.  The "heap" implementation currently takes no properties.
@@ -990,7 +990,7 @@ public interface TransactionController
 	<blockquote><pre>
 	  x: 1 3 4 4 4 5 5 5 6 7 9
 	  y: 1 1 2 4 6 2 4 6 1 1 1
-	</blockquote></pre>
+	</pre></blockquote>
 	<P>
 	A {start key, search op} pair of {{5.2}, GE} would position on
 	{x=5, y=2}, whereas the pair {{5}, GT} would position on {x=6, y=1}.
@@ -1019,7 +1019,7 @@ public interface TransactionController
 	| x = 5  and y &lt; 5  | {5}   | GE | {5,5} |GE |{5,2} .. {5,4}|{4,6} .. {5,4}|
 	| x = 2             | {2}   | GE | {2}   |GT | none         |{1,1} .. {1,1}|
 	+-------------------+-------+----+-------+---+--------------+--------------+
-	</blockquote></pre>
+	</pre></blockquote>
 	<P>
 	As the above table implies, the underlying scan may lock
 	more rows than it returns in order to guarantee serialization.
@@ -1068,14 +1068,12 @@ public interface TransactionController
     <blockquote><pre>
     if (qualifier != null)
     {
-        <blockquote><pre>
 		for (int and_clause; and_clause &lt; qualifier.length; and_clause++)
 		{
             boolean or_qualifies = false;
 
             for (int or_clause; or_clause &lt; qualifier[and_clause].length; or_clause++)
             {
-                <blockquote><pre>
                 DataValueDescriptor key     = 
                     qualifier[and_clause][or_clause].getOrderable();
 
@@ -1084,11 +1082,9 @@ public interface TransactionController
 
                 boolean or_qualifies = 
                 row_col.compare(qualifier[i].getOperator,
-                <blockquote><pre>
                 key,
                 qualifier[i].getOrderedNulls,
                 qualifier[i].getUnknownRV);
-                </blockquote></pre>
 
                 if (or_qualifies)
                 {
@@ -1098,16 +1094,12 @@ public interface TransactionController
 
             if (!or_qualifies)
             {
-                <blockquote><pre>
                 don't return this row to the client - proceed to next row;
-                </blockquote></pre>
             }
-            </blockquote></pre>
 
         }
-        </blockquote></pre>
     }
-    </blockquote></pre>
+    </pre></blockquote>
 
 
 	@param conglomId The identifier of the conglomerate
@@ -1631,11 +1623,11 @@ public interface TransactionController
 	row.
 	<p>
 	So, for the query:
-	<pre><blockquote>
+	<blockquote><pre>
 		select a, sum(b)
 		from t
 		group by a
-	</blockquote></pre>
+	</pre></blockquote>
 	The input row to the sorter would have one column for
 	a and another column for sum(b).  It is up to the caller
 	to get the format of the row correct, and to initialize

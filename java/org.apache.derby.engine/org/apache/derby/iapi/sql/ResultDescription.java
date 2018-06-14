@@ -51,11 +51,16 @@ public interface ResultDescription
 
 	/**
 		Return information about all the columns.
+
+        @return information about all the columns
 	*/
 	public ResultColumnDescriptor[] getColumnInfo();
 
     /**
      * Return the information about a single column (0-based indexing)
+     *
+     * @param idx The column index
+     * @return The column descriptor
      */
     public  ResultColumnDescriptor  getColumnInfo( int idx );
 
@@ -102,6 +107,8 @@ public interface ResultDescription
      * threads call this concurrently, only one will be saved.
      * It is assumed the JDBC layer passes in a ResultSetMetaData
      * object based upon this.
+     *
+     * @param rsmd The metadata to set
      */
     public void setMetaData(java.sql.ResultSetMetaData rsmd);
     
@@ -110,6 +117,8 @@ public interface ResultDescription
      * null if setMetaData() has not been called on this
      * object. The caller then should manufacture a
      * ResultSetMetaData object and pass it into setMetaData.
+     *
+     * @return the metadata
      */
     public java.sql.ResultSetMetaData getMetaData();
     
@@ -120,7 +129,7 @@ public interface ResultDescription
      * Rules are the matching is case insensitive
      * and the insensitive name matches the first
      * column found that matches (starting at postion 1).
-     * @param name
+     * @param name The column name
      * @return Position of the column (1-based), -1 if no match.
      */
     public int findColumnInsenstive(String name);

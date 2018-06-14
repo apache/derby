@@ -68,6 +68,8 @@ public class OptimizerTrace
 
 	/**
 	 * Get the current optimizer tracer, if any.
+     *
+     * @return the optimizer tracer
 	 */
 	public static   OptTrace getOptimizerTracer()
 	{

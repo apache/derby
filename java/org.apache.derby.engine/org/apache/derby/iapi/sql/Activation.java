@@ -98,6 +98,7 @@ public interface Activation extends Dependent
 	 * commit time, data should not be deleted from the table. This method, (gets called at commit time) checks if this
 	 * activation held cursor and if so, does that cursor reference the passed temp table name.
 	 *
+     * @param tableName A table name
 	 * @return	true if this activation has held cursor and if it references the passed temp table name
 	 */
 	public boolean checkIfThisActivationHasHoldCursor(String tableName);
@@ -124,6 +125,8 @@ public interface Activation extends Dependent
 	 * in one call, as opposed to one call per parameter.
 	 *
 	 * @param parameterValues	The values of the parameters.
+     * @param parameterTypes    Their types
+     * @throws StandardException on error
 	 */
 	void	setParameters(ParameterValueSet parameterValues, DataTypeDescriptor[] parameterTypes) throws StandardException;
 
@@ -168,17 +171,23 @@ public interface Activation extends Dependent
 	/**
 		Returns true if this Activation is only going to be used for
 		one execution.
+
+        @return true if this Activation is single-use
 	*/
 	boolean isSingleExecution();
 
 	/**
 	  Returns the chained list of warnings. Returns null
 	  if there are no warnings.
+
+      @return the chain of sql warnings
 	  */
 	SQLWarning getWarnings();
 
 	/**
 	  Add a warning to the activation
+
+      @param w The next warning to chain to the end of the list
 	  */
 	void addWarning(SQLWarning w);
 
@@ -189,12 +198,16 @@ public interface Activation extends Dependent
 
 	/**
 	 * Get the language connection context associated with this activation
+     *
+     * @return the LCC
      */
 	public	LanguageConnectionContext	getLanguageConnectionContext();
 
 	/**
 	 * Get the Execution TransactionController associated with this 
 	 * activation/lcc.
+     *
+     * @return the transaction controller
 	 */
 	TransactionController getTransactionController();
 
@@ -227,6 +240,9 @@ public interface Activation extends Dependent
 
 	/**
 	 * Get the current row at the given index.
+     *
+     * @param resultSetNumber Index into list of result sets
+     * @return the current row in that result set
 	 */
 	public Row getCurrentRow(int resultSetNumber);
     
@@ -258,7 +274,8 @@ public interface Activation extends Dependent
 	/**
 		Check the validity of the current executing statement. Needs to be
 		called after a statement has obtained the relevant table locks on
-		the 
+
+        @throws StandardException on error
 	*/
 	public void checkStatementValidity() throws StandardException;
 
@@ -403,6 +420,8 @@ public interface Activation extends Dependent
 	 * call.  Because of synchronization, this check is likely to be
 	 * expensive, so it may only check every hundred calls or so.
 	 *
+     * @param resultSet The result set to inform on
+     * @param rowCount The number of rows found in that result set
 	 * @exception StandardException		Thrown on error
 	 */
 	public void informOfRowCount(NoPutResultSet resultSet, long rowCount)
@@ -495,6 +514,8 @@ public interface Activation extends Dependent
 	 * Save the TableDescriptor for the target of 
 	 * DDL so that it can be passed between the
 	 * various ConstantActions during execution.
+     *
+     * @param td The table descriptor for the target of the DDL
 	 */
 	public void setDDLTableDescriptor(TableDescriptor td);
 
@@ -533,6 +554,8 @@ public interface Activation extends Dependent
 	/**
 	 * Save the ResultSet for the target
 	 * of an update/delete to a VTI.
+     *
+     * @param targetVTI The result set which is the target of an updatable VTI
 	 */
 	public void setTargetVTI(java.sql.ResultSet targetVTI);
 
@@ -548,16 +571,25 @@ public interface Activation extends Dependent
     /**
      * Push a ConstantAction to be returned by getConstantAction().
      * Returns the newConstantAction.
+     *
+     * @param newConstantAction The new constant action to push
+     * @return that constant action
      */
     public  ConstantAction    pushConstantAction( ConstantAction newConstantAction );
 
     /**
      * Pop the ConstantAction stack, returning the element which was just popped
      * off the stack.
+     *
+     * @return the constant action just popped off the stack
      */
     public  ConstantAction    popConstantAction();
 
-    /** Get the top ConstantAction on the stack without changing the stack. */
+    /**
+     * Get the top ConstantAction on the stack without changing the stack.
+     *
+     * @return the top of the stack
+     */
 	public ConstantAction	getConstantAction();
 
 	//store a reference to the parent table result sets
@@ -566,6 +598,9 @@ public interface Activation extends Dependent
 	/**
 	 * get the reference to parent table ResultSets, that will be needed by the 
 	 * referential action dependent table scans.
+     *
+     * @param resultSetId An handle on the result set
+     * @return the parent result sets
 	 */
     @SuppressWarnings("UseOfObsoleteCollectionType")
     public Vector<TemporaryRowHolder> getParentResultSet(String resultSetId);
@@ -578,6 +613,8 @@ public interface Activation extends Dependent
 	/**
 	 * beetle 3865: updateable cursor using index.  A way of communication
 	 * between cursor activation and update activation.
+     *
+     * @param forUpdateResultSet An updatable result set
 	 */
 	public void setForUpdateIndexScan(CursorResultSet forUpdateResultSet);
 
@@ -596,6 +633,8 @@ public interface Activation extends Dependent
 		Return the maximum number of dynamical created result sets from the procedure definition.
 		Base implementation returns 0, a generated class for a procedure overwrites
 		this with a real implementation.
+
+        @return the maximum number of dynamical created result sets from the procedure definition
 	*/
 	public int getMaxDynamicResults();
 
@@ -603,6 +642,8 @@ public interface Activation extends Dependent
 	/**
 	 * Get the current SQL session context if in a nested connection of a
 	 * stored routine or in a substatement.
+     *
+     * @return the sql session context
 	 */
 	public SQLSessionContext getSQLSessionContextForChildren();
 
@@ -613,12 +654,15 @@ public interface Activation extends Dependent
 	 * substatement, which shares the parents statement's session context
 	 * (push=false).
 	 * @param push true if used to push a new connection context
+     * @return current SQL session context
 	 */
 	public SQLSessionContext setupSQLSessionContextForChildren(boolean push);
 
 	/**
 	 * This activation is created in a dynamic call context or a substatement
-	 * execution context, chain its parent statements activation..
+	 * execution context, chain its parent statements activation.
+     *
+     * @param a The parent activation
 	 */
 	public void setParentActivation(Activation a);
 
@@ -639,6 +683,7 @@ public interface Activation extends Dependent
      * @param typeFormatID The format id of the data type to be returned. E.g., StoredFormatIds.SQL_INTEGER_ID.
      *
 	 * @return The next number in the sequence
+     * @throws StandardException on error
 	 */
 	public NumberDataValue getCurrentValueAndAdvance
         ( String sequenceUUIDstring, int typeFormatID )

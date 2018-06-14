@@ -638,6 +638,11 @@ public class BrokeredCallableStatement extends BrokeredPreparedStatement
 	}
 	/**
 		Create a duplicate CalableStatement to this, including state, from the passed in Connection.
+
+        @param conn The current connection
+        @param oldStatement The old statement
+        @return a new CallableStatement
+        @throws SQLException on error
 	*/
 	public CallableStatement createDuplicateStatement(Connection conn, CallableStatement oldStatement) throws SQLException {
 

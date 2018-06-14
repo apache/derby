@@ -60,6 +60,7 @@ public interface PreparedStatement
 	 *
 	 * @return	TRUE if the PreparedStatement is up to date,
 	 *		FALSE if it is not up to date
+     * @throws StandardException on error
 	 */
 	boolean	upToDate() throws StandardException;
 
@@ -86,6 +87,7 @@ public interface PreparedStatement
 	 * represented by an instance of this class (PreparedStatement).
 	 *
 	 * @param lcc			The LanguageConnectionContext.
+     * @param scrollable Scrollability
 	 * @return	The new activation.
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -156,6 +158,8 @@ public interface PreparedStatement
 	 * @param rollbackParentContext  True if in the event of a statement-level
 	 *	 exception, the parent context needs to be rolled back, too.
 	 * @param timeoutMillis timeout value in milliseconds.
+     * @return a result set for the statement
+     * @throws StandardException on error
 	 * @see #executeSubStatement(Activation, Activation, boolean, long)
 	 */
     ResultSet executeSubStatement(LanguageConnectionContext lcc,
@@ -196,6 +200,10 @@ public interface PreparedStatement
     /**
      * Get the type of the parameter at the given (0-based) index.
      * Raises an exception if the index is out of range.
+     *
+     * @param idx The 0-based index of the parameter
+     * @return the parameter type
+     * @throws StandardException if the index is out of range
      */
     DataTypeDescriptor  getParameterType( int idx ) throws StandardException;
 
@@ -275,6 +283,8 @@ public interface PreparedStatement
 
 	/**
 		Return any compile time warnings. Null if no warnings exist.
+
+        @return the warnings
 	*/
 	public SQLWarning getCompileTimeWarnings();
 

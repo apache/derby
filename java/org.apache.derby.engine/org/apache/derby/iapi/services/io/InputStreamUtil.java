@@ -35,6 +35,8 @@ public final class InputStreamUtil {
 		Read an unsigned byte from an InputStream, throwing an EOFException
 		if the end of the input is reached.
 
+        @param in Whence to read a byte
+        @return the byte
 		@exception IOException if an I/O error occurs.
 		@exception EOFException if the end of the stream is reached
 
@@ -52,6 +54,10 @@ public final class InputStreamUtil {
 	/**
 		Read a number of bytes into an array.
 
+        @param in Whence to read
+        @param b The byte array to fill
+        @param offset Position in byte array where we should start writing
+        @param len Number of bytes to read
 		@exception IOException if an I/O error occurs.
 		@exception EOFException if the end of the stream is reached
 
@@ -79,6 +85,11 @@ public final class InputStreamUtil {
         (InputStream.read(byte[],int,int) does not guarantee to read len bytes
          even if it can do so without reaching EOF or raising an exception.)
 
+        @param in Whence to read
+        @param b The byte array to fill
+        @param offset Position in byte array where we should start writing
+        @param len Number of bytes to read
+        @return the number of bytes read
 		@exception IOException if an I/O error occurs.
 	*/
 	public static int readLoop(InputStream in,
@@ -125,10 +136,8 @@ public final class InputStreamUtil {
     /**
      * Skips requested number of bytes,
      * throws EOFException if there is too few bytes in the stream.
-     * @param is
-     *      InputStream to be skipped.
-     * @param skippedBytes
-     *      number of bytes to skip. if skippedBytes &gl;= zero, do nothing.
+     * @param is InputStream to be skipped.
+     * @param skippedBytes number of bytes to skip. if skippedBytes &gt;= zero, do nothing.
      * @throws EOFException
      *      if EOF meets before requested number of bytes are skipped.
      * @throws IOException

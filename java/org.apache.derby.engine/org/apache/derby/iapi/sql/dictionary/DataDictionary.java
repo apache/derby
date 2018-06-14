@@ -545,7 +545,7 @@ public interface DataDictionary
 	 * @param role name of starting point for closure
 	 * @param inverse If {@code true}, compute closure on inverse of
 	 *        relation GRANT role-a TO role-b that is, we look at
-	 *        closure of all roles granted <bold>to</bold> {@code role}. If
+	 *        closure of all roles granted <b>to</b> {@code role}. If
 	 *        {@code false}, we look at closure of all roles that have
 	 *        been granted {@code role}.
 	 * @throws StandardException

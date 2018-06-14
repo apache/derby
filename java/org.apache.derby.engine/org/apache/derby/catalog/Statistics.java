@@ -23,12 +23,12 @@ package org.apache.derby.catalog;
 
 /**
  
- <P>
+ <p>
  This interface is used in the column SYS.SYSSTATISTICS.STATISTICS. It
  encapsulates information collected by the UPDATE STATISTICS command
  and is used internally by the Derby optimizer to estimate cost 
  and selectivity of different query plans.
- <p>
+ </p>
 */
 
 public interface Statistics
@@ -41,6 +41,7 @@ public interface Statistics
     long getRowEstimate();
 
 	/**
+     * @param predicates The predicates to evaluate
 	 * @return the selectivity for a set of predicates.
 	 */
 	double selectivity(Object[] predicates);

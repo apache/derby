@@ -36,14 +36,18 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 /**
+  <P>
   A set of static utility methods to work with rows.
+  </P>
   <P>
   A row or partial row is described by two or three parameters.
+  </P>
   <OL>
-  <LI>DataValueDescriptor[] row - an array of objects, one per column.
+  <LI>DataValueDescriptor[] row - an array of objects, one per column.</LI>
   <LI>FormatableBitSet validColumns - 
-      an indication of which objects in row map to which columns
+      an indication of which objects in row map to which columns</LI>
   </OL>
+  <P>
   These objects can describe a complete row or a partial row. A partial row is 
   one where a sub-set (e.g. columns 0, 4 and 7) of the columns are supplied 
   for update, or requested to be fetched on a read.  Here's an example
@@ -51,6 +55,7 @@ import java.util.Vector;
   4th (type BAR), and 7th (type MMM) columns from a row with 10 columns, note
   that the format for a partial row changed from a "packed" representation
   in the 3.0 release to a "sparse" representation in later releases:
+  </P>
 
   <blockquote><pre>
 
@@ -66,29 +71,39 @@ import java.util.Vector;
   FormatableBitSet.set(0);
   FormatableBitSet.set(4);
   FormatableBitSet.set(7);
-  </blockquote></pre>
+  </pre></blockquote>
 
 
-  <BR><B>Column mapping<B><BR>
+  <BR>
+  <P>
+  <B>Column mapping</B>
+  </P>
+  <BR>
+  <P>
   When validColumns is null:
+  </P>
   <UL>
-  <LI> The number of columns is given by row.length
-  <LI> Column N maps to row[N], where column numbers start at zero.
+  <LI> The number of columns is given by row.length</LI>
+  <LI> Column N maps to row[N], where column numbers start at zero.</LI>
   </UL>
   <BR>
+  <P>
   When validColumns is not null, then
+  </P>
   <UL>
   <LI> The number of requested columns is given by the number of bits set in 
-       validColumns.
+       validColumns.</LI>
   <LI> Column N is not in the partial row if validColumns.isSet(N) 
-       returns false.
-  <LI> Column N is in the partial row if validColumns.isSet(N) returns true.
+       returns false.</LI>
+  <LI> Column N is in the partial row if validColumns.isSet(N) returns true.</LI>
   <LI> If column N is in the partial row then it maps to row[N].
 	   If N &gt;= row.length then the column is taken as non existent for an
-	   insert or update, and not fetched on a fetch.
+	   insert or update, and not fetched on a fetch.</LI>
   </UL>
+  <P>
   If row.length is greater than the number of columns indicated by validColumns
   the extra entries are ignored.
+  </P>
 
 **/
 public class RowUtil

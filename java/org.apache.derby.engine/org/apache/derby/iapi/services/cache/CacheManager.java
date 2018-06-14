@@ -62,6 +62,7 @@ public interface CacheManager {
 			
 		</PRE>
 
+        @param key The object key
 		@return A reference to an object in the cache, or null if the object cannot be found.
 
 		@exception StandardException Standard Derby error policy.
@@ -93,6 +94,8 @@ public interface CacheManager {
 			}
 			
 		</PRE>
+        @param key The object key
+        @return the matching Cacheable
 		@exception StandardException Standard Derby error policy.
 	*/
 	public Cacheable findCached(Object key) throws StandardException;
@@ -131,6 +134,8 @@ public interface CacheManager {
 			
 		</PRE>
 
+        @param key The object key
+        @param createParameter Creation details
 		@return A reference to an object in the cache.
 
 		@exception StandardException Standard Derby error policy.
@@ -197,6 +202,7 @@ public interface CacheManager {
         be able to handle a partial key, e.g. a page has PageKey but a clean 
         may pass a ContainerKey which will discard all pages in that container.
 
+        @param partialKey Key fragment to be matched
 		@exception StandardException Standard Derby error policy.
 	*/
 	public void clean(Matchable partialKey) throws StandardException;
@@ -234,6 +240,8 @@ public interface CacheManager {
 		in the background. The caller must ensure that it has exclusive access
         to the cache when this method is called. No synchronization is required
         in the implementations of this method.
+
+        @param daemon A daemon service
 	*/
 	public void useDaemonService(DaemonService daemon);
 
@@ -252,6 +260,7 @@ public interface CacheManager {
 		a partial key, e.g. a page has PageKey but a discard may pass a ContainerKey which will discard
 		all pages in that container.
 		<P>
+        @param partialKey Key fragment to be matched
 		@return true if discard has successful gotten rid of all objects that
 		match the partial or exact key.  False if some objects that matches
 		were not gotten rid of because it was kept.

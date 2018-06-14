@@ -36,12 +36,14 @@ import java.io.File;
 
 /**
 
+  <p>
   Module interface for an access manager.  An access manager provides
   transactional access via access methods to data in a single storage
   manager.
+  </p>
   <p>
   An AccessFactory is typically obtained from the Monitor:
-  <p>
+  </p>
   <blockquote><pre>
 	// Get the current transaction controller.
 	AccessFactory af;

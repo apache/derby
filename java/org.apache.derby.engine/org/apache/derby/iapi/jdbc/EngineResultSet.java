@@ -32,6 +32,8 @@ public interface EngineResultSet extends ResultSet {
     
     /**
      * Is this result set from a select for update statement?
+     *
+     * @return true if this is a select for update statement's ResultSet
      */
     public boolean isForUpdate();
     
@@ -39,9 +41,9 @@ public interface EngineResultSet extends ResultSet {
      * Is the designated columnIndex a null data value?
      * This is used by EXTDTAInputStream to get the null value without 
      * retrieving the underlying data value.
-     * @param columnIndex
+     * @param columnIndex Column position
      * @return true if the data value at columnIndex for the current row is null 
-     * @throws SQLException 
+     * @throws SQLException on error
      */
     public boolean isNull(int columnIndex) throws SQLException;
     
@@ -51,7 +53,7 @@ public interface EngineResultSet extends ResultSet {
      * 
      * @param columnIndex  column to access
      * @return length of data value
-     * @throws SQLException
+     * @throws SQLException on error
      * @see org.apache.derby.iapi.types.DataValueDescriptor#getLength() 
      */
     public int getLength(int columnIndex) throws SQLException;

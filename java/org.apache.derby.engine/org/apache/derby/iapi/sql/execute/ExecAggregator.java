@@ -28,12 +28,15 @@ import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 
 /**
- * An ExecAggregator is the interface that execution uses
- * to an aggregate.  System defined aggregates will implement
- * this directly. 
+   <P>
+   An ExecAggregator is the interface that execution uses
+   to an aggregate.  System defined aggregates will implement
+   this directly. 
+   </P>
  
    <P>
    The life time of an ExecAggregator is as follows.
+   </P>
 
 	<OL>
 	<LI> An ExecAggregator instance is created using the defined class name.
@@ -44,9 +47,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 	<LI> accumlate and merge will be called across these set of aggregators
 	<LI> One of these aggregators will be used as the final one for obtaining the result
 	</OL>
-
-
- * <P>
  */
 public interface ExecAggregator extends Formatable
 {

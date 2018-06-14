@@ -57,7 +57,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	/**
 	 * Create an ArrayInputStream with the passed in data.
 	 * The position is set to 0 and the limit is the entire byte array.
-	 * @param data
+	 * @param data The data in the stream
 	 */
 	public ArrayInputStream(byte[] data) {
 		super();
@@ -72,6 +72,8 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	/**
 		Set the array of bytes to be read.
 		Position is set to zero.
+
+        @param data The data in the stream
 	*/
 	public void setData(byte[] data) {
 		pageData = data;
@@ -81,7 +83,9 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 
 	/**
 		Return a reference to the array of bytes this stream is going to read
-		from so that caller may load it with stuff 
+		from so that caller may load it with stuff
+
+        @return the data in the stream
 	*/
 	public byte[] getData()
 	{
@@ -163,6 +167,8 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	/**
 		A setLimit which also sets the position to be offset.
 
+        @param offset Offset into the stream
+        @param length New length
 		@exception IOException limit is out of range 
 	*/
 	public void setLimit(int offset, int length) throws IOException {
@@ -555,6 +561,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      * 4 byte- 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx val &gt; 16383 &amp;&amp; &lt;= MAX_INT
      * </PRE>
      *
+     * @return the uncompressed int
      * @exception IOException if an I/O error happens
      **/
     public final int readCompressedInt()
@@ -638,7 +645,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      *
      * Formats are (with x representing value bits):
      * <PRE>
-     * value &gl;= 16383 (0x3fff): 
+     * value &gt;= 16383 (0x3fff): 
      *     2 byte - 00xxxxxx xxxxxxxx 
      *
      * value &gt; 16383 &amp;&amp; &lt;= 0x3fffffff:
@@ -648,6 +655,8 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      *     8 byte - 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
      * </PRE>
      *
+     * @return the uncompressed long
+     * @throws IOException on error
      **/
     public final long readCompressedLong()
         throws IOException

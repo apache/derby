@@ -30,10 +30,12 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**
 
+<p>
 The StoreCostController interface provides methods that an access client
 (most likely the system optimizer) can use to get store's estimated cost of
 various operations on the conglomerate the StoreCostController was opened
 for.
+</p>
 <p>
 It is likely that the implementation of StoreCostController will open 
 the conglomerate and will leave the conglomerate open until the
@@ -42,6 +44,7 @@ work, so the caller if possible should attempt to open the StoreCostController
 once per unit of work and rather than close and reopen the controller.  For
 instance if the optimizer needs to cost 2 different scans against a single
 conglomerate, it should use one instance of the StoreCostController.
+</p>
 <p>
 The locking behavior of the implementation of a StoreCostController is
 undefined, it may or may not get locks on the underlying conglomerate.  It
@@ -49,7 +52,8 @@ may or may not hold locks until end of transaction.
 An optimal implementation will not get any locks on the underlying 
 conglomerate, thus allowing concurrent access to the table by a executing
 query while another query is optimizing.
-<p>
+</p>
+
 @see TransactionController#openStoreCost
 @see RowCountable
 

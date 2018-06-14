@@ -40,12 +40,15 @@ public interface StreamStorable
 {
 	/**
 	  Return the on-disk stream state of the object.
-	  
+
+      @return a stream to read the object state
 	**/
 	public InputStream returnStream();
 
 	/**
 	  sets the on-disk stream state for the object.
+
+      @param newStream The new stream to use
 	**/
 	public void setStream(InputStream newStream);
 

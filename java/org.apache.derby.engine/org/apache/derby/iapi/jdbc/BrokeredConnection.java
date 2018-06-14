@@ -534,6 +534,8 @@ public class BrokeredConnection implements EngineConnection
 	/**
 		Sync up the state of the underlying connection
 		with the state of this new handle.
+
+        @throws SQLException on error
 	*/
 	public void syncState() throws SQLException {
 		EngineConnection conn = getRealConnection();
@@ -549,6 +551,7 @@ public class BrokeredConnection implements EngineConnection
 		if the isolation is set using SQL rather than JDBC. In order to
 		ensure correct state level information, this method is called
 		at the start and end of a global transaction.
+        @throws SQLException on error
 	*/
 	public void getIsolationUptoDate() throws SQLException {
 		if (control.isIsolationLevelSetUsingSQLorJDBC()) {
@@ -564,6 +567,7 @@ public class BrokeredConnection implements EngineConnection
 		Connection, otherwise set only the Connection related state (ie.
 		the non-transaction specific state).
 
+        @throws SQLException on error
 
 	*/
 	public void setState(boolean complete) throws SQLException {
@@ -651,8 +655,8 @@ public class BrokeredConnection implements EngineConnection
 	 * get the isolation level that is currently being used to prepare 
 	 * statements (used for network server)
 	 * 
-	 * @throws SQLException
 	 * @return current prepare isolation level 
+     * @throws SQLException on error
 	 * See EmbedConnection#getPrepareIsolation
 	 */
 	public final int getPrepareIsolation() throws SQLException
@@ -662,7 +666,7 @@ public class BrokeredConnection implements EngineConnection
     
     /**
      * Add a SQLWarning to this Connection object.
-     * @throws SQLException 
+     * @throws SQLException  on error
      */
     public final void addWarning(SQLWarning w) throws SQLException
     {
@@ -1026,7 +1030,7 @@ public class BrokeredConnection implements EngineConnection
      * EngineConnection interface, so that the NetworkServer can get at the
      * current schema for piggy-backing
      * @return the current schema name
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException on error
      */
     public String getCurrentSchemaName() throws SQLException {
         try {

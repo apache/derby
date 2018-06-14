@@ -42,7 +42,9 @@ public interface CipherFactoryBuilder
      *                  for creating the cipher factory.
      * @param newAttrs  true, if cipher factory has to be created using 
      *                  the new attributes specified by the user. 
-     *                 
+     *
+     * @return a cipher factory
+     * @throws StandardException on error
      */
     public CipherFactory createCipherFactory(boolean create, 
                                              Properties props, 

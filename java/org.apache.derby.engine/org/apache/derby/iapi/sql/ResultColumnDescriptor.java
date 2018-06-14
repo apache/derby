@@ -100,6 +100,8 @@ public interface ResultColumnDescriptor
 
 	/**
 	 * Return true if this result column represents a generated column.
+     *
+     * @return true if this result column represents a generated column
 	 */
     boolean hasGenerationClause();
     

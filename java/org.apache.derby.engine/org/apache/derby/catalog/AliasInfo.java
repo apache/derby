@@ -79,6 +79,8 @@ public interface AliasInfo
 
 	/**
 	 * Return true if this alias is a Table Function.
+     *
+     * @return true if this alias is a Table Function
 	 */
 	public boolean isTableFunction();
 

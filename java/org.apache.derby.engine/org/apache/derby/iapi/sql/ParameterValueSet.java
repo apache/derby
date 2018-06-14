@@ -39,6 +39,7 @@ public interface ParameterValueSet
 	 * Initialize the parameter set by allocating DataValueDescriptor
 	 * corresponding to the passed in type for each parameter.
 	 * @param types expected to match the number of parameters.
+     * @throws StandardException on error
 	 */
 	void initialize(DataTypeDescriptor[] types) throws StandardException;
 
@@ -46,6 +47,9 @@ public interface ParameterValueSet
 	/**
 		Set the mode of the parameter, called when setting up static method calls and stored procedures.
 		Otherwise the parameter type will default to an IN parameter.
+
+        @param position The position of the parameter in the set
+        @param mode The IN/OUT mode to set
 	*/
     void setParameterMode(int position, int mode);
 
@@ -92,6 +96,7 @@ public interface ParameterValueSet
 	/**
 	 * Returns the parameter at the given position.
 	 *
+     * @param position The parameters's position in the set
 	 * @return	The parameter at the given position.
 	 * @exception StandardException		Thrown on error
 	 */
@@ -100,10 +105,10 @@ public interface ParameterValueSet
 
 	/**
 	 * Returns the parameter at the given position in order to set it.
-	   Setting via an unknown object type must use setParameterAsObject()
-	   to ensure correct typing.
-
+	 * Setting via an unknown object type must use setParameterAsObject()
+	 * to ensure correct typing.
 	 *
+     * @param position The parameters's position in the set
 	 * @return	The parameter at the given position.
 	 * @exception StandardException		Thrown on error
 	 */
@@ -111,8 +116,10 @@ public interface ParameterValueSet
 
 	/**
 		Set the value of this user defined parameter to the passed in Object.
-		
-		  @exception StandardException		Thrown on error
+
+        @param parameterIndex The position of the parameter
+        @param value It's value
+		@exception StandardException		Thrown on error
 	*/
 	void setParameterAsObject(int parameterIndex, Object value) throws StandardException;
 	
@@ -194,6 +201,8 @@ public interface ParameterValueSet
 		
 	 *
 	 * @param parameterIndex the first parameter is 1, the second is 2, ...
+     *
+     * @return the IN/OUT mode of the parameter
 	 *
 	 */
 	public short getParameterMode(int parameterIndex);
@@ -202,6 +211,7 @@ public interface ParameterValueSet
     /**
      * Get the value of the return parameter in order to set it.
      *
+     * @return the return parameter
      *
      * @exception StandardException if a database-access error occurs.
      */

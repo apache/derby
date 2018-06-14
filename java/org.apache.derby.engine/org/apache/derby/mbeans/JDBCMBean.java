@@ -36,6 +36,8 @@ public interface JDBCMBean {
     
     /**
      * Get the JDBC driver's implementation level
+     *
+     * @return the driver level
      */
     public String getDriverLevel();
 
@@ -64,6 +66,7 @@ public interface JDBCMBean {
      * Does the driver accept the passed in JDBC URL
      * @param url JDBC URL to check.
      * @return True if it supports it, false otherwise.
+     * @throws SQLException on error
      * @see java.sql.Driver#acceptsURL(String)
      */
     public boolean acceptsURL(String url) throws SQLException;

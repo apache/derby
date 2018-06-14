@@ -31,17 +31,20 @@ import org.apache.derby.shared.common.error.StandardException;
   that the column value in a given column identified by column
   id is to be compared via a specific operator to a particular
   DataValueDescriptor value.
+  </p>
   <p>
   The implementation of this interface is provided by the client; 
   the methods of Qualifier are the methods the access code uses to use it.
+  </p>
   <p>
   Arrays of qualifiers are provided to restrict the rows 
   returned by scans.  A row is returned from a scan if all qualifications
   in the array return true.  
+  </p>
   <p>
   A qualification returns true if in the following pseudo-code compare_result
   is true.
-  <p>
+  </p>
   <blockquote><pre>
   if (qualifier.negateCompareResult())
   {
@@ -56,20 +59,23 @@ import org.apache.derby.shared.common.error.StandardException;
           compare_result = !(compare_result);
       }
   }
-  </blockquote></pre>
+  </pre></blockquote>
   <p>
   Qualifiers are often passed through interfaces as a set of Qualifiers,
   rather than one at a time, for example see the qualifier argument in 
   TransactionController.openScan(). 
+  </p>
   <p>
   To make this consistent the following protocols are to be used when passing
   around sets of Qualifiers.
+  </p>
   <p>
   A single dimensional array is to be used to pass around a set of AND'd 
   qualifiers.  Thus qualifier[] argument is to be treated as:
+  </p>
   <blockquote><pre>
       qualifier[0] AND qualifer[1] ... AND qualifier[qualifer.length - 1]
-  </blockquote></pre>
+  </pre></blockquote>
   <p>
   A two dimensional array is to be used to pass around a AND's and OR's in
   conjunctive normal form.  The top slot of the 2 dimensional array is optimized
@@ -79,6 +85,7 @@ import org.apache.derby.shared.common.error.StandardException;
   of OR's.  Thus the 2 dimensional array qual[][] argument is to be treated as 
   the following, note if qual.length = 1 then only the first array is valid and
   it is and an array of AND clauses:
+  </p>
   <blockquote><pre>
   (qual[0][0] AND qual[0][0] ... AND qual[0][qual[0].length - 1])
   AND
@@ -87,28 +94,33 @@ import org.apache.derby.shared.common.error.StandardException;
   (qual[2][0] OR  qual[2][1] ... OR  qual[2][qual[2].length - 1])
   ...
   AND (qual[qual.length - 1][0] OR  qual[1][1] ... OR  qual[1][2])
-  </blockquote></pre>
+  </pre></blockquote>
   <p>
   If any of the array's qual[0].length ... qual[qual.length -1] are 0 length
   they will be evaluated as TRUE; but they must be not NULL.  See Example 4 for
   encoding of (a or b) that takes advantage of this.
+  </p>
   <p>
   Note that any of the arrays qual[0].length ... qual[qual.length -1] may also
   be of length 1, thus no guarantee is made the presence of OR
   predicates if qual.length &lt; 1. See example 1a.
+  </p>
   <p>
   The following give pseudo-code examples of building Qualifier arrays:
+  </p>
   <p>
   Example 1: "a AND b AND c"
+  </p>
   <blockquote><pre>
     qualifier = new Qualifier[1][3]; // 3 AND clauses
 
     qualifier[0][0] = a
     qualifier[0][1] = b
     qualifier[0][2] = c
-  </blockquote></pre>
+  </pre></blockquote>
   <p>
   Example 1a "a AND b AND c" - less efficient than example 1 but legal
+  </p>
   <blockquote><pre>
     qualifier = new Qualifier[3]; // 3 AND clauses
     qualifier[0] = new Qualifier[1];
@@ -118,10 +130,11 @@ import org.apache.derby.shared.common.error.StandardException;
     qualifier[0][0] = a
     qualifier[1][0] = b
     qualifier[2][0] = c
-  </blockquote></pre>
+  </pre></blockquote>
   <p>
   Example 2: "(f) AND (a OR b) AND (c OR d OR e)"
     Would be represented by an array that looks like the following:
+  </p>
   <blockquote><pre>
     qualifier = new Qualifier[3]; // 3 and clauses
     qualifier[0] = new Qualifier[1]; // to be intitialized to f
@@ -134,9 +147,10 @@ import org.apache.derby.shared.common.error.StandardException;
     qualifier[2][0] = c
     qualifier[2][1] = d
     qualifier[2][2] = e
-  </blockquote></pre>
+  </pre></blockquote>
   <p>
   Example 3: "(a OR b) AND (c OR d) AND (e OR f)" 
+  </p>
   <blockquote><pre>
     qualifier = new Qualifier[3]; // 3 and clauses
     qualifier = new Qualifier[4]; // 4 and clauses
@@ -152,9 +166,10 @@ import org.apache.derby.shared.common.error.StandardException;
     qualifier[2][1] = d
     qualifier[3][0] = e
     qualifier[3][1] = f
-  </blockquote></pre>
+  </pre></blockquote>
   <p>
   Example 4: "(a OR b)" 
+  </p>
   <blockquote><pre>
     qualifier = new Qualifier[2]; // 2 and clauses
     qualifier[0] = new Qualifier[0]; // 0 length array is TRUE
@@ -162,7 +177,7 @@ import org.apache.derby.shared.common.error.StandardException;
 
     qualifier[1][0] = a
     qualifier[1][1] = b
-  </blockquote></pre>
+  </pre></blockquote>
 
   @see ScanController
   @see TransactionController#openScan 
@@ -184,7 +199,8 @@ public interface Qualifier
 	 *		<li> CONSTANT 		- can be cached across executions. </li></ul>
 	 * <p>
 	 * <b>NOTE</b>: the following is guaranteed: <i> 
-	 *		VARIANT &lt; SCAN_INVARIANT &lt; QUERY_INVARIANT &lt; CONSTANT
+	 *		VARIANT &lt; SCAN_INVARIANT &lt; QUERY_INVARIANT &lt; CONSTANT</i>
+	 * </p>
 	 */
 	public static final int VARIANT = 0;
 	public static final int SCAN_INVARIANT = 1;

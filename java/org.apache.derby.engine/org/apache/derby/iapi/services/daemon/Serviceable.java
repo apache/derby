@@ -99,6 +99,8 @@ public interface Serviceable {
 		directly, like in post commit processing
 
 		<P>MT - MT safe
+
+        @return true if this should work as soon as possible
 	*/
 	public boolean serviceASAP();
 
@@ -107,7 +109,9 @@ public interface Serviceable {
 		If this work should be done immediately on the user thread then return true.  
 		If it doesn't make any difference if this work is done on a the user thread
 		immediately or if it is performed by another thread asynchronously
-		later, then return false.  
+		later, then return false.
+
+        @return true if this work shold happen immediately on the user thread
 	*/
 	public boolean serviceImmediately();
 

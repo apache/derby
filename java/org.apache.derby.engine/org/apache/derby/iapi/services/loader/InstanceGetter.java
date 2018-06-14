@@ -28,9 +28,12 @@ public interface InstanceGetter {
 	/**
 		Create an instance of a class.
 
+        @return a new instance of the class
+
 		@exception InstantiationException Zero arg constructor can not be executed
 		@exception IllegalAccessException Class or zero arg constructor is not public.
 		@exception InvocationTargetException Exception throw in zero-arg constructor.
+        @exception NoSuchMethodException Missing method exception
 
 	*/
 	public Object getNewInstance()

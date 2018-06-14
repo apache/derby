@@ -39,12 +39,10 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 
     <P>This class is called from a Query constructed in 
     java/org.apache.derby.impl.jdbc/metadata.properties:
-<PRE>
-
-
-    <P>The VTI will return columns 3-14, an extra column to the specification
+    The VTI will return columns 3-14, an extra column to the specification
     METHOD_ID is returned to distinguish between overloaded methods.
-
+    </P>
+    
   <OL>
         <LI><B>PROCEDURE_CAT</B> String =&gt; procedure catalog (may be null)
         <LI><B>PROCEDURE_SCHEM</B> String =&gt; procedure schema (may be null)

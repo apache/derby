@@ -92,6 +92,7 @@ public interface PersistentSet
 	 * is visible as long as the property is not set.
      *
      * @param key     The "key" of the property that is being requested.
+     * @return true if the default property is visible
 	 * @exception  StandardException  Standard exception policy.
      **/
     public boolean propertyDefaultIsVisible(String key) throws StandardException;

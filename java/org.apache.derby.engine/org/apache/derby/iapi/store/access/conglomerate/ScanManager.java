@@ -29,11 +29,11 @@ import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 
 /**
-
+<p>
 The ScanManager interface contains those methods private to access method
 implementors necessary to implement Scans on Conglomerates.  Client of scans
 use the ScanController to interact with the scan.
-<P>
+</p>
 @see ScanController
 
 **/

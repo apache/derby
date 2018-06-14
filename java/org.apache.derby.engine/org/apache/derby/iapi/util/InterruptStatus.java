@@ -120,15 +120,18 @@ public class InterruptStatus {
 
 
     /**
+     * <p>
      * Checks if the thread has been interrupted in NIO, presumably because we
      * saw an exception indicating this. Make a note of this and clear the
      * thread's interrupt status flag (NIO doesn't clear it when throwing) so
      * we can retry whatever we are doing. It will be set back ON before
      * control is transferred back to the application, cf. {@code
      * restoreIntrFlagIfSeen}.
-     * <p/>
+     * </p>
+     * <p>
      * The note that we saw an interrupt is stored in the lcc if available, if
      * not, in thread local {@code exception}.
+     * </p>
      *
      * @param s (debug info) whence
      * @param threadsInPageIO (debug info) number of threads inside the NIO
@@ -166,12 +169,14 @@ public class InterruptStatus {
 
 
     /**
+     * <p>
      * Check if the we ever noticed and reset the thread's interrupt status
      * flag to allow safe operation during execution.  Called from JDBC API
      * methods before returning control to user application. Typically, this
      * happens just prior to return in methods that catch {@code Throwable} and
      * invoke
      * {@code handleException} (directly or indirectly) on it, e.g.
+     * </p>
      * <pre>
      *       :
      *       InterruptStatus.restoreIntrFlagIfSeen();
@@ -180,12 +185,15 @@ public class InterruptStatus {
      *       throw handleException(t);
      *    }
      * </pre>
+     * <p>
      * {@code handleException} does its own calls to {@code
      * restoreIntrFlagIfSeen}. If {@code setupContextStack} has been called
      * consider using the overloaded variant of {@code restoreIntrFlagIfSeen}
      * with an lcc argument.
-     * <p/>
+     * </p>
+     * <p>
      * If an interrupt status flag was seen, we set it back <em>on</em> here.
+     * </p>
      */
     public static void restoreIntrFlagIfSeen() {
 
@@ -221,6 +229,7 @@ public class InterruptStatus {
     }
 
     /**
+     * <p>
      * Same purpose as {@code restoreIntrFlagIfSeen()}. This variant presumes
      * we are sure we have a {@code lcc != null}, i.e. {@code
      * setupContextStack} has been called and not yet restored.  Note that we
@@ -228,9 +237,11 @@ public class InterruptStatus {
      * typically called in a {@code finally} block, at which point in time, the
      * {@code lcc} may be gone due to errors of severity {@code
      * SESSION_SEVERITY} or {@code DATABASE_SEVERITY}.
-     * <p/>
+     * </p>
+     * <p>
      * If no {@code lcc} is available, use the zero-arg variant. We only need
      * this variant for performance reasons.
+     * </p>
      *
      * @param lcc the language connection context for this session
      */
@@ -261,13 +272,16 @@ public class InterruptStatus {
 
 
     /**
+     * <p>
      * Check if the we ever noticed and reset the thread's interrupt status
      * flag to allow safe operation during execution, or if the interrupt
      * status flag is set now.  Called when operations want to be prematurely
      * terminated due to interrupt.
-     * <p/>
+     * </p>
+     * <p>
      * If an interrupt status flag was seen, but temporarily switched off, we
      * set it back ON here.
+     * </p>
      *
      * @param lcc the language connection context for this session
      * @throws StandardException (session level SQLState.CONN_INTERRUPT) if

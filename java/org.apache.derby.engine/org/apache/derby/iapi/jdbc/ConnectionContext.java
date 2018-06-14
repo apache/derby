@@ -41,6 +41,8 @@ public interface ConnectionContext
 		DriverManager.getConnection("jdbc:default:connection");
 		</PRE>
 
+        @param internal True if the connection should be internal
+        @return a nested connection
 		@exception SQLException Parent connection has been closed.
 	*/
 	public Connection getNestedConnection(boolean internal) throws SQLException;
@@ -49,6 +51,7 @@ public interface ConnectionContext
 	 * Get a jdbc ResultSet based on the execution ResultSet.
 	 *
 	 * @param executionResultSet	a result set as gotten from execution
+     * @return a JDBC ResultSet
 	 *	
 	 * @exception java.sql.SQLException	on error
 	 */	

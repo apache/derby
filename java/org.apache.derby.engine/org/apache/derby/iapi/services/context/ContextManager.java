@@ -471,6 +471,8 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 
 	/**
 		Set the locale for this context.
+
+        @param finder The local finder
 	*/
 	public void setLocaleFinder(LocaleFinder finder) {
 		this.finder = finder;

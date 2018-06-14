@@ -188,12 +188,16 @@ public interface TypeDescriptor
 
 	/**
 	 * Return true if this is a Row Multiset type
-	  */
+     *
+     * @return true if this is a Row Multiset type
+     */
 	public	boolean isRowMultiSet();
     
 	/**
 	 * Return true if this is a user defined type
-	  */
+     *
+     * @return true if this is a user defined type
+     */
 	public	boolean isUserDefinedType();
     
     /**

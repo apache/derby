@@ -33,38 +33,48 @@ public interface BrokeredStatementControl
         Returns the holdability that should be
         used which may be different from the passed
         in holdabilty.
+
+        @param holdability The desired holdability
+        @return the actual holdability
+        @throws SQLException on error
 	*/
 	public int checkHoldCursors(int holdability) throws SQLException;
 
 	/**
 	 * Close the real JDBC Statement when this is controlling a Statement.
-	 * @throws SQLException
+	 * @throws SQLException on error
 	 */
 	public void closeRealStatement() throws SQLException;
 	
 	/**
 	 * Close the real JDBC CallableStatement when this is controlling a
 	 * CallableStatement. 
-	 * @throws SQLException
+	 * @throws SQLException on error
 	 */
 	public void closeRealCallableStatement() throws SQLException;
 	
 	/**
 	 * Close the real JDBC CallableStatement when this is controlling a
 	 * PreparedStatement. 
-	 * @throws SQLException
+	 * @throws SQLException on error
 	 */
 	public void closeRealPreparedStatement() throws SQLException;
 	
 	/**
 		Return the real JDBC statement for the brokered statement
 		when this is controlling a Statement.
+
+        @return the real statement
+        @throws SQLException on error
 	*/
 	public Statement	getRealStatement() throws SQLException;
 
 	/**
 		Return the real JDBC PreparedStatement for the brokered statement
 		when this is controlling a PreparedStatement.
+
+        @return the real prepared statement
+        @throws SQLException on error
 	*/
 	public PreparedStatement	getRealPreparedStatement() throws SQLException;
 
@@ -72,12 +82,17 @@ public interface BrokeredStatementControl
 	/**
 		Return the real JDBC CallableStatement for the brokered statement
 		when this is controlling a CallableStatement.
+
+        @return the real callable statement
+        @throws SQLException on error
 	*/
 	public CallableStatement	getRealCallableStatement() throws SQLException;
 
 	/**
 		Optionally wrap a returned ResultSet in another ResultSet.
         @param s Statement that created the ResultSet.
+        @param rs The ResultSet to wrap
+        @return the wrapper ResultSet
 	*/
 	public ResultSet	wrapResultSet(Statement s, ResultSet rs);
 }

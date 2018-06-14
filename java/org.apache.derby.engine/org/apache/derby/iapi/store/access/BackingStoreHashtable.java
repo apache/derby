@@ -118,8 +118,8 @@ to disk may be the following:
 </p>
 
 <ul>
-<li>DataValueDescriptor[] and ArrayList<DataValueDescriptor></li>
-<li>or LocatedRow and ArrayList<LocatedRow></li>
+<li>DataValueDescriptor[] and ArrayList&lt;DataValueDescriptor&gt;</li>
+<li>or LocatedRow and ArrayList&lt;LocatedRow&gt;</li>
 </ul>
 
 <p>

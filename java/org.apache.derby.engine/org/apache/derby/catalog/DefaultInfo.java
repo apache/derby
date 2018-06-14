@@ -36,6 +36,8 @@ public interface DefaultInfo
 	/**
 	 * If this default is a generation clause, then return the names of
 	 * other columns in the row which the generation clause references.
+     *
+     * @return the referenced column names
 	 */
 	public String[] getReferencedColumnNames();
 	
@@ -55,12 +57,16 @@ public interface DefaultInfo
 
 	/**
 	 * Return true if this is the generation clause for a generated column.
+     *
+     * @return true if this is the generation clause for a generated column.
 	 */
 	public boolean isGeneratedColumn();
 	
 	/**
 	 * Return the name of the current schema when the default was created. This
 	 * is filled in for generated columns.
+     *
+     * @return the name of the current schema when the default was created
 	 */
 	public String   getOriginalCurrentSchema();
 	

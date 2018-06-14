@@ -34,6 +34,9 @@ public interface Resetable
 {
 	/**
 	 *  Reset the stream to the beginning.
+     *
+     * @throws IOException on error
+     * @throws StandardException on error
 	 */
 	public void resetStream() throws IOException, StandardException;
 
@@ -41,6 +44,7 @@ public interface Resetable
 	 *  Initialize. Needs to be called first, before a resetable stream can
      *  be used.
      *
+     * @throws StandardException on error
 	 */
     public void initStream() throws StandardException;
 

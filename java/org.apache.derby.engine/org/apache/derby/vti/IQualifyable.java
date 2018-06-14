@@ -32,7 +32,16 @@ public interface IQualifyable {
 		Called at runtime before each scan of the VTI.
 		The passed in qualifiers are only valid for the single
 		execution that follows.
+
+        @param vtiEnvironment VTI context
+        @param qualifiers Store qualifiers
+
+        @throws SQLException on error
 	*/
-	public void setQualifiers(VTIEnvironment vtiEnvironment, org.apache.derby.iapi.store.access.Qualifier[][] qualifiers)
+	public void setQualifiers
+      (
+       VTIEnvironment vtiEnvironment,
+       org.apache.derby.iapi.store.access.Qualifier[][] qualifiers
+       )
 		throws SQLException;
 }

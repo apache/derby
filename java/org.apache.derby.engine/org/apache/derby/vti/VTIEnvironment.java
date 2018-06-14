@@ -39,17 +39,23 @@ public interface VTIEnvironment
 	/**
 		Return true if this instance of the Table Function has been created for compilation,
 		false if it is for runtime execution.
+
+        @return true if this instance of the Table Function has been created for compilation
 	*/
 	public boolean isCompileTime();
 
 	/**
 		Return the SQL text of the original SQL statement.
+
+        @return the SQL text of the original SQL statement
 	*/
 	public String getOriginalSQL();
 
 	/**
 		Get the  specific JDBC isolation of the statement. If it returns Connection.TRANSACTION_NONE
 		then no isolation was specified and the connection's isolation level is implied.
+
+        @return the  specific JDBC isolation of the statement
 	*/
 	public int getStatementIsolationLevel();
 
@@ -59,11 +65,17 @@ public interface VTIEnvironment
 		Any previous value associated with the key is discarded.
 		Any saved object can be seen by any JDBC Connection that has a Statement object
 		that references the same statement plan.
+
+        @param key Key into a cache of context variables
+        @param value Value to associate with the key
 	*/
 	public void setSharedState(String key, java.io.Serializable value);
 
 	/**
 		Get an object associated with a key from set of objects maintained with the statement plan.
+
+        @param key Key into a cache of context variables
+        @return the value associated with the key
 	*/
 	public Object getSharedState(String key);
 }

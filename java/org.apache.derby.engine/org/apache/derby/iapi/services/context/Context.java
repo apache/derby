@@ -59,6 +59,8 @@ public interface Context
 	/**
 	 * Returns the context manager that has stored this
 	 * context in its stack.
+     *
+     * @return the context manager
 	 */
 	public ContextManager getContextManager();
 
@@ -75,6 +77,8 @@ public interface Context
 	 * field with the name CONTEXT_ID. For example,
 	 * see org.apache.derby.iapi.sql.compile.CompilerContext.CONTEXT_ID.
 	 * @see org.apache.derby.iapi.sql.compile.CompilerContext
+     *
+     * @return the current id name
 	 */
 	public String getIdName();
 
@@ -109,6 +113,7 @@ public interface Context
 	 * is an instance of StandardException that is more severe than the original error
 	 * or the new exception is a not an instance of StandardException (e.g java.lang.NullPointerException).
 	 *
+     * @param error The original error
 	 * @exception StandardException thrown if cleanup goes awry
 	 */
 	public void cleanupOnError(Throwable error)
@@ -138,6 +143,9 @@ public interface Context
 	 * interested in session level errors because they both have clean up to do.
 	 * This method allows both of them to return false so that all such handlers
 	 * under them can do their clean up.
+     *
+     * @param severity The severity level
+     * @return whether or not this context is the "last" handler for a severity level
 	 */
 	public boolean isLastHandler(int severity);
 }

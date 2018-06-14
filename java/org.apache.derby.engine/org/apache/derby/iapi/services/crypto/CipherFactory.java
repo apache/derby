@@ -66,6 +66,7 @@ public interface CipherFactory
 		Returns a CipherProvider which is the encryption or decryption engine.
 		@param mode is either ENCRYPT or DECRYPT.  The CipherProvider can only
 				do encryption or decryption but not both.
+        @return a cipher provider
 
 		@exception StandardException Standard Derby Error Policy
 	 */
@@ -86,7 +87,9 @@ public interface CipherFactory
 		@param	storageFactory storageFactory is used to access any stored data
 					that might be needed for verification process of the encryption key
 		@param	properties	properties at time of database connection as well as those in service.properties
-	 */
+
+        @throws StandardException on error
+    */
 	public void verifyKey(boolean create, StorageFactory storageFactory,Properties properties)
 		throws StandardException;
 

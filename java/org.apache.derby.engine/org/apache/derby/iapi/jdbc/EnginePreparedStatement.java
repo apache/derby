@@ -37,6 +37,7 @@ public interface EnginePreparedStatement extends PreparedStatement, EngineStatem
      * the caller may assume that a recompilation has not taken place, i.e.
      * meta-data are (also) unchanged.
      * @return version counter
+     * @throws SQLException on error
      */
     public long getVersionCounter() throws SQLException;
     

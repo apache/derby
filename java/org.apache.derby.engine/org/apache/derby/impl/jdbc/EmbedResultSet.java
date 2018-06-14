@@ -2966,7 +2966,7 @@ public class EmbedResultSet extends ConnectionChild
      *
      * The updater methods are used to update column values in the current row
      * or the insert row. The updater methods do not update the underlying
-     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
      * methods are called to update the database.
      *
      * @param columnIndex the first column is 1, the second is 2, ...
@@ -3134,7 +3134,7 @@ public class EmbedResultSet extends ConnectionChild
      *
      * The updater methods are used to update column values in the current row
      * or the insert row. The updater methods do not update the underlying
-     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
      * methods are called to update the database.
      *
      * @param columnIndex the first column is 1, the second is 2, ...
@@ -5068,7 +5068,7 @@ public class EmbedResultSet extends ConnectionChild
      *
      * The updater methods are used to update column values in the current row
      * or the insert row. The updater methods do not update the underlying
-     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
      * methods are called to update the database.
      *
      * @param columnName the label for the column specified with the SQL AS
@@ -5170,7 +5170,7 @@ public class EmbedResultSet extends ConnectionChild
      *
      * The updater methods are used to update column values in the current row
      * or the insert row. The updater methods do not update the underlying
-     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
      * methods are called to update the database.
      *
      * @param columnName the label for the column specified with the SQL AS

@@ -113,18 +113,28 @@ public interface LockFactory extends PropertySetCallback {
 
 	/**
 		Unlock all locks on a group that match the passed in value.
+
+        @param compatibilitySpace A lock space
+        @param group A group
+        @param key The key
 	*/
 	public void unlockGroup(CompatibilitySpace compatibilitySpace,
 							Object group, Matchable key);
 
 	/**
 		Transfer a set of locks from one group to another.
+
+        @param compatibilitySpace A lock space
+        @param oldGroup The source group
+        @param newGroup The target group
 	*/
 	public void transfer(CompatibilitySpace compatibilitySpace,
 						 Object oldGroup, Object newGroup);
 
 	/**
 		Returns true if locks held by anyone are blocking anyone else
+
+        @return true if someone is blocked
 	*/
 	public boolean anyoneBlocked();
 
@@ -132,7 +142,9 @@ public interface LockFactory extends PropertySetCallback {
 		Return true if locks are held in this compatibility space and
 		 this group.
 
+        @param compatibilitySpace A lock space
 		@param group handle of group that objects were locked with.
+        @return true if locks matching the arguments are held
 
 	*/
 	public boolean areLocksHeld(CompatibilitySpace compatibilitySpace,
@@ -140,6 +152,10 @@ public interface LockFactory extends PropertySetCallback {
 
 	/**
 		Return true if locks are held in this compatibility space.
+
+        @param compatibilitySpace A lock space
+        @return true if locks matching the arguments are held
+
 	*/
 	public boolean areLocksHeld(CompatibilitySpace compatibilitySpace);
 
@@ -186,6 +202,13 @@ public interface LockFactory extends PropertySetCallback {
 
 	/**
 		Check to see if a specific lock is held.
+
+        @param compatibilitySpace A lock space
+        @param group A group
+        @param ref Something which can be locked
+        @param qualifier The kind of lock
+
+        @return true if the indicated lock is held
 	*/
 	public boolean isLockHeld(CompatibilitySpace compatibilitySpace,
 							  Object group, Lockable ref, Object qualifier);
@@ -193,6 +216,8 @@ public interface LockFactory extends PropertySetCallback {
 	/**
 		Get the lock timeout in milliseconds. A negative number means that
         there is no timeout.
+
+        @return the lock timeout in milliseconds
 	*/
 	public int getWaitTimeout();
 
@@ -211,17 +236,27 @@ public interface LockFactory extends PropertySetCallback {
 		<BR>
 		Only one limit may be in place for a group at any time.
 		@see Limit
+
+        @param compatibilitySpace A lock space
+        @param group A group
+        @param limit A limit for the group
+        @param callback Code to call when the limit is reached
 	*/
 	public void setLimit(CompatibilitySpace compatibilitySpace, Object group,
 						 int limit, Limit callback);
 
 	/**
 		Clear a limit set by setLimit.
+
+        @param compatibilitySpace A lock space
+        @param group A group
 	*/
 	public void clearLimit(CompatibilitySpace compatibilitySpace, Object group);
 
 	/**
 		Make a virtual lock table for diagnostics.
+
+        @return a virtual lock table
 	 */
 	public Enumeration makeVirtualLockTable();
 

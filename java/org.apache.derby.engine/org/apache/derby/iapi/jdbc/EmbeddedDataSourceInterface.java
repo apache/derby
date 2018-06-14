@@ -64,7 +64,7 @@ public interface EmbeddedDataSourceInterface extends javax.sql.DataSource {
      * @param requestPassword {@code true} if the password came from the
      *        getConnection() call with user and password arguments..
      * @return user connection
-     * @throws SQLException
+     * @throws SQLException on error
      */
     public Connection getConnection(String username,
                                    String password,

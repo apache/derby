@@ -44,15 +44,19 @@ import org.apache.derby.iapi.util.InterruptStatus;
 import java.util.Properties;
 import java.sql.SQLException;
 
-/** 
+/**
+ *  <P>
  *	An instance of a TransactionResourceImpl is a bundle of things that
  *	connects a connection to the database - it is the transaction "context" in
  *	a generic sense.  It is also the object of synchronization used by the
  *	connection object to make sure only one thread is accessing the underlying
  *	transaction and context.
  *
- *  <P>TransactionResourceImpl not only serves as a transaction "context", it
- *	also takes care of: <OL>
+ *  <P>
+ *  TransactionResourceImpl not only serves as a transaction "context", it
+ *	also takes care of:
+ *  </P>
+ *  <OL>
  *	<LI>context management: the pushing and popping of the context manager in
  *		and out of the global context service</LI>
  *	<LI>transaction demarcation: all calls to commit/abort/prepare/close a
@@ -67,11 +71,13 @@ import java.sql.SQLException;
  *  case of a XATransaction).  A nested connection must be a ProxyConnection.
  *  A proxyConnection is not detachable and can itself be a XA connection -
  *  although an XATransaction may start nested local (proxy) connections.
+ *  </P>
  *
  *	<P> this is an example of how all the objects in this package relate to each
  *		other.  In this example, the connection is nested 3 deep.  
  *		DetachableConnection.  
- *	<P><PRE>
+ *	</P>
+ * <PRE>
  *
  *      lcc  cm   database  jdbcDriver
  *       ^    ^    ^         ^ 
@@ -107,6 +113,7 @@ import java.sql.SQLException;
  * TransactionResource at all times.  A detachable connection can be without a
  * TransactionResource, and a TransactionResource for an XATransaction
  * (called  XATransactionResource) can be without a connection.
+ *  </P>
  *
  *
  */

@@ -55,17 +55,25 @@ public abstract class ClassFactoryContext extends ContextImpl {
      * transactional nature of the class loading lock.
      * Used when the classpath changes or a database
      * jar file is installed, removed or replaced.
+     *
+     * @return the lock compatibility space
+     * @throws StandardException on error
      */
     public abstract CompatibilitySpace getLockSpace() throws StandardException;
 
     /**
      * Get the set of properties stored with this service.
+     *
+     * @return the set of properties stored with this service
+     * @throws StandardException on error
     */
 	public abstract PersistentSet getPersistentSet() throws StandardException;
 
 	/**
 		Get the mechanism to rad jar files. The ClassFactory
 		may keep the JarReader reference from the first class load.
+
+        @return the jar file reader
 	*/
 	public abstract JarReader getJarReader();
 

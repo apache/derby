@@ -26,12 +26,13 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.shared.common.error.StandardException;
 
 /**
+ * <p>
  * The Row interface provides methods to get information about the columns
  * in a result row.
  * It uses simple, position (1-based) access to get to columns.
  * Searching for columns by name should be done from the ResultSet
  * interface, where metadata about the rows and columns is available.
- * <p>
+ * </p>
  *
  * @see ResultSet
  *
@@ -56,6 +57,7 @@ public interface Row
 	 * Set a DataValueDescriptor in a Row by ordinal position (1-based).
 	 *
 	 * @param position	The ordinal position of the column.
+     * @param value The column value to set
 	 */
 	void	setColumn (int position, DataValueDescriptor value);
 

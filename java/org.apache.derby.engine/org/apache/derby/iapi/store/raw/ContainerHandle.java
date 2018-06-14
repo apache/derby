@@ -27,17 +27,22 @@ import org.apache.derby.shared.common.error.StandardException;
 import java.util.Properties;
 
 /**
+	<p>
 	A Container contains a contigious address space of pages, the pages
 	start at page number Container.FIRST_PAGE_NUMBER and are numbered sequentially.
+	</p>
 	
+	<p>
 	The page size is set at addContainer() time.
+	</p>
 
 
+	<p>
 	RESOLVE: this style of coding is not currently enforced
 	If the caller calls getPage (or one of its variants) more than once on the 
     same page, the caller must call unlatch a corresponding number of times in 
     order to ensure that the page is latched.  For example:
-	<p>
+	</p>
 	<blockquote><pre>
     Container c;
 	Page p1 = c.getPage(Container.FIRST_PAGE_NUMBER);
@@ -50,24 +55,29 @@ import java.util.Properties;
 	There is no restriction on the order in which latching and unlatching is 
     done.  In the example, p1 could have been unlatched after p2 with no ill 	
     effects.
+	</p>
 
-	<P>	<B>Open container modes</B>
+	<p>	<B>Open container modes</B>
 	ContainerHandle.MODE are used to open or create the container.
 	Unlike TableProperties, MODEs are not permanantely associated with the
 	container, it is effective only for the lifetime of the containerHandle
 	itself.
-	<BR>A container may use any of these mode flags when it is opened.
+	</p>
+	<BR>
+	<p>
+    A container may use any of these mode flags when it is opened.
+	</p>
 	<UL>
-	<LI>MODE_READONLY - Open the container in read only mode.
+	<LI>MODE_READONLY - Open the container in read only mode.</LI>
 	<LI>MODE_FORUPDATE - Open the container in update mode, if the underlying 
     storage does not allow updates
-	then the container will be opned in read only mode.
+	then the container will be opned in read only mode.</LI>
 	<LI>MODE_UNLOGGED - If Unset, any changes to the container are logged.
 	If set, any user changes to the container are unlogged. It is guaranteed
     at commit time that all changes made during the transaction will have been 
     flushed to disk. Using this mode automatically opens the container in 
     container locking, isolation 3 level. The state of the container following
-    an abort or any type of rollback is unspecified.
+    an abort or any type of rollback is unspecified.</LI>
 	<LI>MODE_CREATE_UNLOGGED - If set, not only are user changes to the
 	container are unlogged, page allocations are also unlogged.  This MODE is
 	only useful for container is created in the same statement and no change on
@@ -78,18 +88,24 @@ import java.util.Properties;
 	does not force the cache.  It is up to the client of raw store to force the
 	cache at the appropriate time - this allows a statement to create and open
 	the container serveral times for bulk loading without logging or doing any
-	synchronous I/O. 
+	synchronous I/O.</LI>
 	<LI>MODE_LOCK_NOWAIT - if set, then don't wait for the container lock, else
 	wait for the container lock.  This flag only dictates whether the lock
 	should be waited for or not.  After the container is successfully opened,
-	whether this bit is set or not has no effect on the container handle.
+	whether this bit is set or not has no effect on the container handle.</LI>
 	</UL>
+    <P>
 	If neither or both of the {MODE_READONLY, MODE_FORUPDATE} modes are 
     specified then the behaviour of the container is unspecified.
+    </P>
 	<BR>
+    <P>
 	MODE_UNLOGGED must be set for MODE_CREATE_UNLOGGED to be set.
-	<P>
-	<B>Temporary Containers</B><BR>
+    </P>
+    <P>
+	<B>Temporary Containers</B>
+    </P>
+    <P>
 	If when creating a container the segment used is 
     ContainerHandle.TEMPORARY_SEGMENT then the container is a temporary 
     container. Temporary containers are not logged or locked and do not live 
@@ -98,20 +114,24 @@ import java.util.Properties;
     update since the last commit or abort.  Temporary containers are private 
     to a transaction and must only be used a single thread within the 
     transaction at any time, these restrictions are not currently enforced.
-	<BR>
+    </P>
+	<P>
 	When opening a temporary container for update access these additional mode
     flags may be used
+    </P>
 	<UL>
-	<LI> MODE_TRUNCATE_ON_COMMIT - At commit/abort time container is truncated.
-	<LI> MODE_DROP_ON_COMMIT - At commit/abort time the container is dropped.
-	<LI> MODE_TEMP_IS_KEPT - At commit/abort time the container is kept around.
+	<LI> MODE_TRUNCATE_ON_COMMIT - At commit/abort time container is truncated.</LI>
+	<LI> MODE_DROP_ON_COMMIT - At commit/abort time the container is dropped.</LI>
+	<LI> MODE_TEMP_IS_KEPT - At commit/abort time the container is kept around.</LI>
 	</UL>
+    <P>
 	If a temporary container is opened multiple times in the same transaction 
     with different modes then the most severe mode is used, ie. none &lt; 
     truncate on commit &lt; drop on commit.
 	The MODE_UNLOGGED, MODE_CREAT_UNLOGGED flags are ignored when opening a 
-    temporary container, not logged is always assumed.  */
-
+    temporary container, not logged is always assumed.
+    </P>
+*/
 public interface ContainerHandle 
 {
 
@@ -394,7 +414,7 @@ public interface ContainerHandle
 		for (Page p = containerHandle.getFirstPage();
 			 p != null;
 			 p = containerHandle.getNextPage(p.getPageNumber()))
-		<PRE>
+		</PRE>
 		will guarentee to iterate thru and latched all the valid pages 
 		in the container
 

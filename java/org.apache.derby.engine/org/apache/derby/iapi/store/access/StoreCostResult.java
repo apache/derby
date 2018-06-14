@@ -23,9 +23,10 @@ package org.apache.derby.iapi.store.access;
 
 /**
 
+<p>
 Manage the result information from a single call to 
 StoreCostController.getScanCost().
-<p>
+</p>
 @see StoreCostController
 
 **/

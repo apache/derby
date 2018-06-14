@@ -33,6 +33,8 @@ public interface GeneratedClass {
 
 	/**
 		Return the name of the generated class.
+
+        @return the class name
 	*/
 	public String getName();
 
@@ -42,6 +44,8 @@ public interface GeneratedClass {
 		constructor of the represneted class.
 		(Similar to java.lang.Class.newInstance).
 
+        @param context Context for the class
+        @return an object of the indicated class
 		@exception 	StandardException	Standard Derby error policy
 
 	*/
@@ -52,6 +56,8 @@ public interface GeneratedClass {
 		Obtain a handle to the method with the given name
 		that takes no arguments.
 
+        @param simpleName Name of the method
+        @return the corresponding generated method
 		@exception 	StandardException	Standard Derby error policy
 	*/
 	public GeneratedMethod getMethod(String simpleName)
@@ -59,6 +65,8 @@ public interface GeneratedClass {
 
 	/**
 		Return the class reload version that this class was built at.
+
+        @return the class loader's version
 	*/
 	public int getClassLoaderVersion();
 }

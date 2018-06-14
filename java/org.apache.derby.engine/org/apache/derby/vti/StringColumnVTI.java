@@ -87,6 +87,10 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      * <p>
      * Get the string value of the column in the current row identified by the 1-based columnNumber.
      * </p>
+     *
+     * @param columnNumber The 1-based column index to lookup
+     * @return the string value of the corresponding column
+     * @throws SQLException on error
      */
     protected  abstract    String  getRawColumn( int columnNumber ) throws SQLException;
     
@@ -100,6 +104,8 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      * <p>
      * Build a StringColumnVTI with the given column names
      * </p>
+     *
+     * @param columnNames The names of the VTI's columns
      */
     public  StringColumnVTI( String[] columnNames )
     {
@@ -121,6 +127,9 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      * which need to figure out their column names after analyzing their execution
      * context. Throws an exception if the column names have already been set.
      * </p>
+     *
+     * @param columnNames The names of the columns to be returned by this VTI
+     * @throws SQLException on error
      */
     public  void    setColumnNames( String[] columnNames )
         throws SQLException
@@ -135,6 +144,8 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      * <p>
      * Get the number of columns.
      * </p>
+     *
+     * @return the number of columns in the VTI
      */
     public int getColumnCount() { return _columnNames.length; }
 
@@ -142,6 +153,9 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      * <p>
      * Get name of a column (1-based indexing).
      * </p>
+     *
+     * @param columnNumber 1-based position of column whose name is needed
+     * @return the name of the corresponding column
      */
     public String getColumnName( int columnNumber ) { return _columnNames[ columnNumber - 1 ]; }
 

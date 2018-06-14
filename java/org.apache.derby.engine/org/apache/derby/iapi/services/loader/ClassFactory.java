@@ -38,6 +38,9 @@ public interface ClassFactory {
 	/**
 		Add a generated class to the class manager's class repository.
 
+        @param fullyQualifiedName Full name of the class
+        @param classDump The byte code of the class
+        @return the corresponding generated class
 		@exception 	StandardException	Standard Derby error policy
 
 	*/
@@ -46,12 +49,16 @@ public interface ClassFactory {
 
 	/**
 		Return a ClassInspector object
+
+        @return the class inspector object
 	*/
 	public ClassInspector	getClassInspector();
 
 	/**
 		Load an application class, or a class that is potentially an application class.
 
+        @param className The name of the class to load
+        @return the corresponding class object
 		@exception ClassNotFoundException Class cannot be found, or
 		a SecurityException or LinkageException was thrown loading the class.
 	*/
@@ -61,6 +68,8 @@ public interface ClassFactory {
 	/**
 		Load an application class, or a class that is potentially an application class.
 
+        @param classDescriptor Descriptor for class
+        @return the corresponding class
 		@exception ClassNotFoundException Class cannot be found, or
 		a SecurityException or LinkageException was thrown loading the class.
 	*/
@@ -70,6 +79,7 @@ public interface ClassFactory {
 	/**
 		Was the passed in class loaded by a ClassManager.
 
+        @param theClass The class in question
 		@return true if the class was loaded by a Derby class manager,
 		false it is was loaded by the system class loader, or another class loader.
 	*/
@@ -86,6 +96,7 @@ public interface ClassFactory {
 	/**
 		Notify the class manager that the classpath has been modified.
 
+        @param classpath The classpath being modified
 		@exception StandardException thrown on error
 	*/
 	public void notifyModifyClasspath(String classpath) throws StandardException ;
@@ -93,6 +104,8 @@ public interface ClassFactory {
 	/**
 		Return the in-memory "version" of the class manager. The version
 		is bumped everytime the classes are re-loaded.
+
+        @return the version of the class loader
 	*/
 	public int getClassLoaderVersion();
 }

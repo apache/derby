@@ -56,12 +56,14 @@ public interface RestrictedVTI
      * ResultSet method is called. This method performs two tasks:
      * </p>
      *
+     * <ul>
      * <li><b>Column names</b> - Tells the ResultSet which columns need to be fetched.</li>
      * <li><b>Limits</b> - Gives the ResultSet simple bounds to apply in order
      * to limit which rows are returned. Note that the ResultSet does not have
      * to enforce all of these bounds. Derby will redundantly enforce these
      * limits on all rows returned by the ResultSet. That is, filtering not
      * performed inside the ResultSet will still happen outside the ResultSet.</li>
+     * </ul>
      *
      * <p>
      * The <i>columnNames</i> argument is an array of columns which need to be fetched.  This
@@ -130,6 +132,11 @@ public interface RestrictedVTI
      * Function a hint about how to optimize its performance but the Table
      * Function is not required to enforce the entire <i>restriction</i>.
      * </p>
+     *
+     * @param columnNames Names of the columns to be fetched
+     * @param restriction Where clause fragment used to filter rows
+     *
+     * @throws SQLException on error
      */
     public void initScan( String[] columnNames, Restriction restriction ) throws SQLException;
 

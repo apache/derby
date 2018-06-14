@@ -143,6 +143,8 @@ public interface Database
 
 	/**
 	 * Get the Locale for this database.
+     *
+     * @return the Locale for this database.
 	 */
 	public Locale getLocale();
 
@@ -150,6 +152,7 @@ public interface Database
 		Return the UUID of this database.
 		@deprecated No longer supported.
 
+        @return the UUID of this database.
 	*/
 	public UUID getId();
 }	

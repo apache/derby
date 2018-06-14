@@ -47,7 +47,7 @@ or they could be non-relational data feeds.
 Here is an example of how to declare and invoke a Table Function:
 </P>
 
-<BLOCKQUOTE><PRE><FONT color="blue" size="+1"><B>
+<BLOCKQUOTE><PRE style="color:blue; fontsize:125%;"><B>
 CREATE FUNCTION externalEmployees
 ()
 RETURNS TABLE
@@ -66,7 +66,7 @@ EXTERNAL NAME 'com.acme.hrSchema.EmployeesTable.read'
 INSERT INTO employees
   SELECT s.*
     FROM TABLE (externalEmployees() ) s;
-</B></FONT></PRE></BLOCKQUOTE>
+</B></PRE></BLOCKQUOTE>
 
 <P>
 The Derby optimizer makes some assumptions about these Table Functions:

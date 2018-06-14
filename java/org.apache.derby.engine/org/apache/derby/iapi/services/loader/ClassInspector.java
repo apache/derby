@@ -58,6 +58,8 @@ public class ClassInspector
 
 	/**
 		DO NOT USE! use the method in ClassFactory.
+
+        @param cf The class factory
 	*/
 	public ClassInspector(ClassFactory cf) {
 		this.cf = cf;
@@ -71,6 +73,7 @@ public class ClassInspector
 	 *			of the named class
 	 *
 	 * @return	true if obj is an instanceof className, false if not
+     * @throws ClassNotFoundException on error
 	 */
 	public boolean instanceOf(String className, Object obj)
 		throws ClassNotFoundException
@@ -124,6 +127,7 @@ public class ClassInspector
 	 * @param className	The name of the class to test for existence
 	 *
 	 * @return	true if the class exists and is accessible, false if not
+     * @throws ClassNotFoundException on error
 	 */
 	public boolean accessible(String className)
 		throws ClassNotFoundException
@@ -204,8 +208,9 @@ public class ClassInspector
 	 *						if it has one, otherwise use same object type
 	 * @param isParam		Array of booleans telling whether parameter is a ?.
 	 * @param staticMethod	Find a static method.
-	   @param repeatLastParameter If true the last parameter may be repeated any number of times (total count must be greater than one).
+	 * @param repeatLastParameter If true the last parameter may be repeated any number of times (total count must be greater than one).
 	   If false the last parameter is matched as usual. This also requires an exact match on the last parameter type.
+	 * @param hasVarargs True if a varargs marker is expected
 	 *
 	 * @return	A Member representing the matching method.  Returns null
 	 *			if no such method.
@@ -505,6 +510,11 @@ public class ClassInspector
 	 * Given an implementation of a parameterized interface, return
      * the bounds on the type variables. May return null if type resolution
      * fails.
+     *
+     * @param parameterizedInterface A generic interface
+     * @param implementation An implementation of the interface
+     * @return the bounds on the type variable
+     * @throws StandardException on error
 	 */
 	public Class[][] getTypeBounds( Class parameterizedInterface, Class implementation )
         throws StandardException
@@ -537,6 +547,9 @@ public class ClassInspector
 
 	/**
 	 * Return true if the method or constructor supports varargs.
+     *
+     * @param member A member method
+     * @return true if it is a varargs method
 	 */
 	public boolean  isVarArgsMethod( Member member )
 	{
@@ -553,6 +566,11 @@ public class ClassInspector
 	 * Given an implementation of a parameterized interface, return
      * the actual types of the interface type variables.
      * May return null or an array of nulls if type resolution fails.
+     *
+     * @param parameterizedType A parameterized type
+     * @param implementation An implementation of that type
+     * @return the actual types of the interface type variables
+     * @throws StandardException on error
 	 */
     public Class<?>[] getGenericParameterTypes(
             Class parameterizedType, Class implementation )
@@ -878,6 +896,8 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		and primitive types.
 		This will attempt to load the class from the application set.
 
+        @param className Name of class
+        @return the class
 		@exception ClassNotFoundException Class cannot be found, or
 		a SecurityException or LinkageException was thrown loading the class.
 	*/
@@ -1023,6 +1043,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 	 *  @param fromClass	from class
 	 *	@param toClass		to class
 	 *	@param mixTypes		mixing object/primitive types for comparison
+     *  @return true if the conversion is possible
 	 **/
 	protected boolean classConvertableFromTo(Class fromClass, Class toClass, boolean mixTypes) {
 

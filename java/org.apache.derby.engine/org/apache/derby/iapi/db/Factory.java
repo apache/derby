@@ -64,6 +64,8 @@ public class Factory
 	/**
 	<P>
 	Returns the Database object associated with the current connection.
+
+    @return the Database object associated with the current connection
 		@exception SQLException Not in a connection context.
 	**/
 	public static org.apache.derby.database.Database getDatabaseOfConnection()

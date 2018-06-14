@@ -93,18 +93,18 @@ public interface Loggable extends Formatable {
 		releaseResource method.
 
 		<P> The sequence of events in recovery redo of a Loggable operation is:
-		<NL>
+		<UL>
 		<LI> Get the loggable operation.  If loggable.needsRedo is false, then
-		no need to redo this operation.
+		no need to redo this operation.</LI>
 		<LI> If loggable.needsRedo is true, all the resources necessary for
-		applying the doMe is acquired in needsRedo.
+		applying the doMe is acquired in needsRedo.</LI>
 		<LI> If the loggable is actually a compensation operation, then the
 		logging system will find the undoable operation that needs to be
-		undone, call compensation.setUndoOp with the undoable operation.
+		undone, call compensation.setUndoOp with the undoable operation.</LI>
 		<LI> The recovery system then calls loggable.doMe, which re-applies the
 		loggable operation, or re-applies the compensation operation
-		<LI> The recovery system then calls loggable.releaseResource.
-		</NL>
+		<LI> The recovery system then calls loggable.releaseResource.</LI>
+		</UL>
 
 		@param xact		The transaction trying to redo this operation
 		@return true if operation needs redoing, false if not.

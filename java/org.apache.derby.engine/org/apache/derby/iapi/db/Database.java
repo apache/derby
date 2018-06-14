@@ -69,6 +69,7 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 	 * remember the URL that was used to establish the connection,
 	 * so it can implement the DatabaseMetaData.getURL() method.
 	 *
+     * @param cm The context manager
 	 * @param user	The UserID of the user getting the connection
 	 * @param drdaID	The drda id of the connection (from network server)
 	 * @param dbname	The database name
@@ -83,15 +84,20 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 	  Push a DbContext onto the provided context stack. This conext will
 	  shut down the database in case of a DatabaseException being
 	  cleaned up.
+      
+      @param cm The context manager
 	 */
 	public void pushDbContext(ContextManager cm);
 
 	/**
 		Is the database active (open).
+
+        @return true if the database is open
 	*/
 	public boolean isActive();
 
 	/**
+     * @return the engine type
 	  */
 	public	int	getEngineType();
 
@@ -120,11 +126,17 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 	 */
 	public Object getResourceAdapter();
 
-	/** Set the Locale that is returned by this LocaleFinder */
+    /**
+     * Set the Locale that is returned by this LocaleFinder
+     *
+     * @param locale The locale to set
+     */
 	public	void	setLocale(Locale locale);
 
     /**
      * Return the DataDictionary for this database, set up at boot time.
+     *
+     * @return the DataDictionary for this database, set up at boot time.
      */
     public DataDictionary getDataDictionary();
 

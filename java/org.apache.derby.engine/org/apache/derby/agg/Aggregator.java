@@ -35,7 +35,11 @@ public interface Aggregator<V,R,A extends Aggregator<V,R,A>>    extends Serializ
     /** Initialize the Aggregator */
     public void init();
 
-    /** Accumulate the next scalar value */
+    /**
+     * Accumulate the next scalar value
+     *
+     * @param value The new value to accumulate.
+     */
     public  void    accumulate( V value );
 
     /**
@@ -55,10 +59,16 @@ public interface Aggregator<V,R,A extends Aggregator<V,R,A>>    extends Serializ
      * <pre>
      * select a, mode( b ) from mode_inputs group by a order by a
      * </pre>
+     *
+     * @param otherAggregator The other Aggregator to merge with
      */
     public  void    merge( A otherAggregator );
 
-    /** Return the result scalar value */
+    /**
+     * Return the result scalar value
+     *
+     * @return the result scalar value
+     */
     public  R   terminate();
 }
 

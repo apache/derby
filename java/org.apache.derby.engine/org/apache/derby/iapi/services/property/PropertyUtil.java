@@ -146,7 +146,11 @@ public class PropertyUtil {
 		return dbOnly;
 	}
 
-    /** Get the list of properties which are normally stored in service.properties */
+    /**
+     * Get the list of properties which are normally stored in service.properties
+     *
+     * @return the list of properties which are normally stored in service.propertie
+     */
     public  static  String[]    getServicePropertyList()
     {
         return ArrayUtil.copy( servicePropertyList );
@@ -155,6 +159,7 @@ public class PropertyUtil {
 	/**
 		Find a system wide property.
 
+        @param key The key to lookup
 		@return the value of the property or null if it does not exist.
 		@see #getSystemProperty(String,String)
 	*/
@@ -175,6 +180,8 @@ public class PropertyUtil {
 		just to maintain the same lookup logic and security manager concerns
 		for finding derby.properties and reading system properties.
 
+        @param key The propertykey
+        @param defaultValue A default value
 		@return the value of the property or defaultValue if it does not exist.
 	*/
 	public static String getSystemProperty(String key, String defaultValue) {
@@ -210,6 +217,9 @@ public class PropertyUtil {
 		<BR>
 		This method uses the same search order as the getService() calls.
 
+        @param set The property set to inspect
+        @param key The key to lookup
+        @return the value bound to the key
 	*/
 	public static String getPropertyFromSet(Properties set, String key) {
 	
@@ -285,6 +295,9 @@ public class PropertyUtil {
 	/**
 		Get a property only looking in the Persistent Transactional (database) set.
 
+        @param set The property set to inspect
+        @param key The key to lookup
+        @return the value bound to the key
 		@exception StandardException Standard Derby error handling. 
 	*/
 	public static String getDatabaseProperty(PersistentSet set, String key) 
@@ -304,6 +317,9 @@ public class PropertyUtil {
 		The service is the persistent service associated with the
 		current context stack.
 
+        @param set The property set to inspect
+        @param key The key to lookup
+        @param defaultValue The default value to use
 		@return the value of the property or defaultValue if it does not exist.
 
 		@exception StandardException Standard Derby error handling. 
@@ -344,9 +360,11 @@ public class PropertyUtil {
 		The service is the persistent service associated with the
 		current context stack.
 
+        @param set The property set to inspect
+        @param key The key to lookup
 		@return the value of the property or null if it does not exist.
 
-			@exception StandardException Standard Derby error handling. 
+        @exception StandardException Standard Derby error handling. 
 	*/
 	public static String getServiceProperty(PersistentSet set, String key)
 		throws StandardException {
@@ -384,6 +402,9 @@ public class PropertyUtil {
 	/**
 		Get a service wide property as a boolean.
 
+        @param set The property set to inspect
+        @param key The key to lookup
+        @param defValue The default value to use
 		@return true of the property is set to 'true, TRUE', false otherwise
 
 		@exception StandardException Standard Derby error handling. 
@@ -399,6 +420,10 @@ public class PropertyUtil {
 	/**s
 		Get a system wide property as a int.
 
+        @param key The key to lookup
+        @param min The min acceptable value
+        @param max The max acceptable value
+        @param defaultValue The value to use if the key has no match
 		@return value of the property if set subject to min and max, defaultValue if
 		it is not set or set to a non-integer value.
 	*/
@@ -409,6 +434,11 @@ public class PropertyUtil {
 	/**
 		Get a service wide property as a int.
 
+        @param set The property set
+        @param key The key to lookup
+        @param min The min acceptable value
+        @param max The max acceptable value
+        @param defaultValue The value to use if the key has no match
 		@return value of the property if set subject to min and max, defaultValue if
 		it is not set or set to a non-integer value.
 
@@ -425,6 +455,12 @@ public class PropertyUtil {
 		Get a service wide property as a int. The passed in Properties
 		set overrides any system, applcation or per-database properties.
 
+        @param set The target property set
+        @param props The properties
+        @param key The key to lookup
+        @param min The min acceptable value
+        @param max The max acceptable value
+        @param defaultValue The value to use if the key has no match
 		@return value of the property if set subject to min and max, defaultValue if
 		it is not set or set to a non-integer value.
 
@@ -448,6 +484,8 @@ public class PropertyUtil {
 	/**
 		Get a system wide property as a int.
 
+        @param key The key to lookup
+        @param defaultValue The value to use if the key has no match
 		@return value of the property if, defaultValue if
 		it is not set or set to a non-integer value.
 	*/
@@ -457,6 +495,12 @@ public class PropertyUtil {
 
 	/**
 		Parse an string as an int based property value.
+
+        @param value The string value to be parsed as an int
+        @param min The minimum legal value
+        @param max The maximum legal value
+        @param defaultValue The defaultValue to set
+        @return the final value
 	*/
 	public static int handleInt(String value, int min, int max, int defaultValue) {
 
@@ -486,6 +530,11 @@ public class PropertyUtil {
 	  <LI> "true" - returns true (in any case without the quotes)
 	  <LI> "false" - return true (in any case without the quotes)
 	  </UL>
+
+      @param p The property name
+      @param v The desired value
+      @param defaultValue The default value to use
+      @return The final value decided on
 	  @exception StandardException Oops
 	  */
 	public static boolean booleanProperty(String p, Serializable v, boolean defaultValue)
@@ -508,6 +557,12 @@ public class PropertyUtil {
 	  Parse, validate and return an integer property value. If the value is invalid
 	  raise an exception. If the value passed in is null return a default value.
 
+      @param p The property name
+      @param v The desired value
+      @param minValue The minimum legal value
+      @param maxValue The maximum legal value
+      @param defaultValue The default value to use
+      @return The final value decided on
 	  @exception StandardException Oops
 	  */
 	public static int intPropertyValue(String p, Serializable v,
@@ -532,6 +587,9 @@ public class PropertyUtil {
 	/**
 	  Return true iff the key is the name of a database property that is 
 	  stored in services.properties.
+
+      @param key The name of a property
+      @return true if that property is stored in service.properties
 	  */ 
 	public static boolean isServiceProperty(String key)
 	{
@@ -555,7 +613,7 @@ public class PropertyUtil {
 	 *
 	 * @return {@code true} if match found
 	 *
-	 * @exception StandardException
+	 * @exception StandardException on error
 	 */
 	public static boolean existsBuiltinUser (
 		PersistentSet set,
@@ -583,7 +641,10 @@ public class PropertyUtil {
 	}
 
 	/**
-     *Return true if NATIVE authentication has been enabled in the passed-in properties.
+     * Return true if NATIVE authentication has been enabled in the passed-in properties.
+     *
+     * @param properties A set of properties
+     * @return true if NATIVE authentication has been enabled in the passed-in properties
      */
 	public static boolean nativeAuthenticationEnabled( Properties properties )
     {
@@ -597,8 +658,11 @@ public class PropertyUtil {
 	}
 
 	/**
-     *Return true if NATIVE authentication is turned on for the passed-in
+     * Return true if NATIVE authentication is turned on for the passed-in
      * value of Property.AUTHENTICATION_PROVIDER_PARAMETER.
+     *
+     * @param authenticationProvider An authentication service spec
+     * @return true if NATIVE authentication is turned in that spec
      */
 	private static boolean nativeAuthenticationEnabled( String authenticationProvider )
     {
@@ -609,6 +673,9 @@ public class PropertyUtil {
     
 	/**
 		Return true if the passed-in properties specify NATIVE authentication using LOCAL credentials.
+
+        @param properties A set of properties
+        @return true if the passed-in properties specify NATIVE authentication using LOCAL credentials
 	*/
 	public static boolean localNativeAuthenticationEnabled( Properties properties )
     {

@@ -86,6 +86,7 @@ public interface Diagnosticable
      * be provided by a real implementation.
      * <p>
      *
+     * @param prop In/out argument for passing information
      * @exception StandardException  Standard Derby exception policy
      **/
     public void diag_detail(Properties prop) throws StandardException;

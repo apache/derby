@@ -57,6 +57,8 @@ public interface LockOwner {
      * <p>
      * Return true if this is a nested owner, e.g., a nested user transaction.
      * </p>
+     *
+     * @return true if this is a nested owner, e.g., a nested user transaction
      */
     public boolean isNestedOwner();
 
@@ -64,6 +66,9 @@ public interface LockOwner {
      * <p>
      * Return true if this owner nests under another owner.
      * </p>
+     *
+     * @param other The other lock owner
+     * @return true if this owner nests under another owner
      */
     public boolean nestsUnder( LockOwner other );
 

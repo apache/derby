@@ -251,12 +251,14 @@ public class ClassSize
      * size of an array field does not depend on the size of the array. Similarly the size of
      * an object (reference) field does not depend on the object.
      *
-     * @return the size estimate in bytes.
-     *
      * Note that this method will throw a SecurityException if the SecurityManager does not
      * let this class execute the method Class.getDeclaredFields(). If this is a concern try
      * to compute the size coefficients at build time.
      * see org.apache.derbyBuild.ClassSizeCrawler
+     *
+     * @param cl A class
+     * @return the size estimate in bytes.
+     *
      * @see #estimateBaseFromCatalog
      */
     public static int estimateBase( Class cl)
@@ -287,6 +289,7 @@ public class ClassSize
     /**
      * Estimate the size of a string.
      *
+     * @param str The string
      * @return the estimated size, in bytes
      */
     public static int estimateMemoryUsage( String str)

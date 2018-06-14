@@ -1083,8 +1083,7 @@ public interface LanguageConnectionContext extends Context {
 	 * (not case normal form) of the dynamic call context associated with this
 	 * activation.
 	 * @param a activation of statement needing current role
-	 * @return String the role id in delimited form (i.e. <b>not</b>
-	 * internal case normal form</b>)
+	 * @return String the role id in delimited form (i.e. <b>not</b> internal case normal form)
 	 *
 	 * @throws StandardException  standard exception policy
 	 */

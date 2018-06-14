@@ -48,6 +48,7 @@ public interface Statement
 	/**
 	 * Generates an execution plan without executing it.
 	 *
+     * @param lcc The language connection context
 	 * @return A PreparedStatement that allows execution of the execution
 	 *	   plan.
 	 * @exception StandardException	Thrown if this is an
@@ -81,6 +82,7 @@ public interface Statement
 	 * @param	paramDefaults		Default parameter values to use for
 	 *								optimization
 	 * @param	spsSchema schema of the stored prepared statement
+     * @param internalSQL True if this is for Derby-internal SQL
 	 *
 	 * @return A Storable PreparedStatement that allows execution of the execution
 	 *	   plan.

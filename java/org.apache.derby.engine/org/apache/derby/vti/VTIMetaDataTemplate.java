@@ -297,6 +297,9 @@ public abstract class VTIMetaDataTemplate implements ResultSetMetaData {
      * <p>
      * Create a SQLException saying that the calling method is not implemented.
      * </p>
+     *
+     * @param methodName The name of the unimplemented method
+     * @return a SQLFeatureNotSupportedException
      */
     protected SQLException    notImplemented( String methodName )
     {

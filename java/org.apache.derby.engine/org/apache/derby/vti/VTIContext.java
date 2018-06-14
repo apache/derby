@@ -77,13 +77,25 @@ public class VTIContext
     //
     /////////////////////////////////////////////////////////////////
 
-    /** Return the name of the schema holding the table function */
+    /**
+     * Return the name of the schema holding the table function
+     *
+     * @return the name of the schema holding this table function
+     */
     public  String  vtiSchema() { return _vtiSchema; }
 
-    /** Return the unqualified table function name */
+    /**
+     * Return the unqualified table function name
+     *
+     * @return the (unqualified) name of this table function
+     */
     public  String  vtiTable()  { return _vtiTable; }
 
-    /** Return the text of the statement which invoked the table function */
+    /**
+     * Return the text of the statement which invoked the table function
+     *
+     * @return the text of the statement which invoked this table function
+     */
     public  String  statementText() { return _statementText; }
     
 }

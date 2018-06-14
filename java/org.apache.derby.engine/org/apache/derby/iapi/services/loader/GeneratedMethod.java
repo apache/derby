@@ -38,6 +38,8 @@ public interface GeneratedMethod {
 
 		Returns the value returned by the method.
 
+        @param ref  Reference to a method
+        @return the result of invoking the method
 		@exception 	StandardException	Standard Derby error policy
 	*/
 
