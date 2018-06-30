@@ -119,6 +119,7 @@
     <mkdir dir="${generated.src.engine.dir}"/>
     <mkdir dir="${generated.src.shared.dir}"/>
     <mkdir dir="${generated.src.tools.dir}"/>
+    <mkdir dir="${generated.src.tests.dir}"/>
     <mkdir dir="${generated.sanity.dir}"/>
     <mkdir dir="${generated.ij.dir}"/>
     <mkdir dir="${generated.sql.dir}"/>

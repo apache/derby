@@ -56,6 +56,12 @@
   <target name="testing" 
           description="Build Derby testing files">
 
+    <!--  Needed to generate javadoc for the test module -->
+    <mkdir dir="${generated.src.tests.dir}/toursdb"/>
+    <copy todir="${generated.src.tests.dir}/toursdb"
+          file="${derby.demo.src.dir}/toursdb/insertMaps.java"
+    />
+
     <javac
       source="${min.version}"
       target="${min.version}"
