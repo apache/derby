@@ -52,9 +52,9 @@ import javax.naming.spi.ObjectFactory;
  * object is retrieved from JNDI. A JDBC driver vendor should provide an object
  * factory as part of their JDBC 2.0 product.
  *
- * @see org.apache.derby.jdbc.ClientDataSource
- * @see org.apache.derby.jdbc.ClientConnectionPoolDataSource
- * @see org.apache.derby.jdbc.ClientXADataSource
+ * See org.apache.derby.jdbc.ClientDataSource
+ * See org.apache.derby.jdbc.ClientConnectionPoolDataSource
+ * See org.apache.derby.jdbc.ClientXADataSource
  */
 public class ClientDataSourceFactory implements ObjectFactory {
 

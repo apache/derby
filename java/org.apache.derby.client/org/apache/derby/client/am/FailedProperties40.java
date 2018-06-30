@@ -34,8 +34,8 @@ import java.sql.ClientInfoStatus;
      * convenient access to data that is needed when constructing
      * those exceptions. Should be kept in sync with its embedded
      * counter part.
-     * @see java.sql.SQLClientInfoException
-     * @see org.apache.derby.iapi.jdbc.FailedProperties40
+     * See java.sql.SQLClientInfoException
+     * See org.apache.derby.iapi.jdbc.FailedProperties40
      */
 public class FailedProperties40 {
     private final HashMap<String,ClientInfoStatus> failedProps_ = 

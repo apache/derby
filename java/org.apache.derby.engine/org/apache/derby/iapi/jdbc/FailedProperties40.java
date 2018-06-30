@@ -35,7 +35,6 @@ import java.sql.ClientInfoStatus;
      * be kept in sync with its client side counter part
      * (org.apache.derby.client.am.FailedProperties40).
      * @see java.sql.SQLClientInfoException
-     * @see org.apache.derby.client.am.FailedProperties40
      */
 public class FailedProperties40 {
     private final HashMap<String,ClientInfoStatus> failedProps_ = 

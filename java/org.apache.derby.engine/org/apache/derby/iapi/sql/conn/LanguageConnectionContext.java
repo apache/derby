@@ -213,11 +213,10 @@ public interface LanguageConnectionContext extends Context {
 	public void addDeclaredGlobalTempTable(TableDescriptor td) throws StandardException;
 
 	/**
-	 * Drop (mark the declared global temporary table for dropping) from the list of temporary tables known by this connection.
+	 * Drop (mark the declared global temporary table for dropping) from the list of temporary tables known by this connection. Used by org.apache.derby.impl.sql.conn.TempTableInfo.
+     *
 	 * @param tableName look for this table name in the saved list and drop it if found
 	 * @return true if dropped the temporary table. False if no such temporary table exists.
-	 *
-	 * @see org.apache.derby.impl.sql.conn.TempTableInfo
 	 */
 	public boolean dropDeclaredGlobalTempTable(String tableName);
 
@@ -1111,13 +1110,12 @@ public interface LanguageConnectionContext extends Context {
 	 * procedure or function that can contain SQL is invoked, cf. SQL 2003
 	 * section 4.27.3, since this gives rise to a nested connection.
 	 * <p>
-	 * Called from generated code, see
-     * {@link org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext}.
+	 * Called from generated code, at
+     * org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext.
 	 * <p>
 	 * The new SQL session context is also set in the current statement
 	 * context (of the invocation).
 	 *
-     * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext
 	 * @see StatementContext#getSQLSessionContext
 	 * @see #setupSubStatementSessionContext
 	 *

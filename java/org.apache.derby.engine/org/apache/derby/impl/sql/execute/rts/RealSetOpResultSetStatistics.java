@@ -55,6 +55,8 @@ public class RealSetOpResultSetStatistics
      *  Constructs a new <code>RealSetOpResultSetStatistics</code> object 
      *  to represent the runtime statistics for <code>SetOpResultSet</code>.  
      * 
+     *  See     org.apache.derby.impl.sql.execute.SetOpResultSet  
+     *  
      *  @param   opType                       set operation type 
      *  @param   numOpens                     number of open
      *  @param   rowsSeen                     rows seen
@@ -71,8 +73,6 @@ public class RealSetOpResultSetStatistics
      *  @param   optimizerEstimatedCost       optimizer estimated cost
      *  @param   leftResultSetStatistics      left source runtime statistics
      *  @param   rightResultSetStatistics     right source runtime statistics
-     *  
-     *  @see     org.apache.derby.impl.sql.execute.SetOpResultSet  
      */
     public	RealSetOpResultSetStatistics(
                                  int opType,

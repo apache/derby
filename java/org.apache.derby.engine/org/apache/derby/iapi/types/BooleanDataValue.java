@@ -107,7 +107,7 @@ public interface BooleanDataValue extends DataValueDescriptor
     /**
      * If this value is false and we have a deferred constraint, remember the
      * violation and proceed, else throw.  See also
-     * {@link org.apache.derby.impl.sql.compile.AndNoShortCircuitNode}.
+     * org.apache.derby.impl.sql.compile.AndNoShortCircuitNode.
      *
      * @param SQLState      The SQLState of the exception to throw if
      *                      this SQLBoolean is false.

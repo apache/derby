@@ -33,7 +33,7 @@ import org.apache.derby.shared.common.security.SystemPermission;
  * ProductVersionHolder object. The MBean interface is implemented with 
  * callbacks to the wrapped object which gives detailed version information.
  *
- * @see org.apache.derby.iapi.services.info.ProductVersionHolder
+ * See org.apache.derby.iapi.services.info.ProductVersionHolder
  */
 public class Version implements VersionMBean {
     

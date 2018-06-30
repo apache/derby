@@ -1169,6 +1169,9 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * (TransactionController,UUID)</code> so it will become available
      * in newly created databases and after <b>hard</b> upgrade.
      *
+     * See org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,java.util.HashSet,UUID)
+     * See org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
+     *
      * @param catalog limit search to this catalog
      * @param schemaPattern limit search to schemas matching this pattern
      * @param functionNamePattern limit search to functions matching this 
@@ -1176,8 +1179,6 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * @return a <code>ResultSet</code> listing the fucntions
      * @exception SQLException if a database error occurs
      * @see #getFunctionsX(String, String, String)
-     * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,java.util.HashSet,UUID)
-     * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
      */
 
     public ResultSet getFunctions(String catalog,
@@ -1245,6 +1246,9 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * (TransactionController,UUID)</code> so it will become available
      * in newly created databases and after <b>hard</b> upgrade.
      *
+     * See org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,java.util.HashSet,UUID)
+     * See org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
+     *
      * @param catalog limit search to this catalog
      * @param schemaPattern limit search to schemas matching this pattern
      * @param functionNamePattern limit search to functions matching this 
@@ -1252,8 +1256,6 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * @return a <code>ResultSet</code> listing the fucntions
      * @exception SQLException if a database error occurs
      * @see #getFunctionColumnsX(String, String, String,String)
-     * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,java.util.HashSet,UUID)
-     * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
      */
     public ResultSet
         getFunctionColumns(String catalog,

@@ -44,7 +44,7 @@ package org.apache.derby.mbeans;
  * <LI> <code>SystemPermission("engine", "monitor")</code> for version information
  * specific to derby.jar
  * </UL>
- * @see org.apache.derby.security.SystemPermission
+ * See org.apache.derby.security.SystemPermission
 */
 public interface VersionMBean {
     // attributes

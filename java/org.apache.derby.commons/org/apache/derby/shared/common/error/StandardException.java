@@ -378,12 +378,12 @@ public class StandardException extends Exception
      * Unpack the exception, looking for a StandardException, which carries
 	 * the Derby messageID and arguments.
      *
+	 * See org.apache.derby.impl.jdbc.SQLExceptionFactory
+	 * See org.apache.derby.impl.jdbc.Util
+     *
      * @param se A SQLException
      *
      * @return a Derby exception wrapping the contents of the SQLException
-     *
-	 * @see org.apache.derby.impl.jdbc.SQLExceptionFactory
-	 * @see org.apache.derby.impl.jdbc.Util
 	 */
     public static StandardException getArgumentFerry(SQLException se)
 	{

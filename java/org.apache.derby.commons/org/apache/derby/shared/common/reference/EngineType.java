@@ -29,9 +29,9 @@ package org.apache.derby.shared.common.reference;
  * of its engine type and then use that in a decision
  * as to if it is suitable.
  * 
- * @see org.apache.derby.iapi.services.monitor.ModuleSupportable
- * @see org.apache.derby.iapi.services.monitor.Monitor#isDesiredType(Properties, int)
- * @see org.apache.derby.iapi.services.monitor.Monitor#getEngineType(Properties)
+ * See org.apache.derby.iapi.services.monitor.ModuleSupportable
+ * See org.apache.derby.iapi.services.monitor.Monitor#isDesiredType(Properties, int)
+ * See org.apache.derby.iapi.services.monitor.Monitor#getEngineType(Properties)
  *
  */
 public interface EngineType {

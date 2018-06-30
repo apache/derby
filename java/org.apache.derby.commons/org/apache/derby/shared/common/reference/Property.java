@@ -641,8 +641,8 @@ public interface Property {
      *
      * A new subsubprotocol can be defined by specifying the class that handles storage for the
      * subsubprotocol by implementing the
-     * {@link org.apache.derby.io.StorageFactory StorageFactory} or
-     * {@link org.apache.derby.io.WritableStorageFactory WritableStorageFactory} interface. This
+     * org.apache.derby.io.StorageFactory StorageFactory or
+     * org.apache.derby.io.WritableStorageFactory WritableStorageFactory interface. This
      * is done using a property named db2j.subsubprotocol.<i>xxx</i> where <i>xxx</i> is the subsubprotocol name.
      * Subsubprotocol names are case sensitive and must be at least 3 characters in length.
      *<p>

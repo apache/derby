@@ -118,7 +118,7 @@ public abstract class Sqlca {
      * the error code is {@code -(sqlCode+1)}.</li>
      * </ul>
      *
-     * @see org.apache.derby.impl.drda.DRDAConnThread#getSqlCode(java.sql.SQLException)
+     * See org.apache.derby.impl.drda.DRDAConnThread#getSqlCode(java.sql.SQLException)
      *
      * @return the error code
      */
