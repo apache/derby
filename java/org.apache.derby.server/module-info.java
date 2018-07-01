@@ -42,14 +42,16 @@ module org.apache.derby.server
     requires static geronimo.spec.servlet;
 
     //
+    // PUBLIC API
+    //
+    exports org.apache.derby.drda;
+    exports org.apache.derby.mbeans.drda;
+    
+    //
     // DERBY INTERNAL EXPORTS
     //
     // ONLY VISIBLE TO OTHER DERBY MODULES.
     //
-    exports org.apache.derby.drda to
-        org.apache.derby.runner,
-        org.apache.derby.tests;
-
     exports org.apache.derby.impl.drda to
         org.apache.derby.tests;
 }

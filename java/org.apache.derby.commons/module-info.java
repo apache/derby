@@ -34,6 +34,11 @@ module org.apache.derby.commons
     uses org.apache.derby.loc.client.spi.clientmessagesProvider;
 
     //
+    // PUBLIC API
+    //
+    exports org.apache.derby.shared.common.security;
+
+    //
     // DERBY INTERNAL EXPORTS
     //
     // ONLY VISIBLE TO OTHER DERBY MODULES.
@@ -79,11 +84,6 @@ module org.apache.derby.commons
     exports org.apache.derby.shared.common.sanity to
         org.apache.derby.engine,
         org.apache.derby.client,
-        org.apache.derby.server,
-        org.apache.derby.tests;
-
-    exports org.apache.derby.shared.common.security to
-        org.apache.derby.engine,
         org.apache.derby.server,
         org.apache.derby.tests;
 
