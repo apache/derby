@@ -267,10 +267,10 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
      * This is done to override the optimizer choice to provide maximum 
      * concurrency of record level locking except in SERIALIZABLE where table
      * level locking is required in heap scans for correctness.
+     * See org.apache.derby.impl.sql.compile.FromBaseTable#updateTargetLockMode
      *
      * @param lockMode the compiled encoded lock mode for this query
      * @return the lock mode (record or table) to use to open the result set
-     * @see org.apache.derby.impl.sql.compile.FromBaseTable#updateTargetLockMode
      */
     int decodeLockMode(int lockMode) {
 

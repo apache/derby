@@ -548,7 +548,7 @@ class LuceneQueryVTI extends StringColumnVTI
 	/**
 	 * Returns a Lucene IndexReader, which reads from the indicated Lucene index.
 	 * 
-	 * @param indexHome The directory holding the Lucene index.
+	 * @param dir The directory holding the Lucene index.
 	 */
 	private static IndexReader getIndexReader( final DerbyLuceneDir dir )
         throws IOException, PrivilegedActionException

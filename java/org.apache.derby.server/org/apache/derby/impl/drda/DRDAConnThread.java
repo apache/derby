@@ -5125,11 +5125,11 @@ class DRDAConnThread extends Thread {
 
     /**
      * Parse a date string as it is received from the client.
+     * See org.apache.derby.client.am.DateTime#dateToDateBytes
      *
      * @param dateString the date string to parse
      * @param cal the calendar in which the date is parsed
      * @return a Date object representing the date in the specified calendar
-     * @see org.apache.derby.client.am.DateTime#dateToDateBytes
      * @throws IllegalArgumentException if the date is not correctly formatted
      */
     private java.sql.Date parseDate(String dateString, Calendar cal) {
@@ -5157,11 +5157,11 @@ class DRDAConnThread extends Thread {
 
     /**
      * Parse a time string as it is received from the client.
+     * See org.apache.derby.client.am.DateTime#timeToTimeBytes
      *
      * @param timeString the time string to parse
      * @param cal the calendar in which the time is parsed
      * @return a Date object representing the time in the specified calendar
-     * @see org.apache.derby.client.am.DateTime#timeToTimeBytes
      * @throws IllegalArgumentException if the time is not correctly formatted
      */
     private Time parseTime(String timeString, Calendar cal) {
@@ -5191,12 +5191,12 @@ class DRDAConnThread extends Thread {
 
     /**
      * Parse a timestamp string as it is received from the client.
+     * See org.apache.derby.client.am.DateTime#timestampToTimestampBytes
      *
      * @param timeString the time string to parse
      * @param cal the calendar in which the timestamp is parsed
      * @return a Date object representing the timestamp in the specified
      * calendar
-     * @see org.apache.derby.client.am.DateTime#timestampToTimestampBytes
      * @throws IllegalArgumentException if the timestamp is not correctly
      * formatted
      */
@@ -8396,10 +8396,10 @@ class DRDAConnThread extends Thread {
     /**
      * Convert a {@code java.sql.Date} to a string with the format expected
      * by the client.
+     * See org.apache.derby.client.am.DateTime#dateBytesToDate
      *
      * @param date the date to format
      * @return a string on the format YYYY-MM-DD representing the date
-     * @see org.apache.derby.client.am.DateTime#dateBytesToDate
      */
     private String formatDate(java.sql.Date date) {
         Calendar cal = getGMTCalendar();
@@ -8417,10 +8417,10 @@ class DRDAConnThread extends Thread {
     /**
      * Convert a {@code java.sql.Time} to a string with the format expected
      * by the client.
+     * See org.apache.derby.client.am.DateTime#timeBytesToTime
      *
      * @param time the time to format
      * @return a string on the format HH:MM:SS representing the time
-     * @see org.apache.derby.client.am.DateTime#timeBytesToTime
      */
     private String formatTime(Time time) {
         Calendar cal = getGMTCalendar();
@@ -8438,10 +8438,10 @@ class DRDAConnThread extends Thread {
     /**
      * Convert a {@code java.sql.Timestamp} to a string with the format
      * expected by the client.
+     * See org.apache.derby.client.am.DateTime#timestampBytesToTimestamp
      *
      * @param ts the timestamp to format
      * @return a string on the format YYYY-MM-DD-HH.MM.SS.ffffff[fff]
-     * @see org.apache.derby.client.am.DateTime#timestampBytesToTimestamp
      */
     private String formatTimestamp(Timestamp ts) {
         Calendar cal = getGMTCalendar();

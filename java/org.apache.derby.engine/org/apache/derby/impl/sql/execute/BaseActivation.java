@@ -192,8 +192,8 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * StatementContext. The nested SQL session context is initialized
 	 * by code generated for the call, after parameters are evaluated
      * or just sub-statement execution starts.
-     * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext
-     * @see PreparedStatement#executeSubStatement
+     * See org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext
+     * See PreparedStatement#executeSubStatement
 	 *
 	 */
 	private Activation parentActivation;

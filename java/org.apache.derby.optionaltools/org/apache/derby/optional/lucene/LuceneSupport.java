@@ -1529,9 +1529,7 @@ public class LuceneSupport implements OptionalTool
 	 * 
 	 * @param luceneVersion the version of Lucene being used
 	 * @param analyzer      the Analyzer being used
-	 * @param schema The schema of the indexed column
-	 * @param table The table of the indexed column
-	 * @param textcol The name of the column to be indexed
+	 * @param derbyLuceneDir location of the lucene directory
 	 * @return a Lucene IndexWriter
 	 */
 	private static IndexWriter getIndexWriter

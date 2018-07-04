@@ -11506,9 +11506,15 @@ generatedByDefault(long[] autoIncrementInfo) throws StandardException :
 void
 asIdentity( long[] autoIncrementInfo) throws StandardException :
 {
+	 Object[] optionalClauses = new Object[ 3 ];
 }
 {
-	<AS> <IDENTITY> [<LEFT_PAREN> autoIncrementBeginEnd(autoIncrementInfo) <RIGHT_PAREN>]
+	<AS> <IDENTITY>
+    [
+        <LEFT_PAREN>
+            ( identityColumnOption( autoIncrementInfo , optionalClauses) ) +
+        <RIGHT_PAREN>
+    ]
     {
 		return;
     }
@@ -11541,24 +11547,6 @@ generationClause() throws StandardException :
                                         getContextManager()
                                         );
     }
-}
-
-/*
- * <A NAME="autoIncrementBeginEnd">autoIncrementBeginEnd</A>
- */
-void 
-autoIncrementBeginEnd(long[] autoIncrementInfo) throws StandardException :
-{
-	 Object[] optionalClauses = new Object[ 3 ];
-}
-{
-	( LOOKAHEAD({getToken(1).kind == COMMA ||
-	                   getToken(1).kind == START || getToken(1).kind == INCREMENT
-                                            || getToken(1).kind == CYCLE })
-	
-    		( identityColumnOption( autoIncrementInfo , optionalClauses) ) *
-    	)
-      
 }
 
 /*
