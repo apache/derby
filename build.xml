@@ -2763,13 +2763,18 @@ you should not have to do this.
             </fileset>
           </classfiles>
           <sourcefiles encoding="UTF-8">
-            <fileset dir="java/client"/>
-            <fileset dir="java/drda"/>
-            <fileset dir="java/engine"/>
-            <fileset dir="java/shared"/>
-            <fileset dir="java/testing"/>
-            <fileset dir="java/tools"/>
-            <fileset dir="generated/java"/>
+            <fileset dir="java/${module.name.client}"/>
+            <fileset dir="java/${module.name.server}"/>
+            <fileset dir="java/${module.name.engine}"/>
+            <fileset dir="java/${module.name.commons}"/>
+            <fileset dir="java/${module.name.runner}"/>
+            <fileset dir="java/${module.name.tests}"/>
+            <fileset dir="java/${module.name.tools}"/>
+            <fileset dir="java/${module.name.optionaltools}"/>
+            <fileset dir="generated/java/${module.name.commons}"/>
+            <fileset dir="generated/java/${module.name.engine}"/>
+            <fileset dir="generated/java/${module.name.tests}"/>
+            <fileset dir="generated/java/${module.name.tools}"/>
           </sourcefiles>
         </structure>
 
