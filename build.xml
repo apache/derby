@@ -729,6 +729,7 @@
       description="Remove all build artifacts."
   >
     <delete file="${out.base}/changenumber.properties"/>
+    <delete file="${basedir}/jacoco.exec"/>
   </target>
 
 <!-- =================================================================== -->
@@ -745,7 +746,6 @@
     <delete dir="${out.dir}"/>
     <delete dir="${generated.dir}"/>
   	<delete dir="${out.storeless.dir}"/>
-  	<delete dir="${out.pptesting.dir}"/>
   </target>
 
 <!-- ==================================================================== -->

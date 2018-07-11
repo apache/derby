@@ -111,6 +111,7 @@ grant {
 // Grant the required permissions for JaCoCo (code coverage tool).
 grant {
   permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
+  permission java.io.FilePermission "${jacoco.active}${user.dir}${/}..${/}jacoco.exec", "read, write";
 };
 
 grant codeBase "${derbyTesting.tools}" {
