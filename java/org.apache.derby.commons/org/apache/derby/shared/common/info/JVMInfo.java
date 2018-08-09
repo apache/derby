@@ -52,6 +52,9 @@ public abstract class JVMInfo
         <LI> 9 - J2SE_18 - JDK 1.8
 		</UL>
 	*/
+
+    private static final boolean _isModuleAware;
+  
 	public static final int JDK_ID;
 
     public static final int J2SE_18 = 9;   // Java SE 8
@@ -124,6 +127,8 @@ public abstract class JVMInfo
         }
 
 		JDK_ID = id;
+
+        _isModuleAware = (getSystemModulePath() != null);
 	}
 
 	/**
@@ -177,6 +182,27 @@ public abstract class JVMInfo
      */
     public static final boolean isIBMJVM() {
         return ("IBM Corporation".equals(getSystemProperty("java.vendor")));
+    }
+    
+    /**
+     * Return true if the JVM uses a module path rather than a classpath.
+     *
+     * @return true if it is IBM jvm, false if it is not IBM jvm
+     */
+    public static final boolean isModuleAware()
+    {
+        return _isModuleAware;
+    }
+
+    /**
+     * Get the JVM's system module path. Returns null if the JVM is
+     * not running with a module path.
+     *
+     * @return the system module path (might be null)
+     */
+    public static final String getSystemModulePath()
+    {
+        return getSystemProperty("jdk.module.path");
     }
     
     /**

@@ -209,6 +209,13 @@ grant codeBase "${derbyTesting.client}" {
 };
 
 //
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
+//
 // Permissions for the tools (derbytools.jar)
 // Ideally this would be more secure, for now the
 // focus is on getting the engine & network server secure.

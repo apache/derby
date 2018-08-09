@@ -25,3 +25,11 @@ grant codeBase "${derbyTesting.engine}" {
   // for unit tests
   permission java.util.PropertyPermission "derbyTesting.unittest.*", "read";
 };
+
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+

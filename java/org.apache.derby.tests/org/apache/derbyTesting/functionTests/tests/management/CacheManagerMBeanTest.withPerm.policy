@@ -94,6 +94,13 @@ grant codeBase "${derbyTesting.antjunit}" {
     permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
 
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
 grant codeBase "${derbyTesting.tools}" {
   permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };

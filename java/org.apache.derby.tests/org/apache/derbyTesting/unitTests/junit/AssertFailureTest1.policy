@@ -57,6 +57,13 @@ grant codeBase "${derbyTesting.testing}" {
   
 };
 
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
 
 grant codeBase "${derbyTesting.junit}" {
     // This permission is needed when running the tests using ant 1.7

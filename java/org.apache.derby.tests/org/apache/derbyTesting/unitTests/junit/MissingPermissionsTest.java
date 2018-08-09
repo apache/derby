@@ -236,6 +236,8 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
                     + getSystemProperty("derbyTesting.tools"));
         args.add("-DderbyTesting.testing="
                     + getSystemProperty("derbyTesting.testing"));
+        args.add("-DderbyTesting.shared="
+                    + getSystemProperty("derbyTesting.shared"));
         args.add("-DderbyTesting.junit="
                     + getSystemProperty("derbyTesting.junit"));
         String antjunit = getSystemProperty("derbyTesting.antjunit");
@@ -376,6 +378,8 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
                     + getSystemProperty("derbyTesting.tools"));
             args.add("-DderbyTesting.testing="
                     + getSystemProperty("derbyTesting.testing"));
+            args.add("-DderbyTesting.shared="
+                    + getSystemProperty("derbyTesting.shared"));
             args.add("-DderbyTesting.junit="
                     + getSystemProperty("derbyTesting.junit"));
             String antjunit = getSystemProperty("derbyTesting.antjunit");

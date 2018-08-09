@@ -27,3 +27,11 @@ grant codeBase "${derbyTesting.engine}" {
   permission java.net.SocketPermission "127.0.0.1", "connect,accept,listen";
   permission java.net.SocketPermission "localhost", "connect,accept,listen";
 };
+
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+

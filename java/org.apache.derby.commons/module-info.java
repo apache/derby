@@ -28,12 +28,6 @@ module org.apache.derby.commons
     requires java.sql;
 
     //
-    // FOR LOADING MESSAGE LOCALIZATIONS FROM
-    // OTHER MODULES.
-    //
-    uses org.apache.derby.loc.client.spi.clientmessagesProvider;
-
-    //
     // PUBLIC API
     //
     exports org.apache.derby.shared.common.security;
@@ -43,9 +37,6 @@ module org.apache.derby.commons
     //
     // ONLY VISIBLE TO OTHER DERBY MODULES.
     //
-    exports org.apache.derby.loc.client.spi to
-        org.apache.derby.client;
-
     exports org.apache.derby.shared.common.drda to
         org.apache.derby.client,
         org.apache.derby.server,

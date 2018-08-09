@@ -57,6 +57,13 @@ permission java.lang.RuntimePermission "accessDeclaredMembers";
 
 };
  
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
 //Required set of permissions to stop the network server, assuming you have
 // secured the '${csinfo.codebase}${/}-' directory
 //Remember to fine tune this as per your environment.

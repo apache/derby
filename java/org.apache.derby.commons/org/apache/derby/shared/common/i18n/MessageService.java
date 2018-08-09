@@ -23,9 +23,13 @@ package org.apache.derby.shared.common.i18n;
 
 import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 
+import java.io.InputStream;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.text.MessageFormat;
 
@@ -44,6 +48,8 @@ public final class MessageService {
 	private static final Locale EN = new Locale("en", "US");
     private static final String LOCALE_STUB = "locale_";
     private static final String CLIENT_MESSAGES = "clientmessages";
+    private static final String TOOLS_MESSAGES = "toolsmessages";
+    private static final String SYSINFO_MESSAGES = "sysinfoMessages";
 
 	private static BundleFinder finder;
 
@@ -259,9 +265,90 @@ public final class MessageService {
 	*/
 	private static ResourceBundle lookupBundle(String resource, Locale locale)
     {
-        return ResourceBundle.getBundle(resource, locale);
+        if (JVMInfo.isModuleAware()) { return lookupBundleInModule(resource, locale); }
+        else { return ResourceBundle.getBundle(resource, locale); }
 	}
   
+	/**
+		Lookup the message in a Jigsaw module.
+	*/
+	public static ResourceBundle lookupBundleInModule(String resource, Locale locale)
+    {
+        String moduleName;
+        boolean useEnglish = locale.getLanguage().equals(EN.getLanguage());
+        boolean useEngineModule = false;
+
+        //
+        // The message localizations should be in one of the following modules:
+        //
+        //   engine jar
+        //   client jar
+        //   tools jar
+        //   locale-specific message jar
+        //
+
+        if (resource.contains(CLIENT_MESSAGES)) { moduleName = ModuleUtil.CLIENT_MODULE_NAME; }
+        else if (resource.contains(TOOLS_MESSAGES) || resource.contains(SYSINFO_MESSAGES))
+        {
+            if (useEnglish){ moduleName = ModuleUtil.TOOLS_MODULE_NAME; }
+            else { moduleName = ModuleUtil.localizationModuleName(locale); }
+        }
+        else // must be engine messages
+        {
+            if (useEnglish) { moduleName = ModuleUtil.ENGINE_MODULE_NAME; }
+            else { moduleName = ModuleUtil.localizationModuleName(locale); }
+
+            useEngineModule = true;
+        }
+
+        Module messageModule = ModuleUtil.jvmSystemModule(moduleName);
+        if (messageModule == null) { return null; }
+
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(resource.replace('.', '/'));
+        if (!useEnglish)
+        {
+            buffer.append("_");
+            buffer.append(locale.toString());
+        }
+        if (useEngineModule)
+        {
+            buffer.append("_en");
+        }
+        buffer.append(".properties");
+        String fullResourceName = buffer.toString();
+
+        return getModuleResourceBundle(fullResourceName, messageModule);
+    }
+
+    /**
+     * Get a resource bundle from a module.
+     *
+     * @param resourceName The name of the resource
+     * @param module The module where it lives
+     *
+     * @return the corresponding resource bundle
+     */
+    private static PropertyResourceBundle getModuleResourceBundle
+       (String resourceName, Module module)
+    {
+        try
+        {
+            InputStream is = module.getResourceAsStream(resourceName);
+            //System.out.println("XXX stream = " + is + " for resourceName " + resourceName + " in module " + module);
+
+            if (is != null)
+            {
+                return new PropertyResourceBundle(is);
+            }
+            else { return null; }
+        }
+        catch (IOException ioe)
+        {
+            return null;
+        }
+    }
+
     /**
         Add a directory level named locale_xx_YY to the resource name
         if it is not the clientmessages resource bundle. So, for instance,

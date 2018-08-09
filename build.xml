@@ -1743,9 +1743,12 @@
       <param name="info.file" value="${out.testing.dir}/org/apache/derby/info/tsting/info.properties"/>
     </antcall>
 
-    <zip destfile="${derby.jar.dir}/derbyTesting.jar" filesonly="true" compress="true">
-      <fileset dir="${out.testing.dir}" includes="org/apache/derbyTesting/**,toursdb/**,SimpleApp.class,org/apache/derby/info/tsting/**"/>
-    </zip>
+    <delete file="${derby.jar.dir}/derbyTesting.jar"/>
+    <jar destfile="${derby.jar.dir}/derbyTesting.jar"
+         basedir="${out.testing.dir}"
+         compress="true"
+         filesonly="true"/>
+
   </target>
 
   <target name="ckderbytesting">

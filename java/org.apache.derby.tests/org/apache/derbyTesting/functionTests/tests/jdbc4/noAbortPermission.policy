@@ -195,6 +195,13 @@ grant codeBase "${derbyTesting.tools}" {
 };
 
 //
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
+//
 // Permissions for the tests (derbyTesting.jar)
 // We are liberal here, it's not a goal to make the test harness
 // or tests secure.

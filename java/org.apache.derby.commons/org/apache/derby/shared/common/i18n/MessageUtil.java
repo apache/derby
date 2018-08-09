@@ -137,7 +137,7 @@ public class MessageUtil
             // we should compose a default message or throw an exception if
             // the message still is not found.
             return formatMessage(
-                    ResourceBundle.getBundle(resourceBundleName, US), 
+                    MessageService.getBundleWithEnDefault(resourceBundleName, US), 
                     messageId, arguments, composeDefault);
         }
     }

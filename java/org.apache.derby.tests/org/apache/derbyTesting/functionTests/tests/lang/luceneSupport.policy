@@ -340,6 +340,13 @@ grant {
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
 
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
 // Grant the required permissions for JaCoCo (code coverage tool).
 grant {
   permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";

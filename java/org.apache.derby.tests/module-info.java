@@ -19,7 +19,7 @@
 
  */
 
-module org.apache.derby.tests
+open module org.apache.derby.tests
 {
     //
     // MANDATORY IMPORTS
@@ -39,8 +39,6 @@ module org.apache.derby.tests
     requires org.apache.derby.optionaltools;
     requires org.apache.derby.runner;
 
-    requires junit;
-
     //
     // OPTIONAL IMPORTS
     //
@@ -51,4 +49,13 @@ module org.apache.derby.tests
     requires static lucene.analyzers.common;
     requires static lucene.core;
     requires static lucene.queryparser;
+    // MAKING THIS STATIC ALLOWS sysinfo TO EXAMINE derbyTesting.jar
+    requires static junit;
+
+    //
+    // PUBLIC API
+    //
+    // NEEDED BY sysinfo
+    exports org.apache.derbyTesting.junit;
+
 }

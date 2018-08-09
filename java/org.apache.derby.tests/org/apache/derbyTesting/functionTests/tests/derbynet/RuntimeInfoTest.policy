@@ -134,6 +134,13 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
 };
 
 //
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
+//
 // Permissions for the network server (derbynet.jar)
 //
 grant codeBase "${derbyTesting.netserver}" {
@@ -313,6 +320,7 @@ grant {
 grant {
   permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
   permission java.io.FilePermission "${jacoco.active}${user.dir}${/}..${/}jacoco.exec", "read, write";
+
 };
 
 // When inserting XML values that use external DTD's, the JAXP parser

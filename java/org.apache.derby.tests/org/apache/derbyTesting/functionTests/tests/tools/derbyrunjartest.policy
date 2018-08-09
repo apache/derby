@@ -19,3 +19,10 @@ grant codeBase "${derbyTesting.testing}" {
   permission java.lang.RuntimePermission "getProtectionDomain";
 };
 
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+

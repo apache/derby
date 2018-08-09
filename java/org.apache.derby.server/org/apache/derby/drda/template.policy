@@ -104,6 +104,7 @@ grant codeBase "${derby.install.url}derby.jar"
 // Permissions for shared code (derbyshared.jar)
 //
 grant codeBase "${derby.install.url}derbyshared.jar" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
 //
 // Permissions needed for JMX based management and monitoring, which is only
 // available for JVMs supporting "platform management", that is J2SE 5.0 or better.

@@ -24,6 +24,7 @@ package org.apache.derby.impl.tools.sysinfo;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.io.IOException;
@@ -51,9 +52,11 @@ import java.security.ProtectionDomain;
 import java.security.CodeSource;
 import java.security.AccessController;
 
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.shared.common.info.PropertyNames;
 import org.apache.derby.shared.common.info.ProductVersionHolder;
 import org.apache.derby.shared.common.info.ProductGenusNames;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 
 import org.apache.derby.iapi.tools.i18n.*;
 
@@ -103,6 +106,8 @@ public final class Main {
     private final static LocalizedResource LOCALIZED_RESOURCE =
         new LocalizedResource(LocalizedResource.SYSINFO_MESSAGE_FILE);
 
+    private static final String TEST_CLASS_NAME = "org.apache.derbyTesting.junit.XATestUtil";
+  
   /**
     Application entry point for SysInfo.   This will print out
     the Derby product information as well as a snapshot of
@@ -226,8 +231,15 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	  String classpath = null;
 
-      try {
-          classpath = AccessController.doPrivileged( new PrivilegedAction<String>()
+      if (JVMInfo.isModuleAware())
+      {
+          classpath = JVMInfo.getSystemModulePath();
+      }
+      else
+      {
+          try
+          {
+              classpath = AccessController.doPrivileged( new PrivilegedAction<String>()
               {
                   public String run()
                   {
@@ -235,12 +247,13 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                   }
               }
               );
-	  }
-	  catch (SecurityException se) {
-          localAW.println(
-              Main.getTextMessage ("SIF01.U", se.getMessage()));
-		  classpath = null;
-	  }
+	      }
+	      catch (SecurityException se)
+          {
+              localAW.println(Main.getTextMessage ("SIF01.U", se.getMessage()));
+              classpath = null;
+          }
+      }
 
       ZipInfoProperties zip[]= Main.getAllInfo (classpath);
 
@@ -435,29 +448,39 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     // If so, then read the properties, and print them out.
 
 	Locale[] supportedLocales = Locale.getAvailableLocales();
-	String[] stringLocales = new String[supportedLocales.length];
-    for (int i = 0; i < supportedLocales.length; i++)
-	{
-		stringLocales[i] = supportedLocales[i].toString();
-	}
-	java.util.Arrays.sort(stringLocales);
+    Arrays.sort(supportedLocales, new LocaleSorter());
 
     Properties p = new Properties ();
-    for (int i = 0; i < stringLocales.length; i++) {
+    for (int i = 0; i < supportedLocales.length; i++) {
 
-      String localeResource =
-         "/org/apache/derby/info/locale_" + stringLocales[i] + "/info.properties";
+      final Locale locale = supportedLocales[i];
+      final String localeString = locale.toString();
+      final String finalLocaleResource =
+         "/org/apache/derby/info/locale_" + localeString + "/info.properties";
       
       final Properties finalp = p;
-      final String finalLocaleResource = localeResource;
      
       try {     
-        	InputStream is = AccessController.doPrivileged
-            (new PrivilegedAction<InputStream>() {
-                  public InputStream run() {
+          InputStream is = AccessController.doPrivileged
+            (new PrivilegedExceptionAction<InputStream>() {
+                  public InputStream run() throws IOException {
                     Class loadingClass = Main.class;
-  		            InputStream locis =
-  		            	loadingClass.getResourceAsStream (finalLocaleResource);
+                    InputStream locis = null;
+
+                    if (JVMInfo.isModuleAware())
+                    {
+                        String moduleName = ModuleUtil.localizationModuleName(locale);
+                        Module localizationModule = ModuleUtil.jvmSystemModule(moduleName);
+
+                        if (localizationModule != null)
+                        {
+                            locis = localizationModule.getResourceAsStream(finalLocaleResource);
+                        }
+                    }
+                    else
+                    {
+                        locis = loadingClass.getResourceAsStream (finalLocaleResource);
+                    }
   					return locis;
                   }
               }
@@ -514,7 +537,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
       }
       catch (Throwable t) {
-        localAW.println ("Could not load resource: " + localeResource);
+        localAW.println ("Could not load resource: " + finalLocaleResource);
         localAW.println ("Exception: " + t);
       }
 
@@ -542,14 +565,30 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
       final String finalTstingResource = tstingResource;
       try {
           InputStream is = AccessController.doPrivileged
-                  (new PrivilegedAction<InputStream>() {
-                      public InputStream run() {
+                  (new PrivilegedExceptionAction<InputStream>() {
+                      public InputStream run() throws IOException {
                           Class loadingClass = Main.class;
-                          InputStream is =
-                                  loadingClass.getResourceAsStream (finalTstingResource);
+                          InputStream is = null;
+
+                          if (JVMInfo.isModuleAware())
+                          {
+                              String moduleName = ModuleUtil.TESTING_MODULE_NAME;
+                              Module testingModule = ModuleUtil.jvmSystemModule(moduleName);
+
+                              if (testingModule != null)
+                              {
+                                  is = testingModule.getResourceAsStream(finalTstingResource);
+                              }
+                          }
+                          else
+                          {
+                              is = loadingClass.getResourceAsStream (finalTstingResource);
+                          }
+                          
                           return is;
                       }
                   });
+
           if (is == null) {
               //localAW.println("resource is null: " + tstingResource);
           }
@@ -560,24 +599,44 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                   //Displaying Testing info
                   //String tstingName = p.getProperty("derby.tsting.external.name");
 
-                  StringBuffer successes = new StringBuffer(Main.getTextMessage(crLf()));
-                  StringBuffer failures = new StringBuffer(crLf() + Main.getTextMessage("SIF08.E") + crLf());
-                  tryTstingClasspath(successes, failures);
-                  String successString = successes.toString();
-
-                  if (successString.isEmpty() || successString.length()<=2)
+                  URL testJarURL = null;
+                  
+                  if (JVMInfo.isModuleAware())
                   {
-                      // if we don't have the BaseTestCase class, assume we don't have any of the
-                      // testing classes, and just print nothing
-                      // this would be the situation that end-users would likely see.
-                      return;
+                      try
+                      {
+                          Module testingModule = ModuleUtil.jvmSystemModule(ModuleUtil.TESTING_MODULE_NAME);
+                          Class testingClass = testingModule.getClassLoader().loadClass(TEST_CLASS_NAME);
+                          testJarURL = testingClass.getProtectionDomain().getCodeSource().getLocation();
+                      }
+                      catch (Exception ex) {}
                   }
+                  else
+                  {
+                      StringBuffer successes = new StringBuffer(Main.getTextMessage(crLf()));
+                      StringBuffer failures =
+                          new StringBuffer(crLf() + Main.getTextMessage("SIF08.E") + crLf());
+                      tryTstingClasspath(successes, failures);
+                      String successString = successes.toString();
+
+                      if (successString.isEmpty() || successString.length()<=2)
+                      {
+                          // if we don't have the BaseTestCase class, assume we don't have any of the
+                          // testing classes, and just print nothing
+                          // this would be the situation that end-users would likely see.
+                          return;
+                      }
+
+                      testJarURL = new URL(successString);
+                  }
+
+                  if (testJarURL == null) { return; }
 
                   // show the path and add brackets like we do for the core classes
                   localAW.println(hdr);
                   localAW.print("\t ");
                   localAW.print("[");
-                  localAW.print(formatURL(new URL(successString)));
+                  localAW.print(formatURL(testJarURL));
                   localAW.println("]");
                   // show the version info
                   int major = Integer.parseInt(p.getProperty ("derby.tsting.version.major"));
@@ -1339,6 +1398,15 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
             result = e.getMessage();
         }
         return result;
+    }
+
+
+    public static class LocaleSorter implements Comparator<Locale>
+    {
+        public int compare(Locale left, Locale right)
+        {
+            return left.toString().compareTo(right.toString());
+        }
     }
 
 } // end of class Main

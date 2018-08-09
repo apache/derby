@@ -137,6 +137,13 @@ grant codeBase "${derbyTesting.tools}"
   permission org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals";
 };
 
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
 // JUnit jar file tries to read junit.properties in the user's
 // home directory and seems to require permission to read the
 // property user.home as well.

@@ -46,7 +46,7 @@ module org.apache.derby.server
     //
     exports org.apache.derby.drda;
     exports org.apache.derby.mbeans.drda;
-    
+
     //
     // DERBY INTERNAL EXPORTS
     //

@@ -389,6 +389,7 @@ public class utilMain {
     			} catch (Throwable e) {
                     scriptErrorCount++;
     			  	out.println(langUtil.getTextMessage("IJ_JavaErro0",e.toString()));
+                    e.printStackTrace();
 					doTrace(e);
 				}
 
@@ -553,6 +554,7 @@ public class utilMain {
 			doTrace(ie);
 	    } catch (Throwable t) {
 	  		out.println(langUtil.getTextMessage("IJ_JavaErro0_7", t.toString()));
+            t.printStackTrace();
 			doTrace(t);
 	    }
         return false;

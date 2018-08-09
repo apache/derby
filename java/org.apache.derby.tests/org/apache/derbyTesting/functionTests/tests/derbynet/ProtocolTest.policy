@@ -35,3 +35,11 @@ grant codeBase "${derbyTesting.testing}" {
 grant codeBase "${derbyTesting.netserver}" {
   permission java.io.FilePermission "${user.dir}${/}system${/}-", "read,write";
 };
+
+//
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+

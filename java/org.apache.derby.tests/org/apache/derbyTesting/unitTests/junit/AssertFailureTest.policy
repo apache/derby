@@ -88,6 +88,7 @@ grant codeBase "${derbyTesting.engine}" {
 };
 
 grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
 //These are the ones that matter:
 //-----------------------------------------------------------------------------
   permission java.lang.RuntimePermission "getStackTrace";

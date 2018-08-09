@@ -122,6 +122,13 @@ grant codeBase "${derbyTesting.netserver}" {
 };
 
 //
+// Permissions for shared code (derbyshared.jar)
+//
+grant codeBase "${derbyTesting.shared}" {
+  permission java.util.PropertyPermission "jdk.module.path", "read";
+};
+
+//
 // Permissions for the network client (derbyclient.jar)
 //
 grant codeBase "${derbyTesting.client}" {

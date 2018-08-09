@@ -160,6 +160,7 @@ grant codeBase "${derbyTesting.shared}" {
   // do tracing in that directory. Also, it needs read/write permissions in user.dir in order
   // to create the trace files in that directory.
   permission java.util.PropertyPermission "user.dir", "read";
+  permission java.util.PropertyPermission "jdk.module.path", "read";
   permission java.io.FilePermission "${user.dir}${/}-", "read, write"; 
 
   //
