@@ -1370,6 +1370,7 @@ org.apache.derby.impl.store.replication.net.SlaveAddress.class
 org.apache.derby.impl.store.replication.net.SocketConnection.class
 org.apache.derby.impl.store.replication.slave.ReplicationLogScan.class
 org.apache.derby.impl.store.replication.slave.SlaveController.class
+org.apache.derby.info.engine.DerbyModule.class
 org.apache.derby.io.StorageFactory.class
 org.apache.derby.io.StorageFile.class
 org.apache.derby.io.StorageRandomAccessFile.class

@@ -22,14 +22,30 @@
 /**
  * Template for the module descriptor generated
  * for each localization jar file. The localization
- * jars are declared "open" (for reflective use)
+ * packages are declared "open" (for reflective use)
  * so that the shared module can see their message files
  * when looking up message ids.
  */
 module org.apache.derby.locale_@LOCALE@
 {
+    //
+    // MANDATORY IMPORTS
+    //
+    requires java.base;
+
+    requires org.apache.derby.commons;
+
+    //
+    // PUBLIC API
+    //
     // Allow resource lookup via reflection
     opens org.apache.derby.info.locale_@LOCALE@;
     opens org.apache.derby.loc.locale_@LOCALE@;
     opens org.apache.derby.loc.tools.locale_@LOCALE@;
+
+    //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.info.locale_@LOCALE@.DerbyModule;
 }

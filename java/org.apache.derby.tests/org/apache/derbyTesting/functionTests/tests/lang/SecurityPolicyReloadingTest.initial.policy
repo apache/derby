@@ -119,6 +119,7 @@ grant {
 //
 grant codeBase "${derbyTesting.shared}" {
   permission java.util.PropertyPermission "jdk.module.path", "read";
+  permission java.io.FilePermission "${derby.install.path}${/}-", "read";
 };
 
 grant codeBase "${derbyTesting.tools}" {

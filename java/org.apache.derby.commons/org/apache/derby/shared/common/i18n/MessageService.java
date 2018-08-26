@@ -27,6 +27,8 @@ import org.apache.derby.shared.common.reference.ModuleUtil;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
@@ -50,6 +52,7 @@ public final class MessageService {
     private static final String CLIENT_MESSAGES = "clientmessages";
     private static final String TOOLS_MESSAGES = "toolsmessages";
     private static final String SYSINFO_MESSAGES = "sysinfoMessages";
+    private static final String SERVER_MESSAGES = "drda";
 
 	private static BundleFinder finder;
 
@@ -277,6 +280,7 @@ public final class MessageService {
         String moduleName;
         boolean useEnglish = locale.getLanguage().equals(EN.getLanguage());
         boolean useEngineModule = false;
+        boolean localizationModule = false;
 
         //
         // The message localizations should be in one of the following modules:
@@ -288,30 +292,71 @@ public final class MessageService {
         //
 
         if (resource.contains(CLIENT_MESSAGES)) { moduleName = ModuleUtil.CLIENT_MODULE_NAME; }
+        else if (resource.contains(SERVER_MESSAGES)) { moduleName = ModuleUtil.SERVER_MODULE_NAME; }
         else if (resource.contains(TOOLS_MESSAGES) || resource.contains(SYSINFO_MESSAGES))
         {
             if (useEnglish){ moduleName = ModuleUtil.TOOLS_MODULE_NAME; }
-            else { moduleName = ModuleUtil.localizationModuleName(locale); }
+            else
+            {
+                moduleName = ModuleUtil.localizationModuleName(locale.toString());
+                localizationModule = true;
+            }
         }
         else // must be engine messages
         {
-            if (useEnglish) { moduleName = ModuleUtil.ENGINE_MODULE_NAME; }
-            else { moduleName = ModuleUtil.localizationModuleName(locale); }
-
-            useEngineModule = true;
+            if (useEnglish)
+            {
+                moduleName = ModuleUtil.ENGINE_MODULE_NAME;
+                useEngineModule = true;
+            }
+            else
+            {
+                moduleName = ModuleUtil.localizationModuleName(locale.toString());
+                localizationModule = true;
+            }
         }
 
-        Module messageModule = ModuleUtil.jvmSystemModule(moduleName);
-        if (messageModule == null) { return null; }
+        Module messageModule = ModuleUtil.derbyModule(moduleName);
+        if (messageModule == null)
+        {
+            if (localizationModule)
+            {
+                // retry with just the language as the suffix of the localization module
+                moduleName = ModuleUtil.localizationModuleName(locale.getLanguage());
+                messageModule = ModuleUtil.derbyModule(moduleName);
+            }
+        }
+        if (messageModule == null)
+        {
+            return null;
+        }
 
+        // first try with whole locale string
+        ResourceBundle result = lookupBundleInModule
+          (messageModule, resource, locale.toString(), useEnglish, useEngineModule);
+
+        // if that fails, just use the language code without the country code
+        if ( result == null)
+        {
+            result = lookupBundleInModule
+              (messageModule, resource, locale.getLanguage(), useEnglish, useEngineModule);
+        }
+
+        return result;
+    }
+
+    /** Lookup a message in a given module */
+    private static ResourceBundle lookupBundleInModule
+      (Module messageModule, String resource, String localeSuffix, boolean useEnglish, boolean useEngineModule)
+    {
         StringBuilder buffer = new StringBuilder();
         buffer.append(resource.replace('.', '/'));
         if (!useEnglish)
         {
             buffer.append("_");
-            buffer.append(locale.toString());
+            buffer.append(localeSuffix);
         }
-        if (useEngineModule)
+        if (useEngineModule && useEnglish)
         {
             buffer.append("_en");
         }
@@ -330,12 +375,21 @@ public final class MessageService {
      * @return the corresponding resource bundle
      */
     private static PropertyResourceBundle getModuleResourceBundle
-       (String resourceName, Module module)
+       (final String resourceName, final Module module)
     {
         try
         {
-            InputStream is = module.getResourceAsStream(resourceName);
-            //System.out.println("XXX stream = " + is + " for resourceName " + resourceName + " in module " + module);
+            InputStream is = AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<InputStream>()
+                 {
+                    public InputStream run() throws IOException
+                    {
+                        return module.getResourceAsStream(resourceName);
+                    }
+                });
+
+            //System.out.println("        XXX stream = " + is + " for resourceName " + resourceName + " in module " + module);
 
             if (is != null)
             {
@@ -343,8 +397,9 @@ public final class MessageService {
             }
             else { return null; }
         }
-        catch (IOException ioe)
+        catch (Exception ioe)
         {
+            System.out.println(ioe.getMessage());
             return null;
         }
     }
@@ -357,7 +412,13 @@ public final class MessageService {
     */
     private static String localizeResourceName(String original, String localeName)
     {
-        if ((original == null) || (original.contains(CLIENT_MESSAGES))) { return original; }
+        if (
+            (original == null) ||
+            (original.contains(CLIENT_MESSAGES)) ||
+            (original.contains(SERVER_MESSAGES))
+            )
+        { return original; }
+
 
         // American English messages are not re-located to a subdirectory
         if (EN.toString().equals(localeName))

@@ -49,4 +49,10 @@ module org.apache.derby.optionaltools
     //
     exports org.apache.derby.optional.api;
 
+    //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.optional.info.DerbyModule;
+
 }

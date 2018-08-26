@@ -58,4 +58,10 @@ open module org.apache.derby.tests
     // NEEDED BY sysinfo
     exports org.apache.derbyTesting.junit;
 
+    //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.info.tsting.DerbyModule;
+
 }

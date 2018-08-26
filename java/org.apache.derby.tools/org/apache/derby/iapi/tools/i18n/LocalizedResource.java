@@ -108,7 +108,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
     }
 
     private void init (String encStr, String locStr, String msgF, boolean readEnv){
-		if (encStr != null){
+        if (encStr != null){
 			encode = encStr;
 		}
 		//then get encoding string from environment

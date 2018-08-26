@@ -62,6 +62,7 @@ permission java.lang.RuntimePermission "accessDeclaredMembers";
 //
 grant codeBase "${derbyTesting.shared}" {
   permission java.util.PropertyPermission "jdk.module.path", "read";
+  permission java.io.FilePermission "${derby.install.path}${/}-", "read";
 };
 
 //Required set of permissions to stop the network server, assuming you have

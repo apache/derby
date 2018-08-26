@@ -59,6 +59,7 @@ org.apache.derby.impl.tools.planexporter.CreateXMLFile.class
 org.apache.derby.impl.tools.planexporter.TreeNode.class
 org.apache.derby.impl.tools.sysinfo.Main.class
 org.apache.derby.impl.tools.sysinfo.ZipInfoProperties.class
+org.apache.derby.info.tools.DerbyModule.class
 org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40.class
 org.apache.derby.jdbc.BasicClientDataSource40.class
 org.apache.derby.jdbc.BasicClientXADataSource40.class

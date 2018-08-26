@@ -55,6 +55,12 @@ module org.apache.derby.engine
     exports org.apache.derby.vti;
 
     //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.info.engine.DerbyModule;
+
+    //
     // ALLOW RESOURCE LOOKUP VIA REFLECTION
     //
     
@@ -155,9 +161,12 @@ module org.apache.derby.engine
     exports org.apache.derby.iapi.sql.compile to
         org.apache.derby.tests;
 
-    exports org.apache.derby.iapi.sql.conn to
-        org.apache.derby.optionaltools,
-        org.apache.derby.tests;
+    // FIXME! GENERATED CLASSES NEED TO ACCESS
+    // LanguageConnectionContext
+    exports org.apache.derby.iapi.sql.conn;
+    //    exports org.apache.derby.iapi.sql.conn to
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
 
     exports org.apache.derby.iapi.sql.depend to
         org.apache.derby.tests;

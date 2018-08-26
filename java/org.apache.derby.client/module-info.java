@@ -41,6 +41,12 @@ module org.apache.derby.client
     requires static java.naming;
 
     //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.info.client.DerbyModule;
+
+    //
     // ALLOW RESOURCE LOOKUP VIA REFLECTION
     //
     opens org.apache.derby.loc.client;

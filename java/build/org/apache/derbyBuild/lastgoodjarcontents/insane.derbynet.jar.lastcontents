@@ -42,4 +42,5 @@ org.apache.derby.impl.drda.StandardEXTDTAReaderInputStream.class
 org.apache.derby.impl.drda.Utf8CcsidManager.class
 org.apache.derby.impl.drda.XADatabase.class
 org.apache.derby.impl.drda.memCheck.class
+org.apache.derby.info.net.DerbyModule.class
 org.apache.derby.mbeans.drda.NetworkServerMBean.class

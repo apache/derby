@@ -142,3 +142,4 @@ org.apache.derby.client.net.StatementReplyInterface.class
 org.apache.derby.client.net.StatementRequestInterface.class
 org.apache.derby.client.net.Typdef.class
 org.apache.derby.client.net.Utf8CcsidManager.class
+org.apache.derby.info.client.DerbyModule.class

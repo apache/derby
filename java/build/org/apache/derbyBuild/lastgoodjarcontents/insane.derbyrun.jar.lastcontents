@@ -1,2 +1,3 @@
 module-info.class
+org.apache.derby.run.info.DerbyModule.class
 org.apache.derby.run.run.class

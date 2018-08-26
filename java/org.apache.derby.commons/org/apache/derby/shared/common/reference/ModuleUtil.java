@@ -21,17 +21,11 @@
 
 package org.apache.derby.shared.common.reference;
 
-import java.io.File;
-import java.lang.module.Configuration;
-import java.lang.module.ModuleFinder;
-import java.lang.module.ModuleReference;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.ServiceLoader;
 
+import org.apache.derby.shared.api.DerbyModuleAPI;
 import org.apache.derby.shared.common.info.JVMInfo;
 
 /**
@@ -64,8 +58,8 @@ public class ModuleUtil
     //
     /////////////////////////////////////////////////////////
 
-    /** ModuleFinder for modules on the JVM's module path */
-    private static ModuleFinder _systemModuleFinder;
+    /** Map of module names to Derby modules */
+    private static HashMap<String,java.lang.Module> _derbyModules;
 
     /////////////////////////////////////////////////////////
     //
@@ -74,63 +68,32 @@ public class ModuleUtil
     /////////////////////////////////////////////////////////
 
     /**
-     * Return the module with the given name located on the system module path.
+     * Return the Derby module with the given name.
      *
      * @param moduleName The name of the module
      *
      * @return the corresponding module, or null if none is found
      */
-    public static java.lang.Module jvmSystemModule(String moduleName)
+    public static java.lang.Module derbyModule(String moduleName)
     {
         if (!JVMInfo.isModuleAware()) { return null; }
         
-        initModulePaths();  // read system module path
+        initModuleInfo();  // find all of the derby modules
 
-        try
-        {
-            ModuleLayer parent = ModuleLayer.boot();
-            Configuration configuration =
-                parent
-                .configuration()
-                .resolve(_systemModuleFinder, ModuleFinder.of(), Set.of(moduleName));
-            ModuleLayer layer =
-                parent.defineModulesWithOneLoader(configuration, ClassLoader.getSystemClassLoader());
-
-            return layer.findModule(moduleName).orElse(null);
-        }
-        catch (Exception ex)
-        {
-            return null;
-        }
-    }
-
-    /**
-     * Return all of the jigsaw modules on the system module path.
-     *
-     * @param name The name of the module
-     *
-     * @return the corresponding module, or null if none is found
-     */
-    public static Set<ModuleReference> allJvmSystemModules()
-    {
-        if (!JVMInfo.isModuleAware()) { return null; }
-
-        initModulePaths();  // read system module path
-
-        return _systemModuleFinder.findAll();
+        return _derbyModules.get(moduleName);
     }
 
     /**
      * Get the name of the module containing the localized
      * messages for the given locale.
      *
-     * @param locale The locale in question
+     * @param localeString The locale suffix to use
      *
      * @return the corresponding module name
      */
-    public static String localizationModuleName(Locale locale)
+    public static String localizationModuleName(String localeString)
     {
-        return LOCALE_MODULE_NAME_PREFIX + locale.toString();
+        return LOCALE_MODULE_NAME_PREFIX + localeString;
     }
 
     /////////////////////////////////////////////////////////
@@ -140,23 +103,24 @@ public class ModuleUtil
     /////////////////////////////////////////////////////////
 
     /**
-     * Initialize the list of module paths if necessary.
+     * Initialize the map of Derby modules.
      */
-    private static void initModulePaths()
+    private static void initModuleInfo()
     {
-        if (_systemModuleFinder != null) { return; }
+        if (_derbyModules != null) { return; }
 
-        String modulePathString = JVMInfo.getSystemModulePath();
-        StringTokenizer tokens = new StringTokenizer(modulePathString, File.pathSeparator);
-        int tokenCount = tokens.countTokens();
-        Path[] modulePaths = new Path[tokenCount];
+        HashMap<String,java.lang.Module> result = new HashMap<String,java.lang.Module>();
+        ServiceLoader<DerbyModuleAPI> loader = ServiceLoader.load(DerbyModuleAPI.class);
 
-        for (int idx = 0; idx < tokenCount; idx++)
+        for (DerbyModuleAPI provider : loader)
         {
-            modulePaths[idx] = Paths.get(tokens.nextToken());
+            Class providerClass = provider.getClass();
+            java.lang.Module providerModule = providerClass.getModule();
+
+            result.put(providerModule.getName(), providerModule);
         }
 
-        _systemModuleFinder = ModuleFinder.of(modulePaths);
+        _derbyModules = result;
     }
 
 }

@@ -70,6 +70,7 @@
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
       <modulepath>
+		    <pathelement location="${out.shared.dir}"/>
 		    <pathelement location="${out.drda.dir}"/>
 		    <pathelement location="${out.tools.dir}"/>
       </modulepath>

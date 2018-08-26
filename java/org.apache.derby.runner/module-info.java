@@ -26,6 +26,7 @@ module org.apache.derby.runner
     //
     requires java.base;
 
+    requires org.apache.derby.commons;
     requires org.apache.derby.server;
     requires org.apache.derby.tools;
 
@@ -35,4 +36,11 @@ module org.apache.derby.runner
     // VISIBLE TO ALL CLASSES AT RUNTIME.
     //
     exports org.apache.derby.run;
+
+    //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.run.info.DerbyModule;
+
 }

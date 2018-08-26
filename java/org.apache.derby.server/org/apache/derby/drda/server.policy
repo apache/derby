@@ -99,7 +99,13 @@ grant codeBase "${derby.install.url}derby.jar"
 // Permissions for shared code (derbyshared.jar)
 //
 grant codeBase "${derby.install.url}derbyshared.jar" {
+  // Needed to determine whether the JVM was booted with a module path.
   permission java.util.PropertyPermission "jdk.module.path", "read";
+
+  // Need in order to read message localizations from other derby jars
+  // when running with a module path.
+  permission java.io.FilePermission "${derby.install.path}${/}-", "read";
+
 //
 // Permissions needed for JMX based management and monitoring, which is only
 // available for JVMs supporting "platform management", that is J2SE 5.0 or better.

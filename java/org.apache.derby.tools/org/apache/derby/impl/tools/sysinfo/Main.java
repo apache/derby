@@ -469,8 +469,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
                     if (JVMInfo.isModuleAware())
                     {
-                        String moduleName = ModuleUtil.localizationModuleName(locale);
-                        Module localizationModule = ModuleUtil.jvmSystemModule(moduleName);
+                      String moduleName = ModuleUtil.localizationModuleName(locale.toString());
+                        Module localizationModule = ModuleUtil.derbyModule(moduleName);
 
                         if (localizationModule != null)
                         {
@@ -573,7 +573,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                           if (JVMInfo.isModuleAware())
                           {
                               String moduleName = ModuleUtil.TESTING_MODULE_NAME;
-                              Module testingModule = ModuleUtil.jvmSystemModule(moduleName);
+                              Module testingModule = ModuleUtil.derbyModule(moduleName);
 
                               if (testingModule != null)
                               {
@@ -605,7 +605,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                   {
                       try
                       {
-                          Module testingModule = ModuleUtil.jvmSystemModule(ModuleUtil.TESTING_MODULE_NAME);
+                          Module testingModule = ModuleUtil.derbyModule(ModuleUtil.TESTING_MODULE_NAME);
                           Class testingClass = testingModule.getClassLoader().loadClass(TEST_CLASS_NAME);
                           testJarURL = testingClass.getProtectionDomain().getCodeSource().getLocation();
                       }

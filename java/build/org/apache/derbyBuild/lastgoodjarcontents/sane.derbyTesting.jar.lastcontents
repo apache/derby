@@ -1,4 +1,5 @@
 module-info.class
+org.apache.derby.info.tsting.DerbyModule.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamDrainer.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamSaver.class
 org.apache.derbyTesting.functionTests.harness.CopySuppFiles.class

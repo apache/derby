@@ -49,6 +49,12 @@ module org.apache.derby.tools
     exports org.apache.derby.jdbc;
 
     //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.info.tools.DerbyModule;
+
+    //
     // ALLOW RESOURCE LOOKUP VIA REFLECTION
     //
     opens org.apache.derby.loc.tools;

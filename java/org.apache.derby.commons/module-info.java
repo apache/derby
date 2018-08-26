@@ -30,7 +30,19 @@ module org.apache.derby.commons
     //
     // PUBLIC API
     //
+    exports org.apache.derby.shared.api;
     exports org.apache.derby.shared.common.security;
+
+    //
+    // FOR FINDING ALL DERBY MODULES
+    //
+    uses org.apache.derby.shared.api.DerbyModuleAPI;
+    
+    //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.info.shared.DerbyModule;
 
     //
     // DERBY INTERNAL EXPORTS
@@ -42,13 +54,18 @@ module org.apache.derby.commons
         org.apache.derby.server,
         org.apache.derby.optionaltools;
 
-    exports org.apache.derby.shared.common.error to
-        org.apache.derby.engine,
-        org.apache.derby.client,
-        org.apache.derby.server,
-        org.apache.derby.tools,
-        org.apache.derby.optionaltools,
-        org.apache.derby.tests;
+    // FIXME!
+    // EXPORTED TO UNNAMED MODULE SO THAT GENERATED
+    // CLASSES CAN ACCESS StandardException
+    //
+    exports org.apache.derby.shared.common.error;
+    //    exports org.apache.derby.shared.common.error to
+    //        org.apache.derby.engine,
+    //        org.apache.derby.client,
+    //        org.apache.derby.server,
+    //        org.apache.derby.tools,
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
 
     exports org.apache.derby.shared.common.i18n to
         org.apache.derby.engine,

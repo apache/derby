@@ -48,6 +48,23 @@ module org.apache.derby.server
     exports org.apache.derby.mbeans.drda;
 
     //
+    // SUPPORT MODULE LOOKUP
+    //
+    provides org.apache.derby.shared.api.DerbyModuleAPI
+        with org.apache.derby.info.net.DerbyModule;
+
+    //
+    // FIXME: We have to open this package to reflective access
+    // so that the server can read its default policy file.
+    //
+    opens org.apache.derby.drda;
+
+    //
+    // ALLOW REFLECTIVE ACCESS TO MESSAGE FILES
+    //
+    opens org.apache.derby.loc.drda;
+
+    //
     // DERBY INTERNAL EXPORTS
     //
     // ONLY VISIBLE TO OTHER DERBY MODULES.

@@ -135,6 +135,10 @@
     <mkdir dir="${loc.client.dir}"/>
 
     <mkdir dir="${generated.src.dir}/${locale.stub}${localeSuffix}"/>
+    <mkdir dir="${generated.src.dir}/${locale.stub}${localeSuffix}/org/apache/derby/info/${locale.stub}${localeSuffix}"/>
+    <mkdir dir="${locale.output.dir}"/>
+    <mkdir dir="${locale.output.dir}/org/apache/derby/loc/${locale.stub}${localeSuffix}"/>
+
     <copy overwrite="true"
           file="${derby.locales.src.dir}/module-info.template"
           tofile="${generated.src.dir}/${locale.stub}${localeSuffix}/module-info.java">
@@ -143,8 +147,14 @@
       </filterset>
     </copy>
 
-    <mkdir dir="${locale.output.dir}"/>
-    <mkdir dir="${locale.output.dir}/org/apache/derby/loc/${locale.stub}${localeSuffix}"/>
+    <copy overwrite="true"
+          file="${derby.locales.src.dir}/DerbyModule.template"
+          tofile="${generated.src.dir}/${locale.stub}${localeSuffix}/org/apache/derby/info/${locale.stub}${localeSuffix}/DerbyModule.java">
+      <filterset>
+        <filter token="LOCALE" value="${localeSuffix}"/>
+      </filterset>
+    </copy>
+
   	<javac
       source="${min.version}"
       target="${min.version}"
@@ -158,6 +168,9 @@
       srcdir="${generated.src.dir}/${locale.stub}${localeSuffix}"
       destdir="${locale.output.dir}">
       <compilerarg value="-Xlint:unchecked"/>
+      <modulepath>
+		    <pathelement location="${out.shared.dir}"/>
+      </modulepath>
     </javac>
 
     <java classname="org.apache.derbyBuild.splitmessages"
