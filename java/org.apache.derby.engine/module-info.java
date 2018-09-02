@@ -68,6 +68,8 @@ module org.apache.derby.engine
     opens org.apache.derby;
     // ALLOW ACCESS TO ENGLISH MESSAGES
     opens org.apache.derby.loc;
+    // ALLOW ACCESS TO info.properties
+    opens org.apache.derby.info.engine;
 
     //
     // ALLOW CLASS INSTANTIATION VIA REFLECTION
@@ -75,7 +77,22 @@ module org.apache.derby.engine
     
     // ALLOW ExceptionFactory TO INSTANTIATE SQLExceptionFactory
     opens org.apache.derby.impl.jdbc to org.apache.derby.commons;
-    
+
+    //
+    // FIXME! EXPOSED SO THAT THESE PACKAGES CAN BE ACCESSED
+    // BY THE QUERY PLANS WHICH ARE CODE-GENERATED
+    // INTO THE UNNAMED MODULE.
+    //
+    exports org.apache.derby.iapi.services.io;
+    exports org.apache.derby.iapi.services.loader;
+    exports org.apache.derby.iapi.sql;
+    exports org.apache.derby.iapi.sql.conn;
+    exports org.apache.derby.iapi.sql.execute;
+    exports org.apache.derby.iapi.store.access;
+    exports org.apache.derby.iapi.types;
+    exports org.apache.derby.iapi.util;
+    exports org.apache.derby.impl.sql.execute;
+
     //
     // DERBY INTERNAL EXPORTS
     //
@@ -115,23 +132,8 @@ module org.apache.derby.engine
     exports org.apache.derby.iapi.services.diag to
         org.apache.derby.tests;
 
-    exports org.apache.derby.iapi.services.io to
-        org.apache.derby.server,
-        org.apache.derby.optionaltools,
-        org.apache.derby.tests;
-
     exports org.apache.derby.iapi.services.jmx to
         org.apache.derby.server;
-
-    // FIXME! THE GENERATED CLASSES END UP IN THE UNNAMED MODULE.
-    // BECAUSE THEY REFERENCE GeneratedByteCode, WE HAVE TO EXPORT ITS
-    // PACKAGE. WE SHOULD TIGHTEN THIS UP. MAYBE WE CAN GIVE THE GENERATED
-    // CLASSES THEIR OWN MODULE WHICH CAN RECEIVE THE EXPORT.
-    // THEN WE CAN UNCOMMENT THE EXPORTS TO OTHER MODULES.
-    exports org.apache.derby.iapi.services.loader;
-    //exports org.apache.derby.iapi.services.loader to
-    //    org.apache.derby.optionaltools,
-    //    org.apache.derby.tests;
 
     exports org.apache.derby.iapi.services.locks to
         org.apache.derby.tests;
@@ -149,24 +151,8 @@ module org.apache.derby.engine
     exports org.apache.derby.iapi.services.uuid to
         org.apache.derby.tests;
 
-    // FIXME! THE GENERATED CLASSES END UP IN THE UNNAMED MODULE.
-    // BECAUSE THEY REFERENCE Row, WE HAVE TO EXPORT ITS
-    // PACKAGE. WE SHOULD TIGHTEN THIS UP. MAYBE WE CAN GIVE THE GENERATED
-    // CLASSES THEIR OWN MODULE WHICH CAN RECEIVE THE EXPORT.
-    // THEN WE CAN UNCOMMENT THE EXPORT TO THE TESTING MODULE.
-    exports org.apache.derby.iapi.sql;
-    //exports org.apache.derby.iapi.sql to
-    //    org.apache.derby.tests;
-
     exports org.apache.derby.iapi.sql.compile to
         org.apache.derby.tests;
-
-    // FIXME! GENERATED CLASSES NEED TO ACCESS
-    // LanguageConnectionContext
-    exports org.apache.derby.iapi.sql.conn;
-    //    exports org.apache.derby.iapi.sql.conn to
-    //        org.apache.derby.optionaltools,
-    //        org.apache.derby.tests;
 
     exports org.apache.derby.iapi.sql.depend to
         org.apache.derby.tests;
@@ -174,18 +160,6 @@ module org.apache.derby.engine
     exports org.apache.derby.iapi.sql.dictionary to
         org.apache.derby.tools,
         org.apache.derby.optionaltools,
-        org.apache.derby.tests;
-
-    // FIXME! THE GENERATED CLASSES END UP IN THE UNNAMED MODULE.
-    // BECAUSE THEY REFERENCE ExecutionFactory, WE HAVE TO EXPORT ITS
-    // PACKAGE. WE SHOULD TIGHTEN THIS UP. MAYBE WE CAN GIVE THE GENERATED
-    // CLASSES THEIR OWN MODULE WHICH CAN RECEIVE THE EXPORT.
-    // THEN WE CAN UNCOMMENT THE EXPORT TO THE TESTING MODULE.
-    exports org.apache.derby.iapi.sql.execute;
-    //exports org.apache.derby.iapi.sql.execute to
-    //    org.apache.derby.tests;
-
-    exports org.apache.derby.iapi.store.access to
         org.apache.derby.tests;
 
     exports org.apache.derby.iapi.store.access.conglomerate to
@@ -212,22 +186,6 @@ module org.apache.derby.engine
     exports org.apache.derby.iapi.transaction to
         org.apache.derby.server;
 
-    // FIXME! THE GENERATED CLASSES END UP IN THE UNNAMED MODULE.
-    // BECAUSE THEY REFERENCE DataValueFactory, WE HAVE TO EXPORT ITS
-    // PACKAGE. WE SHOULD TIGHTEN THIS UP. MAYBE WE CAN GIVE THE GENERATED
-    // CLASSES THEIR OWN MODULE WHICH CAN RECEIVE THE EXPORT.
-    // THEN WE CAN UNCOMMENT THE EXPORT TO THE OPTIONALTOOLS AND TESTING MODULES.
-    exports org.apache.derby.iapi.types;
-    //exports org.apache.derby.iapi.types to
-    //    org.apache.derby.optionaltools,
-    //    org.apache.derby.tests;
-
-    exports org.apache.derby.iapi.util to
-        org.apache.derby.server,
-        org.apache.derby.tools,
-        org.apache.derby.optionaltools,
-        org.apache.derby.tests;
-
     exports org.apache.derby.impl.io.vfmem to
         org.apache.derby.tests;
 
@@ -246,15 +204,6 @@ module org.apache.derby.engine
 
     exports org.apache.derby.impl.sql to
         org.apache.derby.tests;
-
-    // FIXME! THE GENERATED CLASSES END UP IN THE UNNAMED MODULE.
-    // BECAUSE THEY EXTEND BaseActivation, WE HAVE TO EXPORT ITS
-    // PACKAGE. WE SHOULD TIGHTEN THIS UP. MAYBE WE CAN GIVE THE GENERATED
-    // CLASSES THEIR OWN MODULE WHICH CAN RECEIVE THE EXPORT.
-    // THEN WE CAN UNCOMMENT THE EXPORT TO THE TESTING MODULE.
-    exports org.apache.derby.impl.sql.execute;
-    //exports org.apache.derby.impl.sql.execute to
-    //    org.apache.derby.tests;
 
     exports org.apache.derby.impl.sql.catalog to
         org.apache.derby.tests;
@@ -288,4 +237,68 @@ module org.apache.derby.engine
     exports org.apache.derby.security to
         org.apache.derby.tests;
 
+    //
+    // STANZAS FOR USE WHEN QUERY PLANS ARE GENERATED INTO
+    // SOME MODULE OTHER THAN THE UNNAMED MODULE.
+    //
+    //
+    // QUERY PLANS REFERENCE org.apache.derby.iapi.services.io.Storable
+    //
+    //    exports org.apache.derby.iapi.services.io to
+    //        org.apache.derby.server,
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFERENCE GeneratedByteCode
+    //
+    //exports org.apache.derby.iapi.services.loader to
+    //    org.apache.derby.optionaltools,
+    //    org.apache.derby.tests;
+    //
+    // QUERY PLANS REFERENCE Row
+    //
+    //exports org.apache.derby.iapi.sql to
+    //    org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFEREENCE LanguageConnectionContext
+    //
+    //    exports org.apache.derby.iapi.sql.conn to
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFERENCE ExecutionFactory
+    //
+    //exports org.apache.derby.iapi.sql.execute to
+    //    org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFERENCE org.apache.derby.iapi.store.access.Qualifier
+    //
+    //exports org.apache.derby.iapi.store.access to
+    //    org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFERENCE DataValueFactory
+    //
+    //exports org.apache.derby.iapi.types to
+    //    org.apache.derby.optionaltools,
+    //    org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFERENCE org.apache.derby.iapi.util.StringUtil
+    //
+    //    exports org.apache.derby.iapi.util to
+    //        org.apache.derby.server,
+    //        org.apache.derby.tools,
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS EXTEND BaseActivation
+    //
+    //exports org.apache.derby.impl.sql.execute to
+    //    org.apache.derby.tests;
 }

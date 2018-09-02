@@ -70,5 +70,6 @@ module org.apache.derby.server
     // ONLY VISIBLE TO OTHER DERBY MODULES.
     //
     exports org.apache.derby.impl.drda to
+        org.apache.derby.engine,
         org.apache.derby.tests;
 }

@@ -19,6 +19,8 @@
  */
 package org.apache.derbyTesting.junit;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derbyTesting.functionTests.harness.JavaVersionHolder;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import junit.framework.Assert;
@@ -645,7 +647,9 @@ public abstract class BaseTestCase
 	 */
     public static Process execJavaCmd(
         String jvm, String cp, String[] cmd, final File dir, boolean addClassPath)
-            throws IOException {
+            throws IOException
+    {
+        boolean isModuleAware = JVMInfo.isModuleAware();
 
         // Is this an invocation of a jar file with java -jar ...?
         final boolean isJarInvocation = cmd.length > 0 && cmd[0].equals("-jar");
@@ -711,6 +715,12 @@ public abstract class BaseTestCase
                 booleanValue()) {
             setupForDebuggerAttach(cmdlist);
         }
+
+        if (isModuleAware)
+        {
+            cmdlist.add("--add-modules");
+            cmdlist.add(ModuleUtil.TESTING_MODULE_NAME + "," + DerbyConstants.JUNIT_MODULE_NAME);
+        }
         
         if (isJarInvocation) {
             // If -jar is specified, the Java command will ignore the user's
@@ -719,8 +729,14 @@ public abstract class BaseTestCase
             // the calling code.
             assertNull("Both -jar and classpath specified", cp);
         } else if (addClassPath) {
-            cmdlist.add("-classpath");
-            cmdlist.add(cp == null ? getSystemProperty("java.class.path") : cp);
+            String myClasspath;
+            if (cp != null) { myClasspath = cp; }
+            else if (isModuleAware) { myClasspath = JVMInfo.getSystemModulePath(); }
+            else { myClasspath = getSystemProperty("java.class.path"); }
+
+            if (isModuleAware) { cmdlist.add("-p"); }
+            else { cmdlist.add("-classpath"); }
+            cmdlist.add(myClasspath);
         }
 
 	    for (int i =0; i < cmd.length;i++) {
@@ -740,6 +756,13 @@ public abstract class BaseTestCase
 	            }
 	        });
 	    } catch (PrivilegedActionException pe) {
+            println("Failed to run command: " + pe.getMessage());
+            if (TestConfiguration.getCurrent().isVerbose())
+            {
+                pe.printStackTrace(out);
+                out.flush();
+            }
+            
             throw (IOException) pe.getException();
 	    }
 	}

@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.info.JVMInfo;
@@ -119,7 +121,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.useSeparateProcess = false;
         this.serverShouldComeUp = true;
         this.startServerAtSetup = true;
-}
+    }
 
     /**
      * Decorates a test with the NetworkServerTestSetup.
@@ -307,6 +309,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
     private void startWithAPI() throws Exception
     {
+        BaseTestCase.println("Starting network server with NetworkServerControl api:");
             
             serverOutput = AccessController.doPrivileged(
                     new PrivilegedAction<FileOutputStream>() {
@@ -337,6 +340,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
                 String[]    args = getDefaultStartupArgs( false );
                 
+                BaseTestCase.println("Starting network server with this command: " + Arrays.asList(args));
+                
                 org.apache.derby.drda.NetworkServerControl.main( args );
             }
             
@@ -345,6 +350,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
     private SpawnedProcess startSeparateProcess() throws Exception
     {
+        boolean isModuleAware = JVMInfo.isModuleAware();
+        BaseTestCase.println("Starting network server as a separate process:");
         ArrayList<String> al = new ArrayList<String>();
         boolean         skipHostName = false;
 
@@ -388,7 +395,16 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             al.add( "-D" + systemProperties[ i ] );
         }
 
-        al.add( "org.apache.derby.drda.NetworkServerControl" );
+        String serverName = NetworkServerControl.class.getName();
+        if (isModuleAware)
+        {
+            al.add("-m");
+            al.add(ModuleUtil.SERVER_MODULE_NAME + "/" + serverName);
+        }
+        else
+        {
+            al.add(serverName);
+        }
 
         count = startupArgs.length;
         for ( int i = 0; i < count; i++ )

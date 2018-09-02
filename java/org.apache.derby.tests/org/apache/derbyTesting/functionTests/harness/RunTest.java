@@ -43,7 +43,10 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import org.apache.derby.shared.common.reference.Attribute;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.DerbyConstants;
 
 public class RunTest
 {
@@ -2289,7 +2292,7 @@ clp.list(System.out);
 		
         if ( (testJavaFlags != null) && (testJavaFlags.length()>0) )
         {
-	    String parsedFlags = setTestJavaFlags(testJavaFlags);
+            String parsedFlags = setTestJavaFlags(testJavaFlags);
             StringTokenizer st = new StringTokenizer(parsedFlags," ");
             while (st.hasMoreTokens())
             {
@@ -2364,8 +2367,23 @@ clp.list(System.out);
             jvm.setSecurityProps();
         else
         	System.out.println("-- SecurityManager not installed --");
-            
+
         Vector<String> v = jvm.getCommandLine();
+
+        boolean isModuleAware = JVMInfo.isModuleAware();
+        if (isModuleAware)
+        {
+            v.add("-p");
+            v.add(JVMInfo.getSystemModulePath());
+            v.add("--add-modules");
+            v.add
+              (
+               ModuleUtil.TESTING_MODULE_NAME + "," +
+               ModuleUtil.TOOLS_MODULE_NAME + "," +
+               DerbyConstants.JUNIT_MODULE_NAME
+               );
+        }
+        
         if ( ij.startsWith("ij") )
         {
             // As of cn1411-20030930 IBM jvm the system takes the default
@@ -2382,7 +2400,19 @@ clp.list(System.out);
             } else if ((isNotAscii == null) || (isNotAscii.equals("false"))) {
                 v.addElement("-Dconsole.encoding=Cp1252" );
             }
-            v.addElement("org.apache.derby.tools." + ij);
+
+            String executableClass = "org.apache.derby.tools." + ij;
+            
+            if (isModuleAware)
+            {
+                v.add("-m");
+                v.add(ModuleUtil.TOOLS_MODULE_NAME + "/" + executableClass);
+            }
+            else
+            {
+                v.addElement(executableClass);
+            }
+
             if (ij.equals("ij"))
             {
                 //TODO: is there a setting/property we could check after which
@@ -2396,10 +2426,19 @@ clp.list(System.out);
         }
         else if ( testType.equals("java") )
         {
-            if (javaPath.length() > 0)
-                v.addElement(javaPath + "." + testBase);
+            String testClass = (javaPath.length() > 0) ?
+                javaPath + "." + testBase : testBase;
+
+            if (isModuleAware)
+            {
+                v.add("-m");
+                v.add(ModuleUtil.TESTING_MODULE_NAME + "/" + testClass);
+            }
             else
-                v.addElement(testBase);
+            {
+                v.addElement(testClass);
+            }
+
             if (propString.length() > 0)
             {
                 v.addElement("-p");

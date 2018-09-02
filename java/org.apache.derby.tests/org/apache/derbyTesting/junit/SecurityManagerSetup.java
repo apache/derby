@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 /**
@@ -428,6 +429,7 @@ public final class SecurityManagerSetup extends TestSetup {
         if (testing.getProtocol().equals("file")) {
            File f = new File(testing.getPath());
            classPathSet.setProperty("derbyTesting.testjarpath", f.getAbsolutePath());
+           classPathSet.setProperty(Property.DERBY_INSTALL_PATH, f.getParentFile().getAbsolutePath());
         }
 
         setCodebase(DERBY_ENGINE, "org.apache.derby.database.Database");

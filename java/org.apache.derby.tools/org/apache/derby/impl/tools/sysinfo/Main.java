@@ -469,7 +469,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
                     if (JVMInfo.isModuleAware())
                     {
-                      String moduleName = ModuleUtil.localizationModuleName(locale.toString());
+                        String moduleName = ModuleUtil.localizationModuleName(locale.toString());
                         Module localizationModule = ModuleUtil.derbyModule(moduleName);
 
                         if (localizationModule != null)

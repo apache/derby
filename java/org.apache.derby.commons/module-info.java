@@ -45,6 +45,14 @@ module org.apache.derby.commons
         with org.apache.derby.info.shared.DerbyModule;
 
     //
+    // FIXME! EXPOSED SO THAT THESE PACKAGES CAN BE ACCESSED
+    // BY THE QUERY PLANS WHICH ARE CODE-GENERATED
+    // INTO THE UNNAMED MODULE.
+    //
+    exports org.apache.derby.shared.common.error;
+
+
+    //
     // DERBY INTERNAL EXPORTS
     //
     // ONLY VISIBLE TO OTHER DERBY MODULES.
@@ -53,19 +61,6 @@ module org.apache.derby.commons
         org.apache.derby.client,
         org.apache.derby.server,
         org.apache.derby.optionaltools;
-
-    // FIXME!
-    // EXPORTED TO UNNAMED MODULE SO THAT GENERATED
-    // CLASSES CAN ACCESS StandardException
-    //
-    exports org.apache.derby.shared.common.error;
-    //    exports org.apache.derby.shared.common.error to
-    //        org.apache.derby.engine,
-    //        org.apache.derby.client,
-    //        org.apache.derby.server,
-    //        org.apache.derby.tools,
-    //        org.apache.derby.optionaltools,
-    //        org.apache.derby.tests;
 
     exports org.apache.derby.shared.common.i18n to
         org.apache.derby.engine,
@@ -102,4 +97,19 @@ module org.apache.derby.commons
 
     exports org.apache.derby.shared.common.util to
         org.apache.derby.engine;
+
+    //
+    // STANZAS FOR USE WHEN QUERY PLANS ARE GENERATED INTO
+    // SOME MODULE OTHER THAN THE UNNAMED MODULE.
+    //
+    //
+    // QUERY PLANS REFERENCE StandardException
+    //
+    //    exports org.apache.derby.shared.common.error to
+    //        org.apache.derby.engine,
+    //        org.apache.derby.client,
+    //        org.apache.derby.server,
+    //        org.apache.derby.tools,
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
 }

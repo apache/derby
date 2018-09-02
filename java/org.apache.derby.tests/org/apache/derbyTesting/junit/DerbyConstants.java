@@ -35,4 +35,7 @@ public interface DerbyConstants {
 
     /** Default name for the DBO (database owner). */
     String TEST_DBO = "TEST_DBO";
+
+    /** Name of the automatic JUnit module. */
+    String JUNIT_MODULE_NAME = "junit";
 }

@@ -34,6 +34,8 @@ import java.util.StringTokenizer;
 import java.util.Properties;
 
 import org.apache.derby.shared.common.info.ProductGenusNames;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 
 public class FileCompare
 {
@@ -110,8 +112,19 @@ public class FileCompare
             topdir = canondir;
         else {
 			// if this is using product jars, use product_master first
-			Class c = FileCompare.class; // get our class loader
-			InputStream is = c.getResourceAsStream("/" + ProductGenusNames.DBMS_INFO);
+            String resourceName = "/" + ProductGenusNames.DBMS_INFO;
+            InputStream is;
+            if (JVMInfo.isModuleAware())
+            {
+                Module engineModule = ModuleUtil.derbyModule(ModuleUtil.ENGINE_MODULE_NAME);
+                is = engineModule.getResourceAsStream(resourceName);
+            }
+            else
+            {
+                Class c = FileCompare.class; // get our class loader
+                is = c.getResourceAsStream(resourceName);
+            }
+            
 			Properties dbprop = new Properties();
 			dbprop.load(is);
 			is.close();

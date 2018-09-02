@@ -29,6 +29,7 @@ import java.util.StringTokenizer;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.impl.tools.sysinfo.ZipInfoProperties;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -319,7 +320,8 @@ public abstract class jvm {
 
 	public static String findCodeBase(boolean[] isJar)
 	{
-		String classpath = System.getProperty("java.class.path");
+        String classpath = JVMInfo.isModuleAware() ?
+            JVMInfo.getSystemModulePath() : System.getProperty("java.class.path");
 		char sep = '/';
 		ZipInfoProperties zip[]= 
 			org.apache.derby.impl.tools.sysinfo.Main.getAllInfo (classpath);
