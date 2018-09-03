@@ -59,6 +59,9 @@ module org.apache.derby.tools
     //
     opens org.apache.derby.loc.tools;
 
+    // ALLOW ACCESS TO info.properties
+    opens org.apache.derby.info.tools;
+
     //
     // DERBY INTERNAL EXPORTS
     //

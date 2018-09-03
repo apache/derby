@@ -24,6 +24,8 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.util.Vector;
 import java.util.StringTokenizer;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+
 /**
   <p>This class is for JDK1.3.
 
@@ -66,6 +68,8 @@ public class jdk13 extends jvm {
 
 	public void appendOtherFlags(StringBuffer sb)
 	{
+        boolean isModuleAware = JVMInfo.isModuleAware();
+        
         if (noasyncgc) warn("jdk13 does not support noasyncgc");
         if (verbosegc) sb.append(" -verbose:gc");
         if (noclassgc) sb.append(" -Xnoclassgc");
@@ -79,8 +83,10 @@ public class jdk13 extends jvm {
           sb.append(" -mx");
           sb.append(mx);
         }
-        if (classpath!=null) {
-          sb.append(" -classpath ");
+        if (classpath!=null)
+        {
+          if (isModuleAware) { sb.append(" -p "); }
+          else { sb.append(" -classpath "); }
           sb.append(classpath);
         }
         if (prof!=null) warn("jdk13 does not support prof");

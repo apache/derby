@@ -21,6 +21,9 @@
 
 package org.apache.derby.impl.tools.ij;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.iapi.tools.i18n.*;
 
@@ -163,18 +166,38 @@ public final class util implements java.security.PrivilegedAction<String> {
 	  */
     static InputStream getResourceAsStream(String resourceName)
 	{
+        boolean isModuleAware = JVMInfo.isModuleAware();
+      
 		final Class c = util.class;
 		final String resource = qualifyResourceName(resourceName,true);
-		if (resource == null) 
-			return null;
-		InputStream is = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
-            public InputStream run() { 
-                      InputStream locis = 
-                          c.getResourceAsStream(resource);
-                                  return locis;
+		if (resource == null) { return null; }
+		InputStream is = null;
+
+        if (isModuleAware)
+        {
+            try
+            {
+                is = ModuleUtil.getResourceAsStream(resource);
+            }
+            catch (Exception ex)
+            {
+                System.out.println(ex.getMessage());
             }
         }
-     );
+        else
+        {
+            is = AccessController.doPrivileged
+              (
+               new PrivilegedAction<InputStream>()
+               {
+                   public InputStream run()
+                   { 
+                      InputStream locis = c.getResourceAsStream(resource);
+                      return locis;
+                   }
+               }
+               );
+        }
 
 		if (is != null) 
 			is = new BufferedInputStream(is, utilMain.BUFFEREDFILESIZE);

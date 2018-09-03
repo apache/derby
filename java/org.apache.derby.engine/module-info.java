@@ -83,6 +83,8 @@ module org.apache.derby.engine
     // BY THE QUERY PLANS WHICH ARE CODE-GENERATED
     // INTO THE UNNAMED MODULE.
     //
+    exports org.apache.derby.diag;
+    exports org.apache.derby.iapi.db;
     exports org.apache.derby.iapi.services.io;
     exports org.apache.derby.iapi.services.loader;
     exports org.apache.derby.iapi.sql;
@@ -102,12 +104,6 @@ module org.apache.derby.engine
         org.apache.derby.tests;
 
     exports org.apache.derby.database to
-        org.apache.derby.optionaltools,
-        org.apache.derby.tests;
-
-    exports org.apache.derby.iapi.db to
-        org.apache.derby.server,
-        org.apache.derby.tools,
         org.apache.derby.optionaltools,
         org.apache.derby.tests;
 
@@ -185,6 +181,9 @@ module org.apache.derby.engine
 
     exports org.apache.derby.iapi.transaction to
         org.apache.derby.server;
+
+    exports org.apache.derby.impl.io to
+        org.apache.derby.tests;
 
     exports org.apache.derby.impl.io.vfmem to
         org.apache.derby.tests;
@@ -301,4 +300,13 @@ module org.apache.derby.engine
     //
     //exports org.apache.derby.impl.sql.execute to
     //    org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFERENCE org.apache.derby.iapi.db.Factory
+    //    exports org.apache.derby.iapi.db to
+    //        org.apache.derby.server,
+    //        org.apache.derby.tools,
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
+
 }

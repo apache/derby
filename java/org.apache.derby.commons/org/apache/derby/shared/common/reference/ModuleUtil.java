@@ -21,11 +21,17 @@
 
 package org.apache.derby.shared.common.reference;
 
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.ServiceLoader;
 
 import org.apache.derby.shared.api.DerbyModuleAPI;
+import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.shared.common.info.JVMInfo;
 
 /**
@@ -96,6 +102,30 @@ public class ModuleUtil
         return LOCALE_MODULE_NAME_PREFIX + localeString;
     }
 
+    /**
+     * Lookup a resource in all the Derby modules. Returns the first
+     * version of the resource which can be found. This should be unambiguous
+     * due to the fact that packages cannot straddle multiple modules.
+     *
+     * @param resourceName The name of the resource to find
+     *
+     * @return a stream opened on the resource or null if it was not found
+     */
+    public static InputStream getResourceAsStream(String resourceName)
+        throws StandardException
+    {
+        initModuleInfo();  // find all of the derby modules
+
+        InputStream retval = null;
+        for (java.lang.Module module : _derbyModules.values())
+        {
+            retval = getResourceAsStream(module, resourceName);
+            if (retval != null) { break; }
+        }
+
+        return retval;
+    }
+
     /////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -123,4 +153,43 @@ public class ModuleUtil
         _derbyModules = result;
     }
 
+    /**
+     * Lookup a resource in a module.
+     *
+     * @param module The module in which to look for the resource
+     * @param resourceName The name of the resource
+     *
+     * @return a stream opened on the resource or null we can't find the resource in the module.
+     */
+    private static InputStream getResourceAsStream
+      (
+         final java.lang.Module module,
+         final String resourceName
+       )
+      throws StandardException
+    {
+        InputStream retval = null;
+        Throwable error = null;
+        try
+        {
+            retval = AccessController.doPrivileged
+              (
+               new PrivilegedExceptionAction<InputStream>()
+               {
+                   public InputStream run() throws IOException
+                   {
+                       return module.getResourceAsStream(resourceName);
+                   }
+               }
+               );
+        }
+        catch (PrivilegedActionException pae) { error = pae; }
+
+        if (error != null)
+        {
+            throw StandardException.plainWrapException(error);
+        }
+        
+        return retval;
+    }
 }

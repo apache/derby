@@ -21,7 +21,10 @@
 
 package org.apache.derbyTesting.functionTests.harness;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derby.tools.sysinfo;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -364,6 +367,8 @@ public class RunSuite
 
     private static void getSystemProperties()
     {
+        boolean isModuleAware = JVMInfo.isModuleAware();
+      
         // Get any properties specified on the command line
         // which may not have been specified in the suite prop file
         Properties sp = System.getProperties();
@@ -423,7 +428,8 @@ public class RunSuite
 		        testSpecialProps = testSpecialProps + "^" + testprops;
 		    suiteProperties.put("testSpecialProps", testSpecialProps);
 		}
-		String clpth = sp.getProperty("classpath");
+
+		String clpth = isModuleAware ? JVMInfo.getSystemModulePath() : sp.getProperty("classpath");
 		if (clpth != null)
 		{
 		    classpath = clpth;

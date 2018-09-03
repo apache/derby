@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.util.Vector;
 import java.util.StringTokenizer;
 
+import org.apache.derby.shared.common.info.JVMInfo;
 
 public class jdk100 extends jvm {
 
@@ -58,7 +59,10 @@ public class jdk100 extends jvm {
         return v;
     }
 
-    public void appendOtherFlags(StringBuffer sb) {
+    public void appendOtherFlags(StringBuffer sb)
+    {
+        boolean isModuleAware = JVMInfo.isModuleAware();
+      
         if (noasyncgc) warn(getName() + " does not support noasyncgc");
         if (verbosegc) sb.append(" -verbose:gc");
         if (noclassgc) sb.append(" -Xnoclassgc");
@@ -72,8 +76,10 @@ public class jdk100 extends jvm {
             sb.append(" -mx");
             sb.append(mx);
         }
-        if (classpath!=null) {
-            sb.append(" -classpath ");
+        if (classpath!=null)
+        {
+            if (isModuleAware) { sb.append(" -p "); }
+            else { sb.append(" -classpath "); }
             sb.append(classpath);
         }
         if (prof!=null) warn(getName() + " does not support prof");

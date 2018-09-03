@@ -31,6 +31,9 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.io.*;
 import java.util.Vector;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
+
 public class SysInfoLog
 {
 
@@ -43,6 +46,8 @@ public class SysInfoLog
         String framework, PrintWriter pw, boolean useprocess)
         throws Exception
 	{
+        boolean isModuleAware = JVMInfo.isModuleAware();
+      
         if ( useprocess == true )
         {
             // Create a process to run sysinfo
@@ -51,7 +56,7 @@ public class SysInfoLog
     		try
     		{
                 // Create the command line
-                //System.out.println("jvmName: " + jvmName);
+                System.out.println("jvmName: " + jvmName);
                 if ( (jvmName == null) || (jvmName.length()==0) )
                     jvmName = "jdk13";
                 else if (jvmName.startsWith("jdk13"))
@@ -70,7 +75,18 @@ public class SysInfoLog
                 }
 
 				Vector<String> v = javavm.getCommandLine();
-                v.addElement("org.apache.derby.tools.sysinfo");
+
+                String mainClassName = "org.apache.derby.tools.sysinfo";
+                if (isModuleAware)
+                {
+                    v.add("-m");
+                    v.add(ModuleUtil.TOOLS_MODULE_NAME + "/" + mainClassName);
+                }
+                else
+                {
+                    v.addElement(mainClassName);
+                }
+                
                 // Now convert the vector into a string array
                 String[] sCmd = new String[v.size()];
                 for (int i = 0; i < v.size(); i++)
@@ -78,7 +94,7 @@ public class SysInfoLog
                     sCmd[i] = (String)v.elementAt(i);
                     //System.out.println(sCmd[i]);
                 }
-                
+
                 pr = Runtime.getRuntime().exec(sCmd);
 
                 // We need the process inputstream to capture into the output file

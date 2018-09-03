@@ -46,6 +46,9 @@ import java.util.StringTokenizer;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
+
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 
@@ -340,6 +343,8 @@ public class RunList
     private static void runTests(Properties suiteProps, String suite)
         throws IOException, Exception
     {
+        boolean isModuleAware = JVMInfo.isModuleAware();
+      
 	    // save a copy of the system properties at this point; when runing with
 	    // java threads we need to reset the system properties to this list;
 	    // otherwise we start to accumulate extraneous properties from
@@ -358,8 +363,10 @@ public class RunList
 	    }
         if ( (testJavaFlags != null) && (testJavaFlags.length()>0) )
             jvmProps.addElement("testJavaFlags=" + testJavaFlags);
-	    if (classpath != null)
+	    if ((classpath != null) && !isModuleAware)
+        {
 	        jvmProps.addElement("classpath=" + classpath);
+        }
 	    if (classpathServer != null)
 	        jvmProps.addElement("classpathServer=" + classpathServer);
 	    if (jversion != null)
@@ -491,7 +498,20 @@ public class RunList
 
         jvm.setD(jvmProps);
         Vector<String> v = jvm.getCommandLine();
-        v.addElement("org.apache.derbyTesting.functionTests.harness.RunTest");
+
+        String execClassName = "org.apache.derbyTesting.functionTests.harness.RunTest";
+        if (isModuleAware)
+        {
+            v.addElement("--add-modules");
+            v.addElement("org.apache.derby.tests,junit");
+            
+            v.add("-m");
+            v.add(ModuleUtil.TESTING_MODULE_NAME + "/" + execClassName);
+        }
+        else
+        {
+            v.addElement(execClassName);
+        }
 
         String str = "";
 	    String lastTest = null;
