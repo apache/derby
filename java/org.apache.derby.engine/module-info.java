@@ -94,6 +94,8 @@ module org.apache.derby.engine
     exports org.apache.derby.iapi.types;
     exports org.apache.derby.iapi.util;
     exports org.apache.derby.impl.sql.execute;
+    exports org.apache.derby.impl.load;
+    exports org.apache.derby.impl.jdbc;
 
     //
     // DERBY INTERNAL EXPORTS
@@ -186,12 +188,6 @@ module org.apache.derby.engine
         org.apache.derby.tests;
 
     exports org.apache.derby.impl.io.vfmem to
-        org.apache.derby.tests;
-
-    exports org.apache.derby.impl.jdbc to
-        org.apache.derby.server,
-        org.apache.derby.tools,
-        org.apache.derby.optionaltools,
         org.apache.derby.tests;
 
     exports org.apache.derby.impl.jdbc.authentication to
@@ -304,6 +300,14 @@ module org.apache.derby.engine
     //
     // QUERY PLANS REFERENCE org.apache.derby.iapi.db.Factory
     //    exports org.apache.derby.iapi.db to
+    //        org.apache.derby.server,
+    //        org.apache.derby.tools,
+    //        org.apache.derby.optionaltools,
+    //        org.apache.derby.tests;
+    //
+    //
+    // QUERY PLANS REFERENCE org.apache.derby.impl.jdbc.LOBStoredProcedure
+    //    exports org.apache.derby.impl.jdbc to
     //        org.apache.derby.server,
     //        org.apache.derby.tools,
     //        org.apache.derby.optionaltools,

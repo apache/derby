@@ -42,11 +42,19 @@ import org.apache.derbyTesting.junit.BaseTestCase;
  */
 public class UpgradeClassLoader
 {
-    private static final String[] jarFiles = {
+    private static final Version FIRST_MODULE_SUPPORT_VERSION = new Version(new int[] { 10, 15, 0, 0 });
+    private static final String[] _preModuleSupport_jarFiles = {
             "derby.jar", 
-            //"derbynet.jar",
-            //"derbyclient.jar",
-            //"derbytools.jar"
+            "derbynet.jar",
+            "derbyTesting.jar",
+            };
+
+    private static final String[] _postModuleSupport_jarFiles = {
+            "derby.jar", 
+            "derbynet.jar",
+            "derbyTesting.jar",
+            "derbyshared.jar",
+            "derbytools.jar"
             };
 
     static final String oldVersionsPath =
@@ -133,7 +141,12 @@ public class UpgradeClassLoader
      */
     private static ClassLoader createClassLoader(int[] version)
     {
-        URL[] url = new URL[jarFiles.length];
+        Version oldVersion = new Version(version);
+        String[] jarFiles = (oldVersion.compareTo(FIRST_MODULE_SUPPORT_VERSION) < 0) ?
+            _preModuleSupport_jarFiles : _postModuleSupport_jarFiles;
+
+        // add an extra slot at the end for junit.jar
+        URL[] url = new URL[jarFiles.length + 1];
         
         String jarLocation = getOldJarLocation(version);
         
@@ -181,6 +194,10 @@ public class UpgradeClassLoader
 
             }
         }
+
+        // add junit.jar to the classpath
+        int lastSlot = jarFiles.length;
+        url[lastSlot] = Assert.class.getProtectionDomain().getCodeSource().getLocation();
 
         // Create a class loader which loads Derby classes from the specified
         // URL, and JDBC classes and other system classes from the platform

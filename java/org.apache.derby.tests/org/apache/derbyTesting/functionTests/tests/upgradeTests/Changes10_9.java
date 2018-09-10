@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derbyTesting.functionTests.tests.upgradeTests.helpers.DisposableIndexStatistics;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
@@ -892,6 +893,13 @@ public class Changes10_9 extends UpgradeChange
         //  appear in order to test the drop statistics after hard upgrade
         if (!oldAtLeast(10, 5)) return;
 
+        // Also don't run this test if we are running with the module path.
+        // In that case, the engine is running remotely in a server at
+        // a different version level. The statistics objects will not
+        // serialize across a network connection: they are only meant to
+        // be deserialized inside the engine.
+        if (JVMInfo.isModuleAware()) { return; }
+
         // Helper object to obtain information about index statistics.
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
@@ -996,6 +1004,13 @@ public class Changes10_9 extends UpgradeChange
         if (!oldAtLeast(10, 5)) {
             return;
         }
+
+        // Also don't run this test if we are running with the module path.
+        // In that case, the engine is running remotely in a server at
+        // a different version level. The statistics objects will not
+        // serialize across a network connection: they are only meant to
+        // be deserialized inside the engine.
+        if (JVMInfo.isModuleAware()) { return; }
 
         final String TBL = "ISTAT_DISPOSABLE_STATS";
         String updateStatsSQL = "call syscs_util.syscs_update_statistics(" +

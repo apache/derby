@@ -20,10 +20,16 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.io.File;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Properties;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.Property;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
@@ -43,6 +49,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 class UpgradeRun extends UpgradeClassLoader
 {
+
+    private static final String QUOTE = "\"";
     
     /**
      * Set of additional databases for tests that
@@ -80,7 +88,24 @@ class UpgradeRun extends UpgradeClassLoader
                     "Empty: Skipped upgrade Tests (no jars) for " + getTextVersion(version));
             return suite;
         }
-        
+
+        //
+        // Skip tests for releases before 10.2.2.0 if
+        // we are running with a module path. That is because
+        // a module-aware run requires that the old release
+        // be booted in a server. But the handleJavaSE6() method
+        // forces us into embedded mode for releases
+        // prior to 10.2.2.0.
+        //
+        if (JVMInfo.isModuleAware() && lessThan(version, new int[] {10, 2, 2, 0}))
+        {
+            BaseTestSuite suite = new BaseTestSuite
+              (
+               "Empty: Skipped upgrade Tests (cannot use module path for " + getTextVersion(version) +
+               " because it comes before before 10.2.2.0)."
+               );
+            return suite;
+        }
 
         BaseTestSuite suite = new BaseTestSuite(
                 "Upgrade Tests from " + getTextVersion(version));
@@ -91,25 +116,29 @@ class UpgradeRun extends UpgradeClassLoader
               phase < UpgradeChange.PHASES.length; phase++)
         {
             ClassLoader loader = null;
+            boolean phaseForOldRelease = false;
             switch (phase)
             {
             case UpgradeChange.PH_CREATE:
             case UpgradeChange.PH_POST_SOFT_UPGRADE:
             case UpgradeChange.PH_POST_HARD_UPGRADE:
                 loader = oldLoader;
+                phaseForOldRelease = true;
                 break;
             case UpgradeChange.PH_SOFT_UPGRADE:
             case UpgradeChange.PH_HARD_UPGRADE:
                 break;
                 
             }
-            Test phaseTests = baseSuite(getTextVersion(version)
-                    + " Upgrade Phase: " + UpgradeChange.PHASES[phase] + " ",
+            String testName = getTextVersion(version)
+              + " Upgrade Phase: " + UpgradeChange.PHASES[phase] + " ";
+            Test phaseTests = baseSuite(testName,
                     phase, version);
             
             Test phaseSet = new PhaseChanger(phaseTests, phase, loader, version, useCreateOnUpgrade);
             phaseSet = handleJavaSE6(phase, version, phaseSet);
-            suite.addTest(phaseSet);
+            Test moduleAdjustment = adjustForModules(phaseSet, version, phaseForOldRelease, oldLoader);
+            suite.addTest(moduleAdjustment);
         }
           
         TestSetup setup = TestConfiguration.singleUseDatabaseDecorator(suite);
@@ -127,11 +156,72 @@ class UpgradeRun extends UpgradeClassLoader
         
         Properties preReleaseUpgrade = new Properties();
         preReleaseUpgrade.setProperty(
-                "derby.database.allowPreReleaseUpgrade", "true");
+                Property.ALPHA_BETA_ALLOW_UPGRADE, "true");
         
         setup = new SystemPropertyTestSetup(setup, preReleaseUpgrade);
    
         return SecurityManagerSetup.noSecurityManager(setup);
+    }
+
+    /**
+     * Adjust with a client/server decorator if we are running on
+     * the module path and the test phase is one of those which
+     * is performed on the old database.
+     *
+     * @param test The test to possibly decorate
+     * @param versionNumber The old version number
+     * @param phaseForOldRelease True if the phase runs on the old release
+     * @param classLoader The ClassLoader to use to find the old release jars
+     *
+     * @return the test, possibly decorate with a client/server wrapper
+     */
+    private static Test adjustForModules
+      (Test test, int[] versionNumber, boolean phaseForOldRelease, ClassLoader loader)
+    {
+        // nothing to do if we aren't running with a module path
+        if (!JVMInfo.isModuleAware()) { return test; }
+
+        // only boot a server off the old release jars
+        // if the phase is an old release phase
+        if (!phaseForOldRelease) { return test; }
+
+        Version version = new Version(versionNumber);
+
+        // get the loader which lists the jar files of the old release
+        URLClassLoader ucl = (URLClassLoader) loader.getParent();
+        URL[] urls = ucl.getURLs();
+        int urlCount = urls.length;
+
+        StringBuilder buffer = new StringBuilder();
+        for (int idx = 0; idx < urlCount; idx++)
+        {
+            if (idx > 0) { buffer.append(File.pathSeparator); }
+            buffer.append(urls[idx].toString());
+        }
+
+        String classpath = buffer.toString();
+
+        // make the server access databases under the same
+        // directory as the embedded usage does.
+        // allow upgrade to the current (trunk) alpha version
+        String[] serverProperties = new String[]
+        {
+            Property.SYSTEM_HOME_PROPERTY + "=system",
+            Property.ALPHA_BETA_ALLOW_UPGRADE + "=true",
+        };
+
+        // network security manager settings are stricter
+        // on later versions of the JVM. turn off the security
+        // manager on the server.
+        ArrayList<String> startupArgList = new ArrayList<String>();
+        if (version.compareTo(Version.V_10_3_0_0) >= 0)
+        { startupArgList.add("-noSecurityManager"); }
+        String[] startupArgs = new String[startupArgList.size()];
+        startupArgList.toArray(startupArgs);
+
+        // boot the old release from the classpath: old releases don't support modules
+        return TestConfiguration.clientServerDecorator
+          (test, serverProperties, startupArgs, true, classpath, false, true);
     }
     
     /**

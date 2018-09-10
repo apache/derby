@@ -38,6 +38,7 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 /**
@@ -495,6 +496,37 @@ public final class TestConfiguration {
     public static Test clientServerDecorator(Test suite)
     {
         Test test = new NetworkServerTestSetup(suite, false);
+            
+        return defaultServerDecorator(test);
+    }
+  
+    /**
+     * Return a decorator for the passed in tests that sets the
+     * configuration for the client to be Derby's JDBC client
+     * and to start the network server at setUp.
+     * <BR>
+     * The database configuration (name etc.) is based upon
+     * the previous configuration.
+     * <BR>
+     * The previous TestConfiguration is restored at tearDown and
+     * the network server is shutdown.
+     */
+    public static Test clientServerDecorator
+      (
+       Test suite,
+       String[] systemProperties,
+       String[] startupArgs,
+       boolean serverShouldComeUp,
+       String moduleOrClassPath,
+       boolean useModules,
+       boolean suppressServerDiagnostics
+       )
+    {
+        Test test = new NetworkServerTestSetup
+          (
+           suite, systemProperties, startupArgs, serverShouldComeUp,
+           moduleOrClassPath, useModules, suppressServerDiagnostics
+           );
             
         return defaultServerDecorator(test);
     }

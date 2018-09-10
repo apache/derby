@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class ShutDownDBWhenNSShutsDownTest
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.derbynet.ShutDownDBWhenNSShutsDownTest
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

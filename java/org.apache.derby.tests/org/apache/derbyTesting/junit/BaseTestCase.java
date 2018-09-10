@@ -649,8 +649,43 @@ public abstract class BaseTestCase
         String jvm, String cp, String[] cmd, final File dir, boolean addClassPath)
             throws IOException
     {
-        boolean isModuleAware = JVMInfo.isModuleAware();
+        boolean useModules = JVMInfo.isModuleAware();
 
+        return execJavaCmd(jvm, cp, cmd, dir, addClassPath, useModules);
+    }
+  
+	/**
+	 * Execute a java command and return the process.
+	 * The caller should decide what to do with the process, if anything,
+	 * typical activities would be to do a pr.waitFor, or to
+	 * get a getInputStream or getErrorStream
+	 * Note, that for verifying the output of a Java process, there is
+	 * assertExecJavaCmdAsExpected
+	 * 
+     * @param jvm the path to the java executable, or {@code null} to use
+     *            the default executable returned by
+     *            {@link #getJavaExecutableName()}
+     * @param cp  the classpath for the spawned process, or {@code null} to
+     *            inherit the classpath from the parent process
+	 * @param cmd array of java arguments for command
+     * @param dir working directory for the sub-process, or {@code null} to
+     *            run in the same directory as the main test process
+     * @param addClassPath if {@code true},add classpath
+     * @param useModulePath if {@code true}, use the modulepath rather than the classpath
+	 * @return the process that was started
+	 * @throws IOException
+	 */
+    public static Process execJavaCmd
+      (
+       String jvm,
+       String cp,
+       String[] cmd,
+       final File dir,
+       boolean addClassPath,
+       boolean useModulePath
+       )
+      throws IOException
+    {
         // Is this an invocation of a jar file with java -jar ...?
         final boolean isJarInvocation = cmd.length > 0 && cmd[0].equals("-jar");
 
@@ -716,7 +751,7 @@ public abstract class BaseTestCase
             setupForDebuggerAttach(cmdlist);
         }
 
-        if (isModuleAware)
+        if (useModulePath)
         {
             cmdlist.add("--add-modules");
             cmdlist.add(ModuleUtil.TESTING_MODULE_NAME + "," + DerbyConstants.JUNIT_MODULE_NAME);
@@ -731,10 +766,10 @@ public abstract class BaseTestCase
         } else if (addClassPath) {
             String myClasspath;
             if (cp != null) { myClasspath = cp; }
-            else if (isModuleAware) { myClasspath = JVMInfo.getSystemModulePath(); }
+            else if (useModulePath) { myClasspath = JVMInfo.getSystemModulePath(); }
             else { myClasspath = getSystemProperty("java.class.path"); }
 
-            if (isModuleAware) { cmdlist.add("-p"); }
+            if (useModulePath) { cmdlist.add("-p"); }
             else { cmdlist.add("-classpath"); }
             cmdlist.add(myClasspath);
         }

@@ -28,7 +28,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import javax.sql.DataSource;
+
 import junit.framework.Test;
+
+import org.apache.derby.shared.common.info.JVMInfo;
+
 import org.apache.derby.catalog.SystemProcedures;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseTestSuite;
@@ -104,10 +108,22 @@ public class BasicSetup extends UpgradeChange {
         case PH_CREATE:
         case PH_POST_SOFT_UPGRADE:
             DatabaseMetaData dmd = getConnection().getMetaData();
-            assertEquals("Old major (driver): ",
+
+            //
+            // If we are running on the classpath, then the driver
+            // will be an embedded driver corresponding to the old version.
+            // But if we are running on the module path, then the
+            // old version is running in a server and the driver
+            // is a client driver corresponding to the current version.
+            //
+            if (!JVMInfo.isModuleAware())
+            {
+              assertEquals("Old major (driver): ",
                     getOldMajor(), dmd.getDriverMajorVersion());
-            assertEquals("Old minor (driver): ",
+              assertEquals("Old minor (driver): ",
                     getOldMinor(), dmd.getDriverMinorVersion());
+            }
+            
             assertEquals("Old major (database): ",
                     getOldMajor(), dmd.getDatabaseMajorVersion());
             assertEquals("Old minor (database): ",
@@ -182,7 +198,7 @@ public class BasicSetup extends UpgradeChange {
      */
     public void testCreateTable() throws SQLException
     {
-        
+      Connection conn = getConnection();
         Statement stmt = createStatement();
         try {
             stmt.executeUpdate("DROP table t");
@@ -193,6 +209,7 @@ public class BasicSetup extends UpgradeChange {
         }
         stmt.executeUpdate("CREATE TABLE T (I INT)");
         TestConfiguration.getCurrent().shutdownDatabase();
+        conn.close();
         stmt = createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * from t");
         JDBC.assertEmpty(rs);  
@@ -207,6 +224,7 @@ public class BasicSetup extends UpgradeChange {
      */
     public void testIndex() throws SQLException 
     {
+        Connection conn = getConnection();
         Statement stmt = createStatement();
         try {
             stmt.executeUpdate("DROP table ti");
@@ -220,6 +238,7 @@ public class BasicSetup extends UpgradeChange {
         stmt.executeUpdate("INSERT INTO  TI values(2)");
         stmt.executeUpdate("INSERT INTO  TI values(3)");
         TestConfiguration.getCurrent().shutdownDatabase();
+        conn.close();
         stmt = createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * from TI ORDER BY I");
         JDBC.assertFullResultSet(rs, new String[][] {{"1"},{"2"},{"3"}});
@@ -242,9 +261,32 @@ public class BasicSetup extends UpgradeChange {
                     // Check the innermost of the nested exceptions
                     SQLException sqle = getLastSQLException(e);
                     String sqlState = sqle.getSQLState();
+                    String message = sqle.getMessage();
                 	// while beta, XSLAP is expected, if not beta, XSLAN
-                	if (!(sqlState.equals("XSLAP")) && !(sqlState.equals("XSLAN")))
-                		fail("expected an error indicating no connection");
+                    String INCOMPATIBLE_VERSION = "XSLAN";
+                    String BETA_UPGRADE_NOT_ALLOWED = "XSLAP";
+                    String BOOT_DATABASE_FAILED = "XJ040";
+                	if (
+                        // if running embedded
+                        (
+                         !(sqlState.equals(BETA_UPGRADE_NOT_ALLOWED)) &&
+                         !(sqlState.equals(INCOMPATIBLE_VERSION)) &&
+                         !(sqlState.equals(BOOT_DATABASE_FAILED))
+                         )
+                        &&
+                        // if running client/server
+                        (
+                         !message.contains(BETA_UPGRADE_NOT_ALLOWED) &&
+                         !message.contains(INCOMPATIBLE_VERSION)
+                         )
+                        )
+                    {
+                		fail
+                          (
+                           "unexpected error after attempting a new connection: " +
+                           "SQLstate = " + sqlState + ", message = '" + sqle.getMessage() + "'"
+                           );
+                    }
                 }
             break;
         }

@@ -29,6 +29,8 @@ import javax.sql.DataSource;
 
 import junit.framework.Test;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSetup;
 import org.apache.derbyTesting.junit.ClassLoaderTestSetup;
@@ -184,10 +186,16 @@ final class PhaseChanger extends BaseTestSetup {
             Method m = unloader.getMethod("unload", (Class[]) null);
             Boolean res = (Boolean) m.invoke(null, (Object[]) null);
 
-            // Check that there weren't any drivers to unload except in the
-            // versions affected by DERBY-2905.
-            assertEquals("Unexpected result from driver unloading",
+            // Don't check this on a JVM which is
+            // module aware because, in that case, the relevant driver is remote
+            // in the server.
+            if (!JVMInfo.isModuleAware())
+            {
+                // Check that there weren't any drivers to unload except in the
+                // versions affected by DERBY-2905.
+                assertEquals("Unexpected result from driver unloading",
                          isAffectedVersion, res.booleanValue());
+            }
         }
     }
 
@@ -208,6 +216,12 @@ final class PhaseChanger extends BaseTestSetup {
             // Nothing to work around in this version.
             return;
         }
+
+        // nothing to do if we are running with a module path.
+        // in that case, the down-rev code runs remotely under
+        // a derby server. the field below no longer exists
+        // in the TableDescriptor class on the trunk.
+        if (JVMInfo.isModuleAware()) { return; }
 
         Class td = Class.forName(
                 "org.apache.derby.iapi.sql.dictionary.TableDescriptor",

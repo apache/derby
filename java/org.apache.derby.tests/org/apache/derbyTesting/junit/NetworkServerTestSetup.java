@@ -87,6 +87,24 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * only when starting the server in a separate virtual machine.
      */
     private final String[]    systemProperties;
+  
+    /**
+     * Classpath or modulepath to use.
+     */
+    private final String      moduleOrClassPath;
+
+    /**
+     * If true, then use the modulepath. Otherwise, use the classpath.
+     */
+    private final boolean     useModules;
+
+    /**
+     * If true, then expected server diagnostics will be ignored
+     * and will not be printed to the console.
+     */
+    private final boolean     suppressServerDiagnostics;
+  
+  
     
     /**
      * Startup arguments for the command line
@@ -120,6 +138,10 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.useSeparateProcess = false;
         this.serverShouldComeUp = true;
         this.startServerAtSetup = true;
+
+        this.moduleOrClassPath = null;
+        this.useModules = false;
+        this.suppressServerDiagnostics = false;
     }
 
     /**
@@ -151,6 +173,10 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.serverShouldComeUp = true;
 
         this.startServerAtSetup = startServerAtSetup;
+
+        this.moduleOrClassPath = null;
+        this.useModules = false;
+        this.suppressServerDiagnostics = false;
     }
     
      /**
@@ -177,6 +203,36 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
          boolean serverShouldComeUp
         )
     {
+        this(test, systemProperties, startupArgs, serverShouldComeUp, null, JVMInfo.isModuleAware(), false);
+    }
+  
+     /**
+     * Decorator for starting up with specific command args
+     * and system properties. Server is always started up
+     * in a separate process with a separate virtual machine.
+     * <P>
+     * If the classes are being loaded from the classes
+     * folder instead of jar files then this will start
+     * the server up with no security manager using -noSecurityManager,
+     * unless the systemProperties or startupArgs set up any security
+     * manager.
+     * This is because the default policy
+     * installed by the network server only works from jar files.
+     * If this not desired then the test should skip the
+     * fixtures when loading from classes or
+     * install its own security manager.
+     */
+    public NetworkServerTestSetup
+      (
+       Test test,
+       String[] systemProperties,
+       String[] startupArgs,
+       boolean serverShouldComeUp,
+       String moduleOrClassPath,
+       boolean useModules,
+       boolean suppressServerDiagnostics
+       )
+    {
         super(test);
         
         this.asCommand = true;
@@ -186,6 +242,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.useSeparateProcess = true;
         this.serverShouldComeUp = serverShouldComeUp;
         this.startServerAtSetup = true;
+        this.moduleOrClassPath = moduleOrClassPath;
+        this.useModules = useModules;
+        this.suppressServerDiagnostics = suppressServerDiagnostics;
     }
 
     /**
@@ -349,7 +408,6 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
     private SpawnedProcess startSeparateProcess() throws Exception
     {
-        boolean isModuleAware = JVMInfo.isModuleAware();
         BaseTestCase.println("Starting network server as a separate process:");
         ArrayList<String> al = new ArrayList<String>();
         boolean         skipHostName = false;
@@ -395,7 +453,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         }
 
         String serverName = NetworkServerControl.class.getName();
-        if (isModuleAware)
+        if (useModules)
         {
             al.add("-m");
             al.add(ModuleUtil.SERVER_MODULE_NAME + "/" + serverName);
@@ -419,7 +477,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         final   String[]  command = new String[ al.size() ];
         al.toArray(command);
 
-        Process serverProcess = BaseTestCase.execJavaCmd(command);
+        Process serverProcess = BaseTestCase.execJavaCmd
+          (null, moduleOrClassPath, command, null, true, useModules);
 
         return new SpawnedProcess(serverProcess, "SpawnedNetworkServer");
     }
@@ -453,7 +512,16 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     networkServerController.shutdown();
                 } catch (Throwable t)
                 {
-                    failedShutdown = t;
+                    String errorMessage = t.getMessage();
+                    //
+                    // The following error message is expected if we
+                    // are shutting down a server from an old Derby
+                    // codeline. That can happen during the upgrade tests.
+                    //
+                    if ((errorMessage == null) || !errorMessage.contains("DRDA_InvalidReplyHead"))
+                    {
+                        failedShutdown = t;
+                    }
                 }
             }
  
@@ -465,6 +533,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 // Destroy the process if a failed shutdown
                 // to avoid hangs running tests as the complete()
                 // waits for the process to complete.
+                if (suppressServerDiagnostics) { spawnedServer.suppressOutputOnComplete(); }
                 spawnedServer.complete(getWaitTime());
                 spawnedServer = null;
             }

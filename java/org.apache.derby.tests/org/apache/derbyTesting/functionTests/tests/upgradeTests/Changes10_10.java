@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
@@ -329,6 +330,14 @@ public class Changes10_10 extends UpgradeChange
      */
     public  void    testFloatLimits()  throws Exception
     {
+        // Skip this test if we are running with a module path.
+        // That means that cases which run on the old release
+        // end up using a client driver to access the down-rev
+        // engine in a remote server. The client driver, however,
+        // corresponds to the trunk version, so these tests do
+        // not stress the engine behavior.
+        if (JVMInfo.isModuleAware()) { return; }
+      
         Statement st = createStatement();
         st.execute("create table d3398(r real, d double)");
 

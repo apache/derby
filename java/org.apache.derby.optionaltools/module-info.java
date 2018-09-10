@@ -55,4 +55,9 @@ module org.apache.derby.optionaltools
     provides org.apache.derby.shared.api.DerbyModuleAPI
         with org.apache.derby.optional.info.DerbyModule;
 
+    //
+    // OPEN TO REFLECTIVE ACCESS FROM THE ENGINE
+    //
+    opens org.apache.derby.optional.lucene to
+        org.apache.derby.engine;
 }

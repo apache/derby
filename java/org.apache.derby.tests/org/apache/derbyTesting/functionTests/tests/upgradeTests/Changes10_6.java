@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derbyTesting.junit.BaseTestSuite;
@@ -158,6 +159,11 @@ public class Changes10_6 extends UpgradeChange {
         case PH_POST_SOFT_UPGRADE:
             
             if ( !hasFunction ) { break; }
+
+            // If we are running with a module path, then the catalog
+            // is remote and the alias descriptor will not serialize
+            // across the client/server connection. Skip the following test.
+            if (JVMInfo.isModuleAware()) { break; }
 
             returnType = getTypeDescriptor( rs.getObject( 1 ) );
             actualJdbcType = getJDBCTypeId( returnType );
