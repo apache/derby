@@ -171,7 +171,7 @@ class UpgradeRun extends UpgradeClassLoader
      * @param test The test to possibly decorate
      * @param versionNumber The old version number
      * @param phaseForOldRelease True if the phase runs on the old release
-     * @param classLoader The ClassLoader to use to find the old release jars
+     * @param loader The ClassLoader to use to find the old release jars
      *
      * @return the test, possibly decorate with a client/server wrapper
      */
