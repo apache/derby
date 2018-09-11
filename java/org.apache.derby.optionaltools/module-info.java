@@ -58,6 +58,14 @@ module org.apache.derby.optionaltools
     //
     // OPEN TO REFLECTIVE ACCESS FROM THE ENGINE
     //
-    opens org.apache.derby.optional.lucene to
-        org.apache.derby.engine;
+    opens org.apache.derby.optional.lucene to org.apache.derby.engine;
+    
+    //
+    // FIXME! EXPOSED SO THAT THESE PACKAGES CAN BE ACCESSED
+    // BY THE QUERY PLANS WHICH ARE CODE-GENERATED
+    // INTO THE UNNAMED MODULE.
+    //
+    exports org.apache.derby.optional.lucene;
+    opens org.apache.derby.optional.json;
+    opens org.apache.derby.optional.dump;
 }

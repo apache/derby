@@ -87,4 +87,11 @@ module org.apache.derby.tools
         org.apache.derby.optionaltools,
         org.apache.derby.runner,
         org.apache.derby.tests;
+
+    //
+    // FIXME! OPEN TO REFLECTIVE ACCESS FROM GENERATED
+    // QUERY PLANS.
+    //
+    opens org.apache.derby.impl.tools.optional;
+    
 }
