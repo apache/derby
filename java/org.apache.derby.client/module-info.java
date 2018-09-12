@@ -47,6 +47,12 @@ module org.apache.derby.client
         with org.apache.derby.info.client.DerbyModule;
 
     //
+    // SUPPORT JDBC AUTOLOADING
+    //
+    provides java.sql.Driver
+        with org.apache.derby.client.ClientAutoloadedDriver;
+
+    //
     // ALLOW RESOURCE LOOKUP VIA REFLECTION
     //
     opens org.apache.derby.loc.client;

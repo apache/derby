@@ -408,7 +408,8 @@ public class AutoloadTest extends BaseJDBCTestCase
     {
         String protocol =
             getTestConfiguration().getJDBCClient().getUrlBase();
-                         
+
+        println("Test case '" + getName() + "'. Looking up driver for protocol " + protocol);
         Driver driver = DriverManager.getDriver(protocol);
         assertNotNull("Expected registered driver", driver);
     }

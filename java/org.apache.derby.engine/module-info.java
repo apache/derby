@@ -61,6 +61,12 @@ module org.apache.derby.engine
         with org.apache.derby.info.engine.DerbyModule;
 
     //
+    // SUPPORT JDBC AUTOLOADING
+    //
+    provides java.sql.Driver
+        with org.apache.derby.iapi.jdbc.AutoloadedDriver;
+
+    //
     // ALLOW RESOURCE LOOKUP VIA REFLECTION
     //
     
