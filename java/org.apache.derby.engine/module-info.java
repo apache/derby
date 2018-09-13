@@ -233,7 +233,10 @@ module org.apache.derby.engine
         org.apache.derby.tests;
 
     exports org.apache.derby.mbeans to
+        java.management,
         org.apache.derby.server;
+    // must be opened to reflective access by the unnamed module
+    opens org.apache.derby.mbeans;
 
     exports org.apache.derby.security to
         org.apache.derby.tests;
