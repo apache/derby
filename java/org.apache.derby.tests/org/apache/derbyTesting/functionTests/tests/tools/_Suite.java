@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.tools;
 
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
@@ -58,7 +59,13 @@ public class _Suite extends BaseTestCase {
         suite.addTest(IjConnNameTest.suite());
         suite.addTest(RollBackWrappingWhenFailOnImportTest.suite());
         suite.addTest(ConnectWrongSubprotocolTest.suite());
-        suite.addTest(derbyrunjartest.suite());
+
+        // running a jar file implies not using a module path
+        if (!JVMInfo.isModuleAware())
+        {
+            suite.addTest(derbyrunjartest.suite());
+        }
+        
         suite.addTest(ij3Test.suite());
         suite.addTest(Test_6661.suite());
         

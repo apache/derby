@@ -26,9 +26,12 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
@@ -41,12 +44,17 @@ import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
  */
 public class SysinfoLocaleTest extends BaseTestCase {
 
+    private static final String SYSINFO_CLASS_NAME = "org.apache.derby.tools.sysinfo";
+
     /** The encoding sysinfo should use for its output. */
     private static final String ENCODING = "UTF-8";
 
     /** Default locale to run this test under. */
     private final Locale defaultLocale;
 
+    /** Properties used to start test */
+    private final Properties _props;
+  
     /**
      * Tells whether or not this test expects sysinfo's output to be localized
      * to German.
@@ -65,12 +73,14 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * @param defaultLocale the default locale for this test
      * @param german true if output is expected to be localized to German
      * @param info extra information to append to the test name (for debugging)
+     * @param props Properties to use if starting with a module path
      */
     private SysinfoLocaleTest(Locale defaultLocale, boolean german,
-                              String info) {
+                              String info, Properties props) {
         super("testSysinfoLocale");
         this.defaultLocale = defaultLocale;
         this.localizedToGerman = german;
+        this._props = props;
         this.name = super.getName() + ":" + info;
     }
 
@@ -147,7 +157,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
         prop.setProperty("derby.ui.codeset", ENCODING);
 
         String info = "defaultLocale=" + loc + ",uiLocale=" + ui;
-        Test test = new SysinfoLocaleTest(loc, german, info);
+        Test test = new SysinfoLocaleTest(loc, german, info, prop);
         return new SystemPropertyTestSetup(test, prop);
     }
 
@@ -157,8 +167,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * <code>derby.ui.locale</code> (happens when the class is loaded).
      */
     private static void runSysinfo() throws Exception {
-        final String className = "org.apache.derby.tools.sysinfo";
-        URL sysinfoURL = SecurityManagerSetup.getURL(className);
+        URL sysinfoURL = SecurityManagerSetup.getURL(SYSINFO_CLASS_NAME);
         URL emmaURL = getEmmaJar();
         URL[] urls = null;
         if(emmaURL != null) {
@@ -174,7 +183,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
         ClassLoader platformLoader = java.sql.Connection.class.getClassLoader();
         URLClassLoader loader = new URLClassLoader(urls, platformLoader);
 
-        Class<?> copy = Class.forName(className, true, loader);
+        Class<?> copy = Class.forName(SYSINFO_CLASS_NAME, true, loader);
         Method main = copy.getMethod("main", new Class[] { String[].class });
         main.invoke(null, new Object[] { new String[0] });
     }
@@ -185,6 +194,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * @return output from sysinfo
      */
     private static String getSysinfoOutput() throws Exception {
+
         final PrintStream savedSystemOut = System.out;
         final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
@@ -198,6 +208,51 @@ public class SysinfoLocaleTest extends BaseTestCase {
         return bytes.toString(ENCODING);
     }
 
+    /**
+     * Run sysinfo using the module path and return its output as a string.
+     *
+     * @return output from sysinfo
+     */
+    private String getSysinfoOutputWithModules() throws Exception
+    {
+        String modulePath = JVMInfo.getSystemModulePath();
+        ArrayList<String> args = new ArrayList<String>();
+
+        // setup locale
+        String country = defaultLocale.getCountry();
+        if ((country != null) && (country.length() > 0))
+        {
+            args.add("-Duser.country=" + country);
+        }
+        String language = defaultLocale.getLanguage();
+        if ((language != null) && (language.length() > 0))
+        {
+            args.add("-Duser.language=" + language);
+        }
+
+        // add other properties: derby.ui.locale and derby.ui.codeset
+        for (Object key : _props.keySet())
+        {
+            String keyName = (String) key;
+            String value = _props.getProperty(keyName);
+            args.add("-D" + key + "=" + value);
+        }
+
+        // add sysinfo entry point
+        args.add("-m");
+        args.add(ModuleUtil.TOOLS_MODULE_NAME + "/" + SYSINFO_CLASS_NAME);
+
+        // now run the sysinfo command and collect its output
+        final   String[]  command = new String[args.size()];
+        args.toArray(command);
+
+        Process sysinfoProcess = BaseTestCase.execJavaCmd
+            (null, modulePath, command, null, true, true);
+        String retval = readProcessOutput(sysinfoProcess);
+
+        return retval;
+    }
+  
     /**
      * Some German strings that are expected to be in sysinfo's output when
      * localized to German.
@@ -241,7 +296,8 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * localized.
      */
     public void testSysinfoLocale() throws Exception {
-        String output = getSysinfoOutput();
+        String output = JVMInfo.isModuleAware() ?
+            getSysinfoOutputWithModules() : getSysinfoOutput();
         String[] expectedSubstrings =
                 localizedToGerman ? GERMAN_STRINGS : ITALIAN_STRINGS;
         assertContains(expectedSubstrings, output);

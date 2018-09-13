@@ -74,4 +74,11 @@ module org.apache.derby.client
 
     exports org.apache.derby.client.net to
         org.apache.derby.tests;
+
+    //
+    // EXPOSE REFLECTIVE ACCESS TO TOOLS MODULE
+    // SO THAT getFunctions() CAN BE CALLED BY IJ.
+    //
+    opens org.apache.derby.client.am to
+        org.apache.derby.tools;
 }
