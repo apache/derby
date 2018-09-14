@@ -37,8 +37,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.DerbyConstants;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SpawnedProcess;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -281,7 +284,17 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
         final String output = spawned.getFullServerOutput(); // ignore
         final String err    = spawned.getFullServerError();
 
-        assertTrue(err, err.matches(expectedMessageOnConsole));
+        assertTrue
+          (
+           err.contains("java.security.AccessControlException") &&
+           err.contains("ccess denied") &&
+           err.contains("java.io.FilePermission") &&
+           err.contains("system") &&
+           err.contains("nested") &&
+           err.contains("write")
+           );
+
+        //assertTrue(err, err.matches(expectedMessageOnConsole));
     }
 
     /**
@@ -368,6 +381,7 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             // Set up run of this test in a sub process, so we can catch its
             // standard err/standard out.
             final List<String> args = new ArrayList<String>();
+
             args.add("-DinSubProcess=true");
             args.add("-Djava.security.manager");
             args.add(
@@ -395,7 +409,17 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
                      getSystemProperty("derby.tests.trace"));
             args.add("-Dderby.system.debug=" +
                      getSystemProperty("derby.tests.debug"));
-            args.add("junit.textui.TestRunner");
+
+            String testRunnerClassName = "junit.textui.TestRunner";
+            if (JVMInfo.isModuleAware())
+            {
+                args.add("-m");
+                args.add(DerbyConstants.JUNIT_MODULE_NAME + "/" + testRunnerClassName);
+            }
+            else
+            {
+                args.add(testRunnerClassName);
+            }
             args.add(this.getClass().getName());
 
             final String[] argArray = args.toArray(new String[0]);
@@ -413,9 +437,12 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             assertTrue(spawned.getFailMessage("subprocess run failed: "),
                     exitCode == 1);
 
-            final String expectedMessageOnConsole =
-                    "WARNING: could not do ThreadGroup#setDaemon on Derby " +
-                    "daemons due to a security exception";
+            final String expectedMessageOnConsole = JVMInfo.isModuleAware() ?
+              "java.security.AccessControlException: access denied " +
+              "(\"java.lang.RuntimePermission\" \"modifyThreadGroup\")"
+              :
+              "WARNING: could not do ThreadGroup#setDaemon on Derby " +
+              "daemons due to a security exception";
 
             final String output = spawned.getFullServerOutput(); // ignore
             final String err    = spawned.getFullServerError();

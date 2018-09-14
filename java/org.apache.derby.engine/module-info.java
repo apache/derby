@@ -54,6 +54,9 @@ module org.apache.derby.engine
     exports org.apache.derby.catalog;
     exports org.apache.derby.vti;
 
+    // DOES NOT APPEAR IN PUBLIC API JAVADOC YET:
+    exports org.apache.derby.security;
+
     //
     // SUPPORT MODULE LOOKUP
     //
@@ -237,9 +240,6 @@ module org.apache.derby.engine
         org.apache.derby.server;
     // must be opened to reflective access by the unnamed module
     opens org.apache.derby.mbeans;
-
-    exports org.apache.derby.security to
-        org.apache.derby.tests;
 
     //
     // STANZAS FOR USE WHEN QUERY PLANS ARE GENERATED INTO

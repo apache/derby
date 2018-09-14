@@ -1110,8 +1110,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     private <T> void execute(SystemPrincipal principal,
                          PrivilegedAction<T> action,
                          boolean isGrantExpected) {
-        //println();
-        //println("    testing action " + action);
+        println("");
+        println("    testing action " + action + " for principal " + principal);
         
         final RunAsPrivilegedUserAction<T> runAsPrivilegedUserAction
             = new RunAsPrivilegedUserAction<T>(principal, action);
@@ -1121,13 +1121,16 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             if (!isGrantExpected) {
                 fail("expected AccessControlException");
             }
+            println("        successfully executed action " + action + " for principal " + principal);
         } catch (AccessControlException ace) {
             //println("    Yikes! " + ace.getMessage());
             if (isGrantExpected) {
                 //fail("caught AccessControlException");
                 throw ace;
             }
+            println("        as expected, failed to execute action " + action + " for principal " + principal);
         }
+        println("");
     }
     
     /**
@@ -1263,9 +1266,9 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         }
 
         public Void run() {
-            //println("    checking access " + permission + "...");
+            println("    checking access " + permission + ":");
             AccessController.checkPermission(permission);
-            //println("    granted access " + this);
+            println("    granted access " + this);
             return null;
         }
 
