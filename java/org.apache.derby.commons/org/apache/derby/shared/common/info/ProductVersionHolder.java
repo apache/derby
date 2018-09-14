@@ -25,6 +25,9 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.derby.shared.common.error.StandardException;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 
 /**
   Class to hold a Derby Product version.
@@ -574,7 +577,22 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	private Properties loadProperties(String productGenus) {
 		String resourceName = "/org/apache/derby/info/" + productGenus+"/info.properties";
 			
-		InputStream is = getClass().getResourceAsStream(resourceName);
+		InputStream is = null;
+
+        if (JVMInfo.isModuleAware())
+        {
+            try
+            {
+                is = ModuleUtil.getResourceAsStream(resourceName);
+            }
+            catch (StandardException ex)
+            {
+              // report some error if you can
+              System.out.println(ex.getMessage());
+            }
+        }
+        else { is = getClass().getResourceAsStream(resourceName); }
+        
 		if (is==null) {
 			return null;
 		}

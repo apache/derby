@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import junit.framework.Test;
+import org.apache.derby.shared.common.info.JVMInfo;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
@@ -117,6 +118,13 @@ public class _Suite
      * @return A default suite of compatibility tests.
      */
     public static Test suite() {
+
+        // Don't run from the module path. Old clients and servers
+        // should always be run from the classpath.
+        if (JVMInfo.isModuleAware())
+        {
+            return new BaseTestSuite("tests.compatibility disabled when using a module path");
+        }
         // DERBY-5889: Disabling tests on Windows where the old releases are
         // run off of UNC paths (network drives).
         if (suffersFromDerby5889()) {
