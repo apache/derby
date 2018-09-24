@@ -163,9 +163,12 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
             //for debug
             println(expectedValues.getProperty(propName));
             println(propVal);
-            assertEquals(expectedValues.getProperty(propName), propVal);
-
-
+            assertEquals
+              (
+               "Unexpected value for property " + propName,
+               expectedValues.getProperty(propName),
+               propVal
+               );
         }
     }
 }

@@ -31,8 +31,11 @@ import java.util.Properties;
 
 import java.sql.*;
 import java.io.*;
+import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientDataSourceInterface;
 
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -890,7 +893,11 @@ public class ReplicationRun extends BaseTestCase
 
         {
             util.DEBUG("bootMasterDatabase getConnection("+URL+")");
-            Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
+            // Needed when running from classes and also when running
+            // from the module path after the upgrade tests have unloaded
+            // the drivers.
+            DriverManager.registerDriver(new ClientDriver());
+
             Connection conn = DriverManager.getConnection(URL);
             conn.close();
         }
@@ -2055,7 +2062,16 @@ public class ReplicationRun extends BaseTestCase
             ceArray.add( serverClassPath );
         }
         ceArray.add( "-Dderby.infolog.append=true" );
-        ceArray.add( networkServerControl );
+
+        if (JVMInfo.isModuleAware())
+        {
+            ceArray.add("-m");
+            ceArray.add(ModuleUtil.SERVER_MODULE_NAME + "/" + networkServerControl);
+        }
+        else
+        {
+            ceArray.add( networkServerControl );
+        }
         ceArray.add( "shutdown" );
         ceArray.add( "-h" );
         ceArray.add( serverHost ); // FIXME! interfacesToListenOn
