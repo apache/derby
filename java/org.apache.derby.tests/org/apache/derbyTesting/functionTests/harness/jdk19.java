@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.util.Vector;
 import java.util.StringTokenizer;
 
+import org.apache.derby.shared.common.info.JVMInfo;
 
 public class jdk19 extends jvm {
 
@@ -73,7 +74,15 @@ public class jdk19 extends jvm {
             sb.append(mx);
         }
         if (classpath!=null) {
-            sb.append(" -classpath ");
+            if (JVMInfo.isModuleAware())
+            {
+                 sb.append(" -p ");
+            }
+            else
+            {
+                sb.append(" -classpath ");
+            }
+            
             sb.append(classpath);
         }
         if (prof!=null) warn("jdk19 does not support prof");

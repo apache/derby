@@ -23,12 +23,15 @@ package org.apache.derbyTesting.functionTests.harness;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.reference.ModuleUtil;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class NetServer
@@ -80,10 +83,8 @@ public class NetServer
 	     "",                                            // suffix
 	     "com.ibm.db2.jcc.DB2Driver",                   //driver
 	     "1527",                                        // port
-	     new String[] {NETWORK_SERVER_CLASS_NAME,  //start
-			   "start"},                        
-	     new String[] {NETWORK_SERVER_CLASS_NAME,  //shutdown
-			   "shutdown"},
+	     serverArgs("start"),                        
+	     serverArgs("shutdown"),
 	     null});                                        //shutdown2
 
 	url = "jdbc:derby://" + hostName + ":1527/";  
@@ -93,10 +94,8 @@ public class NetServer
 	     "",                                            // suffix
 	     "org.apache.derby.jdbc.ClientDriver",           //driver
 	     "1527",                                        // port
-	     new String[] {NETWORK_SERVER_CLASS_NAME,  //start
-			   "start"},                        
-	     new String[] {NETWORK_SERVER_CLASS_NAME,  //shutdown
-			   "shutdown"},
+	     serverArgs("start"),                        
+	     serverArgs("shutdown"),
 	     null});                                        //shutdown2
 
 	url = "jdbc:db2://" + hostName + ":50000/";
@@ -117,6 +116,40 @@ public class NetServer
 	     null,
 	     null,
 	     null});
+    }
+
+    /**
+     * Get server command args, depending on whether we are
+     * running with a module path.
+     *
+     * @param serverCommand start or shutdown
+     *
+     * @return an array of server command args
+     */
+    private static String[] serverArgs(String serverCommand)
+    {
+        ArrayList<String> argList = new ArrayList<String>();
+        boolean isModuleAware = JVMInfo.isModuleAware();
+
+        if (isModuleAware)
+        {
+            argList.add("-p");
+            argList.add(JVMInfo.getSystemModulePath());
+
+            argList.add("-m");
+            argList.add(ModuleUtil.SERVER_MODULE_NAME + "/" + NETWORK_SERVER_CLASS_NAME);
+        }
+        else
+        {
+            argList.add(NETWORK_SERVER_CLASS_NAME);
+        }
+
+        argList.add(serverCommand);
+
+        String[] retval = new String[argList.size()];
+        argList.toArray(retval);
+
+        return retval;
     }
 
     public NetServer(File homeDir, String jvmName, String clPath,
@@ -167,7 +200,7 @@ public class NetServer
 	// if we are just connecting to DB2 we return
 	if (startcmd == null) 
 	    return;
-	
+
         // Build the command to run the WL server
 	String homeDirName = homeDir.getCanonicalPath();
 		jvm jvm = null; // to quiet the compiler
@@ -203,6 +236,7 @@ public class NetServer
 	    serverCmd[i] = (String)vCmd.elementAt(i);
 	    System.out.print(serverCmd[i] + " ");
 	}
+	
 	System.out.println("");
         // Start a process to run the Server
 	pr = Runtime.getRuntime().exec(serverCmd);

@@ -2626,6 +2626,34 @@
   </target>
 
 <!-- =================================================================== -->
+<!--                      Run tests with a module path                   -->
+<!-- =================================================================== -->
+
+  <target name="test-derbyall-with-modulepath"
+          depends="junit-init"
+          description="Old harness tests with module path"
+  >
+    <path id="derbyall.classpath">
+      <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
+   	  <pathelement path="${derby.junit.classpath}"/>
+      <pathelement location="${javatools.dir}/junit.jar"/>
+    </path>
+    <echo message="Modulepath used for derbyall: ${toString:derbyall.classpath}"/>
+    <mkdir dir="junit_${derby.junit.timestamp}/derbyall"/>
+    <java 
+          modulepath="${toString:derbyall.classpath}"
+          module="org.apache.derby.tests"
+          classname="org.apache.derbyTesting.functionTests.harness.RunSuite"
+          fork="yes"
+          dir="junit_${derby.junit.timestamp}/derbyall"
+    >
+      <jvmarg value="--add-modules"/>
+      <jvmarg value="org.apache.derby.tests,junit"/>
+      <arg value="derbyall"/>
+    </java>
+  </target>
+
+<!-- =================================================================== -->
 <!--                         EMMA utility targets                        -->
 <!-- =================================================================== -->
 
