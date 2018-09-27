@@ -47,13 +47,13 @@ public class JavaVersionHolder
         // handle JDK 10
         if (javaVersion.equals( "10" ))
         {
-            javaVersion = "10.0.1";
+            javaVersion = "1.10.0";
         }
 
         // handle JDK 11
         if (javaVersion.startsWith( "11" ))
         {
-            javaVersion = "11.0.1";
+            javaVersion = "1.11.0";
         }
 
         // check for jdk12 or higher
