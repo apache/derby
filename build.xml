@@ -1117,6 +1117,7 @@
       <arg value="-Xdoclint:none"/>
       <arg value="-private"/>
       <arg value="-breakiterator"/>
+      <arg value="-overview"/><arg value="${basedir}/published_api_overview.html"/>
       <arg value="-windowtitle"/><arg value="Apache Derby V${major}.${minor} Internals"/>
       <arg value="-header"/><arg value="Apache Derby ${major}.${minor}"/>
       <arg value="-footer"/><arg value="${javadoc.Footer}"/>
