@@ -19,6 +19,22 @@
 
  */
 
+/**
+ * <p>
+ * All configurations need this utility module.
+ * </p>
+ * 
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/commons.svg"
+ *     alt="module diagram for org.apache.derby.commons"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 module org.apache.derby.commons
 {
     //

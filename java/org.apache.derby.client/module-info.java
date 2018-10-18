@@ -19,6 +19,33 @@
 
  */
 
+/**
+ * <p>
+ * Applications running on remote machines access Derby databases via a
+ * remote client configuration. In its smallest footprint, remote
+ * JDBC connections are created via
+ * <i>java.sql.DriverManager.getConnection()</i>.
+ * Other, optional modules further expand the functionality:
+ * </p>
+ * 
+ * <ul>
+ *  <li><b><font color="gray">org.apache.derby.tools</font></b> - This module lets the application access Derby via
+ *   <i>javax.sql.DataSource</i>s.</li>
+ *  <li><b><font color="gray">java.naming</font></b> - This
+ *  module supports JNDI lookup of DataSources.</li>
+ * </ul>
+ * 
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/client.svg"
+ *     alt="module diagram for org.apache.derby.client"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 module org.apache.derby.client
 {
     //

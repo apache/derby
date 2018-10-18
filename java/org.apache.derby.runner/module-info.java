@@ -19,6 +19,30 @@
 
  */
 
+/**
+ * <p>
+ * This convenience module makes it easy to run several tools and to
+ * administer the network server. Optional functionality includes:
+ * </p>
+ * 
+ * <ul>
+ *  <li><b><font color="gray">org.apache.derby.locale_*</font></b> - Include
+ *  these modules for non-English diagnostic messages.</li>
+ *  <li><b><font color="gray">java.naming</font></b> - This
+ *  module supports JNDI lookup of LDAP authenticators.</li>
+ * </ul>
+ * 
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/runner.svg"
+ *     alt="module diagram for org.apache.derby.runner"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 module org.apache.derby.runner
 {
     //

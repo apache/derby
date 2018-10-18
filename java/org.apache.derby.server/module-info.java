@@ -19,6 +19,25 @@
 
  */
 
+/**
+ * <p>
+ * The Derby network server wraps the engine in a DRDA protocol
+ * driver. In this configuration, clients on remote machines can access
+ * Derby databases. The optional engine modules can be added to this
+ * configuration to provide their extra functionality.
+ * </p>
+ * 
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/server.svg"
+ *     alt="module diagram for org.apache.derby.server"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 module org.apache.derby.server
 {
     //

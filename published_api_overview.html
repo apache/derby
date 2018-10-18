@@ -14,31 +14,125 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <body>
-Apache Derby is a pure Java, standards-based relational database engine.
-Derby provides an easy to use data management solution for
-software developers with zero administration for end users.
+
+<h2>Summary</h2>
+
 <p>
-Derby runs on any Java SE 6 platform or higher with 4.0, 4.1, and 4.2.
-For Java 8, Derby can also run on constrained devices
-with a runtime as specified by OpenJDK JEP 161, i.e. Compact Profile 2
-or higher.
+Apache Derby is a standards-based, pure-Java relational database engine.
+Its easy-to-use data manager requires no administration by end users.
+Derby runs on any JVM at Java version 9 or higher and Derby supports JDBC
+  version 4.3.
+Derby's platform-independent database format may be copied to
+any file system.
 </p>
-Derby's database format is platform independent allowing databases to be copied to
-any machine type.
-<P>
-Apache Derby is a subproject of the Apache DB project, and is
-licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at:
-<BR>
-<a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>
 
-<P>
-You can find Derby on the web at:
-<BR>
- <a href="http://db.apache.org/derby/">http://db.apache.org/derby/</a>
+<p>
+Apache Derby is a subproject of the Apache DB project,
+licensed under the Apache License, Version 2.0, which you may obtain
+from <a href="https://www.apache.org/licenses/LICENSE-2.0">https://www.apache.org/licenses/LICENSE-2.0</a>
+You may find Derby on the web at <a href="https://db.apache.org/derby/">https://db.apache.org/derby/</a>.
+You may download Apache Derby releases from <a href="https://db.apache.org/derby/derby_downloads.html">https://db.apache.org/derby/derby_downloads.html</a>.
+</p>
 
-<P>
-Apache Derby releases can be downloaded from the following page:
-<BR>
-<a href="http://db.apache.org/derby/derby_downloads.html">http://db.apache.org/derby/derby_downloads.html</a>
+<p>
+Information on Derby configurations follows.
+</p>
+
+<h2>Derby Configurations</h2>
+
+<p>
+Derby's modules may be wired together in several configurations. The
+modules are:
+</p>
+
+<table border="1">
+  <thead>
+    <tr>
+     <th>Module name</th>
+     <th>Jar file</th>
+     <th>Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+    <tr>
+      <td>org.apache.derby.engine</td>
+      <td>derby.jar</td>
+      <td>The embedded database engine contains Derby's core
+      functionality. It contains its own JDBC driver, allowing
+      one JVM to host both Derby and the applications which use it.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.server</td>
+      <td>derbynet.jar</td>
+      <td>The network server wraps the database engine, enabling
+      networked JDBC access.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.client</td>
+      <td>derbyclient.jar</td>
+      <td>The remote JDBC client connects to a server across a
+      network.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.tools</td>
+      <td>derbytools.jar</td>
+      <td>Basic tools include a schema dumper and an interactive SQL interpreter.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.optionaltools</td>
+      <td>derbyoptionaltools.jar</td>
+      <td>Optional tools support metadata introspection and access to
+      other vendors' databases.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.runner</td>
+      <td>derbyrun.jar</td>
+      <td>The runner module supports easy command-line administration
+      of Derby installations.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.commons</td>
+      <td>derbyshared.jar</td>
+      <td>The commons module contains cross-module support utilities.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.locale_*</td>
+      <td>derbyLocale_*.jar</td>
+      <td>Message localizations support human-readable diagnostics
+      in languages other than English.</td>
+    </tr>
+    
+    <tr>
+      <td>org.apache.derby.tests</td>
+      <td>derbyTests.jar</td>
+      <td>An extensive body of tests stresses functionality in all of
+      the other modules.</td>
+    </tr>
+    
+  </tbody>
+  
+</table>
+
+<p>
+The following conventions apply to the module diagrams presented here:
+</p>
+
+<ul>
+<li>Derby modules appear in <b><font color="blue">blue</font></b>.</li>
+<li>JVM modules appear in <b><font color="black">black</font></b>.</li>
+<li>3rd party modules appear in <b><font color="pink">pink</font></b>.</li>
+<li>Optional modules appear in <b><font color="gray">gray</font></b>.</li>
+</ul>
+
 </body>

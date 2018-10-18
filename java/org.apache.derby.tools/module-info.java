@@ -19,6 +19,40 @@
 
  */
 
+/**
+ * <p>
+ * A set of basic tools (including an interactive SQL monitor) can access
+ * Derby databases via either the embedded or remote client
+ * drivers. Optional functionality includes:
+ * </p>
+ * 
+ * <ul>
+ *  <li><b><font color="gray">org.apache.derby.engine</font></b> -
+ *  Include this module for embedded access.</li>
+ *  <li><b><font color="gray">org.apache.derby.client</font></b> -
+ *  Include this module for remote access.</li>
+ *  <li><b><font color="gray">org.apache.derby.locale_*</font></b> - Include
+ *  these modules for non-English diagnostic messages.</li>
+ *  <li><b><font color="gray">org.osgi.framework</font></b> - See the
+ *  header comment on the engine module.</li>
+ *  <li><b><font color="gray">java.management</font></b> - See the
+ *  header comment on the engine module.</li>
+ *  <li><b><font color="gray">java.naming</font></b> - This
+ *  module supports JNDI lookup of LDAP authenticators when running with
+ *  the embedded driver.</li>
+ * </ul>
+ * 
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/tools.svg"
+ *     alt="module diagram for org.apache.derby.tools"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 module org.apache.derby.tools
 {
     //

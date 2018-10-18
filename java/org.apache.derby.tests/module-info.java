@@ -19,6 +19,22 @@
 
  */
 
+/**
+ * <p>
+ * The Derby tests exercise all of the modules.
+ * </p>
+ * 
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/tests.svg"
+ *     alt="module diagram for org.apache.derby.tests"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 open module org.apache.derby.tests
 {
     //

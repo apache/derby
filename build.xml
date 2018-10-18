@@ -1099,6 +1099,11 @@
     <copy file="${javadoctools.dir}/logo/derby_logo64.png" 
           todir="${public.api.dir}/resources"/>     
 
+    <!-- Copy the module diagrams used by the overview -->
+    <copy todir="${public.api.dir}/resources">
+      <fileset dir="${javadoctools.dir}/moduleDiagrams"/>
+    </copy>
+
   </target>
 
 
@@ -1128,6 +1133,11 @@
       <arg value="--show-module-contents"/><arg value="all"/>
       <arg value="--module"/><arg value="${module.name.commons},${module.name.engine},${module.name.client},${module.name.server},${module.name.tools},${module.name.optionaltools},${module.name.runner},${module.name.tests}"/>
     </exec>
+
+    <!-- Copy the module diagrams used by the module overviews -->
+    <copy todir="${out.javadoc.dir}/engine/resources">
+      <fileset dir="${javadoctools.dir}/moduleDiagrams"/>
+    </copy>
 
   </target>
 

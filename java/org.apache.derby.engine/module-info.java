@@ -19,6 +19,42 @@
 
  */
 
+/**
+ * <p>
+ * The smallest footprint, core Derby configuration consists of the embedded engine. In
+ * this configuration, Derby is a complete, secure, transactional,
+ * recoverable data manager which runs in the same JVM as the user's
+ * application. This configuration includes an embedded JDBC driver,
+ * accessed via <i>java.sql.DriverManager.getConnection()</i>. More
+ * functionality can be enabled by adding other, optional modules to this configuration:
+ * </p>
+ * 
+ * <ul>
+ *  <li><b><font color="gray">org.apache.derby.tools</font></b> - This module lets the application access Derby via
+ *   <i>javax.sql.DataSource</i>s.</li>
+ *  <li><b><font color="gray">org.apache.derby.locale_*</font></b> - These
+ *  modules let Derby translate diagnostic messages into
+ *  languages other than English.</li>
+ *  <li><b><font color="gray">org.osgi.framework</font></b> - This
+ *  module lets Derby load as an OSGI component. The user must
+ *  supply an OSGI implementation in a module named <b><font color="gray">org.osgi.framework</font></b>.</li>
+ *  <li><b><font color="gray">java.management</font></b> - This
+ *  module lets JMX MBeans introspect the Derby engine.</li>
+ *  <li><b><font color="gray">java.naming</font></b> - This
+ *  module supports JNDI lookup of DataSources and LDAP authenticators.</li>
+ * </ul>
+ *
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/engine.svg"
+ *     alt="module diagram for org.apache.derby.engine"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 module org.apache.derby.engine
 {
     //

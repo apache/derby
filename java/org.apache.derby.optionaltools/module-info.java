@@ -19,6 +19,44 @@
 
  */
 
+/**
+ * <p>
+ * An extra set of tools supports metadata introspection, access to other
+ * vendors' databases, full-text search, and the importing of
+ * JSON-formatted data. Optional functionality includes:
+ * </p>
+ * 
+ * <ul>
+ *  <li><b><font color="gray">json.simple</font></b> - To import
+ *  JSON-formatted data, include the <i>JSON.simple</i> jar file available from
+ *   <a href="https://code.google.com/archive/p/json-simple/">https://code.google.com/archive/p/json-simple/</a>.</li>
+ *  <li><b><font color="gray">lucene.core, lucene.queryparser, lucene.analyzers.common</font></b> - To run full-text
+ *  searches, include the <i>lucene-core-4.5.0.jar</i>,
+ *  <i>lucene-queryparser-4.5.0.jar</i>, and <i>lucene-analyzers-common-4.5.0.jar</i>
+ *   modules available from the
+ *   <a href="https://lucene.apache.org/">Apache Lucene project</a>.</li>
+ *  <li><b><font color="gray">org.apache.derby.locale_*</font></b> - Include
+ *  these modules for non-English diagnostic messages.</li>
+ *  <li><b><font color="gray">org.osgi.framework</font></b> - See the
+ *  header comment on the engine module.</li>
+ *  <li><b><font color="gray">java.management</font></b> - See the
+ *  header comment on the engine module.</li>
+ *  <li><b><font color="gray">java.naming</font></b> - This
+ *  module supports JNDI lookup of LDAP authenticators when running with
+ *  the embedded driver.</li>
+ * </ul>
+ * 
+ * <p><b>Module Diagram:</b</p>
+ *
+ * <div style="text-align:center;">
+ *   <img
+ *     src="resources/optionaltools.svg"
+ *     alt="module diagram for org.apache.derby.optionaltools"
+ *     border="2"
+ *   />
+ * </div>
+ *
+ */
 module org.apache.derby.optionaltools
 {
     //
