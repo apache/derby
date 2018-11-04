@@ -80,13 +80,12 @@ public class MessageBuilder extends Task
         "#\n" +
         "###################################################\n";
 
-    private static  final   String  REF_GUIDE_BOILERPLATE =
+    public static  final   String  REF_GUIDE_BOILERPLATE =
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
         "<!DOCTYPE reference PUBLIC \"-//OASIS//DTD DITA Reference//EN\"\n" +
         " \"../dtd/reference.dtd\">\n";
 
-    private static  final   String  REF_GUIDE_NOTES =
-        "<!-- \n" +
+    public static final String APACHE_LICENSE =
         "Licensed to the Apache Software Foundation (ASF) under one or more\n" +
         "contributor license agreements.  See the NOTICE file distributed with\n" +
         "this work for additional information regarding copyright ownership.\n" +
@@ -100,7 +99,11 @@ public class MessageBuilder extends Task
         "distributed under the License is distributed on an \"AS IS\" BASIS,  \n" +
         "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  \n" +
         "See the License for the specific language governing permissions and  \n" +
-        "limitations under the License.\n" +
+        "limitations under the License.\n";
+
+    private static  final   String  REF_GUIDE_NOTES =
+        "<!-- \n" +
+        APACHE_LICENSE +
         "-->\n" +
         "\n" +
         "<!-- \n" +
@@ -127,7 +130,7 @@ public class MessageBuilder extends Task
 
     /**
      * <p>
-     * XML-wrigint wrapper around a PrintWriter.
+     * XML-writing wrapper around a PrintWriter.
      * </p>
      */
     public  static  final   class   XMLWriter
@@ -135,7 +138,6 @@ public class MessageBuilder extends Task
         // If this boolean is set, then all operations are NOPs.
         private         boolean       _vacuous;
         
-        private         FileWriter   _fw;
         private         PrintWriter _pw;
         private         ArrayList<String>    _tagStack;
 
@@ -149,7 +151,19 @@ public class MessageBuilder extends Task
         public  XMLWriter()
         {
             _vacuous = true;
-         }
+        }
+
+        /**
+         * <p>
+         * Construct from a PrintWriter.
+         * </p>
+         */
+        public  XMLWriter(PrintWriter printWriter)
+        {
+            _vacuous = false;
+            _pw = printWriter;
+            _tagStack = new ArrayList<String>();
+        }
 
         /**
          * <p>
@@ -159,10 +173,7 @@ public class MessageBuilder extends Task
         public  XMLWriter( File file )
             throws IOException
         {
-            _vacuous = false;
-            _fw = new FileWriter( file );
-            _pw = new PrintWriter( _fw );
-            _tagStack = new ArrayList<String>();
+            this(new PrintWriter(file));
         }
 
         public  void    flush() throws IOException
@@ -170,7 +181,6 @@ public class MessageBuilder extends Task
             if ( _vacuous ) { return; }
             
             _pw.flush();
-            _fw.flush();
         }
         
         public  void    close() throws IOException
@@ -178,7 +188,6 @@ public class MessageBuilder extends Task
             if ( _vacuous ) { return; }
 
             _pw.close();
-            _fw.close();
         }
 
         /**
@@ -731,7 +740,7 @@ public class MessageBuilder extends Task
     //
     ////////////////////////////////////////////////////////
 
-    private Element getFirstChild( Element node, String childName )
+    public static Element getFirstChild( Element node, String childName )
         throws Exception
     {
         return (Element) node.getElementsByTagName( childName ).item( 0 );
@@ -742,7 +751,7 @@ public class MessageBuilder extends Task
      * Squeeze the text out of an Element.
      * </p>
      */
-    private String squeezeText( Element node )
+    public static String squeezeText( Element node )
         throws Exception
     {
         Node        textChild = node.getFirstChild();

@@ -58,7 +58,7 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,shared,client,engine,storeless,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,shared,client,engine,storeless,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts,generateSecurityPolicies"
       description="Compile the product source (does not build the tests)."
   />
   <target
@@ -66,6 +66,25 @@
       depends="buildsource,demo,testing,runmessagecheck"
       description="Compile all of the source, including tests as well as production code."
   />
+
+  <!-- Generate security policies and corresponding documentation -->
+  <!-- <target name="buildPolicyFiles" unless="messagesUpToDate" -->
+  <target
+      name="generateSecurityPolicies"
+      description="Build security policies."
+  >
+
+    <taskdef
+      name="generatePolicies"
+      classname="org.apache.derbyBuild.SecurityPolicyGenerator"
+      classpath="${out.build.dir}"
+    />
+
+    <generatePolicies
+      baseDirectory="${basedir}"
+    />
+
+  </target>
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
@@ -1898,6 +1917,39 @@
 
    </target>
 
+   <!-- Checkin the generated security policy documentation to the docs client -->
+   <target name="copy-security-policy-docs">
+
+     <property name="sec.dir" value="${docs.root}/src/security"/>
+     <property name="gen.dita.dir" value="${generated.src.engine.dir}/${derby.dir}/security"/>
+
+     <copy todir="${sec.dir}">
+       <fileset dir="${gen.dita.dir}" includes="*.dita"/>
+     </copy>
+
+     <antcall target="checkinfile">
+        <param name="checkinComment" value="Check in rsecbasicclient.dita as part of building a release."/>
+        <param name="fileName" value="${sec.dir}/rsecbasicclient.dita"/>
+     </antcall>
+     <antcall target="checkinfile">
+        <param name="checkinComment" value="Check in rsecbasicengine.dita as part of building a release."/>
+        <param name="fileName" value="${sec.dir}/rsecbasicengine.dita"/>
+     </antcall>
+     <antcall target="checkinfile">
+        <param name="checkinComment" value="Check in rsecbasicserver.dita as part of building a release."/>
+        <param name="fileName" value="${sec.dir}/rsecbasicserver.dita"/>
+     </antcall>
+     <antcall target="checkinfile">
+        <param name="checkinComment" value="Check in rsecbasictools.dita as part of building a release."/>
+        <param name="fileName" value="${sec.dir}/rsecbasictools.dita"/>
+     </antcall>
+     <antcall target="checkinfile">
+        <param name="checkinComment" value="Check in rsecpolicysample.dita as part of building a release."/>
+        <param name="fileName" value="${sec.dir}/rsecpolicysample.dita"/>
+     </antcall>
+
+   </target>
+
    <!-- Build the NOTICE file and check it in -->
    <target name="buildnotice">
 
@@ -2926,6 +2978,9 @@ you should not have to do this.
 
         <!-- copy the generated sqlstate tables to the docs client and check it in -->
         <antcall target="copyerrordocs"/>
+
+        <!-- copy the generated policy file documentation to the docs client and check it in -->
+        <antcall target="copy-security-policy-docs"/>
 
         <!-- sync the clients to guarantee that we are up-to-date -->
         <antcall target="updatesvnclients"/>

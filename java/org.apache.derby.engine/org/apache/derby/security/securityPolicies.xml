@@ -1,0 +1,926 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE messages SYSTEM "securityPolicies.dtd">
+
+<!-- 
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at      
+
+http://www.apache.org/licenses/LICENSE-2.0  
+
+Unless required by applicable law or agreed to in writing, software  
+distributed under the License is distributed on an "AS IS" BASIS,  
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
+See the License for the specific language governing permissions and  
+limitations under the License.
+--> 
+
+
+<!-- 
+This file contains all of the permissions used by Derby policy files.
+
+For a description of the XML grammar used here, see securityPolicy.dtd.
+-->
+
+<policies>
+
+  <!--
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     !!
+     !! Production policies.
+     !!
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  -->
+
+  <!-- org.apache.derby.commons -->
+
+  <policy>
+    <name>basicCommons</name>
+
+    <jar>
+      <name>derbyshared.jar</name>
+
+      <block>
+        <comment>Needed to determine whether the JVM was booted with a module path.</comment>
+        <a>java.util.PropertyPermission "jdk.module.path", "read"</a>
+      </block>
+
+      <block>
+        <comment>Need in order to read message localizations from other derby jars
+when running with a module path.</comment>
+        <a>java.io.FilePermission "${derby.install.path}${/}-", "read"</a>
+      </block>
+
+      <block>
+        <comment>Gives permission for JMX to be used against Derby
+but only if JMX authentication is not being used.
+In that case the application would need to create
+a whole set of fine-grained permissions to allow specific
+users access to MBeans and actions they perform.</comment>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "monitor"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "server", "monitor"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <!-- org.apache.derby.engine -->
+
+  <policy>
+    <name>basicEngine</name>
+    <include>basicCommons</include>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>These permissions are needed for everyday, embedded Derby usage.</comment>
+        <a>java.lang.RuntimePermission "createClassLoader"</a>
+        <a>java.util.PropertyPermission "derby.*", "read"</a>
+        <a>java.util.PropertyPermission "user.dir", "read"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</a>
+        <a>java.io.FilePermission "${derby.system.home}","read,write"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}derby.properties", "read"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}derby.log", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>Properties needed to determine if the VM is 32 or 64 bit.</comment>
+        <a>java.util.PropertyPermission "sun.arch.data.model", "read"</a>
+        <a>java.util.PropertyPermission "os.arch", "read"</a>
+      </block>
+
+      <block>
+        <comment>Gives permission for JMX to be used against Derby
+but only if JMX authentication is not being used.
+In that case the application would need to create
+a whole set of fine-grained permissions to allow specific
+users access to MBeans and actions they perform.</comment>
+        <a>org.apache.derby.shared.common.security.SystemPermission "jmx", "control"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "monitor"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "server", "monitor"</a>
+      </block>
+
+      <block>
+        <comment>Permissions needed for JMX based management and monitoring.</comment>
+        <a>javax.management.MBeanServerPermission "createMBeanServer"</a>
+      </block>
+
+      <block>
+        <comment>Allows access to Derby's built-in MBeans, within the domain
+org.apache.derby.  Derby must be allowed to register and unregister these
+MBeans.  To fine tune this permission, see the javadoc of
+javax.management.MBeanPermission or the JMX Instrumentation and Agent Specification.</comment>
+       <a>javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]", "registerMBean,unregisterMBean"</a>
+      </block>
+
+      <block>
+        <comment>Trusts Derby code to be a source of MBeans and to register these in the MBean server.</comment>
+        <a>javax.management.MBeanTrustPermission "register"</a>
+      </block>
+
+      <block>
+        <comment>Optional permission needed for printing classpath information to derby.log.</comment>
+        <a>java.lang.RuntimePermission "getProtectionDomain"</a>
+      </block>
+
+      <block>
+        <comment>The following permission must be granted for Connection.abort(Executor) to work.
+Note that this permission must also be granted to outer (application) code domains.</comment>
+        <a>java.sql.SQLPermission "callAbort"</a>
+      </block>
+
+      <block>
+        <comment>Needed by FileUtil#limitAccessToOwner.</comment>
+        <a>java.lang.RuntimePermission "accessUserInformation"</a>
+        <a>java.lang.RuntimePermission "getFileStoreAttributes"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <!-- optional engine permissions -->
+
+  <policy>
+    <name>optionalEngine</name>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Needed to create a temp file in order to open a database in a jar file.
+permission java.io.FilePermission "${java.io.tmpdir}${/}-", "read,write,delete"</comment>
+      </block>
+
+      <block>
+        <comment>Customize the following permission in order to backup and restore
+Derby databases to/from a secure branch of your file system,
+preferably one owned by the database owner or the user who booted the JVM:
+permission java.io.FilePermission "/Users/me/backups/-", "read,write"</comment>
+      </block>
+
+      <block>
+        <comment>Customize the following permission in order to export and import
+tables to/from a secure branch of your file system,
+preferably one owned by the database owner or the user who booted the JVM:
+permission java.io.FilePermission "/Users/me/imports/-", "read,write"</comment>
+      </block>
+
+      <block>
+        <comment>Customize the following permission in order to load
+jar files which contain user-written types, aggregates, functions, and procedures.
+Those jar files should live in a secure branch of your file system,
+preferably one owned by the database owner or the user who booted the JVM:
+permission java.io.FilePermission "/Users/me/myJars/-", "read"</comment>
+      </block>
+
+      <block>
+        <comment>This permission lets a DBA reload the policy file while the server
+is still running. The policy file is reloaded by invoking
+the SYSCS_UTIL.SYSCS_RELOAD_SECURITY_POLICY() system procedure:
+permission java.security.SecurityPermission "getPolicy"</comment>
+      </block>
+
+      <block>
+        <comment>This permission is needed to call DriverManager.deregisterDriver()
+and unload the Derby classes:
+permission java.sql.SQLPermission "deregisterDriver"</comment>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <!-- engine template -->
+
+  <policy>
+    <name>engineTemplate</name>
+    <include>basicEngine</include>
+    <include>optionalEngine</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/engineTemplate.policy</file>
+      <properties>securityProduct.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+    </jar>
+
+  </policy>
+
+  <!-- org.apache.derby.tools -->
+
+  <policy>
+    <name>basicTools</name>
+    <include>basicEngine</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/toolsTemplate.policy</file>
+      <properties>securityProduct.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbytools.jar</name>
+
+      <block>
+        <comment>Access all properties using System.getProperties -
+ij enumerates the properties in order to open connections
+for any property set in ij.connection.* and set protocols
+for any property in ij.protocol.*</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>Needed by sysinfo. The file permission is needed to check the existence
+of jars on the classpath. You can limit this permission to just the locations
+which hold your jar files.</comment>
+        <a>java.util.PropertyPermission "user.*", "read"</a>
+        <a>java.util.PropertyPermission "java.home", "read"</a>
+        <a>java.util.PropertyPermission "java.class.path", "read"</a>
+        <a>java.util.PropertyPermission "java.runtime.version", "read"</a>
+        <a>java.util.PropertyPermission "java.fullversion", "read"</a>
+        <a>java.lang.RuntimePermission "getProtectionDomain"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</a>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <!-- core server permissions -->
+
+  <policy>
+    <name>coreServer</name>
+    <include>basicTools</include>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>Needed by FileUtil#limitAccessToOwner.</comment>
+        <a>java.lang.RuntimePermission "accessUserInformation"</a>
+        <a>java.lang.RuntimePermission "getFileStoreAttributes"</a>
+        <a>java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>Needed for NetworkServerMBean access.</comment>
+        <a>org.apache.derby.shared.common.security.SystemPermission "server", "control,monitor"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <!-- customizable server permissions -->
+
+  <policy>
+    <name>customizableServer</name>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>Accept connections from any host. Derby is listening to the host interface
+specified via the -h command line option to "NetworkServerControl start",
+via the address parameter to the org.apache.derby.drda.NetworkServerControl
+constructor in the API, or via the property derby.drda.host.
+The default is localhost.  You may want to restrict allowed hosts,
+e.g. to hosts in a specific subdomain like "*.example.com".</comment>
+        <a>java.net.SocketPermission "*", "accept"</a>
+      </block>
+
+      <block>
+        <comment>Allow the server to listen to the socket on the port specified with the
+-p option to "NetworkServerControl start" on the command line, or with
+the portNumber parameter to the NetworkServerControl constructor in the
+API, or with the property derby.drda.portNumber. The default is 1527.</comment>
+        <a>java.net.SocketPermission "localhost:${derby.security.port}", "listen"</a>
+      </block>
+
+      <block>
+        <comment>Needed for server tracing.</comment>
+        <a>java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <!-- org.apache.derby.server -->
+
+  <policy>
+    <name>basicServer</name>
+    <include>coreServer</include>
+    <include>customizableServer</include>
+    <output>
+      <file>classes/drda/org/apache/derby/drda/server.policy</file>
+      <properties>securityProduct.properties</properties>
+    </output>
+
+  </policy>
+
+  <!-- org.apache.derby.client -->
+
+  <policy>
+    <name>basicClient</name>
+    <include>basicCommons</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/clientTemplate.policy</file>
+      <properties>securityProduct.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyclient.jar</name>
+
+      <block>
+        <comment>Modify this to be the server host instead of localhost.</comment>
+        <a>java.net.SocketPermission "localhost", "connect,resolve"</a>
+      </block>
+
+      <block>
+        <comment>DERBY-2302: derbyclient.jar needs to be able to read the user.dir property in order to
+do tracing in that directory. Also, it needs read/write permissions in user.dir in order
+to create the trace files in that directory.</comment>
+        <a>java.util.PropertyPermission "user.dir", "read"</a>
+        <a>java.io.FilePermission "${user.dir}${/}-", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>DERBY-1883: Since some classes that are included in both derby.jar and
+derbyclient.jar read properties, derbyclient.jar needs permission to read
+derby.* properties to avoid failures when it is listed before derby.jar in
+the classpath.</comment>
+        <a>java.util.PropertyPermission "derby.*", "read"</a>
+      </block>
+
+      <block>
+        <comment>The following permission must be granted for Connection.abort(Executor) to work.
+Note that this permission must also be granted to outer (application) code domains.</comment>
+        <a>java.sql.SQLPermission "callAbort"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <!--
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     !!
+     !! Test policies.
+     !!
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  -->
+
+  <!-- Basic tests -->
+
+  <policy>
+    <name>basicTests</name>
+    <include>basicServer</include>
+    <include>basicClient</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/util/derby_tests.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyshared.jar</name>
+
+      <block>
+        <comment>These permissions are needed by AssertFailure to dump the thread stack
+traces upon failure.</comment>
+        <a>java.lang.RuntimePermission "getStackTrace"</a>
+        <a>java.lang.RuntimePermission "modifyThreadGroup"</a>
+      </block>
+
+      <block>
+        <comment>DERBY-2302: derbyclient.jar needs to be able to read the user.dir property in order to
+do tracing in that directory. Also, it needs read/write permissions in user.dir in order
+to create the trace files in that directory.</comment>
+        <a>java.util.PropertyPermission "user.dir", "read"</a>
+        <a>java.io.FilePermission "${user.dir}${/}-", "read,write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Needed to create a temp file in order to open a database in a jar file.</comment>
+        <a>java.io.FilePermission "${java.io.tmpdir}${/}-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <a>java.util.PropertyPermission "derby.storage.jvmInstanceId", "write"</a>
+      </block>
+
+      <block>
+        <comment>unit tests (e.g. store/T_RecoverFullLog) set this property
+(called from derbyTesting.jar through code in derby.jar)</comment>
+        <a>java.util.PropertyPermission "derbyTesting.unittest.*", "write"</a>
+      </block>
+
+      <block>
+        <comment>permissions so that we can set the context class loader to null
+for daemon threads to avoid class loader leak. DERBY-3745</comment>
+        <a>java.lang.RuntimePermission "getClassLoader"</a>
+        <a>java.lang.RuntimePermission "setContextClassLoader"</a>
+      </block>
+
+      <block>
+        <comment>For reloading the policy file.</comment>
+        <a>java.security.SecurityPermission "getPolicy"</a>  
+      </block>
+
+      <block>
+        <comment>[DERBY-2000] The write permission was added to allow creation of
+the derby.system.home directory when running tests under a security manager.</comment>
+        <a>java.io.FilePermission "${derby.system.home}", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>Import/export and other support files from these locations in tests</comment>
+        <a>java.io.FilePermission "${user.dir}${/}extin${/}-", "read"</a>
+        <a>java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "${user.dir}${/}extout${/}-", "read,write"</a>
+        <a>java.io.FilePermission "${user.dir}${/}extinout", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>needed to create a temp file in order to open a database in a jar file</comment>
+        <a>java.io.FilePermission "${java.io.tmpdir}${/}-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>This permission is needed to call DriverManager.deregisterDriver().</comment>
+        <a>java.sql.SQLPermission "deregisterDriver"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>Tighten up the connection permissions.</comment>
+        <d>java.net.SocketPermission "*", "accept"</d>
+        <a>java.net.SocketPermission "127.0.0.1", "accept,connect"</a>
+        <a>java.net.SocketPermission "localhost", "accept,connect,listen"</a>
+        <a>java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect"</a>
+        <a>java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect"</a>
+      </block>
+
+      <block>
+        <comment>Need to be able to write to trace file for NetworkServerControlApiTest</comment>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}trace", "read,write"</a>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}trace${/}-", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>Need read/write to trace file for RestrictiveFilePermissionsTest</comment>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_restr", "read,write"</a>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_lax", "read,write"</a>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_restr${/}-", "read,write"</a>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_lax${/}-", "read,write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyclient.jar</name>
+
+      <block>
+        <comment>Tighten up the connection permissions.</comment>
+        <a>java.net.SocketPermission "127.0.0.1", "connect,resolve"</a>
+        <a>java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbytools.jar</name>
+
+      <block>
+        <comment>Read all files under ${user.dir}</comment>
+        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read"</d>
+        <a>java.io.FilePermission "${user.dir}${/}-", "read"</a>
+      </block>
+
+      <block>
+        <comment>IjTestCases read, write, and delete ij's output in the extinout dir</comment>
+        <a>java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>ij needs permission to read the sql files in this jar</comment>
+        <a>java.io.FilePermission "${derbyTesting.testjarpath}", "read"</a>
+      </block>
+
+      <block>
+        <comment>These permissions are needed by AssertFailure to dump the thread stack
+traces upon failure.</comment>
+        <a>java.lang.RuntimePermission "getStackTrace"</a>
+        <a>java.lang.RuntimePermission "modifyThreadGroup"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyoptionaltools.jar</name>
+
+      <block>
+        <comment>Needed by SimpleJsonTest</comment>
+        <a>java.io.FilePermission "${user.dir}${/}extin${/}-", "read"</a>
+      </block>
+
+    </jar>
+
+    <!--
+       Permissions for the tests (derbyTesting.jar)
+       We are liberal here, it's not a goal to make the test harness
+       or tests secure.Production policies.
+    -->
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all properties using System.getProperties</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>Need by various tests which call the ContextService</comment>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</a>
+      </block>
+
+      <block>
+        <comment>Access all files under ${user.dir}to write the test directory structure</comment>
+        <a>java.io.FilePermission "${user.dir}${/}-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>Tests need to be able to exec a java program. DERBY-6295: Also give them
+read permission so that detailed error message is shown.</comment>
+        <a>java.io.FilePermission "${java.home}${/}-", "execute, read"</a>
+      </block>
+
+      <block>
+        <comment>When running with useprocess=false need to install and uninstall
+the security manager and allow setIO to change the system err and out
+streams. Currently the nist suite runs with useprocess=false.</comment>
+        <a>java.lang.RuntimePermission "setSecurityManager"</a>
+        <a>java.security.SecurityPermission "getPolicy"</a>
+        <a>java.lang.RuntimePermission "setIO"</a>
+      </block>
+
+      <block>
+        <comment>Needed by ClasspathSetup to change the classloader</comment>
+        <a>java.lang.RuntimePermission "createClassLoader"</a>
+        <a>java.lang.RuntimePermission "setContextClassLoader"</a>
+      </block>
+
+      <block>
+        <comment>These permissions are needed to dump the thread stack traces upon failure.</comment>
+        <a>java.lang.RuntimePermission "getStackTrace"</a>
+        <a>java.lang.RuntimePermission "modifyThreadGroup"</a>
+      </block>
+
+      <block>
+        <comment>Allow MBeanTest to register the application management MBean.</comment>
+        <a>javax.management.MBeanServerPermission "createMBeanServer"</a>
+        <a>javax.management.MBeanPermission "org.apache.derby.mbeans.Management#[org.apache.derby:type=Management]", "registerMBean,unregisterMBean"</a>
+        <a>javax.management.MBeanPermission "org.apache.derby.mbeans.Management#-[-]", "instantiate"</a>
+        <a>javax.management.MBeanTrustPermission "register"</a>
+      </block>
+
+      <block>
+        <comment>And to find and use Derby's MBeans</comment>
+        <a>javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,setAttribute,invoke"</a>
+        <a>javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo"</a>
+        <a>javax.management.MBeanPermission "-#-[-]", "queryNames"</a>
+        <a>javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames"</a>
+      </block>
+
+      <block>
+        <comment>Test code needs this as well for the platform MBeanServer
+tests where the testing code is in the stack frame.</comment>
+        <a>org.apache.derby.shared.common.security.SystemPermission "jmx", "control"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "monitor"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "server", "control,monitor"</a>
+      </block>
+
+      <block>
+        <comment>This permission is needed to call the Connection.abort(Executor) method added by JDBC 4.1</comment>
+        <a>java.sql.SQLPermission "callAbort"</a>
+      </block>
+
+      <block>
+        <comment>Needed by FileUtil#limitAccessToOwner</comment>
+        <a>java.lang.RuntimePermission "accessUserInformation"</a>
+        <a>java.lang.RuntimePermission "getFileStoreAttributes"</a>
+      </block>
+
+      <block>
+        <comment>Needed by NetworkServerTestSetup when probing ports.</comment>
+        <a>java.net.SocketPermission "localhost", "listen"</a>
+      </block>
+
+      <block>
+        <comment>Needed by ClasspathSetup for freeing resources.</comment>
+        <a>java.lang.RuntimePermission "closeClassLoader"</a>
+      </block>
+
+      <block>
+        <comment>Needed by AutoloadTest to get at spawned process pid (Unixen) and call jstack:</comment>
+        <a>java.lang.RuntimePermission "accessDeclaredMembers"</a>
+        <a>java.lang.reflect.ReflectPermission "suppressAccessChecks"</a>
+      </block>
+
+      <block>
+        <comment>Presumes we have a JDK: First "..": back up past "jre"</comment>
+        <a>java.io.FilePermission "${java.home}${/}..${/}bin${/}-", "execute, read"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>junit.jar</name>
+
+      <block>
+        <comment>JUnit jar file tries to read junit.properties in the user's
+home directory and seems to require permission to read the
+property user.home as well.
+junit.swingui.TestRunner writes to .junitsession on exit.</comment>
+        <a>java.util.PropertyPermission "user.home", "read"</a>
+        <a>java.io.FilePermission "${user.home}${/}junit.properties", "read"</a>
+        <a>java.io.FilePermission "${user.home}${/}.junitsession", "write"</a>
+      </block>
+
+      <block>
+        <comment>This permission is needed when running the tests using ant 1.7</comment>
+        <a>java.io.FilePermission "${user.dir}${/}*", "write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>ant-junit.jar</name>
+
+      <block>
+        <comment>Ant's junit runner requires setOut to redirect the System output streams
+to the forked JVM used when running junit tests inside Ant. Ant requires
+forking the JVM if you want to run tests in a different directory than the
+current one.</comment>
+        <a>java.lang.RuntimePermission "setIO"</a>
+      </block>
+
+      <block>
+        <comment>This permission is needed when running the tests using ant 1.7</comment>
+        <a>java.io.FilePermission "${user.dir}${/}*", "write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>ant.jar</name>
+
+      <block>
+        <comment>Starting with Ant 1.9.3, write permission has to be granted to ant.jar
+as well so that Ant's JUnit runner can write test results to a file.
+Only needed when running the tests under Ant. See DERBY-6685.</comment>
+        <a>java.io.FilePermission "${user.dir}${/}*", "write"</a>
+      </block>
+
+    </jar>
+
+    <!--
+      Grants to all code bases
+    -->
+    <jar>
+      <name></name>
+
+      <block>
+        <comment>functionTests.tests.lang.RoutineSecurityTest requires this grant
+to check to see if permissions are granted through generated code
+through this mechanism.</comment>
+        <a>java.util.PropertyPermission "derbyRoutineSecurityTest.yes", "read"</a>
+      </block>
+
+      <block>
+        <comment>These permissions are needed when testing code instrumented with EMMA.
+They will only be used if the emma.active system property property is
+set, which should be set to "" for the permissions to be correct. Must
+be granted to all code bases because EMMA doesn't use doPrivileged
+blocks around the code that needs the permissions.</comment>
+        <a>java.util.PropertyPermission "${emma.active}user.dir", "read"</a>
+        <a>java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read,write"</a>
+        <a>java.lang.RuntimePermission "${emma.active}writeFileDescriptor"</a>
+      </block>
+
+      <block>
+        <comment>Grant the required permissions for JaCoCo (code coverage tool).</comment>
+        <a>java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read,write"</a>
+        <a>java.io.FilePermission "${jacoco.active}${user.dir}${/}..${/}jacoco.exec", "read,write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>jaxp.jar</name>
+
+      <block>
+        <comment>When inserting XML values that use external DTD's, the JAXP parser
+needs permission to read the DTD files.  We assume that all DTD
+files will be copied to extin/ by whichever tests need them.  So
+grant the JAXP parser permissions to read that directory.</comment>
+        <a>java.io.FilePermission "${user.dir}${/}extin${/}-", "read"</a>
+      </block>
+
+    </jar>
+
+    <!--
+       Permissions for package-private tests run from 'classes.pptesting'
+    -->
+    <jar>
+      <name>ppcodeclasses</name>
+
+      <block>
+        <comment>Needed for ProtocolTest - allows connection to a server</comment>
+        <a>java.net.SocketPermission "127.0.0.1", "connect,resolve"</a>
+        <a>java.net.SocketPermission "localhost", "connect,resolve"</a>
+        <a>java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve"</a>
+      </block>
+
+      <block>
+        <comment>Allows reading support files in 'extin'</comment>
+        <a>java.io.FilePermission "${user.dir}${/}extin${/}-", "read"</a>
+     </block>
+
+    </jar>
+
+  </policy>
+
+  <!--
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     !!
+     !! DITA Documentation in the Derby Security Guide
+     !!
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  -->
+
+  <policy>
+    <name>basicEngineDoc</name>
+    <include>engineTemplate</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/rsecbasicengine.dita</file>
+      <properties>securityProduct.properties</properties>
+      <doc>
+        <title>Basic engine security policy template</title>
+        <shortDesc>Customize this policy if your application embeds the Derby engine, running Derby and application code in a single JVM process.</shortDesc>
+        <majorIndexTerm>Embedded Engine</majorIndexTerm>
+        <minorIndexTerm>basic policy</minorIndexTerm>
+        <longDesc>The embedded engine policy grants essential permissions to the engine and shared modules.</longDesc>
+      </doc>
+    </output>
+  </policy>
+
+  <policy>
+    <name>basicServerDoc</name>
+    <include>basicServer</include>
+    <include>optionalEngine</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/rsecbasicserver.dita</file>
+      <properties>securityProduct.properties</properties>
+      <doc>
+        <title>Basic server security policy template</title>
+        <shortDesc>Customize this policy if you run a Derby server, either standalone or embedded inside your application.</shortDesc>
+        <majorIndexTerm>Network Server</majorIndexTerm>
+        <minorIndexTerm>basic policy</minorIndexTerm>
+        <longDesc>This policy grants essential permissions to the server, tools, engine, and shared modules.</longDesc>
+      </doc>
+    </output>
+  </policy>
+
+  <policy>
+    <name>basicClientDoc</name>
+    <include>basicClient</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/rsecbasicclient.dita</file>
+      <properties>securityProduct.properties</properties>
+      <doc>
+        <title>Basic client security policy template</title>
+        <shortDesc>Customize this policy if you run a client-side application, which connects to a Derby server across a network.</shortDesc>
+        <majorIndexTerm>Network Server</majorIndexTerm>
+        <minorIndexTerm>basic policy</minorIndexTerm>
+        <longDesc>This policy grants essential permissions to the client and shared modules.</longDesc>
+      </doc>
+    </output>
+  </policy>
+
+  <policy>
+    <name>basicToolsDoc</name>
+    <include>basicTools</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/rsecbasictools.dita</file>
+      <properties>securityProduct.properties</properties>
+      <doc>
+        <title>Basic tools security policy template</title>
+        <shortDesc>Customize this policy if you run Derby tools against an embedded Derby engine.</shortDesc>
+        <majorIndexTerm>Network Server</majorIndexTerm>
+        <minorIndexTerm>basic policy</minorIndexTerm>
+        <longDesc>This policy grants essential permissions to the tools, engine, and shared modules.</longDesc>
+      </doc>
+    </output>
+  </policy>
+
+  <policy>
+    <name>customizedExampleDoc</name>
+    <include>coreServer</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/rsecpolicysample.dita</file>
+      <properties>securityDocExample.properties</properties>
+      <doc>
+        <title>Sample customized Java security policy file</title>
+        <shortDesc>Here is a sample customized Java security policy file.</shortDesc>
+        <majorIndexTerm>Network Server</majorIndexTerm>
+        <minorIndexTerm>basic policy</minorIndexTerm>
+        <longDesc>This example configures a server's permissions to allow network access and to allow backup/restore, import/export, and the loading of user-written code:</longDesc>
+      </doc>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Support backup/restore to/from a secure branch of the file system
+owned by the user who booted the JVM:</comment>
+        <a>java.io.FilePermission "/Users/me/derby/dummy/backups/-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>Support export/import of tables to/from a secure branch of the file system
+owned by the user who booted the JVM:</comment>
+        <a>java.io.FilePermission "/Users/me/derby/dummy/imports/-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>Support loading of jar files which contain user-written types,
+aggregates, functions, and procedures when those jar files live
+in a secure branch of the file system owned by the the user who booted the JVM:</comment>
+        <a>java.io.FilePermission /Users/me/derby/dummy/jars/-", "read"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>Accept connections from any host. Derby is listening to the host interface
+specified via the -h command line option to "NetworkServerControl start",
+via the address parameter to the org.apache.derby.drda.NetworkServerControl
+constructor in the API, or via the property derby.drda.host.
+The default is localhost.  You may want to restrict allowed hosts,
+e.g. to hosts in a specific subdomain like "*.example.com".</comment>
+        <a>java.net.SocketPermission "localhost:0-", "accept"</a>
+      </block>
+
+      <block>
+        <comment>Allow the server to listen to the socket on the port specified with the
+-p option to "NetworkServerControl start" on the command line, or with
+the portNumber parameter to the NetworkServerControl constructor in the
+API, or with the property derby.drda.portNumber. The default is 1527.</comment>
+        <a>java.net.SocketPermission "localhost:1527", "listen"</a>
+      </block>
+
+      <block>
+        <comment>Support the writing of traces into a branch of the file system
+owned by the user who booted the JVM:</comment>
+        <a>java.io.FilePermission "Users/me/derby/dummy/traces${/}-", "read,write,delete"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbytools.jar</name>
+
+      <block>
+        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read"</d>
+        <a>java.io.FilePermission "/Users/me/javadb/lib/-", "read"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+</policies>
+

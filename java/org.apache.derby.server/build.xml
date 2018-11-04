@@ -73,11 +73,6 @@
       </modulepath>
     </javac>
 
-    <copy
-       todir="${out.drda.dir}/${derby.dir}/drda/"
-       file="${derby.drda.dir}/drda/server.policy"
-    />
-
     <copy todir="${drdaloc.dir}" flatten="true">
       <fileset dir="${derby.drda.locales.dir}">
         <include name="messages*.properties"/>

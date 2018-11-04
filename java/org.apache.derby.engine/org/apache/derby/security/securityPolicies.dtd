@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at      
+
+http://www.apache.org/licenses/LICENSE-2.0  
+
+Unless required by applicable law or agreed to in writing, software  
+distributed under the License is distributed on an "AS IS" BASIS,  
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
+See the License for the specific language governing permissions and  
+limitations under the License.
+-->
+
+<!-- 
+This is the grammar which defines the structure of securityPolicies.xml.
+That file, in turn, is the source code used to generate security policies
+for the following purposes:
+
+ * production usage
+ * testing
+ * pages in the Derby Security Guide
+
+Elements of the grammar have the following meanings:
+
+ * policies - Root element.
+ * policy - Describes a policy file.
+ * name - Internal handle, referenced by <include> elements
+ * include - (Optional) Other policies to include
+ * output - (Optional) Name of file to generate; properties for customizing the grant targets
+ * block - A block of permissions to add or delete
+ * comment - (Optional) comment to place before the permission block
+ * a - Permission to add
+ * d - Permission to delete
+
+This grammar supports the following concepts:
+
+o Policy - A policy is a list of jars with an optional
+           set of instructions for how to format and output the
+           policy. A policy may include other policies.
+           At a high level, a policy may be viewed as a set of deltas
+           from the parent policies which it includes.
+
+o Jar    - A jar is a grant target. It is a list of permission blocks.
+           The target is specified as a logical name which the output
+           descriptor later maps to a physical jar file name.
+
+o Block  - A permission block is a (possibly commented) list of
+           privileges, which are granted to the enclosing jar.
+           Permissions may be added. They may also be deleted
+           from corresponding permission blocks included
+           by the enclosing policy.
+
+o Output - An output descriptor specifies the file to which the policy
+           is written. By default, the file will be formatted as a
+           valid Java security policy. However, the descriptor may
+           specify that the output should be formatted as DITA source
+           XML, for inclusion in the Derby Security Guide.
+           An output descriptor references a set of properties
+           which are used to map logical jar file names to actual,
+           physical files located in the local file system.
+-->
+
+<!ELEMENT policies (policy+)>
+<!ELEMENT policy (name, include*, output?, jar*)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT include (#PCDATA)>
+<!ELEMENT output (file, properties, doc?)>
+<!ELEMENT file (#PCDATA)>
+<!ELEMENT properties (#PCDATA)>
+<!ELEMENT doc (title, shortDesc, majorIndexTerm, minorIndexTerm, longDesc)>
+<!ELEMENT jar (name, block+)>
+<!ELEMENT block (comment?, a*, d*)>
+<!ELEMENT comment (#PCDATA)>
+<!ELEMENT a (#PCDATA)>
+<!ELEMENT d (#PCDATA)>
