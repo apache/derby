@@ -447,7 +447,7 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             final String output = spawned.getFullServerOutput(); // ignore
             final String err    = spawned.getFullServerError();
 
-            assertTrue(err, err.contains(expectedMessageOnConsole));
+            assertTrue("Full error is '" + err + "'", err.contains(expectedMessageOnConsole));
 
             // Print sub process' output if this test specifies any such
             if (Boolean.parseBoolean(

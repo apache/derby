@@ -769,6 +769,1016 @@ grant the JAXP parser permissions to read that directory.</comment>
 
   </policy>
 
+  <policy>
+    <name>VersionCombinationConfigurator</name>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/compatibility/VersionCombinationConfigurator.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Needed to find the location of classes in jars</comment>
+        <a>java.lang.RuntimePermission "getProtectionDomain"</a>
+      </block>
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>GetCurrentPropertiesTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/derbynet/GetCurrentPropertiesTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>For testPropertiesAfterConnection and testPropertiesTraceOn</comment>
+        <a>java.io.FilePermission "${derby.system.home}${/}-", "write"</a>
+      </block>
+
+      <block>
+        <comment>Restrict visibility on trace files</comment>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}-", "read"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all properties using System.getProperties</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>NetworkServerControlApiTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/derbynet/NetworkServerControlApiTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>Tracing tests</comment>
+        <a>java.io.FilePermission "${derby.system.home}${/}-", "read,write"</a>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}", "read,write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Needed by NetworkServerTestSetup when probing ports.</comment>
+        <a>java.net.SocketPermission "localhost", "listen"</a>
+        <a>java.net.SocketPermission "127.0.0.1", "accept,connect,resolve"</a>
+        <a>java.net.SocketPermission "localhost", "accept,connect,listen"</a>
+        <a>java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect"</a>
+        <a>java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect"</a>
+      </block>
+
+      <block>
+        <comment>For setting properties.</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>ProtocolTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/derbynet/ProtocolTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>Give write permission for trace files if debugging with derby.drda.traceAll=true</comment>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}-", "read,write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Extra permissions needed by the test module.</comment>
+        <a>java.net.SocketPermission "127.0.0.1", "connect,resolve"</a>
+        <a>java.net.SocketPermission "localhost", "connect,resolve"</a>
+        <a>java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>RuntimeInfoTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/derbynet/RuntimeInfoTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all properties using System.getProperties</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>SecureServerTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/derbynet/SecureServerTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Remove this permission for test of DERBY-6619</comment>
+        <d>java.lang.RuntimePermission "setContextClassLoader"</d>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>For running the server in another process</comment>
+        <a>java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "write"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all properties using System.getProperties</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>ServerPropertiesTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/derbynet/ServerPropertiesTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <comment>for testToggleTrace</comment>
+        <a>java.io.FilePermission "${derby.system.home}${/}-", "write"</a>
+      </block>
+
+      <block>
+        <comment>For reading properties?</comment>
+        <a>java.io.FilePermission "${user.dir}${/}system${/}-", "read"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all properties using System.getProperties</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>SysinfoTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/derbynet/SysinfoTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbytools.jar</name>
+
+      <block>
+        <comment>Read all files under ${user.dir}</comment>
+        <a>java.io.FilePermission "${user.dir}${/}-", "read"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all properties using System.getProperties</comment>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>ShutdownWithoutDeregisterPermissionTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/engine/noDeregisterPermission.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Make sure that the deregisterDriver permission is not granted</comment>
+        <d>java.sql.SQLPermission "deregisterDriver"</d>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>AbortTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/jdbc4/noAbortPermission.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Remove this permission so that we can test the case of
+applications which have not been granted the privilege to
+abort physical connections.</comment>
+        <d>java.sql.SQLPermission "callAbort"</d>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>LDAPAuthenticationTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/jdbcapi/LDAPTests.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>resolve is needed to run ldap related tests</comment>
+        <a>java.net.SocketPermission "${derbyTesting.ldapServer}", "connect, resolve"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>resolve is needed to run ldap related tests</comment>
+        <a>java.net.SocketPermission "${derbyTesting.ldapServer}", "connect, resolve"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>XATest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/jdbcapi/XATest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <a>java.lang.management.ManagementPermission "monitor"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>LuceneTests</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/lang/luceneSupport.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyoptionaltools.jar</name>
+
+      <block>
+        <comment>So that the Lucene tool can access Derby internals</comment>
+        <a>java.util.PropertyPermission "derby.system.home", "read"</a>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</a>
+      </block>
+
+      <block>
+        <comment>Databases under derby.system.home</comment>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE${/}-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>Accessing Lucene code</comment>
+        <a>java.io.FilePermission "${derbyTesting.lucene.core.jar.file}", "read"</a>
+        <a>java.util.PropertyPermission "user.dir", "read"</a>
+        <a>java.lang.RuntimePermission "accessDeclaredMembers"</a>
+        <a>java.lang.RuntimePermission "accessClassInPackage.sun.misc"</a>
+        <a>java.lang.reflect.ReflectPermission "suppressAccessChecks"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>lucene-core.jar</name>
+
+      <block>
+        <comment>permissions for file access, write access only to sandbox</comment>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE${/}-", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>Basic permissions needed for Lucene to work</comment>
+        <a>java.util.PropertyPermission "user.dir", "read"</a>
+        <a>java.util.PropertyPermission "sun.arch.data.model", "read"</a>
+        <a>java.lang.RuntimePermission "accessDeclaredMembers"</a>
+        <a>java.lang.RuntimePermission "accessClassInPackage.sun.misc"</a>
+        <a>java.lang.reflect.ReflectPermission "suppressAccessChecks"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>NoDBInternalsPermissionTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/lang/no_derby_internals.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Need to access internal Derby structures</comment>
+        <d>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</d>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>NewOptimizerOverridesTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/lang/resultSetReader.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>For reading fields in the ResultSet graph</comment>
+        <a>java.lang.RuntimePermission "accessDeclaredMembers"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Remove this permission</comment>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>SecurityPolicyReloadingTest.initial</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/lang/SecurityPolicyReloadingTest.initial.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all files</comment>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>SecurityPolicyReloadingTest.modified</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/lang/SecurityPolicyReloadingTest.modified.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Access all files</comment>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete"</a>
+      </block>
+
+      <block>
+        <comment>Restrict the properties which can be read</comment>
+        <d>java.util.PropertyPermission "*", "read,write"</d>
+        <a>java.util.PropertyPermission "derby.*", "read,write"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>SecurityPolicyReloadingTest.unreloadable</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/lang/SecurityPolicyReloadingTest.unreloadable.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>This permission is deliberately omitted.</comment>
+        <d>java.security.SecurityPermission "getPolicy"</d>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>CacheManagerMBeanTest.withoutPerm</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/management/CacheManagerMBeanTest.withoutPerm.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>This permission is deliberately omitted.</comment>
+        <d>org.apache.derby.shared.common.security.SystemPermission "engine", "monitor"</d>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>CacheManagerMBeanTest.withPerm</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/management/CacheManagerMBeanTest.withPerm.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Ensure that this permission is granted.</comment>
+        <a>org.apache.derby.shared.common.security.SystemPermission "engine", "monitor"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>Derby5937SlaveShutdownTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/replicationTests/Derby5937SlaveShutdownTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Add these.</comment>
+        <a>java.net.SocketPermission "127.0.0.1", "connect,accept,listen"</a>
+        <a>java.net.SocketPermission "localhost", "connect,accept,listen"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>derbyrunjartest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/tools/derbyrunjartest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Add this.</comment>
+        <a>java.lang.RuntimePermission "getProtectionDomain"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>T_RecoverFullLog</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/unit/fillLog.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Add this.</comment>
+        <a>java.util.PropertyPermission "derbyTesting.unittest.*", "read"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>Derby3980DeadlockTest</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/functionTests/tests/store/Derby3980DeadlockTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Need to read and delete file for user.dir (Derby3980DeadlockTest)</comment>
+        <a>java.io.FilePermission "${user.dir}", "read"</a>
+        <a>java.io.FilePermission "${user.dir}${/}*.txt", "read,write,delete"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>AssertFailureTest.initial</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/unitTests/junit/AssertFailureTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <comment>Allow tests to install and uninstall the security manager and to refresh the policy</comment>
+        <a>java.util.PropertyPermission "java.security.policy", "read,write"</a>
+      </block>
+
+      <block>
+        <comment>needs to run "doAsPrivileged"</comment>
+        <a>javax.security.auth.AuthPermission "doAsPrivileged"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>AssertFailureTest.reloaded</name>
+    <include>AssertFailureTest.initial</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/unitTests/junit/AssertFailureTest1.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyshared.jar</name>
+
+      <block>
+        <comment>Remove these.</comment>
+        <d>java.lang.RuntimePermission "getStackTrace"</d>
+        <d>java.lang.RuntimePermission "modifyThreadGroup"</d>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>MissingPermissionsTest.initial</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/unitTests/junit/MissingPermissionsTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derbyshared.jar</name>
+
+      <block>
+        <comment>Remove these.</comment>
+        <d>java.lang.RuntimePermission "getStackTrace"</d>
+        <d>java.lang.RuntimePermission "modifyThreadGroup"</d>
+        <d>org.apache.derby.shared.common.security.SystemPermission "engine", "monitor"</d>
+        <d>org.apache.derby.shared.common.security.SystemPermission "server", "monitor"</d>
+        <d>java.util.PropertyPermission "user.dir", "read"</d>
+        <d>java.io.FilePermission "${user.dir}${/}-", "read,write"</d>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <d>java.io.FilePermission "${derby.system.home}","read,write"</d>
+        <d>java.io.FilePermission "${derby.system.home}${/}derby.properties", "read"</d>
+        <d>java.io.FilePermission "${derby.system.home}${/}derby.log", "read,write,delete"</d>
+        <d>java.io.FilePermission "${java.io.tmpdir}${/}-", "read,write,delete"</d>
+        <d>java.io.FilePermission "${derby.system.home}", "read,write"</d>
+        <d>java.io.FilePermission "${user.dir}${/}extin${/}-", "read"</d>
+        <d>java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,write,delete"</d>
+        <d>java.io.FilePermission "${user.dir}${/}extout${/}-", "read,write"</d>
+        <d>java.io.FilePermission "${user.dir}${/}extinout", "read,write"</d>
+      </block>
+
+      <block>
+        <d>java.util.PropertyPermission "derbyTesting.unittest.*", "write"</d>
+        <d>java.util.PropertyPermission "derby.storage.jvmInstanceId", "write"</d>
+        <d>java.lang.RuntimePermission "getClassLoader"</d>
+        <d>java.lang.RuntimePermission "setContextClassLoader"</d>
+        <d>java.security.SecurityPermission "getPolicy"</d>
+      </block>
+
+      <block>
+        <a>java.lang.RuntimePermission "setSecurityManager"</a>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete"</a>
+        <a>java.io.FilePermission "${derby.system.home}","read"</a>
+        <a>java.util.PropertyPermission "user.*", "read"</a>
+        <a>java.util.PropertyPermission "java.home", "read"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbytools.jar</name>
+
+      <block>
+        <d>java.util.PropertyPermission "*", "read,write"</d>
+        <d>java.util.PropertyPermission "user.*", "read"</d>
+        <d>java.util.PropertyPermission "java.home", "read"</d>
+        <d>java.util.PropertyPermission "java.class.path", "read"</d>
+        <d>java.util.PropertyPermission "java.runtime.version", "read"</d>
+        <d>java.util.PropertyPermission "java.fullversion", "read"</d>
+        <d>java.lang.RuntimePermission "getProtectionDomain"</d>
+        <d>java.io.FilePermission "${user.dir}${/}-", "read"</d>
+        <d>java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,write,delete"</d>
+        <d>java.io.FilePermission "${derbyTesting.testjarpath}", "read"</d>
+        <d>java.lang.RuntimePermission "getStackTrace"</d>
+        <d>java.lang.RuntimePermission "modifyThreadGroup"</d>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbynet.jar</name>
+
+      <block>
+        <d>java.lang.RuntimePermission "accessUserInformation"</d>
+        <d>java.lang.RuntimePermission "getFileStoreAttributes"</d>
+        <d>java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "read,write"</d>
+        <d>org.apache.derby.shared.common.security.SystemPermission "server", "control,monitor"</d>
+        <d>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</d>
+        <d>java.net.SocketPermission "localhost:${derby.security.port}", "listen"</d>
+        <d>java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete"</d>
+        <d>java.net.SocketPermission "127.0.0.1", "accept,connect"</d>
+        <d>java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect"</d>
+        <d>java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect"</d>
+        <d>java.net.SocketPermission "localhost", "accept,connect,listen"</d>
+        <d>java.io.FilePermission "${user.dir}${/}system${/}trace", "read,write"</d>
+        <d>java.io.FilePermission "${user.dir}${/}system${/}trace${/}-", "read,write"</d>
+        <d>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_restr", "read,write"</d>
+        <d>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_lax", "read,write"</d>
+        <d>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_restr${/}-", "read,write"</d>
+        <d>java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_lax${/}-", "read,write"</d>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyclient.jar</name>
+
+      <block>
+        <d>java.net.SocketPermission "localhost", "connect,resolve"</d>
+        <d>java.util.PropertyPermission "user.dir", "read"</d>
+        <d>java.io.FilePermission "${user.dir}${/}-", "read,write"</d>
+        <d>java.util.PropertyPermission "derby.*", "read"</d>
+        <d>java.sql.SQLPermission "callAbort"</d>
+        <d>java.net.SocketPermission "127.0.0.1", "connect,resolve"</d>
+        <d>java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve"</d>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <d>org.apache.derby.shared.common.security.SystemPermission "engine", "usederbyinternals"</d>
+        <d>java.io.FilePermission "${user.dir}${/}-", "read,write,delete"</d>
+        <d>java.io.FilePermission "${java.home}${/}-", "execute, read"</d>
+        <d>java.lang.RuntimePermission "setIO"</d>
+        <d>java.lang.RuntimePermission "createClassLoader"</d>
+        <d>java.lang.RuntimePermission "setContextClassLoader"</d>
+        <d>java.lang.RuntimePermission "getStackTrace"</d>
+        <d>org.apache.derby.shared.common.security.SystemPermission "jmx", "control"</d>
+        <d>org.apache.derby.shared.common.security.SystemPermission "engine", "monitor"</d>
+        <d>org.apache.derby.shared.common.security.SystemPermission "server", "control,monitor"</d>
+        <d>java.sql.SQLPermission "callAbort"</d>
+        <d>java.lang.RuntimePermission "accessUserInformation"</d>
+        <d>java.lang.RuntimePermission "getFileStoreAttributes"</d>
+        <d>java.net.SocketPermission "localhost", "listen"</d>
+        <d>java.lang.RuntimePermission "closeClassLoader"</d>
+        <d>java.lang.RuntimePermission "accessDeclaredMembers"</d>
+        <d>java.lang.reflect.ReflectPermission "suppressAccessChecks"</d>
+        <d>java.io.FilePermission "${java.home}${/}..${/}bin${/}-", "execute, read"</d>
+      </block>
+
+      <block>
+        <a>java.util.PropertyPermission "java.security.policy", "read,write"</a>
+        <a>java.lang.RuntimePermission "modifyThread"</a>
+        <a>javax.security.auth.AuthPermission "doAsPrivileged" </a>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete,execute"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>junit.jar</name>
+
+      <block>
+        <a>java.util.PropertyPermission "inSubProcess", "read"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>MissingPermissionsTest.reloaded</name>
+    <include>MissingPermissionsTest.initial</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/unitTests/junit/MissingPermissionsTest1.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <d>java.util.PropertyPermission "derby.*", "read"</d>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <d>java.lang.RuntimePermission "modifyThreadGroup"</d>
+        <d>java.lang.RuntimePermission "modifyThread"</d>
+        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete,execute"</d>
+      </block>
+
+      <block>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>MissingPermissionsTest.reloadedAgain</name>
+    <include>MissingPermissionsTest.reloaded</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/unitTests/junit/MissingPermissionsTest2.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <d>java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete"</d>
+        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete"</d>
+        <d>java.util.PropertyPermission "user.*", "read"</d>
+        <d>java.util.PropertyPermission "java.home", "read"</d>
+        <d>java.util.PropertyPermission "java.class.path", "read"</d>
+        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read"</d>
+        <d>java.io.FilePermission "java.runtime.version", "read"</d>
+        <d>java.io.FilePermission "java.fullversion", "read"</d>
+        <d>java.sql.SQLPermission "callAbort"</d>
+      </block>
+
+      <block>
+        <a>java.util.PropertyPermission "derby.*", "read"</a>
+        <a>java.io.FilePermission "./derby.log", "read,write,delete"</a>
+        <a>java.io.FilePermission "singleUse${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "system", "read,write,delete"</a>
+        <a>java.io.FilePermission "system${/}singleUse{/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission "system${/}nested${/}-", "read,write,delete"</a>
+        <a>java.io.FilePermission ".", "read,write,delete"</a>
+        <a>java.lang.RuntimePermission "setContextClassLoader"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete"</d>
+      </block>
+
+      <block>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write,delete,execute"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbytools.jar</name>
+
+      <block>
+        <a>java.util.PropertyPermission "*", "read,write"</a>
+        <a>java.util.PropertyPermission "java.home", "read"</a>
+        <a>java.util.PropertyPermission "java.class.path", "read"</a>
+        <a>java.util.PropertyPermission "java.runtime.version", "read"</a>
+        <a>java.util.PropertyPermission "java.fullversion", "read"</a>
+        <a>java.lang.RuntimePermission "getProtectionDomain"</a>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
+  <policy>
+    <name>SystemPrivilegesPermissionTest.reloaded</name>
+    <include>basicTests</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest1.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+  </policy>
+
+  <policy>
+    <name>SystemPrivilegesPermissionTest.initial</name>
+    <include>SystemPrivilegesPermissionTest.reloaded</include>
+    <output>
+      <file>classes/testing/org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest.policy</file>
+      <properties>securityTests.properties</properties>
+    </output>
+
+    <jar>
+      <name>principal org.apache.derby.authentication.SystemPrincipal "AUTHORIZEDSYSTEMUSER"</name>
+
+      <block>
+        <a>org.apache.derby.shared.common.security.SystemPermission "server", "shutdown"</a>
+        <a>org.apache.derby.security.DatabasePermission "directory:*", "create"</a>
+        <a>org.apache.derby.security.DatabasePermission "directory:level0/level1/-", "create"</a>
+        <a>org.apache.derby.security.DatabasePermission "directory:/*", "create"</a>
+        <a>org.apache.derby.security.DatabasePermission "directory:/level0/level1/-", "create"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>principal org.apache.derby.authentication.SystemPrincipal "SUPERUSER"</name>
+
+      <block>
+        <a>org.apache.derby.shared.common.security.SystemPermission "server", "shutdown"</a>
+        <a>org.apache.derby.security.DatabasePermission "directory:&lt;&lt;ALL FILES&gt;&gt;", "create"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>principal org.apache.derby.authentication.SystemPrincipal *</name>
+
+      <block>
+        <a>org.apache.derby.security.DatabasePermission "directory:dir", "create"</a>
+      </block>
+
+    </jar>
+
+    <jar>
+      <name>derbyTesting.jar</name>
+
+      <block>
+        <a>javax.security.auth.AuthPermission "doAsPrivileged"</a>
+      </block>
+
+    </jar>
+
+  </policy>
+
   <!--
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      !!

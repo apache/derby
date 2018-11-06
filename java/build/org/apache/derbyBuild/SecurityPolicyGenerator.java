@@ -64,6 +64,7 @@ public class SecurityPolicyGenerator extends Task
 
     private static final String PERMISSION = "permission ";
     private static final String STATEMENT_END = ";";
+    private static final String PRINCIPAL = "principal";
 
     private static final String TAB = "  ";
     private static final String COMMENT = "// ";
@@ -524,14 +525,23 @@ public class SecurityPolicyGenerator extends Task
         {
             String tab = tab(indentLevel);
             String actualName = outputProperties.getProperty(logicalName, logicalName);
+            boolean isPrincipal = actualName.startsWith(PRINCIPAL);
 
             writer.print(tab);
             writer.print("grant");
             if (actualName.length() > 0)
             {
-                writer.print(" codeBase \"");
-                writer.print(actualName);
-                writer.println("\"");
+                writer.print(" ");
+                if (isPrincipal)
+                {
+                    writer.println(actualName);
+                }
+                else
+                {
+                    writer.print("codeBase \"");
+                    writer.print(actualName);
+                    writer.println("\"");
+                }
             }
             else { writer.println(""); }
 

@@ -1,7 +1,6 @@
 /*
 
-   Derby - Class 
-   org.apache.derbyTesting.functionTests.tests.derbynet.SysinfoTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.derbynet.SysinfoTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
