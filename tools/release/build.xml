@@ -196,8 +196,14 @@
                   fullpath="${derby.bin}/demo/programs/toursdb/toursdb_readme.html"/>
       <zipfileset file="${derby.demo.src.dir}/scores/build.xml"
                   fullpath="${derby.bin}/demo/programs/scores/build.xml"/>
-      <zipfileset file="${derby.drda.dir}/drda/template.policy"
-                  fullpath="${derby.bin}/demo/templates/server.policy"/>
+      <zipfileset file="${generated.src.engine.dir}/${derby.dir}/security/clientTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/clientTemplate.policy"/>
+      <zipfileset file="${generated.src.engine.dir}/${derby.dir}/security/engineTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/engineTemplate.policy"/>
+      <zipfileset file="${generated.src.engine.dir}/${derby.dir}/security/serverTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/serverTemplate.policy"/>
+      <zipfileset file="${generated.src.engine.dir}/${derby.dir}/security/toolsTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/toolsTemplate.policy"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleApp.class"
                   prefix="${derby.bin}/demo/programs/simple"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
@@ -251,8 +257,14 @@
                   fullpath="${derby.bin}/demo/programs/toursdb/toursdb_readme.html"/>
       <tarfileset file="${derby.demo.src.dir}/scores/build.xml"
                   fullpath="${derby.bin}/demo/programs/scores/build.xml"/>
-      <tarfileset file="${derby.drda.dir}/drda/template.policy"
-                  fullpath="${derby.bin}/demo/templates/server.policy"/>
+      <tarfileset file="${generated.src.engine.dir}/${derby.dir}/security/clientTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/clientTemplate.policy"/>
+      <tarfileset file="${generated.src.engine.dir}/${derby.dir}/security/engineTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/engineTemplate.policy"/>
+      <tarfileset file="${generated.src.engine.dir}/${derby.dir}/security/serverTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/serverTemplate.policy"/>
+      <tarfileset file="${generated.src.engine.dir}/${derby.dir}/security/toolsTemplate.policy"
+                  fullpath="${derby.bin}/demo/templates/toolsTemplate.policy"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleApp.class"
                   prefix="${derby.bin}/demo/programs/simple"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleMobileApp.class"

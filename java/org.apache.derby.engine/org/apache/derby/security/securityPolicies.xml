@@ -328,6 +328,19 @@ API, or with the property derby.drda.portNumber. The default is 1527.</comment>
 
   </policy>
 
+  <!-- template server policy -->
+
+  <policy>
+    <name>serverTemplate</name>
+    <include>basicServer</include>
+    <include>optionalEngine</include>
+    <output>
+      <file>generated/java/org.apache.derby.engine/org/apache/derby/security/serverTemplate.policy</file>
+      <properties>securityProduct.properties</properties>
+    </output>
+
+  </policy>
+
   <!-- org.apache.derby.client -->
 
   <policy>
@@ -1805,8 +1818,7 @@ abort physical connections.</comment>
 
   <policy>
     <name>basicServerDoc</name>
-    <include>basicServer</include>
-    <include>optionalEngine</include>
+    <include>serverTemplate</include>
     <output>
       <file>generated/java/org.apache.derby.engine/org/apache/derby/security/rsecbasicserver.dita</file>
       <properties>securityProduct.properties</properties>
