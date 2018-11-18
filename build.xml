@@ -2044,6 +2044,7 @@
        <arg value="-Drelease.id.short=${eversion}"/>
        <arg value="-Drelease.id.long=${release.id.long}"/>
        <arg value="-Dcopyright.year=${copyright.year}"/>
+       <arg value="-Dminimum.jdk=${min.version}"/>
        <arg value="-Dsubversion.revision=${changenumber}"/>
        <arg value="all"/>
      </exec>
