@@ -89,7 +89,7 @@ if [ ! -x "$JAVACMD" ] ; then
 fi
 
 # set local classpath, don't overwrite the user's
-LOCALCLASSPATH=$DERBY_LIB/derby.jar:$DERBY_LIB/derbynet.jar:$DERBY_LIB/derbytools.jar:$DERBY_LIB/derbyoptionaltools.jar:$DERBY_LIB/derbyclient.jar
+LOCALCLASSPATH=$DERBY_LIB/derbyshared.jar:$DERBY_LIB/derby.jar:$DERBY_LIB/derbynet.jar:$DERBY_LIB/derbytools.jar:$DERBY_LIB/derbyoptionaltools.jar:$DERBY_LIB/derbyclient.jar
 
 
 # if CLASSPATH_OVERRIDE env var is set, LOCALCLASSPATH will be

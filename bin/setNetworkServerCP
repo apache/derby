@@ -23,4 +23,6 @@ if [ -z "$DERBY_HOME" ]; then
   return 1
 fi
 
-export CLASSPATH="${DERBY_HOME}/lib/derbynet.jar:${DERBY_HOME}/lib/derbytools.jar:${DERBY_HOME}/lib/derbyoptionaltools.jar:${CLASSPATH}"
+export CLASSPATH="${DERBY_HOME}/lib/derbyshared.jar:${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbynet.jar:${DERBY_HOME}/lib/derbytools.jar:${DERBY_HOME}/lib/derbyoptionaltools.jar:${CLASSPATH}"
+
+export MODULEPATH="${DERBY_HOME}/lib/derbyshared.jar:${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbynet.jar:${DERBY_HOME}/lib/derbytools.jar:${DERBY_HOME}/lib/derbyoptionaltools.jar"

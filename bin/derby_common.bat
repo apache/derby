@@ -56,7 +56,7 @@ echo Please set the DERBY_HOME environment variable to the path where you instal
 goto endcommon
 
 :setLocalClassPath
-set LOCALCLASSPATH=%DERBY_HOME%/lib/derby.jar;%DERBY_HOME%/lib/derbynet.jar;%DERBY_HOME%/lib/derbyclient.jar;%DERBY_HOME%/lib/derbytools.jar;%DERBY_HOME%/lib/derbyoptionaltools.jar
+set LOCALCLASSPATH=%DERBY_HOME%/lib/derbyshared.jar;%DERBY_HOME%/lib/derby.jar;%DERBY_HOME%/lib/derbynet.jar;%DERBY_HOME%/lib/derbyclient.jar;%DERBY_HOME%/lib/derbytools.jar;%DERBY_HOME%/lib/derbyoptionaltools.jar
 
 :checkJava
 set _JAVACMD=%JAVACMD%

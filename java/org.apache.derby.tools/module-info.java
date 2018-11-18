@@ -63,8 +63,6 @@ module org.apache.derby.tools
     requires java.sql;
     requires java.xml;
 
-    requires org.apache.derby.engine;
-    requires org.apache.derby.client;
     requires org.apache.derby.commons;
 
     //
@@ -73,6 +71,8 @@ module org.apache.derby.tools
     // REQUIRED AT COMPILE-TIME.
     // OPTIONAL AT RUN-TIME.
     //
+    requires static org.apache.derby.engine;
+    requires static org.apache.derby.client;
     requires static java.naming;
 
     //
