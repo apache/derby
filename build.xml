@@ -2033,6 +2033,7 @@
    <target name="builduserdocs" depends="ant-exec-windows,ant-exec-unix,checkdocsroot">
 
      <property file="${properties.dir}/release.properties"/>
+     <property file="${properties.dir}/defaultcompiler.properties"/>
 
      <antcall target="getsvnversion"/>
 
