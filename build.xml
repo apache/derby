@@ -397,7 +397,7 @@
     <taskdef
       name="writeAndCheckinReleaseProperties"
       classname="org.apache.derbyPreBuild.ReleaseProperties"
-      classpath="${out.build.dir}"
+      classpath="${out.build.dir}:${derby.shared.src.dir}"
     />
 
     <property name="releasePropertyFile" value="${properties.dir}/release.properties"/>
@@ -2132,7 +2132,7 @@
 
     <java classname="org.apache.derbyBuild.maintversion2props">
         <classpath path="${out.build.dir}"/>
-        <arg value="${out.engine.dir}/org/apache/derby/info/DBMS.properties"/>
+        <arg value="${out.engine.dir}/org/apache/derby/info/engine/info.properties"/>
         <arg value="${snapshot.dir}/maintversion.properties"/>
     </java>
     <property file="${snapshot.dir}/maintversion.properties"/>

@@ -144,7 +144,6 @@ public class ReleaseProperties extends Task
 
         try {
             int     drdaMaintID = readDRDAMaintID( target );
-            System.out.println( "XXX ReleaseProperties. drda maint id = " + drdaMaintID );
             
             VersionID versionID = new VersionID( _releaseID );
             if ( _bump ) { versionID.bump(); }

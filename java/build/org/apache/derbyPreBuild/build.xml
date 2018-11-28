@@ -32,6 +32,29 @@
   <target name="build" depends="compile"/>
 
   <target name="compile">
+
+    <!-- Needed by ReleaseProperties -->
+    <javac
+      source="${min.version}"
+      target="${min.version}"
+      nowarn="on"
+      debug="true"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.shared.src.dir}"
+      destdir="${out.shared.dir}"
+      includeantruntime="false"
+      includes="org/apache/derby/shared/common/info/PropertyNames.java"
+    >
+      <classpath>
+        <pathelement path="${ant.core.lib}"/>
+      </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+
     <javac
       source="${min.version}"
       target="${min.version}"
@@ -44,12 +67,15 @@
       verbose="${verbose}"
       srcdir="${derby.build.src.dir}"
       destdir="${out.build.dir}"
-      includeantruntime="false">
-      <include name="org/apache/derbyPreBuild/** ../engine/org/apache/derby/iapi/services/info/PropertyNames.java"/>
+      includeantruntime="false"
+      includes="org/apache/derbyPreBuild/*.java"
+    >
       <classpath>
         <pathelement path="${ant.core.lib}"/>
+        <pathelement path="${out.shared.dir}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
+
   </target>
 </project>

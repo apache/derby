@@ -27,7 +27,7 @@
  * configuration to provide their extra functionality.
  * </p>
  * 
- * <p><b>Module Diagram:</b</p>
+ * <p><b>Module Diagram:</b></p>
  *
  * <div style="text-align:center;">
  *   <img

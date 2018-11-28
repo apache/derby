@@ -43,14 +43,14 @@ public class maintversion2props
         InputStream is = new FileInputStream(args[0]);
         Properties p = new Properties();
         p.load(is);
-	String maint = "";
-        if (args[0].indexOf("DBMS") > 0)
-        {
-          maint = p.getProperty("derby.version.maint");
-        } else if (args[0].indexOf("release") > 0)
+
+	    String maint = "";
+        maint = p.getProperty("derby.version.maint");
+        if (maint == null)
         { 
-          maint = p.getProperty("maint");
+            maint = p.getProperty("maint");
         }
+        
         Properties p2 = new Properties();
         p2.setProperty("interim", Integer.toString(Integer.parseInt(maint) / 1000000));
         p2.setProperty("point", Integer.toString(Integer.parseInt(maint) % 1000000));

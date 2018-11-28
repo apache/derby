@@ -44,7 +44,7 @@
  *  module supports JNDI lookup of DataSources and LDAP authenticators.</li>
  * </ul>
  *
- * <p><b>Module Diagram:</b</p>
+ * <p><b>Module Diagram:</b></p>
  *
  * <div style="text-align:center;">
  *   <img

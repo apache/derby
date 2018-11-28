@@ -31,7 +31,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.Driver;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +63,7 @@ public class SetDerbyVersion {
     private static final File INSANE = new File(REL_JAR_PATH, "insane");
     /** List of required jar files the Maven 2 Derby artifacts. */
     private static final String[] JARS = new String[] {
+        "derbyshared.jar",
         "derby.jar",
         "derby.war",
         "derbynet.jar",
@@ -193,31 +194,9 @@ public class SetDerbyVersion {
         // The class loader used for the Derby jars.
         URLClassLoader cl = new URLClassLoader(URLS, null);
 
-        // Extra sanity check for the sanity...
-        try {
-            Class.forName(
-                    "org.apache.derby.shared.common.sanity.SanityManager",
-                    true ,cl);
-            if (PREFIX == INSANE) {
-                warn("Found SanityManager in INSANE build. Aborting.");
-                return false;
-            }
-        } catch (ClassNotFoundException cnfe) {
-            if (PREFIX == SANE) {
-                warn("Unable to load SanityManager in SANE build. Aborting.");
-                return false;
-            }
-        }
-
         // Fire up Derby to get the version string.
-        Class driverClass =
-                Class.forName("org.apache.derby.jdbc.EmbeddedDriver", true, cl);
-        Driver driver = (Driver)driverClass.newInstance();
-        Connection con = driver.connect(JDBC_URL, null);
+        Connection con = DriverManager.getConnection(JDBC_URL);
         DatabaseMetaData meta = con.getMetaData();
-        con.close();
-        // Delete the derby.log file.
-        new File("derby.log").delete();
 
         // I.e.: 10.6.0.0 alpha - (882129M)
         String fullVersion = meta.getDatabaseProductVersion();
@@ -241,6 +220,11 @@ public class SetDerbyVersion {
                 return false;
             }
         }
+        
+        con.close();
+        // Delete the derby.log file.
+        new File("derby.log").delete();
+
         return true;
     }
 

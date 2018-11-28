@@ -86,8 +86,8 @@
     <mkdir dir="${release.dir}"/>
 
     <java classname="org.apache.derbyBuild.maintversion2props">
-        <classpath path="${out.dir}"/>
-        <arg value="${out.dir}/org/apache/derby/info/DBMS.properties"/>
+        <classpath path="${out.build.dir}"/>
+        <arg value="${out.engine.dir}/org/apache/derby/info/engine/info.properties"/>
         <arg value="${release.dir}/maintversion.properties"/>
     </java>
 	
@@ -208,13 +208,13 @@
                   prefix="${derby.bin}/demo/programs/simple"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
-      <zipfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
+      <zipfileset dir="${basedir}/classes/demo/nserverdemo" includes="*.class"
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <zipfileset dir="${generated.toursdb.dir}" includes="toursdb/**,toursdb.jar"
                   prefix="${derby.bin}/demo/databases"/>
       <zipfileset dir="${basedir}/classes" includes="Wwd*.class"
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
-      <zipfileset dir="${basedir}/classes/org/apache/derbyDemo" includes="vtis/**"
+      <zipfileset dir="${basedir}/classes/demo/org/apache/derbyDemo" includes="vtis/**"
                   prefix="${derby.bin}/demo/programs/vtis/org/apache/derbyDemo"/>
 
       <!-- docs -->
@@ -229,7 +229,7 @@
 	          excludes="derby_core_plugin*,derbyTesting.jar"/>
       <!-- test -->
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
-      <zipfileset dir="${basedir}/java/testing" prefix="${derby.bin}/test" 
+      <zipfileset dir="${basedir}/java/${module.name.tests}" prefix="${derby.bin}/test" 
                   includes="README.htm"/>
     </zip>
   </target>
@@ -271,13 +271,13 @@
                   prefix="${derby.bin}/demo/programs/simplemobile"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
-      <tarfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
+      <tarfileset dir="${basedir}/classes/demo/nserverdemo" includes="*.class"
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <tarfileset dir="${generated.toursdb.dir}" includes="toursdb/**,toursdb.jar"
                   prefix="${derby.bin}/demo/databases"/>
       <tarfileset dir="${basedir}/classes" includes="Wwd*.class"
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
-      <tarfileset dir="${basedir}/classes/org/apache/derbyDemo" includes="vtis/**"
+      <tarfileset dir="${basedir}/classes/demo/org/apache/derbyDemo" includes="vtis/**"
                   prefix="${derby.bin}/demo/programs/vtis/org/apache/derbyDemo"/>
       <!-- docs -->
       <tarfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif,**/*.css"
@@ -291,7 +291,7 @@
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
       <!-- test -->
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
-      <tarfileset dir="${basedir}/java/testing" prefix="${derby.bin}/test" 
+      <tarfileset dir="${basedir}/java/${module.name.tests}" prefix="${derby.bin}/test" 
                   includes="README.htm"/>
     </tar>
   </target>
@@ -306,7 +306,7 @@
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/test" includes="derbyTesting.jar"/>
-      <zipfileset dir="${basedir}/java/testing" prefix="${derby.lib}/test" 
+      <zipfileset dir="${basedir}/java/${module.name.tests}" prefix="${derby.lib}/test" 
                   includes="README.htm"/>
     </zip>
   </target>
@@ -318,7 +318,7 @@
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/test" includes="derbyTesting.jar"/>
-      <tarfileset dir="${basedir}/java/testing" prefix="${derby.lib}/test" 
+      <tarfileset dir="${basedir}/java/${module.name.tests}" prefix="${derby.lib}/test" 
                   includes="README.htm"/>
     </tar>
   </target>
@@ -333,7 +333,7 @@
       <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
       <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/test" includes="derbyTesting.jar"/>
-      <zipfileset dir="${basedir}/java/testing" prefix="${derby.lib-debug}/test" 
+      <zipfileset dir="${basedir}/java/${module.name.tests}" prefix="${derby.lib-debug}/test" 
                   includes="README.htm"/>
     </zip>
   </target>
@@ -345,7 +345,7 @@
       <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
       <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/test" includes="derbyTesting.jar"/>
-      <tarfileset dir="${basedir}/java/testing" prefix="${derby.lib-debug}/test" 
+      <tarfileset dir="${basedir}/java/${module.name.tests}" prefix="${derby.lib-debug}/test" 
                   includes="README.htm"/>
     </tar>
   </target>
@@ -491,7 +491,7 @@
       <entry key="maint" type="int" operation="+" value="1" pattern="0000000"/>
     </propertyfile>
     <java classname="org.apache.derbyBuild.maintversion2props">
-      <classpath path="${out.dir}"/>
+      <classpath path="${out.build.dir}"/>
       <arg value="${basedir}/tools/ant/properties/release.properties"/>
       <arg value="${basedir}/tools/release/maintversion.properties"/>
     </java>

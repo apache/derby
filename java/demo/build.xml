@@ -46,9 +46,8 @@
       proceed="${proceed}"
       verbose="${verbose}"
       destdir="${out.demo.dir}"
-      srcdir="${derby.demo.src.dir}/nserverdemo"
-      includes="nserverdemo/**"
-      excludes="nserverdemo/Simple*">
+      srcdir="${derby.demo.src.dir}"
+      includes="nserverdemo/**">
       <compilerarg value="-Xlint:unchecked"/>
       <compilerarg value="-Xlint:deprecation"/>
       <classpath>

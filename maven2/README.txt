@@ -47,7 +47,7 @@ Description of the required steps:
       o The Derby release version.
         The version must be specified in all POMs. Compile and execute the
         Java program SetDerbyVersion, found in the 'maven2' directory, i.e.:
-            javac SetDerbyVersion && java -cp . SetDerbyVersion
+            javac SetDerbyVersion && java -cp .:../jars/insane/derbyshared.jar:../jars/insane/derby.jar SetDerbyVersion
 
         Alternatively, use search and replace (i.e. Perl or sed) - make sure
         you don't replace version tags that aren't supposed to be modified.
