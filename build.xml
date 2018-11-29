@@ -1069,6 +1069,7 @@
       <arg value="-linkoffline"/><arg value="${j2eedoc.url}"/><arg value="${j2eedoc.local}"/>
       <arg value="--module-source-path"/><arg value="${javasrc.dir}:${generated.src.dir}"/>
       <arg value="--module-path"/><arg value="${osgi}:${servlet24}:${junit}:${lucene_core}:${lucene_a_co}:${lucene_qp}:${json_simple}"/>
+      <arg value="--module"/><arg value="${module.name.client},${module.name.runner}"/>
       <arg value="${derby.shared.src.dir}/org/apache/derby/shared/common/security/SystemPermission.java"/>
       <arg value="${derby.engine.src.dir}/org/apache/derby/agg/Aggregator.java"/>
       <arg value="${derby.engine.src.dir}/org/apache/derby/authentication/UserAuthenticator.java"/>
