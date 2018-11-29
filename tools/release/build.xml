@@ -372,13 +372,13 @@
     </tar>
   </target>
 
-  <!-- generate the md5 and pgp checksums for a target -->
+  <!-- generate the sha-512 and pgp checksums for a target -->
   <target name="sign" depends="sign.bin,sign.lib,sign.src,sign.debug"/>
   <target name="sign.bin" depends="init">
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.bin}.zip"/>
     </antcall>
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.bin}.tar.gz"/>
     </antcall>
     <antcall target="pgp">
@@ -389,10 +389,10 @@
     </antcall>
   </target>
   <target name="sign.lib" depends="init">
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.lib}.zip"/>
     </antcall>
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.lib}.tar.gz"/>
     </antcall>
     <antcall target="pgp">
@@ -403,10 +403,10 @@
     </antcall>
   </target>
   <target name="sign.src" depends="init">
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.src}.zip"/>
     </antcall>
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.src}.tar.gz"/>
     </antcall>
     <antcall target="pgp">
@@ -417,10 +417,10 @@
     </antcall>
   </target>
   <target name="sign.debug" depends="init">
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.lib-debug}.zip"/>
     </antcall>
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${derby.lib-debug}.tar.gz"/>
     </antcall>
     <antcall target="pgp">
@@ -439,13 +439,13 @@
   <target name="sign.eclipse.plugin" depends="init">
     <property file="${release.base}/plugintmp.properties"/>
     <property name="eclipse.plugin" value="${plugin.derby.core.zipfile}_${plugin.derby.version}.zip"/>
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${eclipse.plugin}"/>
     </antcall>
     <antcall target="pgp">
       <param name="sign.archive" value="${release.dir}/${eclipse.plugin}"/>
     </antcall>
-    <antcall target="md5">
+    <antcall target="sha512">
       <param name="sign.archive" value="${release.dir}/${eclipse.ui.doc.plugin.name}"/>
     </antcall>
     <antcall target="pgp">
@@ -453,10 +453,11 @@
     </antcall>
   </target>
 
-  <target name="md5">
-    <exec executable="${md5.exec}" output="${sign.archive}.md5">
-      <arg line="${md5.options} ${sign.archive}"/>
-    </exec>
+  <target name="sha512">
+    <checksum file="${sign.archive}"
+              fileext=".sha-512"
+              algorithm="SHA-512"
+    />
   </target>
 
   <target name="pgp">

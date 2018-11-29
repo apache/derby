@@ -116,7 +116,7 @@ This is a feature release. The following new features were added:
 <releaseVerification>
 
 <p>It is essential that you verify the integrity of the downloaded
-files using the PGP and MD5 signatures.  MD5 verification ensures the
+files using the PGP and SHA-512 signatures.  SHA-512 verification ensures the
 file was not corrupted during the download process.  PGP verification
 ensures that the file came from a certain person.</p>
 
@@ -146,16 +146,12 @@ Then verify the signatures using ...</p>
 
 </pre>
 
-<p>To verify the MD5 signature on the files, you need to use a program
-called <code>md5</code> or <code>md5sum</code>, which is
-included in many unix distributions.  It is also available as part of
-<a href="http://www.gnu.org/software/textutils/textutils.html">GNU
-Textutils</a>.  Windows users can get binary md5 programs from <a
-href="http://www.fourmilab.ch/md5/">here</a>, <a
-href="http://www.pc-tools.net/win32/freeware/console/">here</a>, or
-<a href="http://www.slavasoft.com/fsum/">here</a>.</p>
+<p>To verify the SHA-512 checksums on the files, you need to use a
+platform-specific program. On Mac OSX, this program is called
+<code>shasum</code>, on Linux it is called <code>sha512sum</code>,
+and on Windows it is called <code>CertUtil</code>.</p>
 
-<p>We strongly recommend that you verify your downloads with both PGP and MD5.</p>
+<p>We strongly recommend that you verify your downloads with both PGP and SHA-512.</p>
 
 
 </releaseVerification>
