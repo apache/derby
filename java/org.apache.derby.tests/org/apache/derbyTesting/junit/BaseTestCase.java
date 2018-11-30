@@ -927,6 +927,18 @@ public abstract class BaseTestCase
     }
     
     /**
+     * Temporary method to stabilize the modulepath tests. See DERBY-7011.
+     * @return true if we should short-circuit the module tests.
+     */
+    public static final boolean shortCircuitFor_derby_7011()
+    {
+        boolean isModuleAware = JVMInfo.isModuleAware();
+        boolean isJenkinsRun = getSystemProperty("user.dir").startsWith("/home/jenkins");
+        
+        return isModuleAware && isJenkinsRun;
+    }
+
+    /**
      * Check if this is java 5
      * @return true if java.version system property starts with 1.5
      */

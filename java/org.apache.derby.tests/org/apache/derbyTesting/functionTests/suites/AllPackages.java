@@ -85,7 +85,11 @@ public class AllPackages extends BaseTestCase {
         ArrayList<Object> classes = new ArrayList<Object>();
 
         classes.add(org.apache.derbyTesting.functionTests.tests.derbynet._Suite.class);
-        classes.add(org.apache.derbyTesting.functionTests.tests.lang._Suite.class); 
+
+        if (shortCircuitFor_derby_7011()) { return classes; }
+
+        classes.add(org.apache.derbyTesting.functionTests.tests.lang._Suite.class);
+        
         // DERBY-1903
         // For the largedata test, just run the lite version of the test as
         // the full test is too big.
