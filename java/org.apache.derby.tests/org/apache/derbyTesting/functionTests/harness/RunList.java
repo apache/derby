@@ -54,12 +54,13 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class RunList
 {
+    public static final String SPEC_VERSION = "java.specification.version";
 
 	static String jvmName = "currentjvm";
 	static String javaCmd = "java";
 	static String javaArgs;
 	static jvm jvm;
-	static String javaVersion; // System.getProperty("java.version")
+	static String javaVersion; // System.getProperty("java.specification.version")
 	static String majorVersion;
 	static String minorVersion;
 	static String jversion; // to pass jvm to RunTest as -Djvm=1.2 etc.
@@ -739,10 +740,7 @@ public class RunList
 			else if (j9config.equals("dee"))
 				jvmName="j9dee15";
 
-		if (jversion == null)
-		    javaVersion = System.getProperty("java.version");
-		else
-		    javaVersion = jversion;
+        javaVersion = System.getProperty(SPEC_VERSION);
 		    
 		//System.out.println("RunList setTopSuiteProperties javaVersion: " + javaVersion);
 
@@ -752,12 +750,7 @@ public class RunList
 		else if (javaCmd.equals("jview"))
 		    jvmName = "jview";
 
-		// if j9, we need to check further
-		String javavmVersion;
-		if (System.getProperty("java.vm.name").equals("J9"))
-			javavmVersion = (System.getProperty("java.vm.version"));
-		else
-			javavmVersion = javaVersion;
+        String javavmVersion = javaVersion;
 
 
         JavaVersionHolder jvh = new JavaVersionHolder(javavmVersion);
@@ -779,7 +772,7 @@ public class RunList
 			javaVersion = javaVersion + " - " + majorVersion + "." + minorVersion;
 			System.out.println("javaVersion now: " + javaVersion);
 			// up to j9 2.1 (jdk 1.3.1. subset) the results are the same for all versions, or
-			// we don't care about it anymore. So switch back to 1.3 (java.version values).
+			// we don't care about it anymore. So switch back to 1.3 (java.specification.version values).
 			if ((imajor <= 2) && (iminor < 2))
 			{
 				majorVersion = "1";
@@ -1124,8 +1117,6 @@ public class RunList
 
 	// Determine if this is jdk12 or higher (with or without extensions)
     if (iminor >= 2) isJdk12 = true;
-	if ( System.getProperty("java.version").startsWith("1.1.8") ) isJdk118 = true;
-    if ( System.getProperty("java.version").startsWith("1.1.7") ) isJdk117 = true;
     
 	// if a test needs an ibm jvm, skip if runwithibmjvm is true.
 	// if a test needs to not run in an ibm jvm, skip if runwithibmjvm is false.

@@ -292,7 +292,7 @@ public class RunSuite
             jvmName = p.getProperty("jvm");
 		    if ( (jvmName == null) || (jvmName.length()==0) )
 		    {
-		        javaVersion = System.getProperty("java.version");
+		        javaVersion = System.getProperty(RunList.SPEC_VERSION);
 		    }
 		    else
 		        javaVersion = jvmName;

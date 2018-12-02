@@ -972,7 +972,7 @@ public class RunTest
 		//System.out.println("jvmName is: " + jvmName);
 		if ( (jvmName == null) || (jvmName.length()==0) || (jvmName.equals("jview")))
 		{
-		    javaVersion = System.getProperty("java.version");
+		    javaVersion = System.getProperty(RunList.SPEC_VERSION);
 		    //System.out.println("javaVersion is: " + javaVersion);
 		}
 		else
@@ -1040,7 +1040,7 @@ public class RunTest
 
         // create a JavaVersionHolder for the java.specification.version - 
         // used to control Sed-ing for JDBC4 & up
-        String specversion = (sp.getProperty("java.specification.version"));
+        String specversion = (sp.getProperty(RunList.SPEC_VERSION));
         JavaVersionHolder jvhs = new JavaVersionHolder(specversion);
 
         testEncoding = sp.getProperty("derbyTesting.encoding");
