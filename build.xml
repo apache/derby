@@ -2752,6 +2752,46 @@
     </java>
   </target>
 
+  <!-- Run a single junit test or suite with the modulepath -->
+  <target name="junit-single-with-modulepath"
+          depends="junit-init"
+          description="Run one JUnit test with the module path"
+  >
+    <condition property="noTestclassSet" value="">
+      <not>
+        <isset property="derby.junit.testclass"/>
+      </not>
+    </condition>
+    <fail if="noTestclassSet">No testclass selected! Set property derby.junit.testclass</fail>
+    <path id="junit.all.classpath">
+      <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
+      <pathelement location="${javatools.dir}/junit.jar"/>
+      <pathelement location="${lucene_core}"/>
+      <pathelement location="${lucene_a_co}"/>
+      <pathelement location="${lucene_qp}"/>
+      <pathelement location="${json_simple}"/>
+    </path>
+
+    <echo message="Modulepath used for JUnit tests with modulepath: ${toString:junit.all.classpath}"/>
+    <mkdir dir="junit_${derby.junit.timestamp}/junit-all"/>
+
+    <java 
+          modulepath="${toString:junit.all.classpath}"
+          module="junit"
+          classname="junit.textui.TestRunner"
+          fork="yes"
+          dir="junit_${derby.junit.timestamp}/junit-all"
+    >
+      <sysproperty key="derbyTesting.oldReleasePath" value="${derbyTesting.oldReleasePath}"/>
+      <sysproperty key="derbyTesting.oldVersionsPath" value="${derbyTesting.oldVersionsPath}"/>
+
+      <jvmarg value="--add-modules"/>
+      <jvmarg value="org.apache.derby.tests"/>
+
+      <arg value="${derby.junit.testclass}"/>
+    </java>
+  </target>
+
 <!-- =================================================================== -->
 <!--                         EMMA utility targets                        -->
 <!-- =================================================================== -->
