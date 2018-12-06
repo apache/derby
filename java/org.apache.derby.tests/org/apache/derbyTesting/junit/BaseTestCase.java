@@ -769,6 +769,12 @@ public abstract class BaseTestCase
             else if (useModulePath) { myClasspath = JVMInfo.getSystemModulePath(); }
             else { myClasspath = getSystemProperty("java.class.path"); }
 
+            // on Windows, the garbled "file:" prefix results in an unreadable classpath
+            if (isWindowsPlatform())
+            {
+                myClasspath = myClasspath.replace("file:/", "/");
+            }
+
             if (useModulePath) { cmdlist.add("-p"); }
             else { cmdlist.add("-classpath"); }
             cmdlist.add(myClasspath);
