@@ -1737,6 +1737,17 @@ abort physical connections.</comment>
     <output>
       <file>classes/testing/org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest1.policy</file>
       <properties>securityTests.properties</properties>
+
+    <jar>
+      <name>derby.jar</name>
+
+      <block>
+        <comment>Needed to canonicalize file names on Windows.</comment>
+        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write"</d>
+      </block>
+
+    </jar>
+
     </output>
 
   </policy>
