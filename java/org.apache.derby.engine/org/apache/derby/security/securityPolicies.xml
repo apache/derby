@@ -1743,7 +1743,7 @@ abort physical connections.</comment>
 
       <block>
         <comment>Needed to canonicalize file names on Windows.</comment>
-        <d>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write"</d>
+        <a>java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read,write"</a>
       </block>
 
     </jar>
