@@ -1,10 +1,10 @@
 <html lang="en">
-<title>Release Notes for Apache Derby 10.14.0.0</title>
+<title>Release Notes for Apache Derby 10.15.0.0</title>
 <body>
 <h1>
-<a name="Release Notes for Apache Derby 10.14.0.0"></a>Release Notes for Apache Derby 10.14.0.0</h1>
+<a name="Release Notes for Apache Derby 10.15.0.0"></a>Release Notes for Apache Derby 10.15.0.0</h1>
 <div>
-<p>These notes describe the difference between Apache Derby release 10.14.0.0 and the preceding release 10.13.1.1.</p>
+<p>These notes describe the difference between Apache Derby release 10.15.0.0 and the preceding release 10.14.2.0.</p>
 </div>
 <ul>
 <li>
@@ -59,14 +59,12 @@ Derby functionality includes:
 
 
 <p>
-Support for Java SE 8 is being sunsetted and will not be supported by the next (10.15) release family. The 10.14 release family supports the following Java and JDBC versions:
+The 10.15 release family supports the following Java and JDBC versions:
 </p>
 
 <ul>
   
-<li>Java SE 8 and higher with JDBC 4.2.</li>
-  
-<li>Java SE 8 compact profile 2.</li>
+<li>Java SE 9 and higher with JDBC 4.2.</li>
 
 </ul>
 
@@ -77,7 +75,7 @@ Support for Java SE 8 is being sunsetted and will not be supported by the next (
 
 
 <p>
-This is a feature release. The following new features were added:
+This is a feature release. The following new feature was added:
 </p>
 
 
@@ -85,7 +83,10 @@ This is a feature release. The following new features were added:
 
 
 <li>
-<b>ALTER TABLE cycling</b> - The ALTER TABLE command can now change the cycling behavior of auto-increment columns. See the section on this statement in the Derby Reference Manual.</li>
+<b>JPMS modularization</b> - Derby has been re-packaged as a set of JPMS modules. This introduced a new jar file, <i>derbyshared.jar</i>, required by all configurations. Module diagrams for Derby configurations can be found in the
+<a href="http://db.apache.org/derby/docs/10.15/publishedapi/index.html">javadoc</a>
+for the 10.15 public API.
+</li>
 
 
 </ul>
@@ -95,7 +96,7 @@ This is a feature release. The following new features were added:
 <h2>
 <a name="Bug Fixes"></a>Bug Fixes</h2>
 <div>
-<p>The following issues are addressed by Derby release 10.14.0.0. These issues are not addressed in the preceding 10.13.1.1 release.</p>
+<p>The following issues are addressed by Derby release 10.15.0.0. These issues are not addressed in the preceding 10.14.2.0 release.</p>
 <table border="2">
 <tr>
 <th>
@@ -103,56 +104,252 @@ This is a feature release. The following new features were added:
 </th><th>Description</th>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6956">DERBY-6956</a></td><td>Create table as Select cannot copy Decimal columns</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7020">DERBY-7020</a></td><td>Fix release targets to account for modularization changes</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6936">DERBY-6936</a></td><td>Documentation for changes made as part of DERBY-6904</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7018">DERBY-7018</a></td><td>Test the demo programs after the changes made by DERBY-6945</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6935">DERBY-6935</a></td><td>Test Coverage for added features.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7016">DERBY-7016</a></td><td>Adjust the set*CP scripts to include derbyshared.jar and to set a MODULEPATH variable as well</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6918">DERBY-6918</a></td><td>Problem with schema name starting with number followed by a dot</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6981">DERBY-6981</a></td><td>"SQLSTATE: XJ001, SQLERRMC: java.lang.NullPointerException&#20;&#20;XJ001.U"</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6916">DERBY-6916</a></td><td>Doc of derbyrun.jar should describe complete list of referenced jars</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6980">DERBY-6980</a></td><td>Documentation changes to accompany jigsaw-modularization of derby</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6906">DERBY-6906</a></td><td>Allow a GENERATED column to explicitly specify NO CYCLE</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6973">DERBY-6973</a></td><td>Provide SHA-512 checksums on future releases</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6903">DERBY-6903</a></td><td>ALTER TABLE ALTER COLUMN resets CYCLE option of IDENTITY column</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6945">DERBY-6945</a></td><td>Re-package Derby as a collection of jigsaw modules</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6899">DERBY-6899</a></td><td>Improve docs build.xml to remove CLASSPATH requirement</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6856">DERBY-6856</a></td><td>Make it possible to build Derby using JDK 9</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6898">DERBY-6898</a></td><td>Improve developer documentation for docs</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6726">DERBY-6726</a></td><td>NPE from trigger</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5543">DERBY-5543</a></td><td>include debug info in derby builds uploaded to maven</td>
 </tr>
 </table>
 </div>
 <h2>
 <a name="Issues"></a>Issues</h2>
 <div>
-<ul></ul>
-<p>No issues required detailed release notes.</p>
+<ul>
+<li>
+<a href="#Note for DERBY-6945"><span>Note for DERBY-6945: 
+Modularize Derby, cleanly partitioning its packages across a small set of
+JPMS components.
+</span></a>
+</li>
+</ul>
+<p>Compared with the previous release (10.14.2.0), Derby release 10.15.0.0 introduces the following new features and incompatibilities. These merit your special attention.</p>
+<hr>
+<h3>
+<a name="Note for DERBY-6945"></a>Note for DERBY-6945</h3>
+<div>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
+  issue. It serves as the title for the issue in the Issues section of
+  the full Release Notes.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Modularize Derby, cleanly partitioning its packages across a small set of
+JPMS components.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+A new jar file (<i>derbyshared.jar</i>) has been added. All Derby
+configurations require it. In addition, the <i>derbytools.jar</i> library is
+now required when running the network server and/or when using Derby
+DataSources.
+</p>
+
+
+<p>
+More privileges must be granted to the Derby jar files when running
+under a Security Manager.
+</p>
+
+
+<p>
+Derby jar files can now be wired into a modulepath
+for use by module-aware applications.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Legacy applications may fail if their classpaths don't contain the
+required jar files. Code common to all Derby configurations has been
+isolated in the new <i>derbyshared.jar</i> file. DataSources have
+moved from <i>derbyclient.jar</i> and <i>derby.jar</i> into <i>derbytools.jar</i>
+
+</p>
+
+
+<p>
+Legacy applications which run under a Java SecurityManager may fail
+due to insufficient privilege grants.
+</p>
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+Derby was divided into JPMS components for the following reasons:
+</p>
+
+
+<ul>
+ 
+<li>
+<b>Footprint</b> - Modularization reduces Derby's footprint
+ when running embedded on resource-constrained devices.</li>
+ 
+<li>
+<b>Security</b> - Modularization lets Derby protect its code
+ via package-level encapsulation.</li>
+
+</ul>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+Consult the module diagrams for configurations described on the
+landing page of the
+<a href="http://db.apache.org/derby/docs/10.15/publishedapi/index.html">10.15 public API</a>.
+Then adjust your application's classpath as follows:
+</p>
+
+
+<ul>
+ 
+<li>
+<b>Remote client</b> - When running remote client applications, make
+ sure that the classpath includes <i>derbyshared.jar</i>. Remote applications which
+ use Derby DataSources should also include <i>derbytools.jar</i>.</li>
+ 
+<li>
+<b>Embedded engine</b> - When running the embedded engine, make
+ sure that the classpath includes <i>derbyshared.jar</i>. Embedded applications which
+ use Derby DataSources should also include <i>derbytools.jar</i>.</li>
+ 
+<li>
+<b>Network server</b> - When running the network server, make
+ sure that the classpath includes <i>derbyshared.jar</i> and <i>derbytools.jar</i>.</li>
+ 
+<li>
+<b>Tools</b> - When running Derby tools like <i>ij</i>,
+ <i>dblook</i>, and <i>sysinfo</i>, make
+ sure that the classpath includes <i>derbyshared.jar</i>.</li>
+
+</ul>
+
+
+<p>
+Java security policy files must grant additional privileges to
+Derby jar files. For more information, see the "Configuring Java
+Security" topic in the
+<a href="http://db.apache.org/derby/docs/10.15/security/index.html"><i>Derby Security Guide</i></a>
+and consult
+the following template policy files
+in the <i>demo/templates</i> directory of the bin distribution:
+</p>
+
+
+<ul>
+ 
+<li>
+<b>clientTemplate.policy</b> - Privileges needed by remote
+ client applications.</li>
+ 
+<li>
+<b>engineTemplate.policy</b> - Privileges needed by applications
+ which embed the Derby engine.</li>
+ 
+<li>
+<b>serverTemplate.policy</b> - Privileges needed when running the
+ network server.</li>
+ 
+<li>
+<b>toolsTemplate.policy</b> - Privileges needed when running
+ Derby tools.</li>
+
+</ul>
+
+
+</div>
 </div>
 <h2>
 <a name="Build Environment"></a>Build Environment</h2>
 <div>
-<p>Derby release 10.14.0.0 was built using the following environment:</p>
+<p>Derby release 10.15.0.0 was built using the following environment:</p>
 <ul>
 <li>
-<b>Branch</b> - Source code came from the 10.14 branch.</li>
+<b>Branch</b> - Source code came from the 10.15 branch.</li>
 <li>
-<b>Machine</b> - Mac OSX 10.11.5.</li>
+<b>Machine</b> - Mac OSX 10.11.6.</li>
 <li>
-<b>Ant</b> - Apache Ant(TM) version 1.9.2 compiled on July 8 2013.</li>
+<b>Ant</b> - Apache Ant(TM) version 1.10.2 compiled on February 3 2018.</li>
 <li>
-<b>Compiler</b> - All classes were compiled by the javac from the 1.8.0_101 JDK, Java HotSpot(TM) 64-Bit Server VM (build 25.101-b13, mixed mode).</li>
+<b>Compiler</b> - All classes were compiled by the javac from OpenJDK 64-Bit Server VM 18.9 (build 11+28, mixed mode).</li>
 </ul>
 </div>
 <h2>
@@ -161,7 +358,7 @@ This is a feature release. The following new features were added:
 
 
 <p>It is essential that you verify the integrity of the downloaded
-files using the PGP and MD5 signatures.  MD5 verification ensures the
+files using the PGP and SHA-512 signatures.  SHA-512 verification ensures the
 file was not corrupted during the download process.  PGP verification
 ensures that the file came from a certain person.</p>
 
@@ -194,15 +391,13 @@ Then verify the signatures using ...</p>
 </pre>
 
 
-<p>To verify the MD5 signature on the files, you need to use a program
-called <code>md5</code> or <code>md5sum</code>, which is
-included in many unix distributions.  It is also available as part of
-<a href="http://www.gnu.org/software/textutils/textutils.html">GNU
-Textutils</a>.  Windows users can get binary md5 programs from <a href="http://www.fourmilab.ch/md5/">here</a>, <a href="http://www.pc-tools.net/win32/freeware/console/">here</a>, or
-<a href="http://www.slavasoft.com/fsum/">here</a>.</p>
+<p>To verify the SHA-512 checksums on the files, you need to use a
+platform-specific program. On Mac OSX, this program is called
+<code>shasum</code>, on Linux it is called <code>sha512sum</code>,
+and on Windows it is called <code>CertUtil</code>.</p>
 
 
-<p>We strongly recommend that you verify your downloads with both PGP and MD5.</p>
+<p>We strongly recommend that you verify your downloads with both PGP and SHA-512.</p>
 
 
 

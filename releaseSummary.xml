@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.13.1.1</previousReleaseID>
+<previousReleaseID>10.14.2.0</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -47,10 +47,10 @@ with real information.
 <buildInfo>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Mac OSX 10.11.5.</machine>
+  <machine>Mac OSX 10.11.6.</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
-  <antVersion>Apache Ant(TM) version 1.9.2 compiled on July 8 2013.</antVersion>
+  <antVersion>Apache Ant(TM) version 1.10.2 compiled on February 3 2018.</antVersion>
 
   <!--
          Say which compilers you used.
@@ -59,7 +59,7 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>All classes were compiled by the javac from the 1.8.0_101 JDK, Java HotSpot(TM) 64-Bit Server VM (build 25.101-b13, mixed mode).</compilers>
+  <compilers>All classes were compiled by the javac from OpenJDK 64-Bit Server VM 18.9 (build 11+28, mixed mode).</compilers>
 
 </buildInfo>
 
@@ -85,23 +85,25 @@ Derby functionality includes:
 </ul>
 
 <p>
-Support for Java SE 8 is being sunsetted and will not be supported by the next (10.15) release family. The 10.14 release family supports the following Java and JDBC versions:
+The 10.15 release family supports the following Java and JDBC versions:
 </p>
 <ul>
-  <li>Java SE 8 and higher with JDBC 4.2.</li>
-  <li>Java SE 8 compact profile 2.</li>
+  <li>Java SE 9 and higher with JDBC 4.2.</li>
 </ul>
 </overview>
 
 <newFeatures>
 
 <p>
-This is a feature release. The following new features were added:
+This is a feature release. The following new feature was added:
 </p>
 
 <ul>
 
-<li><b>ALTER TABLE cycling</b> - The ALTER TABLE command can now change the cycling behavior of auto-increment columns. See the section on this statement in the Derby Reference Manual.</li>
+<li><b>JPMS modularization</b> - Derby has been re-packaged as a set of JPMS modules. This introduced a new jar file, <i>derbyshared.jar</i>, required by all configurations. Module diagrams for Derby configurations can be found in the
+<a href="http://db.apache.org/derby/docs/10.15/publishedapi/index.html">javadoc</a>
+for the 10.15 public API.
+</li>
 
 </ul>
 
