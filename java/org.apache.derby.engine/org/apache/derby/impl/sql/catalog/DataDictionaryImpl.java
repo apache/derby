@@ -517,7 +517,7 @@ public final class	DataDictionaryImpl
 	public void boot(boolean create, Properties startParams) 
 			throws StandardException
 	{
-		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_15);
+		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_16);
 
 		startupParameters = startParams;
 
