@@ -39,7 +39,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/client.svg"
+ *     src="client.svg"
  *     alt="module diagram for org.apache.derby.client"
  *     border="2"
  *   />

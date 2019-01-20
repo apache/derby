@@ -36,7 +36,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/runner.svg"
+ *     src="runner.svg"
  *     alt="module diagram for org.apache.derby.runner"
  *     border="2"
  *   />

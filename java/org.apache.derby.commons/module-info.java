@@ -28,7 +28,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/commons.svg"
+ *     src="commons.svg"
  *     alt="module diagram for org.apache.derby.commons"
  *     border="2"
  *   />

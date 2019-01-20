@@ -31,7 +31,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/server.svg"
+ *     src="server.svg"
  *     alt="module diagram for org.apache.derby.server"
  *     border="2"
  *   />

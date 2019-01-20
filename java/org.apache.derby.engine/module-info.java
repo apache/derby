@@ -48,7 +48,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/engine.svg"
+ *     src="engine.svg"
  *     alt="module diagram for org.apache.derby.engine"
  *     border="2"
  *   />

@@ -117,6 +117,7 @@
     <property file="${state.file}"/>
     <property file="${properties.dir}/sane${sanity}.properties"/>
     <antcall target="setissane"/>
+    <available property="atLeastJava11" classname="java.lang.invoke.ConstantBootstraps"/>
     <property name="init.done" value="true"/>
   </target>
 
@@ -1120,12 +1121,45 @@
           todir="${public.api.dir}/resources"/>     
 
     <!-- Copy the module diagrams used by the overview -->
-    <copy todir="${public.api.dir}/resources">
-      <fileset dir="${javadoctools.dir}/moduleDiagrams"/>
-    </copy>
+    <antcall target="copyJava9ModuleDiagrams"><param name="svg.dir" value="${public.api.dir}"/></antcall>
+    <antcall target="copyJava11ModuleDiagrams"><param name="svg.dir" value="${public.api.dir}"/></antcall>
 
   </target>
 
+  <!-- Copy module diagrams to the correct place for Java 9 and Java 10 -->
+  <target name="copyJava9ModuleDiagrams" unless="atLeastJava11">
+    <copy todir="${svg.dir}">
+      <fileset dir="${javadoctools.dir}/moduleDiagrams"/>
+    </copy>
+  </target>
+
+  <!-- Copy module diagrams to the correct place for Java 11 -->
+  <target name="copyJava11ModuleDiagrams" if="atLeastJava11">
+    <copy file="${javadoctools.dir}/moduleDiagrams/client.svg" 
+          todir="${svg.dir}/org.apache.derby.client"/>     
+    <copy file="${javadoctools.dir}/moduleDiagrams/commons.svg" 
+          todir="${svg.dir}/org.apache.derby.commons"/>     
+    <copy file="${javadoctools.dir}/moduleDiagrams/engine.svg" 
+          todir="${svg.dir}/org.apache.derby.engine"/>     
+    <copy file="${javadoctools.dir}/moduleDiagrams/optionaltools.svg" 
+          todir="${svg.dir}/org.apache.derby.optionaltools"/>     
+    <copy file="${javadoctools.dir}/moduleDiagrams/runner.svg" 
+          todir="${svg.dir}/org.apache.derby.runner"/>     
+    <copy file="${javadoctools.dir}/moduleDiagrams/server.svg" 
+          todir="${svg.dir}/org.apache.derby.server"/>     
+    <copy file="${javadoctools.dir}/moduleDiagrams/tools.svg" 
+          todir="${svg.dir}/org.apache.derby.tools"/>
+
+    <available property="test.javadoc.exists" file="${svg.dir}/org.apache.derby.tests"/>
+    <antcall target="copyJava11testModuleDiagram"/>
+
+  </target>
+
+  <!-- Copy module diagram for the tests module to the correct place for Java 11 -->
+  <target name="copyJava11testModuleDiagram" if="test.javadoc.exists">
+    <copy file="${javadoctools.dir}/moduleDiagrams/tests.svg" 
+          todir="${svg.dir}/org.apache.derby.tests"/>     
+  </target>
 
   <target name="derbydocs" depends="initjars,set-doclint">
 
@@ -1156,9 +1190,12 @@
     </exec>
 
     <!-- Copy the module diagrams used by the module overviews -->
-    <copy todir="${out.javadoc.dir}/engine/resources">
-      <fileset dir="${javadoctools.dir}/moduleDiagrams"/>
-    </copy>
+    <antcall target="copyJava9ModuleDiagrams">
+      <param name="svg.dir" value="${out.javadoc.dir}/engine"/>
+    </antcall>
+    <antcall target="copyJava11ModuleDiagrams">
+      <param name="svg.dir" value="${out.javadoc.dir}/engine"/>
+    </antcall>
 
   </target>
 

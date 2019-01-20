@@ -28,7 +28,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/tests.svg"
+ *     src="tests.svg"
  *     alt="module diagram for org.apache.derby.tests"
  *     border="2"
  *   />

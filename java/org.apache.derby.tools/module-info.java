@@ -46,7 +46,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/tools.svg"
+ *     src="tools.svg"
  *     alt="module diagram for org.apache.derby.tools"
  *     border="2"
  *   />

@@ -50,7 +50,7 @@
  *
  * <div style="text-align:center;">
  *   <img
- *     src="resources/optionaltools.svg"
+ *     src="optionaltools.svg"
  *     alt="module diagram for org.apache.derby.optionaltools"
  *     border="2"
  *   />
