@@ -52,7 +52,7 @@
  *   <img
  *     src="optionaltools.svg"
  *     alt="module diagram for org.apache.derby.optionaltools"
- *     border="2"
+ *     style="border:2px solid #000000"
  *   />
  * </div>
  *

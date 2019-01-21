@@ -30,7 +30,7 @@
  *   <img
  *     src="tests.svg"
  *     alt="module diagram for org.apache.derby.tests"
- *     border="2"
+ *     style="border:2px solid #000000"
  *   />
  * </div>
  *
