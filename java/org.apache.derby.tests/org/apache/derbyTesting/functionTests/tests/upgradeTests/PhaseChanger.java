@@ -171,10 +171,16 @@ final class PhaseChanger extends BaseTestSetup {
      * affected Derby 10.2 - 10.7, and it is needed to make the old engine
      * classes eligible for garbage collection.
      */
-    private void deregisterDriver() throws Exception {
-        boolean isAffectedVersion =
+    private void deregisterDriver() throws Exception
+    {
+        boolean isBetween10_2and10_8 =
                 UpgradeRun.lessThan(new int[] {10,2,0,0}, version) &&
                 UpgradeRun.lessThan(version, new int[] {10,8,0,0});
+
+        boolean isAtLeast10_15 = 
+            UpgradeRun.lessThan(new int[] {10,15,0,0}, version);
+
+        boolean isAffectedVersion = isBetween10_2and10_8 || isAtLeast10_15;
 
         if (JDBC.vmSupportsJDBC3()) {
             // DriverManager only allows deregistering of drivers from classes
