@@ -455,7 +455,7 @@
 
   <target name="sha512">
     <checksum file="${sign.archive}"
-              fileext=".sha-512"
+              fileext=".sha512"
               algorithm="SHA-512"
     />
   </target>
