@@ -85,6 +85,7 @@
 
   <modules>
     <module>engine</module>
+    <module>commons</module>
     <module>net</module>
     <module>client</module>
     <module>tools</module>
