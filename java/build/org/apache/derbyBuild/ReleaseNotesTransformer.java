@@ -7,7 +7,7 @@ The ASF licenses this file to You under the Apache License, Version 2.0
 (the "License"); you may not use this file except in compliance with
 the License.  You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,7 +67,7 @@ public class ReleaseNotesTransformer extends Task
         "  (the \"License\"); you may not use this file except in compliance with\n" +
         "  the License.  You may obtain a copy of the License at\n" +
         "\n" +
-        "      http://www.apache.org/licenses/LICENSE-2.0\n" +
+        "      https://www.apache.org/licenses/LICENSE-2.0\n" +
         "\n" +
         "  Unless required by applicable law or agreed to in writing, software\n" +
         "  distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
@@ -86,7 +86,7 @@ public class ReleaseNotesTransformer extends Task
         "<p>You are currently using <strong>[preferred]</strong>. If you encounter a\n" +
         "problem with this mirror, then please select another.  If all\n" +
         "mirrors are failing, there are backup mirrors at the end of the list.\n" +
-        "See <a href=\"http://www.apache.org/mirrors/\">status</a> of mirrors.\n" +
+        "See <a href=\"https://www.apache.org/mirrors/\">status</a> of mirrors.\n" +
         "</p>\n" +
         "\n" +
         "<form action=\"[location]\" method=\"get\" id=\"SelectMirror\">\n" +
@@ -112,17 +112,17 @@ public class ReleaseNotesTransformer extends Task
         "      <li>lib-debug distribution - contains jar files for Derby with source line numbers.</li>\n" +
         "      <li>src distribution - contains the Derby source tree at the point which the binaries were built.</li>\n" +
         "    </ul>\n" +
-        "    <p> <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-bin.zip\">db-derby-{0}-bin.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.zip.sha512\">SHA-512</a>]<br/>\n" +
-        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz\">db-derby-{0}-bin.tar.gz</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz.sha512\">SHA-512</a>]</p>\n" +
+        "    <p> <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-bin.zip\">db-derby-{0}-bin.zip</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.zip.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.zip.sha512\">SHA-512</a>]<br/>\n" +
+        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz\">db-derby-{0}-bin.tar.gz</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz.sha512\">SHA-512</a>]</p>\n" +
         "    \n" +
-        "    <p><a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib.zip\">db-derby-{0}-lib.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.zip.sha512\">SHA-512</a>]<br/>\n" +
-        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib.tar.gz\">db-derby-{0}-lib.tar.gz</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.tar.gz.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.tar.gz.sha512\">SHA-512</a>]</p>\n" +
+        "    <p><a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib.zip\">db-derby-{0}-lib.zip</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.zip.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.zip.sha512\">SHA-512</a>]<br/>\n" +
+        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib.tar.gz\">db-derby-{0}-lib.tar.gz</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.tar.gz.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib.tar.gz.sha512\">SHA-512</a>]</p>\n" +
         "    \n" +
-        "    <p><a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.zip\">db-derby-{0}-lib-debug.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.zip.sha512\">SHA-512</a>]<br/>\n" +
-        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz\">db-derby-{0}-lib-debug.tar.gz</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz.sha512\">SHA-512</a>]</p>\n" +
+        "    <p><a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.zip\">db-derby-{0}-lib-debug.zip</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.zip.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.zip.sha512\">SHA-512</a>]<br/>\n" +
+        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz\">db-derby-{0}-lib-debug.tar.gz</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz.sha512\">SHA-512</a>]</p>\n" +
         "\n" +
-        "    <p><a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-src.zip\">db-derby-{0}-src.zip</a>  [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.zip.sha512\">SHA-512</a>]<br/>\n" +
-        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz\">db-derby-{0}-src.tar.gz</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.sha512\">SHA-512</a>] (Note that, due to long filenames, you will need gnu tar to unravel this tarball.)</p>\n";
+        "    <p><a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-src.zip\">db-derby-{0}-src.zip</a>  [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.zip.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.zip.sha512\">SHA-512</a>]<br/>\n" +
+        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz\">db-derby-{0}-src.tar.gz</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.sha512\">SHA-512</a>] (Note that, due to long filenames, you will need gnu tar to unravel this tarball.)</p>\n";
     
 
 
