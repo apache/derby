@@ -21,6 +21,7 @@ Project info
     period of time can earn a contributor commit access to the codebase.
 
 Official releases:
+ * 10.15.1.3 : Released 2019-03-11
  * 10.14.2.0 : Released 2018-05-03
  * 10.14.1.0 : Released 2017-10-22
  * 10.13.1.1 : Released 2016-10-26
@@ -63,6 +64,7 @@ None.
 RECENT VOTES
 =================================
 
+Release 10.15.1.3 was approved as a release on 2019-02-26, published on 2019-03-05, and announced on 2019-03-11.
 The community voted to sunset support for Java SE 8. The vote closed on 2017-07-09.
 The community voted to sunset support for Java SE 7. The vote closed on 2015-09-12.
 The community voted to sunset support for Java SE 6. The vote closed on 2014-09-15.
