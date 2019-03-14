@@ -80,7 +80,7 @@ public class ReleaseNotesTransformer extends Task
         "<body>\n" +
         "\n" +
         "    <h1>Distributions</h1>\n" +
-        "    <p>Use the links below to download a distribution of Apache Derby. You should <b>always</b> <a href=\"#Verifying Releases\">verify the integrity</a>\n" +
+        "    <p>Use the links below to download a distribution of Apache Derby. You should <b>always</b> <a href=\"#Verifying+Releases\">verify the integrity</a>\n" +
         "       of distribution files downloaded from a mirror.</p>\n" +
         "\n" +
         "<p>You are currently using <strong>[preferred]</strong>. If you encounter a\n" +
