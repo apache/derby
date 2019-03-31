@@ -33,6 +33,27 @@
   <description>Contains optional tools for use with Derby.</description>
   <url>http://db.apache.org/derby/</url>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>ALPHA_VERSION</version>
+      <optional>false</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyshared</artifactId>
+      <version>ALPHA_VERSION</version>
+      <optional>false</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbytools</artifactId>
+      <version>ALPHA_VERSION</version>
+      <optional>false</optional>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
         <plugin>

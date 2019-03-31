@@ -33,6 +33,15 @@
   <description>Contains the core Apache Derby database engine, which also includes the embedded JDBC driver.</description>
   <url>http://db.apache.org/derby/</url>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyshared</artifactId>
+      <version>ALPHA_VERSION</version>
+      <optional>false</optional>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
         <plugin>

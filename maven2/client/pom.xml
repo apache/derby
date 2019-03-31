@@ -33,6 +33,15 @@
   <description>The Derby client JDBC driver, used to connect to a Derby server over a network connection.</description>
   <url>http://db.apache.org/derby/</url>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyshared</artifactId>
+      <version>ALPHA_VERSION</version>
+      <optional>false</optional>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
         <plugin>

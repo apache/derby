@@ -40,6 +40,18 @@
       <version>ALPHA_VERSION</version>
       <optional>false</optional>
     </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyshared</artifactId>
+      <version>ALPHA_VERSION</version>
+      <optional>false</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbytools</artifactId>
+      <version>ALPHA_VERSION</version>
+      <optional>false</optional>
+    </dependency>
   </dependencies>
 
   <build>
