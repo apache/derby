@@ -398,8 +398,12 @@ class AggregateNode extends UnaryOperatorNode
             }
 
             // set up dependency on the user-defined aggregate and compile a check for USAGE
-            // priv if needed
-            getCompilerContext().createDependency( ad );
+            // priv if needed. no need for a dependency if this is a builtin, system-supplied
+            // aggregate
+            if ( !isModernBuiltinAggregate )
+            {
+                getCompilerContext().createDependency( ad );
+            }
 
             if ( isPrivilegeCollectionRequired() )
             {

@@ -80,6 +80,9 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
             stddev_pop();
             // Standard deviation sample (n - 1)
         	stddev_samp();
+
+            // bugs
+            derby7041();
         	
         } finally {
             try {
@@ -92,6 +95,71 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
             expRS = null;
             sqlWarn = null;
         }
+    }
+
+    /**
+     * Bug 7041 was an NPE raised when trying to record a persistent dependency
+     * from a view to a builtin aggregate which had been created with the user-defined
+     * aggregate machinery.
+     */
+    private void derby7041() throws SQLException
+    {
+        x
+            (
+             "CREATE TABLE T1_7041\n" +
+             "(\n" +
+             "	T1_7041_KEY INTEGER,\n" +
+             "	T1_7041_TAG INTEGER\n" +
+             ")\n"
+             );
+        x
+            (
+             "CREATE TABLE T2_7041\n" +
+             "(\n" +
+             "	T2_7041_KEY INTEGER\n" +
+             ")\n"
+             );
+        x
+            (
+             "CREATE TABLE T3_7041\n" +
+             "(\n" +
+             "	T3_7041_KEY1 INTEGER,\n" +
+             "	T3_7041_KEY2 INTEGER,\n" +
+             "	T3_7041_VAL INTEGER\n" +
+             ")\n"
+             );
+        x
+            (
+             "CREATE VIEW V1_7041 (T1_7041_TAG, VALUE) AS\n" +
+             "(\n" +
+             "  SELECT T1_7041_TAG, T3_7041_VAL AS VALUE\n" +
+             "  FROM T1_7041, T2_7041, T3_7041\n" +
+             "  WHERE\n" +
+             "    T1_7041_KEY = T3_7041_KEY2\n" +
+             "    AND T2_7041_KEY = T3_7041_KEY1\n" +
+             ")\n"
+             );
+        x
+            (
+             "CREATE VIEW V2_7041 AS\n" +
+             "(\n" +
+             "  SELECT\n" +
+             "    A.T1_7041_TAG AS A_T1_7041_TAG,\n" +
+             "    A.VALUE AS A_VALUE\n" +
+             "  FROM V1_7041 AS A, V1_7041 AS B\n" +
+             ")\n"
+             );
+        x
+            (
+             "CREATE VIEW V3_7041 (A_T1_7041_TAG, STD_DEV_A_VALUE) AS\n" +
+             "(\n" +
+             "  SELECT\n" +
+             "    A_T1_7041_TAG,\n" +
+             "    STDDEV_SAMP(A_VALUE) AS STD_DEV_A_VALUE\n" +
+             "  FROM V2_7041\n" +
+             "  GROUP BY A_T1_7041_TAG\n" +
+             ")\n"
+             );
     }
 
 
