@@ -95,7 +95,7 @@
     <fail message="FATAL ERROR:  The running Ant version, ${version.running}, is too old.">
         <condition>
             <not>
-                <antversion atleast="1.10.2" />
+                <antversion atleast="1.10.6" />
             </not>
         </condition>
     </fail>
