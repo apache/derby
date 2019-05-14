@@ -1046,9 +1046,6 @@
     and then a second time to build the JDBC4 api. Now it is only called once,
     for the single JDBC4+ api.
 
-    bootClasspath    Sensitive to JDBC level.
-    extraApi         Extra files to include in the public api.
-
     If behind a firewall, the links to Java SE and J2EE javadocs may
     fail.  You can manually download the package-list files into the
     folders ./packageListLoc-se-8 and ./packageListLoc-j2ee-7 instead
@@ -1056,65 +1053,86 @@
   -->
   <target name="publishedapi-workhorse" depends="initjars,set-doclint,install_packagelists">
  
-    <exec executable="javadoc">
-      <arg value ="-d"/><arg value="${public.api.dir}"/>
+    <javadoc
+             modulesourcepath="${javasrc.dir}:${generated.src.dir}"
+             modulepath="${osgi}:${servlet24}:${junit}:${lucene_core}:${lucene_a_co}:${lucene_qp}:${json_simple}"
+             modulenames="${module.name.client},${module.name.runner}"
+
+             breakiterator="true"
+             access="public"
+             destdir="${public.api.dir}"
+    	     Overview="${basedir}/published_api_overview.html"
+             Windowtitle="Apache Derby ${major}.${minor} API Documentation"   
+             Header="Apache Derby ${major}.${minor}"
+             Footer="${javadoc.Footer}"
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">
+
+      <Doctitle> Apache Derby ${major}.${minor} API Documentation</Doctitle>   
+
+      <link offline="true" href="${javasedoc.url}"
+                         packagelistLoc="${javasedoc.local}" />
+      <link offline="true" href="${j2eedoc.url}"
+                     packagelistLoc="${j2eedoc.local}" />
+
+      <fileset dir="${derby.shared.src.dir}"
+               includes="org/apache/derby/shared/common/security/SystemPermission.java"/>
+
+      <fileset dir="${derby.engine.src.dir}"
+                   includes="org/apache/derby/agg/Aggregator.java,
+                             org/apache/derby/authentication/UserAuthenticator.java,
+                             org/apache/derby/catalog/SequencePreallocator.java,
+                             org/apache/derby/mbeans/CacheManagerMBean.java,
+                             org/apache/derby/mbeans/JDBCMBean.java,
+                             org/apache/derby/mbeans/Management.java,
+                             org/apache/derby/mbeans/ManagementMBean.java,
+                             org/apache/derby/mbeans/VersionMBean.java,
+                             org/apache/derby/vti/AwareVTI.java,
+                             org/apache/derby/vti/ForeignTableVTI.java,
+                             org/apache/derby/vti/ForwardingVTI.java,
+                             org/apache/derby/vti/RestrictedVTI.java,
+                             org/apache/derby/vti/Restriction.java,
+                             org/apache/derby/vti/StringColumnVTI.java,
+                             org/apache/derby/vti/VTICosting.java,
+                             org/apache/derby/vti/VTIContext.java,
+                             org/apache/derby/vti/VTIEnvironment.java,
+                             org/apache/derby/vti/VTITemplate.java"
+      />
+
+      <fileset dir="${derby.drda.src.dir}"
+                   includes="org/apache/derby/drda/NetServlet.java,
+                             org/apache/derby/drda/NetworkServerControl.java,
+                             org/apache/derby/mbeans/drda/NetworkServerMBean.java"
+      />
+
+      <fileset dir="${derby.tools.src.dir}"
+                   includes="org/apache/derby/jdbc/BasicClientConnectionPoolDataSource40.java,
+                             org/apache/derby/jdbc/BasicClientDataSource40.java,
+                             org/apache/derby/jdbc/BasicClientXADataSource40.java,
+                             org/apache/derby/jdbc/BasicEmbeddedConnectionPoolDataSource40.java,
+                             org/apache/derby/jdbc/BasicEmbeddedDataSource40.java,
+                             org/apache/derby/jdbc/BasicEmbeddedXADataSource40.java,
+                             org/apache/derby/jdbc/ClientConnectionPoolDataSource.java,
+                             org/apache/derby/jdbc/ClientDataSource.java,
+                             org/apache/derby/jdbc/ClientDriver.java,
+                             org/apache/derby/jdbc/ClientXADataSource.java,
+                             org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java,
+                             org/apache/derby/jdbc/EmbeddedDataSource.java,
+                             org/apache/derby/jdbc/EmbeddedDriver.java,
+                             org/apache/derby/jdbc/EmbeddedXADataSource.java,
+                             org/apache/derby/tools/dblook.java,
+                             org/apache/derby/tools/ij.java,
+                             org/apache/derby/tools/sysinfo.java"
+      />
+
+      <fileset dir="${derby.optional.src.dir}"
+                   includes="org/apache/derby/optional/api/LuceneIndexDescriptor.java,
+                             org/apache/derby/optional/api/LuceneUtils.java,
+                             org/apache/derby/optional/api/SimpleJsonUtils.java,
+                             org/apache/derby/optional/api/SimpleJsonVTI.java"
+      />
+
       <arg value="-Xdoclint:none"/>
-      <arg value="-breakiterator"/>
-      <arg value="-overview"/><arg value="${basedir}/published_api_overview.html"/>
-      <arg value="-windowtitle"/><arg value="Apache Derby ${major}.${minor} API Documentation"/>
-      <arg value="-header"/><arg value="Apache Derby ${major}.${minor}"/>
-      <arg value="-footer"/><arg value="${javadoc.Footer}"/>
-      <arg value="-bottom"/><arg value="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"/>
-      <arg value="-doctitle"/><arg value="Apache Derby ${major}.${minor} API Documentation"/>
-      <arg value="-linkoffline"/><arg value="${javasedoc.url}"/><arg value="${javasedoc.local}"/>
-      <arg value="-linkoffline"/><arg value="${j2eedoc.url}"/><arg value="${j2eedoc.local}"/>
-      <arg value="--module-source-path"/><arg value="${javasrc.dir}:${generated.src.dir}"/>
-      <arg value="--module-path"/><arg value="${osgi}:${servlet24}:${junit}:${lucene_core}:${lucene_a_co}:${lucene_qp}:${json_simple}"/>
-      <arg value="--module"/><arg value="${module.name.client},${module.name.runner}"/>
-      <arg value="${derby.shared.src.dir}/org/apache/derby/shared/common/security/SystemPermission.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/agg/Aggregator.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/authentication/UserAuthenticator.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/catalog/SequencePreallocator.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/mbeans/CacheManagerMBean.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/mbeans/JDBCMBean.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/mbeans/Management.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/mbeans/ManagementMBean.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/mbeans/VersionMBean.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/AwareVTI.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/ForeignTableVTI.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/ForwardingVTI.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/RestrictedVTI.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/Restriction.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/StringColumnVTI.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/VTICosting.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/VTIContext.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/VTIEnvironment.java"/>
-      <arg value="${derby.engine.src.dir}/org/apache/derby/vti/VTITemplate.java"/>
-      <arg value="${derby.drda.src.dir}/org/apache/derby/drda/NetServlet.java"/>
-      <arg value="${derby.drda.src.dir}/org/apache/derby/drda/NetworkServerControl.java"/>
-      <arg value="${derby.drda.src.dir}/org/apache/derby/mbeans/drda/NetworkServerMBean.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/BasicClientConnectionPoolDataSource40.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/BasicClientDataSource40.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/BasicClientXADataSource40.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/BasicEmbeddedConnectionPoolDataSource40.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/BasicEmbeddedDataSource40.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/BasicEmbeddedXADataSource40.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/ClientConnectionPoolDataSource.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/ClientDataSource.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/ClientDriver.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/ClientXADataSource.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/EmbeddedDataSource.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/EmbeddedDriver.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/jdbc/EmbeddedXADataSource.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/tools/dblook.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/tools/ij.java"/>
-      <arg value="${derby.tools.src.dir}/org/apache/derby/tools/sysinfo.java"/>
-      <arg value="${derby.optional.src.dir}/org/apache/derby/optional/api/LuceneIndexDescriptor.java"/>
-      <arg value="${derby.optional.src.dir}/org/apache/derby/optional/api/LuceneUtils.java"/>
-      <arg value="${derby.optional.src.dir}/org/apache/derby/optional/api/SimpleJsonUtils.java"/>
-      <arg value="${derby.optional.src.dir}/org/apache/derby/optional/api/SimpleJsonVTI.java"/>
-    </exec>
+    </javadoc>
 
     <!-- Copy the logo needed by the Doctitle attribute above -->
     <copy file="${javadoctools.dir}/logo/derby_logo64.png" 
@@ -1166,28 +1184,38 @@
     <delete dir="${out.javadoc.dir}/engine"/>
     <mkdir dir="${out.javadoc.dir}/engine"/>
 
-    <exec executable="javadoc">
-      <arg value ="-d"/><arg value="${out.javadoc.dir}/engine"/>
+    <javadoc
+        modulesourcepath="${javasrc.dir}:${generated.src.dir}"
+        modulepath="${osgi}:${servlet24}:${lucene_core}:${lucene_a_co}:${lucene_qp}:${json_simple}:${junit}"
+        modulenames="${module.name.commons},${module.name.engine},${module.name.client},${module.name.server},${module.name.tools},${module.name.optionaltools},${module.name.runner},${module.name.tests}"
+
+        packagenames="org.*"
+        additionalparam="-J-mx500M"
+        access="private"
+        breakiterator="yes"
+        useexternalfile="yes"
+        destdir="${out.javadoc.dir}/engine"
+    	Overview="${basedir}/published_api_overview.html"
+        windowtitle="Apache Derby V${major}.${minor} Internals"
+        doctitle="Apache Derby V${major}.${minor} Internals"
+        Footer="${javadoc.Footer}"
+        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
+      >
+
+        <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
+                path="${out.build.dir}"/>
+        <taglet name="org.apache.derbyBuild.javadoc.PurposeTaglet" 
+                path="${out.build.dir}"/>
+        <taglet name="org.apache.derbyBuild.javadoc.UpgradeTaglet" 
+                path="${out.build.dir}"/>
+        <taglet name="org.apache.derbyBuild.javadoc.DiskLayoutTaglet" 
+                path="${out.build.dir}"/>
+        <taglet name="org.apache.derbyBuild.javadoc.EndFormatTaglet" 
+                path="${out.build.dir}"/>
+
       <arg value="-Xdoclint:none"/>
-      <arg value="-private"/>
-      <arg value="-breakiterator"/>
-      <arg value="-overview"/><arg value="${basedir}/published_api_overview.html"/>
-      <arg value="-windowtitle"/><arg value="Apache Derby V${major}.${minor} Internals"/>
-      <arg value="-header"/><arg value="Apache Derby ${major}.${minor}"/>
-      <arg value="-footer"/><arg value="${javadoc.Footer}"/>
-      <arg value="-bottom"/><arg value="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"/>
-      <arg value="-doctitle"/><arg value="Apache Derby V${major}.${minor} Internals"/>
-      <arg value="-tagletpath"/><arg value="${out.build.dir}"/>
-      <arg value="-taglet"/><arg value="org.apache.derbyBuild.javadoc.FormatIdTaglet"/>
-      <arg value="-taglet"/><arg value="org.apache.derbyBuild.javadoc.PurposeTaglet"/>
-      <arg value="-taglet"/><arg value="org.apache.derbyBuild.javadoc.UpgradeTaglet"/>
-      <arg value="-taglet"/><arg value="org.apache.derbyBuild.javadoc.DiskLayoutTaglet"/>
-      <arg value="-taglet"/><arg value="org.apache.derbyBuild.javadoc.EndFormatTaglet"/>
-      <arg value="--module-source-path"/><arg value="${javasrc.dir}:${generated.src.dir}"/>
-      <arg value="--module-path"/><arg value="${osgi}:${servlet24}:${lucene_core}:${lucene_a_co}:${lucene_qp}:${json_simple}:${junit}"/>
       <arg value="--show-module-contents"/><arg value="all"/>
-      <arg value="--module"/><arg value="${module.name.commons},${module.name.engine},${module.name.client},${module.name.server},${module.name.tools},${module.name.optionaltools},${module.name.runner},${module.name.tests}"/>
-    </exec>
+    </javadoc>
 
     <!-- Copy the module diagrams used by the module overviews -->
     <antcall target="copyJava9ModuleDiagrams">
