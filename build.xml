@@ -605,10 +605,7 @@
     <ant dir="${derby.engine.dir}/loc"/>
     <antcall target="class_size_catalog"/>
   </target>
-	 <target name="engine_169_opt" depends="engine">
-	 	  <ant dir="${derby.engine.src.dir}" target="engine_169_opt"/>
-	 </target>
-	
+
   <target name="tools" depends="engine">
     <ant dir="${derby.tools.src.dir}"/>
   </target>
