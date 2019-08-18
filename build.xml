@@ -55,10 +55,9 @@
 <!-- <echoproperties/> -->
 
 <!-- Targets -->
-
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,shared,client,engine,storeless,tools,drda,optional,runner,build,versioninfo,localeinfo,binscripts,generateSecurityPolicies"
+      depends="checkCompilerLevel,storeless,optional,runner,versioninfo,localeinfo,binscripts,generateSecurityPolicies"
       description="Compile the product source (does not build the tests)."
   />
   <target
@@ -101,7 +100,7 @@
     </fail>
    </target>
 
-   <target name="init" unless="init.done" depends="version_check,makeOutDirs,install_junit,setCompilerProperties">
+   <target name="init" unless="init.done" depends="version_check,install_junit,setCompilerProperties">
     <tstamp/>
     <antcall target="make-generated-dirs"/>
     <antcall target="make-release-dirs"/>
@@ -599,22 +598,22 @@
 <!--                   Derby Engine build target                     -->
 <!-- ==================================================================== -->
 
-  <target name="engine" depends="shared,state">
+  <target name="engine" depends="shared,felixStubs">
     <ant dir="${derby.engine.src.dir}"/>
     <antcall target="build"/>
     <ant dir="${derby.engine.dir}/loc"/>
     <antcall target="class_size_catalog"/>
   </target>
 
-  <target name="tools" depends="engine">
+  <target name="tools" depends="engine,client">
     <ant dir="${derby.tools.src.dir}"/>
   </target>
 	
-  <target name="optional" depends="engine">
+  <target name="optional" depends="tools">
     <ant dir="${derby.optional.src.dir}"/>
   </target>
 	
-  <target name="runner" depends="optional">
+  <target name="runner" depends="drda">
     <ant dir="${derby.run.src.dir}"/>
   </target>
 	
@@ -622,11 +621,11 @@
   	<ant dir="${derby.storeless.src.dir}"/>
   </target>
 	
-  <target name="shared" depends="init,state">
+  <target name="shared" depends="state">
     <ant dir="${derby.shared.src.dir}"/>
   </target>
   
-  <target name="drda" depends="engine">
+  <target name="drda" depends="tools">
     <ant dir="${derby.drda.src.dir}"/>
   </target>
 
@@ -804,7 +803,7 @@
 <!-- =================================================================== -->
 <!--                     Build the stub FELIX (OSGI) implementation                 -->
 <!-- =================================================================== -->
-  <target name="felixStubs">
+  <target name="felixStubs" depends="state">
     <mkdir dir="${out.stubs.dir}"/>
     <mkdir dir="${out.felix.dir}"/>
 
