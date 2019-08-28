@@ -12,3 +12,5 @@
 /javadoc/
 /packageListLoc-j2ee-7/
 /packageListLoc-se-8/
+.idea
+.vscode/
