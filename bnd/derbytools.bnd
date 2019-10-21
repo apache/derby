@@ -1,0 +1,49 @@
+-classpath:       ../jars/sane/derbytools.jar
+-include:         ../classes/version.properties
+-includeresource: @derbytools.jar!/META-INF/**, @derbytools.jar!/module-info.class
+
+-output:       derbytools.jar
+-savemanifest: derbytools.mf
+
+#
+# Specify that the minimum Java requirement is Java 8. We specify "-noee"
+# so that bnd doesn't try to infer the requirement from the bytecode (because
+# module descriptors will cause it to believe that Java 9 is a hard
+# requirement).
+#
+-noee: true
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+
+#
+# Remove headers that reduce reproducibility.
+#
+-noextraheaders: true
+
+#
+# Specify basic OSGi metadata.
+#
+# Specify that all packages are private by default, and sealed. We will
+# override the privacy of an explicit list of packages by exporting them
+# with Export-Package.
+#
+Bundle-DocURL:       https://db.apache.org/derby/manuals/index.html
+Bundle-Name:         Apache Derby Tools ${major}.${minor}
+Bundle-SymbolicName: org.apache.derby.tools
+Bundle-Vendor:       Apache Software Foundation
+Bundle-Version:      ${major}.${minor}.${maint}
+
+Private-Package:     *
+Sealed:              true
+
+Export-Package:\
+org.apache.derby.iapi.tools.i18n, \
+org.apache.derby.impl.tools.ij, \
+org.apache.derby.impl.tools.optional, \
+org.apache.derby.impl.tools.optional, \
+org.apache.derby.impl.tools.planexporter, \
+org.apache.derby.impl.tools.sysinfo, \
+org.apache.derby.info.tools, \
+org.apache.derby.jdbc, \
+org.apache.derby.loc.tools, \
+org.apache.derby.tools, \
+

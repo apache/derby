@@ -1,0 +1,101 @@
+-classpath:       ../jars/sane/derby.jar
+-include:         ../classes/version.properties
+-includeresource: @derby.jar!/META-INF/**, @derby.jar!/module-info.class
+
+-output:       derby.jar
+-savemanifest: derby.mf
+
+#
+# Specify that the minimum Java requirement is Java 8. We specify "-noee"
+# so that bnd doesn't try to infer the requirement from the bytecode (because
+# module descriptors will cause it to believe that Java 9 is a hard
+# requirement).
+#
+-noee: true
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+
+#
+# Remove headers that reduce reproducibility.
+#
+-noextraheaders: true
+
+#
+# Specify basic OSGi metadata.
+#
+Bundle-DocURL:       https://db.apache.org/derby/manuals/index.html
+Bundle-Name:         Apache Derby Embedded Engine ${major}.${minor}
+Bundle-SymbolicName: org.apache.derby.engine
+Bundle-Vendor:       Apache Software Foundation
+Bundle-Version:      ${major}.${minor}.${maint}
+
+Bundle-Activator:    org.apache.derby.osgi.EmbeddedActivator
+
+#
+# Specify that all packages are private by default, and sealed. We will
+# override the privacy of an explicit list of packages by exporting them
+# with Export-Package.
+#
+Private-Package: *
+Sealed:          true
+
+Import-Package:\
+javax.naming;resolution="optional", \
+*
+
+Export-Package: \
+org.apache.derby.agg, \
+org.apache.derby.authentication, \
+org.apache.derby.catalog, \
+org.apache.derby.vti, \
+org.apache.derby.security, \
+org.apache.derby.diag, \
+org.apache.derby.iapi.db, \
+org.apache.derby.iapi.services.io, \
+org.apache.derby.iapi.services.loader, \
+org.apache.derby.iapi.sql, \
+org.apache.derby.iapi.sql.conn, \
+org.apache.derby.iapi.sql.execute, \
+org.apache.derby.iapi.store.access, \
+org.apache.derby.iapi.types, \
+org.apache.derby.iapi.util, \
+org.apache.derby.impl.sql.execute, \
+org.apache.derby.impl.load, \
+org.apache.derby.impl.jdbc, \
+org.apache.derby.catalog.types, \
+org.apache.derby.database, \
+org.apache.derby.iapi.jdbc, \
+org.apache.derby.iapi.services.cache, \
+org.apache.derby.iapi.services.context, \
+org.apache.derby.iapi.services.crypto, \
+org.apache.derby.iapi.services.daemon, \
+org.apache.derby.iapi.services.diag, \
+org.apache.derby.iapi.services.jmx, \
+org.apache.derby.iapi.services.locks, \
+org.apache.derby.iapi.services.monitor, \
+org.apache.derby.iapi.services.property, \
+org.apache.derby.iapi.services.uuid, \
+org.apache.derby.iapi.sql.compile, \
+org.apache.derby.iapi.sql.depend, \
+org.apache.derby.iapi.sql.dictionary, \
+org.apache.derby.iapi.store.access.conglomerate, \
+org.apache.derby.iapi.store.access.xa, \
+org.apache.derby.iapi.store.raw, \
+org.apache.derby.iapi.store.raw.data, \
+org.apache.derby.iapi.store.raw.log, \
+org.apache.derby.iapi.store.raw.xact, \
+org.apache.derby.iapi.transaction, \
+org.apache.derby.impl.io, \
+org.apache.derby.impl.io.vfmem, \
+org.apache.derby.impl.jdbc.authentication, \
+org.apache.derby.impl.services.jce, \
+org.apache.derby.impl.sql, \
+org.apache.derby.impl.sql.catalog, \
+org.apache.derby.impl.store.access.btree, \
+org.apache.derby.impl.store.access.btree.index, \
+org.apache.derby.impl.store.access.conglomerate, \
+org.apache.derby.impl.store.access.heap, \
+org.apache.derby.impl.store.raw.data, \
+org.apache.derby.impl.store.raw.log, \
+org.apache.derby.io, \
+org.apache.derby.mbeans, \
+
