@@ -1374,7 +1374,7 @@
 
 <!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
 
-  <target name="derbyjar" depends="initjars,versions.properties">
+  <target name="derbyjar" depends="initjars,version.properties">
 
     <echo level="info" message="Beginning derby.jar ${sanity.name} build"/>
 
@@ -1442,7 +1442,7 @@
 
   <!-- Produce a properties file containing version information. -->
   <!-- Used when producing OSGi manifests. -->
-  <target name="versions.properties">
+  <target name="version.properties">
     <propertyfile file="classes/version.properties">
       <entry key="major" value="${major}"/>
       <entry key="minor" value="${minor}"/>
@@ -1566,7 +1566,7 @@
 
 <!-- - - - - - - - - - - - - - derbynet.jar target - - - - - - - - - - - -->
 
-  <target name="derbynetjar" depends="setsanityname,versions.properties">
+  <target name="derbynetjar" depends="setsanityname,version.properties">
 
     <echo level="info" message="Beginning derbynet.jar ${sanity.name} build"/>
 
@@ -1614,7 +1614,7 @@
 
 <!-- - - - - - - - - - - - - - derbyclient.jar target - - - - - - - - -->
 
- <target name="derbyclientjar" depends="setsanityname,initjars,versions.properties">
+ <target name="derbyclientjar" depends="setsanityname,initjars,version.properties">
 
     <echo level="info" message="Beginning derbyclient.jar ${sanity.name} build"/>
 
@@ -1672,7 +1672,7 @@
 
 <!-- - - - - - - - - - - - - - derbyshared.jar target - - - - - - - - - - - -->
 
-  <target name="derbysharedjar" depends="setsanityname,versions.properties">
+  <target name="derbysharedjar" depends="setsanityname,version.properties">
 
     <echo level="info" message="Beginning derbyshared.jar ${sanity.name} build"/>
 
@@ -1711,7 +1711,7 @@
 
 <!-- - - - - - - - - - - - - - derbyrun.jar target  - - - - - - - - - -->
    
-  <target name="derbyrunjar" depends="setsanityname,initjars,versions.properties">
+  <target name="derbyrunjar" depends="setsanityname,initjars,version.properties">
 
     <echo level="info" message="Beginning derbyrun.jar build"/>
 
@@ -1741,7 +1741,7 @@
   </target>
 <!-- - - - - - - - - - - - - - derby.war target - - - - - - - - - - - -->
 
- <target name="derbywar" depends="initjars,versions.properties">
+ <target name="derbywar" depends="initjars,version.properties">
 
     <echo level="info" message="Beginning derby.war  build"/>
     <delete file="${derby.jar.dir}/derby.war"/>
@@ -1750,7 +1750,7 @@
 
 <!-- - - - - - - - - - - - - - locale jar targets - - - - - - - - - - - -->
 
-  <target name="derbylocalejars" depends="initjars,versions.properties">
+  <target name="derbylocalejars" depends="initjars,version.properties">
  
     <!-- purge lists directory to avoid unnecessary content from other jars -->
     <delete>
@@ -1816,7 +1816,7 @@
     </antcall>
   </target>
 
-  <target name="localejar">
+  <target name="localejar" depends="version.properties">
  
     <echo level="info" message="Building derbyLocale_${locale.iname}.jar"/>
 
@@ -1833,16 +1833,44 @@
     <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
          basedir="${out.dir}/${locale.stub}${locale.iname}"
          compress="true"
-         filesonly="true"
-      >
+         filesonly="true">
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>
+
+    <antcall target="locale.properties">
+      <param name="locale.iname" value="${locale.iname}"/>
+      <param name="locale.ename" value="${locale.ename}"/>
+    </antcall>
+
+    <!-- Execute the bnd tool to generate a new jar manifest. -->
+    <delete>
+      <fileset dir="bnd" includes="derbyLocale_${locale.iname}.jar"/>
+    </delete>
+    <exec executable="java"
+          failonerror="true"
+          failifexecutionfails="true">
+      <arg value="-jar"/>
+      <arg value="${bnd}"/>
+      <arg value="bnd/derbyLocale.bnd"/>
+    </exec>
+    <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
+         manifest="bnd/derbyLocale_${locale.iname}.mf"
+         update="true"/>
   </target>
-    
+
+  <!-- Produce a properties file containing locale information. -->
+  <!-- Used when producing OSGi manifests. -->
+  <target name="locale.properties">
+    <propertyfile file="classes/locale.properties">
+      <entry key="locale.iname" value="${locale.iname}"/>
+      <entry key="locale.ename" value="${locale.ename}"/>
+    </propertyfile>
+  </target>
+
 <!-- - - - - - - - - - - - derby testing jar target - - - - - - - - - - -->
 
-  <target name="derbytestingjar" depends="initjars,ckderbytesting,versions.properties" if="derbyTesting.available">
+  <target name="derbytestingjar" depends="initjars,ckderbytesting,version.properties" if="derbyTesting.available">
     <!-- generate tsting info property file -->
     <antcall target="tstinginfowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
