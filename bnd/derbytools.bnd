@@ -1,9 +1,9 @@
 -classpath:       ../jars/sane/derbytools.jar
--include:         ../classes/version.properties
+-include:         ../classes/bnd/version.properties
 -includeresource: @derbytools.jar!/META-INF/**, @derbytools.jar!/module-info.class
 
--output:       derbytools.jar
--savemanifest: derbytools.mf
+-output:       ../classes/bnd/derbytools.jar
+-savemanifest: ../classes/bnd/derbytools.mf
 
 #
 # Specify that the minimum Java requirement is Java 8. We specify "-noee"
@@ -34,6 +34,17 @@ Bundle-Version:      ${major}.${minor}.${maint}
 
 Private-Package:     *
 Sealed:              true
+
+Import-Package:\
+com.ibm.db2.jcc;resolution:="optional",\
+javax.naming.directory;resolution:="optional",\
+javax.naming.spi;resolution:="optional",\
+javax.naming;resolution:="optional",\
+javax.sql,\
+javax.transaction.xa;resolution:="optional",\
+javax.xml.transform,\
+javax.xml.transform.stream,\
+*
 
 Export-Package:\
 org.apache.derby.iapi.tools.i18n, \

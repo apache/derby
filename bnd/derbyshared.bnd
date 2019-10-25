@@ -1,9 +1,9 @@
 -classpath:       ../jars/sane/derbyshared.jar
--include:         ../classes/version.properties
+-include:         ../classes/bnd/version.properties
 -includeresource: @derbyshared.jar!/META-INF/**, @derbyshared.jar!/module-info.class
 
--output:       derbyshared.jar
--savemanifest: derbyshared.mf
+-output:       ../classes/bnd/derbyshared.jar
+-savemanifest: ../classes/bnd/derbyshared.mf
 
 #
 # Specify that the minimum Java requirement is Java 8. We specify "-noee"
@@ -36,7 +36,7 @@ Private-Package:     *
 Sealed:              true
 
 Import-Package:\
-com.ibm.jvm;resolution="optional", \
+com.ibm.jvm;resolution:="optional", \
 *
 
 

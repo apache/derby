@@ -1356,6 +1356,7 @@
   <target name="initjars" depends="setsanityname,getsvnversion,setCompilerProperties">
     <property name="derby.jar.dir" value="${jarsdist.dir}/${sanity.name}"/>
     <property name="derby.jar.topdir" value="${jarsdist.dir}"/>
+    <mkdir dir="${out.bnd.dir}"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
 
@@ -1427,7 +1428,7 @@
 
     <!-- Execute the bnd tool to generate a new jar manifest. -->
     <delete>
-      <fileset dir="bnd" includes="derby.jar"/>
+      <fileset dir="${out.bnd.dir}" includes="derby.jar"/>
     </delete>
     <exec executable="java"
           failifexecutionfails="true">
@@ -1436,14 +1437,14 @@
       <arg value="bnd/derby.bnd"/>
     </exec>
     <jar destfile="${derby.jar.dir}/derby.jar"
-         manifest="bnd/derby.mf"
+         manifest="${out.bnd.dir}/derby.mf"
          update="true"/>
   </target>
 
   <!-- Produce a properties file containing version information. -->
   <!-- Used when producing OSGi manifests. -->
   <target name="version.properties">
-    <propertyfile file="classes/version.properties">
+    <propertyfile file="${out.bnd.dir}/version.properties">
       <entry key="major" value="${major}"/>
       <entry key="minor" value="${minor}"/>
       <entry key="maint" value="${maint}"/>
@@ -1504,7 +1505,7 @@
 
     <!-- Execute the bnd tool to generate a new jar manifest. -->
     <delete>
-      <fileset dir="bnd" includes="derbytools.jar"/>
+      <fileset dir="${out.bnd.dir}" includes="derbytools.jar"/>
     </delete>
     <exec executable="java"
           failifexecutionfails="true">
@@ -1513,7 +1514,7 @@
       <arg value="bnd/derbytools.bnd"/>
     </exec>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
-         manifest="bnd/derbytools.mf"
+         manifest="${out.bnd.dir}/derbytools.mf"
          update="true"/>
   </target>
 
@@ -1551,7 +1552,7 @@
 
     <!-- Execute the bnd tool to generate a new jar manifest. -->
     <delete>
-      <fileset dir="bnd" includes="derbyoptionaltools.jar"/>
+      <fileset dir="${out.bnd.dir}" includes="derbyoptionaltools.jar"/>
     </delete>
     <exec executable="java"
           failifexecutionfails="true">
@@ -1560,7 +1561,7 @@
       <arg value="bnd/derbyoptionaltools.bnd"/>
     </exec>
     <jar destfile="${derby.jar.dir}/derbyoptionaltools.jar"
-         manifest="bnd/derbyoptionaltools.mf"
+         manifest="${out.bnd.dir}/derbyoptionaltools.mf"
          update="true"/>
   </target>
 
@@ -1598,7 +1599,7 @@
 
     <!-- Execute the bnd tool to generate a new jar manifest. -->
     <delete>
-      <fileset dir="bnd" includes="derbynet.jar"/>
+      <fileset dir="${out.bnd.dir}" includes="derbynet.jar"/>
     </delete>
     <exec executable="java"
           failonerror="true"
@@ -1608,7 +1609,7 @@
       <arg value="bnd/derbynet.bnd"/>
     </exec>
     <jar destfile="${derby.jar.dir}/derbynet.jar"
-         manifest="bnd/derbynet.mf"
+         manifest="${out.bnd.dir}/derbynet.mf"
          update="true"/>
   </target>
 
@@ -1656,7 +1657,7 @@
 
    <!-- Execute the bnd tool to generate a new jar manifest. -->
    <delete>
-     <fileset dir="bnd" includes="derbyclient.jar"/>
+     <fileset dir="${out.bnd.dir}" includes="derbyclient.jar"/>
    </delete>
    <exec executable="java"
          failonerror="true"
@@ -1666,7 +1667,7 @@
      <arg value="bnd/derbyclient.bnd"/>
    </exec>
    <jar destfile="${derby.jar.dir}/derbyclient.jar"
-        manifest="bnd/derbyclient.mf"
+        manifest="${out.bnd.dir}/derbyclient.mf"
         update="true"/>
   </target>
 
@@ -1695,7 +1696,7 @@
 
     <!-- Execute the bnd tool to generate a new jar manifest. -->
     <delete>
-      <fileset dir="bnd" includes="derbyshared.jar"/>
+      <fileset dir="${out.bnd.dir}" includes="derbyshared.jar"/>
     </delete>
     <exec executable="java"
           failonerror="true"
@@ -1705,7 +1706,7 @@
       <arg value="bnd/derbyshared.bnd"/>
     </exec>
     <jar destfile="${derby.jar.dir}/derbyshared.jar"
-         manifest="bnd/derbyshared.mf"
+         manifest="${out.bnd.dir}/derbyshared.mf"
          update="true"/>
   </target>
 
@@ -1845,7 +1846,7 @@
 
     <!-- Execute the bnd tool to generate a new jar manifest. -->
     <delete>
-      <fileset dir="bnd" includes="derbyLocale_${locale.iname}.jar"/>
+      <fileset dir="${out.bnd.dir}" includes="derbyLocale_${locale.iname}.jar"/>
     </delete>
     <exec executable="java"
           failonerror="true"
@@ -1855,14 +1856,14 @@
       <arg value="bnd/derbyLocale.bnd"/>
     </exec>
     <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
-         manifest="bnd/derbyLocale_${locale.iname}.mf"
+         manifest="${out.bnd.dir}/derbyLocale_${locale.iname}.mf"
          update="true"/>
   </target>
 
   <!-- Produce a properties file containing locale information. -->
   <!-- Used when producing OSGi manifests. -->
   <target name="locale.properties">
-    <propertyfile file="classes/locale.properties">
+    <propertyfile file="${out.bnd.dir}/locale.properties">
       <entry key="locale.iname" value="${locale.iname}"/>
       <entry key="locale.ename" value="${locale.ename}"/>
     </propertyfile>

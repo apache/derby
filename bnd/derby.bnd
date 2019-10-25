@@ -1,9 +1,9 @@
 -classpath:       ../jars/sane/derby.jar
--include:         ../classes/version.properties
+-include:         ../classes/bnd/version.properties
 -includeresource: @derby.jar!/META-INF/**, @derby.jar!/module-info.class
 
--output:       derby.jar
--savemanifest: derby.mf
+-output:       ../classes/bnd/derby.jar
+-savemanifest: ../classes/bnd/derby.mf
 
 #
 # Specify that the minimum Java requirement is Java 8. We specify "-noee"
@@ -39,7 +39,10 @@ Private-Package: *
 Sealed:          true
 
 Import-Package:\
-javax.naming;resolution="optional", \
+javax.naming;resolution:="optional", \
+javax.naming.directory;resolution:="optional", \
+javax.management;resolution:="optional", \
+javax.transaction.xa;resolution:="optional", \
 *
 
 Export-Package: \

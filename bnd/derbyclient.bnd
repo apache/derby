@@ -1,9 +1,9 @@
 -classpath:       ../jars/sane/derbyclient.jar
--include:         ../classes/version.properties
+-include:         ../classes/bnd/version.properties
 -includeresource: @derbyclient.jar!/META-INF/**, @derbyclient.jar!/module-info.class
 
--output:       derbyclient.jar
--savemanifest: derbyclient.mf
+-output:       ../classes/bnd/derbyclient.jar
+-savemanifest: ../classes/bnd/derbyclient.mf
 
 #
 # Specify that the minimum Java requirement is Java 8. We specify "-noee"
@@ -36,7 +36,7 @@ Private-Package:     *
 Sealed:              true
 
 Import-Package:\
-javax.naming;resolution="optional", \
+javax.naming;resolution:="optional", \
 *
 
 Export-Package:\
