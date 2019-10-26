@@ -5,6 +5,8 @@
 -output:       ../classes/bnd/derbytools.jar
 -savemanifest: ../classes/bnd/derbytools.mf
 
+Class-Path: derby.jar derbyclient.jar derbynet.jar
+
 #
 # Specify that the minimum Java requirement is Java 8. We specify "-noee"
 # so that bnd doesn't try to infer the requirement from the bytecode (because
