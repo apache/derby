@@ -30,14 +30,11 @@ import org.osgi.framework.BundleContext;
 public final class EmbeddedActivator implements BundleActivator {
 
 	public void start(BundleContext context) {
-		new org.apache.derby.iapi.jdbc.AutoloadedDriver();
+
 	}
 
 	public void stop(BundleContext context) {
-		try {
-			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		} catch (SQLException sqle) {
-		}
+
 	}
 }
 
