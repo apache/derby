@@ -1356,6 +1356,7 @@
   <target name="initjars" depends="setsanityname,getsvnversion,setCompilerProperties">
     <property name="derby.jar.dir" value="${jarsdist.dir}/${sanity.name}"/>
     <property name="derby.jar.topdir" value="${jarsdist.dir}"/>
+    <mkdir dir="${out.bnd.dir}"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
 
@@ -1374,7 +1375,7 @@
 
 <!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
 
-  <target name="derbyjar" depends="initjars">
+  <target name="derbyjar" depends="initjars,version.properties">
 
     <echo level="info" message="Beginning derby.jar ${sanity.name} build"/>
 
@@ -1415,30 +1416,39 @@
       <param name="driver.name" value="org.apache.derby.iapi.jdbc.AutoloadedDriver"/>
     </antcall>
 
-    <antcall target="make-core-derbyjar-manifest">
-      <param name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
-    </antcall>
-
-    <!-- add extra osgi bits to manifest -->
-
-    <manifest file="${derby.jar.dir}/lists/smf.mf"  mode="update">
-      <attribute name="Bundle-Activator" value="org.apache.derby.osgi.EmbeddedActivator"/>
-      <attribute name="Bundle-SymbolicName" value="derby"/>
-      <attribute name="DynamicImport-Package" value="*"/>
-      <attribute name="Export-Package" value="org.apache.derby.authentication,org.apache.derby.database,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti"/> 
-    </manifest> 
-
     <jar destfile="${derby.jar.dir}/derby.jar"
          basedir="${out.engine.dir}"
          excludes="**/D_*,**/*.done,**/*Test.class,**/_Suite.class,**/modules.properties"
          compress="true"
-         filesonly="true"
-         manifest="${derby.jar.dir}/lists/smf.mf">
+         filesonly="true">
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**,
                          org/apache/derby/modules.properties"/>
-   </jar>
+    </jar>
 
+    <!-- Execute the bnd tool to generate a new jar manifest. -->
+    <delete>
+      <fileset dir="${out.bnd.dir}" includes="derby.jar"/>
+    </delete>
+    <exec executable="java"
+          failifexecutionfails="true">
+      <arg value="-jar"/>
+      <arg value="${bnd}"/>
+      <arg value="bnd/derby.bnd"/>
+    </exec>
+    <jar destfile="${derby.jar.dir}/derby.jar"
+         manifest="${out.bnd.dir}/derby.mf"
+         update="true"/>
+  </target>
+
+  <!-- Produce a properties file containing version information. -->
+  <!-- Used when producing OSGi manifests. -->
+  <target name="version.properties">
+    <propertyfile file="${out.bnd.dir}/version.properties">
+      <entry key="major" value="${major}"/>
+      <entry key="minor" value="${minor}"/>
+      <entry key="maint" value="${maint}"/>
+    </propertyfile>
   </target>
 
   <!-- Add localized jars to the classpath -->
@@ -1446,26 +1456,6 @@
       <manifest file="${manifest.file}" mode="${manifest.mode}">
           <attribute name="Class-Path" value="derbyshared.jar derbyLocale_cs.jar derbyLocale_de_DE.jar derbyLocale_es.jar derbyLocale_fr.jar derbyLocale_hu.jar derbyLocale_it.jar derbyLocale_ja_JP.jar derbyLocale_ko_KR.jar derbyLocale_pl.jar derbyLocale_pt_BR.jar derbyLocale_ru.jar derbyLocale_zh_CN.jar derbyLocale_zh_TW.jar"/>
       </manifest>
-  </target>
-
-  <target name="make-core-derbyjar-manifest">
-
-    <manifest file="${manifest.file}">
-      <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
-      <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
-      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
-      <attribute name="Bundle-ManifestVersion" value="2"/>
-      	<attribute name="Sealed" value="true"/>
-    	<section name="org/apache/derby/jdbc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    </manifest> 
-
-    <antcall target="make-locale-classpath-manifest">
-        <param name="manifest.file" value="${manifest.file}"/>
-        <param name="manifest.mode" value="update"/>
-    </antcall>
-
   </target>
 
 <!-- - - - - - - - - - - - -  derbytools.jar target - - - - - - - - - - -->
@@ -1512,6 +1502,20 @@
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
+
+    <!-- Execute the bnd tool to generate a new jar manifest. -->
+    <delete>
+      <fileset dir="${out.bnd.dir}" includes="derbytools.jar"/>
+    </delete>
+    <exec executable="java"
+          failifexecutionfails="true">
+      <arg value="-jar"/>
+      <arg value="${bnd}"/>
+      <arg value="bnd/derbytools.bnd"/>
+    </exec>
+    <jar destfile="${derby.jar.dir}/derbytools.jar"
+         manifest="${out.bnd.dir}/derbytools.mf"
+         update="true"/>
   </target>
 
 <!-- - - - - - - - - - - - -  derbyoptionaltools.jar target - - - - - - - - - - -->
@@ -1536,33 +1540,34 @@
 
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
-    <manifest file="${derby.jar.dir}/lists/smfoptionaltools.mf">
-      <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
-      <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
-      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
-      <attribute name="Bundle-ManifestVersion" value="2"/>
-      <attribute name="Sealed" value="true"/>
-    </manifest> 
-
-    <antcall target="make-locale-classpath-manifest">
-        <param name="manifest.file" value="${derby.jar.dir}/lists/smfoptionaltools.mf"/>
-        <param name="manifest.mode" value="update"/>
-    </antcall>
 
     <delete file="${derby.jar.dir}/derbyoptionaltools.jar"/>
     <jar destfile="${derby.jar.dir}/derbyoptionaltools.jar"
          basedir="${out.optional.dir}"
-         manifest="${derby.jar.dir}/lists/smfoptionaltools.mf"
          compress="true"
          filesonly="true">
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
+
+    <!-- Execute the bnd tool to generate a new jar manifest. -->
+    <delete>
+      <fileset dir="${out.bnd.dir}" includes="derbyoptionaltools.jar"/>
+    </delete>
+    <exec executable="java"
+          failifexecutionfails="true">
+      <arg value="-jar"/>
+      <arg value="${bnd}"/>
+      <arg value="bnd/derbyoptionaltools.bnd"/>
+    </exec>
+    <jar destfile="${derby.jar.dir}/derbyoptionaltools.jar"
+         manifest="${out.bnd.dir}/derbyoptionaltools.mf"
+         update="true"/>
   </target>
 
 <!-- - - - - - - - - - - - - - derbynet.jar target - - - - - - - - - - - -->
 
-  <target name="derbynetjar" depends="setsanityname">
+  <target name="derbynetjar" depends="setsanityname,version.properties">
 
     <echo level="info" message="Beginning derbynet.jar ${sanity.name} build"/>
 
@@ -1583,27 +1588,34 @@
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
 
-    <manifest file="${derby.jar.dir}/lists/smfnet.mf">
-      <attribute name="Main-Class" value="org.apache.derby.drda.NetworkServerControl"/>
-      <attribute name="Class-Path" value="derby.jar derbyshared.jar derbytools.jar"/>
-      	<attribute name="Sealed" value="true"/>
-    </manifest> 
-
     <delete file="${derby.jar.dir}/derbynet.jar"/>
     <jar destfile="${derby.jar.dir}/derbynet.jar"
          basedir="${out.drda.dir}"
          compress="true"
-         filesonly="true"
-    	 manifest="${derby.jar.dir}/lists/smfnet.mf">
+         filesonly="true">
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
 
+    <!-- Execute the bnd tool to generate a new jar manifest. -->
+    <delete>
+      <fileset dir="${out.bnd.dir}" includes="derbynet.jar"/>
+    </delete>
+    <exec executable="java"
+          failonerror="true"
+          failifexecutionfails="true">
+      <arg value="-jar"/>
+      <arg value="${bnd}"/>
+      <arg value="bnd/derbynet.bnd"/>
+    </exec>
+    <jar destfile="${derby.jar.dir}/derbynet.jar"
+         manifest="${out.bnd.dir}/derbynet.mf"
+         update="true"/>
   </target>
 
 <!-- - - - - - - - - - - - - - derbyclient.jar target - - - - - - - - -->
 
- <target name="derbyclientjar" depends="setsanityname,initjars">
+ <target name="derbyclientjar" depends="setsanityname,initjars,version.properties">
 
     <echo level="info" message="Beginning derbyclient.jar ${sanity.name} build"/>
 
@@ -1623,17 +1635,6 @@
 
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
-    <antcall target="make-core-derbyjar-manifest">
-      <param name="manifest.file" value="${derby.jar.dir}/lists/smfclient.mf"/>
-    </antcall>
-
-    <!-- add extra osgi bits to manifest -->
-
-    <manifest file="${derby.jar.dir}/lists/smfclient.mf"  mode="update">
-      <attribute name="Bundle-SymbolicName" value="derbyclient"/>
-      <attribute name="DynamicImport-Package" value="*"/>
-      <attribute name="Export-Package" value="org.apache.derby.jdbc"/> 
-    </manifest> 
 
     <!-- declare the client driver for autoloading by the JDBC 4 DriverManager -->
     <antcall target="declare-autoloadable-driver">
@@ -1649,17 +1650,30 @@
          update="true"
          excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties,
                    **/*Test.class,
-                   **/_Suite.class"
-    	 manifest="${derby.jar.dir}/lists/smfclient.mf">
+                   **/_Suite.class">
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
-  </target>
 
+   <!-- Execute the bnd tool to generate a new jar manifest. -->
+   <delete>
+     <fileset dir="${out.bnd.dir}" includes="derbyclient.jar"/>
+   </delete>
+   <exec executable="java"
+         failonerror="true"
+         failifexecutionfails="true">
+     <arg value="-jar"/>
+     <arg value="${bnd}"/>
+     <arg value="bnd/derbyclient.bnd"/>
+   </exec>
+   <jar destfile="${derby.jar.dir}/derbyclient.jar"
+        manifest="${out.bnd.dir}/derbyclient.mf"
+        update="true"/>
+  </target>
 
 <!-- - - - - - - - - - - - - - derbyshared.jar target - - - - - - - - - - - -->
 
-  <target name="derbysharedjar" depends="setsanityname">
+  <target name="derbysharedjar" depends="setsanityname,version.properties">
 
     <echo level="info" message="Beginning derbyshared.jar ${sanity.name} build"/>
 
@@ -1679,23 +1693,26 @@
 
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
-    <antcall target="make-locale-classpath-manifest">
-        <param name="manifest.file" value="${derby.jar.dir}/lists/smfshared.mf"/>
-        <param name="manifest.mode" value="update"/>
-    </antcall>
 
-    <delete file="${derby.jar.dir}/derbyshared.jar"/>
+    <!-- Execute the bnd tool to generate a new jar manifest. -->
+    <delete>
+      <fileset dir="${out.bnd.dir}" includes="derbyshared.jar"/>
+    </delete>
+    <exec executable="java"
+          failonerror="true"
+          failifexecutionfails="true">
+      <arg value="-jar"/>
+      <arg value="${bnd}"/>
+      <arg value="bnd/derbyshared.bnd"/>
+    </exec>
     <jar destfile="${derby.jar.dir}/derbyshared.jar"
-         basedir="${out.shared.dir}"
-         compress="true"
-         filesonly="true"
-    	 manifest="${derby.jar.dir}/lists/smfshared.mf"/>
-
+         manifest="${out.bnd.dir}/derbyshared.mf"
+         update="true"/>
   </target>
 
 <!-- - - - - - - - - - - - - - derbyrun.jar target  - - - - - - - - - -->
    
-  <target name="derbyrunjar" depends="setsanityname,initjars">
+  <target name="derbyrunjar" depends="setsanityname,initjars,version.properties">
 
     <echo level="info" message="Beginning derbyrun.jar build"/>
 
@@ -1725,7 +1742,7 @@
   </target>
 <!-- - - - - - - - - - - - - - derby.war target - - - - - - - - - - - -->
 
- <target name="derbywar" depends="initjars">
+ <target name="derbywar" depends="initjars,version.properties">
 
     <echo level="info" message="Beginning derby.war  build"/>
     <delete file="${derby.jar.dir}/derby.war"/>
@@ -1734,7 +1751,7 @@
 
 <!-- - - - - - - - - - - - - - locale jar targets - - - - - - - - - - - -->
 
-  <target name="derbylocalejars" depends="initjars">
+  <target name="derbylocalejars" depends="initjars,version.properties">
  
     <!-- purge lists directory to avoid unnecessary content from other jars -->
     <delete>
@@ -1800,7 +1817,7 @@
     </antcall>
   </target>
 
-  <target name="localejar">
+  <target name="localejar" depends="version.properties">
  
     <echo level="info" message="Building derbyLocale_${locale.iname}.jar"/>
 
@@ -1817,16 +1834,44 @@
     <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
          basedir="${out.dir}/${locale.stub}${locale.iname}"
          compress="true"
-         filesonly="true"
-      >
+         filesonly="true">
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>
+
+    <antcall target="locale.properties">
+      <param name="locale.iname" value="${locale.iname}"/>
+      <param name="locale.ename" value="${locale.ename}"/>
+    </antcall>
+
+    <!-- Execute the bnd tool to generate a new jar manifest. -->
+    <delete>
+      <fileset dir="${out.bnd.dir}" includes="derbyLocale_${locale.iname}.jar"/>
+    </delete>
+    <exec executable="java"
+          failonerror="true"
+          failifexecutionfails="true">
+      <arg value="-jar"/>
+      <arg value="${bnd}"/>
+      <arg value="bnd/derbyLocale.bnd"/>
+    </exec>
+    <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
+         manifest="${out.bnd.dir}/derbyLocale_${locale.iname}.mf"
+         update="true"/>
   </target>
-    
+
+  <!-- Produce a properties file containing locale information. -->
+  <!-- Used when producing OSGi manifests. -->
+  <target name="locale.properties">
+    <propertyfile file="${out.bnd.dir}/locale.properties">
+      <entry key="locale.iname" value="${locale.iname}"/>
+      <entry key="locale.ename" value="${locale.ename}"/>
+    </propertyfile>
+  </target>
+
 <!-- - - - - - - - - - - - derby testing jar target - - - - - - - - - - -->
 
-  <target name="derbytestingjar" depends="initjars,ckderbytesting" if="derbyTesting.available">
+  <target name="derbytestingjar" depends="initjars,ckderbytesting,version.properties" if="derbyTesting.available">
     <!-- generate tsting info property file -->
     <antcall target="tstinginfowriter">
       <param name="info.buildnumber" value="${changenumber}"/>

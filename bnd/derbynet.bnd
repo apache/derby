@@ -1,0 +1,52 @@
+-classpath:       ../jars/sane/derbynet.jar
+-include:         ../classes/bnd/version.properties
+-includeresource: @derbynet.jar!/META-INF/**, @derbynet.jar!/module-info.class
+
+-output:       ../classes/bnd/derbynet.jar
+-savemanifest: ../classes/bnd/derbynet.mf
+
+Class-Path: derby.jar derbyshared.jar
+
+#
+# Specify that the minimum Java requirement is Java 8. We specify "-noee"
+# so that bnd doesn't try to infer the requirement from the bytecode (because
+# module descriptors will cause it to believe that Java 9 is a hard
+# requirement).
+#
+-noee: true
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+
+#
+# Remove headers that reduce reproducibility.
+#
+-noextraheaders: true
+
+#
+# Specify basic OSGi metadata.
+#
+# Specify that all packages are private by default, and sealed. We will
+# override the privacy of an explicit list of packages by exporting them
+# with Export-Package.
+#
+Bundle-DocURL:       https://db.apache.org/derby/manuals/index.html
+Bundle-Name:         Apache Derby Network Server ${major}.${minor}
+Bundle-SymbolicName: org.apache.derby.server
+Bundle-Vendor:       Apache Software Foundation
+Bundle-Version:      ${major}.${minor}.${maint}
+
+Main-Class:          org.apache.derby.drda.NetworkServerControl
+Private-Package:     *
+Sealed:              true
+
+Import-Package:\
+javax.servlet;resolution:="optional", \
+javax.servlet.http;resolution:="optional", \
+javax.transaction.xa;resolution:="optional", \
+*
+
+Export-Package:\
+org.apache.derby.drda, \
+org.apache.derby.impl.drda, \
+org.apache.derby.loc.drda, \
+org.apache.derby.mbeans.drda, \
+

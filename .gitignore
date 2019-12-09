@@ -1,4 +1,6 @@
 *~
+/bnd/*.jar
+/bnd/*.mf
 /classes*/
 /jars/
 /generated/

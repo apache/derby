@@ -1,0 +1,40 @@
+-include:\
+../classes/bnd/locale.properties, \
+../classes/bnd/version.properties
+
+-classpath:       ../jars/sane/derbyLocale_${locale.iname}.jar
+-includeresource: @derbyLocale_${locale.iname}.jar!/META-INF/**, @derbyLocale_${locale.iname}.jar!/module-info.class
+
+-output:       ../classes/bnd/derbyLocale_${locale.iname}.jar
+-savemanifest: ../classes/bnd/derbyLocale_${locale.iname}.mf
+
+#
+# Specify that the minimum Java requirement is Java 8. We specify "-noee"
+# so that bnd doesn't try to infer the requirement from the bytecode (because
+# module descriptors will cause it to believe that Java 9 is a hard
+# requirement).
+#
+-noee: true
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+
+#
+# Remove headers that reduce reproducibility.
+#
+-noextraheaders: true
+
+#
+# Specify basic OSGi metadata.
+#
+Bundle-DocURL:       https://db.apache.org/derby/manuals/index.html
+Bundle-Name:         Apache Derby Locale (${locale.ename}) ${major}.${minor}
+Bundle-SymbolicName: org.apache.derby.locale_${locale.iname}
+Bundle-Vendor:       Apache Software Foundation
+Bundle-Version:      ${major}.${minor}.${maint}
+
+Fragment-Host: org.apache.derby.commons;bundle-version=${major}.${minor}
+
+Export-Package:\
+org.apache.derby.info.locale_${locale.iname}, \
+org.apache.derby.loc.locale_${locale.iname}, \
+org.apache.derby.loc.tools.locale_${locale.iname}, \
+
