@@ -50,6 +50,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
         // ParameterMetaData calls to ensure that the parameter type for
         // dynamic parameter for unary minus and plus get set correctly from
         // the context in which they are used.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         if ( !JDBC.vmSupportsJDBC3()) {
             return new BaseTestSuite(
                 "empty UnaryArithmeticParameterTest - " +
@@ -106,6 +107,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(1,1);
 			expectedTypes=new int[] {Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
 										{-1,-1,-1.0,new String("def")},
 										{3,3,3.1,new String("ghi")},
@@ -117,6 +119,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setDouble(3,1.1);
 			expectedTypes= new int[]{Types.INTEGER, Types.SMALLINT,Types.DOUBLE};
 			JDBC.assertParameterTypes(ps,expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			expectedRows = new Object[][]{{1,1,1.1,new String("abc")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			
@@ -140,6 +143,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(2,1);
 			int[] expectedTypes= new int[]{Types.INTEGER,Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
 										{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
@@ -158,6 +162,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(1,1);
 			int[] expectedTypes= new int[]{Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
 					{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
@@ -208,6 +213,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(4,4);
 			int[] expectedTypes= new int[]{Types.INTEGER,Types.INTEGER, Types.INTEGER,Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
 										{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
@@ -229,6 +235,8 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(1,0);
 			int[] expectedTypes=new int[]{Types.SMALLINT};
 			JDBC.assertParameterTypes(ps,expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 
@@ -237,6 +245,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(2,-1);
 			expectedTypes = new int[]{Types.INTEGER,Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			expectedRows = new Object[][]{{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 
@@ -303,6 +312,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(2,22);
 			int[] expectedTypes = new int[]{Types.INTEGER,Types.SMALLINT};
 			JDBC.assertParameterTypes(ps, expectedTypes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Object[][] expectedRows = new Object[][]{{1},{-22}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			ps.close();

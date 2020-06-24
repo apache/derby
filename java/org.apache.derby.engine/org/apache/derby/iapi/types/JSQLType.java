@@ -176,6 +176,7 @@ public final class JSQLType implements Formatable
 	public	DataTypeDescriptor	getSQLType
 	(
     )
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
 		// might not be filled in if this is a JAVA_CLASS or JAVA_PRIMITIVE
@@ -200,6 +201,7 @@ public final class JSQLType implements Formatable
 
     // Give read-only access to array of strings
 	public static String getPrimitiveName(byte index){
+//IC see: https://issues.apache.org/jira/browse/DERBY-4293
 	    return primitiveNames[index];
 	}
 

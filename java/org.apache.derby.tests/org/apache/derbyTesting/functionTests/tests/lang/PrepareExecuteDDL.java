@@ -89,9 +89,11 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
      * as well.
 	 */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("PrepareExecuteDDL");
         for (int i = 0; i < DDL.length; i++)
         	suite.addTest(new PrepareExecuteDDL("testPrepareExcute", DDL[i]));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1974
         return TestConfiguration.sqlAuthorizationDecorator(suite);
     }
 	private final String ddl;
@@ -109,6 +111,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 	
 	public void testPrepareExcute() throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection conn = getConnection();
         
 		PreparedStatement[] psa= new PreparedStatement[STMTS.length];
@@ -163,6 +166,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 		if (isSelectStar)
 			;
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-1976
 		JDBC.assertDrainResults(rs);
 	}
 	

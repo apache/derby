@@ -60,6 +60,7 @@ public interface ClassFactory {
         @param className The name of the class to load
         @return the corresponding class object
 		@exception ClassNotFoundException Class cannot be found, or
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
 		a SecurityException or LinkageException was thrown loading the class.
 	*/
 	public Class loadApplicationClass(String className)
@@ -71,6 +72,7 @@ public interface ClassFactory {
         @param classDescriptor Descriptor for class
         @return the corresponding class
 		@exception ClassNotFoundException Class cannot be found, or
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
 		a SecurityException or LinkageException was thrown loading the class.
 	*/
 	public Class loadApplicationClass(ObjectStreamClass classDescriptor)

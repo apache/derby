@@ -42,6 +42,7 @@ import java.sql.Clob;
     If its data is small (less than 1 page) it is a byte array taken from
     the SQLChar class. If it is large (more than 1 page) it is a long column
     in the database. The long column is accessed as a stream, and is implemented
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
     in store as an OverflowInputStream. The Resetable interface allows sending
     messages to that stream to initialize itself (reopen its container and
     lock the corresponding row) and to reset itself to the beginning.
@@ -63,6 +64,7 @@ import java.sql.Clob;
         new update methods can safely be added into implementation.
    </UL>
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3576
 final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
 {
 
@@ -84,6 +86,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
      * @throws SQLException
      *
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
     EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
         this.clob = new TemporaryClob (this);
@@ -102,6 +105,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
      * @throws StandardException
      */
     protected EmbedClob(EmbedConnection con, StringDataValue dvd)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5760
         throws StandardException, SQLException
     {
         super(con);
@@ -112,6 +116,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                                  "clob is created on top of a null column");
 
         // See if a String or a stream will be the source of the Clob.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         if (dvd.hasStream()) {
             CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
             /*
@@ -129,7 +134,9 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
              */
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(csd.getStream() instanceof Resetable);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-265
             try {
                 this.clob = new StoreStreamClob(csd, this);
             } catch (StandardException se) {
@@ -145,9 +152,12 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                         this);
             }
             catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5760
                 throw Util.setStreamFailure(e);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
         con.addLOBReference (this);
     }
 
@@ -199,22 +209,28 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
 
         if (pos < 1)
             throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 SQLState.BLOB_BAD_POSITION, pos);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1516
         if (length < 0)
             throw Util.generateCsSQLException(
                 SQLState.BLOB_NONPOSITIVE_LENGTH, length);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         String result;
         // An exception will be thrown if the position is larger than the Clob.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
         Reader reader;
         try {
             try {
                 reader = this.clob.getInternalReader(pos);
             } catch (EOFException eofe) {
                 throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                         SQLState.BLOB_POSITION_TOO_LARGE, eofe, pos);
             }
             char[] chars = new char[length];
@@ -252,6 +268,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
         //the Clob object has been freed by calling free() on it
         checkValidity();
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2823
             return new ClobUpdatableReader (this);
         } catch (IOException ioe) {
             throw Util.setStreamFailure(ioe);
@@ -317,6 +334,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
         checkValidity();
         if (start < 1)
             throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                             SQLState.BLOB_BAD_POSITION, start);
         if (searchStr == null)
             throw Util.generateCsSQLException(
@@ -325,6 +343,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
             return start; // match DB2's SQL LOCATE function
 
         boolean pushStack = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         EmbedConnection ec = getEmbedConnection();
         try
         {
@@ -338,18 +357,21 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                 int matchCount = 0;
                 long pos = start;
                 long newStart = -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
                 Reader reader = this.clob.getInternalReader(start);
                 char [] tmpClob = new char [4096];
                 boolean reset;
                 for (;;) {
                     reset = false;
                     int readCount = reader.read (tmpClob);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     if (readCount == -1) {
                         restoreIntrFlagIfSeen(pushStack, ec);
                         return -1;
                     }
                     for (int clobOffset = 0;
                                 clobOffset < readCount; clobOffset++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
                         if (tmpClob[clobOffset]
                                         == searchStr.charAt(matchCount)) {
                             //find the new starting position in
@@ -361,6 +383,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                             }
                             matchCount ++;
                             if (matchCount == searchStr.length()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                                 restoreIntrFlagIfSeen(pushStack, ec);
                                 return pos + clobOffset
                                         - searchStr.length() + 1;
@@ -380,6 +403,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                                 if (newStart < pos) {
                                     pos = newStart;
                                     reader.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
                                     reader = this.clob.getInternalReader(
                                                                     newStart);
                                     newStart = -1;
@@ -401,8 +425,11 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
         } catch (EOFException eofe) {
             restoreIntrFlagIfSeen(pushStack, ec);
             throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     SQLState.BLOB_POSITION_TOO_LARGE, eofe, start);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             restoreIntrFlagIfSeen(pushStack, ec);
             throw Util.setStreamFailure(ioe);
         } finally {
@@ -430,21 +457,27 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
     {
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         if (start < 1)
             throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                 SQLState.BLOB_BAD_POSITION, start);
         if (searchClob == null)
             throw Util.generateCsSQLException(
                                 SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
 
         boolean pushStack = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         EmbedConnection ec = getEmbedConnection();
         try
         {
             synchronized (getConnectionSynchronization())
             {
                 char[] subPatternChar = new char[1024];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
 
                 boolean seenOneCharacter = false;
 
@@ -458,6 +491,7 @@ restartScan:
                                                         subPatternChar.length);
                             if (read == -1) {
                                 //empty pattern
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                                 if (!seenOneCharacter) {
                                     // matches DB2 SQL LOCATE function
                                     restoreIntrFlagIfSeen(pushStack, ec);
@@ -477,6 +511,7 @@ restartScan:
                             long position = position(subPattern, start);
                             if (position == -1) {
                                 // never seen any match
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                                 if (firstPosition == -1) {
                                     restoreIntrFlagIfSeen(pushStack, ec);
                                     return -1;
@@ -496,7 +531,9 @@ restartScan:
 
                             // read is the length of the subPattern string
                             start = position + read;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
                     } // End inner for loop
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 } // End outer for loop
             } // End synchronized block
         } catch (IOException ioe) {
@@ -535,6 +572,7 @@ restartScan:
      * @throws SQLException if writing the string fails
      */
     public int setString(long pos, String str) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
             return setString (pos, str, 0, str.length());
     }
 
@@ -554,10 +592,13 @@ restartScan:
      * @exception SQLException if writing the string fails
      */
     public int setString(long pos, String str, int offset, int len)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
             throws SQLException {
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2769
         if (pos < 1) {
             throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 SQLState.BLOB_BAD_POSITION, pos);
         }
         
@@ -587,6 +628,7 @@ restartScan:
         if (len + offset > str.length()) {
             throw Util.generateCsSQLException(
                     SQLState.LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     offset, len, str);
         }
         
@@ -602,6 +644,7 @@ restartScan:
         } catch (EOFException eofe) {
             throw Util.generateCsSQLException(
                         SQLState.BLOB_POSITION_TOO_LARGE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         pos);
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
@@ -620,7 +663,9 @@ restartScan:
      * @exception SQLException if obtaining the stream fails
      */
     public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
         try {
             return new ClobAsciiStream (this.clob.getWriter(pos));
         } catch (IOException e) {
@@ -639,6 +684,7 @@ restartScan:
      * @exception SQLException if obtaining the stream fails
      */
     public java.io.Writer setCharacterStream(long pos) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         checkValidity();
         try {
             if (!this.clob.isWritable()) {
@@ -665,6 +711,7 @@ restartScan:
         checkValidity();
         if (len < 0)
             throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 SQLState.BLOB_NONPOSITIVE_LENGTH, len);
         try {
             if (!clob.isWritable()) {
@@ -677,6 +724,7 @@ restartScan:
         catch (EOFException eofe) {
             throw Util.generateCsSQLException(
                         SQLState.BLOB_LENGTH_TOO_LONG,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                         eofe, len);
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
@@ -698,7 +746,9 @@ restartScan:
      * @throws SQLException if an error occurs releasing the Clobs resources
      */
     public void free()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1180
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         if (this.isValid) {
             this.isValid = false;
             // Release and nullify the internal Clob.
@@ -707,6 +757,7 @@ restartScan:
             } catch (IOException e) {
                 throw Util.setStreamFailure(e);
             } finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
                 localConn.removeLOBMapping(locator);
                 this.clob = null;
             }
@@ -733,11 +784,15 @@ restartScan:
         throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         checkValidity();
         
         if (pos <= 0) {
             throw Util.generateCsSQLException(
                     SQLState.BLOB_BAD_POSITION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     pos);
         }
         if (length < 0) {
@@ -745,6 +800,7 @@ restartScan:
                     SQLState.BLOB_NONPOSITIVE_LENGTH,
                     length);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
         if (length > (this.length() - (pos -1))) {
             throw Util.generateCsSQLException(
                     SQLState.POS_AND_LENGTH_GREATER_THAN_LOB,
@@ -752,6 +808,7 @@ restartScan:
         }
         
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
             return new ClobUpdatableReader(this, pos, length);
         } catch (IOException ioe) {
             throw Util.setStreamFailure(ioe);
@@ -767,6 +824,7 @@ restartScan:
      * @throws SQLException if the Clob is not valid
      */
     private void checkValidity() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2787
         localConn.checkIfClosed();        
         if(!isValid)
             throw newSQLException(SQLState.LOB_OBJECT_INVALID);
@@ -783,8 +841,10 @@ restartScan:
      * @throws SQLException if accessing underlying resources fail
      */
     private void makeWritableClobClone()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
             throws IOException, SQLException {
         InternalClob toBeAbandoned = this.clob;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2827
         this.clob = TemporaryClob.cloneClobContent(
                         getEmbedConnection().getDBName(),
                         this, toBeAbandoned);
@@ -804,8 +864,10 @@ restartScan:
      * @throws SQLException if accessing underlying resources fail
      */
     private void makeWritableClobClone(long len)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2800
             throws IOException, SQLException {
         InternalClob toBeAbandoned = this.clob;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2827
         this.clob = TemporaryClob.cloneClobContent(
                         getEmbedConnection().getDBName(),
                         this, toBeAbandoned, len);
@@ -823,6 +885,8 @@ restartScan:
      *
      * @return The current internal Clob representation.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2818
+//IC see: https://issues.apache.org/jira/browse/DERBY-2806
     InternalClob getInternalClob() {
         return this.clob;
     }
@@ -831,9 +895,11 @@ restartScan:
      * @return locator value for this Clob.
      */
     public int getLocator() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
         if (locator == 0) {
             locator = localConn.addLOBMapping(this);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3365
         return locator;
     }
 }

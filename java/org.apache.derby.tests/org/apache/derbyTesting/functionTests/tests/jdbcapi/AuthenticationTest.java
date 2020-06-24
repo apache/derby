@@ -53,6 +53,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     private static final String USERS[] = 
         {"APP","dan","kreg","jeff","ames","jerry","francois","jamie","howardR",
         "\"eVe\"","\"fred@derby.com\"", "\"123\"" };
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
     private static final String zeus = "\u0396\u0395\u03A5\u03A3";
     private static final String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
@@ -83,14 +84,17 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("AuthenticationTest");
         suite.addTest(baseSuite("AuthenticationTest:embedded"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("AuthenticationTest:client")));
         return suite;
     }
     
     public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("AuthenticationTest");
         
         Test test = new AuthenticationTest(
@@ -106,6 +110,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         test = new AuthenticationTest("testNotFullAccessUsers");
         setBaseProps(suite, test);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         test = new AuthenticationTest("testUserAccessRoutines");
         setBaseProps(suite, test);
         
@@ -156,6 +161,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
 
     private static void setBaseProps(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite, Test test, Properties extraDbProps)
     {
         // Use DatabasePropertyTestSetup.builtinAuthentication decorator
@@ -185,6 +191,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     
     protected void setUp() throws Exception {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
         setDatabaseProperty("derby.database.defaultConnectionMode",
                 null, getConnection());
         setDatabaseProperty("derby.database.readOnlyAccessUsers",
@@ -256,6 +263,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // to set the access on others to avoid setting a user to read-only
         // and then not being able to reset it.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
         PreparedStatement psGetAccess = prepareStatement(
             "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(?)");
         CallableStatement csSetAccess = prepareCall(
@@ -303,6 +311,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             connUser.close();
             
             psGetAccess.setString(1, normalUserName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
             JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
                     "READONLYACCESS");
             commit();
@@ -318,6 +327,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             connUser.close(); 
             
             psGetAccess.setString(1, normalUserName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
             JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
                     "FULLACCESS");
             commit();
@@ -339,6 +349,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             connUser.close();
             
             psGetAccess.setString(1, normalUserName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
             JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
                     "READONLYACCESS");
             commit();           
@@ -388,6 +399,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // DatabaseMetaData.getUserName() returns the user name used
         // to make the request via JDBC.
         assertEquals("DatabaseMetaData.getUserName()",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
+//IC see: https://issues.apache.org/jira/browse/DERBY-3158
+//IC see: https://issues.apache.org/jira/browse/DERBY-3159
                 jdbcUserName, connUser.getMetaData().getUserName());
         
         
@@ -452,6 +466,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertShutdownWOUPOK(dbName, "system", "admin");
         assertConnectionOK(dbName, "system", ("admin"));
         // try shutdown as owner
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         assertShutdownUsingConnAttrsOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         
         // ensure that a password is encrypted
@@ -519,6 +534,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // just checking that it's still not working if we try again
         assertConnectionFail("08004", dbName, "badUser", "badPwd");
         // system is not on the list...
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertConnectionFail("08004", dbName, "system", "admin");
         // dan's on the list, but this isn't the pwd
         assertConnectionFail("08004", dbName, "dan", "badPwd");
@@ -707,6 +724,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             "dan", ("dan" + PASSWORD_SUFFIX));
         
         // Test duplicates on the list of users
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
         try {
             setDatabaseProperty("derby.database.fullAccessUsers", 
                     "dan,jamie,dan", conn1);
@@ -779,8 +797,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.commit();
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         PreparedStatement psGetAccess = conn1.prepareStatement(
                 "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(?)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
         psGetAccess.setString(1, "JAMIE");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
         
@@ -800,6 +820,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         psGetAccess.setString(1, "hagrid");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "NOACCESS");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         conn1.commit();
         
         // now add/switch some names using the utility method
@@ -814,6 +835,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         psGetAccess.setString(1, "AMES");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
         psGetAccess.setString(1, "MICKEY");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
         psGetAccess.setString(1, "JAMIE");
@@ -831,6 +853,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         psGetAccess.setString(1, "AMES");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
         psGetAccess.setString(1, "MICKEY");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
         psGetAccess.setString(1, "JAMIE");
@@ -944,6 +967,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     public void testUserAccessRoutines() throws SQLException
     {
         // use valid user/pwd to set the full accessusers.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         Connection conn1 = openDefaultConnection(
             "dan", ("dan" + PASSWORD_SUFFIX));
         
@@ -952,6 +976,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         CallableStatement csSetAccess = conn1.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_USER_ACCESS(?, ?)"); 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
         csSetAccess.setString(1, "DAN");
         csSetAccess.setString(2, "FULLACCESS");
         csSetAccess.execute();
@@ -1006,6 +1031,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.close();
         
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         assertConnectionOK(dbName, zeus, apollo);
         assertConnectionFail("08004", dbName, apollo, apollo);
         // shutdown as non-dbo
@@ -1017,6 +1043,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertShutdownOK(dbName, apollo, zeus);
         assertConnectionOK(dbName, apollo, zeus);
         // shutdown as dbo
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         assertShutdownUsingSetShutdownOK(
             dbName, "APP", ("APP" + PASSWORD_SUFFIX));
 
@@ -1037,6 +1064,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             "derby.database.defaultConnectionMode","fullAccess", conn1);
         setDatabaseProperty(
             "derby.connection.requireAuthentication","false", conn1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         stmt = conn1.createStatement();
         if (usingEmbedded())
             assertUpdateCount(stmt, 0, "drop table APP.t1");
@@ -1062,6 +1090,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setSystemProperty("derby.connection.requireAuthentication", "true");
 
         // bring down the database
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         assertShutdownUsingSetShutdownOK(
             dbName, "APP", "APP" + PASSWORD_SUFFIX);
         // recheck
@@ -1093,6 +1122,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.commit();
         conn1.close();
         openDefaultConnection("system", "admin").close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         assertShutdownUsingSetShutdownOK(
             dbName, "APP", "APP" + PASSWORD_SUFFIX);
         assertSystemShutdownOK("", "system", "admin");
@@ -1214,6 +1244,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
 
         // Store a set of generated password tokens to detect collisions
         HashSet<String> tokens = new HashSet<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         for (int i = 0; i < USERS.length; i++) {
             String user = USERS[i];
@@ -1279,6 +1310,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDBP.setString(1, propertyName);
         setDBP.setString(2, value);
         // user jamie cannot be both readOnly and fullAccess
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250C", setDBP);
         setDBP.close();
     }
@@ -1334,6 +1367,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertEquals(expected.length, i);
         conn1.commit();
         stmt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         conn1.close();
     }
     
@@ -1401,6 +1435,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
 
     protected void assertShutdownUsingSetShutdownOK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
             String dbName, String user, String password) throws SQLException {
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
@@ -1435,6 +1470,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         String dbName, String user, String password)
     throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(ds, "user", user);
@@ -1466,6 +1502,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         String dbName, String user, String password)
     throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
         try {
@@ -1480,6 +1517,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(ds, "user", user);
@@ -1505,7 +1543,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             // where dbName is an empty string - this will in the current code
             // be interpreted as a system shutdown.
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
             ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
             JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
         }
         else 
@@ -1535,6 +1575,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         if (usingEmbedded())
         {
             ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1982
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
+//IC see: https://issues.apache.org/jira/browse/DERBY-1982
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
             JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
         }
         else

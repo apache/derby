@@ -86,6 +86,7 @@ public class UDAPermsTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             UDAPermsTest.class);
 
@@ -452,6 +453,7 @@ public class UDAPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_005_builtinAggregators()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -545,6 +547,7 @@ public class UDAPermsTest extends GeneratedColumnsHelper
                                 "select sys." + aggName + "( a ) from ruth.doubles" );
 
         // cannot use ALL or DISTINCT with a builtin aggregate
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
         expectCompilationError( conn, PARSE_ERROR,
                                 "select " + aggName + "( all a ) from ruth.doubles" );
         expectCompilationError( conn, BAD_DISTINCT,

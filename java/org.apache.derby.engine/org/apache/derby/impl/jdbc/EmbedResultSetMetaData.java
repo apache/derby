@@ -43,6 +43,8 @@ import java.sql.Types;
    <P>
    This class can be used outside of this package to convert a
    ResultDescription into a ResultSetMetaData object.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1879
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
    <P>
    EmbedResultSetMetaData objects are shared across multiple threads
    by being stored in the ResultDescription for a compiled plan.
@@ -60,6 +62,7 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
 	// constructor
 	//
 	public EmbedResultSetMetaData(ResultColumnDescriptor[] columnInfo) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.columnInfo = ArrayUtil.copy(columnInfo);
 	}
 
@@ -73,6 +76,8 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
      * @return the number
      */
 	public final int getColumnCount()	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1879
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
 		return columnInfo.length;
 	}
 
@@ -85,6 +90,8 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
      *
      */
 	public final boolean isAutoIncrement(int column) throws SQLException	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1879
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
         validColumnNumber(column);
 		ResultColumnDescriptor rcd = columnInfo[column - 1];
 		return rcd.isAutoincrement();
@@ -206,6 +213,7 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
 	public final String getSchemaName(int column) throws SQLException	{
 		ResultColumnDescriptor cd = columnInfo[column - 1];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		String s = cd.getSourceSchemaName();
 		// database returns null when no schema name to differentiate from empty name
 		return (s==null? "" : s);
@@ -310,6 +318,7 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
      */
 	public final boolean isWritable(int column) throws SQLException {
 		validColumnNumber(column);
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		return columnInfo[column - 1].updatableByCursor();
 	}
 
@@ -324,6 +333,7 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
 		validColumnNumber(column);
 
 		// we just don't know if it is a base table column or not
+//IC see: https://issues.apache.org/jira/browse/DERBY-2423
 		return false;
 	}
 
@@ -335,6 +345,7 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
 	  if (column < 1 ||
 		        column > getColumnCount() )
 			    throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                       SQLState.COLUMN_NOT_FOUND, column);
 	}
 
@@ -392,6 +403,7 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
      * @return true if this implements the interface
      */
     public final boolean isWrapperFor(Class<?> iface) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         return iface.isInstance(this);
     }
 

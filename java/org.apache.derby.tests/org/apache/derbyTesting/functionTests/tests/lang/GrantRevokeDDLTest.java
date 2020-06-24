@@ -63,6 +63,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         if (JDBC.vmSupportsJSR169()) {
              // return empty suite;
             return new BaseTestSuite("GrantRevokeDDLTest");
@@ -93,6 +94,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         String [] expColNames;
         
         // Invalidating all the stored statements by dbo will work
+//IC see: https://issues.apache.org/jira/browse/DERBY-5578
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()");
         assertUpdateCount(cSt, 0);
@@ -139,6 +141,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         st_satConnection.executeUpdate(
             "create table satheesh.tsat(i int not null primary "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             + "key, j int, noselect int)");
         
         st_satConnection.executeUpdate(
@@ -163,6 +166,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " grant update(i) on satheesh.tsat to bar");
         
         rs = st_satConnection.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms ORDER BY GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
@@ -182,6 +186,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Following revokes should fail. Only owner can revoke 
         // permissions
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42506", st_barConnection,
             "revoke select on satheesh.tsat from public");
         
@@ -287,6 +293,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Check success by looking at systableperms directly for now
         
         rs = st_satConnection.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
@@ -309,6 +316,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Check success by looking at systableperms directly for now
         
         rs = st_satConnection.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms ORDER BY GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
@@ -375,6 +383,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_satConnection.executeUpdate(
             " grant select on v1 to bar");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st_satConnection,
             " grant insert on v1 to foo");
         
@@ -425,6 +435,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_satConnection.executeQuery(
             " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas where schemaname not "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6446
             + "like 'SYS%' and schemaname not like 'TEST_DBO%' ORDER BY SCHEMANAME");
         
         expColNames = new String [] {"SCHEMANAME", "AUTHORIZATIONID"};
@@ -459,6 +470,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // All these DDLs should fail.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42507", st_swiperConnection,
             "create table NotMyTable (i int, j int)");
         
@@ -487,10 +500,13 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Some simple DML tests. Should all fail.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_swiperConnection,
             "select * from satheesh.tsat");
         
         assertStatementError("42500", st_swiperConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             " insert into satheesh.tsat(i, j) values (1, 2)");
         
         assertStatementError("42502", st_swiperConnection,
@@ -506,6 +522,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         
         st_satConnection.executeUpdate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             " grant select(i, j), update(j) on tsat to swiper");
         
         st_satConnection.executeUpdate(
@@ -518,6 +535,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Now some of these should pass
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_swiperConnection,
             "select * from satheesh.tsat");
         
@@ -530,6 +549,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
         
         assertStatementError("42502", st_swiperConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             " select i from satheesh.tsat where noselect=2");
         
         rs = st_swiperConnection.executeQuery(
@@ -541,8 +561,11 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertEmpty(rs);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_swiperConnection,
             " select i from satheesh.tsat where 2 > (select "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             + "count(noselect) from satheesh.tsat)");
         
         rs = st_swiperConnection.executeQuery(
@@ -561,6 +584,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " update satheesh.tsat set j=2 where i=2");
         
         assertStatementError("42502", st_swiperConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             " update satheesh.tsat set j=2 where noselect=1");
         
         rs = st_swiperConnection.executeQuery(
@@ -580,8 +604,13 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertEmpty(rs);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_swiperConnection,
             " select b from satheesh.table1 t1, satheesh.tsat t2 "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             + "where t1.a = t2.noselect");
         
         rs = st_swiperConnection.executeQuery(
@@ -593,7 +622,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
                 
         JDBC.assertEmpty(rs);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_swiperConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
             " select * from satheesh.table1, (select noselect from "
             + "satheesh.tsat) table2");
         
@@ -611,6 +645,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Should fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_swiperConnection,
             "create trigger trig_sat1 after update on "
             + "satheesh.tsat for each statement values 1");
@@ -653,6 +689,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // set connection swiperConnection
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_swiperConnection,
             " create trigger trig_sat1 after update on "
             + "satheesh.tsat for each statement values 1");
@@ -793,6 +831,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // set connection swiperConnection
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", st_swiperConnection,
             " values f_abs(-5)");
         
@@ -850,6 +892,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Negative tests. Should all fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42508", st_swiperConnection,
             "create schema myFriend");
         
@@ -890,6 +934,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " create schema authorization testSchema");
         
         rs = st.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6446
             " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas where schemaname not like 'TEST_DBO%' order by SCHEMANAME");
         
         expColNames = new String [] {"SCHEMANAME", "AUTHORIZATIONID"};
@@ -898,8 +943,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         expRS = new String [][]
         {
             {"APP", "APP"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             {"DERBY", "DERBY"},
             {"GEORGE", "GEORGE"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             {"MYDODO", "DODO"},
             {"MYFRIEND", "TEST_DBO"},
             {"MYSCHEMA", "ME"},
@@ -929,6 +976,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // schemas.. Should fail
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42508", st_swiperConnection,
             " create table mywork.t1(i int)");
         
@@ -941,6 +990,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         Connection monicaConnection = openUserConnection("monica");
         Statement st_monicaConnection = monicaConnection.createStatement();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42508", st_monicaConnection,
             " create table mywork.t1 ( i int)");
         
@@ -986,6 +1037,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Should still work, as DBA
         
         rs = st.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select * from swiper.swiperTab order by i,j");
         
         expColNames = new String [] {"I", "J"};
@@ -1002,6 +1054,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into swiper.swiperTab values (2,2)");
         
         rs = st.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from swiper.swiperTab order by i,j");
         
         expColNames = new String [] {"I", "J"};
@@ -1038,6 +1091,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Try granting or revoking from system tables. Should fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st,
             "grant select on sys.systables to sam");
         
@@ -1100,6 +1155,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt = samConnection.prepareCall(
             " call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SAM', 'SAMTABLE', 1)");
         assertUpdateCount(cSt, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         cSt.close();
         
         cSt = samConnection.prepareCall(
@@ -1114,6 +1170,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt = samConnection.prepareCall(
             "call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SWIPER', 'MYTAB', 1)");
         assertStatementError("38000", cSt);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         cSt.close();
         
         cSt = samConnection.prepareCall(
@@ -1134,7 +1191,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt = samConnection.prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', "
             + "'SAMTABLE' , 'extinout/table.dat', null, null, null)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", cSt);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         cSt.close();
         
         cSt = samConnection.prepareCall(
@@ -1160,6 +1220,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         assertStatementError("42504", cSt);
         cSt.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2772
         cSt = samConnection.prepareCall(
         "CALL SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE()");
             assertStatementError("42504", cSt);
@@ -1294,6 +1355,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
  
         // following select will fail because no permissions
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta3,
             "select * from mamta1.t11");
         
@@ -1305,6 +1368,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // following select will fail because no permissions
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta4,
             "select * from mamta1.t11");
         
@@ -1328,6 +1393,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         }
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from mamta1.t11 order by c111");
         
         expColNames = new String [] {"C111"};
@@ -1390,6 +1457,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no select permissions on 
         // all the columns
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta2,
             "select * from mamta1.t11");
         
@@ -1398,6 +1467,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no update permission on 
         // column c113
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta3,
             "update mamta1.t11 set c113=3");
         
@@ -1419,6 +1490,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no select permission on 
         // column c112
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta4,
             "select c112 from mamta1.t11");
         
@@ -1473,6 +1546,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t11 values(2)");
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t11 order by c111");
         
         expColNames = new String [] {"C111"};
@@ -1580,6 +1654,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // since mamta3 is not dba, following will fail because no 
         // access to mamta2.v22
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta3,
             "create view v31 as select * from mamta2.v22");
         
@@ -1605,6 +1681,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250A", st_mamta2,
             "grant select on v22 to mamta3");
         
@@ -1633,6 +1711,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // privilege on v23 to mamta3
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250A", st_mamta2,
             " grant select on v23 to mamta3");
         
@@ -1722,6 +1802,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no execute permissions on 
         // mamta1.f_abs1
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", st_mamta2,
             "create view v25(c251) as (values mamta1.f_abs1(-1))");
         
@@ -1828,6 +1910,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no access on column 
         // mamta1.t14.c142
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta2,
             "create view v26 as (select * from mamta1.t14 where c142=1)");
         
@@ -1844,6 +1928,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "create view v27 as (select c141 from mamta1.t14)");
         
         rs = st_mamta2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from v27 order by c141");
         
         expColNames = new String [] {"C141"};
@@ -1960,6 +2045,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             + "from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2");
         
         rs = st_mamta2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from v21ViewTest order by c111, c122");
         
         expColNames = new String [] {"C111", "C122"};
@@ -2080,6 +2166,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // dba can do select from that view
         
         rs = st.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select * from mamta2.v21ViewTest order by c111");
         
         expColNames = new String [] {"C111", "C122"};
@@ -2117,6 +2204,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // mamta3 has not been granted select privileges on 
         // mamta2.v21ViewTest
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta3,
             "select * from mamta2.v21ViewTest");
         
@@ -2553,6 +2642,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "grant select on v21ViewTest to mamta3");
         
         rs = st_mamta2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111", "C112"};
@@ -2583,6 +2673,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following should fail because not all the privileges 
         // are in place
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta3,
             "create trigger tr31t31TriggerTest after insert on "
             + "t31TriggerTest for each statement insert into "
@@ -2904,6 +2996,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // view is back in action
         
         rs = st_mamta2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111"};
@@ -3072,6 +3167,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             + "from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2");
         
         rs = st_mamta2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111", "C122"};
@@ -3087,6 +3183,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // grant permission to mamta3, should fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250A", st_mamta2,
             "grant select on v21ViewTest to mamta3");
         
@@ -4067,6 +4167,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following should fail because mamta2 doesn't have 
         // trigger permission on mamta1.t11TriggerTest
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_mamta2,
             "create trigger tr11t11TriggerTest after insert on "
             + "mamta1.t11TriggerTest for each statement insert into "
@@ -4090,6 +4192,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail becuae mamta2 has TRIGGER privilege 
         // but not INSERT privilege on mamta1.t11TriggerTest
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_mamta2,
             "insert into mamta1.t11TriggerTest values(3)");
         
@@ -4260,6 +4364,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // will fail because mamta2 doesn't have INSERT privilege 
         // on mamta3.t31TriggerTest
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_mamta2,
             "insert into mamta3.t31TriggerTest values(1)");
         
@@ -4315,6 +4421,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta1
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t12RoutineTest order by c121");
         
         expColNames = new String [] {"C121"};
@@ -4329,6 +4439,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t13TriggerTest order by c131");
         
         expColNames = new String [] {"C131"};
@@ -4482,6 +4594,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250A", st_mamta3,
             " grant select on v21ViewTest to mamta2");
         
@@ -4505,6 +4619,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta2,
             "select * from mamta3.v21ViewTest");
         
@@ -4540,6 +4658,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " create view v21ViewTest as select * from "
             + "mamta1.t11TriggerTest");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250A", st_mamta2,
             " grant select on v21ViewTest to mamta4");
         
@@ -4565,6 +4685,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         assertStatementError("42X94", st_mamta4,
             " drop trigger tr41t41");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta4,
             " create trigger tr41t41 after insert on "
             + "t41TriggerTest for each statement insert into "
@@ -4577,6 +4699,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t41TriggerTest values(2)");
         
         rs = st_mamta4.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t41TriggerTest order by c411");
         
         expColNames = new String [] {"C411"};
@@ -4593,6 +4716,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta1
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t11TriggerTest order by c111");
         
         expColNames = new String [] {"C111"};
@@ -4609,6 +4735,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta2
         
         rs = st_mamta2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111"};
@@ -4634,11 +4762,17 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // will fail because no permissions on mamta4.t41TriggerTest
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_mamta3,
             "insert into mamta4.t41TriggerTest values(1)");
         
         // will fail because no permissions on mamta2.v21ViewTest
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta3,
             "select * from mamta2.v21ViewTest");
         
@@ -4911,6 +5045,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following attempt to create insert trigger again will 
         // fail because trigger privilege has been revoked.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_mamta2,
             "create trigger tr11t11 after insert on "
             + "mamta1.t11TriggerRevokeTest for each "
@@ -5229,6 +5365,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // of 2 insert triggers
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select * from t11TriggerRevokeTest order by c111");
         
         expColNames = new String [] {"C111"};
@@ -5374,6 +5511,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_mamta1.executeQuery(
             " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms where "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             + "grantee='SAMMY' or grantee='USER1' order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
@@ -5425,6 +5564,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_mamta1.executeQuery(
             " select GRANTEE, GRANTOR, GRANTOPTION from sys.sysroutineperms where "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             + "grantee='SAMMY' or grantee='USER3' order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "GRANTOPTION"};
@@ -5627,6 +5767,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_mamta1.executeQuery(
             " select cast (ATAN(d) as DECIMAL(6,3)) AS ATAN FROM "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             + "SYSFUN_MATH_TEST order by atan");
         
         expColNames = new String [] {"ATAN"};
@@ -5733,6 +5874,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Try granting or revoking to mamta1. Should all fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st_mamta1,
             "grant select on mamta1Table to mamta1");
         
@@ -5753,6 +5896,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " set schema mamta1");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st,
             " grant select on mamta1Table to mamta1");
         
@@ -5834,6 +5979,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_user2,
             "lock table user1.t100 in exclusive mode");
         
@@ -5864,6 +6013,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // attempt to grant this view to others, should fail since 
         // user2 does not have grant privilege on object user1.t1
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42506", st_user2,
             "grant select on user1.t1 to user3");
         
@@ -6007,6 +6158,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into t11TriggerRevokeTest values (5,505)");
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t11TriggerRevokeTest order by c111");
         
         expColNames = new String [] {"C111", "C12"};
@@ -6024,6 +6178,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t12TriggerRevokeTest order by c121");
         
         expColNames = new String [] {"C121", "C122", "C123"};
@@ -6144,6 +6301,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             + "mamta1.d1589t11ConstraintTest)");
 
         // DERBY-3743
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
         st.executeUpdate(
             "CREATE FUNCTION F_ABS(P1 INT) RETURNS INT NO "
             + "SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME "
@@ -6161,6 +6319,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 
         // DERBY-3743b, test 1: multiple constraints, one routine dep per
         // constraint.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
         st.executeUpdate(
             "CREATE FUNCTION F_ABS2(P1 INT) RETURNS INT NO "
             + "SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME "
@@ -6279,6 +6438,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // should fail because mamta3 lost it's select permission 
         // on new column in table mamta2.t1Derby1847
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_mamta3,
             "select c3 from mamta2.t1Derby1847");
         
@@ -6425,6 +6588,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         try {
             ResultSet crs2 = ps_crs2.executeQuery();
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
             assertSQLState("42502", e);
         }
         
@@ -6450,6 +6617,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         rs = st_user1.executeQuery(
             " select c.grantee, c.type, c.columns from "
             + "sys.syscolperms c, sys.systables t where c.tableid = "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             + "t.tableid and t.tablename='D1847_C' order by grantee");
         
         expColNames = new String [] {"GRANTEE", "TYPE", "COLUMNS"};
@@ -6470,6 +6638,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         rs = st_user1.executeQuery(
             " select c.grantee, c.type, c.columns from "
             + "sys.syscolperms c, sys.systables t where c.tableid = "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             + "t.tableid and t.tablename='D1847_C' order by GRANTEE");
         
         expColNames = new String [] {"GRANTEE", "TYPE", "COLUMNS"};
@@ -7014,6 +7183,14 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "select * from user1.t1 where i = 1");
         
@@ -7051,6 +7228,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t2 values (1, 'Yip', 10)");
         
         rs = st_user1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from t1 order by C1");
         
         expColNames = new String [] {"C1", "C2"};
@@ -7144,6 +7322,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // test SELECT privilege, expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "select * from user1.t1");
         
@@ -7195,6 +7375,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to grant privileges for public on user1.t1, expect 
         // error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42506", st_user2,
             "grant "
             + "select,insert,delete,update,references,trigger on "
@@ -7203,6 +7385,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to grant all privileges for user2 on user1.t1, 
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42506", st_user2,
             "grant ALL PRIVILEGES on user1.t1 to user2");
         
@@ -7222,6 +7406,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to revoke all privileges from user1 on table 
         // user1.t1, expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st_user2,
             "revoke ALL PRIVILEGES on user1.t1 from user1");
         
@@ -7236,6 +7422,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // try revoking yourself from user2.t2, expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st_user2,
             "revoke select on t2 from user2");
         
@@ -7300,6 +7488,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " grant execute on function F_ABS1 to user2");
         
         rs = st_user1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
@@ -7321,6 +7510,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertDrainResults(rs, 0);
 
         rs = st_user1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select GRANTEE, GRANTOR, GRANTOPTION from sys.sysroutineperms order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "GRANTOPTION"};
@@ -7349,6 +7539,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to select from t1, ok
         
         rs = st_user2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2"};
@@ -7365,6 +7556,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // try to insert from t1, expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_user2,
             "insert into user1.t1 values (5, 'e')");
         
@@ -7416,6 +7609,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42500", st_user2,
             "insert into user1.t1 values (2, 'abc', 'ABC')");
         
@@ -7445,6 +7640,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // user3 does not have permission to execute, expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", st_user3,
             "values user1.F_ABS1(-8)");
         
@@ -7577,6 +7774,11 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // ok, privileged
         
         rs = st_user3.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
@@ -7608,6 +7810,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user3,
             "select * from user1.t1");
         
@@ -7697,6 +7901,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "select * from user1.t4");
         
@@ -7716,6 +7922,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "update user1.t4 set c1=10, c3=100");
         
@@ -7741,6 +7949,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "select c2 from user1.t4");
         
@@ -7759,6 +7969,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42508", st_user2,
             "create table myschema.t5 (i int)");
         
@@ -7769,6 +7981,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42508", st_user2,
             "CREATE SCHEMA w3 AUTHORIZATION user2");
         
@@ -7782,6 +7996,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42508", st_user2,
             "CREATE SCHEMA myschema");
         
@@ -7809,6 +8025,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42507", st_user5,
             "DROP SCHEMA w3 RESTRICT");
         
@@ -7827,6 +8045,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "select tablename from user1.sv1");
 
@@ -7906,6 +8126,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "create view svc (i) as select * from user1.sva "
             + "union select * from user1.svb");
@@ -7924,6 +8146,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             + "union select * from user1.svb");
         
         rs = st_user2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from svc order by I");
         
         expColNames = new String [] {"I"};
@@ -7995,6 +8218,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error, don't have with grant option
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250A", st_user2,
             "grant select on user2.v02ap to user3");
         
@@ -8075,6 +8300,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "create table rt2 (c1 int primary key not null, c2 "
             + "int not null, c3 int not null, constraint rt2fk "
@@ -8115,6 +8342,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into rt2 values (3,3,3)");
         
         rs = st_user2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from rt2 order by C1, C2, C3");
         
         expColNames = new String [] {"C1", "C2", "C3"};
@@ -8130,6 +8358,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             "create table rt3 (c1 int primary key not null, c2 "
             + "int not null, c3 int not null, constraint rt3fk "
@@ -8227,6 +8457,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into rt3 values (3)");
         
         // test multiple FKs
+//IC see: https://issues.apache.org/jira/browse/DERBY-3376
+//IC see: https://issues.apache.org/jira/browse/DERBY-1736
+//IC see: https://issues.apache.org/jira/browse/DERBY-1589
         st_user3.executeUpdate("drop table user3.rt3");
         st_user2.executeUpdate("drop table user2.rt2");
         st_user1.executeUpdate("drop table user1.rt1");
@@ -8322,6 +8555,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st_user2,
             "revoke execute on function ABS from user2 restrict");
         
@@ -8345,6 +8580,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", st_user2,
             "values user1.F_ABS1(10) + user1.F_ABS2(-10)");
         
@@ -8385,6 +8624,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // not allowed. expect errors, sanity check
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st_user1,
             "grant ALL PRIVILEGES on sys.sysaliases to user2");
         
@@ -8627,6 +8868,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         CallableStatement cSt3 = user3.prepareCall(
             "CALL SQLJ.INSTALL_JAR ('bogus.jar','user2.bogus',0)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
@@ -8771,6 +9014,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ('USER3', "
             + "'TABLEEXP1', 'myfile.del', null, null, null)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
@@ -8795,6 +9040,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt3 = user3.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY "
             + "('derby.locks.deadlockTimeout', '10')");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", cSt3);
         
         assertStatementError("42504", st_user3,
@@ -8819,6 +9066,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // test check table routines, only db owner have privilege 
         // by default
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42504", st_user3,
             "VALUES SYSCS_UTIL.SYSCS_CHECK_TABLE('USER3', 'TABLEEXP1')");
         
@@ -8865,6 +9114,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42507", st_user2,
             "drop synonym user1.s1");
         
@@ -8924,6 +9175,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // set connection user2
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             " select * from user1.t1000");
         
@@ -8951,6 +9204,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         user1.rollback();
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42502", st_user2,
             " select * from user1.t1000");
         
@@ -9208,6 +9463,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // DERBY-1858 expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42507", st_user2,
             "drop schema user4 restrict");
         
@@ -9283,6 +9540,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // -----------------------------------
         // Now try with column level privilege
         // DERBY-3736
+//IC see: https://issues.apache.org/jira/browse/DERBY-3736
         st_user1.executeUpdate(
             " grant select(i) on ttt2 to user2");
 
@@ -9314,6 +9572,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // expect error
 
         assertStatementError("42502", pSt2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
 
         // end of test case for DERBY-3736
         // --------------------------------
@@ -9336,6 +9598,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("42509", st_user1,
             "revoke select on user2.tshared0 from user2");
         
@@ -9447,6 +9711,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection user4
         
         rs = st_user4.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from user2.tshared1 order by I");
         
         expColNames = new String [] {"I"};
@@ -9463,6 +9728,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user4.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from user3.tshared1 order by I");
         
         expColNames = new String [] {"I"};
@@ -9498,6 +9764,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into user2.tshared1 select * from user3.tshared1");
         
         rs = st_user4.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from vshared1 order by I");
         
         expColNames = new String [] {"I"};
@@ -9515,6 +9782,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user4.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from vshared2 order by I");
         
         expColNames = new String [] {"I"};
@@ -9544,6 +9812,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user4.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from vshared4 order by I");
         
         expColNames = new String [] {"I"};
@@ -9552,6 +9821,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         expRS = new String [][]
         {
             {"0"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             {"1"},
             {"2"},
             {"3"},
@@ -9562,6 +9834,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         assertStatementError("4250A", st_user4,
             "grant select on vshared1 to user5");
         
@@ -9646,6 +9920,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t6 values (1, 10)");
         
         rs = st.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from user2.t7 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
@@ -9711,6 +9986,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into user1.t8 values (2, 20)");
         
         rs = st_user1.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from user1.t9 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
@@ -9808,6 +10084,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " update user1.t10 set i=20");
         
         rs = st_user2.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from user1.t10 order by I, J");
         
         expColNames = new String [] {"I", "J"};
@@ -9934,6 +10212,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user5.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
             " select * from user1.t11 order by I");
         
         expColNames = new String [] {"I"};
@@ -10132,6 +10413,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             new String [][] {{"1", "2"}, {"2", "3"}});
 
         st_mamta2.execute("drop table fkt2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5102
         st_mamta2.execute("drop schema mamta2 restrict");
         st_mamta1.execute("drop table pkt2");
         st_mamta1.execute("drop table pkt1");
@@ -10208,6 +10490,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             { "values exists(select 1 from user1.t4191)",  new String[][] {{"false"}} },
             { "values exists(select * from user1.t4191)",  new String[][] {{"false"}} },
             { "select count(*) from (select 1 from user1.t4191) s", new String[][] {{"0"}} },
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             { "insert into user1.t4191_table3 select 1, 2 from user1.t4191", 0 },
             { "update user1.t4191_table3 set c31 = 1 where exists (select * from user1.t4191)", 0 },
             { "delete from user1.t4191_table3 where exists (select * from user1.t4191)", 0 },
@@ -10234,6 +10517,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // the minimum select privilege on the table, will work.
         user1St.execute("grant select(x) on t4191 to user2");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
         for (int i = 0; i < requireMinimumSelectPrivilege.length; i++) {
             String sql = (String) requireMinimumSelectPrivilege[i][0];
             Object expectedResult = requireMinimumSelectPrivilege[i][1];
@@ -10317,6 +10601,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         //following queries will still work because there is still a 
         //select privilege on user1.t4191 available to user2
         rs = user2St.executeQuery("select count(*) from user1.t4191");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
         JDBC.assertSingleValueResultSet(rs, "0");
         rs = user2St.executeQuery("select count(1) from user1.t4191");
         JDBC.assertSingleValueResultSet(rs, "0");
@@ -10331,6 +10616,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 		" ( select max(x) + 2 from user1.t4191 )");
 
         user1St.execute("drop table t4191");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5102
         user1St.execute("drop table t4191_table2");
         user1St.execute("drop view view_t4191_table3");
         user1St.execute("drop table t4191_table3");
@@ -10344,6 +10630,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * DERBY-3266
      */
     public void testGlobalTempTables() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3266
         Connection dbo  = getConnection();
         Statement dboSt = createStatement();
 
@@ -10365,6 +10652,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         dboSt.executeUpdate("create schema session");
         dboSt.executeUpdate("create table session.t2(i int)");
         dboSt.executeUpdate("insert into session.t2 values 2,22");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
         rs = dboSt.executeQuery("select * from session.t2 order by I");
         JDBC.assertFullResultSet(rs, new String [][] {{"2"}, {"22"}} );
 
@@ -10374,6 +10662,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         dboSt.executeUpdate("declare global temporary table t2(i int, j int) " +
                             "on commit preserve rows not logged");
         dboSt.executeUpdate("insert into session.t2 values (222,222),(2,2)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
         rs = dboSt.executeQuery("select * from session.t2 order by i");
         JDBC.assertFullResultSet(rs,
                                  new String [][] { {"2", "2"}, {"222", "222"}, } );
@@ -10392,6 +10681,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             ("declare global temporary table t4(i int, j int) " +
              "on commit preserve rows not logged");
         georgeSt.executeUpdate("insert into session.t4 values (4,4),(44,44)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
         rs = georgeSt.executeQuery("select * from session.t4 order by i");
         JDBC.assertFullResultSet(rs,
                                  new String [][] {{"4", "4"}, {"44", "44"}} );
@@ -10411,6 +10701,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         dbo.close();
         dbo = getConnection();
         dboSt = dbo.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
         rs = dboSt.executeQuery("select * from session.t2 order by i");
         JDBC.assertFullResultSet(rs, new String [][] {{"2"}, {"22"}} );
 
@@ -10418,6 +10709,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         rs.close();
 
         // Drop the objects created in this test case
+//IC see: https://issues.apache.org/jira/browse/DERBY-5102
         dboSt.execute("drop table session.t2");
         dboSt.execute("drop schema session restrict");
 
@@ -10446,6 +10738,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "create view v_4502( a ) as select tablename from sys.systables");
 
         // Clean up
+//IC see: https://issues.apache.org/jira/browse/DERBY-5102
         st_mamta1.execute("drop view v_4502");
         st_mamta1.execute("drop schema mamta1 restrict");
     }
@@ -10570,6 +10863,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_user1Connection.executeUpdate(
         		"drop table user1.t13");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5409
         st_user1Connection.executeUpdate("drop schema user1 restrict");
         st_user2Connection.executeUpdate("drop schema user2 restrict");
     }
@@ -10614,6 +10908,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_user1Connection.executeUpdate(
                 " insert into user1.t12 values(91,91)");
         JDBC.assertFullResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6441
         		st_user1Connection.executeQuery(" select * from user1.t11 order by c111"),
                 new String[][]{{null, "1"}});
         
@@ -10642,6 +10937,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_user1Connection.executeUpdate(
                 "drop table user1.t12");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5409
         st_user1Connection.executeUpdate("drop schema user1 restrict");
         st_user2Connection.executeUpdate("drop schema user2 restrict");
     }
@@ -10651,6 +10947,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * described on DERBY-6429. Tables are referenced in SET and WHERE clauses.
      */
     public void test_6429_tables()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -11477,6 +11774,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * described on DERBY-6434.
      */
     public void test_6434_insert()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -11724,6 +12022,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * described on DERBY-6434.
      */
     public void test_6434_delete()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -11950,6 +12249,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * described on DERBY-6434.
      */
     public void test_6434_select()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -12091,6 +12391,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * Test that INSERT and UPDATEs run CHECK constraints with definer's rights.
      */
     public void test_6432()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
+//IC see: https://issues.apache.org/jira/browse/DERBY-6432
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -12231,6 +12533,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * Test that INSERT and UPDATEs run generation expressions with definer's rights.
      */
     public void test_6433()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
+//IC see: https://issues.apache.org/jira/browse/DERBY-6433
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -12375,6 +12679,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * types of the table columns.
      */
     public void test_6491()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6491
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );

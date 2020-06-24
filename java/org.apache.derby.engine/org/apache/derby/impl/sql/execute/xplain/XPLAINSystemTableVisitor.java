@@ -98,6 +98,7 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
     public XPLAINSystemTableVisitor(){
         // System.out.println("System Table Visitor created...");
         // initialize lists
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         rsets        = new ArrayList<XPLAINResultSetDescriptor>();
         rsetsTimings = new ArrayList<Object>();
         sortrsets    = new ArrayList<XPLAINSortPropsDescriptor>();
@@ -143,6 +144,7 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         
         if(considerTimingInformation){
             timingID = dd.getUUIDFactory().createUUID();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rsetsTimings.add(
                     statistics.getResultSetTimingsDescriptor(timingID));
         }
@@ -210,6 +212,7 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
              
              stmtTimings = new XPLAINStatementTimingsDescriptor(
                  stmtTimingsUUID,                    // the Timing UUID
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                  rss.getParseTimeInMillis(),         // the Parse Time
                  rss.getBindTimeInMillis(),          // the Bind Time
                  rss.getOptimizeTimeInMillis(),      // the Optimize Time
@@ -370,6 +373,7 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
 
         PreparedStatement ps = conn.prepareStatement(
             (String)lcc.getXplainStatement("SYSXPLAIN_RESULTSETS"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<XPLAINResultSetDescriptor> rsetsiter = rsets.iterator();
         while (rsetsiter.hasNext())
         {
@@ -385,6 +389,7 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         {
             ps = conn.prepareStatement(
                 (String)lcc.getXplainStatement("SYSXPLAIN_RESULTSET_TIMINGS"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Iterator<Object> timingsiter = rsetsTimings.iterator();
             while (timingsiter.hasNext())
             {
@@ -397,6 +402,7 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         }
         ps = conn.prepareStatement(
             (String)lcc.getXplainStatement("SYSXPLAIN_SCAN_PROPS"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<XPLAINScanPropsDescriptor> scaniter = scanrsets.iterator();
         while (scaniter.hasNext())
         {
@@ -409,6 +415,7 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
 
         ps = conn.prepareStatement(
             (String)lcc.getXplainStatement("SYSXPLAIN_SORT_PROPS"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<XPLAINSortPropsDescriptor> sortiter = sortrsets.iterator();
         while (sortiter.hasNext())
         {

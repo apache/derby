@@ -50,7 +50,10 @@ public class OLAPTest extends BaseJDBCTestCase {
 	}
 
 	public static Test makeSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
         Test clean = new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(OLAPTest.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException
@@ -58,6 +61,7 @@ public class OLAPTest extends BaseJDBCTestCase {
                     getConnection().setAutoCommit(false);
                     s.executeUpdate("create table t1 (a int, b int)");
                     s.executeUpdate("create table t2 (x int)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
                     s.executeUpdate("create table t3 (y int)");
                     s.executeUpdate("create table t4 (a int, b int)");
                     s.executeUpdate("create table t5 (a int, b int)");
@@ -83,6 +87,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 
 	public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("OLAPTest");
 		suite.addTest(makeSuite());
 		suite.addTest(TestConfiguration.clientServerDecorator(makeSuite()));
@@ -146,6 +151,8 @@ public class OLAPTest extends BaseJDBCTestCase {
 		/* Ordering */
 		rs = s.executeQuery("select row_number() over () as r, t1.* from t1 order by b desc");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		expectedRows = new String[][]{{"5", "50", "500"},
 									  {"4", "40", "400"},
 									  {"3", "30", "300"},
@@ -296,6 +303,8 @@ public class OLAPTest extends BaseJDBCTestCase {
 		// Check that flattening does not happen when a window is used in a
 		// subquery
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		rs = s.executeQuery("select * from t5 o where o.a in " +
 							"(select x + row_number() over () from t2)");
 		expectedRows = new String[][]{{"2", "4"},
@@ -303,6 +312,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(rs, expectedRows);
 
         // Subquery in SELECT list. DERBY-5954
+//IC see: https://issues.apache.org/jira/browse/DERBY-5954
         rs = s.executeQuery(
             "SELECT rn_t1, (" +
             "     SELECT rn_t2 FROM (" +
@@ -323,6 +333,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 		/*
 		 * Group by and having
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
 		rs = s.executeQuery("select r from (select a, row_number() over() as r, b from t1) x group by r");
 		expectedRows = new String[][]{{"1"}, {"2"}, {"3"}, {"4"}, {"5"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
@@ -383,6 +394,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(rs, expectedRows);
 		
 		/* A couple of distinct queries */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
 		rs = s.executeQuery("select distinct row_number() over (), 'ABC' from t1");
 		expectedRows = new String[][]{{"1", "ABC"},
 										{"2", "ABC"},
@@ -391,6 +403,8 @@ public class OLAPTest extends BaseJDBCTestCase {
 										{"5", "ABC"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		rs = s.executeQuery(
 			"select * from (select distinct row_number() over (), " +
 			"                               'ABC' from t1) tmp");
@@ -589,6 +603,7 @@ public class OLAPTest extends BaseJDBCTestCase {
             "                     t_1.a = row_number() over () + t_2.a");
 
         // DERBY-6565: NPE before
+//IC see: https://issues.apache.org/jira/browse/DERBY-6565
         assertStatementError(
                 LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
                 s,
@@ -597,6 +612,7 @@ public class OLAPTest extends BaseJDBCTestCase {
         // DERBY-6688: subquery using SubqueryNode rather than FromSubquery
         // had problems with presence of window function in order by.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6688
         JDBC.assertFullResultSet(s.executeQuery("select * from t3"),
                 new String[][]{{"4"},{"5"},{"6"},{"7"},{"8"}});
 
@@ -611,6 +627,7 @@ public class OLAPTest extends BaseJDBCTestCase {
         // Used to work before
         JDBC.assertFullResultSet(s.executeQuery(
             "select * from  " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6691
             "    (select y from t3 order by row_number() over () " + 
             "     fetch first 1 row only) tt"),
             new String[][]{{"0"}});
@@ -636,6 +653,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 
         // DERBY-6690: a window function in generated clause was not detected
         // before
+//IC see: https://issues.apache.org/jira/browse/DERBY-6690
         assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
             s,
             "create table t (x int generated always as " +
@@ -882,6 +900,7 @@ public class OLAPTest extends BaseJDBCTestCase {
     public void testGroupByWithAndWithoutRollup()
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
         Statement s = createStatement();
         // A very simple set of master-detail ORDER and ORDER_ITEM tables,
         // with some fake customer data:

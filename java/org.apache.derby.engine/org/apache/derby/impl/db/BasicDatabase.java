@@ -132,6 +132,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	public boolean canSupport(Properties startParams) {
         boolean supported =
             Monitor.isDesiredCreateType(startParams, getEngineType());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
 
         if (supported) {
             String repliMode =
@@ -149,6 +150,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		throws StandardException
 	{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		ModuleFactory monitor = getMonitor();
 		if (create)
 		{
@@ -158,6 +160,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			String localeID = 
                 startParams.getProperty(
                     org.apache.derby.shared.common.reference.Attribute.TERRITORY);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 			if (localeID == null) {
 				localeID = Locale.getDefault().toString();
@@ -168,6 +171,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			databaseLocale = monitor.getLocale(this);
 		}
 		setLocale(databaseLocale);      
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
 		// boot the validation needed to do property validation, now property
 		// validation is separated from AccessFactory, therefore from store
@@ -177,9 +181,11 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		// registered types (DECIMAL) are there before logical undo recovery 
         // might need them.
 		DataValueFactory dvf = (DataValueFactory) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             bootServiceModule(
                 create, 
                 this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				org.apache.derby.shared.common.reference.ClassName.DataValueFactory, 
                 startParams);
 
@@ -191,6 +197,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
         // Add the database properties read from disk (not stored
         // in service.properties) into the set seen by booting modules.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2341
 		Properties allParams =
             new DoubleProperties(getAllDatabaseProperties(), startParams);
 
@@ -202,8 +209,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		bootClassFactory(create, allParams);
         
         dd = (DataDictionary)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             bootServiceModule(create, this,
                     DataDictionary.MODULE, allParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2341
 
 		lcf = (LanguageConnectionFactory) 
             bootServiceModule(
@@ -227,6 +236,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		//
 		authenticationService = bootAuthenticationService(create, allParams);
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			SanityManager.ASSERT(
                 authenticationService != null,
                 "Failed to set the Authentication service for the database");
@@ -243,6 +253,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		active = true;
 
         // Create an index statistics update daemon.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4936
         if (dd.doCreateIndexStatsRefresher()) {
             dd.createIndexStatsRefresher(this, allParams.getProperty(
                         Property.PROPERTY_RUNTIME_PREFIX + "serviceDirectory"));
@@ -252,6 +263,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	public void stop() {
         // The data dictionary is not available if this database has the
         // role as an active replication slave database.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5390
         if (dd != null) {
             try {
                 // on orderly shutdown, try not to leak unused numbers from
@@ -278,6 +290,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      * This implementation supports the standard database.
 	  */
 	public int getEngineType() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
         return EngineType.STANDALONE_DB;
     }
 
@@ -313,6 +326,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		//a bit of a hack. Unfortunately, we can't initialize this
 		//when we push it. We first must push a few more contexts. 
 		lctx.initialize();		
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
 		// Need to commit this to release locks gotten in initialize.  
 		// Commit it but make sure transaction not have any updates. 
@@ -329,6 +343,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      */
     public final DataDictionary getDataDictionary()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
         return dd;
     }
 
@@ -342,6 +357,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 	public AuthenticationService getAuthenticationService()
 		throws StandardException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
 
 		// Expected to find one - Sanity check being done at
 		// DB boot-up.
@@ -367,9 +383,11 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      * @exception SQLException Thrown on error
      */
     public void startReplicationMaster(String dbmaster, String host, int port,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
                                        String replicationMode)
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
             af.startReplicationMaster(dbmaster, host, port, replicationMode);
         } catch (StandardException se) {
             throw PublicAPI.wrapStandardException(se);
@@ -382,6 +400,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      * @exception SQLException Thrown on error
      */
     public void stopReplicationMaster()  throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
         try {
             af.stopReplicationMaster();
         } catch (StandardException se) {
@@ -410,6 +429,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      * @see org.apache.derby.iapi.db.Database#failover(String)
      */
     public void failover(String dbname) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3428
         af.failover(dbname);
     }
 
@@ -433,6 +453,8 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 
     public void backup(String backupDir, boolean wait) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
         throws SQLException
     {
 		try {
@@ -456,6 +478,8 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			af.backupAndEnableLogArchiveMode(backupDir, 
                                              deleteOnlineArchivedLogFiles,
                                              wait); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             if ( luceneLoaded() )
             {
                 backupLucene( backupDir );
@@ -586,6 +610,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		
 		TransactionController tc = af.getTransaction(
 				getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		String  upgradeID = null;
 		UUID	databaseID;
@@ -596,6 +621,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			// this could be an upgrade, see if it's stored in the service set
 
 			UUIDFactory	uuidFactory  = getMonitor().getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			
 			upgradeID = startParams.getProperty(DataDictionary.DATABASE_ID);
@@ -662,6 +688,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		if (newClasspath != null) {
 			// parse it when it is set to ensure only valid values
 			// are written to the actual conglomerate.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 			dbcp = IdUtil.parseDbClassPath(newClasspath);
 		}
 
@@ -701,6 +728,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 			//
 			// Invalidate stored plans.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
             getDataDictionary().invalidateAllSPSPlans();
 		
 			String newClasspath = (String) value;
@@ -743,9 +771,12 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 			// parse the class path and allow 2 part names.
 			IdUtil.parseDbClassPath(classpath);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
 			startParams.put(Property.BOOT_DB_CLASSPATH, classpath);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			cfDB = (ClassFactory) bootServiceModule(create, this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 					org.apache.derby.shared.common.reference.Module.ClassFactory, startParams);
 	}
 
@@ -763,12 +794,14 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 	protected AuthenticationService bootAuthenticationService(boolean create, Properties props) throws StandardException {
 		return (AuthenticationService)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				bootServiceModule(create, this, AuthenticationService.MODULE, props);
 	}
 
 	protected void bootValidation(boolean create, Properties startParams)
 		throws StandardException {
 		pf = (PropertyFactory) bootServiceModule(create, this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			org.apache.derby.shared.common.reference.Module.PropertyFactory, startParams);
 	}
 
@@ -785,6 +818,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		throws StandardException {
 
 		TransactionController tc = af.getTransaction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     getContextService().getCurrentContextManager());
 		Properties dbProps = tc.getProperties();
 		tc.commit();
@@ -808,7 +842,9 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		try
 		{
 			resourceAdapter = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				bootServiceModule(create, this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 										 org.apache.derby.shared.common.reference.Module.ResourceAdapter,
 										 allParams);
 		}
@@ -835,9 +871,11 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		long generationId = fid.getGenerationId();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         ContextManager cm = getContextService().getCurrentContextManager();
 		FileResource fr = af.getTransaction(cm).getFileHandler();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         String externalName = JarUtil.mkExternalName(
             fid.getUUID(), schemaName, sqlName, fr.getSeparatorChar());
 
@@ -856,6 +894,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      * </p>
      */
     private boolean luceneLoaded()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws StandardException
     {
         try {
@@ -892,6 +931,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
         throws StandardException
     {
         DataFactory dataFactory = (DataFactory) findServiceModule( this, DataFactory.MODULE );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         return dataFactory.getStorageFactory();
     }
@@ -948,12 +988,14 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

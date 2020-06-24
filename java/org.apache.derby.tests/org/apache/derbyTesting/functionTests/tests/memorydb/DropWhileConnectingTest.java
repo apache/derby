@@ -102,6 +102,7 @@ public class DropWhileConnectingTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
        return new BaseTestSuite(DropWhileConnectingTest.class);
     }
 
@@ -374,6 +375,7 @@ public class DropWhileConnectingTest
                     }
                 }
             } catch (Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6824
                 if (t instanceof org.apache.derby.shared.common.error.ShutdownException){
                     // Not sure if this is a good thing yet.
                     System.out.println(

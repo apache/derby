@@ -62,6 +62,7 @@ import org.apache.derby.iapi.tools.i18n.*;
 
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-826
   <P>
   Sysinfo reports values relevant to the current Derby configuration.
 
@@ -73,6 +74,7 @@ import org.apache.derby.iapi.tools.i18n.*;
   classpath, and eliminates any duplicated information. If no files
   are found, or some other exception occurs, the
   value returned will be "<info unavailable>".
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
 
   <P>
   This class can be used to print out system information at the
@@ -81,6 +83,7 @@ import org.apache.derby.iapi.tools.i18n.*;
     java org.apache.derby.tools.sysinfo
   </PRE>
   Alternatively, you can use SysInfo within your program to display
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
   Derby information; a Derby version string is returned by this Java code:
   <PRE>
     new Main().toString();
@@ -105,17 +108,20 @@ public final class Main {
      */
     private final static LocalizedResource LOCALIZED_RESOURCE =
         new LocalizedResource(LocalizedResource.SYSINFO_MESSAGE_FILE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
     private static final String TEST_CLASS_NAME = "org.apache.derbyTesting.junit.XATestUtil";
   
   /**
     Application entry point for SysInfo.   This will print out
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
     the Derby product information as well as a snapshot of
     the System properties.
   */
   public static void main(String args[]) {
         // adjust the application in accordance with derby.ui.locale and derby.ui.codeset
         LocalizedResource.getInstance().init();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2903
 
 		LocalizedOutput out;
 
@@ -139,6 +145,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     aw.println (javaSep);
     reportJavaInfo (aw);
     aw.println (jbmsSep);
+//IC see: https://issues.apache.org/jira/browse/DERBY-920
     reportDerby (aw);
     aw.println (sep);
 
@@ -154,6 +161,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     }
     
     // derbyTesting info
+//IC see: https://issues.apache.org/jira/browse/DERBY-6468
     try {
         reportTesting(aw);
     }
@@ -231,6 +239,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	  String classpath = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
       if (JVMInfo.isModuleAware())
       {
           classpath = JVMInfo.getSystemModulePath();
@@ -239,6 +248,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
       {
           try
           {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
               classpath = AccessController.doPrivileged( new PrivilegedAction<String>()
               {
                   public String run()
@@ -248,6 +258,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
               }
               );
 	      }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	      catch (SecurityException se)
           {
               localAW.println(Main.getTextMessage ("SIF01.U", se.getMessage()));
@@ -275,6 +286,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 
   } // end of reportDerby
+//IC see: https://issues.apache.org/jira/browse/DERBY-920
 
   /**
     Writes out the relevant info about the Java environment to
@@ -320,6 +332,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	localAW.println("java.specification.name: " + getJavaProperty("java.specification.name"));
 	localAW.println("java.specification.version: " + getJavaProperty("java.specification.version"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4441
 	printPropertyIfNotNull(localAW, "java.runtime.version");
 	printPropertyIfNotNull(localAW, "java.fullversion");
 
@@ -365,6 +378,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     final   String unavailable = nullUnavailable ? null : Main.getTextMessage ("SIF01.H");
 
     try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         String  property = AccessController.doPrivileged( new PrivilegedAction<String>()
             {
                 public  String  run()
@@ -393,7 +407,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static String getCanonicalPath(final File f) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4617
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             return AccessController
                     .doPrivileged(new PrivilegedExceptionAction<String>() {
                         public String run() throws IOException {
@@ -449,6 +465,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	Locale[] supportedLocales = Locale.getAvailableLocales();
     Arrays.sort(supportedLocales, new LocaleSorter());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
     Properties p = new Properties ();
     for (int i = 0; i < supportedLocales.length; i++) {
@@ -469,6 +486,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
                     if (JVMInfo.isModuleAware())
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                         String moduleName = ModuleUtil.localizationModuleName(locale.toString());
                         Module localizationModule = ModuleUtil.derbyModule(moduleName);
 
@@ -537,6 +556,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
       }
       catch (Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         localAW.println ("Could not load resource: " + finalLocaleResource);
         localAW.println ("Exception: " + t);
       }
@@ -550,6 +570,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
   /**
   Writes out information about the derbyTesting classes with the product.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6468
 
   @param localAW the AppStreamWriter to which the info is written. If this
   value is null, the info is written to System.out
@@ -560,11 +581,13 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
       String hdr="org.apache.derbyTesting.*:";
       Properties p = new Properties ();
       String tstingResource ="/org/apache/derby/info/tsting/info.properties";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
       final Properties finalp = p;
       final String finalTstingResource = tstingResource;
       try {
           InputStream is = AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                   (new PrivilegedExceptionAction<InputStream>() {
                       public InputStream run() throws IOException {
                           Class loadingClass = Main.class;
@@ -574,6 +597,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                           {
                               String moduleName = ModuleUtil.TESTING_MODULE_NAME;
                               Module testingModule = ModuleUtil.derbyModule(moduleName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
                               if (testingModule != null)
                               {
@@ -599,12 +623,14 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                   //Displaying Testing info
                   //String tstingName = p.getProperty("derby.tsting.external.name");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                   URL testJarURL = null;
                   
                   if (JVMInfo.isModuleAware())
                   {
                       try
                       {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                           Module testingModule = ModuleUtil.derbyModule(ModuleUtil.TESTING_MODULE_NAME);
                           Class testingClass = testingModule.getClassLoader().loadClass(TEST_CLASS_NAME);
                           testJarURL = testingClass.getProtectionDomain().getCodeSource().getLocation();
@@ -675,6 +701,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	private static final String MAINUSAGESTRING = "java org.apache.derby.tools.sysinfo -cp";
 
     private static final String USAGESTRINGPARTA = MAINUSAGESTRING + " [ [ "
+//IC see: https://issues.apache.org/jira/browse/DERBY-4806
+//IC see: https://issues.apache.org/jira/browse/DERBY-4597
             + EMBEDDED + " ][ " + NET + " ][ " + CLIENT + "] [ " + TOOLS
             + " ] [";
     private static final String USAGESTRINGPARTB = ".class ] ]";
@@ -810,12 +838,14 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	
 	private static void tryTstingClasspath(StringBuffer successes, StringBuffer failures) {
         // use a class that is not dependent on junit
+//IC see: https://issues.apache.org/jira/browse/DERBY-6532
         tryMyClasspath("org.apache.derbyTesting.junit.XATestUtil", "", successes, failures);
     }
 
 	private static void tryMyClasspath(String cn, String library, StringBuffer successes, StringBuffer failures) {
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-668
 			Class c = Class.forName(cn);
                         String loc = getFileWhichLoadedClass(c);
                         successes.append(found(cn, library, loc));
@@ -835,6 +865,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		try {
 			java.io.InputStream in = cn.getClass().getResourceAsStream(cn);
 			in.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-668
                         String loc = getFileWhichLoadedClass(cn.getClass());
 			successes.append(found(cn, library, loc));
 		}
@@ -850,6 +881,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		StringBuffer temp = new StringBuffer(crLf());
 		temp.append("   " + library);
 		temp.append(crLf());
+//IC see: https://issues.apache.org/jira/browse/DERBY-668
                 if (loc != null)
                     temp.append("   ").append(loc).append(crLf());
 		temp.append(crLf());
@@ -923,6 +955,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
     private static final String infoNames[] =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         org.apache.derby.shared.common.info.ProductGenusNames.DBMS_INFO,
         org.apache.derby.shared.common.info.ProductGenusNames.TOOLS_INFO,
         org.apache.derby.shared.common.info.ProductGenusNames.NET_INFO,
@@ -971,6 +1004,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     public static ZipInfoProperties[] getAllInfo(String classpath)
     {
         ZipInfoProperties zips[] = loadZipFromResource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-826
 
         // No info properties files found, but here we are in sysinfo.
         // Avoid an NPE in mergeZips by creating a ZipInfoProperties array
@@ -988,6 +1022,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 			if (classpath != null) {
 				String cp [] = parseClasspath(classpath);
 				List<String> jarNamesList = Arrays.asList(jarNames);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				Vector<ZipInfoProperties> v = new Vector<ZipInfoProperties>();
 				for (int i = 0; i < cp.length; i++)
 				{
@@ -1004,6 +1039,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                     if (!matches)
                         continue;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1229
 					ZipInfoProperties zip = null;
 					try {
 						zip = checkForInfo(cp[i]);
@@ -1021,6 +1057,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 				}
 				if (v.size() > 0)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-826
 					ZipInfoProperties cpzips[] = new ZipInfoProperties[v.size()];
 					v.copyInto(cpzips);
 					return mergeZips(zips, cpzips);
@@ -1033,6 +1070,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         {
             ZipInfoProperties zip[] = new ZipInfoProperties[1];
             zip[0] = new ZipInfoProperties(null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1229
             zip[0].setLocation(
 					Main.getTextMessage ("SIF03.C", se.getMessage()));
             return zip;
@@ -1051,11 +1089,13 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     private static ZipInfoProperties [] loadZipFromResource()
     {
 		java.util.ArrayList<ZipInfoProperties> al = new java.util.ArrayList<ZipInfoProperties>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         for (int i = 0; i < infoNames.length; i++)
         {
             final String resource = "/".concat(infoNames[i]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             InputStream is = AccessController.doPrivileged
             (new PrivilegedAction<InputStream>() {
                 public InputStream run() {
@@ -1072,6 +1112,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 			ZipInfoProperties ze = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(is));
  
                         // get the real location of the info file
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                         URL locUrl = AccessController.doPrivileged
                         (new PrivilegedAction<URL>() {
                             public URL run() {
@@ -1130,6 +1171,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static ZipInfoProperties checkForInfo(final String cpEntry)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return AccessController.doPrivileged( new PrivilegedAction<ZipInfoProperties>()
             {
                 public ZipInfoProperties run()
@@ -1190,6 +1232,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
             InputStream bis = new FileInputStream(f);
 
             ZipInfoProperties zip = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(bis));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4617
             zip.setLocation(getCanonicalPath(new File(dirname)).replace('/', File.separatorChar));
             return zip;
         }
@@ -1239,6 +1282,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
             }
 
             ZipInfoProperties zip = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(bis));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4617
             zip.setLocation(getCanonicalPath(new File(filename)).replace('/', File.separatorChar));
             return zip;
 
@@ -1256,6 +1300,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	*/
 
     public static String getTextMessage(String msgId, Object... arguments) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3142
         return LOCALIZED_RESOURCE.getTextMessage(msgId, arguments);
 	}
 
@@ -1268,6 +1313,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static String getFileWhichLoadedClass(final Class cls)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
          return AccessController.doPrivileged( new PrivilegedAction<String>()
         {
             public String run()
@@ -1277,6 +1323,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                     cs = cls.getProtectionDomain().getCodeSource ();
                 }
                 catch (SecurityException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2128
                     return Main.getTextMessage(
                         "SIF01.V", cls.getName(), se.getMessage());
                 }
@@ -1286,6 +1333,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      
                 URL result = cs.getLocation ();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4806
+//IC see: https://issues.apache.org/jira/browse/DERBY-4597
                 try {
                     // DERBY-4806 Should use UTF-8 according to
                     // http://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
@@ -1318,8 +1367,10 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      *  @return the merged array
      */
     private static ZipInfoProperties[] mergeZips(ZipInfoProperties[] zip1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-826
                                                  ZipInfoProperties[] zip2)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Vector<ZipInfoProperties> v = new Vector<ZipInfoProperties>();
         boolean foundDup = false;
   
@@ -1346,6 +1397,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
           {
             for (int k = 0; k < v.size(); k++)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 ZipInfoProperties z = v.get(k);
                 if (zip2[j].getLocation().equals(z.getLocation()))
                   foundDup = true;
@@ -1370,6 +1422,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static String formatURL(URL loc)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3132
         String filename;
         try {
             // Should use UTF-8 according to
@@ -1393,8 +1446,11 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
         String result = ""; 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4617
             result = getCanonicalPath(new File(filename)).replace('/', File.separatorChar);
         } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4806
+//IC see: https://issues.apache.org/jira/browse/DERBY-4597
             result = e.getMessage();
         }
         return result;
@@ -1405,6 +1461,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     {
         public int compare(Locale left, Locale right)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             return left.toString().compareTo(right.toString());
         }
     }

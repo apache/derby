@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CreateSchemaNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -34,6 +35,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateSchemaNode extends DDLStatementNode
 {
 	private String 	name;
@@ -92,11 +95,14 @@ class CreateSchemaNode extends DDLStatementNode
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext cc = getCompilerContext();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		if (isPrivilegeCollectionRequired())
 			cc.addRequiredSchemaPriv(name, aid, Authorizer.CREATE_SCHEMA_PRIV);
 
 	}
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "CREATE SCHEMA";

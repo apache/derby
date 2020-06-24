@@ -71,6 +71,7 @@ public class RealNestedLoopLeftOuterJoinStatistics
 								long restrictionTime,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics,
@@ -93,6 +94,7 @@ public class RealNestedLoopLeftOuterJoinStatistics
 			false,		// We never do an EXISTS join for an outer join
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 			userSuppliedOptimizerOverrides,
 			leftResultSetStatistics,
 			rightResultSetStatistics
@@ -194,6 +196,7 @@ public class RealNestedLoopLeftOuterJoinStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                           // index updates
            null,                           // lock mode

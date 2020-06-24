@@ -43,6 +43,7 @@ public class CountTest extends JDBCPerfTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("CountTest");
         int iterations = 1200, repeats = 4;
 

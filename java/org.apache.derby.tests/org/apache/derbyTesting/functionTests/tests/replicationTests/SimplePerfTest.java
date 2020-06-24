@@ -52,10 +52,12 @@ public class SimplePerfTest extends BaseJDBCTestCase
     public static Test suite()
         throws Exception
     {        
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         masterHostName = System.getProperty("test.serverHost", "localhost");
         masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));
         dbPath = System.getProperty("test.dbPath", "wombat");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("SimplePerfTest");
         
         tuplesToInsert = Integer.parseInt(System.getProperty("test.inserts", "1000"));
@@ -73,6 +75,7 @@ public class SimplePerfTest extends BaseJDBCTestCase
      */
     public static Test suite(String serverHost, int serverPort, String dbPath)
     {     
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         Test t = TestConfiguration.existingServerSuite(SimplePerfTest.class,false,serverHost,serverPort,dbPath);
         return SecurityManagerSetup.noSecurityManager(t);
    }
@@ -84,9 +87,11 @@ public class SimplePerfTest extends BaseJDBCTestCase
      */
     public void testInserts()
     throws SQLException, IOException, InterruptedException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            ClassNotFoundException, IllegalAccessException, InstantiationException,
            NoSuchMethodException, InvocationTargetException
     {        
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String vc = "";
         for ( int i=0;i<20000;i++ )
         {
@@ -130,8 +135,10 @@ public class SimplePerfTest extends BaseJDBCTestCase
     public void verifyTestInserts()
         throws SQLException, IOException, InterruptedException,
             ClassNotFoundException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                InstantiationException, NoSuchMethodException, InvocationTargetException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         Connection conn = clientConnection(masterHostName, masterPortNo, dbPath);
         
         Statement s = conn.createStatement();
@@ -143,6 +150,7 @@ public class SimplePerfTest extends BaseJDBCTestCase
     }
     private Connection clientConnection(String hostName, int portNo, String dbPath)
             throws SQLException, ClassNotFoundException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         ClientDataSourceInterface ds;
@@ -152,6 +160,7 @@ public class SimplePerfTest extends BaseJDBCTestCase
             clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
             ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             ds = new BasicClientDataSource40();
         }
 

@@ -63,6 +63,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      */
     public void setUp() throws Exception {
         getConnection().setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
 
         Statement stmt1 = createStatement();
         stmt1.execute("create table testBlobX1 (" +
@@ -74,6 +75,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         byte[] b2 = new byte[1];
         b2[0] = (byte)64;
         String c2 = "c";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         PreparedStatement stmt2 = prepareStatement(
                 "INSERT INTO testBlobX1(a, b, c) " +
                 "VALUES (?, ?, ?)");
@@ -103,6 +105,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      * @throws Exception if something goes wrong
      */
     public void testGettingBlobTwice()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
             throws Exception {
         setAutoCommit(false);
         // We need a Blob represented as a stream in store.
@@ -239,6 +242,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- blob not found", rs3.next());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         blob = rs3.getBlob(1);
         long new_length = blob.length();
         assertEquals("FAIL -- wrong blob length;",
@@ -262,6 +266,8 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     public void testBlobWrite1Param() throws Exception {
         InputStream streamIn = new LoopingAlphabetStream(streamSize[1]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         PreparedStatement stmt3 = prepareStatement(
             "SELECT b FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
@@ -278,6 +284,8 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         outstream.close();
         streamIn.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET b = ? WHERE a = 1");
         stmt4.setBlob(1,  blob);
@@ -289,6 +297,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
 
         assertTrue("FAIL -- blob not found", rs3.next());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         blob = rs3.getBlob(1);
         long new_length = blob.length();
         assertEquals("FAIL -- wrong blob length", streamSize[1], new_length);
@@ -337,6 +346,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- clob not found", rs3.next());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         clob = rs3.getClob(1);
         long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length", streamSize[1], new_length);
@@ -386,6 +396,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
 
         assertTrue("FAIL -- clob not found", rs3.next());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         clob = rs3.getClob(1);
         long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length",
@@ -429,6 +440,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
 
         assertTrue("FAIL -- clob not found", rs3.next());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         clob = rs3.getClob(1);
         long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length",
@@ -510,6 +522,8 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- clob not found", rs3.next());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         clob = rs3.getClob(1);
         long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length", unicodeTestString.length(), new_length);
@@ -533,6 +547,12 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     {
         char testchar = 'a';
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         PreparedStatement stmt3 = prepareStatement(
             "SELECT c FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
@@ -544,6 +564,12 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         clobWriter.write(testchar);
         clobWriter.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET c = ? WHERE a = 1");
         stmt4.setClob(1,  clob);
@@ -554,6 +580,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- clob not found", rs3.next());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         clob = rs3.getClob(1);
         long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length", 1, new_length);
@@ -574,9 +601,11 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite ts  = new BaseTestSuite ("LobStreamsTest");
         ts.addTest(TestConfiguration.defaultSuite (LobStreamsTest.class));
         // JSR169 does not have support for encryption
+//IC see: https://issues.apache.org/jira/browse/DERBY-2718
         if (JDBC.vmSupportsJDBC3()) {
             BaseTestSuite encSuite =
                 new BaseTestSuite ("LobStreamsTest:encrypted");
@@ -587,6 +616,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     }
     //method to ensure that buffer is filled if there is any data in stream
     private int readBytesFromStream (byte [] b, InputStream is) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
                                                           throws IOException {
         int read = 0;
         while (read < b.length) {
@@ -614,6 +644,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         String fString, lString;
 
         do {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
             fLength = readBytesFromStream (fByte, fStream);
             lLength = readBytesFromStream (lByte, lStream);
             if (!java.util.Arrays.equals(fByte, lByte))

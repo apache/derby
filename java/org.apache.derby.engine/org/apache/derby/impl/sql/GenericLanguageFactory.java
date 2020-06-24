@@ -72,6 +72,7 @@ public class GenericLanguageFactory implements LanguageFactory, ModuleControl
 	 */
 	public void boot(boolean create, Properties startParams) throws StandardException 
 	{		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		LanguageConnectionFactory lcf = (LanguageConnectionFactory)  findServiceModule(this, LanguageConnectionFactory.MODULE);
 		PropertyFactory pf = lcf.getPropertyFactory();
 		if (pf != null)
@@ -114,6 +115,8 @@ public class GenericLanguageFactory implements LanguageFactory, ModuleControl
 	 */
 	public ResultDescription getResultDescription
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ResultDescription	inputResultDescription,
 		int[]				theCols
 	)
@@ -148,6 +151,7 @@ public class GenericLanguageFactory implements LanguageFactory, ModuleControl
      * can't call this entry point.
      */
     private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

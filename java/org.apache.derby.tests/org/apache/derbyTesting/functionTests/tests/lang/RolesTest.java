@@ -88,6 +88,7 @@ public class RolesTest extends BaseJDBCTestCase
      */
     private final static String[] users =
         {"TEST_DBO", "DonaldDuck", "\"additional\"\"user\""};
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 
     private final static int
         dboIndex            = 0; // used for connections
@@ -128,10 +129,12 @@ public class RolesTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("RolesTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         /* Negative syntax tests */
         suite.addTest(negativeSyntaxSuite("suite: negative syntax, embedded"));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         suite.addTest(
             TestConfiguration.clientServerDecorator(
                 negativeSyntaxSuite("suite: negative syntax, client")));
@@ -146,6 +149,7 @@ public class RolesTest extends BaseJDBCTestCase
         /* Semantic tests */
         suite.addTest(
             semanticSuite("suite: semantic, embedded"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 
         suite.addTest(
             TestConfiguration.clientServerDecorator(
@@ -168,6 +172,7 @@ public class RolesTest extends BaseJDBCTestCase
     private static Test negativeSyntaxSuite(String framework)
     {
         BaseTestSuite suite = new BaseTestSuite("roles:"+framework);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         /* Tests running without sql authorization set.
          */
@@ -178,6 +183,7 @@ public class RolesTest extends BaseJDBCTestCase
                                           null,
                                           null));
         suite.addTest(noauthSuite);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
         // Tests running with sql authorization set.
         suite.addTest(wrapInAuthorization("testNegativeSyntax"));
@@ -229,6 +235,8 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("create role current_role", // current_role is reserved word
                syntaxError, syntaxError, syntaxError);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3073
+//IC see: https://issues.apache.org/jira/browse/DERBY-2207
         char[] longname = new char[MAX_IDENTIFIER_LENGTH + 1];
         java.util.Arrays.fill(longname, 'a');
         String nameWithMoreThanMaxChars = new String(longname);
@@ -240,6 +248,7 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, invalidRoleName, invalidRoleName);
         doStmt("create role \"SYSROLE\"",
                sqlAuthorizationRequired, invalidRoleName, invalidRoleName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3333
         doStmt("create role public",
                syntaxError, syntaxError, syntaxError);
         doStmt("create role \"PUBLIC\"",
@@ -248,6 +257,7 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, invalidPUBLIC, invalidPUBLIC);
         doStmt("revoke \"PUBLIC\" from " + users[1],
                sqlAuthorizationRequired, invalidPUBLIC, invalidPUBLIC);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         _stm.close();
     }
 
@@ -279,6 +289,8 @@ public class RolesTest extends BaseJDBCTestCase
 
         // Check that role name can be longer than present user name
         // (max 30, cf.  Limits.DB2_MAX_USERID_LENGTH).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3073
+//IC see: https://issues.apache.org/jira/browse/DERBY-2207
         String nameWithMoreThan30Chars = ("r123456789" +
                                           "0123456789" +
                                           "01234567890"); // 31 long
@@ -328,8 +340,10 @@ public class RolesTest extends BaseJDBCTestCase
          * Tests running without sql authorization set.  The purpose
          * of this is just to make sure the proper errors are given.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite noauthSuite = new BaseTestSuite(
             "suite: security level=noSqlAuthorization");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
         noauthSuite.addTest(new RolesTest("testSemantics",
                                           NO_SQLAUTHORIZATION,
                                           null,
@@ -340,9 +354,12 @@ public class RolesTest extends BaseJDBCTestCase
          * sqlAuthorization.
          */
         BaseTestSuite suite = new BaseTestSuite("roles:"+framework);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         suite.addTest(noauthSuite);
         suite.addTest(wrapInAuthorization("testSemantics"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 
         return suite;
     }
@@ -356,11 +373,13 @@ public class RolesTest extends BaseJDBCTestCase
     private static Test wrapInAuthorization(String testName)
     {
         // add decorator for different users authenticated
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite usersSuite =
             new BaseTestSuite("suite: security level=sqlAuthorization");
 
         // First decorate with users (except "additionaluser"), then
         // with authorization decorator
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
         for (int userNo = 0; userNo <= users.length - 2; userNo++) {
             usersSuite.addTest
                 (TestConfiguration.changeUserDecorator
@@ -386,6 +405,7 @@ public class RolesTest extends BaseJDBCTestCase
      */
     public void testSemantics() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
         println("testSemantics: auth=" + this._authLevel +
                 " user="+getTestConfiguration().getUserName());
 
@@ -397,9 +417,11 @@ public class RolesTest extends BaseJDBCTestCase
          * CREATE ROLE
          */
         doStmt("create role foo",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role bar",
                sqlAuthorizationRequired, null , roleDboOnly);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         doStmt("create role notGranted",
                sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role role", // role is not reserved word
@@ -410,6 +432,7 @@ public class RolesTest extends BaseJDBCTestCase
                 sqlAuthorizationRequired, null , roleDboOnly);
 
         // Verify that we can't create a role which already exists
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         doStmt("create role foo",
                sqlAuthorizationRequired, objectAlreadyExists, roleDboOnly);
 
@@ -442,6 +465,7 @@ public class RolesTest extends BaseJDBCTestCase
                objectAlreadyExists, roleDboOnly);
 
         testLoginWithUsernameWhichIsARole();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3681
 
         /*
          * GRANT <role>
@@ -469,6 +493,7 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("grant foo,bar to admin",
                sqlAuthorizationRequired, null , roleDboOnly);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         assertSysRolesRowCount(0, 24,
                                // nonDbo run: foo, bar, notGranted still in
                                // place, used for testing SET ROLE for non-dbo
@@ -477,6 +502,7 @@ public class RolesTest extends BaseJDBCTestCase
                                5);
 
         checkGrantCircularity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
 
         /*
          * SET ROLE
@@ -491,6 +517,7 @@ public class RolesTest extends BaseJDBCTestCase
 
         doDynamicSetRole(_conn);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         doStmt("set role 'NONE'",
                sqlAuthorizationRequired, idParseError, idParseError);
         doStmt("set role 'none'",
@@ -503,6 +530,7 @@ public class RolesTest extends BaseJDBCTestCase
 
         doStmt("set role bar",
                sqlAuthorizationRequired, null , null /* direct grant */);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         doStmt("set role notGranted",
                sqlAuthorizationRequired, null , invalidRole /* not granted */);
         doStmt("set role role",
@@ -524,7 +552,10 @@ public class RolesTest extends BaseJDBCTestCase
         ResultSet rs = doQuery("values current_role",
                                sqlAuthorizationRequired, null , null);
         assertRoleInRs(rs, "\"ROLE\"", "\"BAR\"");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
         if (rs != null) {
             rs.close();
         }
@@ -590,6 +621,7 @@ public class RolesTest extends BaseJDBCTestCase
         assertSysTablePermsRowCount(0,
                                     // role admin not dropped yet:
                                     // + grant to whoever int setup
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
                                     2,
                                     // role admin has been dropped, so
                                     // this run's grant to admin is de
@@ -614,6 +646,7 @@ public class RolesTest extends BaseJDBCTestCase
 
         doStmt("drop role admin",
                sqlAuthorizationRequired, null , roleDboOnly);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
         assertSysTablePermsRowCount(0,
                                     // grant to whoever in setup:
                                     1,
@@ -650,6 +683,7 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, null , null );
 
         // assert (almost) blank slate
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
         assertSysTablePermsRowCount(0,
                                     // grant to whoever in setup:
                                     1,
@@ -659,10 +693,13 @@ public class RolesTest extends BaseJDBCTestCase
 
         // roles foo and bar survive to nonDbo run and beyond:
         assertSysRolesRowCount(0, 5, 5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
         _stm.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3865
         if (!JDBC.vmSupportsJSR169()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3859
             testCurrentRoleIsReset();
         }
     }
@@ -677,6 +714,7 @@ public class RolesTest extends BaseJDBCTestCase
      * @exception Exception
      */
     private void testLoginWithUsernameWhichIsARole() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3681
         if (_authLevel == SQLAUTHORIZATION && isDbo()) {
             _stm.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
                          "('derby.user.soonarole', 'whatever')");
@@ -724,6 +762,7 @@ public class RolesTest extends BaseJDBCTestCase
      */
     private void testCurrentRoleIsReset()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3859
 
         if (_authLevel == SQLAUTHORIZATION && isDbo() /* once is enough */) {
             final String user = "DonaldDuck";
@@ -738,6 +777,7 @@ public class RolesTest extends BaseJDBCTestCase
             // This is currently only implemented in the client driver.
             if (usingDerbyNetClient()) {
                 J2EEDataSource.setBeanProperty(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     cpDs, "maxStatements",7);
                 doTestCurrentRoleIsReset(cpDs.getPooledConnection(user, passwd),
                                          user);
@@ -765,6 +805,7 @@ public class RolesTest extends BaseJDBCTestCase
         // Change the role.
         stmt.execute("set role bar");
         ResultSet rs = stmt.executeQuery("values current_role");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         assertRoleInRs(rs, "\"BAR\"", n_a);
         rs.close();
         stmt.close();
@@ -783,6 +824,7 @@ public class RolesTest extends BaseJDBCTestCase
 
 
     private void checkGrantCircularity() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
         if (isDbo()) {
             // Test circularity in role grant relation given this a
             // priori graph:
@@ -860,6 +902,7 @@ public class RolesTest extends BaseJDBCTestCase
             try {
                 _stm.executeUpdate("drop role foo");
                 _stm.executeUpdate("drop role bar");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                 _stm.executeUpdate("drop role notGranted");
             } catch (SQLException se) {
             }
@@ -871,6 +914,7 @@ public class RolesTest extends BaseJDBCTestCase
         } catch (SQLException se) {
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
         if (_authLevel == SQLAUTHORIZATION && isDbo()) {
             // create a table grant to an (uknown) user WHOEVER.
             // This is used to test that create role detects the
@@ -919,6 +963,7 @@ public class RolesTest extends BaseJDBCTestCase
 
 
     private void doStmt(String stmt,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
                         String noAuthState,
                         String authDboState,
                         String authNotDboState)
@@ -980,6 +1025,7 @@ public class RolesTest extends BaseJDBCTestCase
             } else { // SQLAUTHORIZATION
                 if (isDbo()) {
                     if (authDboState[0] != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
                         fail("exception " + authDboState[0] + " expected: (" +
                              stmt);
                     }
@@ -990,6 +1036,7 @@ public class RolesTest extends BaseJDBCTestCase
                     }
                 } else {
                     if (authNotDboState[0] != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
                         fail("exception " + authNotDboState[0] +
                              " expected: (" + stmt);
                     }
@@ -1004,6 +1051,7 @@ public class RolesTest extends BaseJDBCTestCase
             if (_authLevel == NO_SQLAUTHORIZATION) {
                 if (noAuthState[0] == null) {
                     fail("stmt " + stmt + " failed with exception " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                          e.getSQLState(), e);
                 } else {
                     assertSQLState("Stmt " + stmt, noAuthState[0], e);
@@ -1013,6 +1061,7 @@ public class RolesTest extends BaseJDBCTestCase
                 if (isDbo()) {
                     if (authDboState[0] == null) {
                         fail("stmt " + stmt + " failed with exception " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                              e.getSQLState(), e);
                     } else {
                         assertSQLState("Stmt " + stmt, authDboState[0], e);
@@ -1047,11 +1096,13 @@ public class RolesTest extends BaseJDBCTestCase
                  assertSQLState(sqlAuthorizationRequired, e);
                  return;
              } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                  fail("prepare of set role ? failed:" + e, e);
              }
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             pstmt.setString(1, "BAR");
             int rowcnt = pstmt.executeUpdate();
             assertEquals("rowcount from set role ? not 0", rowcnt, 0);
@@ -1060,6 +1111,7 @@ public class RolesTest extends BaseJDBCTestCase
         }
 
         // Test that trimming works:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4475
         try {
             pstmt.setString(1, " BAR ");
             int rowcnt = pstmt.executeUpdate();
@@ -1073,11 +1125,13 @@ public class RolesTest extends BaseJDBCTestCase
                 "set role ' BAR '");
             assertEquals("rowcount from set role ? not 0", rowcnt, 0);
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
             fail("execute of set role ? failed: [foo]" + e, e);
         }
 
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             pstmt.setString(1, "");
             int rowcnt = pstmt.executeUpdate();
             fail("Expected syntax error on identifier");
@@ -1086,6 +1140,7 @@ public class RolesTest extends BaseJDBCTestCase
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             pstmt.setString(1, " ");
             int rowcnt = pstmt.executeUpdate();
             fail("Expected syntax error on identifier");
@@ -1115,18 +1170,29 @@ public class RolesTest extends BaseJDBCTestCase
             }
 
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                 pstmt.setString(1, "none");
                 int rowcnt = pstmt.executeUpdate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                 fail("NONE should not be allowed as a dynamic parameter");
             } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                 assertSQLState(idParseError, e);
             }
 
             try {
                 pstmt.setString(1, "\"NONE\"");
                 int rowcnt = pstmt.executeUpdate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
                 assertEquals("rowcount from set role ? not 0", rowcnt, 0);
                 ResultSet rs = doQuery("values current_role", n_a, null , n_a );
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                 assertRoleInRs(rs, "\"NONE\"", n_a);
                 rs.close();
             } catch (SQLException e) {
@@ -1241,6 +1307,8 @@ public class RolesTest extends BaseJDBCTestCase
         println("SYS.SYSROLES:");
 
         while (rs.next()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
             println("uuid=" + rs.getString(1) +
                     " r=" + rs.getString(2) + " -ee:" + rs.getString(3) +
                     " -or:" + rs.getString(4) + " a:" + rs.getString(5) +
@@ -1326,6 +1394,8 @@ public class RolesTest extends BaseJDBCTestCase
             assertNull(rs);
         } else {
             if (isDbo()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
                 JDBC.assertSingleValueResultSet(rs, dboRole);
             } else {
                 JDBC.assertSingleValueResultSet(rs, notDboRole);

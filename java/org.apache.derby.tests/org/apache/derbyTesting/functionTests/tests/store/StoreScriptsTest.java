@@ -41,6 +41,7 @@ public class StoreScriptsTest extends ScriptTestCase {
         /* in comments reasons why scripts from the storemore suite can/cannot be run like this*/
         "cisco",        
         "connectDisconnect", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5977
         "databaseProperties", // causes failures in AccessTest in EncryptionSuite
         "longRow",
         //"logDevice", // cannot run like this; test tries to set up 
@@ -95,6 +96,7 @@ public class StoreScriptsTest extends ScriptTestCase {
         //"onlineBackupTest2", // runs into lock time out 
         //"onlineBackupTest4" // runs into security exception
         // Following scripts were part of the 'storetests' suite
+//IC see: https://issues.apache.org/jira/browse/DERBY-5977
         "st_derby1189",
         // "st_1",// this one can just be removed - was the
         // first initial test for the SYSCS_UTIL schema. All functionality
@@ -110,6 +112,7 @@ public class StoreScriptsTest extends ScriptTestCase {
     
     private static Test getSuite(String[] list)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("SQL scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(
@@ -132,6 +135,7 @@ public class StoreScriptsTest extends ScriptTestCase {
         // Lock timeout settings that were set for the old harness store tests
         test = DatabasePropertyTestSetup.setLockTimeouts(test, 1, 4);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("StoreScripts");
         suite.addTest(test);
 
@@ -143,6 +147,7 @@ public class StoreScriptsTest extends ScriptTestCase {
         Statement s = createStatement();
         // Clear the database properties set by this test so that they
         // don't affect other tests.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5977
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
                 "('derby.storage.pageSize', NULL)");
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +

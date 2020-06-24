@@ -39,6 +39,7 @@ public class ModuleLoadingTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         BaseTestSuite ts = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Run concurrentLoadingOfSortFactory in a separate database so that
         // the sort factory isn't already loaded.
@@ -68,6 +69,7 @@ public class ModuleLoadingTest extends BaseJDBCTestCase {
         final int[] activeThreads = new int[1];
         // List of exceptions/throwables thrown by the forked threads.
         final ArrayList<Throwable> exceptions = new ArrayList<Throwable>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         Thread[] threads = new Thread[numThreads];
 
@@ -132,6 +134,7 @@ public class ModuleLoadingTest extends BaseJDBCTestCase {
         // At least one of the threads failed. Re-throw the first error
         // reported.
         if (!exceptions.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             throw exceptions.get(0);
         }
     }

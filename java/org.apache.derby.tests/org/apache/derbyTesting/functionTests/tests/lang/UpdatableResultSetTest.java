@@ -283,6 +283,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("UpdatableResultSetTest");
         
         BaseTestSuite embeddedSuite =
@@ -305,8 +306,12 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     }
     
     private static BaseTestSuite baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(UpdatableResultSetTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
         return suite;
     }
     
@@ -1971,6 +1976,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         // this delete row will fire the delete trigger which will delete all
         // the rows from the table and from the resultset
         rs.deleteRow();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
         assertFalse("FAIL - row not found", rs.next());
         try {           
             rs.deleteRow();
@@ -2055,12 +2061,14 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         // this delete row will cause the delete cascade constraint to delete
         // all the rows from the table and from the resultset
         rs.deleteRow();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
         assertFalse("FAIL - row not found", rs.next());
         try {      
             rs.deleteRow();
             fail("FAIL - there should have be no more rows in the resultset " +
                     "at this point because of the delete cascade");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
             String sqlState = usingEmbedded() ? "24000" : "42X30";
             assertSQLState(sqlState, e);
         }
@@ -2562,6 +2570,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                 } catch (SQLException e) {
                     // updateArray and updateRef are not implemented on both 
                     // drivers
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
                     if((updateXXXName == 20) || (updateXXXName == 21)) {
                         assertSQLState("FAIL - unexpected exception on " + 
                                 allUpdateXXXNames[updateXXXName-1], "0A000", e);
@@ -2598,6 +2607,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     updateXXXName <= allUpdateXXXNames.length; 
                     updateXXXName++) 
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2158
                 if(JDBC.vmSupportsJSR169() && (updateXXXName == 4))
                     continue;
                 println("Testing " + allUpdateXXXNames[updateXXXName-1] + 
@@ -2883,6 +2893,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     updateXXXName <= allUpdateXXXNames.length; 
                     updateXXXName++) 
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2158
                 if(JDBC.vmSupportsJSR169() && (updateXXXName == 4))
                     continue;
                 println("  Testing " + allUpdateXXXNames[updateXXXName-1] + 
@@ -2925,6 +2936,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     println(displayString + " Short object as parameters");
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                 rs1.getShort(updateXXXName));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
@@ -2949,6 +2961,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                                 rs1.getLong(updateXXXName));
                 } else if (updateXXXName == 4) { 
                     //updateObject using BigDecimal object
+//IC see: https://issues.apache.org/jira/browse/DERBY-2158
+//IC see: https://issues.apache.org/jira/browse/DERBY-2158
                     if(!JDBC.vmSupportsJSR169()) {
                         println(displayString + 
                                 " BigDecimal object as parameters");
@@ -2964,6 +2978,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     println(displayString + " Float object as parameters");
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                 rs1.getFloat(updateXXXName));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
@@ -3068,6 +3083,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     //since Derby don't support boolean datatype
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                 rs1.getBoolean(1));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
@@ -3290,6 +3306,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         if (usingEmbedded() && JDBC.vmSupportsJDBC3()) {
             println("  updateClob and then cancelRowUpdates");
             String clb1 = rs.getString(13);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
             String clb2 = rs1.getString(13);
             rs.updateClob(13, rs1.getClob(13));
             assertEquals("FAIL - wrong value returned by getXXX method",
@@ -4154,6 +4171,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             int sqlType,
             int updateXXXName) throws SQLException, UnsupportedEncodingException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5701
         Statement s = createStatement();
         ResultSet rs, rs1;
         int checkAgainstColumn = updateXXXName;
@@ -4191,6 +4209,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                         rs.updateLong(ColumnNames[sqlType-1], 
                                 rs1.getLong(updateXXXName));
                 } else if (updateXXXName == 4) { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2158
                     if (!JDBC.vmSupportsJSR169())
                     {
                         //update column with updateBigDecimal methods
@@ -4370,6 +4389,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                 }
                 verifyData(sqlType, checkAgainstColumn);
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5701
                 s.executeUpdate("DELETE FROM AllDataTypesForTestingTable");
                 
             } catch (SQLException se) {
@@ -4391,6 +4411,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             rs.close();
             rs1.close();       
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5701
         closeStatement(s);
     }
     
@@ -4561,6 +4582,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             assertEquals("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1], 
                     rs.getBoolean(sqlType), rs1.getBoolean(1));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5701
         } else if (updateXXXName == 19) { //verifying updateNull
             assertNull("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1], 
@@ -4584,6 +4606,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     " using " + allUpdateXXXNames[updateXXXName - 1],
                     rs1.getLong(updateXXXName), rs.getLong(sqlType));
         } else if (sqlType == 4) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2158
             if (!JDBC.vmSupportsJSR169()) {
                 // verify update made to DECIMAL column with updateXXX methods
                 assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
@@ -4599,6 +4622,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         } else if (sqlType == 6) {
             // verify update made to DOUBLE column with updateXXX methods
             Double d1, d2;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             d1 = rs.getDouble(sqlType);
             d2 = rs1.getDouble(updateXXXName);
             // can have precision problems with updateFloat
@@ -4635,6 +4659,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                             rs1.getBytes(updateXXXName)));
         } else if (sqlType == 13 && JDBC.vmSupportsJDBC3()) {
             // verify update made to CLOB column with updateXXX methods
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
             Clob clob = rs.getClob(sqlType);
             int len = (int)clob.length();
             assertEquals("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
@@ -4658,6 +4683,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     rs1.getTimestamp(updateXXXName), rs.getTimestamp(sqlType));
         } else if (sqlType == 17 && JDBC.vmSupportsJDBC3()) {
             // verify update made to BLOB column with updateXXX methods
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
             Blob blob = rs.getBlob(sqlType);
             long len = blob.length();
             assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
@@ -4668,6 +4694,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         
         rs.close();
         rs1.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5701
         closeStatement(pstmt);
         closeStatement(pstmt1);
     }
@@ -4683,6 +4710,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         insertSQL.append("cast("+SQLData[allSQLTypes.length - 1][0]
                 + " as BLOB(1K)))");
         stmt.executeUpdate(insertSQL.toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5701
         closeStatement(stmt);
     }
 }

@@ -81,6 +81,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     private static final String[][] NUMERIC_FUNCTIONS =
     {
         // Section C.1 JDBC 3.0 spec.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         { "ABS", "-25.67" },
         { "ACOS", "0.0707" },
         { "ASIN", "0.997" },
@@ -183,6 +184,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     @Override
     protected void setUp()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             throws Exception {
         // Currently there are no tests that depend on data created outside
         // of the test ficture itself. This means we can relax the retrictions 
@@ -197,12 +199,16 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     @Override
     protected void tearDown() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         if (modifiedDatabase)
         {
             Connection conn = getConnection();
             conn.setAutoCommit(false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
             DatabaseMetaData dmd = getDMD();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             for (String IDS1 : IDS) {
                 JDBC.dropSchema(dmd, getStoredIdentifier(IDS1));
             }
@@ -217,9 +223,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @return the suite
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DatabaseMetaDataTest");
         suite.addTest(
             TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3350
+//IC see: https://issues.apache.org/jira/browse/DERBY-3171
 
         // Add some tests to be run with connection pooling enabled.
         suite.addTest(connectionPoolingSuite("embedded"));
@@ -233,6 +242,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         suite.addTest(
             TestConfiguration.singleUseDatabaseDecorator(
                 new DatabaseMetaDataTest("initialCompilationTest")));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
 
         // The test for DERBY-4160 needs a fresh database to ensure that the
         // meta-data queries haven't already been compiled.
@@ -266,7 +278,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     private static Test connectionPoolingSuite(String jdbcClient) {
         // Return an empty suite if running in JavaME environment.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3685
         if (JDBC.vmSupportsJSR169()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("Base connection pooling suite:DISABLED");
         }
 
@@ -274,6 +288,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             new BaseTestSuite("Base connection pooling suite");
         // Add the tests here.
         baseCpSuite.addTest(new DatabaseMetaDataTest("testConnectionSpecific"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3431
 
         // Setup the two configurations; CPDS and XADS.
         BaseTestSuite fullCpSuite = new BaseTestSuite(
@@ -295,6 +310,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     private String[] getSortedIdentifiers()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         String[] dbIDS = new String[IDS.length];
         // Remove any quotes from user schemas and upper case
         // those without quotes.
@@ -472,6 +488,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         assertTrue(dmd.supportsColumnAliasing());
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-462
         assertFalse(dmd.supportsConvert());
         // Simple check since convert is not supported.
         // A comprehensive test should be added when convert
@@ -479,6 +496,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // specific to convert.
         assertFalse(dmd.supportsConvert(Types.INTEGER, Types.SMALLINT));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         assertFalse(dmd.supportsCoreSQLGrammar());
         assertTrue(dmd.supportsCorrelatedSubqueries());
         
@@ -530,6 +548,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertTrue(dmd.supportsPositionedDelete());
         assertTrue(dmd.supportsPositionedUpdate());
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         assertTrue(dmd.supportsResultSetConcurrency(
             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
         assertTrue(dmd.supportsResultSetConcurrency(
@@ -565,6 +584,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertTrue(dmd.supportsSchemasInTableDefinitions());
         assertTrue(dmd.supportsSelectForUpdate());
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         assertFalse(dmd.supportsStatementPooling());
         assertTrue(dmd.supportsStoredProcedures());
         assertTrue(dmd.supportsSubqueriesInComparisons());
@@ -600,6 +620,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testDataSourceLimits() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         DatabaseMetaData dmd = getDMD();
         
         assertEquals(0, dmd.getMaxBinaryLiteralLength());
@@ -625,11 +646,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertEquals(0, dmd.getMaxStatements());
         assertEquals(128, dmd.getMaxTableNameLength());
         assertEquals(0, dmd.getMaxTablesInSelect());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3146
         assertEquals(128, dmd.getMaxUserNameLength());
     }
     
     public void testMiscellaneous() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         DatabaseMetaData dmd = getDMD();
         
         assertTrue(dmd.allProceduresAreCallable());
@@ -647,6 +670,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY));
         assertTrue(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         assertFalse(dmd.insertsAreDetected(ResultSet.TYPE_FORWARD_ONLY));
         assertFalse(dmd.insertsAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.insertsAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
@@ -706,6 +730,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         assertFalse(dmd.isCatalogAtStart()); 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2789
         assertTrue(dmd.locatorsUpdateCopy());
         
         assertTrue(dmd.usesLocalFilePerTable());
@@ -763,6 +788,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int expectedJDBCMajor = -1;
         int expectedJDBCMinor = -1;
         // java 8 - jdbc 4.2
+//IC see: https://issues.apache.org/jira/browse/DERBY-6324
         if (JDBC.vmSupportsJDBC42())
         {
             expectedJDBCMajor = 4;
@@ -798,6 +824,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetURL() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         DatabaseMetaData dmd = getDMD();
         
         String url;
@@ -806,6 +833,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         } catch (NoSuchMethodError e) {
             // JSR 169 - method must not be there!
             assertTrue("getURL not supported", JDBC.vmSupportsJSR169());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
             assertFalse("getURL not supported", JDBC.vmSupportsJDBC3());
             return;
         }
@@ -820,6 +848,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // client returns the URL with connection attributes.
         if (usingDerbyNetClient()) {
             List<String> urlComponents = Arrays.asList(url.split(";"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
             // Only compare whatever comes before the first semi-colon with
             // the expected URL. Check connection attributes separately.
@@ -921,6 +950,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testConstants()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
       assertEquals(DatabaseMetaData.columnNoNulls, ResultSetMetaData.columnNoNulls);
       assertEquals(DatabaseMetaData.columnNullable, ResultSetMetaData.columnNullable);
       assertEquals(DatabaseMetaData.columnNullableUnknown, ResultSetMetaData.columnNullableUnknown);
@@ -964,6 +994,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         String[][] expectedRows = new String[][]
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             {  null, schema, "PRICE", "org.apache.derbyTesting.functionTests.tests.lang.Price", "2000", null, null },
         };
         JDBC.assertFullResultSet( rs, expectedRows );
@@ -980,6 +1011,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
 
         // try explicit schema and type name
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = dmd.getUDTs( null, schema, "PRICE",
                 new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
         JDBC.assertFullResultSet( rs, expectedRows );
@@ -1005,6 +1037,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             },
         };
         JDBC.assertFullResultSet( rs, expectedRows );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = dmd.getColumns( null, schema, "ORDERS", null );
         crossCheckGetColumnsAndResultSetMetaData( rs, false, 0 );
 
@@ -1062,6 +1095,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         rs = dmd.getAttributes(null,null,null,null);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         String [] columnNames = {
                 "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "ATTR_NAME", "DATA_TYPE",
                 "ATTR_TYPE_NAME", "ATTR_SIZE", "DECIMAL_DIGITS", "NUM_PREC_RADIX",
@@ -1083,6 +1117,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         if (usingDerbyNetClient())
             nullval = false;
         boolean [] nullability = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3350
+//IC see: https://issues.apache.org/jira/browse/DERBY-3171
                 true, true, false, nullval, nullval, nullval, nullval,
                 nullval, nullval, nullval, true, true, nullval, nullval,
                 nullval, nullval, nullval, true, true, true, true
@@ -1101,6 +1137,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         columnTypes = new int[] {
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
         nullability = new boolean[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3350
                 true, true, false, false};
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
@@ -1113,10 +1150,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
                 Types.VARCHAR, Types.VARCHAR};
         nullability = new boolean[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3350
                 true, true, false, true, true, false};
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         ResultSet rss[] = getVersionColumns(null,null, "No_such_table");
         checkVersionColumnsShape(rss);
         JDBC.assertEmpty(rss[0]);
@@ -1180,6 +1219,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     private static final String[] IDS =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
             "one_dmd_test",
             "TWO_dmd_test",
             "ThReE_dmd_test",
@@ -1213,6 +1254,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
          
         ResultSet rs = dmd.getSchemas();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         checkSchemas(rs, new String[0]);
     }
     
@@ -1222,9 +1265,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testGetSchemasModify() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         createSchemasForTests();
         DatabaseMetaData dmd = getDMD();
         ResultSet rs = dmd.getSchemas();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         checkSchemas(rs, IDS);
     }
     
@@ -1234,6 +1280,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         modifiedDatabase = true;
 
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         for (String IDS1 : IDS) {
             s.executeUpdate("CREATE SCHEMA " + IDS1);
         }
@@ -1316,6 +1363,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
          new int[] {
           Types.VARCHAR, Types.VARCHAR
          }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         , new boolean[] {false, true}
         );        
     }
@@ -1352,6 +1400,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         ResultSet rs;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         rs = getDMDTables(dmd, null, null, null, null);
         checkTablesShape(rs);
         int allTableCount = JDBC.assertDrainResults(rs);
@@ -1435,9 +1484,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // Get the list of idenifiers from IDS as the database
         // would store them in the order required.      
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         String[] dbIDS = getSortedIdentifiers();    
                
         // Check the contents, ordered by TABLE_CAT, TABLE_SCHEMA, TABLE_NAME
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         rs = getDMDTables(dmd, null, null, null, userTableOnly);
         checkTablesShape(rs);
         int rowPosition = 0;
@@ -1446,6 +1497,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             //boolean ourTable;
             assertEquals("TABLE_CAT", "", rs.getString("TABLE_CAT"));
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             String schema_ = rs.getString("TABLE_SCHEM");
             
             // See if the table is in one of the schemas we created.
@@ -1469,6 +1521,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             assertNull("SELF_REFERENCING_COL_NAME", rs.getString("SELF_REFERENCING_COL_NAME"));
             assertNull("REF_GENERATION", rs.getString("REF_GENERATION"));
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             if (ourSchema)
                 rowPosition++;
          }
@@ -1478,16 +1531,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
        
          Random rand = new Random();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         for (String schema_ : dbIDS) {
             int pc = rand.nextInt(6);
             String schemaPattern = schema_.substring(0, pc + 2) + "%";
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             rs = getDMDTables(dmd, null, schemaPattern, null, userTableOnly);
             checkTablesShape(rs);
             rowPosition = 0;
             while (rs.next())
             {
                 assertEquals("TABLE_SCHEM",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
                         schema_, rs.getString("TABLE_SCHEM"));
                 assertEquals("TABLE_NAME",
                         dbIDS[rowPosition%dbIDS.length], rs.getString("TABLE_NAME"));
@@ -1499,10 +1555,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     dbIDS.length, rowPosition);
         }
          
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         for (String table : dbIDS) {
             int pc = rand.nextInt(6);
             String tablePattern = table.substring(0, pc + 2) + "%";
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             rs = getDMDTables(dmd, null, null, tablePattern, userTableOnly);
             checkTablesShape(rs);
             rowPosition = 0;
@@ -1535,10 +1593,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     private void checkGetTablesODBC(String catalog, String schema,
             String table, String[] tableTypes) throws SQLException, IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         String tableTypesAsString = null;
         if (tableTypes != null) {
             int count = tableTypes.length;
             StringBuilder sb = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
 
             for (int i = 0; i < count; i++) {
                 if (i > 0)
@@ -1595,7 +1655,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     private int createTablesForTest(boolean skipXML) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         getConnection().setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<String> types = getSQLTypes(getConnection());
         if (skipXML)
             types.remove("XML");
@@ -1604,6 +1666,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // The BOOLEAN datatype is only allowed in databases
         // at level 10.7 or higher.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         Version dataVersion = getDataVersion( getConnection() );
         if ( dataVersion.compareTo( new Version( 10, 7, 0, 0 ) ) < 0 )
         {
@@ -1618,6 +1681,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         int columnCounter = 0;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         for (String IDS1 : IDS) {
             for (String IDS2 : IDS) {
                 StringBuilder sb = new StringBuilder();
@@ -1651,6 +1715,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.close();
         
         commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
 
         return IDS.length * IDS.length;
     }
@@ -1665,6 +1730,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetColumnsReadOnly() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         ResultSet[] rs = getColumns(null, null, null, null);
         for ( int j =0 ; j<2 ; j++) {
             checkColumnsShape(rs[j], j);
@@ -1685,8 +1751,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // First cross check all the columns in the database
         // with the ResultSetMetaData.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         testGetColumnsReadOnly();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         Random rand = new Random();
         String[] dbIDS = getSortedIdentifiers();
             
@@ -1697,6 +1765,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             String tableNamePattern = getPattern(rand, dbIDS);
             String columnNamePattern = getPattern(rand, dbIDS);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             ResultSet[] rs = getColumns(null,
                 schemaPattern, tableNamePattern, columnNamePattern);
             
@@ -1705,6 +1774,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
                 while (rs[j].next())
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
                     String schema_ = rs[j].getString("TABLE_SCHEM");
                     String table = rs[j].getString("TABLE_NAME");
                     String column = rs[j].getString("COLUMN_NAME");
@@ -1735,6 +1805,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             for (int j=0  ; j<2 ; j++) {
                 while (rs[j].next())
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
                     String schema_ = rs[j].getString("TABLE_SCHEM");
                     String table = rs[j].getString("TABLE_NAME");
                     String column = rs[j].getString("COLUMN_NAME");
@@ -1877,6 +1948,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             base = dbIDS[rand.nextInt(dbIDS.length)];
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < base.length();)
         {
@@ -1941,6 +2013,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         while (rs.next())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             String schema_ = rs.getString("TABLE_SCHEM");
             String table = rs.getString("TABLE_NAME");
             
@@ -1951,6 +2024,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                      
             for (int col = 1; col <= rsmdt.getColumnCount() ; col++)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 if (!partial) {
                     if (col != 1)
                         assertTrue(rs.next());
@@ -1962,11 +2036,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 assertEquals("TABLE_CAT",
                         "", rs.getString("TABLE_CAT"));
                 assertEquals("TABLE_SCHEM",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
                         schema_, rs.getString("TABLE_SCHEM"));
                 assertEquals("TABLE_NAME",
                         table, rs.getString("TABLE_NAME"));
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 crossCheckGetColumnRowAndResultSetMetaData(rs, rsmdt, odbc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 if (partial)
                     break;
                 
@@ -1989,6 +2066,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void crossCheckGetColumnRowAndResultSetMetaData(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             ResultSet rs, ResultSetMetaData rsmdt, int odbc)
         throws Exception
     {
@@ -2075,6 +2153,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         */
         
         // not used by JDBC spec, but by ODBC
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         if (odbc == 0)
         {
             assertEquals("BUFFER_LENGTH", 0, rs.getInt("BUFFER_LENGTH"));
@@ -2106,6 +2185,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // COLUMN_DEF ??
        
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         if (odbc == 0)
         {
             // both unused by JDBC spec
@@ -2183,6 +2263,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws java.sql.SQLException
      */
     private ResultSet getColumnsODBC(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             String catalog, String schemaPattern, String tableNamePattern,
             String columnNamePattern)
         throws SQLException 
@@ -2239,6 +2320,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                new int[] {
                 Types.VARCHAR
                }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         , null
               );
         
@@ -2260,6 +2343,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int BOOLEAN = Types.BOOLEAN;      
         
         String[] JDBC_COLUMN_NAMES = new String[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 "TYPE_NAME", "DATA_TYPE", "PRECISION", "LITERAL_PREFIX",
                 "LITERAL_SUFFIX", "CREATE_PARAMS", "NULLABLE", "CASE_SENSITIVE",
                 
@@ -2305,10 +2389,16 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         );
 
 	/*
+//IC see: https://issues.apache.org/jira/browse/DERBY-2258
+//IC see: https://issues.apache.org/jira/browse/DERBY-2259
+//IC see: https://issues.apache.org/jira/browse/DERBY-2260
+//IC see: https://issues.apache.org/jira/browse/DERBY-2245
 	 Derby-2258 Removed 3 data types which are not supported by Derby
 	 and added XML data type which is supported by Derby
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<Integer> supportedTypes = new ArrayList<Integer>(Arrays.asList(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
           Types.BIGINT, Types.BINARY, Types.BLOB, Types.BOOLEAN,
           Types.CHAR, Types.CLOB, Types.DATE,
           Types.DECIMAL, Types.DOUBLE, Types.FLOAT,
@@ -2317,6 +2407,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.TIME, Types.TIMESTAMP,  Types.VARBINARY,
           Types.VARCHAR, JDBC.SQLXML, Types.JAVA_OBJECT
         ));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         Version dataVersion = getDataVersion(getConnection());
         boolean booleanSupported =
@@ -2325,6 +2416,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // DERBY-4946: Boolean isn't supported if DB is soft-upgraded from
         // pre-10.7 version
         if (!booleanSupported) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             supportedTypes.remove(Integer.valueOf(Types.BOOLEAN));
         }
 
@@ -2341,6 +2433,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             // DATA_TYPE (column 2)
             int type = rs.getInt("DATA_TYPE");
             assertFalse(rs.wasNull());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             if (!supportedTypes.get(offset).equals(type))
             {
                 fail("Unexpected type " + typeName);
@@ -2354,6 +2447,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             int precision = -1;
             switch (type)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
             case Types.BOOLEAN:
                 precision = 1;
                 break;
@@ -2373,6 +2467,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 precision = 8;
                 break;
             case Types.TIMESTAMP:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
                 precision = 29;
                 break;
                                 
@@ -2436,6 +2531,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             // LITERAL_SUFFIX (column 5)
             
             // CREATE_PARAMS (column 6)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             String createParams;
             switch (type)
             {
@@ -2478,6 +2574,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             switch (type)
             {
 	    /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-2258
+//IC see: https://issues.apache.org/jira/browse/DERBY-2259
+//IC see: https://issues.apache.org/jira/browse/DERBY-2260
+//IC see: https://issues.apache.org/jira/browse/DERBY-2245
 	     Derby-2259 Correcting the searchable value for 
 	     LONGVARBINARY, LONGVARCHAR & BLOB data type
 	     also adding SQLXML data type in the test.
@@ -2517,6 +2617,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             
             // FIXED_PREC_SCALE (column 11)
             boolean fixedScale = type == Types.DECIMAL || type == Types.NUMERIC;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             assertEquals("FIXED_PREC_SCALE " + typeName,
                     fixedScale, rs.getBoolean("FIXED_PREC_SCALE"));
             assertFalse(rs.wasNull());
@@ -2546,11 +2647,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             boolean hasScale = true;
             switch (type)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2262
         case Types.DECIMAL:
         case Types.NUMERIC:
             maxScale = 31; // Max Scale for Decimal & Numeric is 31: Derby-2262
             break;
             case Types.TIMESTAMP:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
                 maxScale = 9;
                 break;
             case Types.SMALLINT:
@@ -2599,6 +2702,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // ODBC column names & types differ from JDBC slightly.
         // ODBC has one more column.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         String[] ODBC_COLUMN_NAMES = new String[19];
         System.arraycopy(JDBC_COLUMN_NAMES, 0, ODBC_COLUMN_NAMES, 0,
                 JDBC_COLUMN_NAMES.length);
@@ -2623,7 +2727,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // column 16 - SQL_DATA_TYPE is NULL in JDBC but a valid non-null value in ODBC
         // column 19 -  INTERVAL_PRECISION (extra column comapred to JDBC)
         boolean[] ODBC_COLUMN_NULLABILITY = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3400
                 true, false, true, true,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3350
                 true, true, false, false,
                 false, true, false,
                 true, true,
@@ -2654,6 +2760,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     private void checkColumnsShape(ResultSet rs, int odbc) throws SQLException
     {
         int[] columnTypes = new int[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
                 Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.INTEGER,
                 Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.VARCHAR,
@@ -2665,6 +2772,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         boolean[]   nullability =
         {
             false,   false,  false,  false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             true,  true,   true,  true,
             true,   true,   true,  false,
             true,   true,   true,   true,
@@ -2681,6 +2789,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             columnTypes[13] = Types.SMALLINT;
             columnTypes[14] = Types.SMALLINT;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         assertMetaDataResultSet
             (
              rs,
@@ -2743,6 +2852,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
          new int[] {
           Types.CHAR
          }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         , new boolean[] {false}
         );        
     }
@@ -2755,6 +2865,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     private static void checkVersionColumnsShape(ResultSet[] rs) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         String [] columnNames = new String[] {
                 "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME",
                 "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "PSEUDO_COLUMN"
@@ -2929,6 +3040,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public static List<String> getSQLTypes(Connection conn) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<String> list = new ArrayList<String>();
         
         Random rand = new Random();
@@ -2951,6 +3063,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 continue;
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             if (createParams.contains("length"))
             {
                 int maxLength = rs.getInt("PRECISION");
@@ -2963,6 +3076,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     list.add(typeName + "(" + length + ")");
                     
                 } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
                     StringBuilder sb = new StringBuilder();
                     sb.append(typeName.substring(0, paren+1));
                     sb.append(length);
@@ -2973,6 +3087,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 continue;
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             if (createParams.contains("scale"))
             {
                 int maxPrecision = rs.getInt("PRECISION");
@@ -2992,6 +3107,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 continue;
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             if (createParams.contains("precision"))
             {
                 list.add(typeName);
@@ -3092,6 +3208,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         if ("XML".equals(type))
             return JDBC.SQLXML;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         if (type.equals("BOOLEAN"))
             return Types.BOOLEAN;
         
@@ -3123,6 +3240,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             int lp = type.indexOf('(');
             int rp = type.indexOf(')');
             int precision =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
                 Integer.parseInt(type.substring(lp+1, rp));
             return precision;
 
@@ -3172,6 +3290,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
          * there is no equivalent in JDBC.
          */
         checkODBCKeys(null, schema, null, null, null, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
 
         /* Run equivalent of getImportedKeys(), getExportedKeys(),
          * and getCrossReference for each of the primary/foreign
@@ -3293,6 +3412,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
             JDBC.assertFullResultSet(odbcrs,
                 new String [][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                     {"",schema,"PKT1","I","",schema,"FKT1","FI",
                         "1","3","3","FK1","PK1","7"},
                     {"",schema,"PKT2","C","",schema,"FKT1","FC",
@@ -3443,6 +3563,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // DERBY-3180; if this table gets created here, running the entire test
         // twice with defaultSuite runs into into trouble.
         // Moving into separate fixture does not have this problem.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         st.execute("create table brit17 (i int not null default 10, " +
                 "s smallint not null, c30 char(30) not null, " +
                 "vc10 varchar(10) not null default 'asdf', " +
@@ -3468,6 +3589,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
         
         // result: column i
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         ResultSet[] rs = getBestRowIdentifier(null,schema,"BRIT1",
         		DatabaseMetaData.bestRowTemporary, true);
         verifyBRIResults(rs, expRSI);
@@ -3481,6 +3603,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // sorts after i: DERBY-6623)
         rs = getBestRowIdentifier(null,schema,"BRIT3",
         		DatabaseMetaData.bestRowTemporary,true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         verifyBRIResults(rs, expRSI);
         // result: column i
         rs = getBestRowIdentifier(null,schema,"BRIT4",
@@ -3576,6 +3699,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
                 {"2", "VC10", "12", "VARCHAR", "10", null, null, "1"}
         };
+//IC see: https://issues.apache.org/jira/browse/DERBY-6968
         JDBC.assertUnorderedResultSet(rs[0], expRS, true);
         // set buffer_length expected for ODBC; for most of the simple 
         // tables/rows in our test it's "4" so set in verifyBRIResults
@@ -3585,6 +3709,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // test DERBY-2610 for fun; can't pass in null table name      
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             getBestRowIdentifier(null,schema,null,
             		DatabaseMetaData.bestRowTemporary,true);
         } catch (SQLException sqle) {
@@ -3597,6 +3722,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         expRS = new String [][] {
                 {"2", "TABLEID", "1", "CHAR", "36", null, null, "1"}
         };
+//IC see: https://issues.apache.org/jira/browse/DERBY-6968
         JDBC.assertUnorderedResultSet(rs[0], expRS, true);
         // set buffer_length expected for ODBC
         expRS[0][5] = "72";
@@ -3693,6 +3819,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
                 Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
         int[] odbcColumnTypes = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 Types.SMALLINT, Types.VARCHAR, Types.SMALLINT, Types.VARCHAR,
                 Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
         boolean [] nullability = {
@@ -3729,6 +3856,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void verifyBRIResults(ResultSet[] rss, String[][] expRS) throws SQLException {      
         JDBC.assertFullResultSet(rss[0], expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         for (String[] expRS1 : expRS) {
             expRS1[5] = "4";
         }
@@ -3749,6 +3877,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // getColumnPrivileges with all nulls gets stopped because 
         // the spec indicates it takes a table name, not just a pattern
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             getColumnPrivileges(null,null,null,null);
             fail ("expected error XJ103");
         } catch (SQLException sqle) {
@@ -3838,6 +3967,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetTablePrivileges() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         ResultSet rs[] = getTablePrivileges(null,null,null);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
@@ -3986,9 +4116,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         st.execute("create table iit (i int not null, j int)");
         st.execute("create unique index iii on iit(i asc, j desc)");
         DatabaseMetaData dmd = getDMD();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         ResultSet rs = dmd.getIndexInfo("",schema,"IIT",false,false);
         boolean more = rs.next();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         if (more) {
             assertEquals("A",rs.getString(10));
         }
@@ -3999,10 +4131,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             assertEquals("D",rs.getString(10));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = getIndexInfoODBC("",schema,"IIT",false,false);
         more = rs.next();
 
         if (more) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             assertEquals("A",rs.getString(10));
         }
 
@@ -4077,6 +4212,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
                 Types.BOOLEAN,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
                 // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.BIGINT,
                 Types.BIGINT,Types.VARCHAR};
         
@@ -4125,6 +4261,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     private void assertFullUnorderedResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         ResultSet rs[], String[][] expRS, boolean trim) throws SQLException
     {
         JDBC.assertUnorderedResultSet(rs[0], expRS, trim);
@@ -4204,6 +4341,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     public void testGetPrimaryKeys() throws SQLException
     {
         String[][] expRS = new String[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 {"",schema,"KT1","I","2","PRIMKEY"},
                 {"",schema,"KT1","VC10","1","PRIMKEY"}};
                        
@@ -4211,9 +4349,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // try with valid search criteria
         // although, % may not actually be appropriate?
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         ResultSet rs[] = getPrimaryKeys("", "%", "KT1");
         assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = getPrimaryKeys(null, schema, "KT1");
         assertFullResultSet(rs, expRS, true);
 
@@ -4308,6 +4448,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
 
         String[][] expRS1 = new String[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             {"",schema,"KT1","VC10","",schema,"REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
             {"",schema,"KT1","I","",schema,"REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
             {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
@@ -4324,10 +4465,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // try with valid search criteria
         // although, % may not actually be appropriate?
         ResultSet rs[] = getImportedKeys("", "%", "REFTAB");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         assertFullUnorderedResultSet(rs, expRS1, true);
         rs = getImportedKeys("", "%", "REFTAB2");
         assertFullResultSet(rs, expRS2, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = getImportedKeys(null, schema, "REFTAB");
         assertFullUnorderedResultSet(rs, expRS1, true);
         rs = getImportedKeys(null, schema, "REFTAB2");
@@ -4362,6 +4505,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // getExportedKeys
         expRS1 = new String[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 {"",schema,"KT1","VC10","",schema,"REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
                 {"",schema,"KT1","I","",schema,"REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
                 {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
@@ -4383,6 +4527,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = getExportedKeys(null, schema, "REFTAB");
        assertFullResultSet(rs, expRS2, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = getExportedKeys(null, null, "KT1");
         assertFullResultSet(rs, expRS1, true);
 
@@ -4392,6 +4537,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // tablename may not be null
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             rs[0] = dmd.getExportedKeys(null, schema, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
@@ -4411,6 +4557,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // getCrossReference
         expRS1 = new String[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 {"",schema,"KT1","VC10","",schema,"REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
                 {"",schema,"KT1","I","",schema,"REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
                 {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
@@ -4455,6 +4602,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"",schema,"KT1","I","",schema,"REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
         JDBC.assertFullResultSet(rs[1], expRS, true);
         // Test also with null for schema.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = getCrossReference(null, null, "%", null, null, "%");
         JDBC.assertEmpty(rs[0]);
         JDBC.assertResultSetContains(rs[1], expRS);
@@ -4471,7 +4619,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         // Note: With ODBC, this does *not* give an error. 
         // If that changes, uncomment the fail.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             rs[1] = getCrossReferenceODBC(null, schema, null, null, schema, null);
         //    fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
@@ -4482,6 +4632,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         // tablename may not be null
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             rs[0] = dmd.getCrossReference(null, null, "", null, null, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
@@ -4490,7 +4641,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             else
                 assertSQLState("XJ103", sqle);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             rs[1] = getCrossReferenceODBC(null, schema, "", null, schema, null);
             //fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
@@ -4501,6 +4654,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }        
         
         // DERBY-2610, tablename must be given as stored - % means no rows
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         rs = getCrossReference(null, schema, "%", null, schema, "%");
         JDBC.assertEmpty(rs[0]);
         // But it *is* allowed with ODBC, see DERBY-2758
@@ -4713,6 +4867,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         short setnull = DatabaseMetaData.importedKeySetNull;
         short setdefault = DatabaseMetaData.importedKeySetDefault;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         ResultSet rs[] = getCrossReference("",schema,"REFACTION1","",schema,"REFACTNONE");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
         rs = getCrossReference("",schema,"REFACTION1","",schema,"REFACTRESTRICT");
@@ -4754,6 +4909,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {restrict, no_action}};
         for (int i = 0 ; i < 6 ; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
             rs[0].next();
             assertEquals(expkeyresults[i][0], rs[0].getShort(10));
             assertEquals(expkeyresults[i][1], rs[0].getShort(11));
@@ -4822,6 +4978,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "e SMALLINT, f INTEGER, g BIGINT, h FLOAT, i DOUBLE PRECISION, " +
                 "k DATE, l TIME, T TIMESTAMP )"+
                 "language java external name " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-514
                 "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc'" +
         " parameter style java"); 
         s.execute("create procedure GETPCTEST2 (pa INTEGER, pb BIGINT)"+
@@ -4848,6 +5006,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "language java external name " +
                 "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc4b'" +
         " parameter style java");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
 
         if ( supportsBoolean )
         {
@@ -4867,6 +5026,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         ResultSet rs[] = getProcedures(null, "%", "GETPCTEST%");
         Object[][] expRS = new Object[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 {"",schema,"GETPCTEST1",null,null,null,getpc,i(1),genid},
                 {"",schema,"GETPCTEST2",null,null,null,getpc,i(1),genid},
                 {"",schema,"GETPCTEST3A",null,null,null,getpc,i(1),genid},
@@ -4883,6 +5043,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                  expRS,
                  new Object[][]
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                      {"",schema,"GETPCTEST5",null,null,null,foo,i(1),genid},
                  }
                  );
@@ -4904,6 +5065,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = getProcedureColumns(null, "%", "GETPCTEST%", "%");
 
         expRS = new Object[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 {null,schema,"GETPCTEST1","OUTB",i(4),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(1),"YES",genid,i(12),i(0)},
                 {null,schema,"GETPCTEST1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(2),"YES",genid,i(12),i(1)},
                 {null,schema,"GETPCTEST1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),null,null,i(3),"YES",genid,i(12),i(2)},
@@ -4931,6 +5093,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                  expRS,
                  new Object[][]
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                      {null,schema,"GETPCTEST5","INARG",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(1),"YES",genid,i(3),i(0)},
                      {null,schema,"GETPCTEST5","OUTARG",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(2),"YES",genid,i(3),i(1)},
                      {null,schema,"GETPCTEST5","INOUTARG",i(2),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(3),"YES",genid,i(3),i(2)},
@@ -4945,10 +5108,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
             // JDBC variant has always null in column #15 (SQL_DATA_TYPE) and
             // column #16 (SQL_DATETIME_SUB)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             Object[] jdbcRow = row.clone();
             jdbcRow[14] = jdbcRow[15] = null;
 
             // ODBC variant lacks column #20 (SPECIFIC_NAME)...
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             ArrayList<Object> odbcRow =
                     new ArrayList<Object>(Arrays.asList(row));
             odbcRow.remove(19);
@@ -4967,6 +5132,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs[0], jdbcExpRS, false);
         JDBC.assertFullResultSet(rs[1], odbcExpRS, false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         if ( supportsBoolean ) { s.execute("drop procedure GETPCTEST5"); }
         s.execute("drop procedure GETPCTEST4Bx");
         s.execute("drop procedure GETPCTEST4B");
@@ -4990,6 +5156,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int suffixLength = suffix.length;
         int resultLength = targetLength + suffixLength;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4933
         Object[][] result = new Object[resultLength][];
         System.arraycopy(target, 0, result, 0, targetLength);
         System.arraycopy(suffix, 0, result, targetLength, suffixLength);
@@ -5144,6 +5311,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 , Types.SMALLINT, Types.SMALLINT};
 
         boolean[] nullability = new boolean[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2775
+//IC see: https://issues.apache.org/jira/browse/DERBY-3346
+//IC see: https://issues.apache.org/jira/browse/DERBY-3342
                 true, false, false, false, false, false, false, false, false, true,
                 true, false, true, true, true, true, true, false, false, false//};
                 , false, false};
@@ -5167,6 +5337,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         //      SQL_DATA_TYPE NULL in JDBC, valid type in ODBC.
         // otherwise the same as JDBC
         boolean[] odbcNullability = new boolean[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3400
                 true, false, false, false, false, false, false, false, false, true,
                 true, false, true, true, false, true, true, false, false, false
                 , false};
@@ -5200,6 +5371,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // this method is supported in database meta data only from 10.2 onward
 
         boolean supportsBoolean = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         Version dataVersion = getDataVersion( getConnection() );
         if ( dataVersion.compareTo( new Version( 10, 7, 0, 0 ) ) < 0 ) { supportsBoolean = false; }
         
@@ -5230,6 +5402,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // vm whose DatabaseMetaData doesn't include this method, even though
         // our actual drivers do.
         Method gfcMethod = dmd.getClass().getMethod
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
             ( "getFunctionColumns", new Class<?>[] {
                 String.class, String.class, String.class, String.class, } );
         
@@ -5239,6 +5412,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.GeneratedId genid = new JDBC.GeneratedId();
 
         Object[][] expRS = new Object[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             {null,schema,"F_GFC_1","",i(4),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(0),"YES",genid,i(11),i(-1)},
             {null,schema,"F_GFC_1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,i(6),i(1),"YES",genid,i(11),i(0)},
             {null,schema,"F_GFC_1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),"YES",genid,i(11),i(1)},
@@ -5260,6 +5434,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                  expRS,
                  new Object[][]
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                      {null,schema,"F_GFC_2","",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(0),"YES",genid,i(1),i(-1)},
                      {null,schema,"F_GFC_2","A",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(1),"YES",genid,i(1),i(0)},
                  }
@@ -5279,6 +5454,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @return an Integer
      */
     private static Integer i(int i) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return i;
     }
 
@@ -5289,6 +5465,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void test_jdbc4_1() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Version dataVersion = getDataVersion( getConnection() );
         if ( dataVersion.compareTo( new Version( 10, 8, 0, 0 ) ) < 0 ) { return; }
 
@@ -5334,6 +5511,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // IS_GENERATEDCOLUMN added to ResultSet returned by getColumns()
         //
         s.execute( "create table t_jdbc41( a int, b int, c generated always as ( -a ) )" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         ResultSet   rs2 = dmd.getColumns( null, schema, "T_JDBC41", null );
         String[][] expectedRows = new String[][]
         {
@@ -5347,6 +5525,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 null
             },
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 "", schema, "T_JDBC41", "B",
                 "4", "INTEGER", "10", null,
                 "0", "10", "1", "",
@@ -5356,6 +5535,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 null
             },
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 "", schema, "T_JDBC41", "C",
                 "4", "INTEGER", "10", null,
                 "0", "10", "1", "",
@@ -5378,6 +5558,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void test_jdbc4_2() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         Version dataVersion = getDataVersion( getConnection() );
         if ( dataVersion.compareTo( new Version( 10, 10, 0, 0 ) ) < 0 ) { return; }
 
@@ -5390,6 +5571,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // getMaxLogicalLobSize()
         //
         assertEquals( 0L, wrapper.getMaxLogicalLobSize() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         //
         // supportsRefCursors()
@@ -5415,6 +5597,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.execute("CREATE TABLE Derby655t3(c31_ID BIGINT NOT NULL primary key)");
         s.execute("ALTER TABLE Derby655t2 ADD CONSTRAINT F_443 Foreign Key (c21_ID) REFERENCES Derby655t3(c31_ID) ON DELETE CASCADE ON UPDATE NO ACTION");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         ResultSet rs = dmd.getImportedKeys("", schema, "DERBY655T1");
         JDBC.assertDrainResults(rs, 1);
         
@@ -5426,6 +5609,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // if you do not get an error, the bug does not occur.          
         if(JDBC.vmSupportsJDBC3()){
             s.execute("create procedure isReadO() language java external name " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-514
                     "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.isro'" +
             " parameter style java"); 
             s.execute("call isReadO()");
@@ -5462,6 +5647,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // Expected values for various columns in the meta-data.
         String[][] expected = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
             {"TABLE_SCHEM", schema},
             {"TABLE_NAME", "DERBY5274"},
             {"COLUMN_NAME", "X"},
@@ -5476,6 +5662,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // Verify that the returned meta-data looks right.
         assertTrue("No columns found", rs.next());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         for (String[] expected1 : expected) {
             String label = expected1[0];
             String expectedVal = expected1[1];
@@ -5509,6 +5696,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @return the {@code j} byte array
      */
     public static byte[] getpc(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
         String a, BigDecimal b, short c, byte d, short e,
         int f, long g, float h, double i, byte[] j, Date k, Time l, Timestamp T)
     {

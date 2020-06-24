@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.TernaryOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -51,6 +52,7 @@ class TernaryOperatorNode extends OperatorNode
 {
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_TRIM = 0;
     final static int K_LOCATE = 1;
     final static int K_SUBSTRING = 2;
@@ -114,6 +116,7 @@ class TernaryOperatorNode extends OperatorNode
                     ContextManager cm)
     {
         super(cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         this.kind = kind;
         constructorMinion(
                 receiver, leftOperand, rightOperand, -1);
@@ -195,6 +198,8 @@ class TernaryOperatorNode extends OperatorNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -235,11 +240,13 @@ class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		receiver = receiver.bindExpression(fromList, subqueryList, 
             aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList,
                 aggregates);
@@ -250,6 +257,7 @@ class TernaryOperatorNode extends OperatorNode
                 aggregates);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_TRIM) {
 			trimBind();
         } else if (kind == K_LOCATE) {
@@ -281,6 +289,8 @@ class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -322,16 +332,19 @@ class TernaryOperatorNode extends OperatorNode
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, resultInterfaceType);
 
 		receiver.generateExpression(acb, mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_TRIM)
 		{
 			mb.push(trimType);
 			leftOperand.generateExpression(acb, mb);
 			mb.cast(leftInterfaceType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3081
 
 			mb.getField(field);
 			nargs = 3;
 			receiverType = receiverInterfaceType;
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         else if (kind == K_LOCATE)
 		{
 			leftOperand.generateExpression(acb, mb); 
@@ -342,6 +355,7 @@ class TernaryOperatorNode extends OperatorNode
 			nargs = 3;
 		
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         else if (kind == K_SUBSTRING)
 		{
 			leftOperand.generateExpression(acb, mb); 
@@ -361,14 +375,17 @@ class TernaryOperatorNode extends OperatorNode
 			nargs = 4;
 			receiverType = receiverInterfaceType;
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         else if (kind == K_TIMESTAMPADD || kind == K_TIMESTAMPDIFF)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
             Object intervalType = leftOperand.getConstantValueAsObject();
             if( SanityManager.DEBUG)
                 SanityManager.ASSERT( intervalType != null && intervalType instanceof Integer,
                                       "Invalid interval type used for " + operator);
             mb.push( ((Integer) intervalType).intValue());
             rightOperand.generateExpression( acb, mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             mb.upCast(TernaryArgType[kind][2]);
             acb.getCurrentDateExpression( mb);
 			mb.getField(field);
@@ -390,6 +407,8 @@ class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLeftOperand(ValueNode newLeftOperand)
 	{
 		leftOperand = newLeftOperand;
@@ -400,6 +419,8 @@ class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current leftOperand.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getLeftOperand()
 	{
 		return leftOperand;
@@ -410,6 +431,8 @@ class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @param newRightOperand	The new rightOperand
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRightOperand(ValueNode newRightOperand)
 	{
 		rightOperand = newRightOperand;
@@ -420,6 +443,8 @@ class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current rightOperand.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getRightOperand()
 	{
 		return rightOperand;
@@ -473,6 +498,8 @@ class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -516,11 +543,13 @@ class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (receiver != null)
 		{
 			receiver = (ValueNode)receiver.accept(v);
@@ -556,6 +585,7 @@ class TernaryOperatorNode extends OperatorNode
 		// handle parameters here
 
 		/* Is there a ? parameter for the receiver? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if (receiver.requiresTypeFromContext())
 		{
 			/*
@@ -564,6 +594,7 @@ class TernaryOperatorNode extends OperatorNode
 			** for a varchar.
 			*/
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			receiver.setType(getVarcharDescriptor());
             //check if this parameter can pick up it's collation from the 
 			//character that will be used for trimming. If not(meaning the
@@ -654,6 +685,8 @@ class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode locateBind() throws StandardException
 	{
 		TypeId	firstOperandType, secondOperandType, offsetType;
@@ -663,6 +696,7 @@ class TernaryOperatorNode extends OperatorNode
 		 * left/firstOperand's.  If the left/firstOperand are both parameters,
 		 * both will be max length.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if( receiver.requiresTypeFromContext())
 		{
 			if( leftOperand.requiresTypeFromContext())
@@ -689,6 +723,7 @@ class TernaryOperatorNode extends OperatorNode
 		 * Is there a ? parameter for the second arg.  Copy the receiver's.
 		 * If the receiver are both parameters, both will be max length.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if(leftOperand.requiresTypeFromContext())
 		{
 			if(receiver.requiresTypeFromContext())
@@ -713,6 +748,7 @@ class TernaryOperatorNode extends OperatorNode
 		/*
 		 * Is there a ? parameter for the third arg.  It will be an int.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if( rightOperand.requiresTypeFromContext())
 		{
 			rightOperand.setType(
@@ -756,6 +792,8 @@ class TernaryOperatorNode extends OperatorNode
 	                vnTC.getCastToCharWidth(
 		                    vn.getTypeServices()));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ValueNode newNode = new CastNode(vn, dtd, getContextManager());
             
             // DERBY-2910 - Match current schema collation for implicit cast as we do for
@@ -776,15 +814,19 @@ class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode substrBind()
 			throws StandardException
 	{
 		TypeId	receiverType;
 		TypeId	resultType = TypeId.getBuiltInTypeId(Types.VARCHAR);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2352
 
 		// handle parameters here
 
 		/* Is there a ? parameter for the receiver? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if (receiver.requiresTypeFromContext())
 		{
 			/*
@@ -793,6 +835,7 @@ class TernaryOperatorNode extends OperatorNode
 			** for a varchar.
 			*/
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			receiver.setType(getVarcharDescriptor());
 			//collation of ? operand should be same as the compilation schema 
 			//because that is the only context available for us to pick up the
@@ -827,6 +870,7 @@ class TernaryOperatorNode extends OperatorNode
 		** Check the type of the receiver - this function is allowed only on
 		** string value types.  
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2352
 		receiverType = receiver.getTypeId();
 		switch (receiverType.getJDBCTypeId())
 		{
@@ -840,6 +884,10 @@ class TernaryOperatorNode extends OperatorNode
 				throwBadType("SUBSTR", receiverType.getSQLTypeName());
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 		if (receiverType.getTypeFormatId() == StoredFormatIds.CLOB_TYPE_ID) {
 		// special case for CLOBs: if we start with a CLOB, we have to get
 		// a CLOB as a result (as opposed to a VARCHAR), because we can have a 
@@ -883,6 +931,7 @@ class TernaryOperatorNode extends OperatorNode
 	 */
 
  	private ValueNode timestampAddBind() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
 			throws StandardException
 	{
         if( ! bindParameter( rightOperand, Types.INTEGER))
@@ -891,6 +940,7 @@ class TernaryOperatorNode extends OperatorNode
             if( jdbcType != Types.TINYINT && jdbcType != Types.SMALLINT &&
                 jdbcType != Types.INTEGER && jdbcType != Types.BIGINT)
                 throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARG_TYPE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                                                      rightOperand.getTypeId().getSQLTypeName(), 2,
                                                      operator);
         }
@@ -912,6 +962,7 @@ class TernaryOperatorNode extends OperatorNode
 	{
         bindDateTimeArg( rightOperand, 2);
         bindDateTimeArg( receiver, 3);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2386
         setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.BIGINT));
         return this;
     } // End of timestampDiffBind
@@ -922,6 +973,7 @@ class TernaryOperatorNode extends OperatorNode
         {
             if( ! arg.getTypeId().isDateTimeTimeStampTypeId())
                 throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARG_TYPE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                                                      arg.getTypeId().getSQLTypeName(), argNumber,
                                                      operator);
         }
@@ -943,6 +995,7 @@ class TernaryOperatorNode extends OperatorNode
      */
     private boolean bindParameter( ValueNode arg, int jdbcType) throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
         if( arg.requiresTypeFromContext() && arg.getTypeId() == null)
         {
             arg.setType( new DataTypeDescriptor(TypeId.getBuiltInTypeId( jdbcType), true));
@@ -951,6 +1004,8 @@ class TernaryOperatorNode extends OperatorNode
         return false;
     } // end of bindParameter
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getReceiver()
 	{
 		return receiver;
@@ -972,6 +1027,7 @@ class TernaryOperatorNode extends OperatorNode
 		/* If the receiver is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (receiver.getTypeId().userType())
 		{
 			receiver = receiver.genSQLJavaSQLTree();
@@ -980,6 +1036,7 @@ class TernaryOperatorNode extends OperatorNode
 		/* If the left operand is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (leftOperand.getTypeId().userType())
 		{
 			leftOperand = leftOperand.genSQLJavaSQLTree();
@@ -990,6 +1047,7 @@ class TernaryOperatorNode extends OperatorNode
 		 */
 		if (rightOperand != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			if (rightOperand.getTypeId().userType())
 			{
 				rightOperand = rightOperand.genSQLJavaSQLTree();
@@ -1002,6 +1060,7 @@ class TernaryOperatorNode extends OperatorNode
 	}
         
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) &&
                 ((TernaryOperatorNode)o).kind == this.kind;
     }

@@ -50,6 +50,7 @@ final class SystemContext extends ContextImpl
 				return;
             
             popMe();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 
 			if (severity >= ExceptionSeverity.SYSTEM_SEVERITY)
 				doShutdown = true;
@@ -77,6 +78,7 @@ final class SystemContext extends ContextImpl
 
 		} finally {
 			// we need this to happen even if we fail to print out a notice
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			getMonitor().shutdown();
 		}
 

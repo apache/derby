@@ -32,6 +32,8 @@ import org.apache.derby.iapi.types.TypeId;
  * Defintion for the MAX()/MIN() aggregates.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class MaxMinAggregateDefinition
 		implements AggregateDefinition 
 {
@@ -61,6 +63,7 @@ class MaxMinAggregateDefinition
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
 			QueryTreeNode.getContext(LanguageConnectionContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			/*
 			** MIN and MAX may return null
@@ -86,6 +89,8 @@ class MaxMinAggregateDefinition
 	/**
 	 * This is set by the parser.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final void setMaxOrMin(boolean isMax)
 	{
 		this.isMax = isMax;
@@ -96,6 +101,8 @@ class MaxMinAggregateDefinition
 	 *
 	 * @return boolean true/false
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final boolean isMax()
 	{
 		return(isMax);

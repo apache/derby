@@ -62,6 +62,7 @@ public class st_derby1939 extends BaseJDBCTestCase {
 	private final int VC_SIZE = 1024;
 
     public st_derby1939(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         super(name);
     }
 
@@ -111,6 +112,7 @@ public class st_derby1939 extends BaseJDBCTestCase {
 			 */
 			for (int j = 0; j < 10; j++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
                 String str = buildString(i + ":" + j);
 				pSt.setInt(1, i % 10);
 				pSt.setString(2, str);
@@ -134,6 +136,7 @@ public class st_derby1939 extends BaseJDBCTestCase {
 		pSt2.setNull(1, Types.INTEGER);
 		pSt2.setDouble(2, 48.0d);
 		pSt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         commit();
 	}
 
@@ -145,6 +148,7 @@ public class st_derby1939 extends BaseJDBCTestCase {
 		 * to "spill" to disk.
 		 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         PreparedStatement pSt = prepareStatement(
 			"select * from d1939_t2 " +
 			"  left outer join " +
@@ -155,6 +159,7 @@ public class st_derby1939 extends BaseJDBCTestCase {
 			"    ) x1 " + 
 			"  on d1939_t2.j = x1.i");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         println("Done preparing, about to execute...");
 		pSt.setShort(1, (short)8);
 		int count = 0;
@@ -168,6 +173,7 @@ public class st_derby1939 extends BaseJDBCTestCase {
 			for (count = 0; rs.next() && count < 10; count++);
 			rs.close();
             println("Ran without error, retrieved first " + count + " rows.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
 		} catch (SQLException se) {
 
@@ -181,6 +187,7 @@ public class st_derby1939 extends BaseJDBCTestCase {
 		}
 
 		pSt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         rollback();
 	}
 

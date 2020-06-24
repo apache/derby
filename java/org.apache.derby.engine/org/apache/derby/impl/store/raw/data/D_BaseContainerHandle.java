@@ -64,6 +64,7 @@ public class D_BaseContainerHandle extends DiagnosticableGeneric
         */
 
         long container_id = ch.getId().getContainerId();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2141
 
         long conglom_id   = 
             D_DiagnosticUtil.diag_containerid_to_conglomid(

@@ -87,6 +87,8 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
         // If the name begins with a quote, then it is the schema-qualified name
         // of a UDT. Parse the name.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         if ( className.charAt( 0 ) == '"' )
         {
             String[] nameParts = IdUtil.parseMultiPartSQLIdentifier( className );

@@ -136,6 +136,7 @@ public interface DataValueDescriptor extends Storable, Orderable
      * the associated stream is given.
      */
     String getTraceString() throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1693
 
 	/**
 	 * Gets the value in the data value descriptor as a boolean.
@@ -290,6 +291,7 @@ public interface DataValueDescriptor extends Storable, Orderable
      * @see StringDataValue#getStreamWithDescriptor()
      */
     InputStream getStream() throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
 
     /**
      * Tells if this data value is, or will be, represented by a stream.
@@ -827,6 +829,7 @@ public interface DataValueDescriptor extends Storable, Orderable
          * or higher than all non-NULL values.
 	 *
 	 * @param other		The Orderable to compare this one to.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
          % @param nullsOrderedLow True if null should be lower than non-NULL
 	 *
 	 * @return  &lt;0 - this Orderable is less than other.

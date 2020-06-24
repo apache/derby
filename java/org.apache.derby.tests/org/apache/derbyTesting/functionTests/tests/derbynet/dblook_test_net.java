@@ -36,6 +36,7 @@ public class dblook_test_net extends dblook_test {
 		new dblook_test_net().doTest();
 		System.out.println("\n[ Done. ]\n");
 		renameDbLookLog("dblook_test_net");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3458
 
 	}
 
@@ -50,6 +51,7 @@ public class dblook_test_net extends dblook_test {
 		try {
 
 			createTestDatabase(dbCreationScript_1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 
 			// Don't let error stream ruin the diff.
 			System.err.close();

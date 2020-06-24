@@ -49,6 +49,8 @@ import java.sql.Types;
 	This virtual table can be invoked by calling it
 	directly
 	<PRE> select * from SYSCS_DIAG.TRANSACTION_TABLE </PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-714
+//IC see: https://issues.apache.org/jira/browse/DERBY-571
 
 	<P>The TransactionTable virtual table takes a snap shot of the 
 	transaction table while the system is in flux, so it is possible that some
@@ -64,6 +66,7 @@ import java.sql.Types;
 	<LI>GLOBAL_XID varchar(140) - nullable.  The global transaction id, only
 	set if this transaction is a participant in a distributed transaction.</LI>
 	<LI>USERNAME varchar(128) - nullable.  The user name, or APP by default.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	May appear null if the transaction is started by Derby.</LI>
 	<LI>TYPE varchar(30) - not nullable. UserTransaction or an internal
 	transaction spawned by Derby.</LI>
@@ -110,6 +113,7 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 		{
 			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
 			transactionTable = lcc.getTransactionExecute().
 			   getAccessManager().getTransactionInfo();
 
@@ -176,6 +180,7 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 		case 7:
 
 			str = info.getStatementTextString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			str = StringUtil.truncate(str, Limits.DB2_VARCHAR_MAXWIDTH);
 			break;
 
@@ -236,10 +241,12 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 		EmbedResultSetMetaData.getResultColumnDescriptor("TYPE",          Types.VARCHAR, false, 30),
 		EmbedResultSetMetaData.getResultColumnDescriptor("STATUS",        Types.VARCHAR, false, 8),
 		EmbedResultSetMetaData.getResultColumnDescriptor("FIRST_INSTANT", Types.VARCHAR, true,  20),
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_TEXT",      Types.VARCHAR, true,  Limits.DB2_VARCHAR_MAXWIDTH),
 	};
 	
     private static final ResultSetMetaData metadata =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         new EmbedResultSetMetaData(columnInfo);
 }
 

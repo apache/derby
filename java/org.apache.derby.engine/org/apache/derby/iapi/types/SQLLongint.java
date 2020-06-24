@@ -132,6 +132,7 @@ public final class SQLLongint
 		if (isNull())
 			return null;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			return value;
 	}
 
@@ -143,6 +144,8 @@ public final class SQLLongint
 	// this is for DataType's error generator
 	public String getTypeName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return TypeId.BIGINT_NAME;
 	}
 
@@ -409,6 +412,7 @@ public final class SQLLongint
 	 * Set the value from a correctly typed Long object.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue)
 	{
 		setValue(((Long) theValue).longValue());

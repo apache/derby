@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UnionNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -44,6 +45,8 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class UnionNode extends SetOperatorNode
 {
 	/* Only optimize it once */
@@ -69,6 +72,8 @@ class UnionNode extends SetOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     UnionNode(ResultSetNode  leftResult,
               ResultSetNode  rightResult,
               boolean        all,
@@ -110,6 +115,8 @@ class UnionNode extends SetOperatorNode
 	 *									directly under a ResultColumn
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void rejectParameters() throws StandardException
 	{
 		if ( ! tableConstructor())
@@ -133,6 +140,7 @@ class UnionNode extends SetOperatorNode
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			SanityManager.ASSERT(getResultColumns().size() <= typeColumns.size(),
 				"More columns in ResultColumnList than in base table.");
 		}
@@ -190,6 +198,10 @@ class UnionNode extends SetOperatorNode
 	 * top of this node and enhance the RCL in that node.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
+//IC see: https://issues.apache.org/jira/browse/DERBY-3
+//IC see: https://issues.apache.org/jira/browse/DERBY-4433
+//IC see: https://issues.apache.org/jira/browse/DERBY-1644
 	ResultSetNode enhanceRCLForInsert(
 			InsertNode target, boolean inOrder, int[] colMap)
 		throws StandardException
@@ -200,6 +212,7 @@ class UnionNode extends SetOperatorNode
 			rightResultSet = target.enhanceAndCheckForAutoincrement
                 ( rightResultSet, inOrder, colMap, false );
 			if (!inOrder ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 getResultColumns().size() < target.resultColumnList.size()) {
 				setResultColumns( getRCLForInsert(target, colMap) );
 			}
@@ -295,6 +308,7 @@ class UnionNode extends SetOperatorNode
 							 rightResultSet.getCostEstimate().singleScanRowCount());
 
         costEst.add(rightResultSet.getCostEstimate(), costEst);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** Get the cost of this result set in the context of the whole plan.
@@ -307,6 +321,8 @@ class UnionNode extends SetOperatorNode
 							(ConglomerateDescriptor) null,
 							outerCost,
 							optimizer,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             costEst
 							);
 
@@ -336,6 +352,8 @@ class UnionNode extends SetOperatorNode
 	 * @exception	StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void pushExpressions(PredicateList predicateList)
 					throws StandardException
 	{
@@ -379,6 +397,8 @@ class UnionNode extends SetOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		ResultSetNode retRSN;
@@ -441,6 +461,8 @@ class UnionNode extends SetOperatorNode
 			 */
 			if (! columnTypesAndLengthsMatch())
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 treeTop = new NormalizeResultSetNode(
                         treeTop, null, null, false, getContextManager());
 			}
@@ -456,6 +478,7 @@ class UnionNode extends SetOperatorNode
 			 * us would have a tableNumber of -1 instead of our tableNumber.)
 			 */
 			((FromTable)treeTop).setTableNumber(tableNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			treeTop.setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
 			all = true;
 		}
@@ -463,6 +486,7 @@ class UnionNode extends SetOperatorNode
 		/* Generate the OrderByNode if a sort is still required for
 		 * the order by.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i=0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
 
@@ -478,6 +502,7 @@ class UnionNode extends SetOperatorNode
             final ValueNode offset = qec.getOffset(i);
             final ValueNode fetchFirst = qec.getFetchFirst(i);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
             if (offset != null || fetchFirst != null) {
                 ResultColumnList newRcl =
                         treeTop.getResultColumns().copyListAndObjects();
@@ -489,6 +514,7 @@ class UnionNode extends SetOperatorNode
                         newRcl,
                         offset,
                         fetchFirst,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
                         qec.getHasJDBCLimitClause()[i].booleanValue(),
                         getContextManager());
             }
@@ -539,6 +565,7 @@ class UnionNode extends SetOperatorNode
 		** the types of the ? parameters come from the columns being inserted
 		** into in that case.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (topTableConstructor && ( ! isInsertSource()) )
 		{
 			/*
@@ -631,6 +658,7 @@ class UnionNode extends SetOperatorNode
 
 		// Get our final cost estimate based on the child estimates.
 		setCostEstimate( getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// build up the tree.
 
@@ -641,6 +669,7 @@ class UnionNode extends SetOperatorNode
 		leftResultSet.generate(acb, mb);
 
 		/* Do we need a NormalizeResultSet above the left ResultSet? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (! getResultColumns().isExactTypeAndLengthMatch(leftResultSet.getResultColumns()))
 		{
 			acb.pushGetResultSetFactoryExpression(mb);
@@ -654,6 +683,7 @@ class UnionNode extends SetOperatorNode
 		rightResultSet.generate(acb, mb);
 
 		/* Do we need a NormalizeResultSet above the right ResultSet? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (! getResultColumns().isExactTypeAndLengthMatch(rightResultSet.getResultColumns()))
 		{
 			acb.pushGetResultSetFactoryExpression(mb);
@@ -674,10 +704,12 @@ class UnionNode extends SetOperatorNode
 		 *  arg7: close method
 		 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(getResultSetNumber());
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUnionResultSet",
                 ClassName.NoPutResultSet, 5);
 	}
@@ -691,10 +723,13 @@ class UnionNode extends SetOperatorNode
 	 *  the sum of the two child costs.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		// If we already found it, just return it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCandidateFinalCostEstimate() != null)
         {
 			return getCandidateFinalCostEstimate();

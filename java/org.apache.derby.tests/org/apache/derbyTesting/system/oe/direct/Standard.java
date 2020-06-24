@@ -121,6 +121,7 @@ public class Standard extends StatementHelper implements Operations {
                         "SELECT D_NEXT_O_ID FROM DISTRICT WHERE D_W_ID = ? AND D_ID = ?");
 
                 PreparedStatement sl2 = prepareStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
                         "SELECT COUNT(DISTINCT(S_I_ID)) AS LOW_STOCK FROM ORDERLINE, STOCK " +
                         "WHERE OL_W_ID = ? AND OL_D_ID = ? " +
                         "AND OL_O_ID < ? AND OL_O_ID >= ? " +
@@ -140,14 +141,17 @@ public class Standard extends StatementHelper implements Operations {
                 rs.next();
                 int nextOrder = rs.getInt("D_NEXT_O_ID");
                 reset(sl1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
 
                 sl2.setInt(3, nextOrder);
                 sl2.setInt(4, nextOrder - 20);
 
                 rs = sl2.executeQuery();
                 rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
                 lowStock = rs.getInt("LOW_STOCK");
                 reset(sl2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
 
                 conn.commit();
             } finally {
@@ -162,6 +166,7 @@ public class Standard extends StatementHelper implements Operations {
         }
 
         if (display != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
             display.displayStockLevel(displayData, w, d, threshold, lowStock);
     }
        
@@ -199,6 +204,7 @@ public class Standard extends StatementHelper implements Operations {
                 
                 nameList.add(customer);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
             reset(osCustomerByName);
             if (nameList.isEmpty())
                 throw new SQLException("Order Status by name - no matching customer "
@@ -250,6 +256,7 @@ public class Standard extends StatementHelper implements Operations {
             customer.setMiddle(rs.getString("C_MIDDLE"));
             customer.setLast(rs.getString("C_LAST"));    
             reset(osCustomerById);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
 
             getOrderStatusForCustomer(display, displayData, false, customer);
         } catch (SQLException e) {
@@ -287,6 +294,7 @@ public class Standard extends StatementHelper implements Operations {
         ResultSet rs = osLastOrderNumber.executeQuery();
         rs.next();
         order.setId(rs.getInt("LAST_ORDER"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         reset(osLastOrderNumber);
         
         // Details for the order.
@@ -555,6 +563,7 @@ public class Standard extends StatementHelper implements Operations {
     }
     
     private static final String[] STOCK_INFO = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
     "SELECT S_QUANTITY, S_DIST_01, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
     "SELECT S_QUANTITY, S_DIST_02, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
     "SELECT S_QUANTITY, S_DIST_03, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
@@ -760,6 +769,7 @@ public class Standard extends StatementHelper implements Operations {
         
         int isolation = conn.getTransactionIsolation(); 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
 
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             
@@ -912,6 +922,7 @@ public class Standard extends StatementHelper implements Operations {
     public void sortOrderItems(int[] items, short[] quantities, short[] supplyW) {
 
         OrderItem4Sort[] list = new OrderItem4Sort[items.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
 
         for (int i = 0; i < items.length; i++)
         {

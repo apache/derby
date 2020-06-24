@@ -108,6 +108,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     public void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3202
         bootDerby();
         // Shutdown engine so we can change properties for error stream
         getTestConfiguration().shutdownEngine();
@@ -116,8 +117,10 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
 
     public void tearDown() throws Exception {
         resetProps();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6380
         closeStreams();
         nullFields();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5725
         super.tearDown();
     }
 
@@ -145,6 +148,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         getTestConfiguration().shutdownEngine();
 
         boolean deleted = deleteFile(derbyLog);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3202
         assertTrue("File " + derbyLog + " could not be deleted", deleted);
     }
 
@@ -169,6 +173,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      * Test the derby.stream.error.file property with wrong input.
      */
     public void testWrongFile() throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3202
         setSystemProperty(FILE_PROP, getCanonicalPath(new File(
               new File(getSystemProperty("derby.system.home"), "foo"),
               makeStreamFilename("file")))); // erroneous path
@@ -354,6 +359,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      * Test the derby.stream.error.style=rollingFile property.
      */
     public void testStyleRollingFile() throws IOException, SQLException  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
         setSystemProperty(STYLE_PROP, ROLLING_FILE_STYLE);
         
         File derby0log = new File(getSystemProperty("derby.system.home"), DERBY_0_LOG);
@@ -518,6 +524,9 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         File derby0log = new File(getSystemProperty("derby.system.home"), DERBY_0_LOG);
         
         setSystemProperty(FILE_PROP, getCanonicalPath(fileStreamFile));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3202
+//IC see: https://issues.apache.org/jira/browse/DERBY-3202
+//IC see: https://issues.apache.org/jira/browse/DERBY-3202
 
         bootDerby();
         getTestConfiguration().shutdownEngine();
@@ -556,6 +565,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         assertIsEmpty(errStreamFile);
 
         boolean deleted = deleteFile(derby0log);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
         assertTrue("File " + derby0log + " could not be deleted", deleted);    
      }
 
@@ -584,6 +594,8 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         assertIsEmpty(errStreamFile);
 
         boolean deleted = deleteFile(derby0log);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
+//IC see: https://issues.apache.org/jira/browse/DERBY-6380
         assertTrue("File " + derby0log + " could not be deleted", deleted);
     }
 
@@ -602,6 +614,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
 
     private void openStreams() throws IOException{
         String systemHome = getSystemProperty("derby.system.home");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6380
         String logFilesHome=systemHome + File.separatorChar + LOGFILESDIR;
         makeDirIfNotExisting(systemHome);
         makeDirIfNotExisting(logFilesHome);
@@ -638,6 +651,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
 
     private static void assertNotDirectory(final File f) throws IOException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             AccessController.doPrivileged(
                     new PrivilegedExceptionAction<Void>() {
                 public Void run() throws IOException {
@@ -653,6 +667,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     private static void assertIsEmpty(final File f) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         String path = getCanonicalPath(f);
         assertTrue(path + " doesn't exist",
                 PrivilegedFileOpsForTests.exists(f));
@@ -666,6 +681,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
             AccessController.doPrivileged(
                     new PrivilegedExceptionAction<Void>() {
                 public Void run() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3202
                     assertTrue("assertNotEmpty failed: " + f.getCanonicalPath()
                           + " does not exist.", f.exists());
                     FileInputStream fis = new FileInputStream(f);
@@ -683,6 +699,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     private static void assertFileSize(final File f, final int size) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
         try {
             AccessController.doPrivileged(
                     new PrivilegedExceptionAction<Void>() {
@@ -698,6 +715,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     private static void assertIsExisting(final File f) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         String path = getCanonicalPath(f);
         assertTrue(path + " doesn't exist",
                 PrivilegedFileOpsForTests.exists(f));
@@ -729,6 +747,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     private static void makeDirIfNotExisting(final String filename) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 File f = new File(filename);
@@ -743,6 +762,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     private static FileOutputStream newFileOutputStream(final File f)
     throws FileNotFoundException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                   new PrivilegedExceptionAction<FileOutputStream>() {
                 public FileOutputStream run() throws FileNotFoundException {
@@ -760,6 +780,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         removeSystemProperty(FILE_PROP);
         removeSystemProperty(METHOD_PROP);
         removeSystemProperty(FIELD_PROP);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
         removeSystemProperty(STYLE_PROP);        
     }
 
@@ -802,6 +823,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      * </p>
      */
     public void runBareOverridable() throws Throwable {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6380
         PrintStream out = System.out;
         TestConfiguration config = getTestConfiguration();
         boolean stopAfterFirstFail = config.stopAfterFirstFail();
@@ -813,6 +835,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         catch (Throwable running) {
             PrintWriter stackOut = null;
             try{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6380
                 copyFileToFail(LOGFILESDIR);
                 nullFields();
                 deleteFile(LOGFILESDIR);
@@ -855,6 +878,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
             // attempt to clean up
             // first ensure we have the engine shutdown, or some
             // files cannot be cleaned up.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6380
             getTestConfiguration().shutdownEngine();
             File origLogFilesDir = new File(DEFAULT_DB_DIR, LOGFILESDIR);
             nullFields();

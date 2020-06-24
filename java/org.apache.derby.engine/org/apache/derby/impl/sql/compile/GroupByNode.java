@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.GroupByNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -70,6 +71,8 @@ import org.apache.derby.impl.sql.execute.AggregatorInfoList;
  *
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class GroupByNode extends SingleChildResultSetNode
 {
 	/**
@@ -103,6 +106,7 @@ class GroupByNode extends SingleChildResultSetNode
 
 	// Is the source in sorted order
     final private boolean isInSortedOrder;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	private ValueNode havingClause;
 	
@@ -124,6 +128,8 @@ class GroupByNode extends SingleChildResultSetNode
      * @param cm            The context manager
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     GroupByNode(ResultSetNode  bottomPR,
                 GroupByList    groupingList,
                 List<AggregateNode> aggregates,
@@ -157,6 +163,8 @@ class GroupByNode extends SingleChildResultSetNode
 		}
 
 		ResultColumnList newBottomRCL;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         this.groupingList = groupingList;
         this.aggregates = aggregates;
 		this.parent = this;
@@ -169,6 +177,7 @@ class GroupByNode extends SingleChildResultSetNode
 		** RCL to its columns.
 		*/
 		newBottomRCL = childResult.getResultColumns().copyListAndObjects();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setResultColumns( childResult.getResultColumns() );
 		childResult.setResultColumns(newBottomRCL);
 
@@ -181,6 +190,7 @@ class GroupByNode extends SingleChildResultSetNode
 
 		if (this.groupingList != null && this.groupingList.isRollup())
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                     getResultColumns().setNullability(true);
 			parent.getResultColumns().setNullability(true);
                 }
@@ -199,6 +209,7 @@ class GroupByNode extends SingleChildResultSetNode
 			int index;
 			for (index = 0; index < glSize; index++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 GroupByColumn gc = this.groupingList.elementAt(index);
 				if (gc.getColumnExpression() instanceof ColumnReference) 
 				{
@@ -261,6 +272,8 @@ class GroupByNode extends SingleChildResultSetNode
 			int count = aggInfo.size();
 			for (int i = 0; i < count; i++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 agg = aggInfo.elementAt(i);
 				if (agg.isDistinct())
 				{
@@ -291,7 +304,10 @@ class GroupByNode extends SingleChildResultSetNode
 		** Get the new PR, put above the GroupBy.  
 		*/
         ResultColumnList rclNew = new ResultColumnList((getContextManager()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns())
 		{
 			if (!rc.isGenerated()) {
@@ -302,8 +318,11 @@ class GroupByNode extends SingleChildResultSetNode
 		// if any columns in the source RCL were generated for an order by
 		// remember it in the new RCL as well. After the sort is done it will
 		// have to be projected out upstream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		rclNew.copyOrderBySelect(getResultColumns());
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         parent = new ProjectRestrictNode(
 										this, 	// child
 										rclNew,
@@ -324,6 +343,7 @@ class GroupByNode extends SingleChildResultSetNode
 		** Set the group by RCL to be empty
 		*/
         setResultColumns( new ResultColumnList((getContextManager())) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 	}
 
@@ -342,14 +362,19 @@ class GroupByNode extends SingleChildResultSetNode
 	{
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
 		ResultColumnList groupByRCL = getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		ArrayList<SubstituteExpressionVisitor> referencesToSubstitute = new ArrayList<SubstituteExpressionVisitor>();
 		ArrayList<SubstituteExpressionVisitor> havingRefsToSubstitute = null;
 		if (havingClause != null)
 			havingRefsToSubstitute = new ArrayList<SubstituteExpressionVisitor>();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (GroupByColumn gbc : groupingList)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ResultColumn newRC = new ResultColumn(
                     "##UnaggColumn",
 					gbc.getColumnExpression(),
@@ -362,6 +387,8 @@ class GroupByNode extends SingleChildResultSetNode
 			newRC.setVirtualColumnId(bottomRCL.size());
 			
 			// now add this column to the groupbylist
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ResultColumn gbRC = new ResultColumn(
                     "##UnaggColumn",
 					gbc.getColumnExpression(),
@@ -376,6 +403,8 @@ class GroupByNode extends SingleChildResultSetNode
 			 ** Reset the original node to point to the
 			 ** Group By result set.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             VirtualColumnNode vc = new VirtualColumnNode(
 					this, // source result set.
 					gbRC,
@@ -438,6 +467,7 @@ class GroupByNode extends SingleChildResultSetNode
 			}
 			gbc.setColumnPosition(bottomRCL.size());
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		ExpressionSorter sorter = new ExpressionSorter();
 		Collections.sort(referencesToSubstitute,sorter);
 		for (int r = 0; r < referencesToSubstitute.size(); r++)
@@ -500,6 +530,7 @@ class GroupByNode extends SingleChildResultSetNode
 	  </pre>
 	 * the query tree ends up looking like this:
 	   <pre>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	    ProjectRestrictNode RCL -&gt; (ptr to GBN(column[0]), ptr to GBN(column[1]), ptr to GBN(column[4]))
 	              |
 	    GroupByNode RCL-&gt;(C1, SUM(C2), &lt;agg-input&gt;, <aggregator>, MAX(C3), &lt;agg-input&gt;, &lt;aggregator&gt;)
@@ -532,9 +563,11 @@ class GroupByNode extends SingleChildResultSetNode
 	{
 		aggInfo = new AggregatorInfoList();
 		ArrayList<SubstituteExpressionVisitor> havingRefsToSubstitute = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		if (groupingList != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4071
 			havingRefsToSubstitute = addUnAggColumns();
 		}
 
@@ -546,6 +579,8 @@ class GroupByNode extends SingleChildResultSetNode
 			// having clause.
 			if (havingRefsToSubstitute != null) {
 				for (int r = 0; r < havingRefsToSubstitute.size(); r++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     havingClause.accept(havingRefsToSubstitute.get(r));
 				}
 			}
@@ -559,6 +594,7 @@ class GroupByNode extends SingleChildResultSetNode
 			// it is allright to have columns from parent or child subqueries;
 			//   select * from p where p.p1 in 
 			//      (select c.c1 from c group by c.c1 having count(*) = p.p2
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             CollectNodesVisitor<ColumnReference> collectNodesVisitor =
                 new CollectNodesVisitor<ColumnReference>(
                     ColumnReference.class, AggregateNode.class);
@@ -566,6 +602,8 @@ class GroupByNode extends SingleChildResultSetNode
 
             for (ColumnReference cr: collectNodesVisitor.getList())
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 				if ( ! (cr.getGeneratedToReplaceAggregate() ||
 						cr.getGeneratedToReplaceWindowFunctionCall()) &&
 					 cr.getSourceLevel() == level) {
@@ -592,6 +630,7 @@ class GroupByNode extends SingleChildResultSetNode
 		ResultColumn	tmpRC;
 		ResultColumn	aggResultRC;
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		ResultColumnList groupByRCL = getResultColumns();
 		ResultColumnList aggRCL;
 		int				aggregatorVColId;
@@ -608,6 +647,8 @@ class GroupByNode extends SingleChildResultSetNode
 		
 		ReplaceAggregatesWithCRVisitor replaceAggsVisitor = 
 			new ReplaceAggregatesWithCRVisitor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     new ResultColumnList((getContextManager())),
 				((FromTable) childResult).getTableNumber(),
 				ResultSetNode.class);
@@ -618,6 +659,8 @@ class GroupByNode extends SingleChildResultSetNode
 		{
 			// replace aggregates in the having clause with column references.
 			replaceAggsVisitor = new ReplaceAggregatesWithCRVisitor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     new ResultColumnList((getContextManager())),
 					((FromTable)childResult).getTableNumber());
 			havingClause.accept(replaceAggsVisitor);
@@ -635,6 +678,8 @@ class GroupByNode extends SingleChildResultSetNode
 		for (int index = 0; index < alSize; index++)
 		{
             AggregateNode aggregate = aggregates.get(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/*
 			** AGG RESULT: Set the aggregate result to null in the
@@ -656,6 +701,8 @@ class GroupByNode extends SingleChildResultSetNode
 			** was created when we called
 			** ReplaceAggregatesWithCRVisitor()
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             newColumnRef = new ColumnReference(newRC.getName(),
                                                null,
                                                getContextManager());
@@ -689,6 +736,8 @@ class GroupByNode extends SingleChildResultSetNode
 			bottomRCL.addElement(newRC);
 			newRC.setVirtualColumnId(bottomRCL.size());
 			aggInputVColId = newRC.getVirtualColumnId();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
            aggResultRC = new ResultColumn(
                     "##aggregate expression",
                     aggregate.getNewNullResultExpression(),
@@ -726,6 +775,8 @@ class GroupByNode extends SingleChildResultSetNode
 			** to generate a proper result description for input
 			** to this agg if it is a user agg.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             aggRCL = new ResultColumnList((getContextManager()));
 			aggRCL.addElement(aggResultRC);
 
@@ -776,6 +827,7 @@ class GroupByNode extends SingleChildResultSetNode
 			throws StandardException
 	{
 		// RESOLVE: NEED TO FACTOR IN THE COST OF GROUPING (SORTING) HERE
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         ((Optimizable) childResult).optimizeIt( optimizer,
                                                 predList,
                                                 outerCost,
@@ -813,6 +865,8 @@ class GroupByNode extends SingleChildResultSetNode
 													optimizer,
 													rowOrdering);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         CostEstimate costEst = getCostEstimate(optimizer);
         costEst.setCost(childCost.getEstimatedCost(),
 							childCost.rowCount(),
@@ -846,6 +900,7 @@ class GroupByNode extends SingleChildResultSetNode
 		if (SanityManager.DEBUG)
 		{
 			return "singleInputRowOptimization: " + singleInputRowOptimization + "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				super.toString();
 		}
 		else
@@ -861,14 +916,20 @@ class GroupByNode extends SingleChildResultSetNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
 
             printLabel(depth, "aggregates:\n");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
             for (int i = 0; i < aggregates.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 AggregateNode agg = aggregates.get(i);
                 debugPrint(formatNodeString("[" + i + "]:", depth + 1));
                 agg.treePrint(depth + 1);
@@ -925,6 +986,8 @@ class GroupByNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows)
@@ -940,6 +1003,7 @@ class GroupByNode extends SingleChildResultSetNode
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.
         setCostEstimate( getOptimizerFactory().getCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
@@ -949,6 +1013,7 @@ class GroupByNode extends SingleChildResultSetNode
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 	ResultColumnDescriptor[] makeResultDescriptors()
 	{
 	    return childResult.makeResultDescriptors();
@@ -990,6 +1055,7 @@ class GroupByNode extends SingleChildResultSetNode
 
 		// Get the final cost estimate from the child.
 		setCostEstimate( childResult.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** Get the column ordering for the sort.  Note that
@@ -1012,9 +1078,12 @@ class GroupByNode extends SingleChildResultSetNode
 		{
 			if (SanityManager.DEBUG_ON("AggregateTrace"))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 StringBuilder s = new StringBuilder();
 					
 				s.append("Group by column ordering is (");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
                 ColumnOrdering[] ordering =
                         orderingHolder.getArray(ColumnOrdering[].class);
 
@@ -1050,6 +1119,7 @@ class GroupByNode extends SingleChildResultSetNode
 		mb.push(orderingItem);
 
         mb.push(acb.addItem(getResultColumns().buildRowTemplate()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		mb.push(getResultColumns().getTotalColumnSize());
 		mb.push(getResultSetNumber());
@@ -1117,10 +1187,13 @@ class GroupByNode extends SingleChildResultSetNode
 		 */
 		String resultSet = (addDistinctAggregate) ? "getDistinctGroupedAggregateResultSet" : "getGroupedAggregateResultSet";
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 		mb.push(groupingList.isRollup());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet,
                 ClassName.NoPutResultSet, 10);
 
@@ -1149,6 +1222,8 @@ class GroupByNode extends SingleChildResultSetNode
 		ColumnReference	tmpColumnRef;
 		ResultColumn	newRC;
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         tmpColumnRef = new ColumnReference(targetRC.getName(),
                                            null,
                                            getContextManager());
@@ -1194,6 +1269,8 @@ class GroupByNode extends SingleChildResultSetNode
 		{
             if (aggregates.size() == 1)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 AggregateNode an = aggregates.get(0);
 				AggregateDefinition ad = an.getAggregateDefinition();
 				if (ad instanceof MaxMinAggregateDefinition)
@@ -1203,6 +1280,7 @@ class GroupByNode extends SingleChildResultSetNode
 						/* See if the underlying ResultSet tree
 						 * is ordered on the ColumnReference.
 						 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                         ColumnReference[] crs = {
                             (ColumnReference) an.getOperand()
                         };
@@ -1210,10 +1288,12 @@ class GroupByNode extends SingleChildResultSetNode
                         // Holder list for the FromBaseTable. We expect no more
                         // than one table, hence initial capacity is 1.
                         ArrayList<FromBaseTable> fbtHolder = new ArrayList<FromBaseTable>(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                         boolean minMaxOptimizationPossible = isOrderedOn(crs, false, fbtHolder);
 						if (SanityManager.DEBUG)
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                             SanityManager.ASSERT(fbtHolder.size() <= 1,
                                 "bad number of FromBaseTables returned by isOrderedOn() -- " +
                                 fbtHolder.size());
@@ -1254,6 +1334,8 @@ class GroupByNode extends SingleChildResultSetNode
 								}
 							}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             FromBaseTable fbt = fbtHolder.get(0);
 							MaxMinAggregateDefinition temp = (MaxMinAggregateDefinition)ad;
 
@@ -1316,6 +1398,8 @@ class GroupByNode extends SingleChildResultSetNode
 	 * a+b+c, a+b, then a.
 	 */
     private static class ExpressionSorter
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         implements Comparator<SubstituteExpressionVisitor>
 	{
 		public int compare(SubstituteExpressionVisitor o1, SubstituteExpressionVisitor o2)
@@ -1324,6 +1408,7 @@ class GroupByNode extends SingleChildResultSetNode
 				ValueNode v1 = o1.getSource();
 				ValueNode v2 = o2.getSource();
 				int refCount1, refCount2;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 CollectNodesVisitor<ColumnReference> vis =
                     new CollectNodesVisitor<ColumnReference>(
                         ColumnReference.class);

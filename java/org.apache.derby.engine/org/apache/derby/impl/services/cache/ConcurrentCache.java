@@ -207,6 +207,7 @@ final class ConcurrentCache implements CacheManager {
         CacheEntry entry = cache.remove(key);
         entry.getCacheable().clearIdentity();
         entry.setCacheable(null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         countEviction();
     }
 
@@ -226,6 +227,8 @@ final class ConcurrentCache implements CacheManager {
             throws StandardException {
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2911
+//IC see: https://issues.apache.org/jira/browse/DERBY-3493
             replacementPolicy.insertEntry(entry);
         } catch (StandardException se) {
             // Failed to insert the entry into the replacement policy. Make
@@ -285,6 +288,8 @@ final class ConcurrentCache implements CacheManager {
      */
     public Cacheable find(Object key) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2911
+//IC see: https://issues.apache.org/jira/browse/DERBY-3493
         if (stopped) {
             return null;
         }
@@ -298,6 +303,7 @@ final class ConcurrentCache implements CacheManager {
                 // The object is already cached. Increase the use count and
                 // return it.
                 entry.keep(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
                 countHit();
                 return item;
             } else {
@@ -361,9 +367,11 @@ final class ConcurrentCache implements CacheManager {
             // locked it, getCacheable() returns null and so should we do.
             Cacheable item = entry.getCacheable();
             if (item != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
                 countHit();
                 entry.keep(true);
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
                 countMiss();
             }
             return item;
@@ -388,6 +396,8 @@ final class ConcurrentCache implements CacheManager {
     public Cacheable create(Object key, Object createParameter)
             throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2911
+//IC see: https://issues.apache.org/jira/browse/DERBY-3493
         if (stopped) {
             return null;
         }
@@ -627,6 +637,7 @@ final class ConcurrentCache implements CacheManager {
         if (cleaner != null) {
             cleaner.unsubscribe();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         deregisterMBean();
     }
 
@@ -713,12 +724,14 @@ final class ConcurrentCache implements CacheManager {
 
     @Override
     public void registerMBean(String dbName) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(mbean == null, "registerMBean() called twice");
         }
 
         ManagementService managementService =
                 (ManagementService) getSystemModule(Module.JMX);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         if (managementService != null) {
             mbean = managementService.registerMBean(
@@ -731,8 +744,11 @@ final class ConcurrentCache implements CacheManager {
 
     @Override
     public void deregisterMBean() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         if (mbean != null) {
             ManagementService managementService =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 (ManagementService) getSystemModule(Module.JMX);
             if (managementService != null) {
                 managementService.unregisterMBean(mbean);
@@ -794,6 +810,7 @@ final class ConcurrentCache implements CacheManager {
 
     /** Get the number of allocated entries in the cache. */
     long getAllocatedEntries() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         return replacementPolicy.size();
     }
 
@@ -808,6 +825,7 @@ final class ConcurrentCache implements CacheManager {
      */
     private static  Object getSystemModule( final String factoryInterface )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Object>()

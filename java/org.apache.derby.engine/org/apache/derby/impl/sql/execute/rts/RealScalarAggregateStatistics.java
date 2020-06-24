@@ -146,6 +146,7 @@ public class RealScalarAggregateStatistics
 		return getStatementExecutionPlanText(0);
 	}
   public java.util.Vector<ResultSetStatistics> getChildren(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     java.util.Vector<ResultSetStatistics> children = new java.util.Vector<ResultSetStatistics>();
     children.addElement(childResultSetStatistics);
     return children;
@@ -186,6 +187,7 @@ public class RealScalarAggregateStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                              // the number of index updates 
            null,                           // lock mode

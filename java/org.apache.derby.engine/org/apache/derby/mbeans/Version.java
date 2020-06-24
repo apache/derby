@@ -47,6 +47,7 @@ public class Version implements VersionMBean {
     
     public Version(ProductVersionHolder pvh, String permissionName) {
         versionInfo = pvh;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         this.permissionName = permissionName;
     }
     
@@ -59,6 +60,7 @@ public class Version implements VersionMBean {
      */
     private void checkMonitor() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
         try {
             if (System.getSecurityManager() != null)
                 AccessController.checkPermission(

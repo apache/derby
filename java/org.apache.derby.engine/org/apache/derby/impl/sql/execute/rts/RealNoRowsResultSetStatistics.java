@@ -119,6 +119,7 @@ abstract class RealNoRowsResultSetStatistics
 	 * @return java.util.Vector	A vector of objects.
 	 */
   public Vector<ResultSetStatistics> getChildren(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     Vector<ResultSetStatistics> children = new Vector<ResultSetStatistics>();
     children.addElement(sourceResultSetStatistics);
     return children;
@@ -178,6 +179,7 @@ abstract class RealNoRowsResultSetStatistics
            null,                                   // the open time
            null,                                   // the next time
            null,                                   // the close time
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.executeTime,             // the execute time
            null,                                   // the avg next time/row
            null,                                   // the projection time

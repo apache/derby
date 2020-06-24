@@ -37,6 +37,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
  * multiple distinct aggregates.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 {
 
@@ -58,6 +59,7 @@ class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     DistinctGroupedAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,

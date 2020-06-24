@@ -87,6 +87,7 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
      */
     public RowMultiSetImpl( String[] columnNames, TypeDescriptor[] types )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
         _columnNames = ArrayUtil.copy( columnNames );
         setTypes( types );
 

@@ -51,6 +51,7 @@ class LockTableVTI implements Enumeration
 	private ListIterator waitingList;
 	private Latch nextLock;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 	LockTableVTI(Map clonedLockTable)
 	{
 		outerControl = clonedLockTable.values().iterator();
@@ -65,6 +66,7 @@ class LockTableVTI implements Enumeration
 		for (;;) {
 
 			if (control == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 				if (!outerControl.hasNext())
 					return false;
 //System.out.println("new control lock ");
@@ -102,6 +104,7 @@ class LockTableVTI implements Enumeration
 		Latch lock = null;
 		if (grantedList != null) {
 			if (grantedList.hasNext()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5224
 				lock = (Latch) grantedList.next();
 			}
 			else
@@ -111,6 +114,7 @@ class LockTableVTI implements Enumeration
 		if (lock == null) {
 			if (waitingList != null) {
 				if (waitingList.hasNext()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5224
 					lock = (Latch) waitingList.next();
 				}
 				else

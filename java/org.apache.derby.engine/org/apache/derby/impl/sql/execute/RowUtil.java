@@ -45,6 +45,7 @@ public class RowUtil
      */
     public  static  void    setRowCountBase( long newBase )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (SanityManager.DEBUG)    { rowCountBase = newBase; }
     }
 
@@ -59,6 +60,7 @@ public class RowUtil
 	  */
 	public static ExecRow getEmptyValueRow(int columnCount, LanguageConnectionContext lcc)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		return lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(columnCount);
 	}
 
@@ -70,6 +72,7 @@ public class RowUtil
 	  */
 	public static ExecIndexRow getEmptyIndexRow(int columnCount, LanguageConnectionContext lcc)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		return lcc.getLanguageConnectionFactory().
             getExecutionFactory().getIndexableRow(columnCount);
 	}
@@ -170,6 +173,7 @@ public class RowUtil
 	  For copying from a compact array to a reconstituted array.
 	  E.g. if positions = {2, 4}, and from = {666, 777} then
 	  to =&gt; {null, 666, null, 777}.  Will only go as far as to.getArray().length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 	  @param to Place the column references here.  Sparse array
 	  @param from Get the column references from here. Compact array

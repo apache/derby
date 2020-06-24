@@ -61,6 +61,7 @@ import java.sql.PreparedStatement;
  * </UL>
 
   <P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   Format : &lt;encoded length&gt;&lt;raw data&gt;
   <BR>
   Length is encoded to support Cloudscape 5.x databases where the length was stored as the number of bits.
@@ -88,6 +89,7 @@ import java.sql.PreparedStatement;
   <BR>
   The Cloudscape '5.x format bits' format I think was never used by Derby.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 abstract class SQLBinary
 	extends DataType implements BitDataValue
 {
@@ -208,6 +210,7 @@ abstract class SQLBinary
 	 */
 	public final InputStream	getStream() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         if (!hasStream()) {
             throw StandardException.newException(
                     SQLState.LANG_STREAM_INVALID_ACCESS, getTypeName());
@@ -252,6 +255,7 @@ abstract class SQLBinary
 		}
 		catch (IOException ioe)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3732
 			throwStreamingIOException(ioe);
 		}
 		catch (SQLException se) { throw StandardException.plainWrapException( se ); }
@@ -275,6 +279,7 @@ abstract class SQLBinary
 					// If we have the stream length encoded.
 					// just read that.
 					streamValueLength = readBinaryLength((ObjectInput) stream);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
                     if (streamValueLength == 0) {
                         // Otherwise we will have to read the whole stream.
                         streamValueLength =
@@ -355,8 +360,10 @@ abstract class SQLBinary
             
             int bytesRead = 0;
             int numOfBytes = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4686
             byte[] buffer = new byte[Math.min(len, LEN_OF_BUFFER_TO_WRITE_BLOB)];
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-4686
             while(bytesRead < len) {
                 numOfBytes = is.read(buffer);
                 
@@ -595,7 +602,9 @@ abstract class SQLBinary
      *  Beetle 4896
      */
     public final DataValueDescriptor cloneHolder() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
         if (stream == null && _blobValue == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
             return cloneValue(false);
         } else {
             // Cast to SQLBinary to avoid having to catch StandardException.
@@ -629,6 +638,7 @@ abstract class SQLBinary
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", se);
 			return null;
 		}
@@ -956,6 +966,7 @@ abstract class SQLBinary
 				BitDataValue result)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5246
         if (result == null)
         {
             result = (BitDataValue) getNewNull();
@@ -1168,6 +1179,7 @@ abstract class SQLBinary
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", se);
 			return 0;
 		}
@@ -1175,6 +1187,7 @@ abstract class SQLBinary
 		// Hash code should ignore trailing PAD bytes.
 		byte[] bytes = dataValue;
         int lastNonPadByte = bytes.length - 1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3981
         while (lastNonPadByte >= 0 && bytes[lastNonPadByte] == PAD) {
             lastNonPadByte--;
         }
@@ -1232,6 +1245,7 @@ abstract class SQLBinary
       */
      public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-203
                   ps.setBytes(position, getBytes());
      }
 
@@ -1247,6 +1261,7 @@ abstract class SQLBinary
         }
 
         // Check if we have a stream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         if (hasStream()) {
             return (getTypeName() + "(" + getStream().toString() + ")");
         }
@@ -1291,6 +1306,7 @@ abstract class SQLBinary
                     getLength(), desiredWidth);
 
             StatementContext statementContext = (StatementContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 DataValueFactoryImpl.getContext(ContextId.LANG_STATEMENT);
             statementContext.getActivation().
                     getResultSet().addWarning(warning);

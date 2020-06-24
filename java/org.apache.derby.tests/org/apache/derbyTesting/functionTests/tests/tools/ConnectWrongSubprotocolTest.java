@@ -39,11 +39,13 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class ConnectWrongSubprotocolTest extends BaseJDBCTestCase {
 
     public ConnectWrongSubprotocolTest(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5084
         super(name);
     }
     
     public static Test suite() {
         // Test does not run on J2ME
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         if (JDBC.vmSupportsJSR169()) {
             return new BaseTestSuite(
                 "empty: no support for Driver.sql.Manager with jsr 169");
@@ -86,6 +88,7 @@ public class ConnectWrongSubprotocolTest extends BaseJDBCTestCase {
     private String runIjScript(String ijScript, boolean useSystemProperties) 
             throws UnsupportedEncodingException, SQLException {
         ByteArrayInputStream bais = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
         		new ByteArrayInputStream(ijScript.getBytes("US-ASCII"));
         ByteArrayOutputStream baos = new ByteArrayOutputStream(10 * 1024);
         Connection conn = getConnection();
@@ -101,6 +104,7 @@ public class ConnectWrongSubprotocolTest extends BaseJDBCTestCase {
         if (!conn.isClosed() && !conn.getAutoCommit())
             conn.commit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
         return new String(baos.toByteArray(), "US-ASCII");
     }
 }

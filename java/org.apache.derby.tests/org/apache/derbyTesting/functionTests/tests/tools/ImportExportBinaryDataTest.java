@@ -54,6 +54,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(ImportExportBinaryDataTest.class);
 
@@ -76,6 +77,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
                               "C_VBD VARCHAR(10) FOR BIT DATA, " +
                               "C_LVBD LONG VARCHAR FOR BIT DATA)");
                     // Create a table that holds some invalid hex strings. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                     s.execute("CREATE TABLE hex_tab(id int," +
                               "C1 varchar(20)," + 
                               "C2 varchar(20)," +
@@ -273,6 +275,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         try {
             doExportQuery("select * from BIN_TAB", fileName,
                           "|", "f", null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
@@ -291,12 +294,17 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
             doImportTable("APP", "BIN_TAB_IMP", fileName, "2", null, null, 0);
             fail();
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
              assertSQLState("XIE0J", e);
         }
 
         try {
             doImportData(null, "BIN_TAB_IMP", null, 
                          null,  fileName, null, "c", null, 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
@@ -309,6 +317,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
      * the import file. 
      */
     public void testImportWitgInvalidHexStrings() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         throws SQLException   
     {
         Statement s = createStatement();
@@ -364,6 +373,12 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
             assertSQLState("XIE0N", e);
         }
     }

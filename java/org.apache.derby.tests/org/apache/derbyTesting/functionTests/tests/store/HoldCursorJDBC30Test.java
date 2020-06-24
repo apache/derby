@@ -102,6 +102,7 @@ public final class HoldCursorJDBC30Test extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("HoldCursorJDBC30Test");
         suite.addTest(decorateTest(TestConfiguration.embeddedSuite(HoldCursorJDBC30Test.class)));
         suite.addTest(decorateTest(TestConfiguration.clientServerSuite(HoldCursorJDBC30Test.class)));

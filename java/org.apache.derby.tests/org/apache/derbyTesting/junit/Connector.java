@@ -59,6 +59,7 @@ interface Connector {
      * defined by the configuration passed to setConfiguration.
      * If the database does not exist then it should be created.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
     abstract Connection openConnection(String databaseName) throws SQLException;
    
     /**
@@ -74,6 +75,7 @@ interface Connector {
      * defined by the configuration passed to setConfiguration.
      * If the database does not exist then it should be created.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
      abstract Connection openConnection(String databaseName, String user, String password)
          throws SQLException;
 
@@ -106,11 +108,13 @@ interface Connector {
      * Return nothing, exception is expected to be thrown with SQLState XJ015
      * @param deregisterDriver if true, deregister driver
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     abstract void shutEngine(boolean deregisterDriver) throws SQLException;
    
     /**
      * Set the login timeout for getting connections. Timeout is measured in seconds.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
     abstract void setLoginTimeout( int seconds ) throws SQLException;
     
     /**

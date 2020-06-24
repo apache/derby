@@ -43,10 +43,13 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("errorcode Test");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
         suite.addTest(TestConfiguration.defaultSuite(ErrorCodeTest.class));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5251
         return new LocaleTestSetup(suite, Locale.ENGLISH);
     }
 
@@ -54,6 +57,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
     {
         ResultSet rs = null;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         Statement s = createStatement();
         
         s.executeUpdate(
@@ -80,6 +84,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
        // -- test ErrorMessages VTI        
         rs = s.executeQuery(
             "select * from SYSCS_DIAG.error_Messages  where "
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
             + "CAST(sql_state AS CHAR(5)) = '07000'");
          
         String [][] expRS = new String [][]
@@ -97,6 +102,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08001","A connection could not be established because the security token is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","A connection could not be established because the user id has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","A connection could not be established because the password has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-4009
         		{"08001","A connection could not be established because the external name (EXTNAM) has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","A connection could not be established because the server name (SRVNAM) has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","Required Derby DataSource property {0} not set.","40000"},
@@ -118,14 +124,19 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08004","Database connection refused.","40000"},
         		{"08004","User '{0}' cannot shut down database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08004","User '{0}' cannot (re)encrypt database '{1}'. Only the database owner can perform this operation.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6061
         		{"08004","User '{0}' cannot upgrade database '{1}'. Only the database owner can perform this operation.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
         		{"08004","Connection refused to database '{0}' because it is in replication slave mode.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
+//IC see: https://issues.apache.org/jira/browse/DERBY-2954
         		{"08004","User '{0}' cannot issue a replication operation on database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08004","Missing permission for user '{0}' to shutdown system [{1}].","40000"},
         		{"08004","Cannot check system permission to create database '{0}' [{1}].","40000"},
         		{"08004","Missing permission for user '{0}' to create database '{1}' [{2}].","40000"},
         		{"08004","Connection authentication failure occurred. Either the supplied credentials were invalid, or the database uses a password encryption scheme not compatible with the strong password substitution security mechanism. If this error started after upgrade, refer to the release note for DERBY-4483 for options.","40000"},
         		{"08004","Username or password is null or 0 length.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 {"08004","User '{0}' cannot decrypt database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08006","An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
         		{"08006","SocketException: '{0}'","40000"},
@@ -136,6 +147,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08006","A network protocol error was encountered and the connection has been terminated: {0}","40000"},
         		{"08006","org.apache.derby.jdbc.EmbeddedDriver is not registered with the JDBC driver manager","40000"},
         		{"08006","Database '{0}' shutdown.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
                 {"08006","Database '{0}' dropped.","45000"},
         		{"0A000","The DRDA command {0} is not currently implemented.  The connection has been terminated.","40000"},
         		{"57017","There is no available conversion for the source code page, {0}, to the target code page, {1}.  The connection has been terminated.","40000"},
@@ -159,16 +171,19 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"58015","The DDM object 0x{0} is not supported.  The connection has been terminated.","40000"},
         		{"58016","The DDM parameter 0x{0} is not supported.  The connection has been terminated.","40000"},
         		{"58017","The DDM parameter value 0x{0} is not supported.  An input host variable may not be within the range the server supports.  The connection has been terminated.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         		{"XBDA0","Login timeout exceeded.","40000"},
         		{"XBM01","Startup failed due to an exception. See next exception for details. ","45000"},
         		{"XBM02","Startup failed due to missing functionality for {0}. Please ensure your classpath includes the correct Derby software.","45000"},
         		{"XBM03","Supplied value '{0}' for collation attribute is invalid, expecting UCS_BASIC or TERRITORY_BASED.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
         		{"XBM04","Collator support not available from the JVM for the database's locale '{0}'.","45000"},
         		{"XBM05","Startup failed due to missing product version information for {0}.","45000"},
         		{"XBM06","Startup failed. An encrypted database cannot be accessed without the correct boot password.  ","45000"},
         		{"XBM07","Startup failed. Boot password must be at least 8 bytes long.","45000"},
         		{"XBM08","Could not instantiate {0} StorageFactory class {1}.","45000"},
         		{"XBM0A","The database directory '{0}' exists. However, it does not contain the expected '{1}' file. Perhaps Derby was brought down in the middle of creating this database. You may want to delete this directory and try creating the database again.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
 			{"XBM0B","Failed to edit/write service properties file: {0}","45000"},
 			{"XBM0C","Missing privilege for operation '{0}' on file '{1}': {2}", "45000"},
         		{"XBM0G","Failed to start encryption engine. Please make sure you are running Java 2 and have downloaded an encryption provider such as jce and put it in your class path. ","45000"},
@@ -177,6 +192,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XBM0J","Directory {0} already exists.","45000"},
         		{"XBM0K","Unknown sub-protocol for database name {0}.","45000"},
         		{"XBM0L","Specified authentication scheme class {0} does implement the authentication interface {1}.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-5741
         		{"XBM0M","Error creating an instance of a class named '{0}'. This class name was the value of the derby.authentication.provider property and was expected to be the name of an application-supplied implementation of org.apache.derby.authentication.UserAuthenticator. The underlying problem was: {1}","45000"},
         		{"XBM0N","JDBC Driver registration with java.sql.DriverManager failed. See next exception for details. ","45000"},
         		{"XBM0P","Service provider is read-only. Operation not permitted. ","45000"},
@@ -184,6 +200,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XBM0R","Unable to remove File {0}.  ","45000"},
         		{"XBM0S","Unable to rename file '{0}' to '{1}'","45000"},
         		{"XBM0T","Ambiguous sub-protocol for database name {0}.   ","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-4628
         		{"XBM0X","Supplied locale description '{0}' is invalid, expecting ln[_CO[_variant]]\nln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.","45000"},
         		{"XBM0Y","Backup database directory {0} not found. Please make sure that the specified backup path is right.","45000"},
         		{"XBM0Z","Unable to copy file '{0}' to '{1}'. Please make sure that there is enough space and permissions are correct. ","45000"},
@@ -191,8 +208,10 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XJ004","Database '{0}' not found.","40000"},
         		{"XJ015","Derby system shutdown.","50000"},
         		{"XJ028","The URL '{0}' is not properly formed.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-4598
         		{"XJ040","Failed to start database '{0}' with class loader {1}, see the next exception for details.","40000"},
         		{"XJ041","Failed to create database '{0}', see the next exception for details.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
                 {"XJ048","Conflicting boot attributes specified: {0}","40000"},
         		{"XJ049","Conflicting create attributes specified.","40000"},
         		{"XJ05B","JDBC attribute '{0}' has an invalid value '{1}', valid values are '{2}'.","40000"},
@@ -201,6 +220,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XN022","A write chain that has transmitted data to the server cannot be reset until the request is finished and the chain terminated.","40000"},
         		{"XN023","The stream specified by parameter #{0} is locator-based and requires a nested request on the same connection to be materialized. This is not supported.","40000"},
         		{"XN024","Encountered an exception which terminated the connection, while reading from the stream specified by parameter #{0}. The Exception had this message: '{1}'.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3254
         		{"XRE20","Failover performed successfully for database '{0}', the database has been shutdown.","45000"},
         		{"XSDB0","Unexpected exception on in-memory page {0}","45000"},
         		{"XSDB1","Unknown page format at page {0}","45000"},
@@ -209,16 +229,22 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSDB4","Page {0} is at version {1}, the log file contains change version {2}, either there are log records of this page missing, or this page did not get written out to disk properly.","45000"},
         		{"XSDB5","Log has change record on page {0}, which is beyond the end of the container.","45000"},
         		{"XSDB6","Another instance of Derby may have already booted the database {0}.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
         		{"XSDB7","Warning: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result and may have already occurred.","45000"},
         		{"XSDB8","Warning: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result if 2 instances of Derby boot on the same database at the same time.  The derby.database.forceDatabaseLock=true property has been set, so the database will not boot until the db.lck is no longer present.  Normally this file is removed when the first instance of Derby to boot on the database exits, but it may be left behind in some shutdowns.  It will be necessary to remove the file by hand in that case.  It is important to verify that no other VM is accessing the database before deleting the db.lck file by hand.","45000"},
         		{"XSDB9","Stream container {0} is corrupt.","45000"},
         		{"XSDBA","Attempt to allocate object {0} failed.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3725
         		{"XSDBB", "Unknown page format at page {0}, page dump follows: {1} ", "45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
         		{"XSDBC", "Write of container information to page 0 of container {0} failed.  See nested error for more information. ", "45000"},
         		{"XSDG0","Page {0} could not be read from disk.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3729
         		{"XSDG1","Page {0} could not be written to disk, please check if the disk is full, or if a file system limit, such as a quota or a maximum file size, has been reached.","45000"},
         		{"XSDG2","Invalid checksum on Page {0}, expected={1}, on-disk version={2}, page dump follows: {3}","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-1958
         		{"XSDG3","Meta-data for {0} could not be accessed to {1} {2}","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6504
                 {"XSDG4","Unrecoverable internal error encountered while attempting to read low level metadata about the table or index. Please provide your support organization with the following exception information: Failed: arraycopy of embryonic page byte[{0}] to container information byte[{1}]. Values of variables and constants: MAX_BORROWED_SPACE: {2}, BORROWED_SPACE_OFFSET({3}) + BORROWED_SPACE_LENG({4}) = {5}; arraycopylength: {6}; embryonic page {7}.","45000"},
         		{"XSDG5","Database is not in create mode when createFinished is called.","45000"},
         		{"XSDG6","Data segment directory not found in {0} backup during restore. Please make sure that backup copy is the right one and it is not corrupted.","45000"},
@@ -229,6 +255,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSLA1","Log Record has been sent to the stream, but it cannot be applied to the store (Object {0}).  This may cause recovery problems also.","45000"},
         		{"XSLA2","System will shutdown, got I/O Exception while accessing log file.","45000"},
         		{"XSLA3","Log Corrupted, has invalid data in the log stream.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6157
         		{"XSLA4","Error encountered when attempting to write the transaction recovery log. Most likely the disk holding the recovery log is full. If the disk is full, the only way to proceed is to free up space on the disk by either expanding it or deleting files not related to Derby. It is also possible that the file system and/or disk where the Derby transaction log resides is read-only. The error can also be encountered if the disk or file system has failed.","45000"},
         		{"XSLA5","Cannot read log stream for some reason to rollback transaction {0}.","45000"},
         		{"XSLA6","Cannot recover the database.","45000"},
@@ -236,6 +263,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSLA8","Cannot rollback transaction {0}, trying to compensate {1} operation with {2}","45000"},
         		{"XSLAA","The store has been marked for shutdown by an earlier exception.","45000"},
         		{"XSLAB","Cannot find log file {0}, please make sure your logDevice property is properly set with the correct path separator for your platform.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-5885
         		{"XSLAC","Database at {0} has a format incompatible with the current version of software. It may have been created by or upgraded by a later version.","45000"},
         		{"XSLAD","Log Record at instant {2} in log file {3} corrupted. Expected log record length {0}, real length {1}.","45000"},
         		{"XSLAE","Control file at {0} cannot be written or updated.","45000"},
@@ -248,6 +276,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSLAM","Cannot verify database format at {1} due to IOException: {0}","45000"},
         		{"XSLAN","Database at {0} has an incompatible format with the current version of the software.  The database was created by or upgraded by version {1}.","45000"},
         		{"XSLAO","Recovery failed unexpected problem: {0}.","45000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
         		{"XSLAP","Database at {0} is at version {1}. Beta databases cannot be upgraded.","45000"},
         		{"XSLAQ","Cannot create log file at directory {0}.","45000"},
         		{"XSLAR","Unable to copy log file '{0}' to '{1}' during restore. Please make sure that there is enough space and permissions are correct. ","45000"},
@@ -258,9 +287,11 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSTB3","Cannot abort transaction because the log manager is null, probably due to an earlier error.","50000"},
         		{"XSTB5","Creating database with logging disabled encountered unexpected problem.","50000"},
         		{"XSTB6","Cannot substitute a transaction table with another while one is already in use.","50000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
                 {"XXXXX","Normal database session close.","40000"},
                 {"XRE04","Could not establish a connection to the peer of the replicated database '{0}' on address '{1}:{2}'.","40000"},
                 {"XRE04","Connection lost for replicated database '{0}'.","40000"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                 {"XRE05","The log files on the master and slave are not in synch for replicated database '{0}'. The master log instant is {1}:{2}, whereas the slave log instant is {3}:{4}. This is fatal for replication - replication will be stopped.","40000"},
                 {"XRE09","Cannot start replication slave mode for database '{0}'. The database has already been booted.","40000"},
                 {"XRE11","Could not perform operation '{0}' because the database '{1}' has not been booted.","40000"},
@@ -269,6 +300,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
                 {"XRE41","Replication operation 'failover' or 'stopSlave' refused on the slave database because the connection with the master is working. Issue the 'failover' or 'stopMaster' operation on the master database instead.","40000"},
                 {"XRE42","Replicated database '{0}' shutdown.","40000"}};
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2647
         JDBC.assertUnorderedResultSet(rs, expectedRows);
         s.executeUpdate("drop table t");
         commit();        

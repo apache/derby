@@ -54,6 +54,7 @@ public class ShutdownDatabaseTest extends BaseJDBCTestCase {
         // Only run in embedded as running in client/server
         // hits a problem. See DERBY-2477. To see the bug
         // just use the defaultSuite.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new CleanDatabaseTestSetup(new BaseTestSuite(
             ShutdownDatabaseTest.class, "ShutdownDatabaseTest"));
     }
@@ -79,6 +80,7 @@ public class ShutdownDatabaseTest extends BaseJDBCTestCase {
         st.execute("DROP TABLE TEST_TABLE");
         st.close();
         commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2709
         super.tearDown();
     }
 

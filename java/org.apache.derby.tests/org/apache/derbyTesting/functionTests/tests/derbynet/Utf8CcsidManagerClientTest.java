@@ -50,6 +50,7 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
 
         // Set up a dummy Agent since testInvalidCharacters require one for
         // generating exceptions.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5771
         PrintWriter pw = new PrintWriter(new TestNullOutputStream());
         agent = new NetAgent(null, new LogWriter(pw, 0));
     }
@@ -98,6 +99,7 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
         buffer[2] = additionalBytes[2];
         
         // Offset 3 bytes and convert the 4 chars in ucs2String
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
         ByteBuffer wrapper = ByteBuffer.wrap(buffer);
         wrapper.position(3);
         ccsidManager.startEncoding();
@@ -131,6 +133,7 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
     public void testInvalidCharacters() {
         // Codepoints 0xD800 - 0xDFFF arent legal
         String invalidString = "\uD800";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
 
         ccsidManager.startEncoding();
         try {

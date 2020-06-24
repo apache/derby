@@ -44,6 +44,7 @@ public class NetAgent extends Agent {
     //---------------------navigational members-----------------------------------
 
     // All these request objects point to the same physical request object.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ConnectionRequestInterface connectionRequest_;
     StatementRequestInterface statementRequest_;
     ResultSetRequestInterface resultSetRequest_;
@@ -66,6 +67,7 @@ public class NetAgent extends Agent {
     // Alias for (Request) super.*Request, all in one
     // In the case of the NET implementation, these all point to the same physical request object.
     private Request request_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     NetConnectionRequest netConnectionRequest_;
     private NetPackageRequest netPackageRequest_;
     private NetStatementRequest netStatementRequest_;
@@ -95,6 +97,7 @@ public class NetAgent extends Agent {
     
     // TODO: Remove target? Keep just one CcsidManager?
     //public CcsidManager targetCcsidManager_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     Typdef typdef_;
     Typdef targetTypdef_;
     Typdef originalTargetTypdef_; // added to support typdef overrides
@@ -118,6 +121,7 @@ public class NetAgent extends Agent {
 
     // Only used for testing
     public NetAgent(NetConnection netConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     LogWriter logWriter) throws SqlException {
         super(netConnection, logWriter);
         this.netConnection_ = netConnection;
@@ -135,6 +139,7 @@ public class NetAgent extends Agent {
         port_ = port;
         netConnection_ = netConnection;
         clientSSLMode_ = clientSSLMode;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2356
 
         if (server_ == null) {
             throw new DisconnectException(this, 
@@ -143,11 +148,13 @@ public class NetAgent extends Agent {
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             socket_ = (Socket)AccessController.doPrivileged(
                 new OpenSocketAction(server, port, clientSSLMode_));
         } catch (PrivilegedActionException e) {
             throw new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_CONNECT_TO_SERVER),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 e.getException(),
                 e.getException().getClass().getName(), server, port,
                 e.getException().getMessage());
@@ -160,6 +167,7 @@ public class NetAgent extends Agent {
                 socket_.setKeepAlive(true); // PROTOCOL Manual: TCP/IP connection allocation rule #2
                 socket_.setSoTimeout(loginTimeout * 1000);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (SocketException e) {
             try {
                 socket_.close();
@@ -175,6 +183,7 @@ public class NetAgent extends Agent {
                 rawSocketOutputStream_ = socket_.getOutputStream();
                 rawSocketInputStream_ = socket_.getInputStream();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (IOException e) {
             try {
                 socket_.close();
@@ -182,6 +191,7 @@ public class NetAgent extends Agent {
             }
             exceptionOpeningSocket_ = new DisconnectException(this, 
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_OPEN_SOCKET_STREAM),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 e, e.getMessage());
         }
 
@@ -189,6 +199,7 @@ public class NetAgent extends Agent {
         utf8CcsidManager_ = new Utf8CcsidManager();
         
         currentCcsidManager_ = ebcdicCcsidManager_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
 
         if (netConnection_.isXAConnection()) {
             NetXAConnectionReply netXAConnectionReply_ = new NetXAConnectionReply(this, netConnection_.commBufferSize_);
@@ -205,6 +216,8 @@ public class NetAgent extends Agent {
             statementReply_ = (StatementReply) resultSetReply_;
             packageReply_ = (ConnectionReply) statementReply_;
             connectionReply_ = (ConnectionReply) packageReply_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
             NetXAConnectionRequest netXAConnectionRequest_ = new NetXAConnectionRequest(this, netConnection_.commBufferSize_);
             netResultSetRequest_ = (NetResultSetRequest) netXAConnectionRequest_;
             netStatementRequest_ = (NetStatementRequest) netResultSetRequest_;
@@ -229,6 +242,8 @@ public class NetAgent extends Agent {
             statementReply_ = (StatementReply) resultSetReply_;
             packageReply_ = (ConnectionReply) statementReply_;
             connectionReply_ = (ConnectionReply) packageReply_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
             netResultSetRequest_ = new NetResultSetRequest(this, netConnection_.commBufferSize_);
             netStatementRequest_ = (NetStatementRequest) netResultSetRequest_;
             netPackageRequest_ = (NetPackageRequest) netStatementRequest_;
@@ -256,6 +271,7 @@ public class NetAgent extends Agent {
         // Set TCP/IP Socket Properties
         try {
             socket_.setSoTimeout(loginTimeout * 1000);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (SocketException e) {
             try {
                 socket_.close();
@@ -301,6 +317,7 @@ public class NetAgent extends Agent {
                 // changing {4} to e.getMessage() may require pub changes
                 accumulatedExceptions = new SqlException(logWriter_,
                     new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, e.getMessage());
             } finally {
                 rawSocketInputStream_ = null;
@@ -310,6 +327,8 @@ public class NetAgent extends Agent {
         if (rawSocketOutputStream_ != null) {
             try {
                 rawSocketOutputStream_.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             } catch (IOException e) {
                 // note when {6} = 0 it indicates the socket was closed.
                 // this should be ok since we are going to go an close the socket
@@ -317,6 +336,7 @@ public class NetAgent extends Agent {
                 // changing {4} to e.getMessage() may require pub changes
                 SqlException latestException = new SqlException(logWriter_,
                     new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, e.getMessage());
                 accumulatedExceptions = Utils.accumulateSQLException(latestException, accumulatedExceptions);
             } finally {
@@ -327,6 +347,7 @@ public class NetAgent extends Agent {
         if (socket_ != null) {
             try {
                 socket_.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             } catch (IOException e) {
                 // again {6} = 0, indicates the socket was closed.
                 // maybe set {4} to e.getMessage().
@@ -334,6 +355,9 @@ public class NetAgent extends Agent {
                 // add this to the message pubs.
                 SqlException latestException = new SqlException(logWriter_,
                     new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                         e, e.getMessage());
                 accumulatedExceptions = Utils.accumulateSQLException(latestException, accumulatedExceptions);
             } finally {
@@ -359,6 +383,7 @@ public class NetAgent extends Agent {
      * infinite timeout.
      */
     protected void setTimeout(int timeout) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1090
         try {
             // Sets a timeout on the socket
             socket_.setSoTimeout(timeout * 1000); // convert to milliseconds
@@ -404,7 +429,9 @@ public class NetAgent extends Agent {
     private void sendRequest() throws DisconnectException {
         try {
             request_.flush(rawSocketOutputStream_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             throwCommunicationsFailure(e);
         }
     }
@@ -414,6 +441,7 @@ public class NetAgent extends Agent {
     }
 
     public CcsidManager getCurrentCcsidManager() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         return currentCcsidManager_;
     }
     
@@ -421,6 +449,7 @@ public class NetAgent extends Agent {
         return rawSocketOutputStream_;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void setInputStream(InputStream inputStream) {
         rawSocketInputStream_ = inputStream;
     }
@@ -429,6 +458,7 @@ public class NetAgent extends Agent {
         rawSocketOutputStream_ = outputStream;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void throwCommunicationsFailure(Throwable cause)
         throws DisconnectException {
         //DisconnectException
@@ -438,6 +468,7 @@ public class NetAgent extends Agent {
         accumulateChainBreakingReadExceptionAndThrow(
             new DisconnectException(this,
                 new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 cause, cause.getMessage()));
     }
         
@@ -512,6 +543,8 @@ public class NetAgent extends Agent {
             netConnection_.readDeferredReset();
             checkForExceptions();
         } catch (SqlException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             DisconnectException de = new DisconnectException(this, 
                 new ClientMessageId(SQLState.CONNECTION_FAILED_ON_DEFERRED_RESET));
             de.setNextException(sqle);
@@ -520,6 +553,7 @@ public class NetAgent extends Agent {
     }
 
     protected void beginReadChain(ClientStatement statement)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         // Clear here as endWriteChain may not always be called
         writeChainIsDirty_ = false;
@@ -537,13 +571,16 @@ public class NetAgent extends Agent {
     /**
      * Switches the current CCSID manager to UTF-8
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void switchToUtf8CcsidMgr() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         currentCcsidManager_ = utf8CcsidManager_;
     }
     
     /**
      * Switches the current CCSID manager to EBCDIC
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void switchToEbcdicMgr() {
         currentCcsidManager_ = ebcdicCcsidManager_;
     }

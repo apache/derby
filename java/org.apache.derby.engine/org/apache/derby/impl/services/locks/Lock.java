@@ -38,6 +38,7 @@ import java.util.Map;
 */
 
 class Lock implements Latch, Control {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 
 	/**
 		Compatibility space the object is locked in.
@@ -76,6 +77,7 @@ class Lock implements Latch, Control {
 
 	/**
 		Return the compatibility space this lock is held in.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 
 		MT - Thread safe
 	*/
@@ -150,6 +152,7 @@ class Lock implements Latch, Control {
 		if (other instanceof Lock) {
 			Lock ol = (Lock) other;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 			return (space == ol.space) && ref.equals(ol.ref)
 				&& (qualifier == ol.qualifier);
 		}
@@ -166,6 +169,7 @@ class Lock implements Latch, Control {
 	}
 
 	public Lock getLock(CompatibilitySpace compatibilitySpace,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 						Object qualifier) {
 		if ((space == compatibilitySpace) && (this.qualifier == qualifier)) {
 			return this;
@@ -222,6 +226,7 @@ class Lock implements Latch, Control {
 	}
 
     public boolean isGrantable(boolean noWaitersBeforeMe,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
                                CompatibilitySpace compatibilitySpace,
                                Object requestQualifier)
     {

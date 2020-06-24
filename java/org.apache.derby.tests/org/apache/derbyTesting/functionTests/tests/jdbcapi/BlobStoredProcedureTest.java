@@ -55,7 +55,9 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
      * @return the test suite created.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2427
         if (JDBC.vmSupportsJSR169()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "empty: client not supported on JSR169; procs use DriverMgr");
         }
@@ -73,6 +75,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
     protected void setUp() throws SQLException, UnsupportedEncodingException {
     	 //Byte array obatined from the string
     	byte [] strBytes = testStr.getBytes("US-ASCII");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3775
 
         //initialize the locator to a default value.
         int locator = -1;
@@ -120,6 +123,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
         // stored procedure
         String testSubStr = testStr.substring(0, 10);
         byte [] testSubBytes = testSubStr.getBytes("US-ASCII");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3775
 
         //create a callable statement and execute it to call the stored
         //procedure BLOBGETBYTES that will get the bytes
@@ -163,6 +167,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
         //remember in setup a locator is already created
         //hence expected value is 2
         assertEquals("The locator values returned by " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3365
             "SYSIBM.BLOBCREATELOCATOR() are incorrect", 2, locator);
         cs.close();
     }
@@ -226,6 +231,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
         cs.setInt(2, 1);
         //find the position of the bytes corresponding to
         //the String simple in the test string.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3775
         cs.setBytes(3, (new String("simple")).getBytes("US-ASCII"));
         cs.setLong(4, 1L);
         cs.executeUpdate();
@@ -321,6 +327,8 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
      */
     public void testBlobGetPositionFromLocatorSP() throws SQLException, UnsupportedEncodingException {
         String newString = "simple";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3775
+//IC see: https://issues.apache.org/jira/browse/DERBY-3775
         byte [] newBytes = newString.getBytes("US-ASCII");
         //initialize the locator to a default value.
         int locator = -1;

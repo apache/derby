@@ -71,6 +71,7 @@ public class SQLExceptionFactory extends ExceptionFactory {
         // Create dummy exception which ferries arguments needed to serialize
         // SQLExceptions across the DRDA network layer.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         StandardException ferry =
                 wrapArgsForTransportAcrossDRDA(messageId, t, args);
 
@@ -136,8 +137,10 @@ public class SQLExceptionFactory extends ExceptionFactory {
     @Override
     public final SQLException getSQLException(String messageId,
             SQLException next, Throwable cause, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         String message = MessageService.getTextMessage(messageId, args);
         int severity = StandardException.getSeverityFromIdentifier(messageId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return getSQLException(message, messageId, next, severity, cause, args);
     }
 
@@ -155,6 +158,7 @@ public class SQLExceptionFactory extends ExceptionFactory {
 	 */
     private StandardException wrapArgsForTransportAcrossDRDA(
             String messageId, Throwable cause, Object[] args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
 
         // If the cause is a StandardException with the same message id, we
         // already have what we need. Just return that exception.

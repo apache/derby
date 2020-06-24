@@ -56,11 +56,13 @@ final class ReflectLoaderJava2 extends ClassLoader {
 		Load a generated class from the passed in class data.
 	*/
     LoadedGeneratedClass loadGeneratedClass(String name, ByteArray classData) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6621
 
 		Class jvmClass = defineClass(name, classData.getArray(), classData.getOffset(), classData.getLength());
 
 		resolveClass(jvmClass);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5935
         return new ReflectGeneratedClass(cf, jvmClass);
 	}
 }

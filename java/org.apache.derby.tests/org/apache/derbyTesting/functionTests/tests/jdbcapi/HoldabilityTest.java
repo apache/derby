@@ -51,6 +51,7 @@ public class HoldabilityTest extends SURBaseTest {
         // We also use more records to ensure that the disk
         // is being used.
         SURDataModelSetup.createDataModel
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getConnection(),
              recordCount);
         commit();
@@ -89,6 +90,10 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldForwardOnlyResultSetScanInProgress() 
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement();
         ResultSet rs = s.executeQuery(selectStatement);
 
@@ -111,6 +116,8 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldForwardOnlyUpdatableResultSetScanInit() 
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
@@ -172,6 +179,8 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldForwardOnlyUpdatableResultSetScanInProgress() 
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
@@ -181,6 +190,8 @@ public class HoldabilityTest extends SURBaseTest {
             verifyTuple(rs);
         }
         updateTuple(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit(); // Scan is in progress
         rs.next();
         updateTuple(rs); // Still updatable
@@ -197,6 +208,8 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableResultSetScanInit() 
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_READ_ONLY);
         ResultSet rs = s.executeQuery(selectStatement);
@@ -224,6 +237,8 @@ public class HoldabilityTest extends SURBaseTest {
             rs.next();
             verifyTuple(rs);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit(); // Scan is in progress
         
         while (rs.next()) {
@@ -240,6 +255,10 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableResultSetScanDone() 
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_READ_ONLY);
         ResultSet rs = s.executeQuery(selectStatement);
@@ -266,6 +285,8 @@ public class HoldabilityTest extends SURBaseTest {
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
             fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit(); // scan initialized
         
         scrollForward(rs);
@@ -291,6 +312,10 @@ public class HoldabilityTest extends SURBaseTest {
             rs.next();
             verifyTuple(rs);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit(); // Scan is in progress
         
         while (rs.next()) {
@@ -318,6 +343,8 @@ public class HoldabilityTest extends SURBaseTest {
       
         scrollForward(rs); // Scan is done
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         
         scrollBackwardAndUpdate(rs);
@@ -330,8 +357,15 @@ public class HoldabilityTest extends SURBaseTest {
      * on a held forward only ResulTset.
      */
     public void testUpdateRowAfterCommitOnHeldForwardOnlyResultSet() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1172
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
@@ -367,6 +401,10 @@ public class HoldabilityTest extends SURBaseTest {
             fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
         rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         try {
             rs.updateInt(2, -100);
@@ -395,6 +433,8 @@ public class HoldabilityTest extends SURBaseTest {
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
             fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit(); // commit
         
         // Verifies resultset can do updates after compress
@@ -412,6 +452,8 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
         // First: Read all records in the table into the ResultSet:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
@@ -420,6 +462,8 @@ public class HoldabilityTest extends SURBaseTest {
         }
         rs.next(); // Scan is in progress.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit(); // commit, releases the lock on the records
         
         verifyCompressInvalidation(rs);
@@ -436,6 +480,18 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
         // First: Read all records in the table into the ResultSet:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
@@ -445,9 +501,15 @@ public class HoldabilityTest extends SURBaseTest {
         
         scrollForward(rs); // scan is done
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit(); // commit, releases the lock on the records
         
         verifyCompressInvalidation(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
     }
 
@@ -481,12 +543,15 @@ public class HoldabilityTest extends SURBaseTest {
             ps.setInt(2, recordId);
             ps.setInt(3, recordId *2 + 17);
             ps.setString(4, "m" + recordId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
             ps.setString(5, "c"+recordId);
             ps.addBatch();
         }
         ps.executeBatch();
         ps.close();
         commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
 
         rs.next();
         updateTuple(rs);
@@ -531,6 +596,10 @@ public class HoldabilityTest extends SURBaseTest {
     {
         
         // Delete all records except the first:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement delStatement = createStatement();
         int deleted = delStatement.executeUpdate("delete from T1 where id>0");
         int expectedDeleted = recordCount-1;    
@@ -545,6 +614,8 @@ public class HoldabilityTest extends SURBaseTest {
         
         // Now reinsert the tuples:
         PreparedStatement ps = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
             prepareStatement("insert into t1 values (?,?,?,?,?)");
         
         for (int i=0; i<recordCount*2; i++) {
@@ -553,10 +624,13 @@ public class HoldabilityTest extends SURBaseTest {
             ps.setInt(2, recordId);
             ps.setInt(3, recordId *2 + 17);
             ps.setString(4, "m" + recordId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
             ps.setString(5, "c" + recordId);
             ps.addBatch();
         }
         ps.executeBatch();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         ps.close();
         commit();
         
@@ -574,6 +648,10 @@ public class HoldabilityTest extends SURBaseTest {
         updateTuple(rs); 
         warn = rs.getWarnings();
         assertWarning(warn, CURSOR_OPERATION_CONFLICT);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         
         // Verify data
@@ -597,6 +675,7 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
                // Use a new connection to compress the table        
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         final Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         
@@ -609,6 +688,8 @@ public class HoldabilityTest extends SURBaseTest {
         ps2.setBoolean(5, truncate);
         
         ps2.executeUpdate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         ps2.close();
         con2.commit();
         con2.close();

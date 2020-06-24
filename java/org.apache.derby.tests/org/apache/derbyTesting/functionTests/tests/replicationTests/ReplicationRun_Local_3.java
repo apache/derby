@@ -63,6 +63,7 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         util.DEBUG("BEGIN _failOver"); 
         ClientDataSourceInterface ds;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
@@ -75,6 +76,7 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         ds.setConnectionAttributes("failover=true"
                 +useEncryption(false));
         try {
@@ -109,6 +111,7 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         ds.setConnectionAttributes("startSlave=true;create=true"
                 +useEncryption(true));
         try {
@@ -126,6 +129,8 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         util.DEBUG("_stopMaster");
         ClientDataSourceInterface ds;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
@@ -138,6 +143,7 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(masterServerHost);
         ds.setPortNumber(masterServerPort);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         ds.setConnectionAttributes("stopMaster=true"
                 +useEncryption(false));
         try {

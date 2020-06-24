@@ -68,6 +68,8 @@ public class OutBufferedStreamTest extends BaseJDBCTestCase {
      * @return the testsuite
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3812
+//IC see: https://issues.apache.org/jira/browse/DERBY-3796
         Properties properties = new Properties();
         properties.setProperty("derby.drda.streamOutBufferSize", "131072");
 

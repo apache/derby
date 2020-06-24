@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.GroupByColumn
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -58,6 +59,8 @@ class GroupByColumn extends OrderedColumn
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -66,6 +69,7 @@ class GroupByColumn extends OrderedColumn
 
 			if (columnExpression != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				printLabel(depth, "columnExpression: ");
 				columnExpression.treePrint(depth + 1);
 			}
@@ -77,6 +81,8 @@ class GroupByColumn extends OrderedColumn
 	 *
 	 * @return	The name of this column
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getColumnName()
 	{
 		return columnExpression.getColumnName();
@@ -96,11 +102,14 @@ class GroupByColumn extends OrderedColumn
     void bindExpression(
 			FromList fromList, 
 			SubqueryList subqueryList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             List<AggregateNode> aggregates)
 				throws StandardException
 	{
 		/* Bind the ColumnReference to the FromList */
         int previousReliability = orReliability( CompilerContext.GROUP_BY_RESTRICTION );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         columnExpression = columnExpression.bindExpression(fromList,
 							  subqueryList,
                               aggregates);
@@ -127,6 +136,8 @@ class GroupByColumn extends OrderedColumn
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getColumnExpression()
 	{
 		return columnExpression;
@@ -146,6 +157,7 @@ class GroupByColumn extends OrderedColumn
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException {
 

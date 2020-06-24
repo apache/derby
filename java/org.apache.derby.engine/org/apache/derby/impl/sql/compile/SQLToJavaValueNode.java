@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SQLToJavaValueNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -63,6 +64,8 @@ class SQLToJavaValueNode extends JavaValueNode
 	 *					the Java domain.
      * @param cm        The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SQLToJavaValueNode(ValueNode value, ContextManager cm) {
         super(cm);
         this.value = value;
@@ -115,6 +118,9 @@ class SQLToJavaValueNode extends JavaValueNode
 	  */
     @Override
     String getPrimitiveTypeName()
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 		throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
@@ -145,6 +151,7 @@ class SQLToJavaValueNode extends JavaValueNode
 	{
 		if ( jsqlType == null )
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			if ( value.requiresTypeFromContext()) 
 			{
   				ParameterNode pn;
@@ -181,7 +188,9 @@ class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     JavaValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -440,6 +449,7 @@ class SQLToJavaValueNode extends JavaValueNode
 		  mb.getField(returnsNullOnNullState);
 		mb.completeConditional();
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		mb.setField(returnsNullOnNullState);
 	}
 
@@ -494,11 +504,13 @@ class SQLToJavaValueNode extends JavaValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (value != null)
 		{
 			value = (ValueNode)value.accept(v);

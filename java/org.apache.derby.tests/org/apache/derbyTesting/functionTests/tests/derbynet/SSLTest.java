@@ -57,6 +57,7 @@ public class SSLTest extends BaseJDBCTestCase
     {
         //NetworkServerTestSetup.setWaitTime(10000L);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("SSLTest");
         
         // Server booting requires that we run from the jar files
@@ -93,6 +94,7 @@ public class SSLTest extends BaseJDBCTestCase
             new NetworkServerTestSetup(sslTest,
                                        startupProperties,
                                        startupArgs,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3504
                                        true);
         
         Test testSetup =
@@ -121,6 +123,7 @@ public class SSLTest extends BaseJDBCTestCase
      */
     private static  String[]  getStartupProperties()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return new String[] {
             "javax.net.ssl.keyStore=extinout/SSLTestServerKey.key",
             "javax.net.ssl.keyStorePassword=qwerty",

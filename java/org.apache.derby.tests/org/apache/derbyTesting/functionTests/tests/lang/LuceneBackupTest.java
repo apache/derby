@@ -68,6 +68,7 @@ public class LuceneBackupTest extends GeneratedColumnsHelper
 
     private static  final   String      READ_POEMS_INDEX =
         "select p.originalAuthor, i.score\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
         "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
         "order by i.score desc\n";
@@ -114,6 +115,7 @@ public class LuceneBackupTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             LuceneBackupTest.class );
 

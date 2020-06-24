@@ -54,6 +54,7 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_3_p5 Suite");
         
@@ -90,6 +91,7 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
                 
         _killMasterServer(); // "Crash" master.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
         stopSlave(slaveServerHost,
                   slaveServerPort,
                   slaveDatabasePath,
@@ -97,6 +99,7 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
                   false); // master server dead
 
         // Try to re-establish replication mode:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
@@ -143,6 +146,7 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
                 slaveReplPort);
         // Should now be back in "normal" replication mode state.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
         assertSqlStateSlaveConn(REPLICATION_SLAVE_STARTED_OK);
         
         failOver(jvmVersion,

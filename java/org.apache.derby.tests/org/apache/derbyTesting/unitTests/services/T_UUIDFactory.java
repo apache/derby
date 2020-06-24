@@ -64,6 +64,7 @@ public class T_UUIDFactory extends T_Generic {
 	*/
 	protected void runTests() throws T_Fail {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		factory = getMonitor().getUUIDFactory();
 		if (factory == null) {
 			throw T_Fail.testFailMsg(getModuleToTestProtocolName() + " module not started.");
@@ -163,6 +164,7 @@ public class T_UUIDFactory extends T_Generic {
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

@@ -70,6 +70,7 @@ public final class BasicUUIDFactory
 	private long timemillis;
 
 	public BasicUUIDFactory() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		Object env = getMonitor().getEnvironment();
 		if (env != null) {
 			String s = env.toString();
@@ -165,6 +166,7 @@ public final class BasicUUIDFactory
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

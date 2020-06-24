@@ -111,6 +111,7 @@ final class GenericStatementContext
 	*/
 	GenericStatementContext(LanguageConnectionContext lcc) 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		super(lcc.getContextManager(), org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
 		this.lcc = lcc;
 
@@ -136,6 +137,7 @@ final class GenericStatementContext
      * a CancelQueryTask is scheduled if a timeout &gt; 0 has been set.
      */
     private static class CancelQueryTask
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
         extends
             TimerTask
     {
@@ -188,6 +190,7 @@ final class GenericStatementContext
     }
 
     private static TimerFactory getTimerFactory() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return GenericLanguageConnectionFactory.getMonitor().getTimerFactory();
     }
 
@@ -199,6 +202,7 @@ final class GenericStatementContext
 		boolean isAtomic, 
                 boolean isForReadOnly,
 		String stmtText,
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
 		ParameterValueSet pvs,
         long timeoutMillis
 	) 
@@ -206,6 +210,7 @@ final class GenericStatementContext
 		inUse = true;
 
 		this.parentInTrigger = parentInTrigger;
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 		this.isForReadOnly = isForReadOnly;
 		this.isAtomic = isAtomic;
 		this.stmtText = stmtText;
@@ -226,18 +231,23 @@ final class GenericStatementContext
 
 		parentInTrigger = false;
 		isAtomic = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 		isForReadOnly = false;
 		this.stmtText = null;
 		sqlAllowed = -1;
 		isSystemCode = false;
 		rollbackParentContext = false;
         statementWasInvalidated = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
         if (cancelTask != null) {
             cancelTask.forgetContext();
             cancelTask = null;
         }
         cancellationFlag = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
         activation = null;
 		sqlSessionContext = null;
     }
@@ -463,6 +473,7 @@ final class GenericStatementContext
 		
 		if (dependencies == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			dependencies = new ArrayList<Dependency>();
 		}
 		dependencies.add(dy);
@@ -513,6 +524,7 @@ final class GenericStatementContext
         ** to be of session severity.  
         */
         int severity = ExceptionSeverity.SESSION_SEVERITY;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
         if (error instanceof StandardException) {
             StandardException se = (StandardException)error;
             // Update the severity.
@@ -564,6 +576,7 @@ final class GenericStatementContext
 		{
 			DependencyManager dmgr = lcc.getDataDictionary().getDependencyManager();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			for (Iterator<Dependency> iterator = dependencies.iterator(); iterator.hasNext(); ) 
 			{
 				Dependency dy = iterator.next();
@@ -626,6 +639,7 @@ final class GenericStatementContext
         // let outer contexts take corrective action for jvm errors, so 
         // return false as this will not be the last handler for such 
         // errors.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1732
 		return inUse && !rollbackParentContext && 
             ( severity == ExceptionSeverity.STATEMENT_SEVERITY );
 	}
@@ -684,6 +698,7 @@ final class GenericStatementContext
 	}
     public boolean isForReadOnly()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 	return isForReadOnly;
     }
         
@@ -698,6 +713,7 @@ final class GenericStatementContext
      */
     public boolean isCancelled()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
         return cancellationFlag;
     }
 
@@ -764,6 +780,7 @@ final class GenericStatementContext
 
 			sb.append(getStatementText());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2606
 			if ((pvs != null) && pvs.getParameterCount() > 0)
 			{
 				String pvsString = " with " + pvs.getParameterCount() +
@@ -779,6 +796,8 @@ final class GenericStatementContext
 	 * @see StatementContext#setActivation(Activation a)
 	 */
 	public void setActivation(Activation a) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 		activation = a;
 	}
 
@@ -804,6 +823,7 @@ final class GenericStatementContext
 	}
 
     public boolean getStatementWasInvalidated() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
         return statementWasInvalidated;
     }
 }

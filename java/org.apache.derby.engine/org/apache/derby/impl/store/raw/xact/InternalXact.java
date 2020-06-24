@@ -56,6 +56,7 @@ public class InternalXact extends Xact
     DataValueFactory    dataValueFactory) 
     {
 		super(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
             xactFactory, null, logFactory, dataFactory, dataValueFactory, 
             false, null, false);
 
@@ -148,6 +149,7 @@ public class InternalXact extends Xact
 			catch (StandardException se)
 			{
 				if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 					SanityManager.THROWASSERT("unexpected exception", se);
 			}
 		}

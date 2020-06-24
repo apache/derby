@@ -870,6 +870,7 @@ class CodePoint
 
     protected static int [] MGR_CODEPOINTS = {
                                             AGENT,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                                             CCSIDMGR,
                                             CMNAPPC, 
                                             CMNSYNCPT,
@@ -881,6 +882,8 @@ class CodePoint
                                             SQLAM,
                                             SUPERVISOR,
                                             SYNCPTMGR,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
+//IC see: https://issues.apache.org/jira/browse/DERBY-2031
                                             UNICODEMGR,
                                             XAMGR
                                             };

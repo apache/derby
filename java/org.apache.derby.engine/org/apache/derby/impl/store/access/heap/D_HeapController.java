@@ -120,6 +120,7 @@ public class D_HeapController extends DiagnosticableGeneric
 
         if (ratio > 0.001)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
             String double_str = "" + ratio;
             short_str = double_str.substring(
                 0, 
@@ -141,6 +142,7 @@ public class D_HeapController extends DiagnosticableGeneric
     TableStats stat)
     {
         String ret_string   = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 
         // Totals:
         ret_string += 
@@ -241,6 +243,7 @@ public class D_HeapController extends DiagnosticableGeneric
 
         while (page != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
             D_HeapController.diag_page(page, prop, stat);
             pageid = page.getPageNumber();
             page.unlatch();

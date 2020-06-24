@@ -60,6 +60,7 @@ public class Changes10_5 extends UpgradeChange {
      */
     public static Test suite(int phase) {
         BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.5");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTestSuite(Changes10_5.class);
         return new SupportFilesSetup((Test) suite);
@@ -120,6 +121,7 @@ public class Changes10_5 extends UpgradeChange {
      */
     public void testDeterminismKeyword() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3570
         String  sqlstate = null;
         
         switch (getPhase())
@@ -229,6 +231,7 @@ public class Changes10_5 extends UpgradeChange {
         // set, so we can only check if the system tables for roles is
         // present.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3901
         Statement s = createStatement();
         String createRoleText = "create role foo";
 

@@ -218,6 +218,7 @@ public final class ConglomerateUtil
     int[]   collationIds)
     {
         int[] collation_ids = new int[sizeof_ids];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         if (collationIds != null)
         {
             if (SanityManager.DEBUG)
@@ -333,6 +334,7 @@ public final class ConglomerateUtil
             int array_index = CompressedNumber.readInt(in);
             collation_id_array[array_index] = CompressedNumber.readInt(in);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         return num_compressed_entries > 0;
 	}
 

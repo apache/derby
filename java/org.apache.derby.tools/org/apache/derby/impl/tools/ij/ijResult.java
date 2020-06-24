@@ -52,6 +52,7 @@ interface ijResult {
 	Statement getStatement();
 	int getUpdateCount() throws SQLException;
 	ResultSet getResultSet() throws SQLException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	List<ResultSet> getMultipleResultSets();
 	ResultSet getNextRowOfResultSet();
 	Vector getVector();

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.NewInvocationNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -60,6 +61,8 @@ class NewInvocationNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     NewInvocationNode(
             String javaClassName,
             List<ValueNode> params,
@@ -107,6 +110,8 @@ class NewInvocationNode extends MethodCallNode
 	 *  is a delimited identifier.
      * @param cm context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     NewInvocationNode(
                     TableName vtiTableFuncName,
                     TableDescriptor tableDescriptor,
@@ -129,6 +134,8 @@ class NewInvocationNode extends MethodCallNode
 				"be null, but neither or both of them were null.");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         TableName vtiName = vtiTableFuncName;
         TableDescriptor td = tableDescriptor;
 		boolean isTableFunctionVTI = (vtiTableFuncName != null);
@@ -209,7 +216,9 @@ class NewInvocationNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     JavaValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -277,6 +286,7 @@ class NewInvocationNode extends MethodCallNode
 
 		for (int i = 0; i < methodParameterTypes.length; i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
 			if (ClassInspector.primitiveType(methodParameterTypes[i]))
 				methodParms[i].castToPrimitive(true);
 		}
@@ -428,6 +438,7 @@ class NewInvocationNode extends MethodCallNode
 			 */
 			if (SanityManager.DEBUG)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", e);
 			}
 			return null;

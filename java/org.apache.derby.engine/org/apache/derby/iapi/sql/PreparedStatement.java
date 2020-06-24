@@ -38,6 +38,7 @@ import java.sql.SQLWarning;
  *
  */
 public interface PreparedStatement
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
 	extends Dependent
 {
 
@@ -74,6 +75,7 @@ public interface PreparedStatement
 	 *
 	 * @exception StandardException thrown if unable to perform
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4279
 	void rePrepare(LanguageConnectionContext lcc) 
 		throws StandardException;
 
@@ -206,6 +208,7 @@ public interface PreparedStatement
      * @throws StandardException if the index is out of range
      */
     DataTypeDescriptor  getParameterType( int idx ) throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 
 	/**
 	 *	Return the SQL string that this statement is for.

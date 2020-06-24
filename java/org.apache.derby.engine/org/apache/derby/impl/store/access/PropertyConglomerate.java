@@ -146,6 +146,7 @@ class PropertyConglomerate
                     AccessFactoryGlobals.HEAP,
                     template, 
                     null, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     (int[]) null, // use default collation for property conglom.
                     conglomProperties, 
                     TransactionController.IS_DEFAULT);
@@ -274,6 +275,7 @@ class PropertyConglomerate
 		else
 		{
 			synchronized (this) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 Hashtable<Object, Object> defaults = new Hashtable<Object, Object>();
 				getProperties(tc,defaults,false/*!stringsOnly*/,true/*defaultsOnly*/);
 				validate(key,value,defaults);
@@ -368,6 +370,7 @@ class PropertyConglomerate
 	{
 		if (saveServiceProperty(key,value)) return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         FormatableHashtable defaults = (FormatableHashtable)
             readProperty(tc,AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
 		if (defaults == null) defaults = new FormatableHashtable();
@@ -383,6 +386,7 @@ class PropertyConglomerate
 											 String key, Serializable value, boolean dbOnlyProperty)
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Dictionary<Object, Object> d = new Hashtable<Object, Object>();
 		getProperties(tc,d,false/*!stringsOnly*/,false/*!defaultsOnly*/);
 		Serializable mappedValue = pf.doValidateApplyAndMap(tc, key,
@@ -454,6 +458,7 @@ class PropertyConglomerate
 
 			RawStoreFactory rsf = (RawStoreFactory)
 				findServiceModule(af, RawStoreFactory.MODULE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			// remove secret key from properties list if possible
 			serviceProperties.remove(Attribute.BOOT_PASSWORD);
@@ -660,6 +665,7 @@ class PropertyConglomerate
 	}
 
     private <K, V> Dictionary<? super K, ? super V> copyValues(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Dictionary<? super K, ? super V> to,
             Dictionary<K, V> from, boolean stringsOnly)
 	{
@@ -684,6 +690,7 @@ class PropertyConglomerate
 	}
 
 	public void getProperties(TransactionController tc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                Dictionary<Object, Object> d,
 							   boolean stringsOnly,
 							   boolean defaultsOnly) throws StandardException
@@ -715,6 +722,7 @@ class PropertyConglomerate
 		 throws StandardException
 	{
 		Dictionary<String,Object> set = new Hashtable<String,Object>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         // scan the table for a row with no matching "key"
 		ScanController scan = openScan(tc, (String) null, 0);
@@ -730,11 +738,13 @@ class PropertyConglomerate
                     SanityManager.THROWASSERT(
                         "Key is not a string " + key.getClass().getName());
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			set.put((String)key, value);
 		}
 		scan.close();
 
 		// add the known properties from the service properties set
+//IC see: https://issues.apache.org/jira/browse/DERBY-6166
         String[]    servicePropertyList = PropertyUtil.getServicePropertyList();
 		for (int i = 0; i < servicePropertyList.length; i++) {
 			String value =
@@ -745,6 +755,7 @@ class PropertyConglomerate
 	}
 
     private Dictionary<String, Object>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             getCachedDbProperties(TransactionController tc)
 		 throws StandardException
 	{
@@ -768,6 +779,7 @@ class PropertyConglomerate
 		// it. Thus readers see the old uncommited values. When this
 		// thread releases its exclusive lock the cached is cleared
 		// and the next reader will re-populate the cache.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs = tc.getLockSpace();
 		Object csGroup = cs.getOwner();
 		lf.lockObject(cs, csGroup, cachedLock, ShExQual.EX,
@@ -780,6 +792,7 @@ class PropertyConglomerate
 	  */
 	private boolean iHoldTheUpdateLock(TransactionController tc) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs = tc.getLockSpace();
 		Object csGroup = cs.getOwner();
 		return lf.isLockHeld(cs, csGroup, cachedLock, ShExQual.EX);
@@ -789,6 +802,7 @@ class PropertyConglomerate
      * can't call this entry point.
      */
     private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

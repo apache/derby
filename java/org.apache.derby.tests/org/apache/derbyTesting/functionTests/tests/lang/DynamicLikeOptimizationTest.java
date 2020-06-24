@@ -44,6 +44,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
     /** All rows in the cei table. */
     private static final Object[][] CEI_ROWS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         { 0, "Alarms", "AlarmDisk999" },
         { 1, "Alarms", "AlarmFS-usr" },
         { 2, "Alarms", "AlarmPower" },
@@ -60,6 +61,7 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite tests =
             new BaseTestSuite("DynamicLikeOptimizationTest");
 
@@ -320,6 +322,7 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
                                          String[][][] rows)
             throws SQLException {
         Object[] args = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             null, 1, "", "%", "%f", "%g", "asd%", "_%", "%_",
             "_asdf", "_asdf %", "%asdf"
         };
@@ -408,6 +411,7 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
             "(name LIKE ? escape '\\') and (source like ? escape '\\') " +
             "order by source asc, name asc");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<String[], Object[][]> inputOutput =
                 new HashMap<String[], Object[][]>();
         inputOutput.put(
@@ -450,6 +454,7 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
             new Object[][] { CEI_ROWS[8] });
         inputOutput.put(new String[] {"Bogus", "Name"}, new Object[][] {});
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Map.Entry<String[], Object[][]> entry : inputOutput.entrySet()) {
             String[] args = entry.getKey();
             Object[][] rows = entry.getValue();
@@ -531,6 +536,7 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
      * predicate is rewritten to &gt;=, &lt; and LIKE.
      */
     public void testDynamicLikeOptimization() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2642
         Statement s = createStatement();
         ResultSet rs = s.executeQuery( 
           		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')");

@@ -42,6 +42,7 @@ public class UnitTestMain  {
 
 	public static void main(String args[]) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         AccessController.doPrivileged
             (
              new PrivilegedAction<Object>()

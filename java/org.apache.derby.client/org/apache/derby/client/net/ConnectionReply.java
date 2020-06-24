@@ -26,9 +26,11 @@ import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.SqlException;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ConnectionReply {
     private ConnectionReplyInterface materialConnectionReply_;
     Agent agent_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     ConnectionReply(
             Agent agent,
@@ -38,6 +40,7 @@ class ConnectionReply {
         materialConnectionReply_ = materialConnectionReply;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readCommitSubstitute(ConnectionCallbackInterface connection)
             throws SqlException {
         materialConnectionReply_.readCommitSubstitute(connection);

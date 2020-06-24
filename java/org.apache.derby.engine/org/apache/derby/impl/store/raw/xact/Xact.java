@@ -2881,6 +2881,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
      * @throws org.apache.derby.shared.common.error.StandardException 
      */
 	public void checkpointInRollForwardRecovery(LogInstant cinstant,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3562
 												long redoLWM, long undoLWM)
 		throws StandardException
 	{
@@ -2889,6 +2890,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
     public boolean isNestedOwner()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
         return (parentTransactionId != null );
     }
 

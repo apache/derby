@@ -96,6 +96,7 @@ final class ValidateCheckConstraintResultSet extends TableScanResultSet
 
     @Override
     boolean loopControl(boolean moreRows) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6674
          try {
              scanController.fetch(candidate.getRowArray());
          } catch (StandardException e) {

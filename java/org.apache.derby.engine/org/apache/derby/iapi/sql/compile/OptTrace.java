@@ -103,6 +103,7 @@ public  interface   OptTrace
     /** Say that we are remembering the current plan as the best join order so far. */
     public  void    traceRememberingBestJoinOrder
         ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
     /** Say that we are skipping a plan because it consumes too much memory. */
     public  void    traceSkippingBecauseTooMuchMemory( int maxMemoryPerTable );

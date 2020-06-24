@@ -67,6 +67,7 @@ public class XMLBindingTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("XML Binding Suite");
         if (XML.classpathMeetsXMLReqs())
         {
@@ -74,6 +75,7 @@ public class XMLBindingTest extends BaseJDBCTestCase {
              * database before the embedded and client suites.  This ensures
              * that we do not remove the objects created by XBindTestSetup.
              */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6233
             Test test =
                 TestConfiguration.defaultSuite(XMLBindingTest.class, false);
 
@@ -157,6 +159,7 @@ public class XMLBindingTest extends BaseJDBCTestCase {
             if (!rs.wasNull())
             {
                 int ch = xResult.read();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
                 for (charCount = 0; ch != -1; ch = xResult.read())
                 {
                     /* Xalan serialization produces platform-specific line-
@@ -272,6 +275,7 @@ public class XMLBindingTest extends BaseJDBCTestCase {
     private static class XBindTestSetup extends BaseJDBCTestSetup
     {
         public XBindTestSetup(Test test) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6233
             super(test);
         }
 

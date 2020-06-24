@@ -55,6 +55,7 @@ public class IndexStatsUtil {
     private static final int NO_EXPECTATION = -1;
     private static final String SEP =
                 BaseJDBCTestCase.getSystemProperty("line.separator");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
 
     private final Connection con;
     /** Timeout in milliseconds. */
@@ -77,6 +78,7 @@ public class IndexStatsUtil {
      * @param con connection to the database to query
      */
     public IndexStatsUtil(Connection con) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
         this(con, 0L);
     }
 
@@ -118,6 +120,7 @@ public class IndexStatsUtil {
      * @throws SQLException if obtaining the statistics fails
      */
     public void assertNoStatsTable(String table)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
             throws SQLException {
         assertTableStats(table, 0);
     }
@@ -130,6 +133,7 @@ public class IndexStatsUtil {
      */
     public void assertStats(int expectedCount)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
         IdxStats[] ret = getStats();
         if (ret.length != expectedCount) {
             Assert.assertEquals(buildStatString(ret, "<ALL TABLES>"),
@@ -147,6 +151,7 @@ public class IndexStatsUtil {
      */
     public void assertTableStats(String table, int expectedCount)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
         getStatsTable(table, expectedCount);
     }
 
@@ -160,6 +165,7 @@ public class IndexStatsUtil {
      */
     public void assertIndexStats(String index, int expectedCount)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
         getStatsIndex(index, expectedCount);
     }
 
@@ -193,6 +199,7 @@ public class IndexStatsUtil {
             throws SQLException {
         if (psGetStats == null) {
             psGetStats = con.prepareStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
                     "select * from SYS.SYSSTATISTICS " +
                     "order by TABLEID, REFERENCEID, COLCOUNT");
         }
@@ -208,6 +215,7 @@ public class IndexStatsUtil {
      */
     public IdxStats[] getStatsTable(String table)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
         return getStatsTable(table, NO_EXPECTATION);
     }
 
@@ -254,6 +262,7 @@ public class IndexStatsUtil {
      * @throws SQLException if obtaining statistics fails
      */
     public IdxStats[] getNewStatsTable(String table, IdxStats[] currentStats)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             throws SQLException {
         if (timeout == 0) {
             throw new IllegalStateException(
@@ -272,6 +281,7 @@ public class IndexStatsUtil {
      */
     public IdxStats[] getStatsIndex(String index)
              throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
         return getStatsIndex(index, NO_EXPECTATION);
     }
 
@@ -390,6 +400,7 @@ public class IndexStatsUtil {
             psGetIdToNameMapTable = con.prepareStatement(
                     "select TABLEID, TABLENAME from SYS.SYSTABLES");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Map<String, String> map = new HashMap<String, String>();
         ResultSet rs = psGetIdToNameMapConglom.executeQuery();
         while (rs.next()) {
@@ -413,6 +424,7 @@ public class IndexStatsUtil {
      * @throws SQLException if accessing the result set fails
      */
     private IdxStats[] buildStatisticsList(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             ResultSet rs, Map<String, String> idToName)
             throws SQLException {
         List<IdxStats> stats = new ArrayList<IdxStats>();
@@ -434,6 +446,7 @@ public class IndexStatsUtil {
      * Releases resources and closes the associated connection.
      */
     public void release() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5759
         release(true);
     }
 
@@ -461,6 +474,7 @@ public class IndexStatsUtil {
             if (!con.isClosed()) {
                 con.rollback();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5759
             if (closeConnection) {
                 con.close();
             }
@@ -483,7 +497,9 @@ public class IndexStatsUtil {
      * @throws SQLException if obtaining statistics fails
      */
     private void awaitChange(IdxStats[] current, long timeout)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Set<IdxStats> oldStats = new HashSet<IdxStats>(Arrays.asList(current));
         Set<IdxStats> newStats = null;
         long start = System.currentTimeMillis();
@@ -573,6 +589,7 @@ public class IndexStatsUtil {
             sb.append("{tableId=").append(tableId).
                     append(", tableName=").append(tableName).
                     append(", indexName=").append(indexName).
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
                     append(", lcols=").append(lcols).
                     append(", rows=").append(rows).
                     append(", unique/card=").append(card).
@@ -587,6 +604,7 @@ public class IndexStatsUtil {
          * @return {@code true} if the other object is considered equal to this
          */
         public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4834
             if (obj == null) {
                 return false;
             }

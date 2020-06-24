@@ -65,6 +65,7 @@ public class Logs {
 		try {
 
 			logFile = new PrintWriter(new FileOutputStream(logFileName, appendLogs));
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			ddlFile = (ddlFileName == null) ? null
 					: new PrintWriter(new FileOutputStream(ddlFileName, appendLogs));
 			verbose = doVerbose;

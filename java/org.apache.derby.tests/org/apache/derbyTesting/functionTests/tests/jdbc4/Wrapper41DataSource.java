@@ -67,6 +67,7 @@ public  class   Wrapper41DataSource
     public Wrapper41DataSource( Object wrapped ) throws Exception
     {
         if (JDBC.vmSupportsJNDI()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             if ( wrapped instanceof EmbeddedDataSource  ) {
                 _embedded = (EmbeddedDataSource) wrapped; }
             else if ( wrapped instanceof EmbeddedConnectionPoolDataSource ) {
@@ -81,6 +82,7 @@ public  class   Wrapper41DataSource
                 _cxads = (ClientXADataSource) wrapped; }
             else { throw nothingWrapped(); }
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             if ( wrapped instanceof BasicEmbeddedDataSource40  ) {
                 _basicembedded = (BasicEmbeddedDataSource40 ) wrapped; }
             else if ( wrapped instanceof BasicClientDataSource40 ) {
@@ -106,6 +108,7 @@ public  class   Wrapper41DataSource
             else if ( _cxads != null ) {return _cxads.getParentLogger(); }
             else { throw nothingWrapped(); }
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             if ( _basicembedded != null ) {
                 return _basicembedded.getParentLogger(); }
             else if ( _basicnetclient != null) {
@@ -122,6 +125,7 @@ public  class   Wrapper41DataSource
 
     public CommonDataSource   getWrappedObject() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJNDI()) {
             if ( _embedded != null ) { return _embedded; }
             else if ( _netclient != null ) { return _netclient; }
@@ -131,6 +135,7 @@ public  class   Wrapper41DataSource
             else if ( _cxads != null ) { return _cxads; }
             else { throw nothingWrapped(); }
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             if ( _basicembedded != null ) { return _basicembedded; }
             else if ( _basicnetclient != null ) { return _basicnetclient; }
             else { throw nothingWrapped(); }

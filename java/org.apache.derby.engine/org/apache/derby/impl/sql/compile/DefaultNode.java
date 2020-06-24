@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DefaultNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -49,6 +50,8 @@ public  class DefaultNode extends ValueNode
      *
      * @param cm            The context manager
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DefaultNode(ContextManager cm) {
         super(cm);
     }
@@ -106,6 +109,7 @@ public  class DefaultNode extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			return "columnName: " + columnName + "\n" +
 				"defaultText: " + defaultText + "\n" +
 				super.toString();
@@ -123,8 +127,11 @@ public  class DefaultNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
@@ -153,6 +160,7 @@ public  class DefaultNode extends ValueNode
 	 * @exception StandardException		Thrown on failure
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 		throws StandardException
 	{
@@ -188,6 +196,8 @@ public  class DefaultNode extends ValueNode
 		DefaultInfoImpl defaultInfo = (DefaultInfoImpl) cd.getDefaultInfo();
 		if (defaultInfo != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             String      defaultTxt = defaultInfo.getDefaultText();
             ValueNode   defaultTre = parseDefault(
                 defaultTxt,
@@ -202,11 +212,14 @@ public  class DefaultNode extends ValueNode
             return defaultTre.bindExpression(
 									fromList, 
 									subqueryList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                                     aggregates);
 		}
 		else
 		{
 			// Default is null
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             return new UntypedNullConstantNode(getContextManager());
 		}
 	}
@@ -253,6 +266,7 @@ public  class DefaultNode extends ValueNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 		Visitable qt = p.parseStatement(values);
 		if (SanityManager.DEBUG)
 		{
@@ -271,6 +285,7 @@ public  class DefaultNode extends ValueNode
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         defaultTree = ((CursorNode) qt).getResultSetNode().getResultColumns().
                 elementAt(0).getExpression();
 

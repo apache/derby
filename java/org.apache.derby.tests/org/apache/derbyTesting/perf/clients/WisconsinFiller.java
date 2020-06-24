@@ -37,6 +37,7 @@ public class WisconsinFiller implements DBFiller {
     int numRows;
     public WisconsinFiller(int nRows)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
         super();
         numRows = nRows;
     }
@@ -53,6 +54,7 @@ public class WisconsinFiller implements DBFiller {
         dropTable(c, "BPRIME");
 
         wisconsin.createTables(c, false, numRows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
 
         c.commit();
     }

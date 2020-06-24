@@ -96,6 +96,7 @@ final class StoreStreamClob
      * @param conChild the connection (child) this Clob belongs to
      */
     public StoreStreamClob(CharacterStreamDescriptor csd,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                            ConnectionChild conChild)
             throws StandardException {
         if (SanityManager.DEBUG) {
@@ -103,6 +104,7 @@ final class StoreStreamClob
             // supposed to be a position aware stream already!
             SanityManager.ASSERT(!csd.isPositionAware());
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3970
         try {
             this.positionedStoreStream = 
                     new PositionedStoreStream(csd.getStream());
@@ -119,6 +121,7 @@ final class StoreStreamClob
         }
         this.conChild = conChild;
         this.synchronizationObject = conChild.getConnectionSynchronization();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         if (SanityManager.DEBUG) {
             // Creating the positioned stream should reset the stream.
             SanityManager.ASSERT(positionedStoreStream.getPosition() == 0);
@@ -136,6 +139,7 @@ final class StoreStreamClob
      */
     public void release() {
         if (!released) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
             if (this.internalReader != null) {
                 this.internalReader.close();
             }
@@ -154,6 +158,7 @@ final class StoreStreamClob
     public long getCharLength()
             throws SQLException {
         checkIfValid();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         if (this.csd.getCharLength() == 0) {
             // Decode the stream to find the length.
             long charLength = 0;
@@ -165,12 +170,14 @@ final class StoreStreamClob
                 } catch (Throwable t) {
                     throw noStateChangeLOB(t);
                 } finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
                     ConnectionChild.restoreIntrFlagIfSeen(
                         true, conChild.getEmbedConnection());
                     conChild.restoreContextStack();
                 }
             }
             // Update the stream descriptor.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             this.csd = new CharacterStreamDescriptor.Builder().
                     copyState(this.csd).charLength(charLength).build();
         }
@@ -183,6 +190,7 @@ final class StoreStreamClob
      * @return The number of characters in the Clob, or {@code -1} if unknown.
      */
     public long getCharLengthIfKnown() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
         checkIfValid();
         // Treat a cached value of zero as a special case.
         return (csd.getCharLength() == 0 ? -1 : csd.getCharLength());
@@ -205,6 +213,7 @@ final class StoreStreamClob
         checkIfValid();
         try {
             // Skip the encoded length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             this.positionedStoreStream.reposition(this.csd.getDataOffset());
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
@@ -257,6 +266,7 @@ final class StoreStreamClob
      * @throws SQLException if accessing the store resources fail
      */
     public Reader getInternalReader(long characterPosition)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
             throws IOException, SQLException {
         if (this.internalReader == null) {
             if (positionedStoreStream.getPosition() != 0) {
@@ -292,6 +302,7 @@ final class StoreStreamClob
      * @return Zero (read-only Clob).
      */
     public long getUpdateCount() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         return 0L;
     }
 
@@ -321,6 +332,7 @@ final class StoreStreamClob
      * @return {@code true} if released, {@code false} if not.
      */
     public boolean isReleased() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         return released;
     }
 

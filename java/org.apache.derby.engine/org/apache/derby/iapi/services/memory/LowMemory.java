@@ -101,6 +101,7 @@ public class LowMemory {
                     interrupted = true;
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             if (interrupted) {
                 // reinstate flag
                 Thread.currentThread().interrupt();

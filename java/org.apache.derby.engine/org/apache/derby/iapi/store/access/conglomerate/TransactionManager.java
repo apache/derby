@@ -32,6 +32,7 @@ import org.apache.derby.shared.common.error.StandardException;
 
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 <p>
 The TransactionManager interface provides methods on the transaction needed
 by an access method implementer, but should not be visible to clients of a
@@ -99,6 +100,7 @@ public interface TransactionManager extends TransactionController
 	public boolean checkVersion(
     int     requiredMajorVersion, 
     int     requiredMinorVersion, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     String  feature) 
         throws StandardException;
 

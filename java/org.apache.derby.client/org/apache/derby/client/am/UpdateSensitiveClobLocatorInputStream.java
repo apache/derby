@@ -31,6 +31,7 @@ import java.io.InputStream;
  * which re-creates the underlying Clob locator stream whenever a
  * update happens on the Clob object associated with this stream.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class UpdateSensitiveClobLocatorInputStream
         extends UpdateSensitiveLOBLocatorInputStream {
     //Stores the Clob instance associated with
@@ -50,6 +51,7 @@ class UpdateSensitiveClobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     UpdateSensitiveClobLocatorInputStream(
             ClientConnection con,
             ClientClob clob) throws SqlException {

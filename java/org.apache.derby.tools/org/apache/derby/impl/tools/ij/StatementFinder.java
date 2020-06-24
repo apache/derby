@@ -36,6 +36,7 @@ import java.io.Reader;
 	are not considered to be statement terminators but to be
 	part of those tokens.
 	<p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-3242
     Comments currently recognized include the SQL comment,
     which begins with "--" and ends at the next EOL, and nested
     bracketed comments.
@@ -86,12 +87,14 @@ public class StatementFinder {
 		The constructor does not assume the stream is data input
 		or buffered, so it will wrap it appropriately.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
 		If the StatementFinder's input stream is connected to
 		System.in, a LocalizedOutput stream may be given to print
 		line continuation prompts when StatementFinder reads a newline.
 
 		@param s the input stream for reading statements from.
 		@param promptDest LocalizedOutput stream to write line
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 						continuation prompts ("&gt; ") to. If null,
 						no such prompts will be written.
 	 */
@@ -126,6 +129,7 @@ public class StatementFinder {
 		atEOF = false;
 		peekEOF = false;
 		peeked = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
 		if(s.isStandardInput() && promptwriter != null) {
 			doPrompt = true;
 		} else {
@@ -177,6 +181,7 @@ public class StatementFinder {
 				break;
 			}
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
 			if (!(nextChar == MINUS))
 				continuedStatement=true;
 
@@ -184,6 +189,7 @@ public class StatementFinder {
 				case MINUS:
 					readSingleLineComment(nextChar);
 					break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3242
 				case SLASH:
 				    readBracketedComment();
 				    break;
@@ -194,6 +200,7 @@ public class StatementFinder {
 				case SEMICOLON:
 					haveSemi = true;
 					state = END_OF_STATEMENT;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
 					continuedStatement=false;
 					break;
 				case NEWLINE:
@@ -240,6 +247,7 @@ public class StatementFinder {
 	 */
 	private void readBracketedComment() {
 		char nextChar = peekChar();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3242
 
 		// if next char is EOF, we are done.
 		if (peekEOF()) return;
@@ -311,6 +319,7 @@ public class StatementFinder {
 
 		// if nextChar is not a minus, it was just a normal minus,
 		// nothing special to do
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
 		if (nextChar != commentChar)
 		{
 			continuedStatement=true;
@@ -333,6 +342,7 @@ public class StatementFinder {
 				case RETURN:
 					readChar(); // okay to process the character
 					state = IN_STATEMENT;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
 					if (doPrompt){
 						// If we had previously already started a statement,
 						// add the prompt.

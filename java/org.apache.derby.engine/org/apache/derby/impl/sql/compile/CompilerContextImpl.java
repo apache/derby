@@ -102,6 +102,7 @@ public class CompilerContextImpl extends ContextImpl
             
             int severity = se.getSeverity();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 			if (severity < ExceptionSeverity.SYSTEM_SEVERITY) 
 			{
 				if (currentDependent != null)
@@ -115,6 +116,7 @@ public class CompilerContextImpl extends ContextImpl
 			// anything system or worse, or non-DB errors,
 			// will cause the whole system to shut down.
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
             if (severity >= ExceptionSeverity.SESSION_SEVERITY)
                 popMe();
 		}
@@ -135,16 +137,22 @@ public class CompilerContextImpl extends ContextImpl
 		compilationSchema = null;
 		parameterList = null;
 		parameterDescriptors = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		scanIsolationLevel = TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
 		warnings = null;
 		savedObjects = null;
 		reliability = CompilerContext.SQL_LEGAL;
 		returnParameterFlag = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		initRequiredPriv();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
 		defaultSchemaStack = null;
         referencedSequences = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         privilegeCheckFilters =  null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         namedScopes = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6491
         skippingTypePrivileges = false;
 	}
 
@@ -167,6 +175,8 @@ public class CompilerContextImpl extends ContextImpl
     public  OptimizerFactory    getOptimizerFactory()
     {   return lcf.getOptimizerFactory(); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 	public int getNextColumnNumber()
 	{
@@ -322,9 +332,11 @@ public class CompilerContextImpl extends ContextImpl
 
 	public int addSavedObject(Object obj) {
         if (savedObjects == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             savedObjects = new ArrayList<Object>();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		savedObjects.add(obj);
 		return savedObjects.size()-1;
 	}
@@ -332,6 +344,7 @@ public class CompilerContextImpl extends ContextImpl
 	public Object[] getSavedObjects() {
 		if (savedObjects == null) return null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 		Object[] retVal = savedObjects.toArray();
 		savedObjects = null; // erase to start over
 		return retVal;
@@ -340,6 +353,7 @@ public class CompilerContextImpl extends ContextImpl
 	/** @see CompilerContext#setSavedObjects */
     public void setSavedObjects(List<Object> objs)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<Object> it = objs.iterator();
         while (it.hasNext()) {
             addSavedObject(it.next());
@@ -429,11 +443,14 @@ public class CompilerContextImpl extends ContextImpl
 			throws StandardException
 	{
         Long conglomNum = conglomerateNumber;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 
         // Try to find the given conglomerate number among the already
         // opened conglomerates.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         StoreCostController retval =
                 storeCostControllers.get(conglomNum);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
         if (retval == null) {
             // Not found, so get a StoreCostController from the store.
@@ -450,6 +467,7 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	private void closeStoreCostControllers()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<StoreCostController> it = storeCostControllers.values().iterator();
         while (it.hasNext())
 		{
@@ -480,6 +498,7 @@ public class CompilerContextImpl extends ContextImpl
 			*/
 
 			sortCostController =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 				lcc.getTransactionCompile().openSortCostController();
 		}
 
@@ -530,7 +549,9 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	public void pushCompilationSchema(SchemaDescriptor sd)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
 		if (defaultSchemaStack == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			defaultSchemaStack = new ArrayList<SchemaDescriptor>(2);
 		}
 
@@ -545,6 +566,7 @@ public class CompilerContextImpl extends ContextImpl
 	public void popCompilationSchema()
 	{
 		SchemaDescriptor sd =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			defaultSchemaStack.remove(
 				defaultSchemaStack.size() - 1);
 		setCompilationSchema(sd);
@@ -593,6 +615,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
      * Get an array of type descriptors for all the ? parameters.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     DataTypeDescriptor[] getParameterTypes()
 	{
 		return parameterDescriptors;
@@ -673,13 +696,18 @@ public class CompilerContextImpl extends ContextImpl
 		privTypeStack.clear();
 		requiredColumnPrivileges = null;
 		requiredTablePrivileges = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		requiredSchemaPrivileges = null;
 		requiredRoutinePrivileges = null;
 		requiredUsagePrivileges = null;
 		requiredRolePrivileges = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if( lcc.usesSqlAuthorization())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			requiredColumnPrivileges = new HashMap<StatementTablePermission,StatementColumnPermission>();
 			requiredTablePrivileges = new HashMap<StatementTablePermission,StatementTablePermission>();
 			requiredSchemaPrivileges = new HashMap<StatementSchemaPermission,StatementSchemaPermission>();
@@ -699,12 +727,14 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	public void pushCurrentPrivType( int privType)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 		privTypeStack.add(currPrivType);
 		currPrivType = privType;
 	}
 
 	public void popCurrentPrivType( )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Integer top = privTypeStack.remove(privTypeStack.size() - 1);
         currPrivType = top.intValue();
 	}
@@ -745,6 +775,7 @@ public class CompilerContextImpl extends ContextImpl
 		if (td == null)
 			return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3266
 		if (td.getTableType() ==
 				TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE) {
 			return; // no priv needed, it is per session anyway
@@ -762,6 +793,7 @@ public class CompilerContextImpl extends ContextImpl
             // the already existing SELECT privilege requirement.
 			StatementTablePermission key = new StatementTablePermission( 
 					tableUUID, Authorizer.SELECT_PRIV);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
             if (requiredColumnPrivileges.containsKey(key) ||
                     requiredTablePrivileges.containsKey(key)) {
 				return;
@@ -775,17 +807,21 @@ public class CompilerContextImpl extends ContextImpl
 			//that, remove the MIN_SELECT_PRIV privilege requirement
 			StatementTablePermission key = new StatementTablePermission( 
 					tableUUID, Authorizer.MIN_SELECT_PRIV);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
             requiredColumnPrivileges.remove(key);
 		}
 		
 		StatementTablePermission key = new StatementTablePermission( tableUUID, currPrivType);
 		StatementColumnPermission tableColumnPrivileges
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		  = requiredColumnPrivileges.get( key);
 		if( tableColumnPrivileges == null)
 		{
 			tableColumnPrivileges = new StatementColumnPermission( tableUUID,
 																   currPrivType,
 																   new FormatableBitSet( td.getNumberOfColumns()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 			requiredColumnPrivileges.put(key, tableColumnPrivileges);
 		}
 		tableColumnPrivileges.getColumns().set(column.getPosition() - 1);
@@ -801,6 +837,7 @@ public class CompilerContextImpl extends ContextImpl
 		if( requiredTablePrivileges == null || table == null)
 			return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3266
 		if (table.getTableType() ==
 				TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE) {
 			return; // no priv needed, it is per session anyway
@@ -814,10 +851,12 @@ public class CompilerContextImpl extends ContextImpl
 			//that, remove the MIN_SELECT_PRIV privilege requirement
 			StatementTablePermission key = new StatementTablePermission( 
 					table.getUUID(), Authorizer.MIN_SELECT_PRIV);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
             requiredColumnPrivileges.remove(key);
 		}
 
 		StatementTablePermission key = new StatementTablePermission( table.getUUID(), currPrivType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		requiredTablePrivileges.put(key, key);
 	}
 
@@ -837,6 +876,7 @@ public class CompilerContextImpl extends ContextImpl
 			return;
 
  		if (requiredRoutinePrivileges.get(routine.getUUID()) == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 			requiredRoutinePrivileges.put(routine.getUUID(), 1);
 	}
 
@@ -878,6 +918,7 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	public void addRequiredRolePriv(String roleName, int privType)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		if( requiredRolePrivileges == null)
 			return;
 
@@ -907,6 +948,7 @@ public class CompilerContextImpl extends ContextImpl
 		if( requiredRolePrivileges != null)
         { size += requiredRolePrivileges.size(); }
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		ArrayList<StatementPermission> list = new ArrayList<StatementPermission>( size);
 		if( requiredRoutinePrivileges != null)
 		{
@@ -923,6 +965,8 @@ public class CompilerContextImpl extends ContextImpl
 			{
 				UUID objectID = itr.next();
 				
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 list.add(new StatementGenericPermission(
                         objectID,
                         requiredUsagePrivileges.get(objectID),
@@ -936,6 +980,7 @@ public class CompilerContextImpl extends ContextImpl
 				list.add( itr.next());
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		if( requiredSchemaPrivileges != null)
 		{
 			for( Iterator<StatementSchemaPermission> itr = requiredSchemaPrivileges.values().iterator(); itr.hasNext();)
@@ -950,6 +995,7 @@ public class CompilerContextImpl extends ContextImpl
 				list.add( itr.next());
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		if( requiredRolePrivileges != null)
 		{
 			for( Iterator<StatementRolePermission> itr = requiredRolePrivileges.values().iterator();
@@ -964,6 +1010,7 @@ public class CompilerContextImpl extends ContextImpl
 	public void addReferencedSequence( SequenceDescriptor sd )
     {
         if ( referencedSequences == null ) { referencedSequences = new HashMap<UUID,SequenceDescriptor>(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         referencedSequences.put( sd.getUUID(), sd );
     }
@@ -980,6 +1027,7 @@ public class CompilerContextImpl extends ContextImpl
 
     public  void    addPrivilegeFilter( VisitableFilter vf )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         if ( privilegeCheckFilters == null ) { privilegeCheckFilters = new ArrayList<VisitableFilter>(); }
         
         privilegeCheckFilters.add( vf );
@@ -1009,6 +1057,7 @@ public class CompilerContextImpl extends ContextImpl
     
     public  void    beginScope( String scopeName )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         if ( namedScopes == null ) { namedScopes = new HashMap<String,int[]>(); }
         
         int[]   scopeDepth = namedScopes.get( scopeName );
@@ -1048,6 +1097,7 @@ public class CompilerContextImpl extends ContextImpl
         boolean oldValue = skippingTypePrivileges;
         
         skippingTypePrivileges = skip;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6491
 
         return oldValue;
     }

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.VirtualColumnNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -37,6 +38,8 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class VirtualColumnNode extends ValueNode
 {
 	/* A VirtualColumnNode contains a pointer to the immediate child result
@@ -62,6 +65,8 @@ class VirtualColumnNode extends ValueNode
 	 * @param columnId			The columnId within the current Row
      * @param cm                The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     VirtualColumnNode(ResultSetNode sourceResultSet,
                       ResultColumn sourceColumn,
                       int columnId,
@@ -82,6 +87,8 @@ class VirtualColumnNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -90,6 +97,9 @@ class VirtualColumnNode extends ValueNode
 
 			printLabel(depth, "sourceColumn: ");
 		    sourceColumn.treePrint(depth + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
+//IC see: https://issues.apache.org/jira/browse/DERBY-2526
+//IC see: https://issues.apache.org/jira/browse/DERBY-3023
             printLabel(depth, "sourceResultSet: ");
             sourceResultSet.treePrint(depth + 1);
 		}
@@ -100,6 +110,8 @@ class VirtualColumnNode extends ValueNode
 	 *
 	 * @return ResultSetNode	
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode getSourceResultSet()
 	{
 		return sourceResultSet;
@@ -110,6 +122,8 @@ class VirtualColumnNode extends ValueNode
 	 *
 	 * @return ResultSetNode	
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getSourceColumn()
 	{
 		return sourceColumn;
@@ -126,6 +140,8 @@ class VirtualColumnNode extends ValueNode
 	 * 		derived column), it returns NULL.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getTableName()
 	{
 		return sourceColumn.getTableName();
@@ -142,6 +158,8 @@ class VirtualColumnNode extends ValueNode
 	 *		If the column is not in a schema (i.e. derived column), it returns NULL.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSchemaName() throws StandardException
 	{
 		return sourceColumn.getSchemaName();
@@ -165,6 +183,8 @@ class VirtualColumnNode extends ValueNode
 	 * @return ResultSetNode	
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getSourceResultColumn()
 	{
 		return sourceColumn;
@@ -278,6 +298,8 @@ class VirtualColumnNode extends ValueNode
 	 *		may be null if the node isn't bound yet.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final public DataTypeDescriptor getTypeServices()
 	{
         return sourceColumn.getTypeServices();
@@ -291,6 +313,7 @@ class VirtualColumnNode extends ValueNode
     
     boolean isEquivalent(ValueNode o) throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
     		VirtualColumnNode other = (VirtualColumnNode)o;
     		return sourceColumn.isEquivalent(other.sourceColumn);

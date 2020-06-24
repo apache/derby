@@ -260,6 +260,7 @@ public class Like {
 	private static boolean checkEquality(char[] val, int vLoc,
 			char[] pat, int pLoc, RuleBasedCollator collator) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3136
 		if (val[vLoc] == pat[pLoc]) { 
 	        // same character, so two strings consisting of this 
 	        // single character must be equal regardless of territory 
@@ -278,6 +279,8 @@ public class Like {
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 		Calculate the shortest length string that could match this pattern
 	 */
 	static int getMinLen(char[] pattern, int pStart, int pEnd, boolean haveEsc, char escChar) 
@@ -344,6 +347,8 @@ public class Like {
 
 	/*
 		Most typical interface for character string types with UCS_BASIC and 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 		territory based collation.
 	 */
 	public static Boolean like(char[] value, int valueLength, char[] pattern, 
@@ -368,6 +373,7 @@ public class Like {
 
 	public static boolean isOptimizable(String pattern)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1231
 		if (pattern == null)
 		{
 			return false;
@@ -423,6 +429,7 @@ public class Like {
 		// what is there, while stripping escapes
 		//
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-44
 		if ((escape != null) && (escape.length() != 0))
 		{
 			char escChar = escape.charAt(0);
@@ -581,6 +588,7 @@ public class Like {
 		char	newLastChar;
 		final int escChar;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-44
 		if ((escape != null) && (escape.length() !=0))
 		{
 			escChar = escape.charAt(0);

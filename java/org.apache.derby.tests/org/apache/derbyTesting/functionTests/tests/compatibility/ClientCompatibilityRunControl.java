@@ -84,6 +84,7 @@ public class ClientCompatibilityRunControl
         // Fork the client test with a minimal classpath.
         String classpath = clientDist.getDerbyClientJarPath() +
                 File.pathSeparator + testingPath +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5897
                 File.pathSeparator + getJUnitPath();
         // If we are running the LOB tests we also need derby.jar, because the
         // test code being run references classes from the iapi package.
@@ -119,6 +120,7 @@ public class ClientCompatibilityRunControl
      * @return A path.
      */
     private static String getJUnitPath() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5897
         URI uri = VersionCombinationConfigurator.getClassURI(
                 junit.framework.TestCase.class);
         return new File(uri).getPath();

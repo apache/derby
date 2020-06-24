@@ -322,6 +322,7 @@ public abstract class RawTransaction extends DerbyObservable implements Transact
      * @exception StandardException Exception encountered during checkpoint
 	 */
 	public abstract void checkpointInRollForwardRecovery(LogInstant cinstant,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3562
 														 long redoLWM,
 														 long undoLWM)
 		throws StandardException;

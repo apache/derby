@@ -43,6 +43,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     public static Test suite() {
         // This test uses XADataSource and so is not suitable for JSR169
         if (JDBC.vmSupportsJSR169())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("");
         else {
             BaseTestSuite suite = new BaseTestSuite("XADSAuthenticationTest");
@@ -57,9 +58,11 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     // in AuthenticationTest
     public static Test baseSuite(String name) {
         BaseTestSuite suite = new BaseTestSuite("XADSAuthenticationTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Test test = new XADSAuthenticationTest(
             "testConnectShutdownAuthentication");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         setBaseProps(suite, test);
         
         test = new XADSAuthenticationTest("testUserFunctions");
@@ -137,6 +140,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     }
     
     protected void assertShutdownUsingSetShutdownOK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
             String dbName, String user, String password) throws SQLException {
         XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
@@ -188,6 +192,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     throws SQLException
     {
         XADataSource xads = J2EEDataSource.getXADataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         try {
@@ -203,6 +208,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     throws SQLException
     {
         XADataSource xads = J2EEDataSource.getXADataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(xads, "user", user);
@@ -219,6 +225,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         String dbName, String user, String password)
     throws SQLException {
         XADataSource xads = J2EEDataSource.getXADataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
@@ -239,6 +246,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(xads, "user", user);
         JDBCDataSource.setBeanProperty(xads, "password", password);

@@ -210,6 +210,7 @@ public class PositionedStoreStreamTest
      * @throws StandardException will never happen
      */
     public void testDerby3781()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3781
             throws IOException, StandardException {
         final long size = 10;
         InputStream in = new LoopingAlphabetStream(size);
@@ -239,6 +240,7 @@ public class PositionedStoreStreamTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
                 PositionedStoreStreamTest.class, "PositionedStoreStreamTest");
     }

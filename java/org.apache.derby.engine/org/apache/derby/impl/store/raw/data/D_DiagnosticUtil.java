@@ -88,6 +88,7 @@ public class D_DiagnosticUtil
         Object   store_module = null;
 
 		Object db = findService(Property.DATABASE_MODULE, db_name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         // RESOLVE (mikem) - find a single way to find the current 
         // AccessFactory that works both for ij and unit tests.
@@ -199,6 +200,7 @@ public class D_DiagnosticUtil
             TransactionController tc =
                 store_module.getTransaction(
                     FileContainer.getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
             ConglomerateController open_table = 
                 tc.openConglomerate(
@@ -247,7 +249,9 @@ public class D_DiagnosticUtil
 
 			RawStoreFactory store_module = (RawStoreFactory)
 				findServiceModule(module, RawStoreFactory.MODULE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			xact = store_module.startInternalTransaction
                 (FileContainer.getContextService().getCurrentContextManager());
 
@@ -339,6 +343,7 @@ public class D_DiagnosticUtil
                 TransactionController tc = 
                     store_module.getTransaction(
                         FileContainer.getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
                 conglom_id = tc.findConglomid(containerid);
             }
@@ -408,6 +413,8 @@ public class D_DiagnosticUtil
         // Find the AccessFactory
         store_module = (AccessFactory) 
             getServiceModule(module, AccessFactory.MODULE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         if (store_module != null)
         {
@@ -416,6 +423,7 @@ public class D_DiagnosticUtil
                 TransactionController tc =
                     store_module.getTransaction(
                         FileContainer.getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
                 container_id = tc.findContainerid(conglomid);
             }
@@ -445,6 +453,7 @@ public class D_DiagnosticUtil
      * can't call this entry point.
      */
     private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

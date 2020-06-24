@@ -49,6 +49,7 @@ public class Utf8CcsidManager extends CcsidManager {
         try {
             return sourceString.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("Could not convert Java String to byte[] in UTF-8", e);
             }
@@ -60,6 +61,7 @@ public class Utf8CcsidManager extends CcsidManager {
        try {
            return new String(sourceBytes,"UTF-8");
         } catch (UnsupportedEncodingException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("Could not convert byte[] to Java String using UTF-8 encoding", e);
             }
@@ -72,8 +74,10 @@ public class Utf8CcsidManager extends CcsidManager {
      */
     public String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
             return new String(sourceBytes, offset, numToConvert, "UTF-8");
         } catch (UnsupportedEncodingException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("Could not convert byte[] to Java String using UTF-8 encoding with offset",e);
             }
@@ -94,6 +98,7 @@ public class Utf8CcsidManager extends CcsidManager {
     }
 
     int getByteLength(String str) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
         try {
             return str.getBytes("UTF-8").length;
         } catch (UnsupportedEncodingException e) {

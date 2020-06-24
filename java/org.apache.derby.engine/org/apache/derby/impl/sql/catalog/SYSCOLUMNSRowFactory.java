@@ -113,6 +113,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	private final DataDictionary dataDictionary;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
     SYSCOLUMNSRowFactory(DataDictionary dd,UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		this(dd, uuidf, ef, dvf, TABLENAME_STRING);
@@ -123,6 +128,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf);
 		this.dataDictionary = dd;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 		initInfo(SYSCOLUMNS_COLUMN_COUNT, myName, indexColumnPositions, uniqueness, uuids);
 	}
 
@@ -141,6 +147,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	 */
   	@Override
   	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 					throws StandardException{
 	return makeRow(td, getHeapColumnCount());
 	}
@@ -163,6 +174,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		Object					defaultSerializable = null;
 		long					autoincStart = 0;
 		long					autoincInc = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 		long					autoincValue = 0;
 		boolean					autoincCycle = false;
 		//The SYSCOLUMNS table's autoinc related columns change with different
@@ -172,6 +184,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		//start value? Following variable is used to keep track of what happened 
 		//to the autoincrement column.
 		long autoinc_create_or_modify_Start_Increment = -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 
 		if (td != null)
 		{
@@ -182,12 +195,20 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 			tabID = column.getReferencingUUID().toString();
 			colName = column.getColumnName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			colID = column.getPosition();
 			autoincStart = column.getAutoincStart();
 			autoincInc   = column.getAutoincInc();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 			autoincValue   = column.getAutoincValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 			autoinc_create_or_modify_Start_Increment = column.getAutoinc_create_or_modify_Start_Increment();
 			autoincCycle = column.getAutoincCycle();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 
 			if (column.getDefaultInfo() != null)
 			{
@@ -212,6 +233,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 		/* Build the row to insert  */
 		row = getExecutionFactory().getValueRow(columnCount);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 
 		/* 1st column is REFERENCEID (UUID - char(36)) */
 		row.setColumn(SYSCOLUMNS_REFERENCEID, new SQLChar(tabID));
@@ -225,6 +251,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		/* 4th column is COLUMNDATATYPE */
 		row.setColumn(SYSCOLUMNS_COLUMNDATATYPE,
 				new UserType(typeDesc));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 5th column is COLUMNDEFAULT */
 		row.setColumn(SYSCOLUMNS_COLUMNDEFAULT,
@@ -253,11 +280,17 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 			// In this case, the autoincValue may have a
 			// different value than the autoincStart.
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 						  new SQLLongint(autoincValue));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, 
 						  new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, 
 						  new SQLLongint(autoincInc));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 			if (row.nColumns() >= 10) {
             // This column is present only if the data dictionary version is
             // 10.14 or higher.
@@ -272,6 +305,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 			ColumnDescriptor  column = (ColumnDescriptor)td;
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, new SQLLongint(autoincStart));
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, new SQLLongint(
 					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincInc()));
@@ -305,6 +339,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 						  new SQLLongint());
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC,
 						  new SQLLongint());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 			if (row.nColumns() >= 10) {
             // This column is present only if the data dictionary version is
             // 10.14 or higher.
@@ -374,6 +413,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		{
 			
 			int expectedCols =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
                 dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_14, null)
                     ? SYSCOLUMNS_COLUMN_COUNT
                     : (SYSCOLUMNS_COLUMN_COUNT - 1);
@@ -392,6 +436,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		UUID				defaultUUID = null;
 		UUID				uuid = null;
 		UUIDFactory			uuidFactory = getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 		long autoincStart, autoincInc, autoincValue;
 		boolean autoincCycle = false;
 
@@ -468,6 +513,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 		/* 7th column is AUTOINCREMENTVALUE (long) */
 		autoincValue = row.getColumn(SYSCOLUMNS_AUTOINCREMENTVALUE).getLong();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 
 		/* 8th column is AUTOINCREMENTSTART (long) */
 		autoincStart = row.getColumn(SYSCOLUMNS_AUTOINCREMENTSTART).getLong();
@@ -475,6 +521,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		/* 9th column is AUTOINCREMENTINC (long) */
 		autoincInc = row.getColumn(SYSCOLUMNS_AUTOINCREMENTINC).getLong();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 		if (row.nColumns() >= 10){
 			DataValueDescriptor col = row.getColumn(SYSCOLUMNS_AUTOINCREMENTINCCYCLE);
 			autoincCycle = col.getBoolean();
@@ -514,6 +565,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[]	buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
         
@@ -531,6 +583,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
             SystemColumnImpl.getColumn("AUTOINCREMENTSTART", Types.BIGINT, true),
             SystemColumnImpl.getColumn("AUTOINCREMENTINC", Types.BIGINT, true),
             SystemColumnImpl.getColumn("AUTOINCREMENTCYCLE", Types.BOOLEAN, true)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 
        };
 	}

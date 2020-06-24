@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.TableName
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -53,6 +54,7 @@ public class TableName extends QueryTreeNode
     TableName(String schemaName, String tableName, ContextManager cm)
 	{
         super(cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-18
 		hasSchema = schemaName != null;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -119,6 +121,8 @@ public class TableName extends QueryTreeNode
 	 * @param schemaName	 Schema name as a String
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setSchemaName(String schemaName)
 	{
 		this.schemaName = schemaName;
@@ -131,6 +135,8 @@ public class TableName extends QueryTreeNode
 	 * @return Full table name as a String
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getFullTableName()
 	{
 		if (schemaName != null)
@@ -144,6 +150,7 @@ public class TableName extends QueryTreeNode
      */
     public  String  getFullSQLName()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         return IdUtil.mkQualifiedName( schemaName, tableName );
     }
 
@@ -156,6 +163,7 @@ public class TableName extends QueryTreeNode
     @Override
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-18
 		if (hasSchema)
 			return getFullTableName();
 		else
@@ -174,6 +182,7 @@ public class TableName extends QueryTreeNode
 	 */
     boolean equals(TableName otherTableName)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-127
         if( otherTableName == null)
             return false;
         

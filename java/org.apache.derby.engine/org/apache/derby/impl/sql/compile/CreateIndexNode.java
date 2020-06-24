@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CreateIndexNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -44,6 +45,8 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateIndexNode extends DDLStatementNode
 {
     private boolean             unique;
@@ -71,6 +74,8 @@ class CreateIndexNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateIndexNode(boolean unique,
                     String indexType,
                     TableName indexName,
@@ -112,6 +117,8 @@ class CreateIndexNode extends DDLStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "CREATE INDEX";
@@ -133,6 +140,8 @@ class CreateIndexNode extends DDLStatementNode
 		int						columnCount;
 
         getSchemaDescriptor(); // want checking side-effects only
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		td = getTableDescriptor(tableName);
 
@@ -143,6 +152,7 @@ class CreateIndexNode extends DDLStatementNode
 		}
 
 		//If total number of indexes on the table so far is more than 32767, then we need to throw an exception
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		if (td.getTotalNumberOfIndexes() > Limits.DB2_MAX_INDEXES_ON_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEXES_ON_TABLE,
@@ -268,6 +278,7 @@ class CreateIndexNode extends DDLStatementNode
         }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		return getGenericConstantActionFactory().getCreateIndexConstantAction(
                     false, // not for CREATE TABLE
                     unique,
@@ -275,6 +286,7 @@ class CreateIndexNode extends DDLStatementNode
                     false, // it's not a constraint, so its checking
                            // is not deferrable
                     false, // initiallyDeferred: N/A
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                     -1,    // constraintType: N/A
                     indexType,
                     sd.getSchemaName(),
@@ -298,6 +310,7 @@ class CreateIndexNode extends DDLStatementNode
 				throws StandardException
 	{
 		int size = columnNameList.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         HashSet<String> seenNames = new HashSet<String>(size + 2, 0.999f);
 		columnNames = new String[size];
 		isAscending = new boolean[size];
@@ -307,6 +320,8 @@ class CreateIndexNode extends DDLStatementNode
 			/* Verify that this column's name is unique within the list
 			 * Having a space at the end meaning descending on the column
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             columnNames[index] = columnNameList.get(index);
 			if (columnNames[index].endsWith(" "))
 			{
@@ -318,6 +333,7 @@ class CreateIndexNode extends DDLStatementNode
 
             boolean alreadySeen = !seenNames.add(columnNames[index]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 			if (alreadySeen)
 			{
 				throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_NAME_CREATE_INDEX, columnNames[index]);

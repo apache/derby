@@ -53,6 +53,7 @@ public class DB_Alias
 		throws SQLException {
 
 		// First do stored procedures.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4485
 		PreparedStatement ps = conn.prepareStatement
             (
              "SELECT ALIAS, ALIASINFO, " +
@@ -128,6 +129,7 @@ public class DB_Alias
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4485
                 switch( aliasType )
                 {
                 case UDT_TYPE: Logs.reportMessage( "DBLOOK_UDTHeader" ); break;
@@ -171,6 +173,7 @@ public class DB_Alias
 
 		StringBuffer alias = new StringBuffer("CREATE ");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4485
         switch( aliasType )
         {
         case UDT_TYPE: alias.append( "TYPE " ); break;

@@ -102,10 +102,12 @@ public class RunSuite
 		if (j9config != null) 
 			if (j9config.equals("foun10")) 
 				jvmName="j9_foundation";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
 			else if (j9config.equals("foun11")) 
 				jvmName="j9_foundation11";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
 			else if (j9config.equals("dee"))
 				jvmName="j9dee15";
 
@@ -120,6 +122,7 @@ public class RunSuite
 
 	    // suiteName may be one suite or a list of suites
         suitesToRun = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Get properties set in the suite's properties file
 		suiteProperties = getSuiteProperties(suiteName, true);
@@ -292,6 +295,7 @@ public class RunSuite
             jvmName = p.getProperty("jvm");
 		    if ( (jvmName == null) || (jvmName.length()==0) )
 		    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
 		        javaVersion = System.getProperty(RunList.SPEC_VERSION);
 		    }
 		    else
@@ -319,6 +323,7 @@ public class RunSuite
             javaCmd = p.getProperty("javaCmd");
             jvmflags = p.getProperty("jvmflags");
             testJavaFlags = p.getProperty("testJavaFlags");
+//IC see: https://issues.apache.org/jira/browse/DERBY-238
             testSpecialProps = p.getProperty("testSpecialProps");
             classpath = p.getProperty("classpath");
             classpathServer = p.getProperty("classpathServer");
@@ -350,6 +355,7 @@ public class RunSuite
             outputdir = p.getProperty("outputdir");
             canondir = p.getProperty("canondir");
             bootcp = p.getProperty("bootcp");
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
             hostName = p.getProperty("hostName");
             serverJvm = p.getProperty("serverJvm");
             systemdiff = p.getProperty("systemdiff");
@@ -359,6 +365,7 @@ public class RunSuite
             reportstderr = p.getProperty("reportstderr");
             timeout = p.getProperty("timeout");
             shutdownurl = p.getProperty("shutdownurl");
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
             testEncoding = p.getProperty("derbyTesting.encoding");
         }
         suites = p.getProperty("suites");
@@ -397,6 +404,7 @@ public class RunSuite
 		// when the time comes to have this converted into actual jvm flags
 		// the ones given at the command line will overwrite whatever's in the suite
 		String jflags = sp.getProperty("jvmflags");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4860
 		if (jvmflags != null && jvmflags.length() > 0)
 		{
 		  //DERBY-4680 Make sure ^ does not get appended to jvmflags
@@ -422,13 +430,16 @@ public class RunSuite
 		String testprops = sp.getProperty("testSpecialProps");
 		if (testprops != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4860
 		    if (testSpecialProps == null || testSpecialProps.length() == 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
 		        testSpecialProps = testprops;
 		    else // add to testSpecialProps
 		        testSpecialProps = testSpecialProps + "^" + testprops;
 		    suiteProperties.put("testSpecialProps", testSpecialProps);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		String clpth = isModuleAware ? JVMInfo.getSystemModulePath() : sp.getProperty("classpath");
 		if (clpth != null)
 		{
@@ -456,6 +467,7 @@ public class RunSuite
 		String encrypt = sp.getProperty("encryption");
 		if (encrypt != null)
 		    suiteProperties.put("encryption", encrypt);
+//IC see: https://issues.apache.org/jira/browse/DERBY-238
 		String encryptAlgorithm = sp.getProperty("testEncryptionAlgorithm");
 		if (encryptAlgorithm != null)
 		    suiteProperties.put("testEncryptionAlgorithm", encryptAlgorithm);
@@ -492,20 +504,24 @@ public class RunSuite
 		    bootcp = j9bootcp;
 		    suiteProperties.put("bootcp", bootcp);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 		String hostname = sp.getProperty("hostName");
 		if (hostname != null)
 			suiteProperties.put("hostName", hostname);
 		String serverJvm = sp.getProperty("serverJvm");
 		if (serverJvm != null)
 		    suiteProperties.put("serverJvm", serverJvm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
 		String cmlTestEncoding = sp.getProperty("derbyTesting.encoding");
 		if (cmlTestEncoding != null)
 		    suiteProperties.put("derbyTesting.encoding", cmlTestEncoding);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1348
                 String upgradejarpath = sp.getProperty("derbyTesting.jar.path");
                 if (upgradejarpath != null)
                     suiteProperties.put("derbyTesting.jar.path", upgradejarpath);
 		String testout = sp.getProperty("testoutname");
 		if (testout != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3294
 		    suiteProperties.put("testoutname", testout);
 		String mtdir = sp.getProperty("mtestdir"); // used by multi tests
 		if (mtdir != null)

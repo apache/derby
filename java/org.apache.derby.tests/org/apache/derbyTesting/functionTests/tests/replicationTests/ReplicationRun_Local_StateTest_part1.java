@@ -38,6 +38,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
     final static String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE = "08004";
     final static String LOGIN_FAILED = "08004";
     final static String REPLICATION_DB_NOT_BOOTED = "XRE11";
@@ -59,6 +60,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_StateTest_part1 Suite");
         
@@ -91,19 +93,23 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 masterDbSubPath); // Distinguishing master/slave
         
         // State test. 
         _testPreStartedSlaveServer(); 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 slaveDbSubPath); // Distinguishing master/slave
         
         startServerMonitor(slaveServerHost);
@@ -252,6 +258,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         Connection conn = null;
         
         // 1.  stopMaster on master: fail
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
@@ -271,6 +278,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String msg = ec + " " + ss + " " + se.getMessage();
             // SQLState.REPLICATION_NOT_IN_MASTER_MODE
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
             BaseJDBCTestCase.assertSQLState(
                 "stopMaster on master failed: " + msg,
                 REPLICATION_NOT_IN_MASTER_MODE,
@@ -296,6 +304,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             int ec = se.getErrorCode();
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
             BaseJDBCTestCase.assertSQLState(
                 "stopSlave on slave failed: " + msg,
                 REPLICATION_DB_NOT_BOOTED,
@@ -307,6 +316,8 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
     private void _testPreStartedSlave()
     {
         Connection conn = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
@@ -330,6 +341,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG(msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
             BaseJDBCTestCase.assertSQLState(
                 "2. Unexpected SQLException: " + msg,
                 REPLICATION_SLAVE_STARTED_OK,
@@ -349,6 +361,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG(msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
             BaseJDBCTestCase.assertSQLState(
                 "2. Unexpected SQLException: " + msg,
                 LOGIN_FAILED,
@@ -361,6 +374,8 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
     throws Exception
     {
         Connection conn = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         String db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
@@ -394,6 +409,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG(msg);
             util.DEBUG("1. startMaster: No connection as expected: " + msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
             BaseJDBCTestCase.assertSQLState(
                 "1. Unexpected SQLException: " + msg,
                 REPLICATION_CONNECTION_EXCEPTION,
@@ -418,6 +434,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG("2. startMaster No connection as expected: " + msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
             BaseJDBCTestCase.assertSQLState(
                 "2. Unexpected SQLException: " + msg,
                 REPLICATION_MASTER_ALREADY_BOOTED,
@@ -427,6 +444,8 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         
         // A 2. StartSlave connect should fail:
         util.DEBUG("startSlave attempt should fail on: " + connectionURL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
@@ -447,6 +466,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG("3. startSlave No connection as expected: " + msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
             BaseJDBCTestCase.assertSQLState(
                 "3. Unexpected SQLException: " + msg,
                 CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE,

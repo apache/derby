@@ -115,6 +115,7 @@ public class T_XA extends T_Generic
 		startParams = T_Util.setEncryptionParam(startParams);
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			store = (AccessFactory) createPersistentService(
 				getModuleToTestProtocolName(), testService, startParams);
 		} catch (StandardException mse) {
@@ -562,6 +563,8 @@ public class T_XA extends T_Generic
 
         ContextManager cm = 
                 getContextService().getCurrentContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         // ABORT AN IDLE TRANSACTION.
 
@@ -1073,6 +1076,10 @@ public class T_XA extends T_Generic
 
         ContextManager cm = 
                 getContextService().getCurrentContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         TransactionController   tc = store.getTransaction(cm);
 
@@ -1130,6 +1137,16 @@ public class T_XA extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, //column sort order - not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 				null,  	//default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
@@ -1191,12 +1208,14 @@ public class T_XA extends T_Generic
      */
     static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }
@@ -1277,6 +1296,7 @@ class commit_method
 
                 SanityManager.ASSERT(
                     cm == 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     T_XA.getContextService().getCurrentContextManager(),
                     "cm = " + cm +
                     "current = " + 
@@ -1322,6 +1342,7 @@ class commit_method
 
                 SanityManager.ASSERT(
                     cm == 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     T_XA.getContextService().getCurrentContextManager(),
                     "cm = " + cm +
                     "current = " + 

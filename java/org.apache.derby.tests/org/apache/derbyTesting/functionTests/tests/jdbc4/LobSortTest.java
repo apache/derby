@@ -195,9 +195,11 @@ public class LobSortTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
         Properties props = new Properties();
         // Adjust sort buffer size to trigger the bug situation with less data.
         props.setProperty("derby.storage.sortBufferMax", "4");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(LobSortTest.class,
                                         "LobSortTestEmbedded");
         return new CleanDatabaseTestSetup(
@@ -221,6 +223,7 @@ public class LobSortTest
                 ps.setInt(4, 0);
                 ps.setInt(5, rnd.nextInt());
                 ps.executeUpdate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
                 for (int i=0; i < 100; i++) {
                     CharAlphabet ca = getCharAlphabet(1 + rnd.nextInt(3));
                     int length = (int)(rnd.nextDouble() * 64.0 * 1024.0);

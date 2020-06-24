@@ -93,6 +93,7 @@ public interface Loggable extends Formatable {
 		releaseResource method.
 
 		<P> The sequence of events in recovery redo of a Loggable operation is:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		<UL>
 		<LI> Get the loggable operation.  If loggable.needsRedo is false, then
 		no need to redo this operation.</LI>

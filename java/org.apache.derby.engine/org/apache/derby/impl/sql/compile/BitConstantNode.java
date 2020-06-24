@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BitConstantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -31,6 +32,8 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.StringUtil;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class BitConstantNode extends ConstantNode
 {
     /**

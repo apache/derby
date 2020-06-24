@@ -117,6 +117,7 @@ public class ByteAlphabet {
      * Create an alphabet that consists of a single byte.
      */
     public static ByteAlphabet singleByte(byte b) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         return new ByteAlphabet(
                 "Single byte: " + b,
                 new char[] { (char) (b & 0xff) },
@@ -144,6 +145,7 @@ public class ByteAlphabet {
             tmpBytes = new byte[] {0};
         }
         this.bytes = tmpBytes;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         this.byteCount = tmpBytes.length;
     }
 

@@ -74,6 +74,7 @@ public abstract	class CatalogRowFactory
 
     public CatalogRowFactory(UUIDFactory uuidf,
 							 ExecutionFactory ef,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 							 DataValueFactory dvf)
 								 
 	{
@@ -192,6 +193,7 @@ public abstract	class CatalogRowFactory
 	public	String	generateIndexName( int indexNumber )
 	{
 		indexNumber++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 		return	catalogName + "_INDEX" + indexNumber;
 	}
 
@@ -223,6 +225,7 @@ public abstract	class CatalogRowFactory
 		indexCount = (indexColumnPositions != null) ? 
 			                 indexColumnPositions.length : 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 		this.catalogName = catalogName;
 		this.columnCount = columnCount;
 
@@ -239,6 +242,7 @@ public abstract	class CatalogRowFactory
 				indexNames[ictr] = generateIndexName(ictr);
 				indexUUID[ictr] = uf.recreateUUID(uuidStrings[ictr + 2 ]);
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 			this.indexColumnPositions = ArrayUtil.copy2( indexColumnPositions );
 			this.indexUniqueness = ArrayUtil.copy( indexUniqueness );
  

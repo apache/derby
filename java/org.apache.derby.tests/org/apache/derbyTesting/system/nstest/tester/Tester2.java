@@ -63,6 +63,7 @@ public class Tester2 extends TesterObject {
 			//the connection will now open. It closes at the end of the loop
 			connex = getConnection();
 			if (connex == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println("FAIL: " + getThread_id()
 						+ " could not get database connection");
 				return; //quit
@@ -73,12 +74,14 @@ public class Tester2 extends TesterObject {
 			try {
 				connex.setAutoCommit(false);
 			} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println("FAIL: " + getThread_id()
 						+ "'s setAutoCommit() failed:");
 				printException("setting AutoCommit in Tester2", e);
                 
                 // if you can't change the autocommit state, the connection is unusable.
                 // get out of here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                 return;
 			}
 
@@ -97,6 +100,7 @@ public class Tester2 extends TesterObject {
 				case 0: //do a select operation
 					try {
 						int numSelected = doSelectOperation(NsTest.MAX_LOW_STRESS_ROWS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 						NsTest.logger.println(getThread_id() + " selected "
 								+ numSelected + " rows");
 					} catch (Exception e) {
@@ -121,12 +125,14 @@ public class Tester2 extends TesterObject {
 				try {
 					connex.commit();
 				} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 					NsTest.logger.println("FAIL: " + getThread_id()
 							+ "'s commit() failed:");
 					printException("committing Xn in Tester2", e);
                     
                     // if you can't commit, the connection is unusable.
                     // get out of here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                     return;
 				}
 			}//end of for(int numOp=1...)
@@ -137,6 +143,7 @@ public class Tester2 extends TesterObject {
 		}//end of for (int i=0;...)
 
 		NsTest.logger.println("Thread " + getThread_id() + " is now terminating");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 	}//end of startTesting()
 

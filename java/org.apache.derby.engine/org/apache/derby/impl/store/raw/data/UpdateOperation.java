@@ -77,6 +77,7 @@ public final class UpdateOperation extends PhysicalPageOperation {
 
 	transient protected ByteArray preparedLog;
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     UpdateOperation(
     RawTransaction              t, 
     BasePage                    page, 
@@ -331,6 +332,7 @@ public final class UpdateOperation extends PhysicalPageOperation {
      **/
 	private RecordHandle getRecordHandle()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5165
 		return new RecordId(getPageId(), recordId);
 	}
 

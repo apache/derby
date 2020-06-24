@@ -86,6 +86,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery("CALL RETRIEVE_DYNAMIC_RESULTS(1)");
         assertNotNull("executeQuery() returned null.", rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
         assertSame(stmt, rs.getStatement());
         JDBC.assertDrainResultsHasData(rs);
     }
@@ -169,6 +170,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         ps.setInt(1, 1);
         ResultSet rs = ps.executeQuery();
         assertNotNull("executeQuery() returned null.", rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
         assertSame(ps, rs.getStatement());
         JDBC.assertDrainResultsHasData(rs);
 
@@ -262,6 +264,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         cs.setInt(1, 1);
         ResultSet rs = cs.executeQuery();
         assertNotNull("executeQuery() returned null.", rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
         assertSame(cs, rs.getStatement());
         JDBC.assertDrainResultsHasData(rs);
     }
@@ -492,6 +495,12 @@ public class ProcedureTest extends BaseJDBCTestCase {
         testRollbackStoredProcWhenExecuteUpdateReturnsResults_prepared()
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection conn = getConnection();
         conn.setAutoCommit(true);
         PreparedStatement ps =
@@ -572,6 +581,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
         PreparedStatement ps =
             prepareStatement("CALL RETRIEVE_EXTERNAL_RESULT(?,?,?)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         ps.setString(1, getTestConfiguration().getDefaultDatabaseName());
         ps.setString(2, getTestConfiguration().getUserName());
         ps.setString(3, getTestConfiguration().getUserPassword());
@@ -621,6 +632,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * test case for DERBY-5280.
      */
     public void testStatementSeverityErrorInProcedure() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5280
+//IC see: https://issues.apache.org/jira/browse/DERBY-5161
+//IC see: https://issues.apache.org/jira/browse/DERBY-5157
         Statement s = createStatement();
         s.execute("create procedure proc_5280() language java " +
                   "parameter style java external name '" +
@@ -855,6 +869,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param i INOUT parameter that gets set to 10 by the procedure
      */
     public static void proc_2516(Integer[] i) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         i[0] = 10;
     }
 
@@ -1009,6 +1024,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     private void assertMultipleResultsFromExecuteQuery(SQLException sqle)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4785
+//IC see: https://issues.apache.org/jira/browse/DERBY-4785
         assertSQLState("Unexpected SQL state.", "X0Y78", sqle);        
     }
 
@@ -1019,6 +1036,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param sqle a <code>SQLException</code> value
      */
     private void assertResultsFromExecuteUpdate(SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4785
         assertSQLState("Unexpected SQL state.", "X0Y79", sqle);
     }
 
@@ -1030,8 +1048,10 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("ProcedureTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("ProcedureTest:embedded"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
 
         suite.addTest(
                 TestConfiguration.clientServerDecorator(
@@ -1046,6 +1066,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     private static Test baseSuite(String name)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         
         // Need JDBC DriverManager to run these tests
@@ -1054,6 +1075,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         
         suite.addTestSuite(ProcedureTest.class);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
         return new CleanDatabaseTestSetup(suite) {
             /**
              * Creates the tables and the stored procedures used in the test
@@ -1078,6 +1100,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public void setUp() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         Statement s = createStatement();
@@ -1100,12 +1123,15 @@ public class ProcedureTest extends BaseJDBCTestCase {
           ProcedureTest.class.getName() + ".retrieveDynamicResults' " +
           "DYNAMIC RESULT SETS 4",
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
 
           "CREATE PROCEDURE RETRIEVE_CLOSED_RESULT() LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".retrieveClosedResult' " +
           "DYNAMIC RESULT SETS 1",
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
           "CREATE PROCEDURE RETRIEVE_EXTERNAL_RESULT(" +
           "DBNAME VARCHAR(128), DBUSER VARCHAR(128), DBPWD VARCHAR(128)) LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
@@ -1197,6 +1223,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public static void retrieveExternalResult(String dbName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
             String user, String password, ResultSet[] external)
         throws SQLException
     {
@@ -1292,6 +1320,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     {
         return new AllTypesTuple
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              1L,
              new HarmonySerialBlob( new byte[] { (byte) 1, (byte) 1, (byte) 1 } ),
              Boolean.TRUE,
@@ -1299,7 +1328,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new byte[] { (byte) 1, (byte) 1, (byte) 1 },
              new HarmonySerialClob( "firstt" ),
              new Date( 1L ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5485
              new BigDecimal( "1" ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              1.0,
              1 ,
              new String( "firstt" ),
@@ -1308,6 +1339,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
              1,
              new Time( 1L ),
              new Timestamp( 1L ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5485
              new Price( "USD", new BigDecimal( "1" ), new Timestamp( 1 ) ),
              "firstt",
              new byte[] { (byte) 1, (byte) 1, (byte) 1 }
@@ -1317,6 +1349,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     {
         return new AllTypesTuple
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              2L,
              new HarmonySerialBlob( new byte[] { (byte) 2, (byte) 2, (byte) 2 } ),
              Boolean.FALSE,
@@ -1324,7 +1357,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new byte[] { (byte) 2, (byte) 2, (byte) 2 },
              new HarmonySerialClob( "second" ),
              new Date( 2L ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5485
              new BigDecimal( "2" ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              2.0,
              2,
              new String( "second" ),
@@ -1333,6 +1368,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
              2,
              new Time( 2L ),
              new Timestamp( 2L ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5485
              new Price( "USD", new BigDecimal( "2" ), new Timestamp( 2 ) ),
              "second",
              new byte[] { (byte) 2, (byte) 2, (byte) 2 }
@@ -1546,6 +1582,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
             int pass = 0;
             do {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
                     allRS[pass++] = cs.getResultSet();         
                     assertSame(cs, allRS[pass-1].getStatement());
                     // expect everything to stay open.                        
@@ -1568,6 +1606,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
 
             //first two with KEEP_CURRENT_RESULT"
             allRS[0] = cs.getResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
             assertSame(cs, allRS[0].getStatement());
             boolean moreRS = cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
             if (!moreRS)
@@ -1586,6 +1625,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
                     fail("FAIL - no third result set");
             // first and third open
             allRS[2] = cs.getResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
             assertSame(cs, allRS[2].getStatement());
             assertEquals(2,allRS[0].getInt(1));
             JDBC.assertClosed(allRS[1]);
@@ -1598,6 +1638,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
             if (!moreRS)
                     fail("FAIL - no fourth result set");
             allRS[3] = cs.getResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
             assertSame(cs, allRS[3].getStatement());
             allRS[3].next();
             // first, third and fourth open, second closed
@@ -1611,6 +1652,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
             if (!moreRS)
                    fail("FAIL - no fifth result set");
             allRS[4] = cs.getResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
             assertSame(cs, allRS[4].getStatement());
             allRS[4].next();
             // only fifth open
@@ -1698,6 +1740,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
             for (int i = 0; i < 5; i++)
             {
                 allRS[i] = cs.getResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
                 assertSame(cs, allRS[i].getStatement());
                 allRS[i].next();
                 assertEquals(2+i, allRS[i].getInt(1));

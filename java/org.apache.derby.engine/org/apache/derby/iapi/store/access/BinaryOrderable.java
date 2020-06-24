@@ -33,6 +33,7 @@ import java.io.IOException;
   The Orderable interface represents a value that can
   be linearly ordered.
   <P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
   Currently only supports linear (&lt;, =, &lt;=) operations.
   Eventually we may want to do other types of orderings,
   in which case there would probably be a number of interfaces

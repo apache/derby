@@ -81,6 +81,7 @@ public class dbcleanup {
     		PrintStream stdout = System.out;
     		PrintStream stderr = System.err;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(driver);
             clazz.getConstructor().newInstance();
 
@@ -118,6 +119,7 @@ public class dbcleanup {
 
 		Enumeration schemalist = null;
 		Enumeration list = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		Vector<String> schemavec = new Vector<String>();
 		Vector<String> tablevec = null;
 		// get a list of the user schemas
@@ -144,6 +146,7 @@ public class dbcleanup {
 		String n = null;
 		boolean viewdependencyFound = false;
 		boolean tabledependencyFound = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		Vector<String> viewvec = null;
 		int count = 0;
 		for (schemalist = schemavec.elements(); schemalist.hasMoreElements();) {
@@ -169,6 +172,7 @@ public class dbcleanup {
 				}
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			Vector<String> stmtvec = new Vector<String>();
 			try {
 				rs = s.executeQuery( " select stmtname " +
@@ -307,6 +311,7 @@ public class dbcleanup {
 
 		ResultSet rs = null;
 		Vector<String> tableviewvec = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		try {
 			rs = s.executeQuery( " select t.tablename " +
@@ -333,6 +338,7 @@ public class dbcleanup {
 		ResultSet rs = null;
 		Statement s = null;
 		String typestring = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		Vector<String> aliasvec = new Vector<String>();
 		String n = null;
 		int count = 0;

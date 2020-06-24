@@ -90,6 +90,7 @@ import org.apache.derby.impl.jdbc.Util;
  * @see EmbeddedDataSource
  */
 public class BasicEmbeddedDataSource40 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
     implements javax.sql.DataSource, java.io.Serializable, 
                EmbeddedDataSourceInterface
 {
@@ -598,6 +599,7 @@ public class BasicEmbeddedDataSource40
     @Override
     public boolean equals(Object other) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
         if (other instanceof EmbeddedDataSource) {
             EmbeddedDataSource ds = (EmbeddedDataSource)other;
 
@@ -863,6 +865,7 @@ public class BasicEmbeddedDataSource40
                     // if monitor is never setup by any ModuleControl,
                     // getMonitor returns null and no Derby database
                     // has been booted.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     if (getMonitor() != null) {
                         database = (Database)
                             findService(Property.DATABASE_MODULE,
@@ -881,6 +884,7 @@ public class BasicEmbeddedDataSource40
 
                         // now try to find it again
                         database = (Database)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                             findService(Property.DATABASE_MODULE,
                                                 dbName);
                     }
@@ -944,6 +948,7 @@ public class BasicEmbeddedDataSource40
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

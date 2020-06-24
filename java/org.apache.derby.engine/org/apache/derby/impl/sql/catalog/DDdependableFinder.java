@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.catalog.DDdependableFinder
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -166,15 +167,18 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
 				return Dependable.VIEW;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
 				return Dependable.TABLE_PERMISSION;
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
 				return Dependable.COLUMNS_PERMISSION;
 
 			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
 				return Dependable.ROUTINE_PERMISSION;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3666
 			case StoredFormatIds.ROLE_GRANT_FINDER_V01_ID:
 				return Dependable.ROLE_GRANT;
 
@@ -201,6 +205,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	public final Dependable getDependable(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
         Dependable dependable = findDependable(dd, dependableObjectID);
         if (dependable == null)
             throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND,
@@ -255,6 +260,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
                 return dd.getViewDescriptor(dependableObjectID);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
             case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
                 return dd.getColumnPermissions(dependableObjectID);
 
@@ -266,6 +272,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 
 		    case StoredFormatIds.ROLE_GRANT_FINDER_V01_ID:
 				return dd.getRoleGrantDescriptor(dependableObjectID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
 			case StoredFormatIds.SEQUENCE_DESCRIPTOR_FINDER_V01_ID:
                 return dd.getSequenceDescriptor(dependableObjectID);
@@ -279,6 +286,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 					SanityManager.THROWASSERT(
 						"getDependable() called with unexpeced formatId = " + formatId);
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
                 return null;
 		}
     }

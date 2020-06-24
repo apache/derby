@@ -51,6 +51,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
         if (JDBC.vmSupportsJDBC3()) {
             ldapServer=getSystemProperty("derbyTesting.ldapServer");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             if (ldapServer == null || ldapServer.length() < 1) {
                 return new BaseTestSuite(
                     "XAJNDITest requires property derbyTesting.ldapServer " +
@@ -74,6 +75,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
                     "for setting o=, eg: -DderbyTesting.dnString=myJNDIstring");
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3659
             return TestConfiguration.defaultSuite(XAJNDITest.class);
         }
         return new BaseTestSuite("XAJNDITest cannot run without XA support");
@@ -90,8 +92,10 @@ public class XAJNDITest extends BaseJDBCTestCase {
     private InitialDirContext getInitialDirContext()
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Hashtable<String, String> env = new Hashtable<String, String>();
             // using properties - these will have been passed in.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
             String ldapContextFactory=getSystemProperty("derbyTesting.ldapContextFactory");
             if (ldapContextFactory == null || ldapContextFactory.length() < 1)
                 env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -130,6 +134,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
             // property manually. And by the way, we don't trust that equals()
             // in embedded data sources checks all the properties, so do a
             // full check for embedded as well.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3669
             String[] orgprops = getPropertyBeanList(xads);
             String[] bindprops = getPropertyBeanList(ads);
             assertEquals(orgprops.length, bindprops.length);
@@ -159,6 +164,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
     private static String[] getPropertyBeanList(Object ds) {
         Method[] allMethods = ds.getClass().getMethods();
         ArrayList<String> properties = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         for (int i = 0; i < allMethods.length; i++) {
             Method method = allMethods[i];
@@ -188,6 +194,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return properties.toArray(new String[properties.size()]);
     }
 }

@@ -66,6 +66,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("OffsetFetchNextTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(
             baseSuite("OffsetFetchNextTest:embedded"));
@@ -78,6 +79,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     public static Test baseSuite(String suiteName) {
         return new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(OffsetFetchNextTest.class,
                           suiteName)) {
             @Override
@@ -153,6 +155,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      */
     public void testNewKeywordNonReserved() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4562
         setAutoCommit(false);
         prepareStatement("select a,b as offset from t1 offset 0 rows");
         prepareStatement("select a,b as limit from t1 offset 0 rows");
@@ -451,6 +454,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 1 rows, update a row and verify result
          */
         variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "1", null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for ( String variant : variants )
         {
             rs = stm.executeQuery( variant );
@@ -489,6 +493,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 0 rows (a no-op), update a row and verify result
          */
         variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "0", null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for ( String variant : variants )
         {
             rs = stm.executeQuery( variant );
@@ -547,6 +552,8 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * also try the "for update" syntax so we see that it still works
          */
         variants = makeVariants( "select * from t1 % for update", FIRST_ROWS_ONLY, "0", null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (String variant : variants)
         {
             rs = stm.executeQuery( variant );
@@ -569,6 +576,8 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 1 rows, fetch 3 row, update some rows and verify result
          */
         variants = makeVariants( "select * from t1 %", NEXT_ROWS_ONLY, "1", "3" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for ( String variant : variants )
         {
             rs = stm.executeQuery( variant );
@@ -619,6 +628,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         
         // Test with projection
         variants = makeVariants( "select * from t1 where a + 1 < b%", NEXT_ROWS_ONLY, "1", null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (String variant : variants)
         {
             rs = stm.executeQuery( variant );
@@ -672,6 +682,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         String[]    variants;
 
         variants = makeVariants( "select * from t1%", NEXT_ROWS_ONLY, "1", null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (String variant : variants)
         {
             rs = stm.executeQuery( variant );
@@ -708,6 +719,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         String[]    variants;
 
         variants = makeVariants( "select a,b from t1%", NEXT_ROWS_ONLY, "2", null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (String variant : variants)
         {
             stm.executeUpdate( "call syscs_util.syscs_set_runtimestatistics(1)" );
@@ -725,6 +737,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
             String plan = rs.getString(1);
 
             // Verify that the plan shows the filtering (2 rows of 3 seen):
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
             assertTrue(plan.indexOf("Row Count (1):\n" +
                                     "Number of opens = 1\n" +
                                     "Rows seen = 3\n" +
@@ -791,6 +804,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         String[]    variants;
 
         variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "2", "2" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (String variant : variants)
         {
             ps = prepareStatement( variant );
@@ -882,6 +896,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         
         // Mix of prepared and not
         variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "?", "3" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (String variant : variants)
         {
             ps = prepareStatement( variant );
@@ -949,11 +964,14 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     	//since there is no getParameterMetaData() call available in JSR169 
     	//implementations, do not run this test if we are running JSR169
     	if (JDBC.vmSupportsJSR169()) return;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4384
 
         PreparedStatement ps;
         String[]    variants;
 
         variants = makeVariants( "select * from t1 where a = ? order by b%", NEXT_ROWS_ONLY, "?", "?" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (String variant : variants)
         {
             ps = prepareStatement( variant );
@@ -1022,6 +1040,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      */
     private void    vetStatement
         ( Statement stmt, String sqlState, String stub, String fetchFormat, String offset, String fetchFirst, String[][] expectedResults )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         throws SQLException
     {
         String[]    variants = makeVariants( stub, fetchFormat, offset, fetchFirst );

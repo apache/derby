@@ -28,6 +28,7 @@ import org.apache.derby.iapi.jdbc.EmbeddedConnectionPoolDataSourceInterface;
 import org.apache.derby.impl.jdbc.EmbedPooledConnection;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    <P>
     This datasource is suitable for an application using embedded Derby,
     running on full Java SE 6 and higher, corresponding to 4.0 and higher.
@@ -60,6 +61,7 @@ import org.apache.derby.impl.jdbc.EmbedPooledConnection;
 
  */
 public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
     implements EmbeddedConnectionPoolDataSourceInterface
 {
 
@@ -85,6 +87,7 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 	*/
     @Override
 	public final PooledConnection getPooledConnection() throws SQLException { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1137
 		return createPooledConnection (getUser(), getPassword(), false);
 	}
 
@@ -147,6 +150,7 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
          * instantiating EmbeddedConnectionPoolDataSource) instead of
          * the newer one (EmbeddedConnectionPoolDataSource40).
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         findDriver();
         return new EmbedPooledConnection(this, user, password, requestPassword);
     }

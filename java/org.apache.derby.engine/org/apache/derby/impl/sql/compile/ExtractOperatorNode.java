@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ExtractOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -48,6 +49,8 @@ static private final String fieldName[] = {
 
 	private int extractField;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ExtractOperatorNode(int field, ValueNode operand, ContextManager cm)
             throws StandardException {
         super(operand,
@@ -70,6 +73,7 @@ static private final String fieldName[] = {
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException 
 	{
@@ -89,8 +93,11 @@ static private final String fieldName[] = {
 		*/
 		if (opTypeId.isStringTypeId())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
             TypeCompiler tc = operand.getTypeCompiler();
 			int castType = (extractField < 3) ? Types.DATE : Types.TIME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             operand = new CastNode(
 					operand, 
 					DataTypeDescriptor.getBuiltInDataTypeDescriptor(castType, true, 
@@ -160,6 +167,7 @@ static private final String fieldName[] = {
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			return "fieldName: " + fieldName[extractField] + "\n" +
 				super.toString();
 		}

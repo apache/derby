@@ -56,6 +56,7 @@ public  class   NsTestError implements Comparable<NsTestError>
     {
         _throwable = throwable;
         _count = 1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         _firstOccurrenceTime = System.currentTimeMillis();
         _lastOccurrenceTime = _firstOccurrenceTime;
     }
@@ -86,6 +87,7 @@ public  class   NsTestError implements Comparable<NsTestError>
 
     public  int compareTo( NsTestError that )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( that == null ) { return -1; }
         else
         {
@@ -107,6 +109,7 @@ public  class   NsTestError implements Comparable<NsTestError>
     /** Increment the number of times this error was seen */
     public  void    increment()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         _count++;
         _lastOccurrenceTime = System.currentTimeMillis();
     }

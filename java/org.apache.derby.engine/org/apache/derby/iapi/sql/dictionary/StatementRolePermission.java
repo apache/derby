@@ -55,6 +55,7 @@ public class StatementRolePermission extends StatementPermission
      */
     public void check(LanguageConnectionContext lcc,
                       boolean forGrant,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                       Activation activation
                       ) throws StandardException
     {
@@ -98,6 +99,7 @@ public class StatementRolePermission extends StatementPermission
 
     private String getPrivName( )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         switch(privType) {
         case Authorizer.CREATE_ROLE_PRIV:
             return "CREATE_ROLE";

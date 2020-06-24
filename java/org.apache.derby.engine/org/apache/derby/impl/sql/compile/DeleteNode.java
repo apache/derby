@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DeleteNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -65,6 +66,8 @@ import org.apache.derby.vti.DeferModification;
  * the named cursor.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class DeleteNode extends DMLModStatementNode
 {
 	/* Column name for the RowLocation column in the ResultSet */
@@ -126,9 +129,12 @@ class DeleteNode extends DMLModStatementNode
 	public void bindStatement() throws StandardException
 	{
 		// We just need select privilege on the where clause tables
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             FromList fromList = new FromList(
                     getOptimizerFactory().doJoinOrderOptimization(),
                     getContextManager());
@@ -143,6 +149,7 @@ class DeleteNode extends DMLModStatementNode
             // The compiler will attempt to add these when generating the full column list during
             // binding of the tables.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
             IgnoreFilter    ignorePermissions = new IgnoreFilter();
             getCompilerContext().addPrivilegeFilter( ignorePermissions );
             
@@ -159,6 +166,8 @@ class DeleteNode extends DMLModStatementNode
 				SanityManager.ASSERT(resultSet != null && resultSet instanceof SelectNode,
 				"Delete must have a select result set");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             SelectNode sel = (SelectNode)resultSet;
 			targetTable = (FromTable) sel.fromList.elementAt(0);
 			if (targetTable instanceof CurrentOfNode)
@@ -206,10 +215,13 @@ class DeleteNode extends DMLModStatementNode
 		
 			// descriptor must exist, tables already bound.
 			verifyTargetTable();
+//IC see: https://issues.apache.org/jira/browse/DERBY-714
+//IC see: https://issues.apache.org/jira/browse/DERBY-571
 
 			/* Generate a select list for the ResultSetNode - CurrentRowLocation(). */
 			if ( SanityManager.DEBUG )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				SanityManager.ASSERT((resultSet.getResultColumns() == null),
 							  "resultColumns is expected to be null until bind time");
             }
@@ -232,6 +244,8 @@ class DeleteNode extends DMLModStatementNode
 				** are needed in the rcl.
 				*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 resultColumnList =
                         new ResultColumnList(getContextManager());
 
@@ -262,6 +276,8 @@ class DeleteNode extends DMLModStatementNode
 				}
 
 				/* Generate the RowLocation column */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 rowLocationNode =
                         new CurrentRowLocationNode(getContextManager());
                 rowLocationColumn =
@@ -277,6 +293,7 @@ class DeleteNode extends DMLModStatementNode
 				correlateAddedColumns( resultColumnList, targetTable );
 			
                 /* Add the new result columns to the driving result set */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 ResultColumnList    originalRCL = resultSet.getResultColumns();
                 if ( originalRCL != null )
                 {
@@ -306,6 +323,9 @@ class DeleteNode extends DMLModStatementNode
 				/* Bind the new ResultColumn */
 				rowLocationColumn.bindResultColumnToExpression();
 				bindConstraints(dataDictionary,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         getOptimizerFactory(),
                         targetTableDescriptor,
                         null,
@@ -321,6 +341,7 @@ class DeleteNode extends DMLModStatementNode
 			 	* subquery.  Also, self-referencing foreign key deletes
 		 	 	* are deferred.  And triggers cause the delete to be deferred.
 			 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 				if (resultSet.subqueryReferencesTarget(
 									targetTableDescriptor.getName(), true) ||
 					requiresDeferredProcessing())
@@ -354,6 +375,7 @@ class DeleteNode extends DMLModStatementNode
 
 				if(!isDependentTable){
 					//graph node
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     dependentTables = new HashSet<String>();
 				}
 
@@ -365,6 +387,7 @@ class DeleteNode extends DMLModStatementNode
 				{
 					cascadeDelete = true;
 					int noDependents = fkTableNames.length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 					dependentNodes = new StatementNode[noDependents];
 					for(int i =0 ; i < noDependents ; i ++)
 					{
@@ -385,11 +408,14 @@ class DeleteNode extends DMLModStatementNode
 					String currentTargetTableName = targetTableDescriptor.getSchemaName()
 							 + "." + targetTableDescriptor.getName();
                     dependentTables.add(currentTargetTableName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 				}
 			}
 
             // add need for DELETE privilege on the target table
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
             getCompilerContext().pushCurrentPrivType( getPrivType());
             getCompilerContext().addRequiredTablePriv( targetTableDescriptor);
             getCompilerContext().popCurrentPrivType();
@@ -451,6 +477,7 @@ class DeleteNode extends DMLModStatementNode
 			*/
 			if (targetTableDescriptor.getLockGranularity() == TableDescriptor.TABLE_LOCK_GRANULARITY)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 lckMode = TransactionController.MODE_TABLE;
 			}
 
@@ -474,6 +501,7 @@ class DeleteNode extends DMLModStatementNode
 				  deferred,
 				  false,
 				  targetTableDescriptor.getUUID(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                   lckMode,
 				  null, null, null, 0, null, null, 
 				  resultDescription,
@@ -530,6 +558,7 @@ class DeleteNode extends DMLModStatementNode
 		// DERBY-827 this must be done in execute() since
 		// createResultSet() will only be called once.
 		generateCodeForTemporaryTable(acb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
 
 		/* generate the parameters */
 		if(!isDependentTable)
@@ -605,6 +634,7 @@ class DeleteNode extends DMLModStatementNode
 			LocalField arrayField =
 				acb.newFieldDeclaration(Modifier.PRIVATE, resultSetArrayType);
 			mb.pushNewArray(ClassName.ResultSet, dependentNodes.length);  // new ResultSet[size]
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 			mb.setField(arrayField);
 			for(int index=0 ; index <  dependentNodes.length ; index++)
 			{
@@ -719,9 +749,12 @@ class DeleteNode extends DMLModStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
         relevantTriggers = new TriggerDescriptorList();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         FormatableBitSet columnMap = DeleteNode.getDeleteReadMap(baseTable,
                 conglomerates, relevantTriggers, needsDeferredProcessing);
 
@@ -741,6 +774,7 @@ class DeleteNode extends DMLModStatementNode
 												ColumnDescriptorList cdl) throws StandardException
 	{
         DMLModStatementNode node = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 		if(refAction == StatementType.RA_CASCADE)
 		{
@@ -755,6 +789,7 @@ class DeleteNode extends DMLModStatementNode
         // The dependent node should be marked as such, and it should inherit
         // the set of dependent tables from the parent so that it can break
         // out of cycles in the dependency graph.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         if (node != null) {
             node.isDependentTable = true;
             node.dependentTables = dependentTables;
@@ -788,6 +823,8 @@ class DeleteNode extends DMLModStatementNode
 		((FromBaseTable) fromTable).setTableProperties(targetProperties);
 
         fromList.addFromTable(fromTable);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         SelectNode rs = new SelectNode(null,
                                        fromList, /* FROM list */
                                        whereClause, /* WHERE clause */
@@ -810,6 +847,10 @@ class DeleteNode extends DMLModStatementNode
 
         ValueNode whereClause = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         TableName tableName =
             new TableName(schemaName , targetTableName, getContextManager());
 
@@ -818,6 +859,7 @@ class DeleteNode extends DMLModStatementNode
         FromTable fromTable = new FromBaseTable(
                 tableName,
                 null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                 FromBaseTable.DELETE,
                 null,
                 getContextManager());
@@ -831,12 +873,21 @@ class DeleteNode extends DMLModStatementNode
 
         fromList.addFromTable(fromTable);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         SelectNode sn = new SelectNode(getSetClause(cdl),
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                               fromList, /* FROM list */
                                               whereClause, /* WHERE clause */
                                               null, /* GROUP BY list */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
                                               null, /* having clause */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
                                               null, /* windows */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
                                               null, /* optimizer override plan */
                                               getContextManager());
 
@@ -881,11 +932,13 @@ class DeleteNode extends DMLModStatementNode
 		{
 			for(int index=0 ; index < dependentNodes.length ; index++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 				dependentNodes[index].optimizeStatement();
 			}
 		}
 
         super.optimizeStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 
         // allow more permissions to be added in case we're just one action
         // of a MERGE statement
@@ -927,7 +980,9 @@ class DeleteNode extends DMLModStatementNode
 	private static FormatableBitSet getDeleteReadMap
 	(
 		TableDescriptor				baseTable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<ConglomerateDescriptor>  conglomerates,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         TriggerDescriptorList       relevantTriggers,
 		boolean[]					needsDeferredProcessing
 	)
@@ -951,6 +1006,7 @@ class DeleteNode extends DMLModStatementNode
 		** Adding indexes also takes care of the replication 
 		** requirement of having the primary key.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         DMLModStatementNode.getXAffectedIndexes(
                 baseTable, null, columnMap, conglomerates);
 
@@ -968,10 +1024,12 @@ class DeleteNode extends DMLModStatementNode
 
 		if (relevantTriggers.size() > 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
 			needsDeferredProcessing[0] = true;
 			
 			boolean needToIncludeAllColumns = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (TriggerDescriptor trd : relevantTriggers) {
 				//Does this trigger have REFERENCING clause defined on it.
 				//If yes, then read all the columns from the trigger table.
@@ -1008,6 +1066,7 @@ class DeleteNode extends DMLModStatementNode
 
 		TableName	correlationNameNode = makeTableName( null, correlationName );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn column : rcl)
 		{
 			ValueNode		expression = column.getExpression();
@@ -1016,6 +1075,7 @@ class DeleteNode extends DMLModStatementNode
 			{
 				ColumnReference	reference = (ColumnReference) expression;
 				
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				reference.setQualifiedTableName( correlationNameNode );
 			}
 		}

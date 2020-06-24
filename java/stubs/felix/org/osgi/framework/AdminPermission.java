@@ -150,6 +150,7 @@ public final class AdminPermission extends BasicPermission {
 		static final Constructor	initStringString;
 		static final Constructor	initBundleString;
 		static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Constructor[] constructors = AccessController.doPrivileged(new ImplHolder());
 			
 			initStringString = constructors[0];
@@ -167,6 +168,7 @@ public final class AdminPermission extends BasicPermission {
 						+ " property not set");
 			}
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Class<?> delegateClass;
 			try {
 				delegateClass = Class.forName(packageName

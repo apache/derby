@@ -65,8 +65,11 @@ public class DriverTest extends BaseJDBCTestCase {
     static final String[] ADDITIONAL_DBS = {
         DB_NAME_WITH_SPACES,
         "testcreatedb1", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         "testcreatedb2",
+//IC see: https://issues.apache.org/jira/browse/DERBY-974
         "testcreatedb3",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         "trailblank",
         "'wombat'"
     };
@@ -79,6 +82,7 @@ public class DriverTest extends BaseJDBCTestCase {
         // java.sql.Driver is not supported with JSR169, so return empty suite
         if (JDBC.vmSupportsJSR169())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "DriverTest tests java.sql.Driver, not supported with JSR169");
         }
@@ -91,6 +95,7 @@ public class DriverTest extends BaseJDBCTestCase {
     
     private static Test baseSuite(String name) {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DriverTest");
         setBaseProps(suite, new DriverTest("testDriverCompliantVersion"));
         setBaseProps(suite, new DriverTest("testAcceptsURL"));
@@ -99,6 +104,7 @@ public class DriverTest extends BaseJDBCTestCase {
         setBaseProps(suite, new DriverTest("testClientURL"));
         setBaseProps(suite, new DriverTest("testDbNameWithSpaces"));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         return suite;
     }
     
@@ -120,6 +126,7 @@ public class DriverTest extends BaseJDBCTestCase {
 
     public void tearDown() throws Exception {
         // attempt to get rid of any left-over trace files
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (int i = 0; i < 2; i++) {
             String traceFileName = "trace" + (i + 1) + ".out";
             File traceFile = new File(traceFileName);
@@ -130,6 +137,7 @@ public class DriverTest extends BaseJDBCTestCase {
         }
 
         TestConfiguration config = TestConfiguration.getCurrent();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
                 for (String dbName : ADDITIONAL_DBS) {
             removeDirectory(config.getDatabasePath(dbName));
         }
@@ -168,10 +176,12 @@ public class DriverTest extends BaseJDBCTestCase {
         // Test that the driver class is the expected one. Currently, the same
         // driver class is used regardless of JDBC version.
         println( "Driver is a " + driver.getClass().getName() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         assertEquals(usingEmbedded() ? "AutoloadedDriver" : "ClientAutoloadedDriver",
                      driver.getClass().getSimpleName());
 
         // test that null connection URLs raise a SQLException per JDBC 4.2 spec clarification
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try {
             driver.acceptsURL( null );
             fail( "Should not have accepted a null connection url" );
@@ -311,6 +321,7 @@ public class DriverTest extends BaseJDBCTestCase {
         }
         
         // shutdown using url
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         try {
             assertConnect(
                 false, protocol + "testcreatedb2;shutdown=true", null);
@@ -345,8 +356,10 @@ public class DriverTest extends BaseJDBCTestCase {
         assertConnect(false, url, info);
         assertTraceFilesExist();
         shutdownDB(url + ";shutdown=true", null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
 
         // Derby-974: test that connection sees default properties as well
+//IC see: https://issues.apache.org/jira/browse/DERBY-974
         info.setProperty("create","true");
         Properties infoWithDefaults = new Properties(info);
 
@@ -362,6 +375,7 @@ public class DriverTest extends BaseJDBCTestCase {
      */
     private static void assertTraceFilesExist() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (int i = 0; i < 2; i++) {
             String traceFileName = "trace" + (i + 1) + ".out";
             File traceFile = new File(traceFileName);
@@ -385,6 +399,7 @@ public class DriverTest extends BaseJDBCTestCase {
         
         Properties info = null;     //test with null Properties object
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         String CLIENT_CREATE_URL_WITH_COLON1 = 
             protocol + dbName + ":create=true";
         //String CLIENT_CREATE_URL_WITH_COLON2 = protocol + DERBY_SYSTEM_HOME + 
@@ -431,6 +446,7 @@ public class DriverTest extends BaseJDBCTestCase {
         // shutdown the databases, which should get rid of all open connections
         // currently, there's only the one; otherwise, this could be done in
         // a loop.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         shutdownDB(
             CLIENT_SHUT_URL_WITH_SINGLE_QUOTES2 + ";shutdown=true", null);
     }   
@@ -462,6 +478,7 @@ public class DriverTest extends BaseJDBCTestCase {
         if (usingDerbyNetClient())
             protocol = protocol + TestConfiguration.getCurrent().getHostName()
             + ":" + TestConfiguration.getCurrent().getPort() + "/";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         url = protocol + DB_NAME_WITH_SPACES + ";create=true";
         String shuturl = protocol + DB_NAME_WITH_SPACES + ";shutdown=true";
         
@@ -469,6 +486,7 @@ public class DriverTest extends BaseJDBCTestCase {
         shutdownDB(shuturl, null);
         
         // Test trailing spaces - Beetle 4653. Moved from urlLocale.sql
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         url = TestConfiguration.getCurrent().getJDBCUrl("trailblank");
         url += ";create=true";
         assertConnect(false,url,null);
@@ -501,6 +519,7 @@ public class DriverTest extends BaseJDBCTestCase {
     {
         Driver driver = DriverManager.getDriver(url);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         Connection conn = driver.connect(url, info);
         assertNotNull(conn);
    
@@ -513,6 +532,7 @@ public class DriverTest extends BaseJDBCTestCase {
         rs.next();
         assertEquals(
             rs.getString(1), conn.getMetaData().getUserName().toUpperCase());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         rs.close();
         conn.close();
         return;
@@ -540,6 +560,7 @@ public class DriverTest extends BaseJDBCTestCase {
         String driverClass =
             TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(driverClass);
             clazz.getConstructor().newInstance();
         } catch (Exception e) {

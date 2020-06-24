@@ -69,6 +69,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
     {
         public void execute(Runnable r)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             r.run();
         }
     }
@@ -99,6 +100,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
 
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("ConnectionMethodsTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("ConnectionMethodsTest:embedded"));
 
@@ -109,6 +111,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
     }
 
     public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(ConnectionMethodsTest.class, name);
 
@@ -117,7 +120,9 @@ public class ConnectionMethodsTest extends Wrapper41Test
             protected void decorateSQL(Statement s) throws SQLException {
                 s.execute("create table clobtable2(n int,clobcol CLOB)");
                 s.execute("create table blobtable2(n int,blobcol BLOB)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                 s.execute("create table abort_table(a int)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                 s.execute("create schema foo");
                 s.execute("create table foo.set_schema_table( a int )");
             }
@@ -227,6 +232,8 @@ public class ConnectionMethodsTest extends Wrapper41Test
         blob = conn.createBlob();
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
             is = AccessController.doPrivileged(
                     new PrivilegedExceptionAction<FileInputStream>() {
                 public FileInputStream run() throws FileNotFoundException {
@@ -242,6 +249,8 @@ public class ConnectionMethodsTest extends Wrapper41Test
 
         OutputStream os = blob.setBinaryStream(1);
         ArrayList<Integer> beforeUpdateList = new ArrayList<Integer>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
 
         int actualLength = 0;
         c = is.read();
@@ -265,6 +274,8 @@ public class ConnectionMethodsTest extends Wrapper41Test
         //Get the InputStream from this Blob.
         InputStream in = blob.getBinaryStream();
         ArrayList<Integer> afterUpdateList = new ArrayList<Integer>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
 
         b = in.read();
 
@@ -396,6 +407,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
         if ( !TestConfiguration.loadingFromJars() ) { return; }
 
         Connection conn0 = openUserConnection( "user0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Connection conn1 = openUserConnection( "user1");
         Connection conn2 = openUserConnection( "user2");
 
@@ -448,6 +460,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
         // the jar file containing this method.
         //
         if ( !TestConfiguration.loadingFromJars() ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 
         XADataSource xads = J2EEDataSource.getXADataSource();
         
@@ -500,6 +513,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
         ps.execute();
         ps.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         ps = prepareStatement( conn1, "select * from app.abort_table");
         ResultSet rsconn1 = ps.executeQuery();
         assertTrue(rsconn1.next());
@@ -547,6 +561,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
         }
         catch (SQLException se)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             assertSQLState( CLOSED_CONNECTION, se );
         }
 
@@ -564,6 +579,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
      */
     public void testGetSetSchema() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Connection  conn = getConnection();
         println( "Testing get/setSchema() on a " + conn.getClass().getName() );
         Wrapper41Conn   wrapper = new Wrapper41Conn( conn );
@@ -618,6 +634,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
      */
     public void testGetSetNetworkTimeout() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Connection  conn = getConnection();
         println( "Testing get/setNetoworkTimeout() on a " + conn.getClass().getName() );
         Wrapper41Conn   wrapper = new Wrapper41Conn( conn );
@@ -645,6 +662,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
         
         try {
             wrapper.getNetworkTimeout();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             fail( "Should raise an Unimplemented Feature exception." );
         }
         catch (SQLException se)

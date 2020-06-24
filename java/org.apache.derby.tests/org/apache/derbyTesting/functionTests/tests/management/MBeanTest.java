@@ -52,6 +52,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * MBeans, which is why this class extends BaseJDBCTestCase instead of 
  * BaseTestCase.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
 abstract class MBeanTest extends BaseJDBCTestCase {
      
     /**
@@ -65,6 +66,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     
     protected static Test suite(Class<? extends MBeanTest> testClass, String suiteName) {
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite outerSuite = new BaseTestSuite(suiteName);
         
         Test platform = new BaseTestSuite(testClass,  suiteName + ":platform");
@@ -79,6 +81,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         outerSuite.addTest(platform);
         
         // Create a suite of all "test..." methods in the class.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test suite = new BaseTestSuite(testClass,  suiteName + ":client");
         
         // Set up to get JMX connections using remote JMX
@@ -97,11 +100,16 @@ abstract class MBeanTest extends BaseJDBCTestCase {
          * and specify this using additional command line properties at server 
          * startup.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         NetworkServerTestSetup networkServerTestSetup = 
                 new NetworkServerTestSetup (
                         suite, // run all tests in this class in the same setup
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
                         getCommandLineProperties(false), // need to set up JMX in JVM
                         new String[0], // no server arguments needed
+//IC see: https://issues.apache.org/jira/browse/DERBY-3504
                         true   // wait for the server to start properly
                 );
 
@@ -118,6 +126,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
                 SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
         // this decorator makes sure the suite is empty if this configration
         // does not support the network server:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         outerSuite.addTest(TestConfiguration.defaultServerDecorator(testSetup));
        
         return outerSuite;
@@ -139,6 +148,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         ArrayList<String> list = new ArrayList<String>();
         list.add("com.sun.management.jmxremote.port=" 
                 + TestConfiguration.getCurrent().getJmxPort());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
         list.add("com.sun.management.jmxremote.authenticate=" +
                 Boolean.toString(authentication));
         list.add("com.sun.management.jmxremote.ssl=false");
@@ -170,8 +180,11 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     
     @Override
     protected void tearDown() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         super.tearDown();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         if (jmxConnection != null) {
            JMXConnectionGetter.mbeanServerConnector.get().close(jmxConnection);
            jmxConnection = null;
@@ -189,8 +202,11 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     protected MBeanServerConnection getMBeanServerConnection() 
             throws Exception {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         if (jmxConnection == null)
             jmxConnection = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
             JMXConnectionGetter.mbeanServerConnector.get()
                 .getMBeanServerConnection(null, null);
         return jmxConnection;
@@ -232,13 +248,16 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         // check the status of the management service
         Boolean active = (Boolean) 
                 getAttribute(mgmtObjName, "ManagementActive");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
 
         if (!active.booleanValue()) {
             // JMX management is not active, so activate it by invoking the
             // startManagement operation.
             invokeOperation(mgmtObjName, "startManagement");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
 
             active = (Boolean) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
                     getAttribute(mgmtObjName, "ManagementActive");
         }
         
@@ -253,6 +272,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     protected Set<ObjectName> getDerbyDomainMBeans() throws Exception
     {
         final ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         return queryMBeans(derbyDomain);
     }
 
@@ -264,6 +284,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     Set<ObjectName> queryMBeans(final ObjectName name) throws Exception {
         final MBeanServerConnection serverConn = getMBeanServerConnection(); 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
             new PrivilegedExceptionAction<Set<ObjectName>>() {
                 public Set<ObjectName> run() throws IOException {
@@ -284,6 +305,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         /* prepare the Management mbean, which is (so far) the only MBean that
          * can be created/registered from a JMX client, and without knowing the
          * system identifier */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
         final ObjectName mgmtObjName 
                 = new ObjectName("org.apache.derby", "type", "Management");
         // create/register the MBean. If the same MBean has already been
@@ -334,6 +356,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      *         <code>null</code> if there is no return value.
      */
     protected Object invokeOperation(ObjectName objName, String name)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
             throws Exception
     {
         return invokeOperation(objName, name, new Object[0], new String[0]);
@@ -352,6 +375,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      *         <code>null</code> if there is no return value.
      */
     protected Object invokeOperation(final ObjectName objName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
                                      final String name, 
                                      final Object[] params, 
                                      final String[] sign)
@@ -377,6 +401,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @param value the new value of the attribute
      * @throws Exception if an error occurs when changing the attribute
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
     void setAttribute(final ObjectName objName, String name, Object value)
             throws Exception {
         final MBeanServerConnection jmxConn = getMBeanServerConnection();
@@ -401,6 +426,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     protected Object getAttribute(final ObjectName objName, final String name) 
             throws Exception {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
         final MBeanServerConnection jmxConn = getMBeanServerConnection();
         
         return AccessController.doPrivileged(
@@ -413,6 +439,9 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     }
     
     protected void assertBooleanAttribute(boolean expected,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
             ObjectName objName, String name) throws Exception
     {
         Boolean bool = (Boolean) getAttribute(objName, name);
@@ -421,6 +450,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     }
     
     protected void assertIntAttribute(int expected,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
             ObjectName objName, String name) throws Exception
     {
         Integer integer = (Integer) getAttribute(objName, name);
@@ -429,6 +459,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     }
     
     protected void assertLongAttribute(int expected,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
             ObjectName objName, String name) throws Exception
     {
         Long longNumber = (Long) getAttribute(objName, name);
@@ -485,6 +516,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @throws java.lang.Exception if an unexpected error occurs
      */
     protected void checkLongAttributeValue(ObjectName objName, String name) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
             throws Exception {
         
         Object value = getAttribute(objName, name);

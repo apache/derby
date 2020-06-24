@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.RowResultSetNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -56,6 +57,7 @@ class RowResultSetNode extends FromTable
     private List<AggregateNode> aggregates;
 
     QueryExpressionClauses qec = new QueryExpressionClauses();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
 	/**
      * Constructor for a RowResultSetNode.
@@ -69,12 +71,15 @@ class RowResultSetNode extends FromTable
                      ContextManager cm) {
         super(null /* correlationName */, tableProperties, cm);
         setResultColumns( valuesClause );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         if (getResultColumns() != null) {
 			getResultColumns().markInitialSize();
         }
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "VALUES";
@@ -87,6 +92,8 @@ class RowResultSetNode extends FromTable
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -99,6 +106,7 @@ class RowResultSetNode extends FromTable
 				subquerys.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             printQueryExpressionSuffixClauses(depth, qec);
 		}
 	}
@@ -112,10 +120,15 @@ class RowResultSetNode extends FromTable
 	 * Modify the RCL of this node to match the target of the insert.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
+//IC see: https://issues.apache.org/jira/browse/DERBY-3
+//IC see: https://issues.apache.org/jira/browse/DERBY-4433
+//IC see: https://issues.apache.org/jira/browse/DERBY-1644
 	ResultSetNode enhanceRCLForInsert(
 			InsertNode target, boolean inOrder, int[] colMap)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (!inOrder || getResultColumns().size() < target.resultColumnList.size()) {
 			setResultColumns( getRCLForInsert(target, colMap) );
 		}
@@ -144,6 +157,7 @@ class RowResultSetNode extends FromTable
 		** fetched.  Is this true, and if not, does it make a difference?
 		** There's nothing to optimize in this case.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCostEstimate() == null)
 		{
 			setCostEstimate( getOptimizerFactory().getCostEstimate() );
@@ -169,6 +183,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 							FromList fromListParam) 
 					throws StandardException
@@ -189,6 +205,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -197,6 +215,7 @@ class RowResultSetNode extends FromTable
         subquerys = new SubqueryList(getContextManager());
 
         aggregates = new ArrayList<AggregateNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		/* Verify that there are no DEFAULTs in the RCL.
 		 * DEFAULT is only valid for an insert, and it has
@@ -206,6 +225,7 @@ class RowResultSetNode extends FromTable
 		 * so we need to check for that here and throw an exception if found.
 		 */
 		getResultColumns().checkForInvalidDefaults();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Believe it or not, a values clause can contain correlated column references
 		 * and subqueries.  In order to get correlated column resolution working 
@@ -224,7 +244,9 @@ class RowResultSetNode extends FromTable
 		}
 		setLevel(nestingLevel);
 		fromListParam.insertElementAt(this, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().bindExpressions(fromListParam, subquerys,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                                       aggregates);
 		// Pop ourselves back out of the FROM list
 		fromListParam.removeElementAt(0);
@@ -235,7 +257,9 @@ class RowResultSetNode extends FromTable
 		}
 
 		SelectNode.checkNoWindowFunctions(getResultColumns(), "VALUES");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
 
@@ -258,6 +282,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
@@ -274,6 +300,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -288,6 +316,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
@@ -302,6 +332,7 @@ class RowResultSetNode extends FromTable
 		*/
 		if (bindingRCL == null)
 			bindingRCL = getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		getResultColumns().bindUntypedNullsToResultColumns(bindingRCL);
 	}
@@ -320,6 +351,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getMatchingColumn(
 						ColumnReference columnReference)
 						throws StandardException
@@ -336,6 +369,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getExposedName() throws StandardException
 	{
 		return null;
@@ -350,6 +385,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
@@ -357,6 +394,7 @@ class RowResultSetNode extends FromTable
 
     @Override
     public void pushQueryExpressionSuffix() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.push();
     }
 
@@ -371,6 +409,7 @@ class RowResultSetNode extends FromTable
     @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.setOrderByList(orderByList);
 	}
 
@@ -384,6 +423,7 @@ class RowResultSetNode extends FromTable
     @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.setOffset(offset);
         qec.setFetchFirst(fetchFirst);
         qec.setHasJDBCLimitClause(hasJDBClimitClause);
@@ -415,6 +455,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -427,6 +469,7 @@ class RowResultSetNode extends FromTable
                 new PredicateList(getContextManager()));
 
 		/* Allocate a dummy referenced table map */ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setReferencedTableMap( new JBitSet(numTables) );
 		getReferencedTableMap().set(tableNumber);
 
@@ -435,6 +478,7 @@ class RowResultSetNode extends FromTable
         // Well, not very likely here, since we're here:
         //     VALUES x followed by ORDER BY 1,1,2
         // but for completeness...
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
 
@@ -456,6 +500,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
@@ -474,6 +520,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
@@ -489,6 +537,7 @@ class RowResultSetNode extends FromTable
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		prRCList = getResultColumns();
 		setResultColumns( getResultColumns().copyListAndObjects() );
 
@@ -499,6 +548,8 @@ class RowResultSetNode extends FromTable
 		prRCList.genVirtualColumnNodes(this, getResultColumns());
 
 		/* Put the new predicate in a list */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         predList = new PredicateList(getContextManager());
 		predList.addPredicate(predicate);
 
@@ -537,6 +588,7 @@ class RowResultSetNode extends FromTable
 			return false;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         if ((aggregates != null) && !aggregates.isEmpty())
 		{
 			return false;
@@ -546,6 +598,7 @@ class RowResultSetNode extends FromTable
 		** Don't flatten if select list contains something
 		** that isn't clonable
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if ( ! getResultColumns().isCloneable())
 		{
 			return false;
@@ -589,6 +642,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList	predicateList,
 								  double outerRows) 
@@ -600,11 +655,13 @@ class RowResultSetNode extends FromTable
 		** This seems like overkill, but it's just an object allocation...
 		*/
         setCostEstimate( getOptimizerFactory().getCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// RESOLVE: THE COST SHOULD TAKE SUBQUERIES INTO ACCOUNT
 		getCostEstimate().setCost(0.0d, outerRows, outerRows);
 
 		subquerys.optimize(dataDictionary, outerRows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6008
 		return this;
 	}
 
@@ -626,6 +683,8 @@ class RowResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		ResultSetNode treeTop = this;
@@ -635,6 +694,7 @@ class RowResultSetNode extends FromTable
 		/* Generate the OrderByNode if a sort is still required for
 		 * the order by.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
             if (obl != null) {
@@ -648,6 +708,7 @@ class RowResultSetNode extends FromTable
             final ValueNode fetchFirst = qec.getFetchFirst(i);
             Boolean hasJDBClimitClause = qec.getHasJDBCLimitClause()[i];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
             if (offset != null || fetchFirst != null) {
                 ResultColumnList newRcl =
                     treeTop.getResultColumns().copyListAndObjects();
@@ -694,6 +755,7 @@ class RowResultSetNode extends FromTable
 			throws StandardException
 	{
 		if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			SanityManager.ASSERT(getResultColumns().visibleSize() <= typeColumns.size(),
 				"More columns in ResultColumnList than in base table");
 
@@ -752,6 +814,7 @@ class RowResultSetNode extends FromTable
 				// That will set the correct length and perform truncation checks etc.
 
                 ResultColumn typeCol = typeColumns.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 				TypeId colTypeId = typeCol.getTypeId();
 
@@ -787,6 +850,7 @@ class RowResultSetNode extends FromTable
 			}
 			else if (re instanceof BitConstantNode)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ResultColumn typeCol   = typeColumns.elementAt(index);
                 TypeId       colTypeId = typeCol.getTypeId();
 
@@ -840,6 +904,7 @@ class RowResultSetNode extends FromTable
 	{
 		if (SanityManager.DEBUG)
             SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// Get our final cost estimate.
 		setCostEstimate( getFinalCostEstimate() );
@@ -875,11 +940,13 @@ class RowResultSetNode extends FromTable
 		acb.pushGetResultSetFactoryExpression(mb);
 
 		acb.pushThisAsActivation(mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().generate(acb, mb);
 		mb.push(canCache);
 		mb.push(getResultSetNumber());
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getRowResultSet",
                 ClassName.NoPutResultSet, 6);
 	}
@@ -888,11 +955,13 @@ class RowResultSetNode extends FromTable
      * {@inheritDoc}
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
 	void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().replaceOrForbidDefaults(ttd, tcl, allowDefaults);
 	}
 

@@ -273,6 +273,7 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
         // foreign key DROPC_FK2 is a unique index. It is not deterministic
         // which index will be checked first, so accept any of the three.
         checkStatementError("23505", st,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6342
             "insert into dropc_t2 values (1, 2, 4)",
             "DROPC_UIX2", "DROPC_UC1", "DROPC_FK2");
 
@@ -322,6 +323,7 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
         // error message.
         checkStatementError("23505", st,
             "insert into dropc_t2 values (1, 2, 4)", "DROPC_UIX2", "DROPC_FK2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6342
 
         // This statement both violates the foreign key DROPC_FK1 and
         // attempts to insert a duplicate value into the column C. Expect
@@ -493,6 +495,7 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testUniqueConstraintWithNullsBackingIndex ()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3502
         throws SQLException
     {
         PreparedStatement countCongloms =
@@ -772,6 +775,7 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
      *   at least one of them
      */
     private void checkStatementError(String sqlState,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6342
         Statement st, String query, String... violatedConstraints)
         throws SQLException
     {
@@ -786,6 +790,7 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
             assertSQLState(sqlState, se);
 
             boolean foundConstraint = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6342
             for (String c : violatedConstraints) {
                 if (se.getMessage().contains(c)) {
                     foundConstraint = true;

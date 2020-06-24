@@ -68,6 +68,7 @@ public class InsertInStaticInitializer
 		catch (SQLException se)
 		{
 			// we expected the above s.execute(INSERT) to fail
+//IC see: https://issues.apache.org/jira/browse/DERBY-2518
 			if (!se.getSQLState().equals("38001")) {
 				throw new ExceptionInInitializerError(se);
 			}
@@ -81,6 +82,7 @@ public class InsertInStaticInitializer
 			}
 			catch (SQLException se)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2518
 				if (!se.getSQLState().equals("38001"))
 					throw new ExceptionInInitializerError(se);
 			}

@@ -71,7 +71,10 @@ class CallStatementResultSet extends NoRowsResultSetImpl
 	public void open() throws StandardException
 	{
 		setup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
         methodCall.invoke(activation);
     }
 

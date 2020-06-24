@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.IsNullNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -51,6 +52,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
      */
     private boolean notNull;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     IsNullNode(ValueNode operand, boolean notNull, ContextManager cm)
             throws StandardException {
         super(operand, cm);
@@ -82,6 +84,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 						"dataTypeServices is expected to be non-null");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         notNull = !notNull;
         updateOperatorDetails();
 		return this;
@@ -105,6 +108,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 		** is required) and hence we will not worry about the collation setting
 		*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		operand.setType(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true));
 	}
 
@@ -128,6 +132,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
     @Override
 	public int getStartOperator(Optimizable optTable)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (SanityManager.DEBUG) {
             if (notNull) {
                 SanityManager.THROWASSERT("NOT NULL not expected here");
@@ -161,6 +166,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	public void generateNegate(MethodBuilder mb,
 										Optimizable optTable)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         mb.push(notNull);
 	}
 
@@ -196,6 +202,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	public boolean equalsComparisonWithConstantExpression(Optimizable optTable)
 	{
 		// Always return false for NOT NULL
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (notNull)
 		{
 			return false;
@@ -227,6 +234,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	public RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return new IsNullNode(otherCR, notNull, getContextManager());
 	}
 
@@ -242,6 +250,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
     @Override
 	public double selectivity(Optimizable optTable) 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (notNull) {
             /* IS NOT NULL is like <>, so should have same selectivity */
 			return 0.9d;

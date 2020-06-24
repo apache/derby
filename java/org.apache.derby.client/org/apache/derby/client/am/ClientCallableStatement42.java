@@ -46,6 +46,7 @@ public class ClientCallableStatement42 extends ClientCallableStatement
      * @throws SqlException on error
      */
     public ClientCallableStatement42(Agent agent,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientConnection connection,
         String sql,
         int type, int concurrency, int holdability,
@@ -56,6 +57,7 @@ public class ClientCallableStatement42 extends ClientCallableStatement
     public  void registerOutParameter( int parameterIndex, SQLType sqlType )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry( this, "registerOutParameter", parameterIndex, sqlType );
@@ -132,6 +134,7 @@ public class ClientCallableStatement42 extends ClientCallableStatement
     }
 
     public  void setObject
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ( int parameterIndex, Object x, SQLType sqlType )
         throws SQLException
     {
@@ -146,11 +149,13 @@ public class ClientCallableStatement42 extends ClientCallableStatement
     }
     
     public void setObject
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ( int parameterIndex, Object x, SQLType sqlType, int scaleOrLength )
         throws SQLException
     {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 agent_.logWriter_.traceEntry( this, "setObject", parameterIndex, x, sqlType, scaleOrLength );
             }
             

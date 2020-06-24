@@ -55,6 +55,7 @@ public class ReaderToUTF8StreamTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(ReaderToUTF8StreamTest.class);
     }
 

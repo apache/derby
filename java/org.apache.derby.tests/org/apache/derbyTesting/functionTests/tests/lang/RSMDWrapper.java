@@ -166,6 +166,7 @@ public class RSMDWrapper extends StringColumnVTI
         if ( _currentRow >= _rowCount ) { return false; }
 
         _currentRow++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         _currentRowNumber = _currentRow;
         
         return true;

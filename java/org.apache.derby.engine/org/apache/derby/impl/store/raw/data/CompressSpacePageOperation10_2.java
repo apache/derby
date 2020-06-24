@@ -42,6 +42,7 @@ public final class CompressSpacePageOperation10_2 extends CompressSpacePageOpera
 	* Constructors for This class:
 	**************************************************************************
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     CompressSpacePageOperation10_2(
 		AllocPage   allocPage, 
 		int         highest_page, 

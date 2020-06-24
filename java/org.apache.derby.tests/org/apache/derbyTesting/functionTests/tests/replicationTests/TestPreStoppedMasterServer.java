@@ -45,6 +45,7 @@ public class TestPreStoppedMasterServer extends ClientRunner
         // String masterHostName = System.getProperty("test.serverHost", "localhost");
         // int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("TestPreStoppedMasterServer");
                 
         suite.addTest(TestPreStoppedMasterServer.suite(slaveServerHost, slaveServerPort));

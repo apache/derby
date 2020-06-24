@@ -646,6 +646,7 @@ public class BrokeredCallableStatement extends BrokeredPreparedStatement
 	*/
 	public CallableStatement createDuplicateStatement(Connection conn, CallableStatement oldStatement) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5877
         CallableStatement newStatement = conn.prepareCall(
             sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 

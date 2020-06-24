@@ -106,6 +106,7 @@ public class SpecialFlags
 	{
 	    // flags is a list of key-value pairs separated by a ^;
 	    // to be parsed and added to either ijProps or srvProps
+//IC see: https://issues.apache.org/jira/browse/DERBY-213
         if (flags == null)
             flags = "";
 	    StringTokenizer st = new StringTokenizer(flags, "^");

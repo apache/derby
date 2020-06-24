@@ -123,6 +123,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void setUp() 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         key = requestKey();
         //create the statement object
         s = createStatement();
@@ -133,6 +134,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         ps = prepareStatement("select count(*) from sys.systables");
         
         // Prepare misc statements.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psFetchBlob = prepareStatement("SELECT dBlob FROM " +
                 BLOBTBL + " WHERE sno = ?");
         psInsertBlob = prepareStatement("INSERT INTO " + BLOBTBL +
@@ -155,12 +157,15 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public void tearDown() 
         throws Exception {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2674
         s.close();
         ps.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2707
         s = null;
         ps = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psFetchBlob.close();
         psFetchClob.close();
         psInsertBlob.close();
@@ -177,10 +182,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("PreparedStatementTest suite");
 
         suite.addTest(baseSuite("PreparedStatementTest:embedded"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         suite.addTest(
                 TestConfiguration.connectionXADecorator(
                         baseSuite("PreparedStatementTest:embedded XADataSource")));
@@ -188,11 +196,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("PreparedStatementTest:client")));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5851
         suite.addTest(TestConfiguration.clientServerDecorator(
                         TestConfiguration.connectionCPDecorator( baseSuite
                                 ("PreparedStatementTest:logical"))));
 
         // Tests for the client side JDBC statement cache.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4843
         suite.addTest(TestConfiguration.clientServerDecorator(
                 statementCachingSuite()));
 
@@ -205,6 +215,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(PreparedStatementTest.class);
         return new CleanDatabaseTestSetup(suite) {
@@ -225,9 +236,11 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * Returns a suite for tests that need JDBC statement caching to be enabled.
      */
     private static Test statementCachingSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("JDBC statement caching suite");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4843
         suite.addTest(new PreparedStatementTest("cpTestIsPoolableHintFalse"));
         suite.addTest(new PreparedStatementTest("cpTestIsPoolableHintTrue"));
         return TestConfiguration.connectionCPDecorator(
@@ -376,6 +389,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     //interface
 
     public void testIsWrapperForStatement() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1536
         assertTrue(ps.isWrapperFor(Statement.class));
     }
 
@@ -392,6 +406,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     public void testIsWrapperForSelf() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
         assertTrue(ps.isWrapperFor(ps.getClass()));
     }
 
@@ -406,6 +421,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     public void testUnwrapAsSelf() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
         PreparedStatement ps2 = ps.unwrap(ps.getClass());
         assertSame("Unwrap returned wrong object.", ps, ps2);
     }
@@ -469,6 +485,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         is.reset();
         
         //initially insert the data
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertClob.setInt(1, key);
         psInsertClob.setClob(2, is, str.length());
         psInsertClob.executeUpdate();
@@ -510,6 +527,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // Life span of Clob objects are the transaction.  Need autocommit off
         // to have Clob objects survive execution of next statement.
         getConnection().setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
 
         //Create the Clob and insert data into it.
         Clob insertClob = getConnection().createClob();
@@ -543,6 +561,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         // Life span of Blob objects are limited by the transaction.  Need
         // autocommit off so Blob objects survive execution of next statement.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
         getConnection().setAutoCommit(false);
         
         //insert default values into the table
@@ -550,6 +569,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         is.reset();
         
         //initially insert the data
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertBlob.setInt(1, key);
         psInsertBlob.setBlob(2, is, BYTES.length);
         psInsertBlob.executeUpdate();
@@ -586,6 +606,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         // Life span of Blob objects are the transaction.  Need autocommit off
         // to have Blob objects survive execution of next statement.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         getConnection().setAutoCommit(false);
         // Create Blob to be inserted
         Blob insertBlob = getConnection().createBlob();
@@ -620,6 +641,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     
     public void testSetPoolable() throws SQLException {
         // Set the poolable statement hint to false
+//IC see: https://issues.apache.org/jira/browse/DERBY-2674
         ps.setPoolable(false);
         assertFalse("Expected a non-poolable statement", ps.isPoolable());
         // Set the poolable statement hint to true
@@ -662,6 +684,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void testIsPoolableDefault() throws SQLException {
         // By default a prepared statement is poolable
+//IC see: https://issues.apache.org/jira/browse/DERBY-2674
         assertTrue("Expected a poolable statement", ps.isPoolable());
     }
 
@@ -673,6 +696,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * @throws SQLException if something goes wrong...
      */
     public void cpTestIsPoolableHintFalse()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4843
             throws SQLException {
         getConnection().setAutoCommit(false);
         // Create a table, insert a row, then create a statement selecting it.
@@ -706,6 +730,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void cpTestIsPoolableHintTrue()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         getConnection().setAutoCommit(false);
         // Create a table, insert a row, then create a statement selecting it.
         Statement stmt = createStatement();
@@ -772,6 +797,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         is.reset();
         
         //initially insert the data
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertClob.setInt(1, key);
         psInsertClob.setCharacterStream(2, is, str.length());
         psInsertClob.executeUpdate();
@@ -792,6 +818,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         //Hence closing the ResultSet after
         //accessing the Clob object.
         //follows the same pattern as testSetBinaryStream().
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
         rs.close();
     }
 
@@ -800,6 +827,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // Insert test data.
         String testString = "Test string for setCharacterStream\u1A00";
         Reader reader = new StringReader(testString);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertClob.setInt(1, key);
         psInsertClob.setCharacterStream(2, reader);
         psInsertClob.execute();
@@ -834,6 +862,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         is.reset();
         
         //initially insert the data
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertClob.setInt(1, key);
         psInsertClob.setAsciiStream(2, is, BYTES.length);
         psInsertClob.executeUpdate();
@@ -854,12 +883,14 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             assertEquals("Error in inserting data into the Clob",BYTES[i],bytes1[i]);
         }
         psInsertClob.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
 
         //Since auto-commit is true in this test
         //this will invalidate the clob object
         //Hence closing the ResultSet after
         //accessing the Clob object.
         //follows the same pattern as testSetBinaryStream().
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
         rs.close();
     }
 
@@ -890,6 +921,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
 
         // Cleanup
         isRetrieved.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertClob.close();
     }
 
@@ -908,9 +940,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         InputStream is = new java.io.ByteArrayInputStream(BYTES);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
         is.reset();
         
         //initially insert the data
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertBlob.setInt(1, key);
         psInsertBlob.setBinaryStream(2, is, BYTES.length);
         psInsertBlob.executeUpdate();
@@ -927,11 +963,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         } catch(IOException ioe) {
             fail("IOException while reading the Clob from the database");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         rs.close(); // Because of autocommit, this will invalidate blobRetrieved
         
         for(int i=0;i<BYTES.length;i++) {
             assertEquals("Error in inserting data into the Blob",BYTES[i],bytes1[i]);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertBlob.close();
     }
 
@@ -962,6 +1000,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
 
         // Cleanup
         isRetrieved.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         psInsertBlob.close();
     }
 
@@ -1208,6 +1247,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public void testLargeUpdate_jdbc4_2() throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         largeUpdate_jdbc4_2( conn );
     }
@@ -1220,6 +1260,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // in an insane production build.
         //
         if (!SanityManager.DEBUG)    { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 
         println( "Running large update test for JDBC 4.2" );
         
@@ -1348,8 +1389,10 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // being reported. We can use getCause because we always run with
         // Java SE 6 or later.
         Throwable cause = getLastSQLException(sqle).getCause();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         assertEquals("org.apache.derby.shared.common.error.StandardException",
                      cause.getClass().getName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
         cause = cause.getCause();
         assertTrue("Exception not a DerbyIOException",
                    cause instanceof DerbyIOException);
@@ -1376,6 +1419,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
 
         public  PreparedStatementWrapper( PreparedStatement wrappedPreparedStatement )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             super( wrappedPreparedStatement );
         }
 

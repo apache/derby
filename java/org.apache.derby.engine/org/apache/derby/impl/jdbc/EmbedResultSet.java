@@ -143,9 +143,11 @@ public class EmbedResultSet extends ConnectionChild
 	/**
 	 This activation is set by EmbedStatement
 	 for a single execution Activation. Ie.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3247
 	 a ResultSet from a Statement.executeQuery() or
      a ResultSet that is now a dynamic result set.
 	 In this case the closing of this ResultSet will close
+//IC see: https://issues.apache.org/jira/browse/DERBY-3004
 	 the activation or the finalization of the parent EmbedStatement
 	 without it being closed will mark the Activation as unused.
 	 @see EmbedStatement#finalize()
@@ -229,6 +231,7 @@ public class EmbedResultSet extends ConnectionChild
 	public EmbedResultSet(EmbedConnection conn, ResultSet resultsToWrap,
 		boolean forMetaData, EmbedStatement stmt, boolean isAtomic)
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-98
 
 		super(conn);
 
@@ -239,13 +242,16 @@ public class EmbedResultSet extends ConnectionChild
 		// ResultSet's for metadata are single use, they are created
 		// with a PreparedStatement internally, but that statement is
 		// never returned to the application.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1142
 		if (this.forMetaData = forMetaData)
 			singleUseActivation = resultsToWrap.getActivation();
         this.applicationStmt = this.stmt = owningStmt = stmt;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
         this.timeoutMillis = stmt == null
             ? 0L
             : stmt.timeoutMillis;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
 
 		this.isAtomic = isAtomic;
                 
@@ -256,6 +262,7 @@ public class EmbedResultSet extends ConnectionChild
 		//If the underlying language resultset is not updateable, then the concurrency of the ResultSet object will be CONCUR_READ_ONLY
 		//and a warning will be issued on the ResultSet object.
 		if (stmt == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			concurrencyOfThisResultSet = java.sql.ResultSet.CONCUR_READ_ONLY;
 		else if (stmt.resultSetConcurrency == java.sql.ResultSet.CONCUR_READ_ONLY)
 			concurrencyOfThisResultSet = java.sql.ResultSet.CONCUR_READ_ONLY;
@@ -269,16 +276,22 @@ public class EmbedResultSet extends ConnectionChild
 		}
 
 		// Fill in the column types
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		resultDescription = theResults.getResultDescription();
 		
 		// Only incur the cost of allocating and maintaining
 		// updated column information if the columns can be updated.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if (concurrencyOfThisResultSet == java.sql.ResultSet.CONCUR_UPDATABLE)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
             final int columnCount = resultDescription.getColumnCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
             final ExecutionFactory factory = getLanguageConnectionContext( conn ).
             getLanguageConnectionFactory().getExecutionFactory();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
 			try{
 				//initialize arrays related to updateRow implementation
 				columnGotUpdated = new boolean[columnCount];
@@ -292,6 +305,7 @@ public class EmbedResultSet extends ConnectionChild
 				throw noStateChangeException(t);
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
         else
         {
             updateRow = null;
@@ -301,6 +315,7 @@ public class EmbedResultSet extends ConnectionChild
         if (stmt != null)
         {
            // At connectivity level we handle only for forward only cursor
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
            if (stmt.resultSetType == java.sql.ResultSet.TYPE_FORWARD_ONLY)
                maxRows = stmt.maxRows;
 
@@ -318,10 +333,12 @@ public class EmbedResultSet extends ConnectionChild
      */
     public  static  void    setFetchedRowBase( long newBase )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (SanityManager.DEBUG)    { fetchedRowBase = newBase; }
     }
 
 	private void checkNotOnInsertRow() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
 		if (isOnInsertRow) {
 			throw newSQLException(SQLState.NO_CURRENT_ROW);
 		}
@@ -332,6 +349,7 @@ public class EmbedResultSet extends ConnectionChild
 	// or milder problems due to not having a row.
 	protected final void checkOnRow() throws SQLException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
 		if (currentRow == null) {
 			throw newSQLException(SQLState.NO_CURRENT_ROW);
 		} 
@@ -341,6 +359,7 @@ public class EmbedResultSet extends ConnectionChild
 	 * Initializes the currentRowHasBeenUpdated and columnGotUpdated fields
 	 */
 	private void initializeUpdateRowModifiers() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 		currentRowHasBeenUpdated = false;
 		Arrays.fill(columnGotUpdated, false);
 	}
@@ -351,11 +370,13 @@ public class EmbedResultSet extends ConnectionChild
 		@exception SQLException ResultSet is not on a row or columnIndex is out of range.
 	*/
 	final int getColumnType(int columnIndex) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 		if (!isOnInsertRow) checkOnRow(); // first make sure there's a row
 		
 		if (columnIndex < 1 ||
 		    columnIndex > resultDescription.getColumnCount())
 			throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		return resultDescription.getColumnDescriptor(columnIndex).getType().getJDBCTypeId();
 	}
@@ -411,6 +432,7 @@ public class EmbedResultSet extends ConnectionChild
 								// on the underlying connection.  Do this
 								// outside of the connection synchronization.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
 		if (isOnInsertRow) {
 			moveToCurrentRow();
 		}
@@ -420,7 +442,9 @@ public class EmbedResultSet extends ConnectionChild
 
 					setupContextStack();
 		    try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 				LanguageConnectionContext lcc = getLanguageConnectionContext( getEmbedConnection() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 				final ExecRow newRow;
 		    try {
 
@@ -431,6 +455,7 @@ public class EmbedResultSet extends ConnectionChild
 				 */
                 StatementContext statementContext =
                     lcc.pushStatementContext(isAtomic, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 					     concurrencyOfThisResultSet==java.sql.ResultSet.CONCUR_READ_ONLY, 
 					     getSQLText(),
 					     getParameterValueSet(),
@@ -439,6 +464,7 @@ public class EmbedResultSet extends ConnectionChild
 				switch (position)
 				{
 					case BEFOREFIRST:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 						newRow = theResults.setBeforeFirstRow();
 						break;
 
@@ -492,6 +518,7 @@ public class EmbedResultSet extends ConnectionChild
          
 			SQLWarning w = theResults.getWarnings();
 			if (w != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5436
                 addWarning(w);
 			}
 			
@@ -528,8 +555,10 @@ public class EmbedResultSet extends ConnectionChild
 		    }
 
             // Clear the indication of which columns were fetched as streams.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
             if (columnUsedFlags != null)
                 Arrays.fill(columnUsedFlags, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 			if (columnGotUpdated != null && currentRowHasBeenUpdated) {
 				initializeUpdateRowModifiers();
 			}
@@ -591,10 +620,13 @@ public class EmbedResultSet extends ConnectionChild
 			try	{
                 LanguageConnectionContext lcc =
                     getLanguageConnectionContext( getEmbedConnection() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 
 				try	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3037
 					theResults.close(); 
 				    
+//IC see: https://issues.apache.org/jira/browse/DERBY-1142
 				    if (this.singleUseActivation != null)
 				    {
 				    	this.singleUseActivation.close();
@@ -632,12 +664,14 @@ public class EmbedResultSet extends ConnectionChild
 		     	}
 
 			} finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 				markClosed();
 			    restoreContextStack();
 			}
 
 			// the idea is to release resources, so:
 			currentRow = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
 
 			// we hang on to theResults and messenger
 			// in case more calls come in on this resultSet
@@ -651,6 +685,7 @@ public class EmbedResultSet extends ConnectionChild
      */
     private void    markClosed()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if ( isClosed ) { return; }
         
         isClosed = true;
@@ -658,6 +693,7 @@ public class EmbedResultSet extends ConnectionChild
         // to prevent infinite looping, tell our parent Statement
         // that we have closed AFTER
         // we have marked ourself as closed
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if ( stmt != null) { stmt.closeMeOnCompletion(); }
         if ( (owningStmt != null) && (owningStmt != stmt) ) { owningStmt.closeMeOnCompletion(); }
     }
@@ -695,6 +731,7 @@ public class EmbedResultSet extends ConnectionChild
     public final String getString(int columnIndex) throws SQLException {
         checkIfClosed("getString");
         int columnType = getColumnType(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         if (columnType == Types.BLOB || columnType == Types.CLOB) {
             checkLOBMultiCall(columnIndex);
             // If the above didn't fail, this is the first getter invocation,
@@ -712,6 +749,7 @@ public class EmbedResultSet extends ConnectionChild
 				String value = dvd.getString();
 
 				// check for the max field size limit 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
                 if (maxFieldSize > 0 && isMaxFieldSizeType(columnType))
                 {
                     if (value.length() > maxFieldSize )
@@ -901,6 +939,7 @@ public class EmbedResultSet extends ConnectionChild
     public final byte[] getBytes(int columnIndex) throws SQLException	{
 		checkIfClosed("getBytes");
         int columnType = getColumnType(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         if (columnType == Types.BLOB) {
             checkLOBMultiCall(columnIndex);
             // If the above didn't fail, this is the first getter invocation,
@@ -917,6 +956,7 @@ public class EmbedResultSet extends ConnectionChild
 			byte[] value = dvd.getBytes();
 
             // check for the max field size limit 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
             if (maxFieldSize > 0 && isMaxFieldSizeType(columnType))
             {
                  if (value.length > maxFieldSize)
@@ -1018,6 +1058,7 @@ public class EmbedResultSet extends ConnectionChild
     public java.sql.Date getDate(String columnName, Calendar cal) 
                 throws SQLException 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
                 checkIfClosed("getDate");
                 return getDate( findColumnName(columnName), cal);
         }
@@ -1071,6 +1112,7 @@ public class EmbedResultSet extends ConnectionChild
     public java.sql.Time getTime(String columnName, Calendar cal)
            throws SQLException 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
                 checkIfClosed("getTime");
                 return getTime( findColumnName( columnName), cal);
         }
@@ -1091,6 +1133,7 @@ public class EmbedResultSet extends ConnectionChild
     public java.sql.Timestamp getTimestamp(String columnName, Calendar cal)     
       throws SQLException 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
                 checkIfClosed("getTimestamp");
                 return getTimestamp(findColumnName(columnName), cal);
         }
@@ -1138,6 +1181,7 @@ public class EmbedResultSet extends ConnectionChild
     public final java.io.Reader getCharacterStream(int columnIndex)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("getCharacterStream");
 		int lmfs;
 		int colType = getColumnType(columnIndex);
@@ -1187,10 +1231,12 @@ public class EmbedResultSet extends ConnectionChild
 			pushStack = true;
 			setupContextStack();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
             java.io.Reader ret; // The reader we will return to the user
             if (dvd.hasStream()) {
                 CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
                 // See if we have to enforce a max field size.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 if (lmfs > 0) {
                     csd = new CharacterStreamDescriptor.Builder().copyState(csd).
                             maxCharLength(lmfs).build();
@@ -1265,6 +1311,7 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final InputStream getBinaryStream(int columnIndex) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("getBinaryStream");
 		int lmfs;
 		int colType = getColumnType(columnIndex);
@@ -1298,10 +1345,12 @@ public class EmbedResultSet extends ConnectionChild
 			pushStack = true;
 			setupContextStack();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
             InputStream stream; // The stream we will return to the user
             if (dvd.hasStream()) {
                 stream = new BinaryToRawStream(dvd.getStream(), dvd);
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                 stream = new ByteArrayInputStream(dvd.getBytes());
             }
 
@@ -1313,6 +1362,7 @@ public class EmbedResultSet extends ConnectionChild
                 stream = limitResultIn;
             }
             // Wrap in a stream throwing exception on invocations when closed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
             stream = new CloseFilterInputStream(stream);
             currentStream = stream;
 			return stream;
@@ -1338,6 +1388,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final String getString(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getString");
     	return (getString(findColumnName(columnName)));
 	}
@@ -1350,6 +1402,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final boolean getBoolean(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getBoolean");
     	return (getBoolean(findColumnName(columnName)));
 	}
@@ -1362,6 +1416,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final byte getByte(String columnName) throws SQLException	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getByte");
     	return (getByte(findColumnName(columnName)));
 	}
@@ -1374,6 +1430,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final short getShort(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getShort");
     	return (getShort(findColumnName(columnName)));
 	}
@@ -1386,6 +1444,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final int getInt(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getInt");
     	return (getInt(findColumnName(columnName)));
 	}
@@ -1398,6 +1458,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final long getLong(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getLong");
     	return (getLong(findColumnName(columnName)));
 	}
@@ -1410,6 +1472,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final float getFloat(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getFloat");
     	return (getFloat(findColumnName(columnName)));
 	}
@@ -1422,6 +1486,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final double getDouble(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getDouble");
     	return (getDouble(findColumnName(columnName)));
 	}
@@ -1438,6 +1504,7 @@ public class EmbedResultSet extends ConnectionChild
     @Deprecated
     public final BigDecimal getBigDecimal(int columnIndex, int scale)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
         BigDecimal ret = getBigDecimal(columnIndex);
         if (ret != null) {
@@ -1452,6 +1519,8 @@ public class EmbedResultSet extends ConnectionChild
         try {
 
             DataValueDescriptor dvd = getColumn(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 
             if (wasNull = dvd.isNull()) {
                 return null;
@@ -1500,6 +1569,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final byte[] getBytes(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getBytes");
     	return (getBytes(findColumnName(columnName)));
 	}
@@ -1512,6 +1583,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Date getDate(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getDate");
     	return (getDate(findColumnName(columnName)));
 	}
@@ -1524,6 +1597,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Time getTime(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getTime");
     	return (getTime(findColumnName(columnName)));
 	}
@@ -1536,6 +1611,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Timestamp getTimestamp(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getTimestamp");
     	return (getTimestamp(findColumnName(columnName)));
 	}
@@ -1549,6 +1626,7 @@ public class EmbedResultSet extends ConnectionChild
      */
     public final java.io.Reader getCharacterStream(String columnName)
     throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getCharacterStream");
     	return (getCharacterStream(findColumnName(columnName)));
     }
@@ -1570,6 +1648,8 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final InputStream getAsciiStream(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getAsciiStream");
     	return (getAsciiStream(findColumnName(columnName)));
 	}
@@ -1590,6 +1670,7 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final InputStream getBinaryStream(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getBinaryStream");
     	return (getBinaryStream(findColumnName(columnName)));
 	}
@@ -1603,6 +1684,7 @@ public class EmbedResultSet extends ConnectionChild
      */
     @Deprecated
     public final java.io.InputStream getUnicodeStream(int columnIndex) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         throw Util.notImplemented("getUnicodeStream");
     }
 
@@ -1728,6 +1810,8 @@ public class EmbedResultSet extends ConnectionChild
 	  checkIfClosed("getMetaData");	// checking result set closure does not depend
 								// on the underlying connection.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1879
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
       ResultSetMetaData rMetaData =
           resultDescription.getMetaData();
 
@@ -1755,6 +1839,7 @@ public class EmbedResultSet extends ConnectionChild
     public final int getHoldability() throws SQLException {
         checkIfClosed("getHoldability");
         if (theResults.getActivation().getResultSetHoldability()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
             return java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
         }
         return java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT;
@@ -1786,6 +1871,7 @@ public class EmbedResultSet extends ConnectionChild
      */
     public final Object getObject(int columnIndex) throws SQLException {
         checkIfClosed("getObject");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 
 		// need special handling for some types.
 		int colType = getColumnType(columnIndex);
@@ -1850,6 +1936,7 @@ public class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Object getObject(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkIfClosed("getObject");
     	return (getObject(findColumnName(columnName)));
 	}
@@ -1867,6 +1954,7 @@ public class EmbedResultSet extends ConnectionChild
      * @exception SQLException Feature not implemented for now.
      */
     public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         checkIfClosed("getObject");
         if (map == null) {
             throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER, map, "map",
@@ -1958,6 +2046,7 @@ public class EmbedResultSet extends ConnectionChild
      * @exception SQLException Feature not implemented for now.
      */
     public final Ref getRef(int i) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         throw Util.notImplemented();
     }
 
@@ -2298,7 +2387,9 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void setFetchSize(int rows) throws SQLException {
 		checkIfClosed("setFetchSize");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3573
 		if (rows < 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			throw Util.generateCsSQLException(SQLState.INVALID_FETCH_SIZE, rows);
 		} else if (rows > 0) // if it is zero ignore the call
 		{
@@ -2386,6 +2477,7 @@ public class EmbedResultSet extends ConnectionChild
 
         boolean rvalue = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		try {
 			if (isForUpdate() && 
 					getType() == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE) {
@@ -2433,11 +2525,15 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public boolean rowDeleted() throws SQLException {
 		checkIfClosed("rowDeleted");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
 		checkNotOnInsertRow();
 		checkOnRow();
 
         boolean rvalue = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		try {
 			if (isForUpdate() && 
 					getType() == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE) {
@@ -2454,10 +2550,14 @@ public class EmbedResultSet extends ConnectionChild
       checksBeforeUpdateOrDelete(methodName, columnIndex);
 
       //1)Make sure for updateXXX methods, the column position is not out of range
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
       ResultDescription rd = theResults.getResultDescription();
       if (columnIndex < 1 || columnIndex > rd.getColumnCount())
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
         throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION,
 					columnIndex, String.valueOf(rd.getColumnCount()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
       //2)Make sure the column corresponds to a column in the base table and it is not a derived column
       if (rd.getColumnDescriptor(columnIndex).getSourceTableName() == null)
@@ -2482,8 +2582,10 @@ public class EmbedResultSet extends ConnectionChild
 
       //2)Make sure this is an updatable ResultSet
       checkUpdatableCursor(methodName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
 
       //3)Make sure JDBC ResultSet is positioned on a row
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
       if (!isOnInsertRow) checkOnRow(); // make sure there's a current row
 	}
 
@@ -2491,6 +2593,7 @@ public class EmbedResultSet extends ConnectionChild
 	protected DataValueDescriptor getDVDforColumnToBeUpdated(int columnIndex, String updateMethodName) throws StandardException, SQLException {
       checksBeforeUpdateXXX(updateMethodName, columnIndex);
       columnGotUpdated[columnIndex-1] = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
       currentRowHasBeenUpdated = true;
       
       return updateRow.getColumn(columnIndex);
@@ -2511,6 +2614,7 @@ public class EmbedResultSet extends ConnectionChild
 
         // 3)Make sure JDBC ResultSet is positioned on insertRow
         if (!isOnInsertRow) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
             throw newSQLException(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW);
         }
     }
@@ -2524,6 +2628,7 @@ public class EmbedResultSet extends ConnectionChild
      * <code>updateAsciiStream()</code>
      */
     private void checksBeforeUpdateAsciiStream(int columnIndex)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
         throws SQLException
     {
         checksBeforeUpdateXXX("updateAsciiStream", columnIndex);
@@ -2768,6 +2873,7 @@ public class EmbedResultSet extends ConnectionChild
 	}
 
     public void updateBigDecimal(int columnIndex, BigDecimal x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             throws SQLException {
         try {
             getDVDforColumnToBeUpdated(columnIndex, "updateBigDecimal").setBigDecimal(x);
@@ -2945,6 +3051,7 @@ public class EmbedResultSet extends ConnectionChild
 	public void updateAsciiStream(int columnIndex, java.io.InputStream x,
 			long length) throws SQLException {
 		checksBeforeUpdateAsciiStream(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
 
 		java.io.Reader r = null;
 		if (x != null)
@@ -2979,6 +3086,7 @@ public class EmbedResultSet extends ConnectionChild
     public void updateAsciiStream(int columnIndex, InputStream x)
             throws SQLException {
         checksBeforeUpdateAsciiStream(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
 
         java.io.Reader r = null;
         if (x != null) {
@@ -3043,6 +3151,8 @@ public class EmbedResultSet extends ConnectionChild
      */
     public void updateBinaryStream(int columnIndex, InputStream x)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
         checksBeforeUpdateBinaryStream(columnIndex);
         updateBinaryStreamInternal(columnIndex, x, true, -1,
                                    "updateBinaryStream");
@@ -3072,6 +3182,7 @@ public class EmbedResultSet extends ConnectionChild
     private void updateBinaryStreamInternal(int columnIndex, InputStream x,
                 final boolean lengthLess, long length, String updateMethodName)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         RawToBinaryFormatStream rawStream;
         if (!lengthLess) {
             if (length < 0)
@@ -3084,9 +3195,11 @@ public class EmbedResultSet extends ConnectionChild
                 throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
                         getColumnSQLType(columnIndex));
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
             rawStream = new RawToBinaryFormatStream(x, (int)length);
         } else {
             // Force length to UNKNOWN_LOGICAL_LENGTH if stream is length less.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4515
             length = DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH;
             rawStream = new RawToBinaryFormatStream(x,
                     getMaxColumnWidth(columnIndex),
@@ -3122,6 +3235,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateCharacterStream(int columnIndex, java.io.Reader x,
 			long length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
 		checksBeforeUpdateCharacterStream(columnIndex);
 		updateCharacterStreamInternal(columnIndex, x, false, length,
                                       "updateCharacterStream");
@@ -3146,6 +3260,7 @@ public class EmbedResultSet extends ConnectionChild
      */
     public void updateCharacterStream(int columnIndex, Reader x)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
         checksBeforeUpdateCharacterStream(columnIndex);
         updateCharacterStreamInternal(columnIndex, x, true, -1,
                                       "updateCharacterStream");
@@ -3184,11 +3299,13 @@ public class EmbedResultSet extends ConnectionChild
                 return;
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             final StringDataValue dvd = (StringDataValue)
                     getDVDforColumnToBeUpdated(columnIndex, updateMethodName);
             // In the case of updatable result sets, we cannot guarantee that a
             // context is pushed when the header needs to be generated. To fix
             // this, tell the DVD/generator which header format to use.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
             dvd.setStreamHeaderFormat(Boolean.valueOf(
                     !getEmbedConnection().getDatabase().getDataDictionary().
                     checkVersion(DataDictionary.DD_VERSION_DERBY_10_5, null)));
@@ -3242,6 +3359,7 @@ public class EmbedResultSet extends ConnectionChild
 
                 utfIn = new ReaderToUTF8Stream(reader, usableLength,
                         truncationLength, getColumnSQLType(columnIndex),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                         dvd.getStreamHeaderGenerator());
             } else {
                 int colWidth = getMaxColumnWidth(columnIndex);
@@ -3280,6 +3398,7 @@ public class EmbedResultSet extends ConnectionChild
 	public void updateObject(int columnIndex, Object x, int scale)
 			throws SQLException {
 		updateObject(columnIndex, x);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         adjustScale( columnIndex, scale );
 	}
 
@@ -3299,9 +3418,11 @@ public class EmbedResultSet extends ConnectionChild
 		if ((colType == Types.DECIMAL) || (colType == Types.NUMERIC)) {
 			if (scale < 0)
 				throw newSQLException(SQLState.BAD_SCALE_VALUE, scale);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 			try {
 				DataValueDescriptor value = updateRow.getColumn(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 
 				int origvaluelen = value.getLength();
 				((VariableSizeDataValue)
@@ -3335,8 +3456,10 @@ public class EmbedResultSet extends ConnectionChild
 	public void updateObject(int columnIndex, Object x) throws SQLException {
 		checksBeforeUpdateXXX("updateObject", columnIndex);
 		int colType = getColumnType(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if (colType == Types.JAVA_OBJECT) {
 			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 				((UserDataValue) getDVDforColumnToBeUpdated(columnIndex, "updateObject")).setValue(x);
 				return;
 			} catch (StandardException t) {
@@ -3384,6 +3507,7 @@ public class EmbedResultSet extends ConnectionChild
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         if (x instanceof BigDecimal) {
             updateBigDecimal(columnIndex, (BigDecimal) x);
             return;
@@ -3438,6 +3562,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateNull(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateNull");
 		updateNull(findColumnName(columnName));
 	}
@@ -3460,6 +3585,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBoolean(String columnName, boolean x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateBoolean");
 		updateBoolean(findColumnName(columnName), x);
 	}
@@ -3482,6 +3608,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateByte(String columnName, byte x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateByte");
 		updateByte(findColumnName(columnName), x);
 	}
@@ -3504,6 +3631,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateShort(String columnName, short x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateShort");
 		updateShort(findColumnName(columnName), x);
 	}
@@ -3526,6 +3654,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateInt(String columnName, int x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateInt");
 		updateInt(findColumnName(columnName), x);
 	}
@@ -3548,6 +3677,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateLong(String columnName, long x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateLong");
 		updateLong(findColumnName(columnName), x);
 	}
@@ -3570,6 +3700,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateFloat(String columnName, float x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateFloat");
 		updateFloat(findColumnName(columnName), x);
 	}
@@ -3592,6 +3723,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateDouble(String columnName, double x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateDouble");
 		updateDouble(findColumnName(columnName), x);
 	}
@@ -3614,6 +3746,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateString(String columnName, String x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateString");
 		updateString(findColumnName(columnName), x);
 	}
@@ -3636,6 +3769,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBytes(String columnName, byte x[]) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateBytes");
 		updateBytes(findColumnName(columnName), x);
 	}
@@ -3659,6 +3793,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateDate(String columnName, java.sql.Date x)
 			throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateDate");
 		updateDate(findColumnName(columnName), x);
 	}
@@ -3682,6 +3817,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTime(String columnName, java.sql.Time x)
 			throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateTime");
 		updateTime(findColumnName(columnName), x);
 	}
@@ -3705,6 +3841,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTimestamp(String columnName, java.sql.Timestamp x)
 			throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateTimestamp");
 		updateTimestamp(findColumnName(columnName), x);
 	}
@@ -3730,6 +3867,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateAsciiStream(String columnName, java.io.InputStream x,
 			int length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateAsciiStream");
 		updateAsciiStream(findColumnName(columnName), x, length);
 	}
@@ -3755,6 +3893,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateBinaryStream(String columnName, java.io.InputStream x,
 			int length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateBinaryStream");
 		updateBinaryStream(findColumnName(columnName), x, length);
 	}
@@ -3780,6 +3919,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateCharacterStream(String columnName, java.io.Reader reader,
 			int length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateCharacterStream");
 		updateCharacterStream(findColumnName(columnName), reader, length);
 	}
@@ -3803,6 +3943,7 @@ public class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateObject(String columnName, Object x, int scale)
       throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateObject");
 		updateObject(findColumnName(columnName), x, scale);
 	}
@@ -3825,6 +3966,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateObject(String columnName, Object x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("updateObject");
 		updateObject(findColumnName(columnName), x);
 	}
@@ -3841,6 +3983,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                insert row have not been given a value
 	 */
 	public void insertRow() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
         synchronized (getConnectionSynchronization()) {
             checksBeforeInsert();
             setupContextStack();
@@ -3866,6 +4009,8 @@ public class EmbedResultSet extends ConnectionChild
                 // got the underlying (schema.)table name
                 insertSQL.append(getFullBaseTableName(targetTable));
                 ResultDescription rd = theResults.getResultDescription();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 
                 insertSQL.append(" (");
                 // in this for loop we are constructing list of column-names 
@@ -3877,7 +4022,10 @@ public class EmbedResultSet extends ConnectionChild
                     }
                     // using quotes around the column name 
                     // to preserve case sensitivity
+//IC see: https://issues.apache.org/jira/browse/DERBY-4044
                     insertSQL.append(IdUtil.normalToDelimited(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
                             rd.getColumnDescriptor(i).getName()));
                     if (columnGotUpdated[i-1]) { 
                         valuesSQL.append("?");
@@ -3890,6 +4038,7 @@ public class EmbedResultSet extends ConnectionChild
                 valuesSQL.append(") ");
                 insertSQL.append(valuesSQL);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 StatementContext currSC = lcc.getStatementContext();
                 Activation parentAct = null;
 
@@ -3912,20 +4061,26 @@ public class EmbedResultSet extends ConnectionChild
                 // which will be the activation of the pushed statement
                 // context.
                 statementContext.setActivation(parentAct);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
                 org.apache.derby.iapi.sql.PreparedStatement ps = 
                         lcc.prepareInternalStatement(insertSQL.toString());
                 Activation act = ps.getActivation(lcc, false);
 
                 statementContext.setActivation(act);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 
                 // in this for loop we are assigning values for parameters 
                 //in sql constructed earlier VALUES (?, ..)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
                 for (int i=1, paramPosition=0; i<=rd.getColumnCount(); i++) { 
                     // if the column got updated, do following
                     if (columnGotUpdated[i-1]) {  
                         act.getParameterValueSet().
                                 getParameterForSet(paramPosition++).
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
                                 setValue(updateRow.getColumn(i));
                     }
                 }
@@ -3964,6 +4119,7 @@ public class EmbedResultSet extends ConnectionChild
         checkNotOnInsertRow();
         
         setupContextStack();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         LanguageConnectionContext lcc = getLanguageConnectionContext( getEmbedConnection() );
         StatementContext statementContext = null;
         try {
@@ -3980,12 +4136,15 @@ public class EmbedResultSet extends ConnectionChild
             updateWhereCurrentOfSQL.append(getFullBaseTableName(targetTable));//got the underlying (schema.)table name
             updateWhereCurrentOfSQL.append(" SET ");
             ResultDescription rd = theResults.getResultDescription();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 
             for (int i=1; i<=rd.getColumnCount(); i++) { //in this for loop we are constructing columnname=?,... part of the update sql
                 if (columnGotUpdated[i-1]) { //if the column got updated, do following
                     if (foundOneColumnAlready)
                         updateWhereCurrentOfSQL.append(",");
                     //using quotes around the column name to preserve case sensitivity
+//IC see: https://issues.apache.org/jira/browse/DERBY-4044
                     updateWhereCurrentOfSQL.append(IdUtil.normalToDelimited(
                             rd.getColumnDescriptor(i).getName()) + "=?");
                     foundOneColumnAlready = true;
@@ -3995,6 +4154,7 @@ public class EmbedResultSet extends ConnectionChild
             updateWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
                     IdUtil.normalToDelimited(getCursorName()));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             StatementContext currSC = lcc.getStatementContext();
             Activation parentAct = null;
 
@@ -4004,6 +4164,7 @@ public class EmbedResultSet extends ConnectionChild
 
             // Context used for preparing, don't set any timeout (use 0)
             statementContext = lcc.pushStatementContext(isAtomic, false, updateWhereCurrentOfSQL.toString(), null, false, 0L);
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 
             // A priori, the new statement context inherits the activation of
             // the existing statementContext, so that that activation ends up
@@ -4015,23 +4176,31 @@ public class EmbedResultSet extends ConnectionChild
             Activation act = ps.getActivation(lcc, false);
 
             statementContext.setActivation(act);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 
             //in this for loop we are assigning values for parameters in sql constructed earlier with columnname=?,... 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
             for (int i=1, paramPosition=0; i<=rd.getColumnCount(); i++) { 
                 if (columnGotUpdated[i-1])  //if the column got updated, do following
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
                     act.getParameterValueSet().getParameterForSet(paramPosition++).setValue(updateRow.getColumn(i));
             }
             // Don't set any timeout when updating rows (use 0)
             // Execute the update where current of sql.
             org.apache.derby.iapi.sql.ResultSet rs =
 				ps.executeSubStatement(activation, act, true, 0L);
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
             SQLWarning w = act.getWarnings();
             if (w != null) {
                 addWarning(w);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2566
             act.close();
             //For forward only resultsets, after a update, the ResultSet will be positioned right before the next row.
             if (getType() == TYPE_FORWARD_ONLY) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
                 currentRow = null;
             } else {
                 movePosition(RELATIVE, 0, "relative");
@@ -4064,9 +4233,13 @@ public class EmbedResultSet extends ConnectionChild
         
             // Check that the cursor is not positioned on insertRow
             checkNotOnInsertRow();
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
 
             setupContextStack();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
             LanguageConnectionContext lcc = getLanguageConnectionContext( getEmbedConnection() );
             StatementContext statementContext = null;
             
@@ -4078,7 +4251,9 @@ public class EmbedResultSet extends ConnectionChild
                 //using quotes around the cursor name to preserve case sensitivity
                 deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
                         IdUtil.normalToDelimited(getCursorName()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4044
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 StatementContext currSC = lcc.getStatementContext();
                 Activation parentAct = null;
 
@@ -4099,23 +4274,36 @@ public class EmbedResultSet extends ConnectionChild
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
                 // Get activation, so that we can get the warning from it
                 Activation act = ps.getActivation(lcc, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 
                 statementContext.setActivation(act);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 
                 // Don't set any timeout when deleting rows (use 0)
                 //execute delete where current of sql
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
                 org.apache.derby.iapi.sql.ResultSet rs = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 					ps.executeSubStatement(activation, act, true, 0L);
                 SQLWarning w = act.getWarnings();
                 if (w != null) {
                     addWarning(w);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2566
+//IC see: https://issues.apache.org/jira/browse/DERBY-2566
                 act.close();
                 //After a delete, the ResultSet will be positioned right before 
                 //the next row.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
                 currentRow = null;
                 lcc.popStatementContext(statementContext, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 InterruptStatus.restoreIntrFlagIfSeen(lcc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
             } catch (Throwable t) {
                     throw closeOnTransactionError(t);
             } finally {
@@ -4129,6 +4317,7 @@ public class EmbedResultSet extends ConnectionChild
 
 	private String getFullBaseTableName(ExecCursorTableReference targetTable) {
 		//using quotes to preserve case sensitivity
+//IC see: https://issues.apache.org/jira/browse/DERBY-4044
         return IdUtil.mkQualifiedName(targetTable.getSchemaName(),
                                       targetTable.getBaseName());
 	}
@@ -4176,6 +4365,7 @@ public class EmbedResultSet extends ConnectionChild
         checksBeforeUpdateOrDelete("cancelRowUpdates", -1);
         
         checkNotOnInsertRow();
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
 
         initializeUpdateRowModifiers();        
     }
@@ -4215,6 +4405,7 @@ public class EmbedResultSet extends ConnectionChild
 				//when dealing with character string datatypes.
 				setupContextStack();
 				// initialize state corresponding to insertRow/updateRow impl.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 				initializeUpdateRowModifiers();
  				isOnInsertRow = true;
 				
@@ -4222,6 +4413,7 @@ public class EmbedResultSet extends ConnectionChild
 					updateRow.setColumn(i, 
 						resultDescription.getColumnDescriptor(i).getType().getNull());
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
                 InterruptStatus.restoreIntrFlagIfSeen
                     ( getLanguageConnectionContext( getEmbedConnection() ) );
 			} catch (Throwable ex) {
@@ -4254,11 +4446,15 @@ public class EmbedResultSet extends ConnectionChild
 				if (isOnInsertRow) {
 					// initialize state corresponding to insertRow/updateRow impl.
 					initializeUpdateRowModifiers();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
 
 					isOnInsertRow = false;
 				}
 
                 InterruptStatus.restoreIntrFlagIfSeen();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
 			} catch (Throwable ex) {
 				handleException(ex);
@@ -4297,6 +4493,7 @@ public class EmbedResultSet extends ConnectionChild
 			try {
 				DataValueDescriptor dvd = getColumn(columnIndex);
                 EmbedConnection ec = getEmbedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
                 if (wasNull = dvd.isNull()) {
                     InterruptStatus.restoreIntrFlagIfSeen();
@@ -4306,12 +4503,14 @@ public class EmbedResultSet extends ConnectionChild
 				// should set up a context stack if we have a long column,
 				// since a blob may keep a pointer to a long column in the
 				// database
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
 				if (dvd.hasStream())
 					pushStack = true;
 
 				if (pushStack)
 					setupContextStack();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 EmbedBlob result = new EmbedBlob(dvd, ec);
                 restoreIntrFlagIfSeen(pushStack, ec);
                 return result;
@@ -4343,6 +4542,10 @@ public class EmbedResultSet extends ConnectionChild
 		// outside of the connection synchronization.
 
         useStreamOrLOB(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
 		synchronized (getConnectionSynchronization()) {
 			int colType = getColumnType(columnIndex);
@@ -4352,11 +4555,13 @@ public class EmbedResultSet extends ConnectionChild
 				throw dataTypeConversion("java.sql.Clob", columnIndex);
 
 			boolean pushStack = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             EmbedConnection ec = getEmbedConnection();
 			try {
 
 				StringDataValue dvd = (StringDataValue)getColumn(columnIndex);
                 LanguageConnectionContext lcc = getLanguageConnectionContext( ec );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 
                 if (wasNull = dvd.isNull()) {
                     InterruptStatus.restoreIntrFlagIfSeen();
@@ -4365,11 +4570,13 @@ public class EmbedResultSet extends ConnectionChild
 
                 // Set up a context stack if we have CLOB whose value is a long
                 // column in the database.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
                 if (dvd.hasStream()) {
                     pushStack = true;
                     setupContextStack();
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 EmbedClob result =  new EmbedClob(ec, dvd);
                 restoreIntrFlagIfSeen(pushStack, ec);
                 return result;
@@ -4391,6 +4598,7 @@ public class EmbedResultSet extends ConnectionChild
 	 * @return an object representing a BLOB
 	 */
 	public final Blob getBlob(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("getBlob");
 		return (getBlob(findColumnName(columnName)));
 	}
@@ -4406,6 +4614,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public final Clob getClob(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed("getClob");
 		return (getClob(findColumnName(columnName)));
 	}	
@@ -4542,6 +4751,8 @@ public class EmbedResultSet extends ConnectionChild
         
         int position = resultDescription.findColumnInsenstive(columnName);
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-1879
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
 		if (position == -1) {
 			throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnName);
 		} else {
@@ -4581,6 +4792,7 @@ public class EmbedResultSet extends ConnectionChild
 	 *
 	 * @exception SQLException		Thrown if this ResultSet is closed.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 	final void checkIfClosed(String operation) throws SQLException {
 		// If the JDBC ResultSet has been explicitly closed, isClosed is
 		// true. In some cases, the underlying language ResultSet can be closed
@@ -4594,6 +4806,7 @@ public class EmbedResultSet extends ConnectionChild
 			// basic cleanup and mark it as closed.
 			if (!isClosed) {
 				closeCurrentStream();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                 markClosed();
 			}
 
@@ -4619,6 +4832,7 @@ public class EmbedResultSet extends ConnectionChild
             
 		if (appConn.isClosed()) {
             closeCurrentStream();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             markClosed();
 			throw Util.noCurrentConnection();
         }
@@ -4658,6 +4872,7 @@ public class EmbedResultSet extends ConnectionChild
 	/*
 	 * close result set if we have a transaction level error 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 	final SQLException closeOnTransactionError(Throwable thrownException) throws SQLException
 	{
 		SQLException sqle = handleException(thrownException);
@@ -4670,6 +4885,7 @@ public class EmbedResultSet extends ConnectionChild
 				try {
 					close();
 	    		} catch (Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 					sqle.setNextException(handleException(t));
 				}
 			}
@@ -4695,7 +4911,9 @@ public class EmbedResultSet extends ConnectionChild
 
 	  closeCurrentStream();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
 	  if (columnIndex < 1 || columnIndex > resultDescription.getColumnCount()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		  throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnIndex);
 	  }
 	  if (isOnInsertRow || currentRowHasBeenUpdated && columnGotUpdated[columnIndex -1]) {
@@ -4726,10 +4944,13 @@ public class EmbedResultSet extends ConnectionChild
 		// to convert the exception to a SQLException.
 
 		return TransactionResourceImpl.wrapInSQLException(thrownException);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-1585
 		A dynamic result was created in a procedure by a nested connection.
 		Once the procedure returns, there is a good chance that connection is closed,
 		so we re-attach the result set to the connection of the statement the called
@@ -4745,6 +4966,7 @@ public class EmbedResultSet extends ConnectionChild
         
         if (owningStmt != null) {
 		    this.owningStmt = owningStmt;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
             this.applicationStmt = owningStmt.applicationStatement;
             this.localConn = owningStmt.getEmbedConnection();
         }
@@ -4759,6 +4981,7 @@ public class EmbedResultSet extends ConnectionChild
         // or CallableStatement. Dynamic result sets created
         // by Statement objects will already be marked as
         // single use.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3247
         this.singleUseActivation = theResults.getActivation();
 	}
 
@@ -4782,14 +5005,19 @@ public class EmbedResultSet extends ConnectionChild
      * is <code>TYPE_FORWARD_ONLY</code>
      */
     private void checkScrollCursor(String methodName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 		checkIfClosed(methodName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if (stmt.getResultSetType() == java.sql.ResultSet.TYPE_FORWARD_ONLY)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
             throw Util.generateCsSQLException(
                     SQLState.NOT_ON_FORWARD_ONLY_CURSOR, methodName);
 	}
     
     private void checkUpdatableCursor(String operation) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         if (getConcurrency() != java.sql.ResultSet.CONCUR_UPDATABLE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             throw Util.generateCsSQLException(
                     SQLState.UPDATABLE_RESULTSET_API_DISALLOWED, 
                     operation);
@@ -4805,8 +5033,10 @@ public class EmbedResultSet extends ConnectionChild
 		synchronized (getConnectionSynchronization()) {
 			setupContextStack();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             LanguageConnectionContext lcc =
                 getLanguageConnectionContext( getEmbedConnection() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 
             try {
 				try {
@@ -4817,8 +5047,10 @@ public class EmbedResultSet extends ConnectionChild
 					 * error. (Cache the LanguageConnectionContext)
 					 */
                     // No timeout for this operation (use 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
 					StatementContext statementContext =
                         lcc.pushStatementContext(isAtomic, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 						 concurrencyOfThisResultSet==java.sql.ResultSet.CONCUR_READ_ONLY,
 						 getSQLText(),
                                                  getParameterValueSet(),
@@ -4827,6 +5059,11 @@ public class EmbedResultSet extends ConnectionChild
 					boolean result = theResults.checkRowPosition(position);
 
 					lcc.popStatementContext(statementContext, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.restoreIntrFlagIfSeen(lcc);
 					return result;
 
@@ -4870,6 +5107,7 @@ public class EmbedResultSet extends ConnectionChild
      * @return the maximum length of the column
      */
     private final int getMaxColumnWidth(int columnIndex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         return resultDescription.getColumnDescriptor(columnIndex).
                     getType().getMaximumWidth();
     }
@@ -4891,7 +5129,9 @@ public class EmbedResultSet extends ConnectionChild
      * @param columnIndex 1-based column index
      * @throws SQLException if the column has already been accessed
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
     final void useStreamOrLOB(int columnIndex) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         checkLOBMultiCall(columnIndex);
         columnUsedFlags[columnIndex - 1] = true;
     }
@@ -4932,12 +5172,14 @@ public class EmbedResultSet extends ConnectionChild
      * @exception SQLException if a database error occurs
      */
     public final boolean isClosed() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
         if (isClosed) return true;
         try {
             // isClosed is not updated when EmbedConnection.close() is
             // called, so we need to check the status of the
             // connection
             checkExecIfClosed("");
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             return false;
         } catch (SQLException sqle) {
             return isClosed;
@@ -4950,6 +5192,7 @@ public class EmbedResultSet extends ConnectionChild
       * @param w The warning to add to the warning chain.
       */
      private void addWarning(SQLWarning w) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
          if (topWarning == null) {
              topWarning = w;
          } else {
@@ -5158,6 +5401,9 @@ public class EmbedResultSet extends ConnectionChild
       *                if a database-access error occurs
       */
      public void updateCharacterStream(String columnName, java.io.Reader reader,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
          long length) throws SQLException {
          checkIfClosed("updateCharacterStream");
          updateCharacterStream(findColumnName(columnName),reader,length);
@@ -5294,6 +5540,7 @@ public class EmbedResultSet extends ConnectionChild
      */
     public void updateBlob(String columnName, InputStream x)
            throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
        checkIfClosed("updateBlob");
        updateBlob(findColumnName(columnName), x);
     }
@@ -5408,6 +5655,7 @@ public class EmbedResultSet extends ConnectionChild
      */
     public void updateClob(String columnName, Reader x)
            throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
        checkIfClosed("updateClob");
        updateClob(findColumnName(columnName), x);
     }
@@ -5425,6 +5673,7 @@ public class EmbedResultSet extends ConnectionChild
      * @exception SQLException Feature not implemented for now.
      */
     public void updateRef(int columnIndex, Ref x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             throws SQLException {
         throw Util.notImplemented();
     }
@@ -5736,6 +5985,7 @@ public class EmbedResultSet extends ConnectionChild
      * @see org.apache.derby.iapi.jdbc.EngineResultSet#isNull(int)
      */
     public boolean isNull(int columnIndex) throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2941
         try {
             DataValueDescriptor dvd = getColumn(columnIndex);
             return dvd.isNull();

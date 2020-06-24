@@ -120,6 +120,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         this.root = root;
         this.dd = dd;
         this.tc = tc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         seenSoFar = new HashMap<String,Object>();
         lifo      = new ArrayList<RoleGrantDescriptor>(); // remaining work stack
 
@@ -131,6 +132,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
              null,
              false,
              false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<RoleGrantDescriptor> dummyList = new ArrayList<RoleGrantDescriptor>();
         dummyList.add(dummy);
         currNodeIter = dummyList.iterator();
@@ -150,6 +152,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         } else if (graph == null) {
             // We get here the second time next is called.
             graph = dd.getRoleGrantGraph(tc, inverse);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             List<RoleGrantDescriptor> outArcs = graph.get(root);
             if (outArcs != null) {
                 currNodeIter = outArcs.iterator();
@@ -183,6 +186,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
                 while (lifo.size() > 0 && currNodeIter == null) {
 
                     newNode = lifo.remove(lifo.size() - 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                     // In the example (see interface doc), the
                     // iterator of outgoing arcs for f (grant inverse)
@@ -204,6 +208,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         }
 
         if (result != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
             String role = inverse ? result.getRoleName(): result.getGrantee();
             seenSoFar.put(role, null);
             return role;

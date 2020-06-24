@@ -73,6 +73,7 @@ public final class MessageService {
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	  <P>
 	  Transform the message from messageID to the actual error, warning, or
 	  info message using the correct locale.
@@ -209,6 +210,7 @@ public final class MessageService {
 	public static ResourceBundle getBundleWithEnDefault(String resource, Locale locale)
     {
         ResourceBundle retval = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         retval = getBundle(resource, locale);
 
@@ -268,6 +270,7 @@ public final class MessageService {
 	*/
 	private static ResourceBundle lookupBundle(String resource, Locale locale)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (JVMInfo.isModuleAware()) { return lookupBundleInModule(resource, locale); }
         else { return ResourceBundle.getBundle(resource, locale); }
 	}
@@ -292,6 +295,7 @@ public final class MessageService {
         //
 
         if (resource.contains(CLIENT_MESSAGES)) { moduleName = ModuleUtil.CLIENT_MODULE_NAME; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         else if (resource.contains(SERVER_MESSAGES)) { moduleName = ModuleUtil.SERVER_MODULE_NAME; }
         else if (resource.contains(TOOLS_MESSAGES) || resource.contains(SYSINFO_MESSAGES))
         {
@@ -375,6 +379,7 @@ public final class MessageService {
      * @return the corresponding resource bundle
      */
     private static PropertyResourceBundle getModuleResourceBundle
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
        (final String resourceName, final Module module)
     {
         try
@@ -397,6 +402,7 @@ public final class MessageService {
             }
             else { return null; }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         catch (Exception ioe)
         {
             System.out.println(ioe.getMessage());
@@ -412,6 +418,7 @@ public final class MessageService {
     */
     private static String localizeResourceName(String original, String localeName)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (
             (original == null) ||
             (original.contains(CLIENT_MESSAGES)) ||

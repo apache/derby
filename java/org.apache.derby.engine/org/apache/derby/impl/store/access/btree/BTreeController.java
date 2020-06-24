@@ -130,6 +130,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         try
         {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
             if ((controlRow = ControlRow.get(open_btree, pageno)) == null)
                 return(false);
 
@@ -190,6 +191,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         }
         finally
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5284
             if (controlRow != null) 
             {
                 if (purged_at_least_one_row) 
@@ -361,6 +363,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             // Get the root page back, and perform a split following the
             // to-be-inserted key.  The split releases the root page latch.
             root = ControlRow.get(split_open_btree, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(root.page.isLatched());
@@ -393,6 +396,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
      * @throws StandardException
      */
     private int comparePreviousRecord (int slot, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
                                     LeafControlRow  leaf, 
                                     DataValueDescriptor [] rows,
                                     DataValueDescriptor [] oldRows) 
@@ -593,6 +597,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         RowLocation lock_row_loc = 
             (RowLocation) scratch_template[scratch_template.length - 1];
         boolean latch_released = !getLockingPolicy().lockNonScanRowOnPage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
                 leaf, slot, lock_fetch_desc, template,
                 lock_row_loc, ConglomerateController.LOCK_UPD);
         //if latch was released some other transaction was operating on this
@@ -672,6 +677,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
         if (scratch_template == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             scratch_template = runtime_mem.get_template(getRawTran());
         }
 
@@ -721,6 +727,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             targetleaf = (LeafControlRow)
                 ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             // Row locking - first lock row previous to row being inserted:
             //     o if (sp.resultExact) then the row must be deleted and
@@ -791,6 +798,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
                     latch_released = 
                         !this.getLockingPolicy().lockNonScanRowOnPage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
                             targetleaf, insert_slot,
                             lock_fetch_desc, scratch_template, lock_row_loc,
                             ConglomerateController.LOCK_UPD);
@@ -845,6 +853,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                         boolean update_succeeded = true;
                         try 
                         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
                             if (runtime_mem.hasCollatedTypes())
                             {
                                 // See DERBY-5367.
@@ -913,6 +922,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                     }
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5604
             else if (targetleaf.page.recordCount() - 1 < BTree.maxRowsPerPage)
             {
                 // The row wasn't there, so try to insert it
@@ -960,6 +970,8 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
                 // start splitting ...
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
             if (getConglomerate().isUniqueWithDuplicateNulls()) 
             {
                 int ret = compareLeftAndRightSiblings(rowToInsert, 
@@ -1071,6 +1083,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             this.isIndexableRowConsistent(rowToInsert);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5604
         if (num_rows_on_page < BTree.maxRowsPerPage)
         {
             // By default maxRowsPerPage is set to MAXINT, some tests
@@ -1085,6 +1098,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 {
                     // verify that the row inserted is >= than previous row.
                     int compare_result =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                         ControlRow.compareIndexRowFromPageToKey(
                             leaf,
                             insert_slot - 1,
@@ -1181,6 +1195,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                     ControlRow.SPLIT_FLAG_LAST_IN_TABLE));
 
         new_leaf = (LeafControlRow) ControlRow.get(this, new_leaf_pageno);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
         // The leaf must be the rightmost leaf in the table, the first time
         // the root grows from leaf to branch it will be a leaf with many
@@ -1248,6 +1263,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
 		super.init(
             xact_manager, xact_manager, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1058
             container, rawtran, hold, open_mode,
             lock_level, btree_locking_policy,
             conglomerate, undo, dynamic_info);
@@ -1350,6 +1366,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
          throws StandardException
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 		if (isClosed())
         {
             if (getHold())
@@ -1419,6 +1436,8 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         {
             throw StandardException.newException(
                         SQLState.BTREE_IS_CLOSED,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         err_containerid);
         }
 
@@ -1504,6 +1523,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
         if (scratch_template == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             scratch_template = runtime_mem.get_template(getRawTran());
         }
 
@@ -1514,6 +1534,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             // Btree must just have been created and empty, so there must
             // be one root leaf page which is empty except for the control row.
             current_leaf = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 (LeafControlRow) ControlRow.get(this, BTree.ROOTPAGEID);
             int current_insert_slot = 1;
 

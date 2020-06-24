@@ -43,6 +43,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * the table's rows satisfying the filter as a result set.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class ProjectRestrictResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 
 {
@@ -78,6 +79,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     ProjectRestrictResultSet(NoPutResultSet s,
 					Activation a,
 					GeneratedMethod r,
@@ -89,6 +91,8 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 					boolean reuseResult,
 					boolean doesProjection,
                     boolean validatingCheckConstraint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                     UUID validatingBaseTableUUID,
 				    double optimizerEstimatedRowCount,
 					double optimizerEstimatedCost) 
@@ -111,6 +115,8 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		this.doesProjection = doesProjection;
         this.validatingCheckConstraint = validatingCheckConstraint;
         this.validatingBaseTableUUID = validatingBaseTableUUID;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
 
 		// Allocate a result row if all of the columns are mapped from the source
 		if (projection == null)
@@ -118,6 +124,10 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 			mappedResultRow = activation.getExecutionFactory().getValueRow(projectMapping.length);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
         cloneMap =
             ((boolean[])a.getPreparedStatement().getSavedObject(cloneMapItem));
 
@@ -173,6 +183,8 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
         if (validatingCheckConstraint) {
             rowLocations = DeferredConstraintsMemory.
                 getDeferredCheckConstraintLocations(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                         activation, validatingBaseTableUUID);
         }
 
@@ -250,6 +262,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	 * @return the next row in the result
 	 */
 	public ExecRow	getNextRowCore() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -269,6 +282,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	    do 
 		{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (validatingCheckConstraint) {
                 candidateRow = null;
 
@@ -545,7 +559,9 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 
                 // See if the column has been marked for cloning.
                 // If the value isn't a stream, don't bother cloning it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
                 if (cloneMap[index] && dvd.hasStream()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
                     dvd = dvd.cloneValue(false);
                 }
 
@@ -576,6 +592,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	 * @exception StandardException thrown on failure.
 	 */
 	public ExecRow doBaseRowProjection(ExecRow sourceRow)
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		throws StandardException
 	{
 		final ExecRow result;
@@ -627,6 +644,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	 * @see NoPutResultSet#updateRow
 	 */
 	public void updateRow (ExecRow row, RowChanger rowChanger)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 			throws StandardException {
 		source.updateRow(row, rowChanger);
 	}
@@ -635,6 +653,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	 * @see NoPutResultSet#markRowAsDeleted
 	 */
 	public void markRowAsDeleted() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		source.markRowAsDeleted();
 	}
 

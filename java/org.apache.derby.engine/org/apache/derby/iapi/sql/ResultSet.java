@@ -85,6 +85,7 @@ public interface ResultSet
 	 * @return	The number of rows affect by the statement, so far.
 	 */
 	long	modifiedRowCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
 	/**
 	 * Returns a ResultDescription object, which describes the results
@@ -95,6 +96,8 @@ public interface ResultSet
 	 * @return	A ResultDescription describing the results of the
 	 *		statement.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 	ResultDescription	getResultDescription();
 	
 	Activation getActivation();
@@ -221,6 +224,7 @@ public interface ResultSet
 	 * methods: getLastRow(), getNextRow(), getPreviousRow(), 
 	 * getFirstRow(), getRelativeRow(..) or getAbsoluteRow(..).
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1361
 	void clearCurrentRow();
 	 
     /**

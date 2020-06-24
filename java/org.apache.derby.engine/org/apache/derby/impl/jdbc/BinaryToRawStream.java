@@ -28,10 +28,12 @@ import java.io.IOException;
 import java.io.EOFException;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	Converts a stream containing the Derby stored binary form
 	to one that just contains the application's data.
 	Simply read and save the length information.
 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2812
 class BinaryToRawStream
 extends java.io.FilterInputStream
 {

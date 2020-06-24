@@ -50,6 +50,8 @@ public final class WindowDefinitionNode extends WindowNode
      * @param cm          The context manager
      * @exception StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     WindowDefinitionNode(String         windowName,
                          OrderByList    orderByList,
                          ContextManager cm) throws StandardException {
@@ -110,6 +112,7 @@ public final class WindowDefinitionNode extends WindowNode
      * @return an existing window definition from wl, if 'this' is equivalent
      * to a window in wl.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     WindowDefinitionNode findEquivalentWindow(WindowList wl) {
         for (WindowDefinitionNode old : wl) {
             if (isEquivalent(old)) {
@@ -143,6 +146,7 @@ public final class WindowDefinitionNode extends WindowNode
     /**
      * @return the order by list of this window definition if any, else null.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     OrderByList getOrderByList() {
         return orderByList;
     }

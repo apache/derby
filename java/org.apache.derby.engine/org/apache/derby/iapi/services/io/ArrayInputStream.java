@@ -49,6 +49,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	 *
 	 */
 	public ArrayInputStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 		this(ArrayUtil.EMPTY_BYTE_ARRAY);
 	}
 
@@ -72,6 +73,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	/**
 		Set the array of bytes to be read.
 		Position is set to zero.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2118
 
         @param data The data in the stream
 	*/
@@ -84,6 +86,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	/**
 		Return a reference to the array of bytes this stream is going to read
 		from so that caller may load it with stuff
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         @return the data in the stream
 	*/
@@ -176,6 +179,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 		start = offset;
 		end = offset + length;
 		position = start;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2118
 
 		if ((offset < 0) || (length < 0) || (end > pageData.length)) {
 			start = end = position = 0;
@@ -192,6 +196,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
         start = position;
         end   = position + length;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2118
         if (end > pageData.length) {
 			start = end = position = 0;
 			throw new EOFException();
@@ -204,6 +209,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 		@see Limit#clearLimit
 	*/
 	public final int clearLimit() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2118
         start = 0;
         int remainingBytes = end - position;
         end = pageData.length;

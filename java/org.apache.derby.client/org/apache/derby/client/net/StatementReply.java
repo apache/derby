@@ -26,6 +26,7 @@ import org.apache.derby.client.am.PreparedStatementCallbackInterface;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.StatementCallbackInterface;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class StatementReply extends ConnectionReply {
     private StatementReplyInterface materialStatementReply_;
 
@@ -36,6 +37,7 @@ class StatementReply extends ConnectionReply {
         materialStatementReply_ = materialStatementReply;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readPrepareDescribeOutput(StatementCallbackInterface statement)
             throws SqlException {
         materialStatementReply_.readPrepareDescribeOutput(statement);

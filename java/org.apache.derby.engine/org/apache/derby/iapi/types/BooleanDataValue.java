@@ -124,6 +124,7 @@ public interface BooleanDataValue extends DataValueDescriptor
      *                                  is false.
      */
     public BooleanDataValue throwExceptionIfImmediateAndFalse(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                     String SQLState,
                                     String tableName,
                                     String constraintName,

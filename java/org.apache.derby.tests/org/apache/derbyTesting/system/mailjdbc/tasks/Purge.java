@@ -39,6 +39,7 @@ public class Purge extends Thread {
 	public Purge(String name) throws Exception{
 		//Sets the thread name
 		setName(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 		conn = DbTasks.getConnection("PURGE", "Purge");
 	}
 
@@ -47,6 +48,7 @@ public class Purge extends Thread {
 			while (true) {
 				//Wait for some activity to happen before deleting the mails,
 				// so sleep for sometime
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 				Thread.sleep(250000);
 				//Deleting mails
 				purgeFromInbox(conn);

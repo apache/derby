@@ -179,6 +179,7 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
             throws StandardException
 	{
         B2I btree = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
         if ((temporaryFlag & TransactionController.IS_TEMPORARY) != 0 &&
                 xact_mgr.getAccessManager().isReadOnly())
@@ -192,6 +193,7 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
         }
         else if (xact_mgr.checkVersion(
                 RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
                 RawStoreFactory.DERBY_STORE_MINOR_VERSION_4,
                 null)) 
         {
@@ -280,17 +282,20 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
 
                 throw StandardException.newException(
                     SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     container_key.getContainerId());
             }
 
             // The conglomerate is located in the control row on the root page.
             root = ControlRow.get(container, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(root.getPage().isLatched());
 
             // read the Conglomerate from it's entry in the control row.
             btree = (Conglomerate) root.getConglom(B2I.FORMAT_NUMBER);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5224
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(btree instanceof B2I);
@@ -363,6 +368,7 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
 		// Find the UUID factory.
 		UUIDFactory uuidFactory = 
             getMonitor().getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		// Make a UUID that identifies this conglomerate's format.
 		formatUUID = uuidFactory.recreateUUID(FORMATUUIDSTRING);
@@ -378,6 +384,7 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

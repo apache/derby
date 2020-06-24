@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class WindowList extends QueryTreeNodeVector<WindowDefinitionNode>
 {
     WindowList(ContextManager cm) {

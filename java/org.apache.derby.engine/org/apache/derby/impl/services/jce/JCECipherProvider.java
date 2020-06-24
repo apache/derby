@@ -338,6 +338,8 @@ class JCECipherProvider implements CipherProvider
 		{
 			// should never happen
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT(ise);
 		}
 		catch (GeneralSecurityException gse)

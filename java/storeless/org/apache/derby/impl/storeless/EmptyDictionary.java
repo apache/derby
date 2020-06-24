@@ -155,6 +155,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	public SchemaDescriptor	getSchemaDescriptor(UUID schemaId,
 												int isolationLevel,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3678
 												TransactionController tc)
 			throws StandardException {
 		// Auto-generated method stub
@@ -162,6 +163,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public boolean existsSchemaOwnedBy(String authid,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 									   TransactionController tc)
 			throws StandardException {
 		// Auto-generated method stub
@@ -199,6 +201,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public void	dropRoleGrant(String roleName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 							  String grantee,
 							  String grantor,
 							  TransactionController tc)
@@ -219,6 +223,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public RoleClosureIterator createRoleClosureIterator
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
 		(TransactionController tc,
 		 String role,
 		 boolean inverse
@@ -259,6 +264,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 
 	public RoleGrantDescriptor getRoleGrantDescriptor(String roleName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 													  String grantee,
 													  String grantor)
 		throws StandardException {
@@ -267,6 +273,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public boolean existsGrantToAuthid(String authId,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 									   TransactionController tc)
 			throws StandardException {
 		// Auto-generated method stub
@@ -274,6 +281,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public TableDescriptor getTableDescriptor(String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 			SchemaDescriptor schema, TransactionController tc) throws StandardException {
 		// Auto-generated method stub
 		return null;
@@ -503,12 +511,14 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public void invalidateAllSPSPlans(LanguageConnectionContext lcc) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5578
 			throws StandardException{
 		// Auto-generated method stub
 
 	}
 
 	public int[] examineTriggerNodeAndCols(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
 			Visitable actionStmt,
 			String oldReferencingName,
 			String newReferencingName,
@@ -526,6 +536,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public String getTriggerActionString(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 			Visitable actionStmt,
 			String oldReferencingName,
 			String newReferencingName,
@@ -536,6 +547,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 			TableDescriptor td,
 			int triggerEventMask,
             boolean createTriggerTime,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
             List<int[]> replacements,
             int[] cols)
 	throws StandardException {
@@ -576,6 +588,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
     @SuppressWarnings("UseOfObsoleteCollectionType")
     public Hashtable<Long, ConglomerateDescriptor>
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         hashAllConglomerateDescriptorsByNumber(TransactionController tc)
             throws StandardException {
 		// Auto-generated method stub
@@ -700,6 +713,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
     public List<AliasDescriptor> getRoutineList(String schemaID,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                                 String routineName,
                                                 char nameSpace)
             throws StandardException {
@@ -787,6 +802,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
     }
                
     public void getCurrentValueAndAdvance
+//IC see: https://issues.apache.org/jira/browse/DERBY-5687
+//IC see: https://issues.apache.org/jira/browse/DERBY-4437
         ( String sequenceUUIDstring, NumberDataValue returnValue )
         throws StandardException
     {
@@ -812,6 +829,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public NumberDataValue getSetAutoincrementValue(RowLocation rl,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5687
+//IC see: https://issues.apache.org/jira/browse/DERBY-4437
 			TransactionController tc, boolean doUpdate,
 			NumberDataValue newValue, boolean wait) throws StandardException {
 		// TODO Auto-generated method stub
@@ -874,6 +893,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
     public boolean isReadOnlyUpgrade() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return false;
     }
 
@@ -981,11 +1001,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
     }
 
     public void dropAllPermDescriptors(UUID objectID, TransactionController tc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             throws StandardException {
         // Auto-generated method stub
     }
 
     public IndexStatisticsDaemon getIndexStatsRefresher(boolean asDaemon) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4936
         return null;
     }
 
@@ -1002,6 +1024,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
     }
 
     public DependableFinder getDependableFinder(int formatId) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return null;
     }
 

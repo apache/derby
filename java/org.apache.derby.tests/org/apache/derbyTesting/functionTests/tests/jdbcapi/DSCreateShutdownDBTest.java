@@ -33,6 +33,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     static final String[] ADDITIONAL_DBS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         "dscreateconatdb1",
         "dscreateshutdowndb1", 
         "dscreateshutdowndb2",
@@ -53,6 +54,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DSCreateShutdownDBTest");
         Test test = TestConfiguration.defaultSuite(DSCreateShutdownDBTest.class);        
         //Test test = TestConfiguration.clientServerSuite(DSCreateShutdownDBTest.class);
@@ -75,6 +77,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         // attempt to get rid of any databases. 
         // only 5 dbs (in addition to defaultdb) should actually get
         // created, but just in case, try all...
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         TestConfiguration conf = TestConfiguration.getCurrent();
         for (int i = 0; i < ADDITIONAL_DBS.length; i++) {
             removeDirectory(conf.getDatabasePath("emb" + ADDITIONAL_DBS[i]));
@@ -108,9 +111,11 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         assertNotSetAndGet(dbName, "shutdownDatabase", "false");
         assertNotSetAndGet(dbName, "createDatabase", "false");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         assertReset(dbName);
         
         // check that create using ConnAttributes works
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         assertCreateUsingConnAttrsOK(composeDatabaseName(ADDITIONAL_DBS[0]));
         
         // check that shutting down using ConnAttributes works
@@ -137,6 +142,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         // what happens when you combine create and shutdown connattr?
         // database does not get created.
         assertShutdownAndCreateConnAttr(DBNotFoundState, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
             composeDatabaseName(ADDITIONAL_DBS[3]), 
             "shutdown=true;create=true");
         assertShutdownAndCreateConnAttr(DBNotFoundState, 
@@ -182,6 +188,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
     }
     
     protected void assertReset(String dbName) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
     throws SQLException {
         DataSource ds = JDBCDataSource.getDataSourceLogical(dbName);
 
@@ -259,6 +266,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
     
     // for completeness' sake, test create=true conn attr.
     protected void assertCreateUsingConnAttrsOK(String dbName)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
     throws SQLException {
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         JDBCDataSource.setBeanProperty(
@@ -337,6 +345,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     protected void assertConflictedSetterConnAttrOK() 
     throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         assertConSetOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[6]), 
             "shutdown=true", "CreateDatabase", "create");
         // with the new networkserver methods, this actually works...

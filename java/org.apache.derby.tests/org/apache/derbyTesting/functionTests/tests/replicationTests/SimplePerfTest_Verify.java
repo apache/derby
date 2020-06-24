@@ -57,6 +57,7 @@ public class SimplePerfTest_Verify extends BaseJDBCTestCase
         dbPath = System.getProperty("test.dbPath", "wombat");
         tuplesToInsert= Integer.parseInt(System.getProperty("test.inserts", "0"));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("SimplePerfTest_Verify");
         
         suite.addTest(SimplePerfTest_Verify.suite(masterHostName, masterPortNo, dbPath));
@@ -79,6 +80,7 @@ public class SimplePerfTest_Verify extends BaseJDBCTestCase
      */
     public void testVerify()
         throws SQLException, IOException, InterruptedException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                ClassNotFoundException, IllegalAccessException, InstantiationException,
                NoSuchMethodException, InvocationTargetException
     {
@@ -100,6 +102,7 @@ public class SimplePerfTest_Verify extends BaseJDBCTestCase
     }
     private Connection clientConnection(String hostName, int portNo, String dbPath)
             throws SQLException, ClassNotFoundException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    InstantiationException, NoSuchMethodException,
                    InvocationTargetException
     {
@@ -109,6 +112,7 @@ public class SimplePerfTest_Verify extends BaseJDBCTestCase
             Class<?> clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
             ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             ds = new BasicClientDataSource40();
         }
 

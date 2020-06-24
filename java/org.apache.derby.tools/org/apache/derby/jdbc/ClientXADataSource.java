@@ -52,6 +52,7 @@ import org.apache.derby.client.ClientXADataSourceInterface;
  */
 public class ClientXADataSource
     extends ClientDataSource implements ClientXADataSourceInterface {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
 
     public static final String className__ = "org.apache.derby.jdbc.ClientXADataSource";
 
@@ -64,6 +65,7 @@ public class ClientXADataSource
 
     @Override
     public XAConnection getXAConnection() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         return getXAConnectionMinion();
     }
 
@@ -74,6 +76,9 @@ public class ClientXADataSource
 
     /** Added by Java 9 */
     public ShardingKeyBuilder createShardingKeyBuilder()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
         throws SQLException
     {
         throw new java.sql.SQLFeatureNotSupportedException();

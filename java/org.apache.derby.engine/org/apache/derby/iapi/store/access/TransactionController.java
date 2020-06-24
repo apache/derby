@@ -305,11 +305,13 @@ public interface TransactionController
 		long conglomId = tc.createConglomerate(
 			"heap", // we're requesting a heap conglomerate
 			template, // a populated template is required for heap and btree.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             null, // no column order
             null, // default collation order for all columns
 			null, // default properties
 			0); // not temporary
 	</pre></blockquote>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
     Each implementation of a conglomerate takes a possibly different set
     of properties.  The "heap" implementation currently takes no properties.
@@ -386,6 +388,7 @@ public interface TransactionController
 	Ascending order.
 
     @param collationIds Specifies the collation id of each of the columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     in the new conglomerate.  Collation id along with format id may be used
     to create DataValueDescriptor's which may subsequently be used for
     comparisons.  For instance the correct collation specific order and
@@ -420,6 +423,7 @@ public interface TransactionController
 
 	All temporary conglomerate is removed by store when the
 	conglomerate controller is destroyed, or if it is dropped by an explicit
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	dropConglomerate.  If Derby reboots, all temporary
 	conglomerates are removed.
 
@@ -454,6 +458,7 @@ public interface TransactionController
     For now, use "BTREE" or "heap" for a local access manager.
 
     @param template A row which describes the prototypical
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 	row that the conglomerate will be holding.
 	Typically this row gives the conglomerate
 	information about the number and type of
@@ -501,6 +506,7 @@ public interface TransactionController
     Properties              properties,
     int                     temporaryFlag,
     RowLocationRetRowSource rowSource,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 	long[]                  rowCount)
     throws StandardException;
 
@@ -549,6 +555,7 @@ public interface TransactionController
 	Ascending order.
 
     @param collationIds Specifies the collation id of each of the columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     in the new conglomerate.  Collation id along with format id may be used
     to create DataValueDescriptor's which may subsequently be used for
     comparisons.  For instance the correct collation specific order and
@@ -626,6 +633,7 @@ public interface TransactionController
     public void addColumnToConglomerate(
     long        conglomId, 
     int         column_id, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Storable    template_column,
     int         collation_id)
 		throws StandardException;
@@ -990,6 +998,7 @@ public interface TransactionController
 	<blockquote><pre>
 	  x: 1 3 4 4 4 5 5 5 6 7 9
 	  y: 1 1 2 4 6 2 4 6 1 1 1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	</pre></blockquote>
 	<P>
 	A {start key, search op} pair of {{5.2}, GE} would position on
@@ -1009,6 +1018,7 @@ public interface TransactionController
 	|                   | value | op | value |op | returned     |serialization |
 	+-------------------+-------+----+-------+---+--------------+--------------+
 	| x = 5             | {5}   | GE | {5}   |GT |{5,2} .. {5,6}|{4,6} .. {5,6}|
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	| x &gt; 5             | {5}   | GT | null  |   |{6,1} .. {9,1}|{5,6} .. {9,1}|
 	| x &gt;= 5            | {5}   | GE | null  |   |{5,2} .. {9,1}|{4,6} .. {9,1}|
 	| x &lt;= 5            | null  |    | {5}   |GT |{1,1} .. {5,6}|first .. {5,6}|
@@ -1019,6 +1029,7 @@ public interface TransactionController
 	| x = 5  and y &lt; 5  | {5}   | GE | {5,5} |GE |{5,2} .. {5,4}|{4,6} .. {5,4}|
 	| x = 2             | {2}   | GE | {2}   |GT | none         |{1,1} .. {1,1}|
 	+-------------------+-------+----+-------+---+--------------+--------------+
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	</pre></blockquote>
 	<P>
 	As the above table implies, the underlying scan may lock
@@ -1068,6 +1079,7 @@ public interface TransactionController
     <blockquote><pre>
     if (qualifier != null)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		for (int and_clause; and_clause &lt; qualifier.length; and_clause++)
 		{
             boolean or_qualifies = false;
@@ -1101,6 +1113,7 @@ public interface TransactionController
     }
     </pre></blockquote>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 	@param conglomId The identifier of the conglomerate
 	to open the scan for.
@@ -1623,6 +1636,7 @@ public interface TransactionController
 	row.
 	<p>
 	So, for the query:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	<blockquote><pre>
 		select a, sum(b)
 		from t
@@ -1748,6 +1762,7 @@ public interface TransactionController
      *
      * @see StoreCostController
      **/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     SortCostController openSortCostController()
 		throws StandardException;
 

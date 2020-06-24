@@ -42,14 +42,18 @@ public class ConnectionHandling {
         new org.apache.derby.jdbc.EmbeddedDriver();
         
         Connection conn = DriverManager.getConnection("jdbc:derby:wombat;create=true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
         conn.close();
         conn = null;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<Connection> list = new ArrayList<Connection>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
         list.ensureCapacity(30000);
         
         Properties p = new Properties();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
         while (true) {
             Connection c;
             try {
@@ -91,9 +95,11 @@ public class ConnectionHandling {
         {
             // Sleep for 10 secs as we know the implementation
             // of the low meory watermark resets after 5 seconds.
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
             if (i == 300)
                 Thread.sleep(10000L);
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
                   Connection c = DriverManager.getConnection("jdbc:derby:wombat", p);
                   list.add(c);
                   ok++;
@@ -121,9 +127,11 @@ public class ConnectionHandling {
         int alreadyClosed = 0;
         for (int i = 0; i < list.size(); i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Connection c = list.set(i, null);
             if (c.isClosed())
                 alreadyClosed++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
             else 
                 c.close();
         }

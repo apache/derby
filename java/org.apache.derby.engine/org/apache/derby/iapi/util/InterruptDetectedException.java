@@ -35,6 +35,7 @@ public class InterruptDetectedException extends StandardException {
     */
 
     public InterruptDetectedException() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         super("intrp.U");
     }
 }

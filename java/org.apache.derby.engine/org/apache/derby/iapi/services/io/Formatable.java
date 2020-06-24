@@ -24,6 +24,7 @@ package org.apache.derby.iapi.services.io;
 import java.io.Externalizable;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
   Derby interface for creating a stored form for
   an object and re-constructing an equivalent object
   from this stored form. The object which creates the

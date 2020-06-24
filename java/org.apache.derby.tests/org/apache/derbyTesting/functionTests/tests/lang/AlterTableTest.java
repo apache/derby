@@ -54,12 +54,14 @@ public final class AlterTableTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("AlterTableTest Test");
         suite.addTest(TestConfiguration.defaultSuite(AlterTableTest.class));
         return TestConfiguration.sqlAuthorizationDecorator(suite);
     }
 
     private void createTestObjects(Statement st) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         CleanDatabaseTestSetup.cleanDatabase(conn, false);
@@ -95,6 +97,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
     private void checkWarning(Statement st, String expectedWarning)
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         SQLWarning sqlWarn = (st == null) ?
                 getConnection().getWarnings() : st.getWarnings();
         assertNotNull("Expected warning but found none", sqlWarn);
@@ -163,6 +166,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("alter table t1 add column c4 int check(c4 = 1)");
 
         // Newly-added column does not appear in existing view:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         ResultSet rs = st.executeQuery("select * from v1");
         JDBC.assertColumnNames(rs, new String[]{"C1"});
         JDBC.assertFullResultSet(rs, new String[][]{{"1"}, {"2"}});
@@ -184,6 +188,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // select * prepared statements do see added columns after 
         // alter table
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5459
+//IC see: https://issues.apache.org/jira/browse/DERBY-2402
         rs = pSt.executeQuery();
         JDBC.assertColumnNames(rs, new String[]{"C1", "C2"});
         JDBC.assertFullResultSet(rs, new String[][]{
@@ -200,6 +206,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, new String[][]{{"1", "0"}});
 
         st.executeUpdate("drop table t0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         rollback();
         rs = st.executeQuery(" select  * from t0");
         JDBC.assertColumnNames(rs, new String[]{"C1"});
@@ -270,6 +277,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertUnorderedResultSet(rs, expRS, true);
 
         rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
 
         st.executeUpdate(
                 " create function countopens() returns varchar(128) " +
@@ -277,6 +285,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker." +
                 "countOpens'");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         commit();
         // do consistency check on scans, etc.
 
@@ -894,6 +903,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // Generated identity values cannot grow beyond the limits of
         // the data type.
         s.execute("insert into t0 values 1,2,3,4");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
         assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s,
                 "alter table t0 add column id smallint generated always as "
                 + "identity (start with 30000, increment by 1000)");
@@ -909,6 +921,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                     { "2", "31000" },
                     { "3", "32000" },
                 });
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
         assertStatementError(EXHAUSTED_IDENTITY_COLUMN, s, "insert into t0(c1) values 4");
         rollback();
 
@@ -977,6 +992,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // tr1 is dropped, tr2 still OK
         st.executeUpdate("drop trigger tr1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         ResultSet rs = st.executeQuery("select * from tab5");
         JDBC.assertColumnNames(rs, new String[]{"C1"});
         JDBC.assertDrainResults(rs, 0);
@@ -997,6 +1013,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery("select * from tab2");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         String[] expColNames = {"C1", "C2", "C3", "C4", "C5"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
@@ -1026,6 +1043,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         expColNames = new String[]{"C2", "C3", "C4"};
         JDBC.assertColumnNames(rs, expColNames);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         String[][] expRS = {
                     {"9", "2.5", "88"},
                     {"10", "3.5", "99"},
@@ -1126,6 +1144,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("drop view vw4");
 
         rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
 
         // check that dropping a column will drop backing index on 
         // referencing table
@@ -1157,6 +1176,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "t.tablename = 'REFTT1'");
         JDBC.assertSingleValueResultSet(rs, "1");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         rollback();
     }
 
@@ -1205,6 +1226,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         //duplicating a key value in a primary key not allowed
         assertStatementError("23505", st, "insert into t0_1 values (1, 1)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         ResultSet rs = st.executeQuery("select * from t0_1");
         JDBC.assertColumnNames(rs, new String[]{"C1", "C2"});
         JDBC.assertFullResultSet(rs, new String[][]{{"1", "1"}});
@@ -1275,9 +1297,11 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
                 " select * from t0_1");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         String[] expColNames = {"C1", "C2"};
         JDBC.assertColumnNames(rs, expColNames);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         String[][] expRS = {
                     {"1", "1"},
                     {"2", "2"},
@@ -1357,6 +1381,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         assertCompileError("42Y55", "alter table xxx add check(c2 = 1)");
         st.executeUpdate("create table xxx(c1 int, c2 int)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         PreparedStatement pSt =
                 prepareStatement("alter table xxx add check(c2 = 1)");
         assertUpdateCount(pSt, 0);
@@ -1373,6 +1398,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery(
                 "select tablename, " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                 "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + DerbyConstants.TEST_DBO +
                 "', tablename) from " + "sys.systables where tabletype = 'T'");
 
@@ -1436,8 +1462,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // verify the consistency of the indexes on the user tables
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         ResultSet rs = st.executeQuery(
                 "select tablename, " + "SYSCS_UTIL.SYSCS_CHECK_TABLE('" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                 DerbyConstants.TEST_DBO + "', tablename) from " +
                 "sys.systables where tabletype = 'T' and tablename = 'T0_1'");
 
@@ -1452,6 +1480,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // verify that alter table works after drop/recreate of table
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         PreparedStatement pSt =
                 prepareStatement("alter table t0_1 drop constraint p2");
 
@@ -1507,6 +1536,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery(
                 "select tablename, " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                 "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + DerbyConstants.TEST_DBO +
                 "', tablename) from " + "sys.systables where tabletype = 'T'");
 
@@ -1598,12 +1629,14 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // schemaname should be DerbyConstants.TEST_DBO
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         ResultSet rs = st.executeQuery(
                 "select schemaname, constraintname from " +
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1");
 
         JDBC.assertFullResultSet(rs, new String[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                     {DerbyConstants.TEST_DBO, "P1"},
                     {DerbyConstants.TEST_DBO, "NEWCONS"}
                 });
@@ -1614,6 +1647,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 " alter table x drop constraint " +
                 DerbyConstants.TEST_DBO + ".newcons");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
 
         st.executeUpdate(
                 " alter table x add constraint newcons primary key (x)");
@@ -1639,6 +1673,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 "alter table x drop constraint " +
                 DerbyConstants.TEST_DBO + ".newcons");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
 
         // bad schema name(table x is not in the same schema of constraint)
         assertStatementError("42X85", st,
@@ -1659,6 +1694,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1");
         JDBC.assertFullResultSet(rs, new String[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                     {DerbyConstants.TEST_DBO, "P1"},
                     {DerbyConstants.TEST_DBO, "CON"}
                 });
@@ -1675,6 +1711,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1");
         JDBC.assertFullResultSet(rs, new String[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                     {DerbyConstants.TEST_DBO, "P1"},
                     {DerbyConstants.TEST_DBO, "CON"}
                 });
@@ -1684,6 +1721,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // add constraint, default to table schema
 
         st.executeUpdate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                 "alter table " + DerbyConstants.TEST_DBO +
                 ".x add constraint con2 check (x > 1)");
 
@@ -1695,6 +1733,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1,2");
         JDBC.assertFullResultSet(rs, new String[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                     {DerbyConstants.TEST_DBO, "CON"},
                     {DerbyConstants.TEST_DBO, "CON2"},
                     {DerbyConstants.TEST_DBO, "P1"}
@@ -1735,6 +1774,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into t1 values (1, 1)");
 
         ResultSet rs = st.executeQuery("select * from t1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
 
         String[] expColNames = {"C1", "C2"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1764,10 +1804,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 " alter table t1 add constraint C1_PLUS_C2 check " +
                 "((c1 + c2) < 100)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         PreparedStatement pSt = prepareStatement(
                 "alter table t1 drop constraint C1_PLUS_C2");
 
         st.executeUpdate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                 " alter table " + DerbyConstants.TEST_DBO +
                 ".t1 drop constraint " + DerbyConstants.TEST_DBO +
                 ".C1_PLUS_C2");
@@ -1895,6 +1937,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
      * @throws SQLException if a database error occurs
      */
     private void testAlterColumnNullability(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
             Statement st, boolean standardSyntax) throws SQLException {
         final String setNotNull = standardSyntax ? "SET NOT NULL" : "NOT NULL";
         final String dropNotNull = standardSyntax ? "DROP NOT NULL" : "NULL";
@@ -1909,6 +1952,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into atmcn_1 values (1,1)");
 
         ResultSet rs = st.executeQuery("select * from atmcn_1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
 
         String[] expColNames = {"A", "B"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1920,6 +1964,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
 
         st.executeUpdate("alter table atmcn_1 alter column a " + setNotNull);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         // should fail because a cannot be null
 
@@ -1940,6 +1985,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
         st.executeUpdate("alter table atmcn_1 alter column b " + dropNotNull);
         st.executeUpdate("insert into atmcn_1 (a) values (1)");
 
@@ -1961,6 +2007,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         assertStatementError("X0Y80", st,
                 "alter table atmcn_1 alter column b " + setNotNull);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         // show that a column which is part of the PRIMARY KEY 
         // cannot be modified NULL
@@ -1971,6 +2018,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         assertStatementError("42Z20", st,
                 " alter table atmcn_2 alter column a " + dropNotNull);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         st.executeUpdate(
                 " create table atmcn_3 (a integer not null, b " +
@@ -1982,6 +2030,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         assertStatementError("42Z20", st,
                 " alter table atmcn_3 alter column b " + dropNotNull);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         // verify that the keyword "column" in the ALTER TABLE ... 
         // ALTER COLUMN ... statement is optional:
@@ -1990,6 +2039,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "create table atmcn_4 (a integer not null, b integer)");
 
         st.executeUpdate("alter table atmcn_4 alter a " + dropNotNull);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         //set column, part of unique constraint, to null
 
@@ -1998,6 +2048,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "not null unique)");
 
         st.executeUpdate("alter table atmcn_5 alter column b " + dropNotNull);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         // SET NOT NULL on an already not nullable column, or DROP NOT NULL
         // on an already nullable column, should be a no-op.
@@ -2052,6 +2103,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into atmod_1 (b) values ('b')");
 
         ResultSet rs = st.executeQuery("select * from atmod_1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         JDBC.assertColumnNames(rs, new String[]{"A", "B"});
 
@@ -2149,6 +2201,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         st.executeUpdate("rename column renc_2.c1 to c2");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         DatabaseMetaData dbmd = getConnection().getMetaData();
         rs = dbmd.getColumns(null, null, "RENC_2", "C2");
         assertTrue(rs.next());
@@ -2163,6 +2216,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertFalse(rs.next());
 
         if (usingEmbedded()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
             dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_2", false, false);
             assertTrue(rs.next());
@@ -2192,6 +2246,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 "rename column renc_3.b to newbie");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         dbmd = getConnection().getMetaData();
         rs = dbmd.getColumns(null, null, "RENC_3", "NEWBIE");
         assertTrue(rs.next());
@@ -2206,6 +2261,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertFalse(rs.next());
 
         if (usingEmbedded()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
             dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_3", false, false);
             assertTrue(rs.next());
@@ -2253,6 +2309,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "rename column renc_4.c1 to unq_c1");
         
         if (usingEmbedded()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
             dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_4", false, false);
             assertTrue(rs.next());
@@ -2278,6 +2335,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "rename column renc_5.c5 to unq_c5");
         
         if (usingEmbedded()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
             dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_5", false, false);
             assertTrue(rs.next());
@@ -2389,6 +2447,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // prepared statement on it. The rename of the column will 
         // be successful; the open statement will get errors when 
         // it tries to re-execute.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         setAutoCommit(false);
         PreparedStatement pSt =
                 prepareStatement("select * from renc_6 where a = ?");
@@ -2402,6 +2461,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         }
         rs = pSt.executeQuery();
         String[] expColNames = {"A", "BB_GUN", "C"};
+//IC see: https://issues.apache.org/jira/browse/DERBY-6644
 
         JDBC.assertColumnNames(rs, expColNames);
 
@@ -2422,6 +2482,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "42X04", pSt);
 
         setAutoCommit(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
 
         // Demonstrate that you cannot rename a column in a 
         // synonym, and demonstrate that renaming a column in the 
@@ -2482,6 +2543,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // cause the following test to fail. Right now, the following
         // test accepts the incorrect metadata length obtained through
         // the resultset's metadata after ALTER TABLE has been performed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         setAutoCommit(false);
         //Create table and load data
         st.executeUpdate(
@@ -2492,6 +2554,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         	ps.setInt(1, i); 
         	ps.executeUpdate(); 
     	} 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         commit();
         //Open a resultset on the table which will be altered because
         // the resultset has been exhausted. The alter table will fail
@@ -2809,6 +2872,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(st.executeQuery(" select * from atdc_1"),
                 new String[][]{{"1", "1"}});
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         ResultSet rs =
                 st.executeQuery(
                 " select columnname,columnnumber,columndatatype from " +
@@ -2926,6 +2990,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 " alter table atdc_1_02 drop column a cascade");
 
         if (usingEmbedded()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
             checkWarning(st, "01500");
         }
 
@@ -3145,6 +3210,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         rs =
                 st.executeQuery("select * from atdc_vw_1");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         String[] expColNames = {"VW_B"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
@@ -3182,6 +3248,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // drop column restrict should fail because trigger is defined to 
         // fire on the update of the column. But cascade should succeed
         // and drop the dependent trigger
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         createTableAndInsertData(st, "ATDC_6", "A", "B");
         sysdependsRowCountBeforeCreateTrigger = numberOfRowsInSysdepends(st);
         st.executeUpdate(
@@ -3201,6 +3269,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(st.executeQuery(
                 " select triggername from sys.systriggers where " +
                 "triggername='ATDC_6_TRIGGER_1'"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
         		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
         st.executeUpdate("drop table ATDC_6");
@@ -3228,6 +3298,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(st.executeQuery(
                 " select triggername from sys.systriggers where " +
                 "triggername='ATDC_11_TRIGGER_1'"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
         		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
         st.executeUpdate("drop table ATDC_11");
@@ -3246,6 +3318,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 " REFERENCING NEW AS newt OLD AS oldt "+
                 " for each row select oldt.b from atdc_12");
         sysdependsRowCountAfterCreateTrigger = numberOfRowsInSysdepends(st);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
 
         // We got an error because Derby detected the dependency of 
         // the triggers
@@ -3265,6 +3339,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(st.executeQuery(
         		" select triggername from sys.systriggers where " +
         		"triggername in ('ATDC_12_TRIGGER_1', 'ATDC_12_TRIGGER_2')"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
         		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
         st.executeUpdate("drop table ATDC_12");
@@ -3297,6 +3373,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 " REFERENCING OLD AS oldt "+
                 " for each row select oldt.b from atdc_13");
         sysdependsRowCountAfterCreateTrigger = numberOfRowsInSysdepends(st);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
 
         assertStatementError("X0Y25", st,
         		"alter table atdc_13 drop column b restrict");
@@ -3304,6 +3382,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             	{"ATDC_13_TRIGGER_2"}, {"ATDC_13_TRIGGER_3"},
             	{"ATDC_13_TRIGGER_4"}, {"ATDC_13_TRIGGER_5"},
             	{"ATDC_13_TRIGGER_6"}});
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
         		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
         
@@ -3316,6 +3396,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         		"'ATDC_13_TRIGGER_2', 'ATDC_13_TRIGGER_3'," +
         		"'ATDC_13_TRIGGER_4', 'ATDC_13_TRIGGER_5'," +
         		"'ATDC_13_TRIGGER_6')"));        
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
         		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
         st.executeUpdate("drop table ATDC_13");
@@ -3335,6 +3417,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             st.executeQuery(" select * from atdc_16_tab2");
         JDBC.assertFullResultSet(rs, new String[][]{{"1","11","111"}});
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         sysdependsRowCountBeforeCreateTrigger = numberOfRowsInSysdepends(st);
         st.executeUpdate(
                 " create trigger atdc_16_trigger_1 " +
@@ -3358,6 +3442,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         rs =
             st.executeQuery(" select * from atdc_16_tab2");
         JDBC.assertFullResultSet(rs, new String[][]{{"1","11","333"}});
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
               		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
         st.executeUpdate("drop table ATDC_16_TAB1");
@@ -3723,6 +3809,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             st.executeQuery(" select * from atdc_15_tab2");
         JDBC.assertFullResultSet(rs, new String[][]{{"1","22"}});
         st.executeUpdate("alter table atdc_15_tab1 drop column a1 restrict");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
         		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
         st.executeUpdate("update atdc_15_tab1 set b1=33");
@@ -3734,6 +3822,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, new String[][]{{"1","33"}});
         st.executeUpdate("drop table ATDC_15_TAB1");
         st.executeUpdate("drop table ATDC_15_TAB2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
 
         st.executeUpdate(
                 " create table atdc_7 (a int, b int, c int, primary key (a))");
@@ -3769,6 +3859,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 st.executeQuery(
                 " select GRANTEE,GRANTOR,TYPE,COLUMNS from sys.syscolperms");
         JDBC.assertFullResultSet(rs, new String[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                     {"BRYAN", DerbyConstants.TEST_DBO, "s", "{0, 1, 2}"}
                 });
 
@@ -3788,6 +3879,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 st.executeQuery(
                 " select GRANTEE,GRANTOR,TYPE,COLUMNS from sys.syscolperms");
         JDBC.assertFullResultSet(rs, new String[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                     {"BRYAN", DerbyConstants.TEST_DBO, "s", "{0, 1}"}
                 });
 
@@ -3843,6 +3936,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
     //Create table and insert data necessary for ALTER TABLE DROP COLUMN test
     private void createTableAndInsertData(Statement s, String tableName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5079
+//IC see: https://issues.apache.org/jira/browse/DERBY-4984
     		String column1, String column2)
     throws SQLException {
         s.execute("CREATE TABLE " + tableName + " (" + 
@@ -3968,6 +4063,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "Message_Data_ID INTEGER NOT NULL , CONSTRAINT " +
                 "d3177_MESSAGES_id_pk PRIMARY KEY(id) )");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         ResultSet rs =
                 st.executeQuery(
                 " select COLUMNNAME, COLUMNNUMBER, COLUMNDATATYPE, " +
@@ -4115,6 +4212,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 " alter table D3177_messages drop column message_data_id");
         checkWarning(st, "01500");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
 
         st.executeUpdate("drop table d3177_BinaryData");
         assertUpdateCount(st, 1, "update d3177_SchemaVersion set version=6");
@@ -4268,6 +4366,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
     
     public void testJira4256() throws SQLException{
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4256
         Statement st = createStatement();
         createTestObjects(st);
         
@@ -4278,6 +4377,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         InputStream stream;
                
         st.executeUpdate("create table clob_tab(c1 int,clob_col clob(10K))");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         commit();
         
         PreparedStatement pSt =
@@ -4290,6 +4390,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertStatementError("XJ001", pSt);
         pSt.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         rollback();
         
         st.executeUpdate("ALTER TABLE clob_tab ALTER COLUMN "
@@ -4310,6 +4411,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("CREATE TABLE blob_tab ( C1 INTEGER," +
                                 "blob_col BLOB(10K) NOT NULL)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         commit();
         
         pSt = prepareStatement("INSERT INTO blob_tab values (?,?)");
@@ -4321,6 +4423,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertStatementError("22001", pSt);
         pSt.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         rollback();
         
         st.executeUpdate("ALTER TABLE blob_tab ALTER COLUMN "
@@ -4344,6 +4447,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
      * name contains a double quote character.
      */
     public void testDerby5157_addColumnWithDefaultValue() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5157
         setAutoCommit(false);
         Statement s = createStatement();
         s.execute("create schema \"\"\"\"");
@@ -4535,6 +4639,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         ps.setBytes( 5, after_4 );
         ps.executeUpdate();
         vetBytes_5679( conn, afterRow );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5713
         rollback();
         conn.setAutoCommit( true );
 
@@ -4856,6 +4961,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
     public void test_6961_setCycle() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
 
         // SMALLINT
         vet_6961_cycling

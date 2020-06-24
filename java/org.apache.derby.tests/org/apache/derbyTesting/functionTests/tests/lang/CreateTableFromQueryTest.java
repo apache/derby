@@ -54,6 +54,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      * o.a.dT.ft.tests.replicationTests.StandardTests.
      */
     public static void decorate(Statement stmt)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3163
          throws SQLException
     {
         // create base tables t1 and t2
@@ -74,6 +75,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
 
             protected void decorateSQL(Statement stmt) throws SQLException
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3163
                 decorate(stmt);
             }
         };
@@ -185,6 +187,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
     public void testDerby6956() throws Exception
     {
         Statement stmt = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6956
 
         stmt.executeUpdate(
             "CREATE TABLE DERBYTEST6956 " +
@@ -270,6 +273,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testBaseTableDoesNotExist() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         assertStatementError("42X05", createStatement(),
             "create table t3 as select * from t4 with no data");
     }
@@ -280,6 +284,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testParametersNotAllowed() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         assertStatementError("42X99", createStatement(),
             "create table t3 as select * from t1 where i = ? with no data");
     }
@@ -290,6 +295,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testDuplicateColumnName() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         assertStatementError("42X12", createStatement(),
             "create table t3 (c1,c2,c1) "
                 + "as select i, s, f from t1 with no data");
@@ -302,6 +308,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testColumnCountMismatch() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         assertStatementError("42X70", createStatement(),
             "create table t3 (c1,c2,c3) as select i,s from t1 with no data");
     }
@@ -313,6 +320,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testSystemGeneratedColumnName() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         assertStatementError("42909", createStatement(),
             "create table t3 as select i, 2*i from t1 with no data");
     }
@@ -323,6 +331,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testNullValues() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         assertStatementError("42X07", createStatement(),
             "create table t3 (x) as values null with no data");
     }
@@ -333,6 +342,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testUnimplementedWithDataClause() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         assertStatementError("0A000", createStatement(),
             "create table t3 as select * from t1 with data");
     }
@@ -343,6 +353,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
     public void testInvalidDataType() throws Exception
     {
         Statement stmt = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
 
         // USER (Java Object)
         assertStatementError("42X71", stmt,
@@ -357,6 +368,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
             String [] nullability, String [] types) throws Exception
     {
         Statement stmt = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
 
         // create table
         stmt.executeUpdate(sql);
@@ -374,6 +386,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
                     types[col], rs.getString("TYPE_NAME"));
             col++;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         rs.close();
         Assert.assertEquals("Unexpected column count:",
                 columnNames.length, col);
@@ -385,6 +398,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     protected void setUp() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5706
         setAutoCommit(false);
     }
 }

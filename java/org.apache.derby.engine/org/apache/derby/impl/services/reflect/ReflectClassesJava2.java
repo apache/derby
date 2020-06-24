@@ -25,10 +25,12 @@ import org.apache.derby.iapi.sql.compile.CodeGeneration;
 import org.apache.derby.iapi.util.ByteArray;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6654
 	Reflect loader with Privileged block for Java 2 security. 
 */
 
 public class ReflectClassesJava2 extends DatabaseClasses
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	implements java.security.PrivilegedAction<Object>
 {
 
@@ -37,10 +39,12 @@ public class ReflectClassesJava2 extends DatabaseClasses
 	private int action = -1;
 
 	synchronized LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 		if (classDump == null || classDump.getArray() == null) {
 
 			if (preCompiled == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				preCompiled = new java.util.HashMap<String,ReflectGeneratedClass>();
 			else
 			{
@@ -52,6 +56,7 @@ public class ReflectClassesJava2 extends DatabaseClasses
 			// not a generated class, just load the class directly.
 			try {
 				Class jvmClass = Class.forName(fullyQualifiedName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5935
 				ReflectGeneratedClass gc = new ReflectGeneratedClass(this, jvmClass);
 				preCompiled.put(fullyQualifiedName, gc);
 				return gc;
@@ -62,6 +67,7 @@ public class ReflectClassesJava2 extends DatabaseClasses
 
         // Generated class. Make sure that it lives in the org.apache.derby.exe package
         int     lastDot = fullyQualifiedName.lastIndexOf( "." );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6654
         String  actualPackage;
         if ( lastDot < 0 ) { actualPackage = ""; }
         else
@@ -80,6 +86,7 @@ public class ReflectClassesJava2 extends DatabaseClasses
 
 	public final Object run() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
 		try {
 			// SECURITY PERMISSION - MP2
 			switch (action) {
@@ -111,6 +118,7 @@ public class ReflectClassesJava2 extends DatabaseClasses
 	    // (the classLoader that loaded Derby). 
 	    // So we call Class.forName to ensure that we find the class.
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
         	ClassLoader cl;
         	synchronized(this) {
         	  action = 2;

@@ -52,6 +52,8 @@ public class BasicInMemoryDbTest
      */
     private static final MemoryDbManager dbm =
             MemoryDbManager.getSharedInstance();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4436
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
 
     public BasicInMemoryDbTest(String name) {
         super(name);
@@ -66,6 +68,7 @@ public class BasicInMemoryDbTest
     public void tearDown()
             throws Exception {
         dbm.cleanUp();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5107
         super.tearDown();
     }
 
@@ -114,6 +117,8 @@ public class BasicInMemoryDbTest
     public void testCreateBackupBootRestore()
             throws IOException, SQLException {
         // 1. Create the database with the in-memory protocol.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4436
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
         Connection memCon = dbm.createDatabase("newMemDb");
         // Make sure the database is newly created.
         assertNull(memCon.getWarnings());
@@ -175,6 +180,8 @@ public class BasicInMemoryDbTest
 
         // 5. Restore modified backup into memory.
         memCon = dbm.getConnection("newMemDb2;createFrom=" + dbPathBackedUp);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4436
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
 
         // 6. Verify the new content, where the original in-memory database was
         //    backed up and the directory protocol was used to add one more row
@@ -197,7 +204,10 @@ public class BasicInMemoryDbTest
      * @throws SQLException if something goes wrong
      */
     public void testShutdown()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4093
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4436
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
         dbm.createDatabase("/tmp/myDB");
         try {
             DriverManager.getConnection(
@@ -218,6 +228,7 @@ public class BasicInMemoryDbTest
      */
     public void testEnginehutdown()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5107
         dbm.createDatabase("/tmp/myDB");
         try {
             DriverManager.getConnection(
@@ -238,9 +249,12 @@ public class BasicInMemoryDbTest
      * @throws SQLException if something goes wrong
      */
     public void testBootSameDbDifferentSubSubProtocol()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4171
             throws SQLException {
         final String dbName = "BSDDSSP";
         // Connect to the in-memory database and create a table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4436
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
         Connection con1 = dbm.createDatabase(dbName);
         Statement stmt1 = dbm.createStatement(con1);
         stmt1.execute("create table t (text varchar(255))");
@@ -270,7 +284,10 @@ public class BasicInMemoryDbTest
      * @throws SQLException if something else goes wrong
      */
     public void testDelete()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4436
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5107
             loadDriver();
             Connection conCreate = DriverManager.getConnection(
                     "jdbc:derby:memory:deleteDbSimple;create=true");
@@ -303,6 +320,7 @@ public class BasicInMemoryDbTest
             // Delete the database.
             try {
                 DriverManager.getConnection(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
                     "jdbc:derby:memory:deleteDbSimple;drop=true");
                 fail("Dropping database should have raised exception.");
             } catch (SQLException sqle) {
@@ -321,6 +339,8 @@ public class BasicInMemoryDbTest
      */
     public void testDeleteWhenInUse()
             throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5107
+//IC see: https://issues.apache.org/jira/browse/DERBY-5107
         loadDriver();
         Connection con = DriverManager.getConnection(
                 "jdbc:derby:memory:deleteDb;create=true");
@@ -382,6 +402,7 @@ public class BasicInMemoryDbTest
 
     public static Test suite() {
         // Run only in embedded-mode for now.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new SupportFilesSetup(
             new BaseTestSuite(BasicInMemoryDbTest.class));
     }

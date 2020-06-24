@@ -44,6 +44,7 @@ public class RolesDependencyTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         Test test = new BaseTestSuite(RolesDependencyTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Populate database with data as DBO
         test = new CleanDatabaseTestSetup(test) {

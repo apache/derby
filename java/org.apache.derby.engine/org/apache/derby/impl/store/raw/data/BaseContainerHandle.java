@@ -52,6 +52,7 @@ import java.util.Properties;
 /**
 	A handle to an open container, implememts RawContainerHandle.
 	<P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	This class is a DerbyObserver to observe RawTransactions
 	and is also a DerbyObservable to
 	handle the list of pages accessed thorough this handle.
@@ -63,6 +64,7 @@ import java.util.Properties;
 */
 
 public class BaseContainerHandle extends DerbyObservable 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     implements RawContainerHandle, DerbyObserver 
 {
 
@@ -186,6 +188,7 @@ public class BaseContainerHandle extends DerbyObservable
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 		Release free space to the OS.
 		<P>
         As is possible release any free space to the operating system.  This
@@ -209,6 +212,7 @@ public class BaseContainerHandle extends DerbyObservable
 	 */
 	public long getReusableRecordIdSequenceNumber() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
 		checkOpen();
 		
 		return container.getReusableRecordIdSequenceNumber();
@@ -373,6 +377,7 @@ public class BaseContainerHandle extends DerbyObservable
 	}
 
 	public Page getPageForCompress(int flag, long pageno) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 		 throws StandardException
 	{
 		checkUpdateOpen();
@@ -412,6 +417,7 @@ public class BaseContainerHandle extends DerbyObservable
 
         // notify our observers (Pages) that we are closing ...
         informObservers();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2141
 
         active = false;
 
@@ -1027,6 +1033,7 @@ public class BaseContainerHandle extends DerbyObservable
      */
 	public void backupContainer(String backupContainerPath) throws StandardException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		checkOpen();
 		container.backupContainer(this, backupContainerPath);
 	}
@@ -1035,6 +1042,7 @@ public class BaseContainerHandle extends DerbyObservable
 
     /** {@inheritDoc} */
     public void encryptOrDecryptContainer(String newFilePath, boolean doEncrypt)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             throws StandardException {
         checkOpen();
         container.encryptOrDecryptContainer(this, newFilePath, doEncrypt);
@@ -1045,6 +1053,7 @@ public class BaseContainerHandle extends DerbyObservable
     {
         if (SanityManager.DEBUG)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
             String str = "BaseContainerHandle:(" + identity.toString() + ")";
             return(str);
         }

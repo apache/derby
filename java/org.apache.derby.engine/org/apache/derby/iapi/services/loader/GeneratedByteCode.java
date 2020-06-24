@@ -40,6 +40,8 @@ public interface GeneratedByteCode {
 	*/
 	public void initFromContext(Context context)
 		throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-418
+//IC see: https://issues.apache.org/jira/browse/DERBY-1142
 
 	/**
 		Set the Generated Class. Call by the class manager just after

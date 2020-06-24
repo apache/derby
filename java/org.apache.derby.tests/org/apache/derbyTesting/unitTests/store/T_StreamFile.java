@@ -96,6 +96,7 @@ public class T_StreamFile extends T_MultiThreadedIterations {
 	public void boot(boolean create, Properties startParams)
 		 throws StandardException {
 		super.boot(create, startParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		contextService = getContextService();
 	}
 
@@ -131,6 +132,7 @@ public class T_StreamFile extends T_MultiThreadedIterations {
 		startParams = T_Util.setEncryptionParam(startParams);
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 								testService, startParams);
 			if (factory == null) {
@@ -400,12 +402,14 @@ public class T_StreamFile extends T_MultiThreadedIterations {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

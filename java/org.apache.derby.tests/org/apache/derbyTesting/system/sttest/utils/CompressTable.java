@@ -47,6 +47,7 @@ public class CompressTable {
 		Connection conn = null;
 		Date d = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(driver);
         clazz.getConstructor().newInstance();
 		
@@ -80,6 +81,7 @@ public class CompressTable {
 	throws java.lang.Exception {
 		System.out.println("compressing table");
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4213
 			conn.setAutoCommit(true);
 			CallableStatement cs = conn
 				.prepareCall("CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?, ?, ?, ?, ?)");

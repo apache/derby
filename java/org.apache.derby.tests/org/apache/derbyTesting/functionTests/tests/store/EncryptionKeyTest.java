@@ -127,6 +127,7 @@ public abstract class EncryptionKeyTest
             con.rollback();
             con.close();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5724
         con = null;
         super.tearDown();
     }
@@ -264,6 +265,7 @@ public abstract class EncryptionKeyTest
         validateDBContents(con);
         CallableStatement cs = con.prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1001
         cs.setString(1, 
                      new File(SupportFilesSetup.EXTINOUT, "backups").getPath());
         // Perform backup.
@@ -281,6 +283,8 @@ public abstract class EncryptionKeyTest
         // Try to create a new database from backup with the wrong key.
         dbNameRestored = dbName + "RestoreAttemptedWrongKey";
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
             con = getConnection(dbNameRestored, WRONG_KEY,
                     "createFrom=" + backupDbLocation);
             fail("Created database from encrypted backup with wrong key.");
@@ -292,6 +296,8 @@ public abstract class EncryptionKeyTest
         // Try to create a new database from backup with an invalid key.
         dbNameRestored = dbName + "RestoreAttemptedInvalidKey";
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
             con = getConnection(dbNameRestored, INVALID_CHAR_KEY,
                     "createFrom=" + backupDbLocation);
             fail("Created database from encrypted backup with an invalid key.");
@@ -303,6 +309,8 @@ public abstract class EncryptionKeyTest
         // Try to create a new database from backup with an odd length key.
         dbNameRestored = dbName + "RestoreAttemptedOddLengthKey";
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
             con = getConnection(dbNameRestored, ODD_LENGTH_KEY,
                     "createFrom=" + backupDbLocation);
             fail("Created db from encrypted backup with an odd length key.");
@@ -329,6 +337,10 @@ public abstract class EncryptionKeyTest
         assertTrue(con.isClosed());
         // Create a new database from backup again.
         dbNameRestored = dbName + "RestoredOnceMore";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
         con = getConnection(dbNameRestored, CORRECT_KEY,
                 "createFrom=" + backupDbLocation);
         validateDBContents(con);
@@ -373,6 +385,8 @@ public abstract class EncryptionKeyTest
         // the existing database we are trying to restore to/into. This is
         // expected behavior currently, but should maybe change?
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
             con = getConnection(dbNameRestored, INVALID_CHAR_KEY,
                     ";restoreFrom=" + obtainDbName(dbName, null));
             fail("Restored database with an invalid key.");
@@ -443,6 +457,7 @@ public abstract class EncryptionKeyTest
      * @return A string with the absolute path to the database.
      * @see SupportFilesSetup
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     String obtainDbName(String dbName, String subdirectory) {
         File tmp = new File(dbName);
         if (subdirectory != null) {
@@ -476,6 +491,8 @@ public abstract class EncryptionKeyTest
         shutdown(sourceDb);
         confirmNonBootedDB(sourceDb);
         // Use the restoreFrom attribute.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
         con = getConnection(targetDb, CORRECT_KEY,
                 ";restoreFrom=" + obtainDbName(sourceDb, "backups"));
         validateDBContents(con);
@@ -567,6 +584,7 @@ public abstract class EncryptionKeyTest
         str.append(";");
         JDBCDataSource.setBeanProperty(
                 ds, "connectionAttributes", str.toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2555
         return ds.getConnection();
     }
 
@@ -606,6 +624,7 @@ public abstract class EncryptionKeyTest
      */
     protected Connection createAndPopulateDB(String dbName)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1001
         Connection newCon = getConnection(dbName, CORRECT_KEY);
         SQLWarning warning = newCon.getWarnings();
         // If the database already exists, fail the test.
@@ -615,6 +634,7 @@ public abstract class EncryptionKeyTest
                         warning.getMessage() + ">");
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1001
         Statement stmt = newCon.createStatement();
         stmt.executeUpdate("CREATE TABLE " + TABLE + " (id int NOT NULL, " +
                 "val int NOT NULL, PRIMARY KEY(id))");
@@ -627,6 +647,7 @@ public abstract class EncryptionKeyTest
             ps.executeUpdate();
         }
         ps.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1001
         return newCon;
     }
 

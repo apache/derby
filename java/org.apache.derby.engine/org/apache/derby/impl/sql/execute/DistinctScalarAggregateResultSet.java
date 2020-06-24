@@ -50,6 +50,7 @@ import java.util.Properties;
  * first call to next().
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 {
 	private ColumnOrdering[] order;
@@ -79,6 +80,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     DistinctScalarAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,
@@ -96,7 +98,9 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 			  singleInputRow,
 			  optimizerEstimatedRowCount,
 			  optimizerEstimatedCost);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
         order = ((FormatableArrayHolder)
                     (a.getPreparedStatement().getSavedObject(orderingItem)))
                         .getArray(ColumnOrdering[].class);
@@ -128,11 +132,13 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "DistinctScalarResultSet already open");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         sortResultRow = (ExecIndexRow) getRowTemplate().getClone();
         sourceExecIndexRow = (ExecIndexRow) getRowTemplate().getClone();
 
         source.openCore();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4330
 		try {
 			/*
 			** Load up the sorter because we have something to sort.
@@ -169,6 +175,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -267,6 +274,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
          */
         public void close() throws StandardException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-756
             super.close();
             closeSource();
         }
@@ -351,6 +359,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	{
 		SortController 			sorter;
 		ExecRow 				sourceRow;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         ExecIndexRow            sortTemplateRow = getRowTemplate();
 		int						inputRowCountEstimate = (int) optimizerEstimatedRowCount;
 
@@ -389,6 +398,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 		** End the sort and open up the result set
 		*/
 		sorter.completedInserts();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 
 		scanController = 
             tc.openSortScan(sortId, activation.getResultSetHoldability());

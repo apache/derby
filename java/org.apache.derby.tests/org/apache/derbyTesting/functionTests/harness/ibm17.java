@@ -53,6 +53,7 @@ public class ibm17 extends jvm {
     public Vector<String> getCommandLine()
     {
         StringBuffer sb = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> v = super.getCommandLine();
         appendOtherFlags(sb);
         String s = sb.toString();

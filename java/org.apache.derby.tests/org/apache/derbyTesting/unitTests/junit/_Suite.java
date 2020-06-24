@@ -43,22 +43,35 @@ public class _Suite extends BaseTestCase {
     public static Test suite() throws SQLException {
 
         BaseTestSuite suite = new BaseTestSuite("JUnit unit tests");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(ArrayInputStreamTest.suite());
         suite.addTest(FormatableBitSetTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
         suite.addTest(SystemPrivilegesPermissionTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2760
         suite.addTest(UTF8UtilTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3742
         suite.addTestSuite(CompressedNumberTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3618
         suite.addTest(AssertFailureTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
         suite.addTest(InputStreamUtilTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
         suite.addTest(CharacterStreamDescriptorTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-646
+//IC see: https://issues.apache.org/jira/browse/DERBY-4084
         suite.addTest(BlockedByteArrayTest.suite());
         suite.addTest(PathUtilTest.suite());
         suite.addTest(VirtualFileTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
         suite.addTest(ReaderToUTF8StreamTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3941
         suite.addTest(DataInputUtilTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5475
         suite.addTest(DerbyVersionTest.suite());
         suite.addTest(MissingPermissionsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
 
         return suite;
     }

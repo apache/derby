@@ -4051,9 +4051,11 @@ public final class NetworkServerControlImpl {
      * @return a collection of network server properties and their current 
      *         values
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
     Properties getPropertyValues()
     {
         Properties retval = new Properties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
         retval.put(Property.DRDA_PROP_PORTNUMBER, Integer.toString(portNumber));
         retval.put(Property.DRDA_PROP_HOSTNAME, hostArg);
         retval.put(Property.DRDA_PROP_KEEPALIVE, Boolean.toString(keepAlive));
@@ -4089,6 +4091,7 @@ public final class NetworkServerControlImpl {
         if (!getTraceAll())
         {
             synchronized(sessionTable) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 for (Session session : sessionTable.values())
                 {
                     if (session.isTraceOn())
@@ -4113,6 +4116,7 @@ public final class NetworkServerControlImpl {
      * @param clientSocket the socket to read from and write to
      */
     void addSession(Socket clientSocket) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1817
 
         int connectionNumber = ++connNum;
 
@@ -4124,15 +4128,18 @@ public final class NetworkServerControlImpl {
         // Note that we always re-fetch the tracing configuration because it
         // may have changed (there are administrative commands which allow
         // dynamic tracing reconfiguration).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3701
         Session session = new Session(this,connectionNumber, clientSocket,
                                       getTraceDirectory(), getTraceAll());
 
         sessionTable.put(connectionNumber, session);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
         // Check whether there are enough free threads to service all the
         // threads in the run queue in addition to the newly added session.
         boolean enoughThreads;
         synchronized (runQueue) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1817
             enoughThreads = (runQueue.size() < freeThreads);
         }
         // No need to hold the synchronization on runQueue any longer than
@@ -4172,6 +4179,7 @@ public final class NetworkServerControlImpl {
      *
      * @param thread the closed thread
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1817
     void removeThread(DRDAConnThread thread) {
         threadList.remove(thread);
     }
@@ -4186,6 +4194,7 @@ public final class NetworkServerControlImpl {
         String s = locallangUtil.getTextMessage("DRDA_RuntimeInfoBanner.I")+ "\n";
         int sessionCount = 0;
         s += locallangUtil.getTextMessage("DRDA_RuntimeInfoSessionBanner.I") + "\n";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (DRDAConnThread thread : threadList)
         {
             String sessionInfo = thread.buildRuntimeInfo("", locallangUtil);
@@ -4196,6 +4205,7 @@ public final class NetworkServerControlImpl {
             }
         }
         int waitingSessions = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Session session : runQueue)
         {
                 s += session.buildRuntimeInfo("", locallangUtil);
@@ -4221,8 +4231,10 @@ public final class NetworkServerControlImpl {
         return s;
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
     long getBytesRead() {
         long count=0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (DRDAConnThread thread : threadList) {
             count += thread.getBytesRead();
         }
@@ -4261,6 +4273,7 @@ public final class NetworkServerControlImpl {
 
     public void setClientLocale(String locale)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         clientLocale = locale;
     }
 
@@ -4275,19 +4288,23 @@ public final class NetworkServerControlImpl {
     {
         ProductVersionHolder myPVH= null;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             myPVH = AccessController.doPrivileged(
                 new PrivilegedExceptionAction<ProductVersionHolder>() {
                     public ProductVersionHolder run()
                             throws UnknownHostException, IOException {
                         InputStream versionStream =
                             getClass().getResourceAsStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                                 "/" + ProductGenusNames.NET_INFO);
                         return ProductVersionHolder.
                                 getProductVersionHolderFromMyEnv(versionStream);
                     }
                 });
         } catch (PrivilegedActionException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             Exception e1 = e.getException();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             consolePropertyMessage("DRDA_ProductVersionReadError.S", e1.getMessage());
         }
         return myPVH;
@@ -4299,6 +4316,7 @@ public final class NetworkServerControlImpl {
      */
     private static  Object getSystemModule( final String factoryInterface )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Object>()

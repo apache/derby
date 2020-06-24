@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CreateTriggerNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -55,6 +56,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateTriggerNode extends DDLStatementNode
 {
 	private	TableName			triggerName;
@@ -266,6 +269,8 @@ class CreateTriggerNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateTriggerNode
 	(
         TableName       triggerName,
@@ -314,6 +319,8 @@ class CreateTriggerNode extends DDLStatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -381,8 +388,10 @@ class CreateTriggerNode extends DDLStatementNode
 		{
 				throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		if (isPrivilegeCollectionRequired())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 			compilerContext.pushCurrentPrivType(Authorizer.TRIGGER_PRIV);
 			compilerContext.addRequiredTablePriv(triggerTableDescriptor);
 			compilerContext.popCurrentPrivType();			
@@ -428,6 +437,7 @@ class CreateTriggerNode extends DDLStatementNode
 			// to procedures that modify SQL data. If the action statement 
 			// contains a procedure call, this reliability will be used during
 			// bind of the call statement node. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-551
 			if(isBefore)
 				compilerContext.setReliability(CompilerContext.MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL);
 					
@@ -465,7 +475,9 @@ class CreateTriggerNode extends DDLStatementNode
 		if (triggerCols != null && triggerCols.size() != 0)
 		{
             HashSet<String> columnNames = new HashSet<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (ResultColumn rc : triggerCols)
 			{
 				if (!columnNames.add(rc.getName()))
@@ -524,6 +536,7 @@ class CreateTriggerNode extends DDLStatementNode
             // Return negative int, zero, or positive int if the offset of the
             // first table is less than, equal to, or greater than the offset
             // of the second table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             return o1.getTableNameField().getBeginOffset() -
                     o2.getTableNameField().getBeginOffset();
         }
@@ -597,6 +610,7 @@ class CreateTriggerNode extends DDLStatementNode
 			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
 			
 			for (int i=0; i < triggerCols.size(); i++){
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ResultColumn rc = triggerCols.elementAt(i);
                 ColumnDescriptor cd =
                     triggerTableDescriptor.getColumnDescriptor(rc.getName());
@@ -629,6 +643,7 @@ class CreateTriggerNode extends DDLStatementNode
 
 			int[] cols;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
 			cols = getDataDictionary().examineTriggerNodeAndCols(actionNode,
 					oldTableName,
 					newTableName,
@@ -671,6 +686,7 @@ class CreateTriggerNode extends DDLStatementNode
 					triggerEventMask,
                     true,
                     actionTransformations, cols);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
 
             // If there is a WHEN clause, we need to transform its text too.
             if (whenClause != null) {
@@ -681,6 +697,7 @@ class CreateTriggerNode extends DDLStatementNode
                             referencedColsInTriggerAction,
                             whenClause.getBeginOffset(),
                             triggerTableDescriptor, triggerEventMask, true,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
                             whenClauseTransformations, cols);
             }
 
@@ -717,6 +734,7 @@ class CreateTriggerNode extends DDLStatementNode
 		{
 			regenNode = true;
 			actionText = transformedActionText;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 			actionNode = parseStatement(actionText, true);
 		}
 
@@ -925,6 +943,8 @@ class CreateTriggerNode extends DDLStatementNode
         final int offset = node.getBeginOffset();
         int start = 0;
         StringBuilder newText = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
         // For a statement trigger, we find all FromBaseTable nodes. If
         // the from table is NEW or OLD (or user designated alternates
@@ -1053,6 +1073,7 @@ class CreateTriggerNode extends DDLStatementNode
 
         if ( genColCount == 0 ) { return; }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<ColumnReference> visitor =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
@@ -1121,6 +1142,8 @@ class CreateTriggerNode extends DDLStatementNode
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         for (TriggerReferencingStruct trn : refClause)
 		{
 			/*
@@ -1211,6 +1234,8 @@ class CreateTriggerNode extends DDLStatementNode
 											whenText,
 											(UUID)null,			// action SPSid 
 											actionText,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                             compSchemaDescriptor.getUUID(),
 											referencedColInts,
 											referencedColsInTriggerAction,
@@ -1239,6 +1264,8 @@ class CreateTriggerNode extends DDLStatementNode
 			String refString = "null";
 			if (refClause != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 StringBuilder buf = new StringBuilder();
                 for (TriggerReferencingStruct trn : refClause)
 				{

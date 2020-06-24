@@ -99,6 +99,7 @@ public class GenericPrivilegeInfo extends PrivilegeInfo
 		// Check that the current user has permission to grant the privileges.
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         String currentUser = lcc.getCurrentUserId(activation);
 		TransactionController tc = lcc.getTransactionExecute();
         SchemaDescriptor sd = _tupleDescriptor.getSchemaDescriptor();

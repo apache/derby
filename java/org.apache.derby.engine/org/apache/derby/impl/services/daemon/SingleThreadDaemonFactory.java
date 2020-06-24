@@ -37,6 +37,7 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 	
 	public SingleThreadDaemonFactory()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		contextService = getContextService();
 	}
 
@@ -49,11 +50,13 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 	{
 		BasicDaemon daemon = new BasicDaemon(contextService);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		final Thread daemonThread = BasicDaemon.getMonitor().getDaemonThread(daemon, name, false);
 		// DERBY-3745.  setContextClassLoader for thread to null to avoid
 		// leaking class loaders.
 		try {
             AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
              new PrivilegedAction<Object>() {
                 public Object run()  {
                     daemonThread.setContextClassLoader(null);
@@ -78,6 +81,7 @@ public class SingleThreadDaemonFactory implements DaemonFactory
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();

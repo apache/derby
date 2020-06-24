@@ -128,6 +128,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		value = val;
 		if ((value != null) && (scale >= 0))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			value = value.setScale(scale, RoundingMode.DOWN);
 		}
 	}
@@ -296,12 +297,14 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		if (localValue == null)
 			return false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return localValue.compareTo(BigDecimal.ZERO) != 0;
 	}
 
 	public String	getString()
 	{
 		BigDecimal localValue = getBigDecimal();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return (localValue == null) ? null : localValue.toPlainString();
 	}
 
@@ -317,6 +320,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 * Set the value from a correctly typed BigDecimal object.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue) throws StandardException
 	{
 		setValue((BigDecimal) theValue);
@@ -399,6 +403,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			//    a BigDecimal with scale -3 (unscaled value of 1)
 			// or a BigDecimal with scale 0 (unscaled value of 1000)
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-225
 			if (scale < 0) {			
 				scale = 0;
 				value = value.setScale(0);
@@ -598,6 +603,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	*/
 	public void setBigDecimal(BigDecimal theValue) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		setCoreValue(theValue);
 	}
 
@@ -629,6 +635,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 */
 	public void setValue(boolean theValue)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		setCoreValue(theValue ? BigDecimal.ONE : BigDecimal.ZERO);
 	}
 
@@ -650,6 +657,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 
 	private void setCoreValue(double theValue) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-123
 		value = new BigDecimal(Double.toString(theValue));
 		rawData = null;
 	}
@@ -841,6 +849,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 		BigDecimal divisorBigDecimal = SQLDecimal.getBigDecimal(divisor);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		if (divisorBigDecimal.compareTo(BigDecimal.ZERO) == 0)
 		{
 			throw  StandardException.newException(SQLState.LANG_DIVIDE_BY_ZERO);
@@ -854,6 +863,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		** (for the whole result set column, eg.); otherwise dynamically
 		** calculates the scale according to actual values.  Beetle 3901
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		result.setBigDecimal
           (
            dividendBigDecimal.divide
@@ -910,6 +920,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
     protected boolean isNegative()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return !isNull() && (getBigDecimal().compareTo(BigDecimal.ZERO) == -1);
     }
     
@@ -983,14 +994,17 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			throws StandardException
 	{
 		if (isNull())
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			return;
 			
 		if (desiredPrecision != IGNORE_PRECISION &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-225
 			((desiredPrecision - desiredScale) <  SQLDecimal.getWholeDigits(getBigDecimal())))
 		{
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, 
 									("DECIMAL/NUMERIC("+desiredPrecision+","+desiredScale+")"));
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		value = value.setScale(desiredScale, RoundingMode.DOWN);
 		rawData = null;
 	}
@@ -1003,6 +1017,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 */
 	public int getDecimalValuePrecision()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-225
 		if (isNull())
 			return 0;
 			
@@ -1079,6 +1094,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
          * if ONE > abs(value) then the number of whole digits is 0
          */
         decimalValue = decimalValue.abs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         if (BigDecimal.ONE.compareTo(decimalValue) == 1)
         {
             return 0;
@@ -1087,6 +1103,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
         // precision is the number of digits in the unscaled value,
         // subtracting the scale (positive or negative) will give the
         // number of whole digits.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return decimalValue.precision() - decimalValue.scale();
 	}
 }

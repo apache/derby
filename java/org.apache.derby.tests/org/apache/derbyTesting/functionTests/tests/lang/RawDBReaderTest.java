@@ -54,6 +54,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
     private static  final   String      BOOT_PASSWORD = "fooBarWibble";
 
     private static  final   String      LIST_USER_SCHEMAS =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         "select schemaname from sys.sysschemas\n" +
         "where schemaname not like 'SYS%'\n" +
         "and schemaname != 'APP'\n" +
@@ -118,6 +119,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
     public static Test suite()
     {
         Test baseTest = TestConfiguration.embeddedSuite(RawDBReaderTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6864
 
         // We don't expect that users of this tool will run with a security
         // manager. The tool is run standalone behind a firewall.
@@ -150,6 +152,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
             // delete the corrupt database so that later tests,
             // which require sql authorization, won't bomb because
             // they can't open the encrypted database
+//IC see: https://issues.apache.org/jira/browse/DERBY-6864
             assertDirectoryDeleted(_dbDir);
             _dbDir = null;
         }
@@ -186,6 +189,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
         Connection  newDBConn = DriverManager.getConnection( MEMORY_DB + ";create=true" );
 
         // verify that the tool hasn't created any schema objects
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         vetUnloaded( newDBConn );
         
         // load the tool to recover the corrupt database
@@ -209,6 +213,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
 
         // verify that the expected schema objects have been created
         vetLoaded( newDBConn );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
 
         runRecoveryScript( newDBConn );
 
@@ -280,6 +285,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
 
     private void    runRecoveryScript( Connection conn ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6864
         try (BufferedReader reader =
                 new BufferedReader(new FileReader(RECOVERY_SCRIPT)))
         {
@@ -352,6 +358,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
 
     private void    vetUnloaded( Connection conn ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         assertResults( conn, LIST_USER_SCHEMAS, NO_ROWS, false );
         assertResults( conn, LIST_USER_TABLES, NO_ROWS, false );
     }

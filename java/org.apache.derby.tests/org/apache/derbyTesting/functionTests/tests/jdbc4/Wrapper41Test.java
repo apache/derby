@@ -91,6 +91,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     protected void examineJDBC4_1extensions( Wrapper41 wrapper, boolean rowOfNulls ) throws Exception
     {
         println( "Vetting a " + wrapper.getWrappedObject().getClass().getName() + ". rowOfNulls = " + rowOfNulls );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 
         _byteArrayClass = Class.forName( "[B" );
         _rowOfNulls = rowOfNulls;
@@ -119,6 +120,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     private void    vetWrappedNull( Wrapper41 wrapper ) throws Exception
     {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 wrapper.getObject( 1, (Class<?>) null );
                 fail( "Did not expect to get a result for a null class type." );
             }
@@ -131,6 +133,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
             if ( wrapper.getWrappedObject() instanceof CallableStatement ) { return; }
             
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 wrapper.getObject( "BIGINTCOL", (Class<?>) null );
                 fail( "Did not expect to get a result for a null class type." );
             }
@@ -146,6 +149,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "1",
              new Class[] { String.class, BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class, Number.class, Object.class }
              );
@@ -171,6 +175,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, _byteArrayClass, getClass() }
              );
     }
@@ -181,6 +186,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              2,
              "BLOBCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : BINARY_VALUE,
              new Class[] { Blob.class, Object.class, _byteArrayClass, String.class,  }
              );
@@ -211,6 +217,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "true",
              new Class[] { String.class, Boolean.class, Object.class }
              );
@@ -219,6 +226,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "1",
              new Class[] { BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class }
              );
@@ -227,6 +235,8 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "1.0",
              new Class[] { Float.class, Double.class }
              );
@@ -236,6 +246,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, _byteArrayClass, getClass() }
              );
     }
@@ -246,6 +257,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "a",
              new Class[] { String.class, Object.class }
              );
@@ -302,6 +314,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "de",
              new Class[] { String.class }
              );
@@ -310,6 +323,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : BINARY_VALUE,
              new Class[] { _byteArrayClass, Object.class }
              );
@@ -334,6 +348,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              6,
              "CLOBCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "abc",
              new Class[] { String.class, Clob.class, Object.class }
              );
@@ -349,6 +364,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
                  BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class,
                  Float.class, Double.class,
                  Date.class, Time.class, Timestamp.class,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                  _byteArrayClass
              }
              );
@@ -366,6 +382,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              7,
              "DATECOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "1994-02-23",
              new Class[] { String.class, Date.class, Object.class }
              );
@@ -374,6 +391,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              7,
              "DATECOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "1994-02-23 00:00:00.0",
              new Class[] { Timestamp.class }
              );
@@ -400,6 +418,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "1.0",
              new Class[] { String.class, Float.class, Double.class, BigDecimal.class, Number.class, Object.class }
              );
@@ -408,6 +427,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "1",
              new Class[] { Byte.class, Short.class, Integer.class, Long.class }
              );
@@ -416,6 +436,9 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : "true",
              new Class[] { Boolean.class }
              );
@@ -425,6 +448,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, _byteArrayClass, getClass() }
              );
     }
@@ -437,6 +461,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              16,
              "TIMECOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : expectedTime.toString(),
              new Class[] { String.class, Time.class, Object.class }
              );
@@ -445,6 +470,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              16,
              "TIMECOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : timeToTimestamp(expectedTime).toString(),
              new Class[] { Timestamp.class }
              );
@@ -472,6 +498,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              17,
              "TIMESTAMPCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : expectedTimestamp,
              new Class[] { String.class, Timestamp.class, Object.class }
              );
@@ -482,6 +509,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              17,
              "TIMESTAMPCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : expectedTime,
              new Class[] { Time.class }
              );
@@ -492,6 +520,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              17,
              "TIMESTAMPCOL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              _rowOfNulls ? null : expectedDate,
              new Class[] { Date.class }
              );
@@ -506,18 +535,24 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
                  Boolean.class,
                  BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class,
                  Float.class, Double.class,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                  Blob.class, Clob.class, _byteArrayClass, getClass()
              }
              );
     }
 
     private void    vetWrapperOK
+//IC see: https://issues.apache.org/jira/browse/DERBY-4951
         ( Wrapper41 wrapper, int colID, String colName, Object expectedValue, Class[] supportedCoercions )
         throws Exception
     {
         int coercionCount = supportedCoercions.length;
         for ( int i = 0; i < coercionCount; i++ )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<?> candidate = supportedCoercions[ i ];
             vetCandidate( candidate, expectedValue, wrapper.getObject( colID, candidate ) );
             
@@ -533,6 +568,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         throws Exception
     {
         if ( actualValue != null ) { assertTrue( candidate.getName(), candidate.isAssignableFrom( actualValue.getClass( ) ) ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 
         if ( expectedValue == null )
         {
@@ -546,6 +582,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         if ( actualValue instanceof Blob )
         {
             Blob    blob = (Blob) actualValue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4951
             vetBytes( (byte[]) expectedValue, blob.getBytes( 1L, (int) blob.length() ) );
             return;
         }
@@ -561,6 +598,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         }
         else { actualString = actualValue.toString(); }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4951
         assertEquals( candidate.getName(), (String) expectedValue, actualString );
     }
     private void    vetBytes( byte[] expected, byte[] actual ) throws Exception
@@ -584,12 +622,14 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         throws Exception
     {
         // null can be coerced to anything
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if ( _rowOfNulls ) { return; }
         
         int coercionCount = unsupportedCoercions.length;
         for ( int i = 0; i < coercionCount; i++ )
         {
             Class<?> candidate = unsupportedCoercions[ i ];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
             try {
                 wrapper.getObject( colID, candidate );
@@ -655,6 +695,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
      */
     private static Timestamp timeToTimestamp(Time time) {
         // Create a calendar object representing the time value
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Calendar timeCal = Calendar.getInstance();
         timeCal.setTime(time);
 

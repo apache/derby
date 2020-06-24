@@ -58,6 +58,7 @@ public class FormatIdTaglet implements Taglet {
      */
     public String toString(DocTree tag) {
         return "\n<dt><table cellpadding=2 cellspacing=2><tr><td>" + ROWNAME + "</td>"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
           + "<td>" + DiskLayoutTaglet.getText(tag) + "</td></tr>\n";
     }
 

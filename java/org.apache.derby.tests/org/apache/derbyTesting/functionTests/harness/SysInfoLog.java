@@ -75,7 +75,9 @@ public class SysInfoLog
                 }
 
 				Vector<String> v = javavm.getCommandLine();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 String mainClassName = "org.apache.derby.tools.sysinfo";
                 if (isModuleAware)
                 {
@@ -138,6 +140,7 @@ public class SysInfoLog
             pw.println(org.apache.derby.impl.tools.sysinfo.Main.javaSep);
             org.apache.derby.impl.tools.sysinfo.Main.reportCloudscape(pw);
             pw.println(org.apache.derby.impl.tools.sysinfo.Main.jbmsSep);
+//IC see: https://issues.apache.org/jira/browse/DERBY-920
             org.apache.derby.impl.tools.sysinfo.Main.reportDerby(pw);
             pw.println(org.apache.derby.impl.tools.sysinfo.Main.licSep);
             org.apache.derby.impl.tools.sysinfo.Main.printLicenseFile(pw);

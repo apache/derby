@@ -62,6 +62,7 @@ public class CollationTest extends BaseJDBCTestCase {
 
     /** Test cases to run with English case-sensitive collation. */
     private final static String[] ENGLISH_CASE_SENSITIVE = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
         "testEnglishCollation",
         "testUsingClauseAndNaturalJoin",
         "testNullColumnInInsert",
@@ -73,6 +74,7 @@ public class CollationTest extends BaseJDBCTestCase {
         "testUsingClauseAndNaturalJoin",
         "testNullColumnInInsert",
         "testDerby6227",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
         "testDerby6890",
     };
 
@@ -110,16 +112,22 @@ public void testDefaultCollation() throws SQLException {
 
       setAutoCommit(false);
       Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       PreparedStatement ps;
       ResultSet rs;
       
       setUpTable(s);
 
       //The collation should be UCS_BASIC for this database
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
       checkLangBasedQuery(s, 
       		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
 			new String[][] {{"UCS_BASIC"}});
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"4","Acorn"},{"0","Smith"},{"1","Zebra"},
       		{"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"} });   
@@ -159,6 +167,7 @@ public void testDefaultCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ",
       		new String[][] {{"0","Smith"}, {"4","Acorn"} });   
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       s.executeUpdate("set schema APP");
       //Following sql will not fail in a database which uses UCS_BASIC for
       //user schemas. Since the collation of user schemas match that of system
@@ -176,6 +185,7 @@ public void testDefaultCollation() throws SQLException {
       //Do some testing using CASE WHEN THEN ELSE
       //following will work with no problem for a database with UCS_BASIC
       //collation for system and user schemas
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CASE " +
       		" WHEN 1=1 THEN TABLENAME ELSE 'c' END = 'SYSCOLUMNS'",
       		new String[][] {{"SYSCOLUMNS"} });   
@@ -226,6 +236,7 @@ public void testDefaultCollation() throws SQLException {
       		new String[][] {{"SYSCOLUMNS"} });   
 
       //Test USER/CURRENT_USER/SESSION_USER
+//IC see: https://issues.apache.org/jira/browse/DERBY-2724
       checkLangBasedQuery(s, "SELECT count(*) FROM CUSTOMER WHERE "+ 
       		"CURRENT_USER = 'APP'",
       		new String[][] {{"7"}});   
@@ -237,11 +248,13 @@ public void testDefaultCollation() throws SQLException {
       		new String[][] {{"Acorn"}});   
 
       //Do some testing with CHAR/VARCHAR functions
+//IC see: https://issues.apache.org/jira/browse/DERBY-2722
       s.executeUpdate("set schema SYS");
       checkLangBasedQuery(s, "SELECT CHAR(ID) FROM APP.CUSTOMER WHERE " +
       		" CHAR(ID)='0'", new String[] [] {{"0"}});
       
       s.executeUpdate("set schema APP");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2722
       if (XML.classpathMeetsXMLReqs())
       	checkLangBasedQuery(s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
       			" FROM xmlTable, SYS.SYSTABLES WHERE " +
@@ -253,6 +266,7 @@ public void testDefaultCollation() throws SQLException {
       //following test won't fail.
       s.executeUpdate("set schema APP");
       ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       		" ? = TABLENAME");
       ps.setString(1, "SYSCOLUMNS");
       rs = ps.executeQuery();
@@ -378,10 +392,12 @@ public void testPolishCollation() throws SQLException {
       setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
       checkLangBasedQuery(s, 
       		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
 			new String[][] {{"TERRITORY_BASED"}});
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"6","aacorn"}, {"4","Acorn"}, {"2","\u0104corn"},
       		{"0","Smith"},{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"} });
@@ -428,6 +444,7 @@ public void testPolishCollation() throws SQLException {
 
       //Do some testing with MAX/MIN operators
       s.executeUpdate("set schema APP");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
       		new String[][] {{"\u017Bebra"}});   
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
@@ -476,10 +493,12 @@ public void testNorwayCollation() throws SQLException {
       setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
       checkLangBasedQuery(s, 
       		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
 			new String[][] {{"TERRITORY_BASED"}});
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"4","Acorn"}, {"2","\u0104corn"},{"0","Smith"},
       		{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"} });
@@ -522,7 +541,9 @@ public void testNorwayCollation() throws SQLException {
       assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
 
       //Do some testing with MAX/MIN operators
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       s.executeUpdate("set schema APP");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
       		new String[][] {{"aacorn"}});   
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
@@ -591,6 +612,7 @@ public void testNullColumnInInsert() throws SQLException {
    * @throws SQLException
   */
 public void testUsingClauseAndNaturalJoin() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
       setAutoCommit(false);
       Statement s = createStatement();
       String collation; 
@@ -1223,15 +1245,20 @@ private void joinTesting(Statement s,
   */
 public void testEnglishCollation() throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
       setAutoCommit(false);
       Statement s = createStatement();
       setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
       checkLangBasedQuery(s,
       		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
 			new String[][] {{"TERRITORY_BASED"}});
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"6","aacorn"},{"4","Acorn"},{"2","\u0104corn"},{"0","Smith"},
       		{"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"} });
@@ -1243,6 +1270,7 @@ public void testEnglishCollation() throws SQLException {
       //In English, 'aacorn' is < 'Acorn'
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
       		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
       		{"3","\u017Bebra"}, {"4","Acorn"}, {"5","\u015Amith"},
 			{"6","aacorn"} });
 
@@ -1251,6 +1279,7 @@ public void testEnglishCollation() throws SQLException {
       		new String[][] {{"0","Smith"}, {"2","\u0104corn"}, {"4","Acorn"},
       		{"6","aacorn"} });
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'Acorn' and 'Zebra' ",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
       		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
       		{"4","Acorn"}, {"5","\u015Amith"} });
       //After index creation, the query above will return same data but in
@@ -1271,6 +1300,7 @@ public void testEnglishCollation() throws SQLException {
       //Do some testing with MAX/MIN operators
       s.executeUpdate("set schema APP");
       checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
       		new String[][] {{"\u017Bebra"}});
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
       		new String[][] {{"aacorn"}});
@@ -1287,6 +1317,9 @@ public void testEnglishCollation() throws SQLException {
   */
 public void testSwedishCaseInsensitiveCollation() throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
       setAutoCommit(false);
       Statement s = createStatement();
       setUpTable(s);
@@ -1327,7 +1360,11 @@ public void testSwedishCaseInsensitiveCollation() throws SQLException {
       assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
 
       //Do some testing with MAX/MIN operators
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       s.executeUpdate("set schema APP");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
       checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
       		new String[][] {{"\u017Bebra"}});
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
@@ -1344,6 +1381,9 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     
     Connection conn = s.getConnection();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
     s.executeUpdate("set schema APP");
     //Following sql will fail because the compilation schema is user schema
     //and hence the character constant "CUSTOMER" will pickup the collation
@@ -1379,6 +1419,9 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //collation of the rhs as per SQL standard. Once DERBY-2678 is fixed, we
     //don't need to use the CAST on this query to make it work (we are doing
     //that in the next test).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
     assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CASE " +
     		" WHEN 1=1 THEN TABLENAME ELSE 'c' END = 'SYSCOLUMNS'");
     //CASTing the result of the CASE expression will solve the problem in the
@@ -1478,6 +1521,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		new String[][] {{"SYSCOLUMNS"} });   
 
     //Do some testing with CHAR/VARCHAR functions
+//IC see: https://issues.apache.org/jira/browse/DERBY-2722
     s.executeUpdate("set schema SYS");
     //Following will work because both operands are = have the collation type
     //of UCS_BASIC
@@ -1506,6 +1550,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //following will fail because we are trying to compare UCS_BASIC 
     //(CURRENT_USER) with territory based ("APP" taking it's collation from
     //compilation schema which is user schema at this time). 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2724
     assertStatementError("42818", s, "SELECT count(*) FROM CUSTOMER WHERE "+
     		"CURRENT_USER = 'APP'");  
     //The problem above can be fixed by CASTing CURRENT_USER so that the 
@@ -1537,6 +1582,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		"CURRENT SCHEMA = 'SYS'", new String[][] {{"7"}});   
     
     s.executeUpdate("set schema APP");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2722
     if (XML.classpathMeetsXMLReqs()) {
         assertStatementError("42818", s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
         		" FROM xmlTable, SYS.SYSTABLES WHERE " + 
@@ -1559,6 +1605,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //At this point, just create a function which involves character strings
     //in it's definition. In subsequent checkin, there will be collation 
     //related testing using this function's return value
+//IC see: https://issues.apache.org/jira/browse/DERBY-2723
     s.executeUpdate("set schema APP");
     s.executeUpdate("CREATE FUNCTION CONCAT_NOCALL(VARCHAR(10), VARCHAR(10)) "+
     		" RETURNS VARCHAR(20) RETURNS NULL ON NULL INPUT EXTERNAL NAME " + 
@@ -1579,6 +1626,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //has collation type of UCS_BASIC
     s.executeUpdate("set schema APP");
     ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
     		" ? = TABLENAME");
     ps.setString(1, "SYSCOLUMNS");
     rs = ps.executeQuery();
@@ -1627,6 +1675,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //The following will fail because the left hand side of LIKE has collation
     //derivation of NONE where as the right hand side has collation derivation
     //of IMPLICIT
+//IC see: https://issues.apache.org/jira/browse/DERBY-2793
     assertStatementError("42ZA2", s, "SELECT TABLENAME FROM SYS.SYSTABLES " +
     		" WHERE TABLENAME || 'AA' LIKE 'SYSCOLUMNS '");   
     //To fix the problem, we can use CAST on the left hand side so it's 
@@ -1677,6 +1726,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //COALESCE will have collation type of UCS_BASIC and that is the same
     //collation that the ? on rhs of = will get.
     ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
 	" COALESCE(TABLENAME, ?) = ?");   
     ps.setString(1, " ");
     ps.setString(2, "SYSCOLUMNS ");
@@ -1724,6 +1774,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //CAST string will compare fine with the output of TRIM. Note CAST always
     //picks up the collation of the compilation schema.
     ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
     		" TRIM('a' FROM ?) = CAST(TABLENAME AS CHAR(10))");
     ps.setString(1, "aSYSCOLUMNS");
     rs = ps.executeQuery();
@@ -1745,6 +1796,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //but TABLENAME has collation of UCS_BASIC and hence LOCATE will fail 
     //because the collation types of it's two operands do not match
     ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
     		" LOCATE(?, TABLENAME) != 0");
     ps.setString(1, "ABC");
     rs = ps.executeQuery();
@@ -1761,6 +1813,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //context which in this case will be collation of TABLENAME which has 
     //collation type of UCS_BASIC. 
     ps = prepareStatement("SELECT COUNT(*) FROM CUSTOMER WHERE ? IN " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
     		" (SELECT TABLENAME FROM SYS.SYSTABLES)");
     ps.setString(1, "SYSCOLUMNS");
     rs = ps.executeQuery();
@@ -1807,6 +1860,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     JDBC.assertFullResultSet(rs,new String[][] {{"9"}});
     //following will fail because NAME has collation type of territory based
     //but 'abc' has collation type of UCS_BASIC
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
     assertStatementError("42818", s, "DELETE FROM APP.CUSTOMER WHERE NAME = 'abc'");
     //changing to APP schema will fix the problem
     s.executeUpdate("set schema APP");
@@ -1836,6 +1890,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		" y char(100))");
     s.execute("create table assocout(x char(10))");
     ps = prepareStatement("insert into assoc values (?, 'hello')");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     ps.setString(1, "10");
     ps.executeUpdate();     
     
@@ -1893,6 +1948,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     if (XML.classpathMeetsXMLReqs()) {
         checkLangBasedQuery(s, "SELECT ID, XMLSERIALIZE(V AS CLOB) " +
         		" FROM DERBY_2961 ORDER BY 1",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3027
         		new String[][] {{"1",null}});
     }
     
@@ -1933,6 +1989,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     
     s.executeUpdate("create table a (vc varchar(30))");
     s.executeUpdate("insert into a values(CURRENT_DATE)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3222
     rs = s.executeQuery("select vc from a where vc <= CURRENT_DATE");
     
     assertEquals(1,JDBC.assertDrainResults(rs));
@@ -1941,6 +1998,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     JDBC.assertDrainResults(rs,1);
     rs = s.executeQuery("select vc from a where vc <= LOWER(CURRENT_DATE)");
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
     JDBC.assertDrainResults(rs,1);    
     rs = s.executeQuery("select vc from a where vc <=  '' || CURRENT_DATE");
     
@@ -2025,6 +2083,7 @@ private void setUpTable(Statement s) throws SQLException {
             ps.executeUpdate();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2722
     s.execute("create table xmlTable (x xml)");
     s.executeUpdate("insert into xmlTable values(null)");
 
@@ -2061,6 +2120,7 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
  * locale xx.
  */
 public void testMissingCollatorSupport() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
       String createDBurl = ";create=true;territory=xx;collation=TERRITORY_BASED";
 	  try {
 		  //Use following utility method rather than 
@@ -2084,21 +2144,26 @@ public void testMissingCollatorSupport() throws SQLException {
    */
   public static Test suite() {
       
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
       BaseTestSuite suite = new BaseTestSuite("CollationTest");
       //Add the test case for a locale which does not exist. We have asked for
       //locale as 'xx' and since there is not support Collator support for such
       //a locale, we will get an exception during database create time.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
       TestCase missingCollatorDbTest = new CollationTest(
     		  "testMissingCollatorSupport");
       suite.addTest(missingCollatorDbTest);
 
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
         suite.addTest(collatedSuite("en", false, ENGLISH_CASE_SENSITIVE));
         suite.addTest(collatedSuite("en", true, ENGLISH_CASE_INSENSITIVE));
          
         // Only add tests for other locales if they are in fact supported 
         // by the jvm.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
+//IC see: https://issues.apache.org/jira/browse/DERBY-3176
         Locale[] availableLocales = Collator.getAvailableLocales();
         boolean norwegian = false; 
         boolean polish = false;
@@ -2119,6 +2184,7 @@ public void testMissingCollatorSupport() throws SQLException {
             }
         }
         if(norwegian) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
             suite.addTest(collatedSuite("no", false, NORWEGIAN_CASE_SENSITIVE));
         }
         if(polish) {
@@ -2127,6 +2193,7 @@ public void testMissingCollatorSupport() throws SQLException {
         if(french) {
             suite.addTest(collatedSuite("fr", false, FRENCH_CASE_SENSITIVE));
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4604
         if(swedish && !hasBuggySwedishLocale()) {
             suite.addTest(collatedSuite("sv", true, SWEDISH_CASE_INSENSITIVE));
         }
@@ -2162,8 +2229,10 @@ public void testMissingCollatorSupport() throws SQLException {
    * @return suite of tests to run for the given locale
    */
   private static Test collatedSuite(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
           String locale, boolean caseInsensitive, String[] testNames)
   {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
       BaseTestSuite suite =
           new BaseTestSuite("CollationTest:territory=" + locale);
 
@@ -2181,10 +2250,12 @@ public void testMissingCollatorSupport() throws SQLException {
       
       if ("en".equals(locale)) {
     	  suite.addTest(DatabaseMetaDataTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2656
           suite.addTest(BatchUpdateTest.embeddedSuite());
           suite.addTest(GroupByExpressionTest.suite());
           suite.addTest(UpdatableResultSetTest.suite());    	  
       }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
       return caseInsensitive
 		  ? Decorator.territoryCollatedCaseInsensitiveDatabase(suite, locale)
 		  : Decorator.territoryCollatedDatabase(suite, locale);
@@ -2195,6 +2266,7 @@ public void testMissingCollatorSupport() throws SQLException {
      */
     public void test_5951() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
         Statement s = createStatement();
         
         s.execute("CREATE TABLE derby5951( a clob )");
@@ -2205,6 +2277,7 @@ public void testMissingCollatorSupport() throws SQLException {
              "external name 'org.apache.derbyTesting.functionTests.tests.lang.CollationTest.makeClob'\n"
              );
         s.executeUpdate("INSERT INTO derby5951 VALUES( makeClob( 'a' ) )");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
         ResultSet rs = s.executeQuery("select * from derby5951");
         JDBC.assertSingleValueResultSet(rs, "a");
         
@@ -2289,6 +2362,7 @@ public void testMissingCollatorSupport() throws SQLException {
         JDBC.assertFullResultSet(s.executeQuery(sql), expectedRows);
     }
     public void testDerby6890()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
                 throws SQLException
     {
         Statement s = createStatement();

@@ -50,6 +50,7 @@ class CacheableConglomerate implements Cacheable
     private Conglomerate    conglom;
 
     /* Constructor */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5632
     CacheableConglomerate(RAMAccessManager parent)
     {
         this.accessManager = parent;
@@ -102,6 +103,7 @@ class CacheableConglomerate implements Cacheable
 	public Cacheable setIdentity(Object key) throws StandardException
     {
         conglomid = (Long) key;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5632
 
         long id = conglomid.longValue();
 

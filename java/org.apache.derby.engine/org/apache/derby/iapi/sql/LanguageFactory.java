@@ -67,6 +67,8 @@ public interface LanguageFactory
 	 */
 	public ResultDescription getResultDescription
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ResultDescription	inputResultDescription,
 		int[]				theCols
 	);

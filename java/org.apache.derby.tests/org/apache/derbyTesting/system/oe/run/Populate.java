@@ -149,13 +149,16 @@ public class Populate extends JDBCPerfTestCase {
      */
     public static Test suite() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Order Entry");
         
         suite.addTest(new Populate("testCreateDB"));
 
         // Create Schema
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         Schema.addBaseSchema(suite);
         if (createConstraintsBeforeLoad)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
             Schema.addConstraints(suite);
         
         // this will populate db

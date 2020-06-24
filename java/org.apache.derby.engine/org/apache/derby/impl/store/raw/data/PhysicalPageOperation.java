@@ -53,6 +53,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	</PRE>
 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
 abstract class PhysicalPageOperation extends PageBasicOperation
         implements Undoable
 {

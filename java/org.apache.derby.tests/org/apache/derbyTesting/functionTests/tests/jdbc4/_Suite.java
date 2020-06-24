@@ -45,6 +45,7 @@ public class _Suite extends BaseTestCase  {
 	public static Test suite() throws SQLException {
 
         BaseTestSuite suite = new BaseTestSuite("jdbc4");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // These really need to run standalone.
 		//suite.addTestSuite(AutoloadBooting.class);
@@ -62,25 +63,39 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(SetObjectUnsupportedTest.suite());
 		suite.addTest(StatementEventsTest.suite());
 		suite.addTest(StatementTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1989
 		suite.addTest(TestDbMetaData.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1988
 		suite.addTest(TestJDBC40Exception.suite());
 		suite.addTest(UnsupportedVetter.suite());
 		suite.addTest(XA40Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2855
 		suite.addTest(ConnectionMethodsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         suite.addTest(VerifySignatures.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         suite.addTest (LobStreamTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
         suite.addTest(LobSortTest.suite());
         suite.addTest (BlobSetMethodsTest.suite());
         suite.addTest (JDBC4FromJDBC3DataSourceTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
         suite.addTest(Derby3650Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         suite.addTest(Derby2017LayerBTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         suite.addTest(AbortTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         suite.addTest(Driver40Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         suite.addTest(Driver40UnbootedTest.suite());
         suite.addTest(LoginTimeoutTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6614
         if (JDBC.vmSupportsJDBC42())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             suite.addTest( getSuite( "org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42" ) );
         }
 		

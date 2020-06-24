@@ -105,6 +105,8 @@ public interface XMLDataValue extends DataValueDescriptor
      */
     public XMLDataValue XMLQuery(SqlXmlUtil sqlxUtil, XMLDataValue result)
 		throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-688
+//IC see: https://issues.apache.org/jira/browse/DERBY-567
 
     /* ****
      * Helper classes and methods.

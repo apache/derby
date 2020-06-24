@@ -568,6 +568,7 @@ public class Derby3650Test extends BaseJDBCTestCase
 
     
     protected static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby3650Test.class);
         return new CleanDatabaseTestSetup(
@@ -595,6 +596,7 @@ public class Derby3650Test extends BaseJDBCTestCase
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Derby3650Test");
         suite.addTest(baseSuite("Derby3650Test:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(

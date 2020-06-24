@@ -41,6 +41,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class SysinfoTest extends BaseJDBCTestCase {
 
     private static final String POLICY_FILE_NAME=
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         "org/apache/derbyTesting/functionTests/tests/derbynet/SysinfoTest.policy";
     private ArrayList<String> OUTPUT;
 
@@ -59,6 +60,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Output from sysinfo without the extra properties. 
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> OUTPUT1 = new ArrayList<String>();
         OUTPUT1.add("--------- Derby Network Server Information --------");
         OUTPUT1.add("derby.drda.maxThreads=0");
@@ -78,6 +80,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Output by sysinfo with the extra properties.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> OUTPUT2 = new ArrayList<String>(OUTPUT1);
         OUTPUT2.add("--------- Derby Network Server Information --------"); 
         OUTPUT2.add("derby.drda.securityMechanism=USER_ONLY_SECURITY"); 
@@ -98,6 +101,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("SysinfoTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // we need to be able to run the server
         if (!Derby.hasServer()) return suite;
@@ -121,6 +125,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
             suite.addTest(decorateTest());
 
         useProperties = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5014
         Properties sysprops = new Properties();
         if (!TestConfiguration.loadingFromJars())
             sysprops.put("sysinfotest.classesdir", findClassDir());
@@ -148,6 +153,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
         Test test = TestConfiguration.clientServerSuite(SysinfoTest.class);
 
         // Install a security manager using the initial policy file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         return TestConfiguration.singleUseDatabaseDecorator(
                 new SecurityManagerSetup(test, POLICY_FILE_NAME));
     }
@@ -197,6 +203,9 @@ public class SysinfoTest extends BaseJDBCTestCase {
         Process p = execJavaCmd(SysInfoLocaleCmd);
         String s = readProcessOutput(p);
         print("testSysinfoLocale", s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-858
+//IC see: https://issues.apache.org/jira/browse/DERBY-858
+//IC see: https://issues.apache.org/jira/browse/DERBY-858
         assertMatchingStringExists(s);
     }
 
@@ -219,6 +228,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
     }
 
     private static String findClassDir() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         URL url = SecurityManagerSetup.getURL("org.apache.derbyTesting." +
                     "functionTests.tests.derbynet.SysinfoTest");
         return url.getPath();
@@ -235,6 +245,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
      * @param actualOutput Actual sysinfo output 
      */
     private void assertMatchingStringExists(String actualOutput) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (String s : OUTPUT) {
             assertTrue("cannot find " + s + " in actualOutput:" + actualOutput,
                     actualOutput.indexOf(s) >=0);            

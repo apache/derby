@@ -111,6 +111,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("SQLSessionContextTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         /* Positive tests */
         if (!JDBC.vmSupportsJSR169()) {
@@ -145,6 +146,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
          */
 
         // add decorator for different users authenticated
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite usersSuite =
             new BaseTestSuite("suite: positiveSuite");
 
@@ -261,6 +263,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
         // for dropper.
         _stm.execute("call test_dbo.dropper()");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3667
         String[] expected = new String[]{null, "TEST_DBO"};
         for (int i= 0; i < 1; i++) {
             rs = ps[i].executeQuery();
@@ -375,6 +378,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
         assertTrue("result set empty", rs.next());
         String actualCurrent = rs.getString(1);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         if (sessionVar.equals("role") && expected != null) {
             // returned current_role is a delimited identifer, which is SQL
             // standard compliant. current_schema returns case normal form,
@@ -382,6 +386,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
             expected = "\"" + expected + "\"";
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3667
         if (expected != null) {
             assertTrue(sessionVar + ": current is " + actualCurrent +
                        ", expected " + expected,
@@ -722,6 +727,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
             stm.close();
 
             String[] expected = new String[]{null, "TEST_DBO"};
+//IC see: https://issues.apache.org/jira/browse/DERBY-3667
 
             // check that we revert correctly
             for (int i= 0; i < variableKeywords.length; i++) {

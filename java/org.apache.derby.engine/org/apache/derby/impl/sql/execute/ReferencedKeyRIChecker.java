@@ -57,6 +57,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
      */
     private final DataValueDescriptor[] refKey =
             new DataValueDescriptor[numColumns];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
 
     /**
      * We save away keys with a counter in this hash table, so we know how many
@@ -72,6 +73,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     ReferencedKeyRIChecker(LanguageConnectionContext lcc,
                            TransactionController tc,
                            FKInfo fkinfo) throws StandardException
@@ -128,8 +130,12 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
             // violated. DERBY-6559
             if (lcc.isEffectivelyDeferred(
                     lcc.getCurrentSQLSessionContext(a),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                     fkInfo.refConstraintID)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                 if (restrictCheckOnly) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                     rememberKey(row);
                     return;
                 } else {
@@ -163,6 +169,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 				close();
 
                 final UUID fkId = fkInfo.fkIds[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
                 // Only considering deferring if we don't have RESTRICT, i.e.
                 // NO ACTION. CASCADE and SET NULL handled elsewhere.
@@ -205,6 +212,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
      * @throws StandardException
      */
     private void rememberKey(ExecRow rememberRow) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
         if (deletedKeys == null) {
             // key: all columns (these are index rows, or a row containing a
             // row location)
@@ -267,6 +275,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 
         int indexOfFirstRestrict = -1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
         for (int i = 0; i < fkInfo.fkConglomNumbers.length; i++) {
             if (fkInfo.raRules[i] == StatementType.RA_RESTRICT) {
                 indexOfFirstRestrict = i;
@@ -304,6 +313,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 
                     StandardException se = StandardException.newException(
                             SQLState.LANG_FK_VIOLATION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                             fkInfo.fkConstraintNames[indexOfFirstRestrict],
                             fkInfo.tableName,
                             StatementUtil.typeName(fkInfo.stmtType),
@@ -343,6 +353,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
                     // present till we commit if we accept this row as being
                     // the one the upholds the constraint when we delete ours.
                     TransactionController.ISOLATION_REPEATABLE_READ,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
 
                     (FormatableBitSet)null, // retrieve all fields
                     key,                    // startKeyValue
@@ -387,6 +398,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
             refKeyIndexScan = null;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
         if (deletedKeys != null) {
             deletedKeys.close();
             deletedKeys = null;

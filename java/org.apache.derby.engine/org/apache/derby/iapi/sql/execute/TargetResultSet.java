@@ -50,6 +50,7 @@ public interface TargetResultSet extends ResultSet
 	public void changedRow(ExecRow execRow, RowLocation rowLocation) throws StandardException;
 
     public void offendingRowLocation(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             RowLocation rl, long constainerId) throws StandardException;
 	/**
 	 * Preprocess the source row prior to getting it back from the source.

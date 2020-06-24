@@ -89,6 +89,8 @@ public class UTF8ReaderTest
         ResultSet rs = stmt.executeQuery(
                 "select * from Utf8ReaderTest where id = 100");
         rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         StringDataValue dvd = (StringDataValue)
                                             ((EmbedResultSet)rs).getColumn(3);
         StoreStreamClob ssClob = new StoreStreamClob(
@@ -129,6 +131,7 @@ public class UTF8ReaderTest
                 // See insertTestData
                 "select * from Utf8ReaderTest where id = 1");
         rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         StringDataValue dvd = (StringDataValue)
                                             ((EmbedResultSet)rs).getColumn(3);
         StoreStreamClob ssClob = new StoreStreamClob(
@@ -191,6 +194,7 @@ public class UTF8ReaderTest
      * @return A test suite.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(UTF8ReaderTest.class);
         return new CleanDatabaseTestSetup(suite) {
             public void decorateSQL(Statement stmt)

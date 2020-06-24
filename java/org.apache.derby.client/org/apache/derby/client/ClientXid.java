@@ -178,6 +178,7 @@ public class ClientXid implements Xid {
     // return fields of Xid
     //
     public byte[] getData() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return data_.clone();
     }
 
@@ -197,6 +198,7 @@ public class ClientXid implements Xid {
     }
 
     public boolean equals(Object obj) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (obj == null) {
             return false;
         }

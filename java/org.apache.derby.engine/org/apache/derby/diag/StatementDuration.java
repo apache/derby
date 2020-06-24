@@ -114,6 +114,7 @@ public class StatementDuration extends VTITemplate
 	{
         DiagUtil.checkAccess();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         final String home = AccessController.doPrivileged
             (
              new PrivilegedAction<String>()
@@ -167,6 +168,7 @@ public class StatementDuration extends VTITemplate
 				throw new SQLException(ex.getMessage());
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			hashTable = new Hashtable<String,String[]>();
 		}
 
@@ -204,6 +206,7 @@ public class StatementDuration extends VTITemplate
 
 				/* NOTE: We need to use the LCCID as the key
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				String[] previousRow = hashTable.put(newRow[3],
 												   newRow);
 				if (previousRow == null)
@@ -256,6 +259,7 @@ public class StatementDuration extends VTITemplate
             // Date.toString(), which is always formatted using the pattern
             // specified below, and always in US locale.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-5414
             SimpleDateFormat sdf =
                 new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
 
@@ -325,6 +329,7 @@ public class StatementDuration extends VTITemplate
 				/* Executing prepared statement is a special case as
 				 * it could span multiple lines
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 				StringBuffer output = new StringBuffer(64);
 				if (line.indexOf(BEGIN_EXECUTING_STRING) == -1)
 				{
@@ -337,6 +342,7 @@ public class StatementDuration extends VTITemplate
 				int endIndex = line.indexOf(END_EXECUTING_STRING, lccidIndex);
 				if (endIndex == -1)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 					output.append(line.substring(line.indexOf(END_XID_STRING, lccidIndex) + 3));
 				}
 				else
@@ -358,6 +364,7 @@ public class StatementDuration extends VTITemplate
 					endIndex = line.indexOf(END_EXECUTING_STRING);
 					if (endIndex == -1)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 						output.append(line);
 					}
 					else
@@ -392,11 +399,13 @@ public class StatementDuration extends VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("THREADID",  Types.VARCHAR, false, 80),
 		EmbedResultSetMetaData.getResultColumnDescriptor("XID",       Types.VARCHAR, false, 15),
 		EmbedResultSetMetaData.getResultColumnDescriptor("LCCID",     Types.VARCHAR, false, 10),
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",   Types.VARCHAR, true, Limits.DB2_VARCHAR_MAXWIDTH),
 		EmbedResultSetMetaData.getResultColumnDescriptor("DURATION",  Types.VARCHAR, false, 10),
 	};
 	
     private static final ResultSetMetaData metadata =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         new EmbedResultSetMetaData(columnInfo);
 }
 

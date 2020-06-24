@@ -55,6 +55,7 @@ abstract class ExportWriteDataAbstract {
 
   //if control file says true for column definition, write it as first line of the
   //data file
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
   abstract void writeColumnDefinitionOptionally(String[] columnNames,
   													   String[] columnTypes)
   											throws Exception;
@@ -76,6 +77,7 @@ abstract class ExportWriteDataAbstract {
      * @return Location where the column data written in the external file. 
      * @exception Exception  if any error occurs while writing the data.  
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     abstract String writeBinaryColumnToExternalFile(InputStream istream) 
         throws Exception;
     

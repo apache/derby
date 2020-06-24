@@ -309,6 +309,7 @@ public class SimpleJsonVTI extends VTITemplate
         try {
             return new BigDecimal( stringValue );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (Throwable t) { throw ToolUtilities.wrap( t ); }
     }
     

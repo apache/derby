@@ -89,6 +89,7 @@ public class TupleDescriptor
 	//////////////////////////////////////////////////////////////////
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 	DependableFinder getDependableFinder(int formatId)
 	{
 		return dataDictionary.getDependableFinder(formatId);

@@ -67,11 +67,14 @@ public class FKInfo implements Formatable
 	/*
 	** See the constructor for the meaning of these fields
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String              schemaName;
     String              tableName;
     int                 type;
     UUID                refUUID; // index index conglomerate uuid
     long                refConglomNumber;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
     UUID                refConstraintID;
     boolean             refConstraintIsDeferrable;
     int                 stmtType;
@@ -126,12 +129,15 @@ public class FKInfo implements Formatable
 	 */
 	public FKInfo(
 					String[]			fkConstraintNames,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     String              schemaName,
                     String              tableName,
 					int					stmtType,
 					int					type,
 					UUID				refUUID,
 					long				refConglomNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                     UUID                refConstraintID,
                     boolean             refConstraintIsDeferrable,
 					UUID[]				fkUUIDs,
@@ -141,6 +147,7 @@ public class FKInfo implements Formatable
 					RowLocation			rowLocation,
                     int[]               raRules,
                     boolean[]           deferrable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     UUID[]              fkIds
 					)
 	{
@@ -151,14 +158,19 @@ public class FKInfo implements Formatable
 		this.type = type;
 		this.refUUID = refUUID;
 		this.refConglomNumber = refConglomNumber;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         this.refConstraintID = refConstraintID;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6559
         this.refConstraintIsDeferrable = refConstraintIsDeferrable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.fkUUIDs = ArrayUtil.copy(fkUUIDs);
         this.fkConglomNumbers = ArrayUtil.copy(fkConglomNumbers);
         this.fkIsSelfReferencing = ArrayUtil.copy(fkIsSelfReferencing);
         this.colArray = ArrayUtil.copy(colArray);
 		this.rowLocation = rowLocation;
         this.raRules = ArrayUtil.copy(raRules);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.deferrable = ArrayUtil.copy(deferrable);
         this.fkIds = ArrayUtil.copy(fkIds);
 
@@ -207,6 +219,7 @@ public class FKInfo implements Formatable
 			return (FKInfo[])null;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<FKInfo> newfksVector = new Vector<FKInfo>();
 		FKInfo[] newfks = null;
 
@@ -253,6 +266,7 @@ public class FKInfo implements Formatable
 			newfks = new FKInfo[size];
 			for (int i = 0; i < size; i++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 newfks[i] = newfksVector.elementAt(i);
 			}
 		}
@@ -287,8 +301,11 @@ public class FKInfo implements Formatable
 		out.writeInt(stmtType);
 		out.writeObject(refUUID);
 		out.writeLong(refConglomNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         out.writeObject(refConstraintID);
         out.writeBoolean(refConstraintIsDeferrable);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
 
 		ArrayUtil.writeArray(out, fkConstraintNames);
 		ArrayUtil.writeArray(out, fkUUIDs);
@@ -296,6 +313,7 @@ public class FKInfo implements Formatable
 		ArrayUtil.writeBooleanArray(out, fkIsSelfReferencing);
 		ArrayUtil.writeIntArray(out, colArray);
 		ArrayUtil.writeIntArray(out, raRules);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         ArrayUtil.writeBooleanArray(out, deferrable);
         ArrayUtil.writeArray(out, fkIds);
 	}
@@ -329,8 +347,11 @@ public class FKInfo implements Formatable
 			stmtType = in.readInt();
 			refUUID = (UUID)in.readObject();
 			refConglomNumber = in.readLong();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             refConstraintID = (UUID)in.readObject();
             refConstraintIsDeferrable = in.readBoolean();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
 
 			fkConstraintNames = new String[ArrayUtil.readArrayLength(in)];
 			ArrayUtil.readArrayItems(in, fkConstraintNames);
@@ -342,6 +363,7 @@ public class FKInfo implements Formatable
 			fkIsSelfReferencing = ArrayUtil.readBooleanArray(in);
 			colArray = ArrayUtil.readIntArray(in);
 			raRules = ArrayUtil.readIntArray(in);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             deferrable = ArrayUtil.readBooleanArray(in);
             fkIds = new UUID[ArrayUtil.readArrayLength(in)];
             ArrayUtil.readArrayItems(in, fkIds);
@@ -368,6 +390,7 @@ public class FKInfo implements Formatable
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             StringBuilder str = new StringBuilder();
 			str.append("\nTableName:\t\t\t");
 			str.append(tableName);
@@ -375,6 +398,7 @@ public class FKInfo implements Formatable
 			str.append("\ntype:\t\t\t\t");
 			str.append((type == FOREIGN_KEY) ? "FOREIGN_KEY" : "REFERENCED_KEY");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             str.append("\nReferenced Key Index UUID:\t\t"+refUUID);
 			str.append("\nReferenced Key ConglomNum:\t"+refConglomNumber);
             str.append("\nReferenced Key Constraint is deferrable:\t" +
@@ -430,6 +454,7 @@ public class FKInfo implements Formatable
 			}
 			str.append(")\n");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             str.append("\nDeferrable array:\t\t\t(");
             for (int i = 0; i < deferrable.length; i++)
             {

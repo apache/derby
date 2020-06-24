@@ -132,6 +132,7 @@ public class XactId implements TransactionId
 	
 	/**
 		Return	0 if a == b, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				+ve number if a &gt; b
 				-ve number if a &lt; b
 	*/

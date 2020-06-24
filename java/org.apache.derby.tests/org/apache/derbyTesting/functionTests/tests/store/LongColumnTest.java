@@ -36,6 +36,7 @@ public class LongColumnTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("LongColumnTest");
         suite.addTest(TestConfiguration.defaultSuite(LongColumnTest.class));
 
@@ -70,6 +71,7 @@ public class LongColumnTest extends BaseJDBCTestCase {
         st.executeUpdate("DROP FUNCTION PADSTRING");
         st.close();
         dropTable("testing");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5723
         super.tearDown();
     }
 

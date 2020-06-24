@@ -52,6 +52,8 @@ public class BigDecimalHandler {
 			// which may not be available with jvms that support JSR169,
 			// even if BigDecimal itself has been made available (e.g. 
 			// supporting J2ME/CDC/Foundation Profile 1.1).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
+//IC see: https://issues.apache.org/jira/browse/DERBY-2225
 			Method getbd = ResultSet.class.getMethod("getBigDecimal", new Class[] {int.class});
 			representation = BIGDECIMAL_REPRESENTATION;
 		}
@@ -68,6 +70,7 @@ public class BigDecimalHandler {
 	
 	//Type conversions supported by ResultSet getBigDecimal method - JDBC3.0 Table B-6 
 	private static final int[] bdConvertibleTypes = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 	{	java.sql.Types.TINYINT,
 		java.sql.Types.SMALLINT,
 		java.sql.Types.INTEGER,
@@ -133,6 +136,8 @@ public class BigDecimalHandler {
 			case STRING_REPRESENTATION:
 				bigDecimalString = rs.getString(columnName);
 				int columnType= rs.getMetaData().getColumnType(columnIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 				if((bigDecimalString != null) && !canConvertToDecimal(columnType))
 					throw new SQLException("Invalid data conversion. Method not called.");
 				break;
@@ -215,6 +220,7 @@ public class BigDecimalHandler {
 	 */
 	public static void updateBigDecimalString(ResultSet rs, int columnIndex, String bdString) throws SQLException{
 				
+//IC see: https://issues.apache.org/jira/browse/DERBY-398
 		switch(representation){
 			case BIGDECIMAL_REPRESENTATION:
 				BigDecimal bd = (bdString == null) ? null : new BigDecimal(bdString);
@@ -260,6 +266,7 @@ public class BigDecimalHandler {
 	 * @throws SQLException
 	 */
 	public static String getBigDecimalString(CallableStatement cs, int parameterIndex, int parameterType) throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 		String bigDecimalString = null;
 		
 		switch(representation){
@@ -290,6 +297,7 @@ public class BigDecimalHandler {
 		
 		switch(representation){
 			case BIGDECIMAL_REPRESENTATION:
+//IC see: https://issues.apache.org/jira/browse/DERBY-398
 				BigDecimal bd = (bdString == null) ? null : new BigDecimal(bdString);
 				ps.setBigDecimal(parameterIndex, bd);
 				break;
@@ -315,6 +323,7 @@ public class BigDecimalHandler {
 		
 		switch(representation){
 			case BIGDECIMAL_REPRESENTATION:
+//IC see: https://issues.apache.org/jira/browse/DERBY-398
 				BigDecimal bd = (objectString == null) ? null : new BigDecimal(objectString);
 				ps.setObject(parameterIndex,bd);
 				break;
@@ -335,6 +344,7 @@ public class BigDecimalHandler {
 	protected static boolean canConvertToDecimal(int type) throws SQLException{
 		boolean  canConvert = false;
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 		for (int bdType = 0; bdType < bdConvertibleTypes.length; bdType++){
 			if(type == bdConvertibleTypes[bdType]){
 				canConvert = true;

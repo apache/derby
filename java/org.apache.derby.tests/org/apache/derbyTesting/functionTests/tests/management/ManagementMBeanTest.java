@@ -53,6 +53,7 @@ public class ManagementMBeanTest extends MBeanTest {
     // MBean names
     private static final String[] MBEAN_TYPES =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4356
         "NetworkServer",
         MANAGEMENT,
         "JDBC",
@@ -66,6 +67,7 @@ public class ManagementMBeanTest extends MBeanTest {
     public static Test suite() {
         
         return MBeanTest.suite(ManagementMBeanTest.class, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
                                         "ManagementMBeanTest");
     }
     
@@ -92,6 +94,7 @@ public class ManagementMBeanTest extends MBeanTest {
         // may include MBeans left over from other engines which ran
         // in earlier tests
         StatsTuple originalStats = getCurrentStats( "Original" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4356
 
         assertTrue("DerbyMBeanCount:" + originalStats.getBeanCount(), originalStats.getBeanCount() >= EXPECTED_BEAN_COUNT );
         

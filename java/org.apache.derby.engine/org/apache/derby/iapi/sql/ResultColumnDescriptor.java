@@ -57,6 +57,7 @@ public interface ResultColumnDescriptor
 	 *		is not in a schema (i.e. is a derived column), it returns NULL.
 	 */
 	String	getSourceSchemaName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 
 	/**
 	 * Get the name of the underlying(base) table this column comes from, if any.

@@ -52,6 +52,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  * interface.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cloneable
 {
 	private ExecRow[] 				rowArray;
@@ -83,6 +84,8 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	(
 		TransactionController		tc,
 		ExecRow[]					rowArray,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ResultDescription			resultDescription,
 		boolean						isVirtualMemHeap,
 		TemporaryRowHolderImpl		holder
@@ -108,6 +111,8 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	(
 		TransactionController		tc,
 		ExecRow[]					rowArray,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ResultDescription			resultDescription,
 		boolean						isVirtualMemHeap,
 		boolean                     isAppendable,
@@ -117,6 +122,8 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	{
 		this.tc = tc;
 		this.rowArray = rowArray;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		this.resultDescription = resultDescription;
 		this.numRowsOut = 0;
 		isOpen = false;
@@ -161,6 +168,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	{
 		if(isAppendable)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(currentConglomId == holder.getTemporaryConglomId(),
                         "currentConglomId(" + currentConglomId + 
@@ -361,6 +369,8 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 			singleRow.insert(row);
 	    } else {
 	    	singleRow =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 	    		new TemporaryRowHolderImpl(activation, null,
 						   rs.getResultDescription());
 			singleRow.insert(rs.getCurrentRow());
@@ -458,6 +468,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 			return currentRow;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
 		if (holder.getTemporaryConglomId() == 0)
 		{
 			return (ExecRow)null;
@@ -470,6 +481,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 		{
 			scan = 
                 tc.openScan(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
                     holder.getTemporaryConglomId(),
                     false,					// hold
                     0, 		// open read only
@@ -523,6 +535,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 			scan.fetchLocation(baseRowLocation);
 			if(heapCC == null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
                 heapCC = tc.openConglomerate(holder.getTemporaryConglomId(),
 											  false,
 											  TransactionController.OPENMODE_FORUPDATE,
@@ -543,6 +556,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	{
 
 		//incase nothing is inserted yet into the temporary row holder
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
         if (holder.getTemporaryConglomId() == 0)
 			return;
 		if(heapCC == null)
@@ -783,6 +797,8 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 */
 	public ResultDescription	getResultDescription()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		return resultDescription;
 	}
 
@@ -1193,6 +1209,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	  not in the partial row if validColumns.get(N) returns false.  Column N is
 	  in the partial row if validColumns.get(N) returns true.  If column N is
 	  in the partial row then it maps to DataValueDescriptor[M] where M is the
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       count of calls to validColumns.get(i) that return true where i &lt; N.  If
 	  DataValueDescriptor.length is greater than the number of columns 
       indicated by validColumns the extra entries are ignored.  
@@ -1232,6 +1249,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	}
 
     public void setHasDeferrableChecks() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (SanityManager.DEBUG) {
             SanityManager.NOTREACHED();
         }
@@ -1283,6 +1301,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	{ }
 
     public void offendingRowLocation(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             RowLocation rl, long containdId) throws StandardException {
         if (SanityManager.DEBUG) {
             SanityManager.NOTREACHED();
@@ -1296,6 +1315,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 * result sets for other result set it is a no-op.
 	 */
 	public void positionScanAtRowLocation(RowLocation rl) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		throws StandardException 
 	{
 		// Only used for Scrollable insensitive result sets otherwise no-op
@@ -1333,6 +1353,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
     }
 
 	public SQLWarning getWarnings() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		return null;
 	}
 
@@ -1343,6 +1364,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 * result sets for other result set it is a no-op.
 	 */
 	public void updateRow(ExecRow row, RowChanger rowChanger)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 			throws StandardException {
 		// Only ResultSets of type Scroll Insensitive implement
 		// detectability, so for other result sets this method
@@ -1367,11 +1389,13 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 * @return activation
 	 */
 	public final Activation getActivation() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 		return holder.activation;
 	}
     
     public Element toXML( Element parentNode, String tag ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6266
         return BasicNoPutResultSetImpl.childrenToXML( BasicNoPutResultSetImpl.toXML( parentNode, tag, this ), this );
     }
 

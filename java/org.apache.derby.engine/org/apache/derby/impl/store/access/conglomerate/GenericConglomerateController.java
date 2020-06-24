@@ -365,6 +365,7 @@ public abstract class GenericConglomerateController
 
         getRowPositionFromRowLocation(loc, pos);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-707
         if (!open_conglom.latchPage(pos)) 
         {
             return false;
@@ -379,6 +380,7 @@ public abstract class GenericConglomerateController
 
         if (open_conglom.isForUpdate())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4685
             open_conglom.lockPositionForWrite(pos, waitForLock);
         }
         else
@@ -457,22 +459,34 @@ public abstract class GenericConglomerateController
             {
                 throw(StandardException.newException(
                         SQLState.HEAP_TEMPLATE_MISMATCH,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         invalidColumn, 
                         open_conglom.getFormatIds().length));
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-806
+//IC see: https://issues.apache.org/jira/browse/DERBY-806
+//IC see: https://issues.apache.org/jira/browse/DERBY-806
+//IC see: https://issues.apache.org/jira/browse/DERBY-806
         RowPosition pos = 
             open_conglom.getRuntimeMem().get_scratch_row_position();
 
         getRowPositionFromRowLocation(loc, pos);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-707
+//IC see: https://issues.apache.org/jira/browse/DERBY-707
         if (!open_conglom.latchPage(pos)) 
         {
             return false;
         }
 
         open_conglom.lockPositionForWrite(pos, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4685
+//IC see: https://issues.apache.org/jira/browse/DERBY-4685
+//IC see: https://issues.apache.org/jira/browse/DERBY-4685
 
         boolean ret_val = true;
 

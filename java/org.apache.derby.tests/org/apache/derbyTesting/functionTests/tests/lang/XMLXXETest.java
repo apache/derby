@@ -69,6 +69,8 @@ public final class XMLXXETest extends BaseJDBCTestCase {
         if (!XML.classpathMeetsXMLReqs())
             return suite;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
+//IC see: https://issues.apache.org/jira/browse/DERBY-6820
 	String[] testFiles = new String[] {
 	    "functionTests/tests/lang/xmlOptimizerXXE1Payload.trace",
 	    "functionTests/tests/lang/xmlOptimizerXXE1.trace",
@@ -108,6 +110,7 @@ public final class XMLXXETest extends BaseJDBCTestCase {
         
         s.execute("CREATE TABLE xml_data(xml_col XML)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
         String stmt = "INSERT INTO xml_data(xml_col) VALUES(XMLPARSE(DOCUMENT" 
                 + "'<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:"
                 + path +"\" >]><yolo>&xxe;</yolo>'"
@@ -127,6 +130,7 @@ public final class XMLXXETest extends BaseJDBCTestCase {
 
     public void testDerby6807BillionLaughs() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
         Statement st = createStatement();
         st.executeUpdate("create table xml_billion_laughs( xml_col xml )");
 
@@ -155,6 +159,8 @@ String xmlBillionLaughs = "insert into xml_billion_laughs( xml_col ) values(" +
     }
 
     public void testDerby6807FileAccessVTI()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
+//IC see: https://issues.apache.org/jira/browse/DERBY-6820
 		throws Exception
     {
 	String VULNERABLE_XML = "xmlOptimizerXXE1.trace";

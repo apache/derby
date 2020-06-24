@@ -140,9 +140,11 @@ public class ClassInvestigator extends ClassHolder {
 	{
 		int interfaceCount = interfaces == null ? 0 : interfaces.length;
 		Vector<String> implemented = new Vector<String>(interfaceCount);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         for (int i = 0; i < interfaceCount; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
             implemented.add(className(interfaces[i]));
         }
         return implemented.elements();
@@ -150,6 +152,7 @@ public class ClassInvestigator extends ClassHolder {
     public Enumeration<ClassMember> getFields() {
 		if (field_info == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			return Collections.enumeration( new Vector<ClassMember>() );
         }
 
@@ -178,6 +181,7 @@ public class ClassInvestigator extends ClassHolder {
 	}
 
 	public Enumeration getStrings() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		HashSet<String> strings = new HashSet<String>(30, 0.8f);
 		
 		int size = cptEntries.size();
@@ -244,6 +248,7 @@ public class ClassInvestigator extends ClassHolder {
 		attribute_info = null;
 
 		// fields
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		for (Enumeration<ClassMember> e = getFields(); e.hasMoreElements(); ) {
 			ClassMember member = e.nextElement();
 
@@ -270,6 +275,7 @@ public class ClassInvestigator extends ClassHolder {
 		}
 
 		// methods
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		for (Enumeration<ClassMember> e = getMethods(); e.hasMoreElements(); ) {
 			ClassMember member = e.nextElement();
 
@@ -304,6 +310,7 @@ public class ClassInvestigator extends ClassHolder {
 
 		ClassInput ci = new ClassInput(new java.io.ByteArrayInputStream(ae.infoIn));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3941
 		DataInputUtil.skipFully(ci, 4);// puts us at code_length
 		int len = ci.getU4();
 		DataInputUtil.skipFully(ci, len);// puts us at exception_table_length
@@ -330,6 +337,7 @@ public class ClassInvestigator extends ClassHolder {
 				System.err.println("ERROR - Unknown code attribute " + name);
 
 			len = ci.getU4();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3941
 			DataInputUtil.skipFully(ci, len);
 		}
 
@@ -400,6 +408,7 @@ public class ClassInvestigator extends ClassHolder {
 
 		for (; e.hasMoreElements(); ) {
 			ClassMember member = e.nextElement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			String oldMemberName = nameIndexToString(member.name_index);
 			String newMemberName = (String) memberNameMap.get(oldMemberName);
@@ -462,6 +471,7 @@ public class ClassInvestigator extends ClassHolder {
 
 		newCpe.index = index;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		cptEntries.set(index, newCpe);
 	}
 
@@ -470,6 +480,7 @@ public class ClassInvestigator extends ClassHolder {
 
 		ConstantPoolEntry item;
         final int tag = in.getU1();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
 
 		switch (tag) {
 		case VMDescriptor.CONSTANT_Class:
@@ -482,6 +493,7 @@ public class ClassInvestigator extends ClassHolder {
 		case VMDescriptor.CONSTANT_Fieldref:
 		case VMDescriptor.CONSTANT_Methodref:
 		case VMDescriptor.CONSTANT_InterfaceMethodref:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
         case VMDescriptor.CONSTANT_InvokeDynamic:
 			item = new CONSTANT_Index_info(tag, in.getU2(), in.getU2());
 			break;
@@ -506,6 +518,7 @@ public class ClassInvestigator extends ClassHolder {
 			item = new CONSTANT_Utf8_info(in.readUTF());
 			break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
         case VMDescriptor.CONSTANT_MethodHandle:
             item = new CONSTANT_Index_info(tag, in.getU1(), in.getU2());
             break;

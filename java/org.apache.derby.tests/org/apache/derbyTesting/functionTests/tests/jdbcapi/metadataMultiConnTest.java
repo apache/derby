@@ -40,6 +40,7 @@ public class metadataMultiConnTest extends BaseJDBCTestCase {
 	}
 
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(metadataMultiConnTest.class);
 	}
 

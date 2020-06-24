@@ -232,6 +232,7 @@ public class JDBCDisplayUtil {
 	static public void DisplayResults(PrintWriter out, Statement stmt, Connection conn )
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		indent_DisplayResults( out, stmt, conn, 0, null, null);			
 	}
 
@@ -273,6 +274,7 @@ public class JDBCDisplayUtil {
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 	    Calculates column display widths from the default widths of the
 	    result set.
 	 */
@@ -299,6 +301,7 @@ public class JDBCDisplayUtil {
        @param out the place to write to
        @param resultSets list of <code>ResultSet</code>s to display
        @param conn the connection against which the <code>ResultSet</code>s
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
             were retrieved
        @param displayColumns column numbers to display, <code>null</code> if all
        @param displayColumnWidths column widths, in characters, if
@@ -312,6 +315,7 @@ public class JDBCDisplayUtil {
                                               int[] displayColumnWidths)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
         indent_DisplayResults( out, resultSets, conn, 0, displayColumns,
                                displayColumnWidths);
     }
@@ -336,9 +340,12 @@ public class JDBCDisplayUtil {
 	}
 
     static private void indent_DisplayResults
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
         (PrintWriter out, ResultSet rs, Connection conn, int indentLevel,
          int[] displayColumns, int[] displayColumnWidths)
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<ResultSet> resultSets = new ArrayList<ResultSet>();
         resultSets.add(rs);
         indent_DisplayResults( out, resultSets, conn, 0, displayColumns, 
@@ -355,6 +362,7 @@ public class JDBCDisplayUtil {
         //get metadata from the first ResultSet
         if (resultSets != null && resultSets.size() > 0)
             rsmd = (resultSets.get(0)).getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         checkNotNull(rsmd, "ResultSetMetaData");
         Vector<ResultSet> nestedResults;
@@ -370,6 +378,7 @@ public class JDBCDisplayUtil {
         if(displayColumnWidths == null)
             displayColumnWidths = getColumnDisplayWidths(rsmd,
                                                          displayColumns,true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
 
         int len = indent_DisplayBanner(out,rsmd, indentLevel, displayColumns,
                                        displayColumnWidths);
@@ -381,6 +390,7 @@ public class JDBCDisplayUtil {
         ResultSet rs = null;
         boolean doNext = true;
         for (int i = 0; i< resultSets.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rs = resultSets.get(i);
             doNext = true;
             while (doNext){
@@ -407,6 +417,7 @@ public class JDBCDisplayUtil {
         if (showSelectCount == true) {
             if (numberOfRowsSelected == 1) {
                 out.println();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
                 indentedPrintLine(out, indentLevel,
                                   LocalizedResource.getMessage("UT_1RowSelec"));
             } else if (numberOfRowsSelected >= 0) {
@@ -451,6 +462,7 @@ public class JDBCDisplayUtil {
 			LocalizedResource.OutputWriter().println(b);
 			LocalizedResource.OutputWriter().println(LocalizedResource.getMessage("UT_Resul0", LocalizedResource.getNumber(i)));
 			LocalizedResource.OutputWriter().println(b);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 			indent_DisplayResults(out, (ResultSet) nr.elementAt(i), conn,
 								  indentLevel, null, null);
 		}
@@ -469,6 +481,7 @@ public class JDBCDisplayUtil {
 	static public void DisplayNextRow(PrintWriter out, ResultSet rs, Connection conn )
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		indent_DisplayNextRow( out, rs, conn, 0, null, (rs == null) ? null
 							   : getColumnDisplayWidths(rs.getMetaData(), null, true));
 	}
@@ -494,6 +507,7 @@ public class JDBCDisplayUtil {
 		// Only print stuff out if there is a row to be had.
 		if (rs.next()) {
 			int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, displayColumns, displayColumnWidths);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
     		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
 					   null, null );
 		}
@@ -521,6 +535,7 @@ public class JDBCDisplayUtil {
 	static public void DisplayCurrentRow(PrintWriter out, ResultSet rs, Connection conn )
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		indent_DisplayCurrentRow( out, rs, conn, 0, null, (rs == null) ? null
 								  : getColumnDisplayWidths(rs.getMetaData(), null, true) );
 	}
@@ -547,6 +562,7 @@ public class JDBCDisplayUtil {
 		checkNotNull(rsmd, "ResultSetMetaData");
 
 		int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, displayColumns, displayColumnWidths);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
    		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
 				   displayColumns, displayColumnWidths );
 
@@ -570,6 +586,7 @@ public class JDBCDisplayUtil {
 	static public int DisplayBanner(PrintWriter out, ResultSetMetaData rsmd )
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		return indent_DisplayBanner( out, rsmd, 0, null, 
 									 getColumnDisplayWidths(rsmd, null, true) );
 	}
@@ -657,6 +674,7 @@ public class JDBCDisplayUtil {
 	    @param displayColumns A list of column numbers to display
 	    @param displayColumnWidths If displayColumns is set, the width of
 								columns to display, in characters.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 
 		@exception SQLException thrown on JDBC access failure
 	 */
@@ -880,6 +898,7 @@ public class JDBCDisplayUtil {
 	static public void DisplayResults(PrintStream out, Statement stmt, Connection conn )
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		indent_DisplayResults( out, stmt, conn, 0, null, null);			
 	}
 
@@ -918,6 +937,7 @@ public class JDBCDisplayUtil {
 	static public void DisplayResults(PrintStream out, ResultSet rs, Connection conn)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		indent_DisplayResults( out, rs, conn, 0, null, null);
 	}
 
@@ -927,6 +947,7 @@ public class JDBCDisplayUtil {
 		throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		checkNotNull(rsmd, "ResultSetMetaData");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<ResultSet> nestedResults;
     int numberOfRowsSelected = 0;
 
@@ -937,6 +958,8 @@ public class JDBCDisplayUtil {
 		else
 			nestedResults = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		if(displayColumnWidths == null)
 			displayColumnWidths = getColumnDisplayWidths(rsmd, displayColumns, false);
 
@@ -952,6 +975,9 @@ public class JDBCDisplayUtil {
 				doNext = rs.next();
 				if (doNext) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
 		    		DisplayRow(out, rs, rsmd, len, nestedResults, conn, 
 							   indentLevel, displayColumns, 
 							   displayColumnWidths);
@@ -1003,7 +1029,9 @@ public class JDBCDisplayUtil {
 			System.out.println(b);
 			System.out.println(s+i+" +");
 			System.out.println(b);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			indent_DisplayResults(out, nr.elementAt(i), conn, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 								  indentLevel, null, null);
 		}
 	}
@@ -1036,6 +1064,7 @@ public class JDBCDisplayUtil {
 		// Only print stuff out if there is a row to be had.
 		if (rs.next()) {
 			int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, null, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
     		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
 					   displayColumns, displayColumnWidths);
 		}
@@ -1053,6 +1082,7 @@ public class JDBCDisplayUtil {
 	static public void DisplayCurrentRow(PrintStream out, ResultSet rs, Connection conn )
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		indent_DisplayCurrentRow( out, rs, conn, 0, null, (rs == null) ? null
 								  : getColumnDisplayWidths(rs.getMetaData(),null,false) );
 	}
@@ -1062,6 +1092,10 @@ public class JDBCDisplayUtil {
 		throws SQLException {
 
 		Vector<ResultSet> nestedResults;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		if (rs == null) {
 			indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_NoCurreRow_19"));
@@ -1071,6 +1105,8 @@ public class JDBCDisplayUtil {
 		// autocommit must be off or the nested cursors
 		// are closed when the outer statement completes.
 		if (!conn.getAutoCommit())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			nestedResults = new Vector<ResultSet>();
 		else
 			nestedResults = null;
@@ -1079,6 +1115,7 @@ public class JDBCDisplayUtil {
 		checkNotNull(rsmd, "ResultSetMetaData");
 
 		int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, displayColumns, displayColumnWidths);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
    		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
 				   displayColumns, displayColumnWidths);
 
@@ -1092,6 +1129,7 @@ public class JDBCDisplayUtil {
 	static public int DisplayBanner(PrintStream out, ResultSetMetaData rsmd )
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		return indent_DisplayBanner( out, rsmd, 0, null,
 									 getColumnDisplayWidths(rsmd,null,false) );
 	}
@@ -1123,6 +1161,7 @@ public class JDBCDisplayUtil {
 				buf.append('|');
 
 			String s = rsmd.getColumnLabel(colnum);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 
 			int w = displayColumnWidths[i-1];
 
@@ -1189,10 +1228,13 @@ public class JDBCDisplayUtil {
 				buf.append('|');
 
 			String s;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 			switch (rsmd.getColumnType(colnum)) {
 			default:
 				s = rs.getString(colnum);
 				break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.JAVA_OBJECT:
 			case Types.OTHER:
 			{
@@ -1201,11 +1243,15 @@ public class JDBCDisplayUtil {
 				else if (o instanceof ResultSet && nestedResults != null)
 				{
 					s = "ResultSet #"+nestedResults.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					nestedResults.addElement( (ResultSet) o);
 				}
 				else
 				{
 					try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 						s = rs.getString(colnum);
 					} catch (SQLException se) {
 						// oops, they don't support refetching the column
@@ -1269,6 +1315,7 @@ public class JDBCDisplayUtil {
      */
     private static boolean getSystemBoolean(final String name) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return (AccessController
                 .doPrivileged(new java.security.PrivilegedAction<Boolean>() {
 

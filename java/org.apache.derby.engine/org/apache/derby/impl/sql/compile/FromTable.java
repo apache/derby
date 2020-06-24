@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.FromTable
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -90,6 +91,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	private boolean considerSortAvoidancePath;
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	 Set of object-&gt;trulyTheBestAccessPath mappings used to keep track
 	 of which of this Optimizable's "trulyTheBestAccessPath" was the best
 	 with respect to a specific outer query or ancestor node.  In the case
@@ -119,6 +121,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
      * @param tableProperties   Properties list associated with the table
      * @param cm                The context manager
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromTable(String correlationName,
               Properties tableProperties,
               ContextManager cm)
@@ -174,6 +178,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		getCostEstimate(optimizer);
 
 		setCostEstimateCost(singleScanCost);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Optimize any subqueries that need to get optimized and
 		 * are not optimized any where else.  (Like those
@@ -253,6 +258,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 			found = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceConsideringJoinStrategy( ap.getJoinStrategy(), tableNumber ); }
 		}
 
@@ -314,6 +320,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 		ap.setJoinStrategy(getCurrentAccessPath().getJoinStrategy());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         if (optimizerTracingIsOn()) {
             getOptimizerTracer().traceRememberingJoinStrategy(
                 getCurrentAccessPath().getJoinStrategy(), tableNumber);
@@ -345,6 +352,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 					"unknown access path type");
 			}
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if (optimizerTracingIsOn()) {
                 getOptimizerTracer().traceRememberingBestUnknownAccessPathSubstring(
                     ap, tableNumber);
@@ -439,6 +447,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		 *		invalid value for hashMaxCapacity
 		 */
         Enumeration<?> e = tableProperties.keys();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		while (e.hasMoreElements())
 		{
@@ -464,6 +473,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			{
 				try
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
 					loadFactor = Float.parseFloat(value);
 				}
 				catch (NumberFormatException nfe)
@@ -528,6 +538,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			if (bestPlanMap != null)
 			{
 				bestPlanMap.remove(planKey);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 if (bestPlanMap.isEmpty()) {
 					bestPlanMap = null;
                 }
@@ -548,6 +560,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			// If the bestPlanMap already exists, search for an
 			// AccessPath for the received key and use that if we can.
 			if (bestPlanMap == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				bestPlanMap = new HashMap<Object,AccessPathImpl>();
 			else
 				ap = bestPlanMap.get(planKey);
@@ -579,6 +592,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			return;
 
 		ap = bestPlanMap.get(planKey);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		// It might be the case that there is no plan stored for
 		// the key, in which case there's nothing to load.
@@ -650,7 +664,9 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		}
 
 		setCostEstimateCost(bestPath.getCostEstimate());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         if ( optimizerTracingIsOn() )
         { getOptimizerTracer().traceRememberingBestAccessPath( bestPath, tableNumber, planType ); }
 	}
@@ -724,10 +740,13 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *  we just return the value stored in costEstimate as a default.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		// If we already found it, just return it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCandidateFinalCostEstimate() != null)
         {
 			return getCandidateFinalCostEstimate();
@@ -759,6 +778,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
      * {@code false} otherwise
      */
     public boolean hasLargeObjectColumns() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns()) {
             if (rc.isReferenced()) {
                 DataTypeDescriptor type = rc.getType();
@@ -835,6 +855,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	/** @see Optimizable#maxCapacity */
 	public int maxCapacity( JoinStrategy joinStrategy, int maxMemoryPerTable) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
         return joinStrategy.maxCapacity( maxCapacity, maxMemoryPerTable, getPerRowUsage());
 	}
 
@@ -843,6 +864,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
         if( perRowUsage < 0)
         {
             // Do not use getRefCols() because the cached refCols may no longer be valid.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             FormatableBitSet refCols = getResultColumns().getReferencedFormatableBitSet(cursorTargetTable(), true, false);
             perRowUsage = 0.0;
 
@@ -851,6 +873,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
             {
                 if (refCols.isSet(i))
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                     ResultColumn rc = getResultColumns().elementAt(i);
                     DataTypeDescriptor expressionType = rc.getExpression().getTypeServices();
                     if( expressionType != null)
@@ -871,6 +894,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
             {
                 if (cd.isIndex() && ( ! isCoveringIndex(cd) ) )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1673
                     perRowUsage +=  12.0 ;
                 }
             }
@@ -911,6 +935,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
     /** @see Optimizable#memoryUsageOK */
     public boolean memoryUsageOK( double rowCount, int maxMemoryPerTable)
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
 			throws StandardException
     {
 		/*
@@ -929,6 +954,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * 
 	 * @see HalfOuterJoinNode#isJoinColumnForRightOuterJoin
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void isJoinColumnForRightOuterJoin(ResultColumn rc)
 	{
 	}
@@ -947,6 +974,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 */
 	public int getNumColumnsReturned()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return getResultColumns().size();
 	}
 
@@ -1037,6 +1065,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 	protected CostEstimate getCostEstimate(Optimizer optimizer)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCostEstimate() == null)
 		{
 			setCostEstimate( getOptimizerFactory().getCostEstimate() );
@@ -1053,6 +1082,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	*/
 	protected CostEstimate getScratchCostEstimate(Optimizer optimizer)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if ( getScratchCostEstimate() == null )
 		{
 			setScratchCostEstimate( getOptimizerFactory().getCostEstimate() );
@@ -1074,6 +1104,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 */
 	protected void assignCostEstimate(CostEstimate newCostEstimate)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setCostEstimate( newCostEstimate );
 	}
 
@@ -1113,12 +1144,15 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getResultColumnsForList(TableName allTableName,
 												ResultColumnList inputRcl,
 												TableName tableName)
 			throws StandardException
 	{
 		TableName		 exposedName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
         TableName        toCompare;
 		/* If allTableName is non-null, then we must check to see if it matches
 		 * our exposed name.
@@ -1152,6 +1186,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			exposedName = makeTableName(null, correlationName);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         final ContextManager cm = getContextManager();
         ResultColumnList rcList = new ResultColumnList(cm);
 
@@ -1217,6 +1252,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getExposedName() throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -1230,6 +1267,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @param tableNumber	The table # for this table.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setTableNumber(int tableNumber)
 	{
 		/* This should only be called if the tableNumber has not been set yet */
@@ -1247,6 +1286,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @return a TableName node representing this FromTable.
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TableName getTableName()
 		throws StandardException
 	{
@@ -1265,6 +1306,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @param level		The query block level for this FromTable.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLevel(int level)
 	{
 		this.level = level;
@@ -1319,6 +1362,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	* @exception	StandardException	throws on schema name
 	*						that doesn't exist	
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SchemaDescriptor getSchemaDescriptor() throws StandardException
 	{
 		return getSchemaDescriptor(corrTableName);
@@ -1334,6 +1379,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	* @exception	StandardException	throws on schema name
 	*						that doesn't exist	
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SchemaDescriptor getSchemaDescriptor(TableName tableName)
             throws StandardException
 	{
@@ -1417,6 +1464,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @param passedMap	The table map to fill in.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void fillInReferencedTableMap(JBitSet passedMap)
 	{
 		if (tableNumber != -1)
@@ -1435,6 +1484,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 */
     protected void markUpdatableByCursor(List<String> updateColumns)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().markUpdatableByCursor(updateColumns);
 	}
 
@@ -1469,9 +1519,13 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromList flatten(ResultColumnList rcl,
 							PredicateList outerPList,
 							SubqueryList sql,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
                             GroupByList gbl,
                             ValueNode havingClause)
 
@@ -1543,8 +1597,11 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @param tableName the unbound table name
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setOrigTableName(TableName tableName)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 		this.origTableName = tableName;
 	}
 	
@@ -1556,6 +1613,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @return TableName the original or unbound tablename
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TableName getOrigTableName()
 	{
 		return this.origTableName;

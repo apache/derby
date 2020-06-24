@@ -79,8 +79,10 @@ public class InterruptStatus {
      * also. Use lcc if available, else thread local variable.
      */
     public static void setInterrupted() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4920
         LanguageConnectionContext lcc = null;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             lcc = (LanguageConnectionContext)getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
 
@@ -112,6 +114,7 @@ public class InterruptStatus {
     public static void saveInfoFromLcc(LanguageConnectionContext lcc) {
         
         StandardException e = lcc.getInterruptedException();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5152
 
         if (e != null) {
             exception.set(e);
@@ -197,9 +200,11 @@ public class InterruptStatus {
      */
     public static void restoreIntrFlagIfSeen() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4911
         LanguageConnectionContext lcc = null;
         try {
             lcc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 (LanguageConnectionContext)getContextOrNull(
                     LanguageConnectionContext.CONTEXT_ID);
         } catch (ShutdownException e) {
@@ -248,8 +253,10 @@ public class InterruptStatus {
     public static void restoreIntrFlagIfSeen(LanguageConnectionContext lcc) {
 
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4920
             LanguageConnectionContext ctxLcc = null;
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 ctxLcc = (LanguageConnectionContext)
                     getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 
@@ -290,6 +297,7 @@ public class InterruptStatus {
     public static void throwIf(LanguageConnectionContext lcc)
             throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         if (Thread.currentThread().isInterrupted()) {
             setInterrupted();
         }
@@ -312,6 +320,7 @@ public class InterruptStatus {
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

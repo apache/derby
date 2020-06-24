@@ -35,6 +35,7 @@ public interface Control {
 
 	public Lock getLock(CompatibilitySpace compatibilitySpace,
 						Object qualifier);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 
 //EXCLUDE-START-lockdiag- 
 	/**
@@ -59,6 +60,7 @@ public interface Control {
 	public List getWaiting();
 
 	public boolean isGrantable(boolean otherWaiters,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 							   CompatibilitySpace compatibilitySpace,
 							   Object qualifier);
 

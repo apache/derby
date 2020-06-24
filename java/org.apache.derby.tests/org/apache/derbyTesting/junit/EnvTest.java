@@ -51,6 +51,7 @@ public class EnvTest extends TestCase {
      * @param text String to print
      */
     public void traceit(final String text) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4808
         setName(text);
         PrintStream out = System.out;
         String KEY_TRACE = "derby.tests.trace";

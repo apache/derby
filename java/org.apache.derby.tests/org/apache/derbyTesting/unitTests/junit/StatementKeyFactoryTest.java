@@ -128,6 +128,7 @@ public class StatementKeyFactoryTest
         StatementKey[] keys = new StatementKey[] {
             StatementKeyFactory.newPrepared(sql, schema, rsh),
             StatementKeyFactory.newPrepared(sql, schema, rsh, auto),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3324
             StatementKeyFactory.newPrepared(sql, schema, rst, rsc, rsh),
             StatementKeyFactory.newCallable(sql, schema, rsh),
             StatementKeyFactory.newCallable(sql, schema, rst, rsc, rsh)};

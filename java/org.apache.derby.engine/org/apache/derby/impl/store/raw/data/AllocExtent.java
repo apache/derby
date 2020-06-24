@@ -607,6 +607,7 @@ public class AllocExtent implements Externalizable
     int        new_highest_page,
     int        num_pages_truncated)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
         if (new_highest_page >= 0)
         {
             freePages.shrink(new_highest_page + 1);

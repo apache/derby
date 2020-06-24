@@ -52,8 +52,10 @@ public class Schema extends JDBCPerfTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("Order Entry- Schema");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Create Schema
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         addBaseSchema(suite);
         addConstraints(suite);
         return suite;
@@ -63,6 +65,7 @@ public class Schema extends JDBCPerfTestCase {
         // Create Schema
         suite.addTest(new Schema("schema.sql"));
         suite.addTest(new Schema("dataroutines.sql"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         suite.addTest(new Schema("delivery.sql"));
     }
 

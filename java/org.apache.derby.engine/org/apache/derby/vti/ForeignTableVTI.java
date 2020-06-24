@@ -167,6 +167,7 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
      */
     public  ForeignTableVTI
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
          String foreignSchemaName,
          String foreignTableName,
          Connection foreignConnection
@@ -232,6 +233,7 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
      */
     public  static  void    dropConnection( String connectionURL )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6440
         _connections.remove( connectionURL );
     }
 
@@ -265,6 +267,7 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
             _restriction = null;
             _columnNumberMap = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
             if ( getWrappedResultSet() != null ) { getWrappedResultSet().close(); }
             if ( _foreignPreparedStatement != null ) { _foreignPreparedStatement.close(); }
 
@@ -298,6 +301,7 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
         ( String[] columnNames, Restriction restriction )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6197
         _columnNames = ArrayUtil.copy( columnNames );
         _restriction = restriction;
 
@@ -307,6 +311,7 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
         int foreignColumnID = 1;
         for ( int i = 0; i < columnCount; i++ )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6197
             if ( _columnNames[ i ] != null ) { _columnNumberMap[ i ] = foreignColumnID++; }
         }
     }
@@ -318,12 +323,14 @@ public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
     ////////////////////////////////////////////////////////////////////////
 
     private static  Connection  getForeignConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
         ( String connectionURL, Connection foreignConnection )
         throws SQLException
     {
         if ( foreignConnection != null ) { return foreignConnection; }
         
         Connection  conn = _connections.get( connectionURL );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         if ( conn == null )
         {

@@ -182,6 +182,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	   Upon entry the only word on the stack is the result set expression
 	 */
 	void finishExecuteMethod() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
 
         if (executeMethod != null) {
             executeMethod.methodReturn();
@@ -312,6 +313,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	/*
 		The first time a current datetime is needed, create the class
 		level support for it. The first half of the logic is in our parent
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		class.
 	 */
     @Override
@@ -325,6 +327,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 		//    to tell cdt to restart:
 		//	  cdt.forget();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
         MethodBuilder execute = getExecuteMethod();
         execute.getField(lf);
         execute.callMethod(

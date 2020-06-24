@@ -42,10 +42,13 @@ public class _Suite extends BaseTestCase  {
 
     public static Test suite() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("In-memory db test suite");
         // Tests are not yet compatible with JSR169 / JavaME
+//IC see: https://issues.apache.org/jira/browse/DERBY-4085
         if (!JDBC.vmSupportsJSR169()) {
             suite.addTest(BasicInMemoryDbTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6662
             suite.addTest(Derby6662Test.suite());
             suite.addTest(MogTest.suite());
         }

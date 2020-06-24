@@ -53,6 +53,7 @@ public  class   Wrapper42DBMD   extends Wrapper41DBMD
 
     public  long getMaxLogicalLobSize() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         if ( _embedded != null ) { return _embedded.getMaxLogicalLobSize(); }
         else if ( _netclient != null ) { return _netclient.getMaxLogicalLobSize(); }
         else { throw nothingWrapped(); }

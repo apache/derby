@@ -45,6 +45,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
      */
     public static Writer getLogDiscarder() {
         // Writer discarding all data written to it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
         return new Writer() {
             public void write(char[] cbuf, int off, int len) {
                 // Do nothing.
@@ -77,9 +78,11 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
      */
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ConnectionHandlingJUnit");
         
         // Only support for java.sql.DriverManager has been implemented.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         if (JDBC.vmSupportsJDBC3()) {
             /* driverMgrTestConnectionsToNonexistentDb:
              * Only support for DriverManager (JDBC2 and above) for now, for
@@ -94,6 +97,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
 
             TestCase nonExistentDbTest = new ConnectionHandlingJunit(
                     "driverMgrTestConnectionsToNonexistentDb");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
             TestCase nonExistentDbTestInMem = new ConnectionHandlingJunit(
                     "driverMgrTestConnectionsToNonexistentDbInMemory");
             
@@ -103,6 +107,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
              * resources are <i>almost</i> exhausted from the embedded test.
              */
             suite.addTest(nonExistentDbTest);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
             suite.addTest(nonExistentDbTestInMem);
             // to run the test in client/server mode, comment the above line,
             // uncomment the next and recompile.
@@ -143,6 +148,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
      */
     public void driverMgrTestConnectionsToNonexistentDb() throws SQLException {
         String url = getTestConfiguration().getJDBCUrl("nonexistentDatabase");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
         driverMgrConnectionInitiator(url, false);
     }
 
@@ -176,6 +182,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
                 try {
                     // We are expecting an exception here because we are trying to 
                     // connect to a DB that does not exist.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
                     myInvalidConn = DriverManager.getConnection(
                             appendId ? url + count : url);
                     // The following may happen because of changes to helper methods
@@ -250,6 +257,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
         // written for every failed connection attempt.
         // To take effect, the property must be set before the driver is
         // loaded, which means this test should be run separately.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
         setSystemProperty("derby.stream.error.method",
                 "org.apache.derbyTesting.functionTests.tests.memory." +
                 "ConnectionHandlingJunit.getLogDiscarder");
@@ -266,6 +274,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
             println("Loading JDBC driver " + driverClass);
             // load the driver
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = Class.forName(driverClass);
                 clazz.getConstructor().newInstance();
             } catch (ClassNotFoundException cnfe) {
@@ -280,6 +289,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
                 throw new SQLException("Failed to load JDBC driver '" 
                         + driverClass + "', InstantiationException: " 
                         + ie.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             } catch (NoSuchMethodException ie) {
                 throw new SQLException("Missing constructor for JDBC driver '" 
                         + driverClass + "', NoSuchMethodException: " 

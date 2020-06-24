@@ -69,18 +69,22 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	//
 	private	static	Exclusions[]	rawExcludables = new Exclusions[]
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 		    new Exclusions
 		    (
 				java.sql.Connection.class,
 				new MD[]
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1380
 						new MD( "createArrayOf", new Class[] { String.class, Object[].class } ),
 						new MD( "createNClob", new Class[] { } ),
 						new MD( "createSQLXML", new Class[] { } ),
 						new MD( "createStruct", new Class[] { String.class, Object[].class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 						new MD( "getNetworkTimeout", new Class[] { }, JDBC.vmSupportsJDBC41() ),
 						new MD( "getTypeMap", new Class[] { } ),
 						new MD( "prepareStatement", new Class[] { String.class, int[].class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 						new MD( "prepareStatement", new Class[] { String.class, String[].class } ),
 						new MD( "setNetworkTimeout", new Class[] { java.util.concurrent.Executor.class, int.class }, JDBC.vmSupportsJDBC41() ),
 						new MD( "setTypeMap", new Class[] { Map.class } ),
@@ -90,6 +94,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				java.sql.Statement.class,
 				new MD[]
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 						new MD( "cancel", new Class[] { } ),
 				    new MD( "execute", new Class[] { String.class, int[].class } ),
 						new MD( "execute", new Class[] { String.class, String[].class } ),
@@ -111,9 +116,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "setNClob", new Class[] { int.class, java.io.Reader.class, long.class } ),
 						new MD( "setNString", new Class[] { int.class, String.class } ),
 						new MD( "setRef", new Class[] { int.class, Ref.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                         new MD( "setRowId", new Class[] { int.class, RowId.class } ),
 						new MD( "setSQLXML", new Class[] { int.class, SQLXML.class } ),
 					    new MD( "setURL", new Class[] { int.class, URL.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 					    new MD( "setNull", new Class[] { int.class, int.class, String.class } ),
 					    new MD( "setUnicodeStream", new Class[] { int.class, InputStream.class, int.class } ),
 						} ),
@@ -127,6 +134,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					// JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
 					// OR THE OTHER OF OUR CLIENTS.
 					//
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 					new FD( "getBlob", new Class[] { int.class } ),
 					new FD( "getClob", new Class[] { int.class } ),
 					
@@ -159,6 +167,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					new MD( "getNString", new Class[] { int.class } ),
 					new MD( "getNString", new Class[] { String.class } ),
 					new MD( "getObject", new Class[] { String.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 					new MD( "getObject", new Class[] { String.class, Class.class }, JDBC.vmSupportsJDBC41() ),
 					new MD( "getRef", new Class[] { int.class } ),
 					new MD( "getRef", new Class[] { String.class } ),
@@ -174,9 +183,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					new MD( "getTimestamp", new Class[] { String.class, java.util.Calendar.class } ),
 					new MD( "getURL", new Class[] { int.class } ),
 					new MD( "getURL", new Class[] { String.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                     new MD( "registerOutParameter", new Class[] { String.class, int.class } ),
                     new MD( "registerOutParameter", new Class[] { String.class, int.class, int.class } ),
                     new MD( "registerOutParameter", new Class[] { String.class, int.class, String.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
                     new MD( "registerOutParameter", new Class[] { int.class, int.class, String.class } ),
                     makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType" }, JDBC.vmSupportsJDBC42() ),
                     makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType", "int" }, JDBC.vmSupportsJDBC42() ),
@@ -184,6 +195,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
                                                 new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, long.class } ),
 						new MD( "setBigDecimal", new Class[] { String.class, java.math.BigDecimal.class } ),
 						new MD( "setBinaryStream", new Class[] { String.class, java.io.InputStream.class } ),
@@ -271,12 +283,14 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "getRowId", new Class[] { String.class } ),
 						new MD( "getSQLXML", new Class[] { int.class } ),
 						new MD( "getSQLXML", new Class[] { String.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 						new MD( "getUnicodeStream", new Class[] { int.class } ),
 						new MD( "getUnicodeStream", new Class[] { String.class } ),
 						new MD( "refreshRow", new Class[] { } ),
 						new MD( "updateArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "updateArray", new Class[] { String.class, java.sql.Array.class } ),
 						new MD( "updateNCharacterStream", new Class[] { int.class, java.io.Reader.class } ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 						new MD( "updateNCharacterStream", new Class[] { int.class, java.io.Reader.class, long.class } ),
 						new MD( "updateNCharacterStream", new Class[] { String.class, java.io.Reader.class } ),
 						new MD( "updateNCharacterStream", new Class[] { String.class, java.io.Reader.class, long.class } ),
@@ -306,6 +320,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
     // Returns null if the JVM doesn't.
     //
     private static  MD  makeMD
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         ( String methodName, String[] argClassNames, boolean requiredAtThisLevel )
     {
         // return null if the class names can't be resolved
@@ -356,12 +371,16 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		throws Exception
 	{
     getTestConfiguration().setVerbosity( true );
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6854
 
     // do not run on java 9. it introduces classes and methods not found in java 8.
     if (vmAtLeast(1, 9)) { return; }
 
     if ( savedVerbosity ) { println( "Supports JDBC 4.2 = " + JDBC. vmSupportsJDBC42() ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 		HashSet<String>	vanishedMethodList = new HashSet<String>();
 		HashSet<String>	unsupportedList = new HashSet<String>();
 		HashSet<String>	notUnderstoodList = new HashSet<String>();
@@ -380,6 +399,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		printUnsupportedList( unsupportedList );
 		printNotUnderstoodList( notUnderstoodList );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-6854
     assertEquals( "vanishedMethodList", 0, vanishedMethodList.size() );
     assertEquals( "unsupportedList", 0, unsupportedList.size() );
     assertEquals( "notUnderstoodList", 0, notUnderstoodList.size() );
@@ -392,6 +413,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
 		DataSource			ds = JDBCDataSource.getDataSource();
 		Connection			conn = ds.getConnection();
 
@@ -407,8 +430,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
 		ConnectionPoolDataSource	ds = J2EEDataSource.getConnectionPoolDataSource();
 		PooledConnection			pc = ds.getPooledConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
 			(getTestConfiguration().getUserName(),
                     getTestConfiguration().getUserPassword());
 		Connection					conn = pc.getConnection();
@@ -426,8 +452,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
 		XADataSource				ds = J2EEDataSource.getXADataSource();
 		XAConnection				xaconn = ds.getXAConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
 			(getTestConfiguration().getUserName(),
                     getTestConfiguration().getUserPassword());
 		Connection					conn = xaconn.getConnection();
@@ -473,6 +502,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		vetObject( dbmd, unsupportedList, notUnderstoodList );
 		vetObject( stmt, unsupportedList, notUnderstoodList );
 		vetObject( csmd, unsupportedList, notUnderstoodList );
+//IC see: https://issues.apache.org/jira/browse/DERBY-1265
 		vetObject( cs, unsupportedList, notUnderstoodList );
 		vetObject( rsmd, unsupportedList, notUnderstoodList );
 		vetObject( rs, unsupportedList, notUnderstoodList );
@@ -549,6 +579,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		for ( int i = 0; i < count; i++ )
 		{
 			Exclusions		exclusions = rawExcludables[ i ];
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
 			Class<?>		iface = exclusions.getInterface();
 			MD[]			mds = exclusions.getExcludedMethods();
 			int				exclusionCount = mds.length;
@@ -558,8 +589,10 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 			{
 				MD		md = mds[ j ];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 if ( md == null ) { continue; }
                 if ( !md.requiredAtThisLevel() ) { continue; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 
 				//
 				// If we are strictly enforcing the JDBC standard,
@@ -567,8 +600,10 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				// doesn't implement.
 				//
 				if ( STRICT_ENFORCEMENT && !md.isOptional()  ) { continue; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 
 				Method	method = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 
 				try {
 					method = iface.getMethod( md.getMethodName(), md.getArgTypes() );
@@ -645,6 +680,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		  HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1265
 		Method[]	methods = sortMethods( iface );
 		int			methodCount = methods.length;
 
@@ -661,6 +697,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	// order. Class.getMethods() does not do us this favor.
 	//
 	private	Method[]	sortMethods( Class iface )
+//IC see: https://issues.apache.org/jira/browse/DERBY-1265
 		throws Exception
 	{
 		Method[]			raw = iface.getMethods();
@@ -692,6 +729,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		}
 		catch (Throwable e)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 			if ( !( e instanceof InvocationTargetException ) )
 			{
 				recordUnexpectedError( candidate, iface, method, notUnderstoodList, e );
@@ -706,6 +744,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 					if ( !isExcludable )
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 					    StackTraceElement[] stack = 
 						cause.getStackTrace();
 						int i = 0;
@@ -740,6 +779,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				}
 				else
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 					recordUnexpectedError( candidate, iface, method, notUnderstoodList, cause );
 				}
 				
@@ -751,6 +791,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	// Record an unexpected error.
 	//
 	private	void	recordUnexpectedError
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 		( Object candidate, Class iface, Method method,
 		  HashSet<String> notUnderstoodList, Throwable cause )
 		throws Exception
@@ -763,6 +804,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	// Returns true if this method is allowed to raise SQLFeatureNotSupportedException.
 	//
 	private	boolean	isExcludable(Method method )
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 		throws Exception
 	{
 		Class				iface = method.getDeclaringClass();
@@ -810,6 +852,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
             return Boolean.FALSE;
         }
         if (type == Character.TYPE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return (char) 0;
         }
         if (type == Byte.TYPE) {
@@ -842,6 +885,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		int			count = unsupportedList.size();
 
 		if ( count == 0 ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1265
 
 		println( "--------------- UNSUPPORTED METHODS ------------------" );
 		println( "--" );
@@ -863,6 +907,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		int			count = vanishedMethodList.size();
 
 		if ( count == 0 ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 
 		println( "--------------- VANISHED METHODS ------------------" );
 		println( "--" );
@@ -884,6 +929,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		int			count = notUnderstoodList.size();
 
 		if ( count == 0 ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1265
 
 		println( "\n\n" );
 		println( "--------------- NOT UNDERSTOOD METHODS ------------------" );
@@ -922,6 +968,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		/** Construct from methodName and argument types. */
 		public	MD( String methodName, Class[] argTypes )
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             this( methodName, argTypes, true );
 		}
 		public	MD( String methodName, Class[] argTypes, boolean requiredAtThisLevel )
@@ -946,6 +993,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		public	String	toString()
 		{
 			StringBuffer	buffer = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 
 			buffer.append( _methodName );
 			buffer.append( "( " );
@@ -1092,6 +1140,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return TestConfiguration.defaultSuite(UnsupportedVetter.class);
     }
 }

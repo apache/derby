@@ -53,6 +53,7 @@ public class NullsTest extends BaseJDBCTestCase {
 
         // A column cannot be declared explicitly nullable.
         assertCompileError("42X01", "create table a(a1 int null)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
         //Trying to define null and not null for a column
         String sql = "create table a(a1 int null not null)";
@@ -122,6 +123,7 @@ public class NullsTest extends BaseJDBCTestCase {
 
         // Adding explicitly nullable column should fail.
         assertCompileError("42X01", "alter table a add column a3 int null");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
         //Alter table table level primary key constraint on nullable column
         //doesn't give an error

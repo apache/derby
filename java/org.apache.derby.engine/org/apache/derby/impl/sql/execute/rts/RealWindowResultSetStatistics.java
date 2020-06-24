@@ -131,6 +131,7 @@ public class RealWindowResultSetStatistics
      */
     public java.util.Vector<ResultSetStatistics> getChildren()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         java.util.Vector<ResultSetStatistics> children = new java.util.Vector<ResultSetStatistics>();
         children.addElement(childResultSetStatistics);
         return children;

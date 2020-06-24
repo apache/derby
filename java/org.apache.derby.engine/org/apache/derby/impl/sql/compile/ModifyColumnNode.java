@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ModifyColumnNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -49,6 +50,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 	UUID	oldDefaultUUID;
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_MODIFY_COLUMN_TYPE = 0;
     final static int K_MODIFY_COLUMN_DEFAULT = 1;
     final static int K_MODIFY_COLUMN_CONSTRAINT = 2;
@@ -70,6 +72,11 @@ class ModifyColumnNode extends ColumnDefinitionNode
             DataTypeDescriptor dataTypeServices,
             long[] autoIncrementInfo,
             ContextManager cm) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
     		super(name, defaultNode, dataTypeServices, autoIncrementInfo, cm);
         	this.kind = kind;
 	}
@@ -108,9 +115,12 @@ class ModifyColumnNode extends ColumnDefinitionNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void checkUserType(TableDescriptor td)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind != K_MODIFY_COLUMN_TYPE) {
             return; // nothing to do if user not changing length
         }
@@ -134,7 +144,10 @@ class ModifyColumnNode extends ColumnDefinitionNode
 		
 		// can only alter the length of varchar, bitvarying columns
 		String typeName = getType().getTypeName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 		if (!(typeName.equals(TypeId.VARCHAR_NAME)) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-4256
 			!(typeName.equals(TypeId.VARBIT_NAME))&&
 			!(typeName.equals(TypeId.BLOB_NAME))&&
 			!(typeName.equals(TypeId.CLOB_NAME)))
@@ -170,14 +183,18 @@ class ModifyColumnNode extends ColumnDefinitionNode
 	 * @exception StandardException		Thrown on Error.
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void checkExistingConstraints(TableDescriptor td)
 	             throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if ((kind != K_MODIFY_COLUMN_TYPE) &&
             (kind != K_MODIFY_COLUMN_CONSTRAINT) &&
             (kind != K_MODIFY_COLUMN_CONSTRAINT_NOT_NULL))
 			return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3456
 		DataDictionary           dd          = getDataDictionary();
 		ConstraintDescriptorList cdl         = dd.getConstraintDescriptors(td);
 		int                      intArray[]  = new int[1];
@@ -201,6 +218,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 			// and fkey columns.
 			if ((constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT) 
 				&&
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 (kind == K_MODIFY_COLUMN_TYPE))
 			{
 				throw StandardException.newException(
@@ -214,6 +232,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 				{
                     // If a column is part of unique constraint it can't be
                     // made nullable in soft upgrade mode from a pre-10.4 db.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     if (kind == K_MODIFY_COLUMN_CONSTRAINT &&
 						(existingConstraint.getConstraintType() == 
 							DataDictionary.UNIQUE_CONSTRAINT)) 
@@ -226,10 +245,12 @@ class ModifyColumnNode extends ColumnDefinitionNode
 
                 // A column that is part of a primary key
                 // is being made nullable; can't be done.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 if ((kind == K_MODIFY_COLUMN_CONSTRAINT) &&
 					((existingConstraint.getConstraintType() == 
 					 DataDictionary.PRIMARYKEY_CONSTRAINT)))
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
 					String errorState = 
 						(getLanguageConnectionContext().getDataDictionary()
 								.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, 
@@ -245,6 +266,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 				if (refcdl.size() > 0)
 				{
 					throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3456
 						 SQLState.LANG_MODIFY_COLUMN_REFERENCED, 
                          name, refcdl.elementAt(0).getConstraintName());
 				}
@@ -265,6 +287,8 @@ class ModifyColumnNode extends ColumnDefinitionNode
 	 * @param td Table Descriptor that holds the column which is being altered
 	 * @throws StandardException
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void useExistingCollation(TableDescriptor td)
     throws StandardException
     {
@@ -293,6 +317,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
     @Override
 	int getAction()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (kind) {
             case K_MODIFY_COLUMN_DEFAULT:
                 if (autoinc_create_or_modify_Start_Increment ==
@@ -303,6 +328,11 @@ class ModifyColumnNode extends ColumnDefinitionNode
                         ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE) {
                     return ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
                 } else if (autoinc_create_or_modify_Start_Increment ==
                         ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE) {
                     return ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE;
@@ -366,6 +396,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 		columnPosition = cd.getPosition();
 
 		// No other work to do if no user specified default
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind != K_MODIFY_COLUMN_DEFAULT) {
 			return;
 		}
@@ -382,12 +413,18 @@ class ModifyColumnNode extends ColumnDefinitionNode
         { defaultInfo = (DefaultInfoImpl)cd.getDefaultInfo(); }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6545
             if ( cd.hasGenerationClause() || cd.isAutoincrement() )
             {
 				throw StandardException.newException( SQLState.LANG_GEN_COL_DEFAULT, cd.getColumnName() );
             }
         }
 		if (autoinc_create_or_modify_Start_Increment ==
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE){
 			autoincrementIncrement = cd.getAutoincInc();
 			autoincrementCycle = cd.getAutoincCycle();
@@ -431,6 +468,8 @@ class ModifyColumnNode extends ColumnDefinitionNode
 	 * when making a column nullable)
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void validateAutoincrement(DataDictionary dd,
                                TableDescriptor td,
                                int tableType) throws StandardException
@@ -460,6 +499,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 		}
 
 		// a column that has an autoincrement default can't be made nullable
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_MODIFY_COLUMN_CONSTRAINT)
 		{
 			cd = getLocalColumnDescriptor(name, td);

@@ -223,12 +223,15 @@ public class IndexStatisticsDaemonImpl
         // For now allow users to override the new behavior through a debug
         // property. Will be removed or renamed in a future release.
         boolean keepDisposableStats = PropertyUtil.getSystemBoolean(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
               Property.STORAGE_AUTO_INDEX_STATS_DEBUG_KEEP_DISPOSABLE_STATS);
         this.skipDisposableStats = dbAtLeast10_9(db) && !keepDisposableStats;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
 
         this.db = db;
         this.dbOwner = userName;
         this.databaseName = databaseName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         this.ctxMgr = getContextService().newContextManager();
         this.timeOfCreation = System.currentTimeMillis();
         trace(0, "created{log=" + doLog + ", traceLog=" +
@@ -246,6 +249,7 @@ public class IndexStatisticsDaemonImpl
     /** Tells if the database is 10.9 or newer. */
     private boolean dbAtLeast10_9(Database db) {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             return db.getDataDictionary().checkVersion(
                 DataDictionary.DD_VERSION_DERBY_10_9, null);
         } catch (StandardException se) {
@@ -266,6 +270,7 @@ public class IndexStatisticsDaemonImpl
      * @param td base table descriptor to update index statistics for
      */
     public void schedule(TableDescriptor td) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4939
         String schedulingReason = td.getIndexStatsUpdateReason();
         synchronized (queue) {
             if (acceptWork(td)) {
@@ -273,6 +278,7 @@ public class IndexStatisticsDaemonImpl
                 queue.add(td);
                 wuScheduled++;
                 log(AS_BACKGROUND_TASK, td,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
                         "update scheduled" +
                         (schedulingReason == null
                             ? ""
@@ -282,6 +288,7 @@ public class IndexStatisticsDaemonImpl
                 if (runningThread == null) {
                     //DERBY-5582. Make sure the thread is in the derby group
                     // to avoid potential security manager issues
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     runningThread = BasicDaemon.getMonitor().getDaemonThread(this, "index-stat-thread", false);
                     runningThread.start();
                 }
@@ -308,6 +315,7 @@ public class IndexStatisticsDaemonImpl
             // duplicates should yield acceptable performance. Also, we don't
             // look for duplicates if the queue is already full.
             for (int i=0; i < queue.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 TableDescriptor work = queue.get(i);
                 if (work.tableNameEquals(table, schema)) {
                     accept = false;
@@ -318,6 +326,7 @@ public class IndexStatisticsDaemonImpl
 
         // If the work was rejected, trace it.
         if (!accept) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
             String msg = td.getQualifiedName() + " rejected, ";
             if (daemonDisabled) {
                 wuRejectedOther++;
@@ -347,10 +356,12 @@ public class IndexStatisticsDaemonImpl
     private void generateStatistics(LanguageConnectionContext lcc,
                                     TableDescriptor td)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
         trace(1, "processing " + td.getQualifiedName());
         boolean lockConflictSeen = false;
         while (true) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                 updateIndexStatsMinion(lcc, td, null, AS_BACKGROUND_TASK);
                 break;
             } catch (StandardException se) {
@@ -385,6 +396,7 @@ public class IndexStatisticsDaemonImpl
     /** Return true if we are being shutdown */
     private boolean isShuttingDown() {
         synchronized (queue) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5088
             if (daemonDisabled || daemonLCC == null){
                 return true;
             } else {
@@ -420,6 +432,8 @@ public class IndexStatisticsDaemonImpl
         // can only properly identify disposable stats if cds == null, 
         // which means we are processing all indexes on the conglomerate.
         final boolean identifyDisposableStats = (cds == null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
 
         // Fetch descriptors if we're updating statistics for all indexes.
         if (cds == null) {
@@ -447,6 +461,8 @@ public class IndexStatisticsDaemonImpl
         // unique single column indexes.  This set is the "non disposable
         // stat list".
         UUID[] non_disposable_objectUUID    = new UUID[cds.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
 
         try
         {
@@ -460,6 +476,7 @@ public class IndexStatisticsDaemonImpl
                 }
 
                 IndexRowGenerator irg = cds[i].getIndexDescriptor();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
 
                 // Skip single-column unique indexes unless we're told not to,
                 // or we are running in soft-upgrade-mode on a pre 10.9 db.
@@ -473,6 +490,8 @@ public class IndexStatisticsDaemonImpl
                 // at this point have found a stat for an existing
                 // index which is not a single column unique index, add it
                 // to the list of "non disposable stats"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                 conglomerateNumber[i]        = cds[i].getConglomerateNumber();
                 non_disposable_objectUUID[i] = cds[i].getUUID();
 
@@ -495,6 +514,7 @@ public class IndexStatisticsDaemonImpl
         // are not single column unique.
 
         if (identifyDisposableStats) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
 
             // Note this loop is not controlled by the skipDisposableStats 
             // flag.  The above loop controls if we drop single column unique
@@ -502,6 +522,7 @@ public class IndexStatisticsDaemonImpl
             // stats with no associated index (orphaned stats).
             
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             List<StatisticsDescriptor> existingStats = td.getStatistics();
             StatisticsDescriptor[] stats = (StatisticsDescriptor[])
                     existingStats.toArray(
@@ -518,6 +539,8 @@ public class IndexStatisticsDaemonImpl
                 UUID referencedIndex = stats[si].getReferenceID();
                 boolean isValid = false;
                 for (int ci=0; ci < conglomerateNumber.length; ci++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                     if (referencedIndex.equals(non_disposable_objectUUID[ci])) {
                         isValid = true;
                         break;
@@ -532,6 +555,7 @@ public class IndexStatisticsDaemonImpl
                 // mechanism in case of another bug like DERBY-5681 in Derby.
                 if (!isValid) {
                     String msg = "dropping disposable statistics entry " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5789
                             stats[si].getUUID() + " for index " +
                             stats[si].getReferenceID() + " (cols=" +
                             stats[si].getColumnCount() + ")";
@@ -572,6 +596,8 @@ public class IndexStatisticsDaemonImpl
 
             // Subtract one for the RowLocation added for indexes.
             int           numCols     = indexRow[indexNumber].nColumns() - 1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
             long[]        cardinality = new long[numCols];
             KeyComparator cmp         = new KeyComparator(indexRow[indexNumber]);
 
@@ -640,6 +666,8 @@ public class IndexStatisticsDaemonImpl
             int retries = 0;
             while (true) {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                     writeUpdatedStats(lcc, td, 
                             non_disposable_objectUUID[indexNumber],
                             cmp.getRowCount(), cardinality, asBackgroundTask);
@@ -692,6 +720,7 @@ public class IndexStatisticsDaemonImpl
         // Update the heap row count estimate.
         setHeapRowEstimate(tc, td.getHeapConglomerateId(), numRows);
         // Drop existing index statistics for this index.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5770
         if (!lcc.dataDictionaryInWriteMode()) {
             dd.startWriting(lcc);
         }
@@ -713,6 +742,7 @@ public class IndexStatisticsDaemonImpl
             }
 
             // Log some information.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5124
             ConglomerateDescriptor cd = dd.getConglomerateDescriptor(index);
             log(asBackgroundTask, td,
                     "wrote stats for index "  + 
@@ -731,6 +761,7 @@ public class IndexStatisticsDaemonImpl
                     "rolled back index stats because index has been dropped");
                 lcc.internalRollback();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5770
             conglomerateGone = (cd == null);
         }
 
@@ -764,6 +795,7 @@ public class IndexStatisticsDaemonImpl
         int retries = 0;
         while (true) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5770
                 if (!lcc.dataDictionaryInWriteMode()) {
                     dd.startWriting(lcc);
                 }
@@ -841,16 +873,19 @@ public class IndexStatisticsDaemonImpl
      */
     public void run() {
         final long runStart = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5088
         ContextService ctxService = null;
         // Implement the outer-level exception handling here.
         try {
             // DERBY-5088: Factory-call may fail.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             ctxService = getContextService();
             ctxService.setCurrentContextManager(ctxMgr);
             processingLoop();
         } catch (ShutdownException se) {
             // The database is/has been shut down.
             // Log processing statistics and exit.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
             trace(1, "swallowed shutdown exception: " + extractIstatInfo(se));
             stop();
             ctxMgr.cleanupOnError(se, db.isActive());
@@ -862,6 +897,7 @@ public class IndexStatisticsDaemonImpl
             //    happens because the background thread interacts with store
             //    on a lower level
             if (!isShuttingDown()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
                 log(AS_BACKGROUND_TASK, null, re,
                         "runtime exception during normal operation");
                 throw re;
@@ -895,6 +931,7 @@ public class IndexStatisticsDaemonImpl
                 daemonLCC.getTransactionExecute().setNoLockWait(true);
             } catch (StandardException se) {
                 log(AS_BACKGROUND_TASK, null, se,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5088
                         "failed to initialize index statistics updater");
                 return;
             }
@@ -920,13 +957,16 @@ public class IndexStatisticsDaemonImpl
                         tc = null;
                         daemonLCC = null;
                         queue.clear();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
                         trace(1, "daemon disabled");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5082
                         break;
                     }
                     if (queue.isEmpty()) {
                         trace(1, "queue empty");
                         break;
                     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     td = queue.get(0);
                 }
                 try {
@@ -1012,6 +1052,7 @@ public class IndexStatisticsDaemonImpl
                               String runContext)
             throws StandardException {
         updateIndexStatsMinion(lcc, td, cds, AS_EXPLICIT_TASK);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
         trace(0, "explicit run completed" + (runContext != null
                                         ? " (" + runContext + "): "
                                         : ": ") +
@@ -1031,8 +1072,10 @@ public class IndexStatisticsDaemonImpl
         // 'queue' and the value of 'daemonDisabled'.
         boolean clearContext = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5087
         synchronized (queue) {
             if (!daemonDisabled) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5447
                 clearContext = true;
                 StringBuffer sb = new StringBuffer(100);
                 sb.append("stopping daemon, active=").
@@ -1044,7 +1087,9 @@ public class IndexStatisticsDaemonImpl
                 log(AS_BACKGROUND_TASK, null, sb.toString());
                 // If there is no running thread and the daemon lcc is still
                 // around, destroy the transaction and clear the lcc reference.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5082
                 if (runningThread == null && daemonLCC != null &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-5088
                         !isShuttingDown()) {
                     // try/catch as safe-guard against shutdown race condition.
                     try {
@@ -1080,10 +1125,12 @@ public class IndexStatisticsDaemonImpl
         //             (if any) has been shut down to avoid Java deadlocks
         //             when closing the container handles obtained with this
         //             context.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5447
         if (clearContext) {
             // DERBY-5336: Trigger cleanup code to remove the context
             //             from the context service. This pattern was
             //             copied from BasicDaemon.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5336
             ctxMgr.cleanupOnError(StandardException.normalClose(), false);
         }
     }
@@ -1102,11 +1149,13 @@ public class IndexStatisticsDaemonImpl
             // We are not allowed to write into the database, most likely the
             // data dictionary. No point to keep doing work we can't gain from.
             disable = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5088
         } else if (isShuttingDown() ||
                 se.getSeverity() >= ExceptionSeverity.DATABASE_SEVERITY) {
             // DERBY-4037: Swallow exceptions raised during shutdown.
             // The database or system is going down. Probably handled elsewhere
             // but disable daemon anyway.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
             trace(1, "swallowed exception during shutdown: " +
                     extractIstatInfo(se));
             disable = true;
@@ -1179,6 +1228,7 @@ public class IndexStatisticsDaemonImpl
         try {
             Thread.sleep(ms);
         } catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             InterruptStatus.setInterrupted();
         }
     }
@@ -1188,6 +1238,7 @@ public class IndexStatisticsDaemonImpl
         // timings[x] = [conglomId, start, end]
         StringBuffer sb = new StringBuffer("scan durations (");
         for (int i=0; i < timings.length && timings[i][0] > 0; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5108
             sb.append('c').append(timings[i][0]).append('=');
             // Handle corner-case where the scans are aborted due to the
             // index statistics daemon being shut down under us.
@@ -1222,6 +1273,7 @@ public class IndexStatisticsDaemonImpl
     private void log(boolean asBackgroundTask, TableDescriptor td, Throwable t,
             String msg) {
         if (asBackgroundTask && (doLog || t != null)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
             logAlways(td, t, msg);
         }
     }
@@ -1313,6 +1365,7 @@ public class IndexStatisticsDaemonImpl
 
     /** Purely for debugging, to avoid printing too much info. */
     private static String extractIstatInfo(Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
         String istatClass = IndexStatisticsDaemonImpl.class.getName();
         StackTraceElement[] stack = t.getStackTrace();
         String trace = "<no stacktrace>";
@@ -1329,6 +1382,7 @@ public class IndexStatisticsDaemonImpl
                 break;
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5089
         if (t instanceof StandardException) {
             sqlState = ", SQLSTate=" + ((StandardException)t).getSQLState();
         }
@@ -1342,6 +1396,7 @@ public class IndexStatisticsDaemonImpl
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();

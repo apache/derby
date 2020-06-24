@@ -56,6 +56,7 @@ public class FrameworkUtil {
 		static final Method	createFilter;
 		
 		static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			createFilter = AccessController.doPrivileged(new ImplHolder());
 		}
 		
@@ -70,6 +71,7 @@ public class FrameworkUtil {
 						+ " property not set");
 			}
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Class<?> delegateClass;
 			try {
 				delegateClass = Class.forName(packageName

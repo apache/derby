@@ -46,6 +46,7 @@ import org.apache.derby.optional.utils.ToolUtilities;
  * See org.apache.derby.optional.lucene.LuceneSupport.listIndexes.
  * 
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6621
 class LuceneListIndexesVTI extends StringColumnVTI
 {
     private Connection  connection;
@@ -61,8 +62,10 @@ class LuceneListIndexesVTI extends StringColumnVTI
 	 * Return a new LuceneListIndexesVTI.
 	 */
 	public LuceneListIndexesVTI()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		super
             ( new String[]
                 {
@@ -72,13 +75,16 @@ class LuceneListIndexesVTI extends StringColumnVTI
                     "LASTUPDATED",
                     "LUCENEVERSION",
                     "ANALYZER",
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                     "INDEXDESCRIPTORMAKER",
                 }
               );
 		
         connection = LuceneSupport.getDefaultConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         StorageFactory  dir = LuceneSupport.getStorageFactory( connection );
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		StorageFile luceneDir = dir.newStorageFile( Database.LUCENE_DIR );
         ArrayList<StorageFile> allIndexes = new ArrayList<StorageFile>();
 
@@ -99,12 +105,14 @@ class LuceneListIndexesVTI extends StringColumnVTI
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         indexes = new StorageFile[ allIndexes.size() ];
         allIndexes.toArray( indexes );
 	}
 
 	public void close() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		connection = null;
         indexes = null;
         schema = null;
@@ -146,6 +154,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
         case 3: return column;
         case 5: return getProperty( LuceneSupport.LUCENE_VERSION );
         case 6: return getProperty( LuceneSupport.ANALYZER );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         case 7: return getProperty( LuceneSupport.INDEX_DESCRIPTOR_MAKER );
         default:
             throw ToolUtilities.newSQLException
@@ -162,9 +171,13 @@ class LuceneListIndexesVTI extends StringColumnVTI
     {
         if ( col != 4 )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException
                 (
                  SQLState.LANG_INVALID_COLUMN_POSITION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                  col,
                  getColumnCount()
                  );
@@ -175,6 +188,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
 
             return new Timestamp( timestampMillis );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (NumberFormatException nfe) { throw ToolUtilities.wrap( nfe ); }
     }
     
@@ -184,6 +198,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
     {
         if ( column != null ) { return; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         StorageFile    columnDir = indexes[ row ];
         column = columnDir.getName();
         StorageFile    tableDir = columnDir.getParentDir();
@@ -207,10 +222,13 @@ class LuceneListIndexesVTI extends StringColumnVTI
         {
             try {
                 readSchemaTableColumn();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
                 String      delimitedColumnName = LuceneSupport.delimitID( column );
                 StorageFile    indexPropertiesFile = LuceneSupport.getIndexPropertiesFile( connection, schema, table, delimitedColumnName );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 rowProperties = readIndexProperties( indexPropertiesFile );
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             catch (IOException ioe) { throw ToolUtilities.wrap( ioe ); }
             catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
         }
@@ -223,10 +241,12 @@ class LuceneListIndexesVTI extends StringColumnVTI
     {
         return AccessController.doPrivileged
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              new PrivilegedAction<StorageFile[]>()
              {
                 public StorageFile[] run()
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                     ArrayList<StorageFile>  subdirectories = new ArrayList<StorageFile>();
                     String[]    fileNames = dir.list();
 
@@ -247,6 +267,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
 
     /** Read the index properties file */
     private static  Properties readIndexProperties( final StorageFile file )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws IOException
     {
         try {
@@ -260,6 +281,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
                 }
              }
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         } catch (PrivilegedActionException pae) {
             throw (IOException) pae.getCause();
         }

@@ -47,6 +47,7 @@ public class LogWriter {
     }
 
     final protected boolean loggingEnabled(int traceLevel) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (SanityManager.DEBUG) {
             if (printWriter_ == null) {
                 SanityManager.THROWASSERT(
@@ -144,7 +145,9 @@ public class LogWriter {
         if (instance == null) // this prevents NPE from instance.getClass() used below
         {
             return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } else if (instance instanceof ClientConnection && loggingEnabled(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 BasicClientDataSource.TRACE_CONNECTION_CALLS)) {
             return "ClientConnection";
         } else if (instance instanceof ClientResultSet && loggingEnabled(
@@ -221,6 +224,7 @@ public class LogWriter {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceDeprecatedExit(Object instance,
                              String methodName,
                              Object returnValue) {
@@ -235,6 +239,7 @@ public class LogWriter {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceExit(
             Object instance,
             String methodName,
@@ -244,6 +249,7 @@ public class LogWriter {
         traceExit(instance, methodName, returnValue);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceExit(
             Object instance,
             String methodName,
@@ -266,6 +272,7 @@ public class LogWriter {
             Object instance,
             String methodName,
             ClientDatabaseMetaData returnValue) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         traceExit(instance, methodName, "DatabaseMetaData@" + Integer.toHexString(returnValue.hashCode()));
     }
@@ -297,6 +304,7 @@ public class LogWriter {
     // --------------------------- method entry tracing --------------------------
 
     public void traceEntry(Object instance, String methodName, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         traceEntryAllArgs(instance, methodName, false, args);
     }
 
@@ -341,6 +349,7 @@ public class LogWriter {
 
     // ---------------------------tracing exceptions and warnings-----------------
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceDiagnosable(SqlException e) {
         if (!loggingEnabled(BasicClientDataSource.TRACE_DIAGNOSTICS)) {
             return;
@@ -362,7 +371,11 @@ public class LogWriter {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceDiagnosable(XAException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (!loggingEnabled(BasicClientDataSource.TRACE_DIAGNOSTICS)) {
             return;
         }
@@ -379,6 +392,7 @@ public class LogWriter {
             ColumnMetaData columnMetaData) {
 
         if (!loggingEnabled(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 BasicClientDataSource.TRACE_PARAMETER_META_DATA) ||
                 columnMetaData == null) {
             return;
@@ -391,6 +405,7 @@ public class LogWriter {
                 dncprintln(header, "Number of parameter columns: " + columnMetaData.getColumnCount());
                 traceColumnMetaData(header, columnMetaData);
                 dncprintln(header, "END TRACE_PARAMETER_META_DATA");
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace parameter meta data");
                 dncprintln(header, "END TRACE_PARAMETER_META_DATA");
@@ -399,10 +414,13 @@ public class LogWriter {
     }
 
     void traceResultSetMetaData(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientStatement statement,
             ColumnMetaData columnMetaData) {
 
         if (!loggingEnabled(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 BasicClientDataSource.TRACE_RESULT_SET_META_DATA) ||
                 columnMetaData == null) {
             return;
@@ -415,6 +433,7 @@ public class LogWriter {
                 dncprintln(header, "Number of result set columns: " + columnMetaData.getColumnCount());
                 traceColumnMetaData(header, columnMetaData);
                 dncprintln(header, "END TRACE_RESULT_SET_META_DATA");
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace result set meta data");
                 dncprintln(header, "END TRACE_RESULT_SET_META_DATA");
@@ -473,6 +492,7 @@ public class LogWriter {
                 printWriter_.println(" }");
                 printWriter_.flush();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         } catch (SQLException e) {
             dncprintln(header, "Encountered an SQL exception while trying to trace column meta data");
         }
@@ -482,6 +502,7 @@ public class LogWriter {
     // Including protocol manager levels, and driver configuration
 
     // Jdbc 2
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     void traceConnectEntry(BasicClientDataSource dataSource) {
         if (loggingEnabled(
                 BasicClientDataSource.TRACE_DRIVER_CONFIGURATION)) {
@@ -493,11 +514,14 @@ public class LogWriter {
     }
 
     // Jdbc 1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceConnectEntry(String server,
                                   int port,
                                   String database,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   Properties properties) {
         if (loggingEnabled(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 BasicClientDataSource.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc1();
         }
@@ -506,6 +530,7 @@ public class LogWriter {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceConnectResetEntry(
             Object instance, LogWriter logWriter,
             String user, BasicClientDataSource ds) {
@@ -516,6 +541,7 @@ public class LogWriter {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void traceConnectExit(ClientConnection connection) {
         if (loggingEnabled(BasicClientDataSource.TRACE_CONNECTS)) {
             traceConnectsExit(connection);
@@ -536,6 +562,7 @@ public class LogWriter {
             traceConnectsResetEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-446
                     getProperties(dataSource));
         } catch ( SqlException se ) {
             dncprintln("Encountered an SQL exception while trying to trace connection reset entry");
@@ -547,6 +574,7 @@ public class LogWriter {
             traceConnectsEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-446
                     getProperties(dataSource));
         } catch ( SqlException se ) {
             dncprintln("Encountered an SQL exception while trying to trace connection entry");
@@ -557,6 +585,7 @@ public class LogWriter {
     private void traceConnectsResetEntry(String server,
                                          int port,
                                          String database,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                          Properties properties) {
         dncprintln("BEGIN TRACE_CONNECT_RESET");
         dncprintln("Connection reset requested for " + server + ":" + port + "/" + database);
@@ -568,6 +597,7 @@ public class LogWriter {
     private void traceConnectsEntry(String server,
                                     int port,
                                     String database,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                     Properties properties) {
         synchronized (printWriter_) {
             dncprintln("BEGIN TRACE_CONNECTS");
@@ -591,6 +621,7 @@ public class LogWriter {
                 dncprintln(header, "Driver name: " + c.databaseMetaData_.getDriverName());
                 dncprintln(header, "Driver version: " + c.databaseMetaData_.getDriverVersion());
                 dncprintln(header, "END TRACE_CONNECTS");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace connection exit");
                 dncprintln(header, "END TRACE_CONNECTS");
@@ -610,6 +641,7 @@ public class LogWriter {
                 dncprintln(header, "Driver name: " + c.databaseMetaData_.getDriverName());
                 dncprintln(header, "Driver version: " + c.databaseMetaData_.getDriverVersion());
                 dncprintln(header, "END TRACE_CONNECT_RESET");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace connection reset exit");
                 dncprintln(header, "END TRACE_CONNECT_RESET");
@@ -623,6 +655,7 @@ public class LogWriter {
     // printWriter_ synchronized by caller.
     private void writeProperties(Properties properties) {
         printWriter_.print("{ ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         for (Iterator i = properties.entrySet().iterator(); i.hasNext();) {
             Map.Entry e = (Map.Entry) (i.next());
             if ("password".equals(e.getKey())) {
@@ -639,6 +672,7 @@ public class LogWriter {
     }
 
     private String escapePassword(String pw) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         StringBuilder sb = new StringBuilder(pw);
         for (int j = 0; j < pw.length(); j++) {
             sb.setCharAt(j, '*');
@@ -666,6 +700,7 @@ public class LogWriter {
     }
 
     private void writeDriverConfiguration() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Version.writeDriverConfiguration(printWriter_);
     }
 
@@ -676,6 +711,7 @@ public class LogWriter {
     throws SqlException {
         
         Properties properties = BasicClientDataSource.getProperties(cds);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         if (properties.getProperty(Attribute.PASSWORD_ATTR) != null) {
             properties.setProperty(Attribute.PASSWORD_ATTR, "********");

@@ -40,13 +40,16 @@ public final class ViewsTest extends BaseJDBCTestCase {
      */
     public ViewsTest(String name)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3520
         super(name);
     }
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("views Test");
         suite.addTest(TestConfiguration.embeddedSuite(ViewsTest.class));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
         return new CleanDatabaseTestSetup(suite);
     }
 
@@ -320,6 +323,7 @@ public final class ViewsTest extends BaseJDBCTestCase {
         assertStatementError("X0X95", st,
             " drop view cv8");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4928
         assertStatementErrorUnordered(
             new String[] {"X0Y23","X0Y23","X0Y23","X0X95"}, st,
             " drop view sv5");
@@ -876,6 +880,7 @@ public final class ViewsTest extends BaseJDBCTestCase {
     * @throws SQLException
     */
     public void testSelectViewFromOtherSchemaWithNoDefaultSchema()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
             throws SQLException {
         Connection conn = openDefaultConnection("joe","joepass");
         Statement st = conn.createStatement();

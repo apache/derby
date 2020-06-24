@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CurrentOfNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -75,6 +76,8 @@ public final class CurrentOfNode extends FromTable {
 	//
 	// initializers
 	//
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CurrentOfNode(String correlationName,
                   String cursor,
                   Properties tableProperties,
@@ -131,6 +134,7 @@ public final class CurrentOfNode extends FromTable {
 		*/
 		if (singleScanCostEstimate == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 			singleScanCostEstimate = getOptimizerFactory().getCostEstimate();
 		}
 
@@ -161,6 +165,8 @@ public final class CurrentOfNode extends FromTable {
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						   FromList fromListParam) 
 		throws StandardException {
@@ -175,6 +181,7 @@ public final class CurrentOfNode extends FromTable {
 		}
 		
         preStmt.rePrepare(getLanguageConnectionContext());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
 
 		// verify that the cursor is updatable (UPDATE is responsible
 		// for checking that the right columns are updatable)
@@ -189,6 +196,8 @@ public final class CurrentOfNode extends FromTable {
 		exposedTableName = makeTableName(null, refTab.getExposedName());
 		baseTableName = makeTableName(schemaName,
 									  refTab.getBaseName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         SchemaDescriptor tableSchema =
                 getSchemaDescriptor(refTab.getSchemaName());
 
@@ -225,6 +234,7 @@ public final class CurrentOfNode extends FromTable {
 		** the result columns from preparedStatement and
 		** turn them into an RCL that we can run with.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( new ResultColumnList(getContextManager()) );
 		ColumnDescriptorList cdl = td.getColumnDescriptorList();
 		int					 cdlSize = cdl.size();
@@ -233,6 +243,8 @@ public final class CurrentOfNode extends FromTable {
 		{
 			/* Build a ResultColumn/BaseColumnNode pair for the column */
             ColumnDescriptor colDesc = cdl.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
             BaseColumnNode bcn = new BaseColumnNode(
                                             colDesc.getColumnName(),
@@ -243,6 +255,7 @@ public final class CurrentOfNode extends FromTable {
                 colDesc, bcn, getContextManager());
 
 			/* Build the ResultColumnList to return */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().addResultColumn(rc);
 		}
 
@@ -261,6 +274,8 @@ public final class CurrentOfNode extends FromTable {
 	 * @param fromListParam		FromList to use/append to.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 	{
 		/* No expressions to bind for a CurrentOfNode.
@@ -283,6 +298,8 @@ public final class CurrentOfNode extends FromTable {
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getMatchingColumn(ColumnReference columnReference)
 						throws StandardException {
 
@@ -294,6 +311,7 @@ public final class CurrentOfNode extends FromTable {
 		TableName		columnsTableName;
 
 		columnsTableName = columnReference.getQualifiedTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         if (columnsTableName != null
                 && columnsTableName.getSchemaName() == null
@@ -341,6 +359,7 @@ public final class CurrentOfNode extends FromTable {
 
 			resultColumn =
 				getResultColumns().getResultColumn(columnReference.getColumnName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			if (resultColumn != null) 
 			{
@@ -352,7 +371,9 @@ public final class CurrentOfNode extends FromTable {
 				// the getMatchingColumn() methods on other FromTables)
 				// suggests that we should always set the table number
 				// if we've found the ResultColumn.  So we do that here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1329
 				columnReference.setTableNumber( tableNumber );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4695
                 columnReference.setColumnNumber(
                    resultColumn.getColumnPosition());
 
@@ -392,12 +413,15 @@ public final class CurrentOfNode extends FromTable {
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
 	{
 		/* Generate an empty referenced table map */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setReferencedTableMap( new JBitSet(numTables) );
 		return this;
 	}
@@ -419,6 +443,7 @@ public final class CurrentOfNode extends FromTable {
     ResultSetNode optimize(DataDictionary dataDictionary,
 					     PredicateList predicateList,
 						 double outerRows) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 						throws StandardException
     {
 		/* Assume there is no cost associated with fetching the current row */
@@ -447,6 +472,7 @@ public final class CurrentOfNode extends FromTable {
 							throws StandardException {
 
 		if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             SanityManager.ASSERT(!isStatementResultSet(), 
 			"CurrentOfNode not expected to be statement node");
 
@@ -465,6 +491,7 @@ public final class CurrentOfNode extends FromTable {
 
 		  mb.push(cursorName);
 		  acb.pushThisAsActivation(mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		  mb.push(getResultSetNumber());
 		
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getCurrentOfResultSet",
@@ -511,6 +538,8 @@ public final class CurrentOfNode extends FromTable {
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth) {
 		if (SanityManager.DEBUG) {
 			super.printSubNodes(depth);
@@ -539,6 +568,8 @@ public final class CurrentOfNode extends FromTable {
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String  getExposedName()
 	{
         // short-circuit for dummy CurrentOfNode cooked up to support

@@ -66,6 +66,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  * probably be rolled into TableScanResultSet.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class BulkTableScanResultSet extends TableScanResultSet
 	implements CursorResultSet
 {
@@ -86,6 +87,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 	 *
 	 * @exception StandardException thrown on failure to open
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     BulkTableScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
 		int resultRowTemplate,
@@ -95,6 +97,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 		boolean sameStartStopPosition,
 		Qualifier[][] qualifiers,
 		String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
@@ -114,6 +117,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 		super(conglomId,
 			scoci,
 			activation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 			resultRowTemplate,
 			resultSetNumber,
 			startKeyGetter,
@@ -123,6 +127,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 			sameStartStopPosition,
 			qualifiers,
 			tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 			userSuppliedOptimizerOverrides,
 			indexName,
 			isConstraint,
@@ -136,6 +141,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 			oneRowScan,
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 
 		if (SanityManager.DEBUG)
 		{
@@ -342,12 +348,14 @@ class BulkTableScanResultSet extends TableScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
 	    ExecRow result = null;
             
         checkCancellationFlag();
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
 
 		beginTime = getCurrentTimeMillis();
 		if (isOpen && scanControllerOpened)
@@ -454,6 +462,7 @@ outer:		for (;;)
 	 */
 	protected boolean canGetInstantaneousLocks()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 		return !forUpdate;
 	}
 

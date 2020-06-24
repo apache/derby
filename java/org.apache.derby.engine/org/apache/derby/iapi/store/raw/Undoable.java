@@ -46,6 +46,7 @@ public interface Undoable extends Loggable {
 
 		<P>
 		There are 3 ways to implement a redo-only log record:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		<UL>
 		<LI>Make the log record a Loggable instead of an Undoable, this is the
 		cleanest method.</LI>
@@ -74,6 +75,7 @@ public interface Undoable extends Loggable {
 
 		<P>
 		The sequence of events in a rollback of a undoable operation is
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		<UL>
 		<LI> The logging system calls undoable.generateUndo.  If this returns
 		null, then there is nothing to undo.</LI>

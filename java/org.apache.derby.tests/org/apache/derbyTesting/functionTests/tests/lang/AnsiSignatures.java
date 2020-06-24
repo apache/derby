@@ -1392,6 +1392,7 @@ public  class   AnsiSignatures
          Integer[] smallintarg
          )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         bigintarg[ 0 ] = 1L;
         booleanarg[ 0 ] = Boolean.TRUE;
         doublearg[ 0 ] = 1.0;

@@ -32,6 +32,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * system tables.
  */
 public abstract class PermissionsDescriptor extends TupleDescriptor 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 	implements Cloneable, Provider
 {
 	protected UUID oid;
@@ -56,6 +57,7 @@ public abstract class PermissionsDescriptor extends TupleDescriptor
 		catch( java.lang.CloneNotSupportedException cnse)
 		{
 			if( SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Could not clone a " +
 										  getClass().getName(), cnse);
 			return null;

@@ -40,6 +40,7 @@ public class _Suite
             throws Exception {
 
         BaseTestSuite suite = new BaseTestSuite("client.am package-private");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(LogicalStatementEntityTest.suite());
 

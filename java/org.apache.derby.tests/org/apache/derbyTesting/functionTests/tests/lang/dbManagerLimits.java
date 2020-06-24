@@ -207,6 +207,7 @@ public class dbManagerLimits
 			String tempString = new String();
 			int i = 0;
 			sbTableElements.append("create table t1 (");
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			for (i = 0; i < Limits.DB2_MAX_COLUMNS_IN_TABLE-2; i++)
 				sbTableElements.append("c" + i +" int, ");
 
@@ -297,6 +298,7 @@ public class dbManagerLimits
 			StringBuffer sbViewColumnNames = new StringBuffer();
 			String tempString = new String();
 			int i = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			for (i = 0; i < Limits.DB2_MAX_COLUMNS_IN_VIEW-2; i++) {
 				sbValuesClause.append(1 + ", ");
 				sbViewColumnNames.append("c" + i + ", ");
@@ -356,6 +358,7 @@ public class dbManagerLimits
 			String tempString = new String();
 			int i = 0;
 			sb.append("create table t1 (");
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			for (i = 0; i < Limits.DB2_MAX_COLUMNS_IN_TABLE-2; i++)
 				sb.append("c" + i +" int, ");
 
@@ -409,6 +412,7 @@ public class dbManagerLimits
 			String tempString = new String();
 			int i = 0;
 			sbOrderBy.append("select * from t1 order by ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			for (i = 0; i < Limits.DB2_MAX_ELEMENTS_IN_ORDER_BY-2; i++)
 				sbOrderBy.append("c1, ");
 
@@ -468,6 +472,7 @@ public class dbManagerLimits
 
 			//first create 7 views with 5000 columns each
 			int i = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			for (i = 0; i < Limits.DB2_MAX_COLUMNS_IN_VIEW-1; i++)
 				sbValuesClause.append(1 + ", ");
 
@@ -481,6 +486,7 @@ public class dbManagerLimits
 			}
       
 			for (int j = 1; j < 7; j++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 				for (i = 0; i < Limits.DB2_MAX_COLUMNS_IN_VIEW; i++)
 					sbGroupBy.append("c" + j + "" + i + ", ");
 			}
@@ -580,6 +586,7 @@ public class dbManagerLimits
 
 			s.executeUpdate("create table t1 (c1 int not null, c2 int, primary key(c1))");
 			System.out.println("First create one index less than maximum allowed number of indexes");
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			for (i = 0; i < Limits.DB2_MAX_INDEXES_ON_TABLE-2; i++) {
 				s.executeUpdate("create index i" + i + " on t1(c1,c2)");
 			System.out.println("   create index" + i);

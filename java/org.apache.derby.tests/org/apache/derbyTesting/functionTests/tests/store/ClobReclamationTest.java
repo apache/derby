@@ -436,6 +436,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
     
     public static Test suite() {
         Test suite = TestConfiguration.embeddedSuite(ClobReclamationTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6215
         return new CleanDatabaseTestSetup(suite) {
             /**
              * Creates the table used in the test cases.
@@ -463,6 +464,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
             }
 
             protected void tearDown() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6215
                 if (SanityManager.DEBUG) {
                     SanityManager.DEBUG_CLEAR("DaemonTrace");
                 }

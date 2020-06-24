@@ -49,6 +49,8 @@ public class ImportExportLobTest extends ImportExportBaseTest
     String fileName; // main file used to perform import/export.
     String lobsFileName; // file name used to store lobs.
     String lobsFileName2; // file name used to store lobs.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2980
+//IC see: https://issues.apache.org/jira/browse/DERBY-2925
 
     public ImportExportLobTest(String name) throws SQLException {
         super(name);
@@ -57,6 +59,8 @@ public class ImportExportLobTest extends ImportExportBaseTest
             (SupportFilesSetup.getReadWrite("books.del")).getPath();
         lobsFileName = 
             (SupportFilesSetup.getReadWrite("books_lobs.dat")).getPath();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2980
+//IC see: https://issues.apache.org/jira/browse/DERBY-2925
 	lobsFileName2 =
             (SupportFilesSetup.getReadWrite("unql_books_lobs.dat")).getPath();
     }
@@ -67,6 +71,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(ImportExportLobTest.class);
         suite.addTest(TestConfiguration.clientServerSuite(
                              ImportExportLobTest.class));
@@ -264,6 +269,12 @@ public class ImportExportLobTest extends ImportExportBaseTest
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
             assertSQLState("XIE0N", e);
         }
     }
@@ -277,6 +288,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
     public void testImportTableExportTableLobsInExtFile()  
         throws SQLException, IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                    null, null , null, lobsFileName);
 	    doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
@@ -292,6 +304,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
      * for the export procedure.
      */
     public void testImportTableExportTableLobsInUnqalifiedExtFile()  
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         throws SQLException, IOException
     {
         // test export procedure with unqulified lob data  file name
@@ -300,6 +313,8 @@ public class ImportExportLobTest extends ImportExportBaseTest
         // using "UTF-16" code set.
        
 	// delete the export files.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2980
+//IC see: https://issues.apache.org/jira/browse/DERBY-2925
         SupportFilesSetup.deleteFile(lobsFileName2);
  
         doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
@@ -326,6 +341,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
         throws SQLException, IOException
     {
         doExportQueryLobsToExtFile("select * from BOOKS", fileName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                                   null, null, "8859_1", lobsFileName);
 	    doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, null, fileName, 
                                    null, null , "8859_1", 0);
@@ -333,6 +349,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
 
         // perform import with column names specified in random order.
         doImportDataLobsFromExtFile(null, "BOOKS_IMP", "PIC, CONTENT, NAME, ID", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3773
                                   "4, 3, 2, 1", fileName, null, null, "8859_1", 1);
         verifyData("PIC, CONTENT, NAME, ID");
 
@@ -357,6 +374,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
     public void testImportDataExportQueryWithFewColsLobsInExtFile() 
         throws SQLException, IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         doExportQueryLobsToExtFile("select id, name, content, pic from BOOKS",
                                    fileName,  null, null, null, lobsFileName);
         doImportDataLobsFromExtFile(null, "BOOKS_IMP", "ID,PIC", "1 , 4",
@@ -389,6 +407,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
          throws SQLException, IOException   
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                        null, "9" , null, lobsFileName);
             fail();
@@ -416,16 +435,23 @@ public class ImportExportLobTest extends ImportExportBaseTest
                                    fileName, null, null, null, lobsFileName);
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, "2", 
                                          null, null, 0);
             fail();
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
              assertSQLState("XIE0J", e);
         }
 
         try {
             doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, 
                                       null,  fileName, null, "c", null, 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
@@ -441,6 +467,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
      * lobs file name as an argument value.
      */
     public void testImportTableExportWithInvalidLobFileName()  
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         throws SQLException, IOException
     {
         // test export of lob data with lob file name parameter 
@@ -449,6 +476,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
             doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                        null, null , null, 
                                        null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
         }catch (SQLException e) {
             assertSQLState("XIE0Q", e);
@@ -468,8 +496,11 @@ public class ImportExportLobTest extends ImportExportBaseTest
             // missing lob file, refered by the main import file.
             doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
                                          null, null, null, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
         }catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
             assertSQLState("XIE0P", e);
         }
     }
@@ -491,6 +522,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
         }
 
 	//DERBY-2925: need to delete export files first
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         SupportFilesSetup.deleteFile(fileName);
         SupportFilesSetup.deleteFile(lobsFileName);
 
@@ -583,6 +615,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
         // insert some clob data with default char delimiter inside 
         // the data. It should get exported in double-delimiter format
         // when exporting to the main export file. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         s.executeUpdate("insert into books values" +
                         "(12, 'Transaction Processing' , " +
                         "'This books covers \"Transaction\" \"processing\" concepts'"+

@@ -69,6 +69,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	private boolean isOpen;
 
 	/* Run time statistics variables */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	final LanguageConnectionContext lcc;
 	protected long beginTime;
 	protected long endTime;
@@ -109,6 +110,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 *
 	 * @exception StandardException thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 	void setup() throws StandardException {
 		isOpen = true;
 
@@ -136,6 +138,8 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 */
 	public ResultDescription	getResultDescription()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 	    return (ResultDescription)null;
 	}
 	
@@ -351,6 +355,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 */
 	public void	close( boolean underMerge ) throws StandardException
 	{ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3037
 		if (!isOpen)
 			return;
 
@@ -371,11 +376,13 @@ abstract class NoRowsResultSetImpl implements ResultSet
             ** to skip printing it.
 			*/
 			if (lcc.getRunTimeStatisticsMode() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
                 !doesCommit() && !activation.isClosed() &&
                 !lcc.getStatementContext().getStatementWasInvalidated())
 			{
 				endExecutionTime = getCurrentTimeMillis();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 				ResultSetStatisticsFactory rssf =
                     lcc.getLanguageConnectionFactory().
                          getExecutionFactory().getResultSetStatisticsFactory();
@@ -414,6 +421,8 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		}
 
 		isOpen = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
+//IC see: https://issues.apache.org/jira/browse/DERBY-3037
 
 		if (activation.isSingleExecution() && !underMerge)
 			activation.close();
@@ -425,6 +434,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @return <code>true</code> if closed, <code>false</code> otherwise
 	 */
 	public boolean isClosed() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 		return !isOpen;
 	}
 
@@ -698,6 +708,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 
     public Element toXML( Element parentNode, String tag ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6266
         return BasicNoPutResultSetImpl.childrenToXML( BasicNoPutResultSetImpl.toXML( parentNode, tag, this ), this );
     }
 

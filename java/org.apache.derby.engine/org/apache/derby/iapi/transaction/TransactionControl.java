@@ -49,6 +49,7 @@ public final class TransactionControl {
      * JDBC constants.
      */
 	private static final int[] CS_TO_JDBC_ISOLATION_LEVEL_MAP = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		java.sql.Connection.TRANSACTION_NONE,				// UNSPECIFIED_ISOLATION_LEVEL
 		java.sql.Connection.TRANSACTION_READ_UNCOMMITTED,	// READ_UNCOMMITTED_ISOLATION_LEVEL
 		java.sql.Connection.TRANSACTION_READ_COMMITTED,		// READ_COMMITTED_ISOLATION_LEVEL
@@ -90,6 +91,7 @@ public final class TransactionControl {
     
     public TransactionControl()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         listeners = new ArrayList<TransactionListener>();
     }
     
@@ -126,6 +128,7 @@ public final class TransactionControl {
         if (listeners.isEmpty())
             return;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (Iterator<TransactionListener> i = listeners.iterator(); i.hasNext(); )
         {
             TransactionListener listener =
@@ -167,6 +170,7 @@ public final class TransactionControl {
         if (listeners.isEmpty())
             return;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (Iterator<TransactionListener> i = listeners.iterator(); i.hasNext(); )
         {
             TransactionListener listener =

@@ -49,6 +49,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("InbetweenTest Test");
         suite.addTest(DatabasePropertyTestSetup.singleProperty(
                 TestConfiguration.defaultSuite(InbetweenTest.class),
@@ -57,6 +58,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
     }
 
     private void createTestObjects(Statement st) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         setAutoCommit(false);
         CleanDatabaseTestSetup.cleanDatabase(getConnection(), false);
         
@@ -178,6 +180,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             + "'15:47:28', null, null)");
         
         st.executeUpdate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4375
                 " insert into bt2 values (28, 82, null, '15:47:28', "
                 + "'"+Timestamp.valueOf("2007-02-23 15:47:27.544")+"', null)");
             
@@ -195,6 +198,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
     
     public void testBetween() throws Exception {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         Statement st = createStatement();
         createTestObjects(st);
                 
@@ -237,6 +241,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         // positive tests type comparisons
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         ResultSet rs = st.executeQuery(
             "select i from t where i between s and r");
         
@@ -256,6 +261,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         JDBC.assertSingleValueResultSet(rs, "0");
         
         rs = st.executeQuery(
@@ -312,6 +318,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         JDBC.assertSingleValueResultSet(rs, "-1");
         
         rs = st.executeQuery(
@@ -321,6 +328,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         JDBC.assertSingleValueResultSet(rs, "-1");
         
         //between 2 and 1
@@ -330,6 +338,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I","S","C","V","D","R","E","T","P"};
         JDBC.assertColumnNames(rs, expColNames);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         JDBC.assertEmpty(rs);
         
         rs = st.executeQuery(
@@ -345,6 +354,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         expColNames = new String [] {"I","S","C","V","D","R","E","T","P"};
         JDBC.assertColumnNames(rs, expColNames);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         String[][] expRS = {
             {"0","100","hello","everyone is here","200.0","300.0",
                      "1992-01-01","12:30:30","1992-01-01 12:30:30.0"},
@@ -601,6 +611,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         rs = st.executeQuery("values (2)");
         rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1;
                 i <= rsmd.getColumnCount(); i++) {
@@ -740,6 +751,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
 
     public void testInList() throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         Statement st = createStatement();
         createTestObjects(st);     
         
@@ -782,6 +794,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         //positive tests
         //type comparisons
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         ResultSet rs = st.executeQuery(
             "select i from t where i in (s, r, i, d, 40e1)");
         
@@ -1265,6 +1278,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
 
     public void testInBetween() throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         Statement st = createStatement();
         createTestObjects(st);
         
@@ -1274,6 +1288,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         st.executeUpdate(" insert into u values null");     
         st.executeUpdate(" insert into u values 2");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         ResultSet rs = st.executeQuery(
             " select * from u where c1 between 2 and 3");
         
@@ -1619,6 +1634,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
     public void testBigInList() throws SQLException {
         // big in lists (test binary search)
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         Statement st = createStatement();
         createTestObjects(st);                
         
@@ -1866,6 +1882,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         // Check various queries for which left column is part of 
         // an index.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         Statement st = createStatement();
         createTestObjects(st);      
                 
@@ -1877,6 +1894,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         String[] expColNames = {"I", "C", "DE"};
         JDBC.assertColumnNames(rs, expColNames);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         String[][] expRS = {
             {"2", "two", "22.2"},
             {"8", "eight", "2.8"},
@@ -2551,6 +2569,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         // Prepared statement checks. Mix of constants and params.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         PreparedStatement pSt = prepareStatement(
             "select * from bt1 where i in (1, 8, 3, ?) order by i, c");
         
@@ -3359,6 +3378,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             " create view v3 as select de d from bt1 union "
             + "select d from bt2");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         ResultSet rs = st.executeQuery(
             " select * from V2, V3 where V2.i in (2,4) and V3.d "
             + "in (4.3, 7.1, 22.2)");
@@ -3500,6 +3520,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into t2 values (4, 8), (8, 8), (7, 6), (5, 6)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         ResultSet rs = st.executeQuery(
             " select c1 from t1 where c1 in (2, sqrt(c2))");
         
@@ -3519,6 +3540,8 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             " select c1 from t1 where c1 in ('10', '5', '20') and c1 > 3"
             + "and c1 < 19");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         CallableStatement cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         assertUpdateCount(cSt, 0);
@@ -3688,6 +3711,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             "select c1 from t1 where c1 in ('9', '4', '8.0', '7.7',"
             + "	5.2, 6, '7.7', '4.9', '6.1')");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         PreparedStatement pSt = prepareStatement(
             "select c1 from t1 where c1 in (3, ?)");
         
@@ -3794,6 +3818,9 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         //reproduction for beetle 5135 ( long list of constants in 
         // IN clause)
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         Statement st = createStatement();
         createTestObjects(st);
         
@@ -3812,6 +3839,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         st.executeUpdate(" insert into t1 values(13037)");       
         st.executeUpdate(" insert into t1 values(9999)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         ResultSet rs = st.executeQuery(
             " SELECT id FROM t1 WHERE id IN "
             + "(2,3,5,7,6,8,11,13,14,15,16,18,19"
@@ -4393,6 +4421,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             + ",4436,5162,5165,5170,5171,5173,5345,5174,5765,5177,5"
             + "750,5793,0) ORDER BY id");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
         String[] expColNames = {"ID"};
         JDBC.assertColumnNames(rs, expColNames);
         
@@ -4438,6 +4467,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         expColNames = new String [] {"C1"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertSingleValueResultSet(rs, "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5715
 
         rollback();
         st.close();

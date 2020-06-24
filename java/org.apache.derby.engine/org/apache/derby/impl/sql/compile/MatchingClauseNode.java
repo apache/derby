@@ -261,6 +261,7 @@ public class MatchingClauseNode extends QueryTreeNode
             {
                 mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression(), ColumnReference.MERGE_UNKNOWN );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 ColumnReference leftCR = new ColumnReference( rc.getName(), targetTableName, getContextManager() );
                 mergeNode.addColumn( drivingColumnMap, leftCR, ColumnReference.MERGE_TARGET );
             }
@@ -327,6 +328,7 @@ public class MatchingClauseNode extends QueryTreeNode
         //
         ResultColumnList    beforeColumns = new ResultColumnList( getContextManager() );
         ResultColumnList    afterColumns = new ResultColumnList( getContextManager() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         ResultColumnList    fullUpdateRow = getBoundSelectUnderUpdate().getResultColumns();
         
         // the full row is the before image, the after image, and a row location
@@ -558,6 +560,7 @@ public class MatchingClauseNode extends QueryTreeNode
                     origRC.setExpression( cr );
 
                     // remove the column descriptor in order to turn off hasGenerationClause()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                     origRC.setColumnDescriptor( null, null );
                 }
                 
@@ -758,6 +761,7 @@ public class MatchingClauseNode extends QueryTreeNode
     private void    buildThenColumnsForDelete()
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         ResultColumnList    dmlSignature = _dml.resultSet.getResultColumns();
         for ( int i = 0; i < dmlSignature.size(); i++ )
         {
@@ -838,6 +842,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
         _dml.bindStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         buildThenColumnsForInsert( fullFromList, targetTable, _dml.resultSet.getResultColumns(), _insertColumns, _insertValues );
     }
 
@@ -863,6 +868,7 @@ public class MatchingClauseNode extends QueryTreeNode
         for ( int i = 0; i <_insertValues.size(); i++ )
         {
             ResultColumn    rc = _insertValues.elementAt( i );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             String          columnName = _insertColumns.elementAt( i ).getName();
             ValueNode       expr = rc.getExpression();
             ColumnDescriptor    cd = td.getColumnDescriptor( columnName );
@@ -1390,6 +1396,7 @@ public class MatchingClauseNode extends QueryTreeNode
         {
             ResultColumn    lastLeftJoinRC = leftJoinResult.elementAt( leftJoinResult.size() - 1 );
             ValueNode       value = lastLeftJoinRC.getExpression();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             String              columnName = lastLeftJoinRC.getName();
             ColumnReference rowLocationCR = new ColumnReference
                 ( columnName, hojn.getTableName(), getContextManager() );
@@ -1417,6 +1424,7 @@ public class MatchingClauseNode extends QueryTreeNode
         throws StandardException
     {
         ResultColumnList    leftJoinResult = generatedScan.getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         for ( ColumnReference cr : getColumnReferences( node ) )
         {

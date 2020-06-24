@@ -89,6 +89,7 @@ public class CharAlphabet {
      * Get a Tamil alphabet
      */
     public static CharAlphabet tamil() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1895
         return new CharAlphabet("Tamil", CharAlphabet.TAMIL);
     }
 
@@ -96,6 +97,7 @@ public class CharAlphabet {
      * Get an alphabet consisting of a single character.
      */
     public static CharAlphabet singleChar(char ch) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         return new CharAlphabet("Single char: " + ch, new char[] { ch });
     }
 
@@ -187,6 +189,7 @@ public class CharAlphabet {
      * @return A clone.
      */
     public CharAlphabet getClone() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
         return new CharAlphabet(name, chars);
     }
 

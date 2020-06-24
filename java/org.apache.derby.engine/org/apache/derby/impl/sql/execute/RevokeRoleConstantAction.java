@@ -76,12 +76,14 @@ class RevokeRoleConstantAction extends DDLConstantAction {
         TransactionController tc = lcc.getTransactionExecute();
 
         final String grantor = lcc.getCurrentUserId(activation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
         dd.startWriting(lcc);
 
         for (Iterator rIter = roleNames.iterator(); rIter.hasNext();) {
             String role = (String)rIter.next();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3333
             if (role.equals(Authorizer.PUBLIC_AUTHORIZATION_ID)) {
                 throw StandardException.
                     newException(SQLState.AUTH_PUBLIC_ILLEGAL_AUTHORIZATION_ID);
@@ -91,6 +93,7 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                 String grantee = (String)gIter.next();
 
                 // check that role exists
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                 RoleGrantDescriptor rdDef =
                     dd.getRoleDefinitionDescriptor(role);
 
@@ -116,6 +119,7 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                     // All ok, we are database owner
                     if (SanityManager.DEBUG) {
                         SanityManager.ASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                             rdDef.getGrantee().equals(grantor),
                             "expected database owner in role grant descriptor");
                         SanityManager.ASSERT(
@@ -127,6 +131,7 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                         (SQLState.AUTH_ROLE_DBO_ONLY, "REVOKE role");
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                 RoleGrantDescriptor rd =
                     dd.getRoleGrantDescriptor(role, grantee, grantor);
 
@@ -134,6 +139,8 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                     // NOTE: Never called yet, withAdminOption not yet
                     // implemented.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                     if (SanityManager.DEBUG) {
                         SanityManager.NOTREACHED();
                     }

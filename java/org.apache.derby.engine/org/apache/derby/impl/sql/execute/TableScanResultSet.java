@@ -52,6 +52,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * improve performance.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 class TableScanResultSet extends ScanResultSet
 	implements CursorResultSet, Cloneable
 {
@@ -120,6 +121,7 @@ class TableScanResultSet extends ScanResultSet
     //
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     TableScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, 
 		Activation activation, 
@@ -130,6 +132,7 @@ class TableScanResultSet extends ScanResultSet
 		boolean sameStartStopPosition,
 		Qualifier[][] qualifiers,
 		String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
@@ -147,7 +150,9 @@ class TableScanResultSet extends ScanResultSet
     {
 		super(activation,
 				resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 				resultRowTemplate,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 				lockMode, tableLocked, isolationLevel,
                 colRefItem,
 				optimizerEstimatedRowCount,
@@ -178,6 +183,7 @@ class TableScanResultSet extends ScanResultSet
 		this.sameStartStopPosition = sameStartStopPosition;
 		this.qualifiers = qualifiers;
 		this.tableName = tableName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
 		this.isConstraint = isConstraint;
@@ -197,6 +203,7 @@ class TableScanResultSet extends ScanResultSet
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
 		
 		/* Always qualify the first time a row is being read */
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		qualify = true;
 		currentRowIsValid = false;
 		scanRepositioned = false;
@@ -224,6 +231,7 @@ class TableScanResultSet extends ScanResultSet
         TransactionController tc = activation.getTransactionController();
 
 		initIsolationLevel();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 
 		if (dcoci == null)
 			dcoci = tc.getDynamicCompiledConglomInfo(conglomId);
@@ -448,6 +456,7 @@ class TableScanResultSet extends ScanResultSet
 
 
     boolean loopControl(boolean moreRows) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6674
         return scanController.fetchNext(candidate.getRowArray());
     }
 
@@ -458,11 +467,14 @@ class TableScanResultSet extends ScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
         checkCancellationFlag();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		if (currentRow == null || scanRepositioned)
 		{
 			currentRow =
@@ -484,6 +496,7 @@ class TableScanResultSet extends ScanResultSet
 			{
                 boolean moreRows = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6674
                 while (true)
 				{
                     // loop control overriden by subclass
@@ -517,6 +530,7 @@ class TableScanResultSet extends ScanResultSet
 					if (past2FutureTbl != null)
 					{
 						RowLocation rowLoc = (RowLocation) currentRow.getColumn(currentRow.nColumns());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3798
 						if (past2FutureTbl.remove(rowLoc) != null){
 						    continue;
 						}
@@ -548,6 +562,7 @@ class TableScanResultSet extends ScanResultSet
 	    }
 
 		setCurrentRow(result);
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		currentRowIsValid = true;
 		scanRepositioned = false;
 		qualify = true;
@@ -625,6 +640,7 @@ class TableScanResultSet extends ScanResultSet
             if (past2FutureTbl != null)
             {
                 past2FutureTbl.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6981
                 past2FutureTbl = null;
             }
 	    }
@@ -700,11 +716,13 @@ class TableScanResultSet extends ScanResultSet
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 			if (currentRowIsValid) {
 				// we reuse the same rowlocation object across several calls.
 				if (rlTemplate == null)
 					rlTemplate = scanController.newRowLocationTemplate();
 				rl = rlTemplate;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1172
 				try {
 					scanController.fetchLocation(rl);
 				} catch (StandardException se) {
@@ -753,6 +771,7 @@ class TableScanResultSet extends ScanResultSet
 		try
 		{
 			if ((currentRow == null)                        ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 			(!currentRowIsValid)                            ||
 			(!scanControllerOpened)                         ||
 			(qualify && scanController.isCurrentPositionDeleted())     ||
@@ -771,6 +790,7 @@ class TableScanResultSet extends ScanResultSet
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         resultRowBuilder.reset(candidate);
         currentRow = getCompactRow(candidate, accessedCols, isKeyed);
 
@@ -793,6 +813,7 @@ class TableScanResultSet extends ScanResultSet
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         setCurrentRow(candidate);
 	    return currentRow;
 	}
@@ -804,6 +825,7 @@ class TableScanResultSet extends ScanResultSet
 	 * will not attempt to re-qualify the current row. 
 	 */
 	public void positionScanAtRowLocation(RowLocation rl) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		throws StandardException 
 	{
 		// Check if the scanController is a B-tree scan controller. Do not
@@ -1148,6 +1170,7 @@ class TableScanResultSet extends ScanResultSet
 			if (positioner.areNullsOrdered(position))
 			{
 				output = output + position + " ";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				colSeen = true;
 			}
 

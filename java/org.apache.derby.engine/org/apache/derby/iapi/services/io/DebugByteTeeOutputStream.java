@@ -46,6 +46,7 @@ class DebugByteTeeOutputStream extends FilterOutputStream {
 
 	void checkObject(Formatable f) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2598
 		ByteArrayInputStream in = 
             new ByteArrayInputStream(tee.getInternalByteArray(), 0, tee.size());
 
@@ -77,6 +78,7 @@ class DebugByteTeeOutputStream extends FilterOutputStream {
 
             // for debugging purposes print this both to derby.log and to
             // System.out.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2598
             String err_msg = 
                 "FormatableError:read error    : " + t.toString() + 
                 "\nFormatableError:class written : " + f.getClass();

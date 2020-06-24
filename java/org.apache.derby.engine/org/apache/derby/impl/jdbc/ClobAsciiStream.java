@@ -56,6 +56,7 @@ final class ClobAsciiStream extends OutputStream {
      *             output stream has been closed.
      */
     public void write(int b) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2618
         writer.write(b & 0xff);
     }
 
@@ -90,10 +91,12 @@ final class ClobAsciiStream extends OutputStream {
      */
     public void write(byte[] b, int off, int len) throws IOException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2618
         while (len > 0)
         {
             int clen = Math.min(len, buffer.length);
             for (int i = 0; i < clen; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2618
                 buffer[i] = (char)(b[off + i] & 0xff);
             }
             writer.write(buffer, 0, clen);

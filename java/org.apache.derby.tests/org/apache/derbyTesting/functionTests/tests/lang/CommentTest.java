@@ -52,6 +52,7 @@ public final class CommentTest extends BaseJDBCTestCase {
     */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4338
         return TestConfiguration.defaultSuite(CommentTest.class);
     }
 
@@ -67,6 +68,7 @@ public final class CommentTest extends BaseJDBCTestCase {
             new String [][] {{"1"}});
 
         JDBC.assertFullResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4338
             stmt.executeQuery("-- eof comment\nVALUES 1"),
             new String [][] {{"1"}});
 
@@ -130,7 +132,9 @@ public final class CommentTest extends BaseJDBCTestCase {
         assertCompileError("42X02", "VALUES 1 /* comment /* nested */");
 
         // just comments generates syntax error
+//IC see: https://issues.apache.org/jira/browse/DERBY-3242
         assertCompileError("42X01", "/* this is a comment */");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4338
         assertCompileError("42X01", "/* this is a comment */ /* /* foo */ */");
         assertCompileError(
             "42X01",
@@ -214,6 +218,7 @@ public final class CommentTest extends BaseJDBCTestCase {
             s.executeQuery("select\"TABLEID\" from sys.systables"));
 
         // Added for DERBY-4748.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4748
         assertCompileError("42X01", "commit");
         assertCompileError("42X01", "commit;");
     }

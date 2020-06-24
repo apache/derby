@@ -3557,6 +3557,7 @@ abstract class FileContainer
      */
     static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()

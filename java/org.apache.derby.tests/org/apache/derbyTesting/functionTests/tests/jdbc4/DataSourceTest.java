@@ -63,6 +63,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * Create a default DataSource
      */
     public void setUp() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         ds = JDBCDataSource.getDataSource();
     }
     
@@ -73,10 +75,12 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception {
         ds = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2707
         super.tearDown();
     }
 
     public void testIsWrapperForDataSource() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1536
         assertTrue(ds.isWrapperFor(DataSource.class));
     }
 
@@ -282,6 +286,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
     	//As per the JDBC definition, an exception and hence an event is raised
     	//for isValid only if the param value is illegal
     	assertFalse(aes12.didConnectionErrorEventHappen());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         aes12.resetState();
         Class<?> clazz;
         if (usingEmbedded())
@@ -305,6 +310,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     public void test_jdbc4_1() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         DataSource  ds = JDBCDataSource.getDataSource();
         ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();
         XADataSource xads = J2EEDataSource.getXADataSource();
@@ -335,7 +341,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         // Use explicit ordering of fixtures until fix of DERBY-5988
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite s = new BaseTestSuite("datasourcetestsuite-embedded");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5988
         s.addTest(new DataSourceTest("testIsNotWrapperForPoolDataSource"));
         s.addTest(new DataSourceTest("testIsNotWrapperForXADataSource"));
         s.addTest(new DataSourceTest("testUnwrapConnectionPoolDataSource"));
@@ -346,6 +354,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         s.addTest(new DataSourceTest("testUnwrapResultSet"));
         s.addTest(new DataSourceTest("testUnwrapDataSource"));
         s.addTest(new DataSourceTest("test_jdbc4_1"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite ns = new BaseTestSuite("datasourcetestsuite-net");
         ns.addTest(new DataSourceTest("testIsNotWrapperForPoolDataSource"));
         ns.addTest(new DataSourceTest("testIsNotWrapperForXADataSource"));
@@ -358,6 +367,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         ns.addTest(new DataSourceTest("testUnwrapDataSource"));
         ns.addTest(new DataSourceTest("test_jdbc4_1"));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite totalsuite = new BaseTestSuite("datasourcetest");
         totalsuite.addTest(new CleanDatabaseTestSetup(s));
         totalsuite.addTest(TestConfiguration.clientServerDecorator(

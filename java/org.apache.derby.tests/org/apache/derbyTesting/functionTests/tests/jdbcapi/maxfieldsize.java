@@ -59,6 +59,7 @@ public class maxfieldsize {
 		Statement stmt;
 
 		// start by cleaning up, just in case
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 		String[] testObjects = {"table tab1", "table tab2"};
 		
 

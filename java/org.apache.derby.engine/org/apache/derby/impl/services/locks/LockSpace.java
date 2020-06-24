@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.locks.LockOwner;
 
 	A LockSpace represents the complete set of locks held within
 	a single compatibility space, broken into groups of locks.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 
     A LockSpace contains a HashMap keyed by the group reference,
     the data for each key is a HashMap of Lock's.
@@ -63,6 +64,7 @@ final class LockSpace implements CompatibilitySpace {
     /** Cached HashMaps for storing lock groups. */
     private final ArrayDeque<HashMap<Lock, Lock>> spareGroups =
             new ArrayDeque<HashMap<Lock, Lock>>(MAX_CACHED_GROUPS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 	// the Limit info.
 	private Object callbackGroup;
@@ -76,7 +78,9 @@ final class LockSpace implements CompatibilitySpace {
 	 * @param owner an object representing the owner of the compatibility space
 	 */
 	LockSpace(LockOwner owner) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         groups = new HashMap<Object, HashMap<Lock, Lock>>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		this.owner = owner;
 	}
 
@@ -97,6 +101,7 @@ final class LockSpace implements CompatibilitySpace {
 
 		Lock lockInGroup = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<Lock, Lock> dl = groups.get(group);
 		if (dl == null)	{
 			dl = getGroupMap(group);
@@ -121,6 +126,7 @@ final class LockSpace implements CompatibilitySpace {
 		if (groupSize > nextLimitCall) {
 
 			inLimit = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 			callback.reached(this, group, limit,
 				new LockList(java.util.Collections.enumeration(dl.keySet())), groupSize);
 			inLimit = false;
@@ -144,11 +150,14 @@ final class LockSpace implements CompatibilitySpace {
 		Unlock all the locks in a group and then remove the group.
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2327
 	synchronized void unlockGroup(LockTable lset, Object group) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<Lock, Lock> dl = groups.remove(group);
 		if (dl == null)
 			return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Lock lock : dl.keySet()) {
             lset.unlock(lock, 0);
 		}
@@ -162,15 +171,18 @@ final class LockSpace implements CompatibilitySpace {
 
     private HashMap<Lock, Lock> getGroupMap(Object group) {
         HashMap<Lock, Lock> dl = spareGroups.poll();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		if (dl == null)
             dl = new HashMap<Lock, Lock>(5, 0.8f);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 		groups.put(group, dl);
 		return dl;
 	}
 
     private void saveGroup(HashMap<Lock, Lock> dl) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (spareGroups.size() < MAX_CACHED_GROUPS) {
             spareGroups.offer(dl);
             dl.clear();
@@ -180,12 +192,15 @@ final class LockSpace implements CompatibilitySpace {
 	/**
 		Unlock all locks in the group that match the key
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2327
 	synchronized void unlockGroup(LockTable lset, Object group, Matchable key) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<Lock, Lock> dl = groups.get(group);
 		if (dl == null)
 			return; //  no group at all
 
 		boolean allUnlocked = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Iterator<Lock> e = dl.keySet().iterator(); e.hasNext(); ) {
             Lock lock = e.next();
 			if (!key.match(lock.getLockable())) {
@@ -199,6 +214,7 @@ final class LockSpace implements CompatibilitySpace {
 		if (allUnlocked) {
 			groups.remove(group);
 			saveGroup(dl);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 			if ((callbackGroup != null) && group.equals(callbackGroup)) {
 				nextLimitCall = limit;
 			}
@@ -206,6 +222,7 @@ final class LockSpace implements CompatibilitySpace {
 	}
 
 	synchronized void transfer(Object oldGroup, Object newGroup) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<Lock, Lock> from = groups.get(oldGroup);
 		if (from == null)
 			return;
@@ -224,6 +241,7 @@ final class LockSpace implements CompatibilitySpace {
 			// place the contents of to into from
 			mergeGroups(to, from);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 			Object oldTo = groups.put(newGroup, from);
 			if (SanityManager.DEBUG) {
 				SanityManager.ASSERT(oldTo == to, "inconsistent state in LockSpace");
@@ -234,22 +252,27 @@ final class LockSpace implements CompatibilitySpace {
 		}
 		
 		clearLimit(oldGroup);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 		groups.remove(oldGroup);
 	}
 
     private void mergeGroups(HashMap<Lock, Lock> from, HashMap<Lock, Lock> into) {
 
         for (Lock lock : from.keySet()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
             Lock lockI = into.get(lock);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 			if (lockI == null) {
 				// lock is only in from list
 				into.put(lock, lock);
 			} else {
 				// merge the locks
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				Lock fromL = lock;
                 Lock intoL = lockI;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 				intoL.count += fromL.getCount();
 			}
@@ -257,10 +280,12 @@ final class LockSpace implements CompatibilitySpace {
 
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2327
 	synchronized int unlockReference(LockTable lset, Lockable ref,
 									 Object qualifier, Object group) {
 
 		// look for locks matching our reference and qualifier.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<Lock, Lock> dl = groups.get(group);
 		if (dl == null)
 			return 0;
@@ -275,6 +300,8 @@ final class LockSpace implements CompatibilitySpace {
 			if (dl.isEmpty()) {
 				groups.remove(group);
 				saveGroup(dl);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 				if ((callbackGroup != null) && group.equals(callbackGroup)) {
 					nextLimitCall = limit;
 				}
@@ -293,6 +320,7 @@ final class LockSpace implements CompatibilitySpace {
 		Return true if locks are held in a group
 	*/
 	synchronized boolean areLocksHeld(Object group) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 		return groups.containsKey(group);
 	}
 
@@ -307,6 +335,7 @@ final class LockSpace implements CompatibilitySpace {
 	synchronized boolean isLockHeld(Object group, Lockable ref, Object qualifier) {
 
 		// look for locks matching our reference and qualifier.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<Lock, Lock> dl = groups.get(group);
 		if (dl == null)
 			return false;
@@ -346,6 +375,7 @@ final class LockSpace implements CompatibilitySpace {
 
 		int count = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (HashMap<Lock, Lock> group: groups.values()) {
             for (Lock lock: group.keySet()) {
 					count += lock.getCount();
@@ -364,6 +394,7 @@ final class LockSpace implements CompatibilitySpace {
 */
 
 class LockList implements Enumeration<Lockable> {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	private Enumeration<Lock> lockGroup;
 
@@ -376,6 +407,7 @@ class LockList implements Enumeration<Lockable> {
 	}
 
 	public Lockable nextElement() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return (lockGroup.nextElement()).getLockable();
 	}
 }

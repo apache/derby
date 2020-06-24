@@ -64,12 +64,14 @@ public class Derby2017LayerATest
      * @return A suite of tests.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite ts = new BaseTestSuite();
         ts.addTest(
                 TestConfiguration.defaultSuite(Derby2017LayerATest.class));
         // Run the tests below with the client driver only.
         BaseTestSuite clientSuite = new BaseTestSuite("Client only tests");
         clientSuite.addTest(new Derby2017LayerATest(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
                 "cs_FailedStreamInsertCharBufferBoundaries"));
         clientSuite.addTest(new Derby2017LayerATest(
                 "cs_StreamInsertCharBufferBoundary"));
@@ -157,6 +159,7 @@ public class Derby2017LayerATest
                 0+i,
             };
             // We test only one combination of auto-commit and rollback here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             doInsertTest(INSERT, false, false);
         }
     }
@@ -343,6 +346,7 @@ public class Derby2017LayerATest
     }
 
     public void testFailedStreamInsertBinary()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws IOException, SQLException {
         byte[][] INSERT = generateDefaultInsert();
         String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
@@ -591,6 +595,7 @@ public class Derby2017LayerATest
      */
     private void doInsertTest(byte[][] INSERT, String[][] MASTER,
                               boolean autoCommit, boolean rollbackOnError)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws IOException, SQLException {
         // A few sanity checks.
         assertEquals("Expects 7 rows", 7, INSERT.length);
@@ -725,6 +730,7 @@ public class Derby2017LayerATest
      * @return A byte array with byte arrays ("rows").
      */
     public static byte[][] generateDefaultInsert() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         try {
             byte[][] INSERT = new byte[][] {
                 "This is row 1".getBytes(UTF8),

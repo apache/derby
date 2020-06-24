@@ -82,6 +82,7 @@ public interface Display {
      * @throws Exception
      */
     public void displayOrderStatus(Object displayData, boolean byName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
             Customer customer, Order order, OrderLine[] lineItems) throws Exception;
               
     /**

@@ -158,6 +158,7 @@ public interface PersistentService {
 		@exception StandardException Properties cannot be saved.
 	*/
 	public void saveServiceProperties(String serviceName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5260
                                       Properties properties)
 		throws StandardException;
 
@@ -179,6 +180,7 @@ public interface PersistentService {
 		cannot be converted into a canonical form.
 		
         @exception StandardException if an error happens when converting the
+//IC see: https://issues.apache.org/jira/browse/DERBY-6323
         name (name probably invalid)
 	*/
 	public String getCanonicalServiceName(String name)

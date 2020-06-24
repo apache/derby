@@ -111,11 +111,14 @@ public final class JMXManagementService implements ManagementService, ModuleCont
     public synchronized void boot(boolean create, Properties properties)
             throws StandardException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
         registeredMbeans = new HashMap<ObjectName,StandardMBean>();
         
         systemIdentifier =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             getMonitor().getUUIDFactory().createUUID().toString();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3429
         findServer();
              
         myManagementBean = (ObjectName) registerMBean(this,
@@ -125,7 +128,9 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         
         registerMBean(
                 new Version(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                         getMonitor().getEngineVersion(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
                         SystemPermission.ENGINE),
                 VersionMBean.class,
                 "type=Version,jar=derby.jar");
@@ -158,6 +163,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         registeredMbeans = null;
         
         myManagementServer = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         systemIdentifier = null;
     }
 
@@ -203,6 +210,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      * 
      */
     public synchronized <T> Object registerMBean(final T bean,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             final Class<T> beanInterface,
             final String keyProperties)
             throws StandardException {
@@ -213,6 +221,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
                     + ",system=" + systemIdentifier);
 
             final StandardMBean standardMBean =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1378
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
                 new StandardMBean(bean, beanInterface) {
                 
                 /**
@@ -229,6 +239,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             };
                 // new StandardMBean(bean, beanInterface);
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
             registeredMbeans.put(beanName, standardMBean);
             if (mbeanServer != null)
                 jmxRegister(standardMBean, beanName);
@@ -289,9 +300,11 @@ public final class JMXManagementService implements ManagementService, ModuleCont
     private synchronized void unregisterMBean(final ObjectName mbeanName)
     {
         //Has this service been shut down?
+//IC see: https://issues.apache.org/jira/browse/DERBY-4306
         if (registeredMbeans == null)
             return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
         if (registeredMbeans.remove(mbeanName) == null)
             return;
         
@@ -339,12 +352,15 @@ public final class JMXManagementService implements ManagementService, ModuleCont
     }
 
     public synchronized boolean isManagementActive() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
         return mbeanServer != null;
     }
 
     public synchronized void startManagement() {
         
         //Has this service been shut down?
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
         if (registeredMbeans == null)
             return;
         
@@ -365,6 +381,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             // If we registered this as a management bean
             // then leave it registered to allow the mbeans
             // to be re-registered with JMX
+//IC see: https://issues.apache.org/jira/browse/DERBY-3499
             if (mbeanName.equals(myManagementBean) &&
                     mbeanServer.isRegistered(myManagementBean))
                 continue;
@@ -395,6 +412,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
                     continue;
                 jmxUnregister(mbeanName);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
             mbeanServer = null;
         }
     }
@@ -403,6 +422,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      * Control permission (permissions are immutable).
      */
     private final static SystemPermission CONTROL =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
         new SystemPermission(
                 SystemPermission.JMX, SystemPermission.CONTROL);
 
@@ -412,6 +432,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      */
     private void checkJMXControl() {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
             if (System.getSecurityManager() != null)
                 AccessController.checkPermission(CONTROL);
         } catch (AccessControlException e) {
@@ -428,6 +449,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
 
     @Override
     public String quotePropertyValue(String value) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         return ObjectName.quote(value);
     }
     
@@ -437,6 +459,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

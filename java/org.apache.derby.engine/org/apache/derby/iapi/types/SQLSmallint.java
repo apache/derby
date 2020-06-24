@@ -158,6 +158,7 @@ public final class SQLSmallint
 		if (isNull())
 			return null;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
           return (int) value;
 	}
 
@@ -326,6 +327,7 @@ public final class SQLSmallint
 	}
 
 	public SQLSmallint(Short obj) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 		if (isnull = (obj == null))
 			;
 		else

@@ -108,6 +108,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     /**
      * Adds both the embedded and client-server versions of the baseSuite to
      * the Test. An empty BaseTestSuite is returned unless we have JDBC3
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
  support, because all test cases call verifyCachedIsolation() which in
  turn makes use of getTransactionIsolationJDBC()
  (GET_TRANSACTION_ISOLATION_JDBC) which uses DriverManager to access the
@@ -126,6 +127,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     
     /**
      * Creates a new BaseTestSuite with all the tests, and wraps it in a
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
  CleanDatabaseSetup with a custom decorator.
      * @param name BaseTestSuite name
      * @return wrapped TestSuite
@@ -214,6 +216,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
                         ".getCycleIsolationJDBC'");
  
                 s.execute("CREATE FUNCTION GET_CYCLE_ISOLATION_SQL " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
                         "() RETURNS VARCHAR(2) READS SQL DATA LANGUAGE JAVA " +
                         "PARAMETER STYLE JAVA EXTERNAL NAME '" +
                         CacheSessionDataTest.class.getName() + 
@@ -378,6 +381,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
      * @throws java.sql.SQLException
      */
     public static void setSchema(String schemaName)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
             throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:default:connection");
         Statement s = c.createStatement();
@@ -450,8 +454,11 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     }
     
     private void verifyCachedSchema(Connection c) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         if (usingDerbyNetClient()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
             String cached =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     ((ClientConnection) c).getCurrentSchemaName();
             Statement s = c.createStatement();
             ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
@@ -808,6 +815,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
                 ResultSet.CONCUR_READ_ONLY);
     }
     public void testLargePreparedScrollInsensitiveReadOnly()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
             throws SQLException {
         preparedCursorTest("BIG", ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
@@ -817,6 +825,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
                 ResultSet.CONCUR_UPDATABLE);
     }
     public void testLargePreparedScrollSensitiveUpdatable()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
             throws SQLException {
         preparedCursorTest("BIG", ResultSet.TYPE_SCROLL_SENSITIVE,
                 ResultSet.CONCUR_UPDATABLE);

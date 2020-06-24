@@ -41,6 +41,7 @@ public class Refresh extends Thread {
 	public Refresh(String name) throws Exception{
 		//sets the thread name
 		setName(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 		conn = DbTasks.getConnection("REFRESH", "Refresh");
 	}
 
@@ -51,6 +52,7 @@ public class Refresh extends Thread {
 			while (true) {
 				doWork();
 				try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 					Thread.sleep(150000);
 				} catch (InterruptedException ie) {
 					MailJdbc.logAct.logMsg("#### " + getName()
@@ -78,6 +80,7 @@ public class Refresh extends Thread {
 		try {
 			insertMail(conn, this.getName());
 			//Try to avoid deadlock situation by Purge thread
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
             Thread.sleep(60000);
 		} catch (Exception e) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + "insertMail() failed "

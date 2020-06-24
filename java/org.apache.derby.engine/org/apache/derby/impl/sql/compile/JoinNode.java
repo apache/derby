@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.JoinNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -57,6 +58,8 @@ import org.apache.derby.iapi.util.PropertyUtil;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class JoinNode extends TableOperatorNode
 {
 	/* Join semantics */
@@ -76,6 +79,7 @@ class JoinNode extends TableOperatorNode
 	private PredicateList rightPredicateList;
 
 	protected boolean flattenableJoin = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     List<AggregateNode>                aggregates;
 	SubqueryList		subqueryList;
 	ValueNode			joinClause;
@@ -85,6 +89,7 @@ class JoinNode extends TableOperatorNode
 	//User provided optimizer overrides
 	Properties joinOrderStrategyProperties;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 
 	/**
      * Constructor for a JoinNode.
@@ -100,6 +105,8 @@ class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JoinNode(ResultSetNode    leftResult,
              ResultSetNode    rightResult,
              ValueNode        onClause,
@@ -110,6 +117,7 @@ class JoinNode extends TableOperatorNode
              ContextManager   cm) throws StandardException {
 
         super(leftResult, rightResult, tableProperties, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( selectList );
         this.joinClause = onClause;
         this.joinClauseNormalized = false;
@@ -119,6 +127,7 @@ class JoinNode extends TableOperatorNode
 		/* JoinNodes can be generated in the parser or at the end of optimization.
 		 * Those generated in the parser do not have resultColumns yet.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         if (getResultColumns() != null)
 		{
 			/* A longer term assertion */
@@ -134,6 +143,7 @@ class JoinNode extends TableOperatorNode
 			/* Build the referenced table map (left || right) */
 			if (leftResultSet.getReferencedTableMap() != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 setReferencedTableMap
                     ( (JBitSet) leftResultSet.getReferencedTableMap().clone() );
                 getReferencedTableMap().or
@@ -162,6 +172,7 @@ class JoinNode extends TableOperatorNode
 			throws StandardException
 	{
         if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceOptimizingJoinNode(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
 		// It's possible that a call to optimize the left/right will cause
 		// a new "truly the best" plan to be stored in the underlying base
@@ -207,6 +218,7 @@ class JoinNode extends TableOperatorNode
 		 * implement full outer join.
 		 */
 		// Walk joinPredicates backwards due to possible deletes
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (int i = joinPredicates.size() - 1; i >= 0; i --)
 		{
             Predicate p = joinPredicates.elementAt(i);
@@ -225,6 +237,7 @@ class JoinNode extends TableOperatorNode
 							leftResultSet.getCostEstimate());
 
 		setCostEstimate( getCostEstimate(optimizer) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** We add the costs for the inner and outer table, but the number
@@ -243,6 +256,7 @@ class JoinNode extends TableOperatorNode
 		** join types.
 		*/
 		adjustNumberOfRowsReturned(getCostEstimate());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** Get the cost of this result set in the context of the whole plan.
@@ -255,6 +269,7 @@ class JoinNode extends TableOperatorNode
 							(ConglomerateDescriptor) null,
 							outerCost,
 							optimizer,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 							getCostEstimate()
 							);
 
@@ -267,6 +282,7 @@ class JoinNode extends TableOperatorNode
 		 	* Also need to figure out the pushing of the joinClause.
 		 	*/
 			subqueryList.optimize(optimizer.getDataDictionary(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                                   getCostEstimate().rowCount());
 			subqueryList.modifyAccessPaths();
 		}
@@ -363,6 +379,8 @@ class JoinNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
@@ -498,6 +516,8 @@ class JoinNode extends TableOperatorNode
 			}
 
 			// Return a spliced copy of the 2 lists
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ResultColumnList
                     tempList = new ResultColumnList((getContextManager()));
 			tempList.nondestructiveAppend(leftRCL);
@@ -520,6 +540,8 @@ class JoinNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getMatchingColumn(ColumnReference columnReference)
             throws StandardException
 	{
@@ -534,6 +556,8 @@ class JoinNode extends TableOperatorNode
 		ResultColumn	usingRC = null;
 
         ResultColumn leftRC = logicalLeftRS.getMatchingColumn(columnReference);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (leftRC != null)
 		{
@@ -577,6 +601,7 @@ class JoinNode extends TableOperatorNode
 			if (leftRC != null)
 			{
 				throw StandardException.newException(SQLState.LANG_AMBIGUOUS_COLUMN_NAME, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-18
 						 columnReference.getSQLColumnName());
 			}
 
@@ -600,6 +625,7 @@ class JoinNode extends TableOperatorNode
 		 * for the ColumnReference will be from the wrong ResultSet
 		 * at generate().)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getResultColumns() != null)
 		{
             for (ResultColumn rc : getResultColumns())
@@ -644,6 +670,8 @@ class JoinNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumns(FromList fromListParam)
 					throws StandardException
 	{
@@ -729,6 +757,7 @@ class JoinNode extends TableOperatorNode
 		 * exist.  This can happen in the degenerate case of an insert
 		 * select with a join expression in a derived table within the select.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getResultColumns() != null)
 		{
 			return;
@@ -741,6 +770,7 @@ class JoinNode extends TableOperatorNode
 		/* We get a shallow copy of the left's ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setResultColumns( leftResultSet.getResultColumns() );
 		leftRCL = getResultColumns().copyListAndObjects();
 		leftResultSet.setResultColumns(leftRCL);
@@ -757,6 +787,7 @@ class JoinNode extends TableOperatorNode
 		*/
 		if (this instanceof HalfOuterJoinNode && ((HalfOuterJoinNode)this).isRightOuterJoin())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().setNullability(true);
 		}
 
@@ -771,6 +802,7 @@ class JoinNode extends TableOperatorNode
 		 */
 		tmpRCL.genVirtualColumnNodes(rightResultSet, rightRCL, false);
 		tmpRCL.adjustVirtualColumnIds(getResultColumns().size());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** If this is a left outer join, we can get nulls on the right side,
@@ -784,18 +816,22 @@ class JoinNode extends TableOperatorNode
 		/* Now we append the propagated RCL from the right to the one from
 		 * the left and call it our own.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().nondestructiveAppend(tmpRCL);
 	}
 
 	private void deferredBindExpressions(FromList fromListParam)
 				throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ContextManager cm = getContextManager();
         CompilerContext cc = getCompilerContext();
 
 		/* Bind the expressions in the join clause */
         subqueryList = new SubqueryList(cm);
         aggregates = new ArrayList<AggregateNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         
 		/* ON clause */
@@ -817,6 +853,9 @@ class JoinNode extends TableOperatorNode
 			 * we don't find an bogus ambiguous column reference. (Bug 377)
 			 */
             joinClause = new BooleanConstantNode(true, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             for (ResultColumn rc : usingClause)
 			{
@@ -826,28 +865,35 @@ class JoinNode extends TableOperatorNode
 
 				/* Create and bind the left CR */
 				fromListParam.insertElementAt(leftResultSet, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 leftCR = new ColumnReference(
                         rc.getName(),
                         ((FromTable) leftResultSet).getTableName(),
                         cm);
 				leftCR = (ColumnReference) leftCR.bindExpression(
 									  fromListParam, subqueryList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                                       aggregates);
 				fromListParam.removeElementAt(0);
 
 				/* Create and bind the right CR */
 				fromListParam.insertElementAt(rightResultSet, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 rightCR = new ColumnReference(
                         rc.getName(),
                         ((FromTable) rightResultSet).getTableName(),
                         cm);
 				rightCR = (ColumnReference) rightCR.bindExpression(
 									  fromListParam, subqueryList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                                       aggregates);
 				fromListParam.removeElementAt(0);
 
 				/* Create and insert the new = condition */
                 equalsNode = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                         BinaryRelationalOperatorNode.K_EQUALS,
                         leftCR,
                         rightCR,
@@ -870,6 +916,7 @@ class JoinNode extends TableOperatorNode
 			/* If joinClause is a parameter, (where ?), then we assume
 			 * it will be a nullable boolean.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			if (joinClause.requiresTypeFromContext())
 			{
 				joinClause.setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, true));
@@ -889,6 +936,7 @@ class JoinNode extends TableOperatorNode
 			/* If the where clause is not a built-in type, then generate a bound 
 			 * conversion tree to a built-in type.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			if (joinTypeId.userType())
 			{
 				joinClause = joinClause.genSQLJavaSQLTree();
@@ -982,9 +1030,12 @@ class JoinNode extends TableOperatorNode
         ResultColumnList rightRCL =
                 getRightResultSet().getAllResultColumns(null);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<String> columnNames = extractColumnNames(leftRCL);
         columnNames.retainAll(extractColumnNames(rightRCL));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ResultColumnList
                 commonColumns = new ResultColumnList((getContextManager()));
 
@@ -1007,7 +1058,9 @@ class JoinNode extends TableOperatorNode
      */
     private static List<String> extractColumnNames(ResultColumnList rcl) {
         ArrayList<String> names = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : rcl) {
             names.add(rc.getName());
         }
@@ -1040,6 +1093,8 @@ class JoinNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -1074,6 +1129,8 @@ class JoinNode extends TableOperatorNode
 				 * flattening will take place. (Bug #1206)
 				 */
                 joinClause = joinClause.preprocess(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     numTables,
                     new FromList(
                         getOptimizerFactory().doJoinOrderOptimization(),
@@ -1100,6 +1157,7 @@ class JoinNode extends TableOperatorNode
     {
         leftResultSet.projectResultColumns();
         rightResultSet.projectResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         getResultColumns().pullVirtualIsReferenced();
         super.projectResultColumns();
     }
@@ -1108,6 +1166,8 @@ class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void normExpressions()
 				throws StandardException
 	{
@@ -1171,6 +1231,8 @@ class JoinNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void pushExpressions(PredicateList outerPredicateList)
 					throws StandardException
 	{
@@ -1246,6 +1308,7 @@ class JoinNode extends TableOperatorNode
 		for (int index = outerPredicateList.size() - 1; index >= 0; index --)
 		{
             Predicate predicate = outerPredicateList.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (! predicate.getPushable())
 			{
@@ -1301,6 +1364,7 @@ class JoinNode extends TableOperatorNode
 		for (int index = outerPredicateList.size() - 1; index >= 0; index --)
 		{
             Predicate predicate = outerPredicateList.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             if (! predicate.getPushable())
 			{
@@ -1356,6 +1420,7 @@ class JoinNode extends TableOperatorNode
 		for (int index = outerPredicateList.size() - 1; index >= 0; index --)
 		{
             Predicate predicate = outerPredicateList.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (! predicate.getPushable())
 			{
@@ -1419,9 +1484,13 @@ class JoinNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromList flatten(ResultColumnList rcl,
 							PredicateList outerPList,
 							SubqueryList sql,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
                             GroupByList gbl,
                             ValueNode havingClause)
 
@@ -1446,6 +1515,8 @@ class JoinNode extends TableOperatorNode
 		 * since there is no exposed name. (And even if there was,
 		 * we could care less about unique exposed name checking here.)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         FromList fromList = new FromList(
                 getOptimizerFactory().doJoinOrderOptimization(),
                 getContextManager());
@@ -1454,6 +1525,7 @@ class JoinNode extends TableOperatorNode
 
 		/* Mark our RCL as redundant */
 		getResultColumns().setRedundant();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Remap all ColumnReferences from the outer query to this node.
 		 * (We replace those ColumnReferences with clones of the matching
@@ -1466,6 +1538,8 @@ class JoinNode extends TableOperatorNode
 			gbl.remapColumnReferencesToExpressions();
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
         if (havingClause != null) {
             havingClause.remapColumnReferencesToExpressions();
         }
@@ -1596,6 +1670,7 @@ class JoinNode extends TableOperatorNode
 		 */
 		if (subquerys != null && subquerys.size() > 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			subquerys.setPointOfAttachment(getResultSetNumber());
 		}
 
@@ -1644,6 +1719,7 @@ class JoinNode extends TableOperatorNode
 		int numArgs = getNumJoinArguments();
 
 		leftResultSet.generate(acb, mb); // arg 1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(leftResultSet.getResultColumns().size()); // arg 2
 		rightResultSet.generate(acb, mb); // arg 3
 		mb.push(rightResultSet.getResultColumns().size()); // arg 4
@@ -1701,6 +1777,7 @@ class JoinNode extends TableOperatorNode
 		}
 
 		mb.push(getResultSetNumber()); // arg 6
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		addOuterJoinArguments(acb, mb);
 
@@ -1709,6 +1786,7 @@ class JoinNode extends TableOperatorNode
 
 		// estimated row count
 		mb.push(getCostEstimate().rowCount());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// estimated cost
 		mb.push(getCostEstimate().getEstimatedCost());
@@ -1716,6 +1794,7 @@ class JoinNode extends TableOperatorNode
 		//User may have supplied optimizer overrides in the sql
 		//Pass them onto execute phase so it can be shown in 
 		//run time statistics.
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		if (joinOrderStrategyProperties != null)
 			mb.push(PropertyUtil.sortProperties(joinOrderStrategyProperties));
 		else
@@ -1735,10 +1814,13 @@ class JoinNode extends TableOperatorNode
 	 *  though, is that for the inner table only.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		// If we already found it, just return it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCandidateFinalCostEstimate() != null)
         {
 			return getCandidateFinalCostEstimate();
@@ -1769,6 +1851,7 @@ class JoinNode extends TableOperatorNode
 	 */
 	protected int getNumJoinArguments()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		return 11;
 	}
 
@@ -1831,6 +1914,8 @@ class JoinNode extends TableOperatorNode
 	{
 		if (leftPredicateList == null)
             leftPredicateList = new PredicateList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		return leftPredicateList;
 	}
@@ -1839,6 +1924,8 @@ class JoinNode extends TableOperatorNode
 	{
 		if (rightPredicateList == null)
             rightPredicateList = new PredicateList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		return rightPredicateList;
 	}
@@ -1914,6 +2001,8 @@ class JoinNode extends TableOperatorNode
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -1951,6 +2040,7 @@ class JoinNode extends TableOperatorNode
 		this.subqueryList = subqueryList;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     void setAggregates(List<AggregateNode> aggregates)
 	{
         this.aggregates = aggregates;
@@ -1994,11 +2084,13 @@ class JoinNode extends TableOperatorNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getResultColumns() != null)
 		{
 			setResultColumns( (ResultColumnList)getResultColumns().accept(v) );
@@ -2014,6 +2106,7 @@ class JoinNode extends TableOperatorNode
 			usingClause = (ResultColumnList)usingClause.accept(v);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4416
 		if (joinPredicates != null)
 		{
 			joinPredicates = (PredicateList) joinPredicates.accept(v);
@@ -2026,6 +2119,8 @@ class JoinNode extends TableOperatorNode
     // The top most LOJ may be a join betw T and X and thus we can reorder the
 	// LOJs.  However, as of 10/2002, we don't reorder LOJ mixed with join.
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JBitSet LOJgetReferencedTables(int numTables)
 				throws StandardException
 	{

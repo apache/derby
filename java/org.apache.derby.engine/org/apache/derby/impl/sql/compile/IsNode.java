@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.IsNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -28,6 +29,8 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class IsNode extends BinaryLogicalOperatorNode
 {
 	private boolean		notMe;	// set to true if we're to negate the sense of this node
@@ -66,6 +69,7 @@ class IsNode extends BinaryLogicalOperatorNode
 	 */
 
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{

@@ -46,6 +46,7 @@ class LOBFile {
      * cannot be opened
      */
     LOBFile(StorageFile lobFile) throws FileNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3889
         storageFile = lobFile;
         randomAccessFile = lobFile.getRandomAccessFile("rw");
     }

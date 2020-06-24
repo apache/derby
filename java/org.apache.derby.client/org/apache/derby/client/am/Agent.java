@@ -30,12 +30,14 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Agent {
     SqlException accumulatedReadExceptions_ = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     private boolean enableBatchedExceptionTracking_;
     private int batchedExceptionLabelIndex_;
     private boolean[] batchedExceptionGenerated_;
 
     ClientConnection connection_; // made friendly for lobs only, refactor !!
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     SectionManager sectionManager_ = null;
 
@@ -66,6 +68,7 @@ public abstract class Agent {
      * @exception SqlException if the type is not supported
      */
     void checkForSupportedDataType(int dataType) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         // JDBC 4.0 javadoc for setObject() says:
         //
@@ -79,9 +82,11 @@ public abstract class Agent {
         // (sort of) JAVA_OBJECT.
 
         switch (dataType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.ARRAY:
         case Types.DATALINK:
         case Types.DISTINCT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         case Types.NCHAR:
         case Types.NCLOB:
         case Types.NVARCHAR:
@@ -100,6 +105,7 @@ public abstract class Agent {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void accumulateDeferredException(SqlException e) {
         if (deferredException_ == null) {
             deferredException_ = e;
@@ -124,7 +130,9 @@ public abstract class Agent {
         deferredException_ = null;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void resetAgent(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientConnection connection,
         LogWriter logWriter,
         int loginTimeout,
@@ -140,6 +148,7 @@ public abstract class Agent {
     //-------------------- entry points ------------------------------------------
 
     public final boolean loggingEnabled() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return logWriter_ != null;
     }
 
@@ -233,6 +242,7 @@ public abstract class Agent {
         beginReadChain(statement);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final void flowBatch(ClientStatement statement, int batchSize)
             throws SqlException {
         endBatchedWriteChain();
@@ -259,6 +269,7 @@ public abstract class Agent {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final void disconnectEvent() {
         // closes client-side resources associated with database connection
         try {
@@ -274,6 +285,7 @@ public abstract class Agent {
         connection_.writeTransactionStart(statement);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final void beginBatchedWriteChain(ClientStatement statement)
             throws SqlException {
         beginWriteChain(statement);
@@ -286,6 +298,7 @@ public abstract class Agent {
     }
 
     protected void beginReadChain(ClientStatement statement)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         connection_.readTransactionStart();
     }
@@ -306,9 +319,11 @@ public abstract class Agent {
         checkForExceptions();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final void endBatchedReadChain(long[] updateCounts,
                                    SqlException accumulatedExceptions)
             throws BatchUpdateException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         disableBatchedExceptionTracking();
         for (int i = 0; i < batchedExceptionGenerated_.length; i++) {
@@ -324,6 +339,7 @@ public abstract class Agent {
             }
         }
         if (accumulatedExceptions != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(logWriter_,
                 new ClientMessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
                 null, updateCounts, accumulatedExceptions);

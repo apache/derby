@@ -47,6 +47,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
  * upgrading an older database that did not forbid this.
  */
 public class RoleGrantDescriptor extends TupleDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-3666
     implements Provider
 {
     private final UUID uuid;
@@ -71,6 +72,9 @@ public class RoleGrantDescriptor extends TupleDescriptor
      *
      */
     public RoleGrantDescriptor(DataDictionary dd,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                UUID uuid,
                                String roleName,
                                String grantee,
@@ -87,6 +91,7 @@ public class RoleGrantDescriptor extends TupleDescriptor
     }
 
     public UUID getUUID() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         return uuid;
     }
 
@@ -116,6 +121,7 @@ public class RoleGrantDescriptor extends TupleDescriptor
 
     public String toString() {
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             return "uuid: " + uuid + "\n" +
                 "roleName: " + roleName + "\n" +
                 "grantor: " + grantor + "\n" +
@@ -148,6 +154,7 @@ public class RoleGrantDescriptor extends TupleDescriptor
         DataDictionary dd = getDataDictionary();
         TransactionController tc = lcc.getTransactionExecute();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         dd.dropRoleGrant(roleName, grantee, grantor, tc);
     }
 
@@ -164,6 +171,7 @@ public class RoleGrantDescriptor extends TupleDescriptor
      */
     public UUID getObjectID()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3666
         return uuid;
     }
 
@@ -208,6 +216,7 @@ public class RoleGrantDescriptor extends TupleDescriptor
      */
     public DependableFinder getDependableFinder()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return getDependableFinder(StoredFormatIds.ROLE_GRANT_FINDER_V01_ID);
     }
 }

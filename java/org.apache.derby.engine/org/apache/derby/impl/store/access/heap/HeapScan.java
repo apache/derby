@@ -136,6 +136,7 @@ class HeapScan
     }
 
     protected void setRowLocationArray(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     RowLocation[]   rowloc_array,
     int             index,
     RecordHandle    rh)
@@ -171,6 +172,7 @@ class HeapScan
      * @exception StandardException Standard exception policy.
      */
     private boolean reopenScanByRecordHandleAndSetLocks (RecordHandle rh) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
             throws StandardException 
     {
         if (rh == null) 
@@ -263,6 +265,7 @@ class HeapScan
         // We could optimize this, if there are no qualifiers and read
         // into a zero column row, but callers should be using fetchNext()
         // instead.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         fetchNext_one_slot_array[0] = 
             open_conglom.getRuntimeMem().get_scratch_row(
                     open_conglom.getRawTran());
@@ -282,6 +285,7 @@ class HeapScan
      * @see org.apache.derby.iapi.store.access.ScanController#positionAtRowLocation
      */
     public boolean positionAtRowLocation(RowLocation rl) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
         if (open_conglom.isClosed() && !rowLocationsInvalidated) 
         {
             reopenAfterEndTransaction();
@@ -334,6 +338,7 @@ class HeapScan
     }
 
     public int fetchNextGroup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     DataValueDescriptor[][] row_array,
     RowLocation[]           old_rowloc_array,
     RowLocation[]           new_rowloc_array)

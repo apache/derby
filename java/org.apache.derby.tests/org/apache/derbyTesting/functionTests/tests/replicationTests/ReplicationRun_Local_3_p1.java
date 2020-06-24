@@ -52,6 +52,7 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_3_p1 Suite");
         
@@ -82,6 +83,7 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
@@ -131,6 +133,7 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
                 slaveServerHost, // for slaveReplInterface
                 slaveReplPort);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         replicationTest = null; // Used as a flag to verifyMaster and verifySlave!
         runTest(replicationTest, // Returns immediatly if replicationTest is null.
                 jvmVersion,
@@ -141,6 +144,7 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
         // 1. separate test
         // slave: stopSlave
         assertException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
             stopSlave(slaveServerHost,
                       slaveServerPort,
                       slaveDatabasePath,
@@ -153,6 +157,7 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
         // master: stopMaster
         // slave: stopSlave
         assertException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
             stopSlave(masterServerHost,
                       masterServerPort,
                       masterDatabasePath,
@@ -174,6 +179,7 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
                 slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
                 slaveServerHost, slaveServerPort);
         assertException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
             stopSlave(slaveServerHost,
                       slaveServerPort,
                       slaveDatabasePath,

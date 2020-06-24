@@ -102,6 +102,7 @@ public class ReleaseNoteReader
         Element                         details = me.getReleaseNoteDetails( doc );
 
         me.forbidBlockQuotes( doc );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5181
 
         // if you get this far, then everything worked
 
@@ -147,6 +148,7 @@ public class ReleaseNoteReader
         //
         Element     root = releaseNote.getDocumentElement();
         Element     summaryParagraph = GeneratorBase.getFirstChild( root, GeneratorBase.PARAGRAPH );
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
 
         return summaryParagraph;
     }
@@ -161,6 +163,7 @@ public class ReleaseNoteReader
     {
         Element     root = releaseNote.getDocumentElement();
         Element     details = GeneratorBase.getFirstChild( root, GeneratorBase.BODY );
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
 
         return details;
     }
@@ -172,6 +175,7 @@ public class ReleaseNoteReader
      */
     private void    forbidBlockQuotes( Document releaseNote )   throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5181
         Element     root = releaseNote.getDocumentElement();
         String          errorMessage = "For accessibility reasons, blockquotes are not allowed. Please remove the blockquote tags.";
 

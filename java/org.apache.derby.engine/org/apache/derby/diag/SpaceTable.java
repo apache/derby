@@ -51,6 +51,7 @@ import org.apache.derby.vti.VTIEnvironment;
 	
 	This virtual table can be invoked by calling it
 	directly, and supplying the schema name and table name as arguments.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4051
     <PRE> SELECT * FROM TABLE(SYSCS_DIAG.SPACE_TABLE('MYSCHEMA', 'MYTABLE')) T;  </PRE>
     If the schema name is not supplied, the default schema is used.
     <PRE> SELECT * FROM TABLE(SYSCS_DIAG.SPACE_TABLE('MYTABLE')) T; </PRE>
@@ -99,6 +100,7 @@ import org.apache.derby.vti.VTIEnvironment;
     select v.*
     from SYS.SYSSCHEMAS s,
          SYS.SYSTABLES t,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4051
          TABLE(SYSCS_DIAG.SPACE_TABLE(SCHEMANAME, TABLENAME)) v
     where s.SCHEMAID = t.SCHEMAID;
     </PRE>
@@ -140,6 +142,7 @@ public class SpaceTable extends VTITemplate implements VTICosting {
         if ( tableName != null )
         {
             // if schemaName is null, it gets the default schema
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
             SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
             TableDescriptor td = dd.getTableDescriptor(tableName,sd, tc);
             if (td == null)  // table does not exist
@@ -215,6 +218,7 @@ public class SpaceTable extends VTITemplate implements VTICosting {
     		{
 				LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
                 tc = lcc.getTransactionExecute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
                getConglomInfo(lcc);
                 
 			    initialized = true;
@@ -377,6 +381,7 @@ public class SpaceTable extends VTITemplate implements VTICosting {
 	
     private static final ResultSetMetaData metadata =
         new EmbedResultSetMetaData(columnInfo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
 }
 

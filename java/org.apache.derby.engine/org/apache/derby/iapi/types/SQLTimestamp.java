@@ -95,6 +95,7 @@ public final class SQLTimestamp extends DataType
 	{
 		if (!isNull())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3173
             String valueString = getTimestamp((Calendar) null).toString();
             /* The java.sql.Timestamp.toString() method is supposed to return a string in
              * the JDBC escape format. However the JDK 1.3 libraries truncate leading zeros from
@@ -141,6 +142,7 @@ public final class SQLTimestamp extends DataType
         cal.clear();
         
         SQLDate.setDateInCalendar(cal, encodedDate);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1985
 
 		return new Date(cal.getTimeInMillis());
 	}
@@ -161,6 +163,7 @@ public final class SQLTimestamp extends DataType
         // to nano-seconds so ensure the Time object
         // maintains that since it has milli-second
         // resolutiuon.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1985
         return SQLTime.getTime(cal, encodedTime, nanos);
 	}
 
@@ -405,6 +408,7 @@ public final class SQLTimestamp extends DataType
 	}
 
 	SQLTimestamp(int encodedDate, int encodedTime, int nanos) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
 
 		this.encodedDate = encodedDate;
 		this.encodedTime = encodedTime;
@@ -595,6 +599,7 @@ public final class SQLTimestamp extends DataType
 	 * Set the value from a correctly typed Timestamp object.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue) throws StandardException
 	{
 		setValue((Timestamp) theValue);
@@ -653,6 +658,7 @@ public final class SQLTimestamp extends DataType
 
 		if (theValue != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             DatabaseContext databaseContext = (DatabaseContext) DataValueFactoryImpl.getContext(DatabaseContext.CONTEXT_ID);
             parseTimestamp( theValue,
                             false,
@@ -666,6 +672,7 @@ public final class SQLTimestamp extends DataType
 	** SQL Operators
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
     NumberDataValue nullValueInt() {
         return new SQLInteger();
     }
@@ -682,6 +689,7 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getYear(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -697,6 +705,7 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getMonth(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -712,6 +721,7 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getDate(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -727,6 +737,7 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getHours(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -742,6 +753,7 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getMinutes(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -764,6 +776,7 @@ public final class SQLTimestamp extends DataType
 		}
 		NumberDataValue result;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueDouble();
         }
@@ -836,6 +849,7 @@ public final class SQLTimestamp extends DataType
 		if (isNull())
 			return null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1985
         if (cal == null)
             cal = new GregorianCalendar();
         setCalendar(cal);
@@ -880,6 +894,7 @@ public final class SQLTimestamp extends DataType
 		computeEncodedDate sets the date in a Calendar object
 		and then uses the SQLDate function to compute an encoded date
 		The encoded date is
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			year &lt;&lt; 16 + month &lt;&lt; 8 + date
 		@param value	the value to convert
 		@return 		the encodedDate
@@ -896,6 +911,7 @@ public final class SQLTimestamp extends DataType
 	/**
 		computeEncodedTime extracts the hour, minute and seconds from
 		a java.util.Date value and encodes them as
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			hour &lt;&lt; 16 + minute &lt;&lt; 8 + second
 		using the SQLTime function for encoding the data
 		@param value	the value to convert
@@ -911,6 +927,8 @@ public final class SQLTimestamp extends DataType
     
     public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-174
+//IC see: https://issues.apache.org/jira/browse/DERBY-175
                   ps.setTimestamp(position, getTimestamp((Calendar) null));
      }
 
@@ -928,6 +946,7 @@ public final class SQLTimestamp extends DataType
                 return new SQLTimestamp();
             if( operand instanceof SQLTimestamp)
                 return (SQLTimestamp) operand.cloneValue(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
             String str = operand.getString();
             if( str.length() == 14)
@@ -983,6 +1002,7 @@ public final class SQLTimestamp extends DataType
      * @exception StandardException
      */
     public DateTimeDataValue timestampAdd( int intervalType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
                                            NumberDataValue count,
                                            java.sql.Date currentDate,
                                            DateTimeDataValue resultHolder)
@@ -1054,6 +1074,7 @@ public final class SQLTimestamp extends DataType
             break;
 
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARGUMENT, intervalType,
                                                   "TIMESTAMPADD");
         }
@@ -1103,6 +1124,7 @@ public final class SQLTimestamp extends DataType
         throws StandardException
     {
         if( resultHolder == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2386
             resultHolder = new SQLLongint();
  
        if( isNull() || time1.isNull())
@@ -1235,9 +1257,11 @@ public final class SQLTimestamp extends DataType
             break;
 
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARGUMENT, intervalType,
                                                   "TIMESTAMPDIFF");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2386
         resultHolder.setValue(ldiff);
         return resultHolder;
     } // end of timestampDiff

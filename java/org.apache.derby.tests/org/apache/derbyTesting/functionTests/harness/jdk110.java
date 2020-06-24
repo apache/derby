@@ -48,6 +48,7 @@ public class jdk110 extends jvm {
 
 
     public Vector<String> getCommandLine() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
         StringBuffer sb = new StringBuffer();
         Vector<String> v = super.getCommandLine();
         appendOtherFlags(sb);

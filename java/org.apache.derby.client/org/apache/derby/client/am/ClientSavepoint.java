@@ -26,6 +26,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ClientSavepoint implements Savepoint {
     // ----------------- internals -----------------------------------------------
 
@@ -36,6 +37,7 @@ class ClientSavepoint implements Savepoint {
     //---------------------constructors/finalizer---------------------------------
 
     // create a named savepoint.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClientSavepoint(Agent agent, String savepointName) {
         agent_ = agent;
         savepointName_ = savepointName;

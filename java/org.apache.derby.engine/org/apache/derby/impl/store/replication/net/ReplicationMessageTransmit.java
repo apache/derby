@@ -81,6 +81,7 @@ public class ReplicationMessageTransmit {
      *                     of the slave to connect to.
      */
     public ReplicationMessageTransmit(SlaveAddress slaveAddress) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
         this.slaveAddress = slaveAddress;
     }
     
@@ -117,9 +118,12 @@ public class ReplicationMessageTransmit {
         
         Socket s = null;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3064
         final int timeout_ = timeout;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4812
         try {
             //create a connection to the slave.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             s = AccessController.doPrivileged(new PrivilegedExceptionAction<Socket>() {
                 public Socket run() throws IOException {
                     SocketFactory sf = SocketFactory.getDefault();
@@ -136,6 +140,7 @@ public class ReplicationMessageTransmit {
         }
         
         // keep socket alive even if no log is shipped for a long time
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         s.setKeepAlive(true);
         
         socketConn = new SocketConnection(s);
@@ -157,6 +162,7 @@ public class ReplicationMessageTransmit {
      */
     public void tearDown() throws IOException {
         stopMessageReceiver = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
         if(socketConn != null) {
             socketConn.tearDown();
             socketConn = null;
@@ -197,11 +203,14 @@ public class ReplicationMessageTransmit {
      * after DEFAULT_MESSAGE_RESPONSE_TIMEOUT millis
      */
     public synchronized ReplicationMessage
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         sendMessageWaitForReply(ReplicationMessage message)
         throws IOException, StandardException {
         receivedMsg = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
         checkSocketConnection();
         socketConn.writeMessage(message);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         long startMillis = System.currentTimeMillis();
         long waited = 0L;
 
@@ -258,7 +267,9 @@ public class ReplicationMessageTransmit {
         // Check that master and slave have the same serialVersionUID
         ReplicationMessage initiatorMsg = 
             new ReplicationMessage(ReplicationMessage.TYPE_INITIATE_VERSION, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                    ReplicationMessage.serialVersionUID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         verifyMessageType(sendMessageWaitForReply(initiatorMsg),
                           ReplicationMessage.TYPE_ACK);
 
@@ -287,6 +298,7 @@ public class ReplicationMessageTransmit {
         throws StandardException {
         //If the message is a TYPE_ACK the slave is capable
         //of handling the messages and is at a compatible database version.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         if (message.getType() == expectedType) {
             return true;
         } else if (message.getType() == ReplicationMessage.TYPE_ERROR) {
@@ -309,6 +321,7 @@ public class ReplicationMessageTransmit {
      *                     valid (is null).
      */
     private void checkSocketConnection() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
         if (socketConn == null) {
             throw new IOException
                     (MessageId.REPLICATION_INVALID_CONNECTION_HANDLE);
@@ -316,7 +329,9 @@ public class ReplicationMessageTransmit {
     }
 
     private void startMessageReceiverThread(String dbname) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4819
         MasterReceiverThread msgReceiver = new MasterReceiverThread(dbname);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         msgReceiver.setDaemon(true);
         msgReceiver.start();
     }
@@ -390,6 +405,7 @@ public class ReplicationMessageTransmit {
          */
         private ReplicationMessage readMessage() throws
             ClassNotFoundException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
             checkSocketConnection();
             return (ReplicationMessage)socketConn.readMessage();
         }

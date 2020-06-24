@@ -68,6 +68,7 @@ public class DataInputUtilTest extends TestCase {
      * Returns a suite of tests.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
             DataInputUtilTest.class, "DataInputUtilTest tests");
     }

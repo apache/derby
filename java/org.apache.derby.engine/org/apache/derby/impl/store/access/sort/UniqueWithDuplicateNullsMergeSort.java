@@ -72,6 +72,9 @@ final class UniqueWithDuplicateNullsMergeSort extends MergeSort {
             //location too.  This is used to provide proper sorting of
             //duplicate keys with nulls, they must be ordered properly 
             //according to the last field also.
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             if (i == colsToCompare - 1 && nonull) {
                 if (sortObserver.deferred()) {
                     sortObserver.rememberDuplicate(r1);

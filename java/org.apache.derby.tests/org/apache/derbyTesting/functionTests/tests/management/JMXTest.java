@@ -49,6 +49,7 @@ public class JMXTest extends MBeanTest {
     public static Test suite() {
         
         return MBeanTest.suite(JMXTest.class, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
                                         "JMXTest");
     }
     
@@ -67,9 +68,11 @@ public class JMXTest extends MBeanTest {
         // We expect Derby to have registered MBeans
         // including a management MBean and the one registered
         // by our setUp method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3499
         assertTrue("Derby MBEan count:" + derbyMBeans.size(),
                 derbyMBeans.size() >= 2);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
         final MBeanServerConnection jmx = getMBeanServerConnection();
         for (final ObjectName name : derbyMBeans)
         {

@@ -34,6 +34,7 @@ public class FullCollationTests extends BaseTestSuite {
      */
     public static Test suite() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("FullCollationTests:territory=" +"no_NO");
         suite.addTest(new CollationTest("testNorwayCollation"));

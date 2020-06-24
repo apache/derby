@@ -37,6 +37,7 @@ class RemoteConnectionGetter implements JMXConnectionGetter {
     
     static final ThreadLocal<Map<MBeanServerConnection,JMXConnector>> connections =
         new ThreadLocal<Map<MBeanServerConnection,JMXConnector>>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
 
     private final JMXServiceURL url;
 
@@ -45,6 +46,7 @@ class RemoteConnectionGetter implements JMXConnectionGetter {
     }
 
     public MBeanServerConnection getMBeanServerConnection(String user,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
             String password) throws Exception {
         
         HashMap<String,String[]> env = new HashMap<String,String[]>();
@@ -55,6 +57,7 @@ class RemoteConnectionGetter implements JMXConnectionGetter {
         }
         
         JMXConnector jmxc = JMXConnectorFactory.connect(url, env);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         MBeanServerConnection jmxConn =  jmxc.getMBeanServerConnection();
         
         Map<MBeanServerConnection,JMXConnector> conns = connections.get();

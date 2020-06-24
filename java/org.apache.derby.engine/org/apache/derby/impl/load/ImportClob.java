@@ -168,6 +168,7 @@ class ImportClob implements java.sql.Clob {
      */
     public int setString(long pos, String str, int offset, int len) 
         throws SQLException { throw methodNotImplemented(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
     /**
      * This routine is not used by the VTI to read the data, so no 
@@ -202,6 +203,7 @@ class ImportClob implements java.sql.Clob {
     /** Return an unimplemented feature error */
     private SQLException   methodNotImplemented()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return LoadError.unexpectedError( new Exception("Method not implemented")) ;
     }
 }

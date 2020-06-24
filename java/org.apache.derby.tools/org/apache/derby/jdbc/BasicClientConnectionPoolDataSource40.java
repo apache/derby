@@ -41,7 +41,9 @@ import org.apache.derby.client.ClientConnectionPoolDataSourceInterface;
  * @see ClientConnectionPoolDataSource40
  */
 public class BasicClientConnectionPoolDataSource40
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         extends BasicClientDataSource40
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         implements ConnectionPoolDataSource,
                    ClientConnectionPoolDataSourceInterface {
 
@@ -50,9 +52,11 @@ public class BasicClientConnectionPoolDataSource40
     /** Message utility used to obtain localized messages. */
     private static final MessageUtil msgUtil =
             new MessageUtil(MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
     public static final String className__ =
             "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
 
     /**
      * Specifies the maximum number of statements that can be cached per

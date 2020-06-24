@@ -242,6 +242,7 @@ public class MemoryDbManager {
             throws SQLException {
         // Close all known statements.
         for (int i=STATEMENTS.size() -1; i >= 0; i--) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Statement stmt = STATEMENTS.remove(i);
             stmt.close();
         }
@@ -257,6 +258,7 @@ public class MemoryDbManager {
         }
         // Delete all known databases.
         for (int i=DATABASES.size() -1; i >= 0; i--) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             dropDatabase(DATABASES.remove(i));
         }
     }

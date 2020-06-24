@@ -34,6 +34,8 @@ import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
  * A DropSequenceNode  represents a DROP SEQUENCE statement.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class DropSequenceNode extends DDLStatementNode {
     private TableName dropItem;
 

@@ -47,6 +47,7 @@ public class T_Bomb implements Runnable {
 			PropertyUtil.getSystemInt(BOMB_DELAY_PN,0,
 									  Integer.MAX_VALUE,
 									  DEFAULT_BOMB_DELAY);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		v = new Vector<T_Bombable>();
 		t = new Thread(this);
 		t.setDaemon(true);
@@ -117,6 +118,7 @@ public class T_Bomb implements Runnable {
 	private void blowUp()
 	{
 			performLastGasp();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			ContextService csf = getContextService();
 			if (csf != null)
 			{
@@ -135,6 +137,7 @@ public class T_Bomb implements Runnable {
 
 	private void performLastGasp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (T_Bombable b : v) {
 			try{
 			 b.lastChance();
@@ -155,6 +158,7 @@ public class T_Bomb implements Runnable {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();

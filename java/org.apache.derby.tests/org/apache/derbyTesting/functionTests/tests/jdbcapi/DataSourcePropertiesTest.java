@@ -56,6 +56,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public static Test suite() {
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DataSourcePropertiesTest");
         
         // TODO: Run fixtures in J2ME and JDBC2 (with extensions)
@@ -67,6 +68,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
             // Add all methods starting with 'test'.
             //suite.addTestSuite(DataSourcePropertiesTest.class);
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
             Method[] methods = DataSourcePropertiesTest.class.getMethods();
             for (int i = 0; i < methods.length; i++) {
                 Method m = methods[i];
@@ -80,6 +82,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
                 }
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return new CleanDatabaseTestSetup(suite);
     }
 
@@ -94,6 +97,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         DataSource ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         JDBCDataSource.setBeanProperty(ds, "password",  "mypassword");
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         Connection c = ds.getConnection();
@@ -110,6 +114,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     {
         ConnectionPoolDataSource ds =
             J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         JDBCDataSource.setBeanProperty(ds, "password",  "mypassword");
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
        // DERBY-1586 caused a malformed url error here
@@ -127,6 +132,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         XADataSource ds = J2EEDataSource.getXADataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         JDBCDataSource.setBeanProperty(ds, "password",  "mypassword");
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         XAConnection xa = ds.getXAConnection();
@@ -142,7 +148,12 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public void embeddedTestAttributesAsPasswordWithPassword_ds()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         DataSource ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         try {
             Connection c = ds.getConnection("username", "mypassword");
@@ -162,7 +173,12 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         ConnectionPoolDataSource ds =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         try {
             PooledConnection pc =
@@ -182,7 +198,12 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public void embeddedTestAttributesAsPasswordWithPassword_xa()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         XADataSource ds = J2EEDataSource.getXADataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         try {
             XAConnection xa = ds.getXAConnection("username", "mypassword");

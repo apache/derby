@@ -59,6 +59,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
     private String[]                   referencedColumnNames;
     private String                  originalCurrentSchema;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 	final private static int BITS_MASK_IS_DEFAULTVALUE_AUTOINC = 0x1 << 0;
 	final private static int BITS_MASK_IS_GENERATED_COLUMN = 0x2;
 
@@ -77,6 +78,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 		String defaultText,
 		DataValueDescriptor defaultValue)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		this.type = calcType(isDefaultValueAutoinc);
 		this.defaultText = defaultText;
 		this.defaultValue = defaultValue;
@@ -117,6 +119,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	 */
 	public String[] getReferencedColumnNames()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
         return ArrayUtil.copy( referencedColumnNames );
 	}
 
@@ -156,6 +159,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 		defaultText = (String) in.readObject();
 		defaultValue = (DataValueDescriptor) in.readObject();
 		type = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 
         if ( isGeneratedColumn() )
         {
@@ -178,6 +182,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	{
 		out.writeObject( defaultText );
 		out.writeObject( defaultValue );
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		out.writeInt(type);
         
         if ( isGeneratedColumn() )
@@ -222,6 +227,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	 * @see DefaultInfo#isDefaultValueAutoinc
 	 */
 	public boolean isDefaultValueAutoinc(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		return (type & BITS_MASK_IS_DEFAULTVALUE_AUTOINC ) != 0;
 	}
 	

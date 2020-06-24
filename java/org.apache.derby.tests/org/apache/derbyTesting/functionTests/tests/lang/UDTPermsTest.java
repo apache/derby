@@ -80,6 +80,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             UDTPermsTest.class);
 
@@ -152,6 +153,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              );
 
         // should work fine. no USAGE priv required.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6491
         goodStatement
             (
              ruthConnection,

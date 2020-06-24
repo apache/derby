@@ -756,6 +756,7 @@ final class CodeChunk {
 	 * now that it holds all of the instructions and
 	 * the exception table.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 	void complete(BCMethod mb, ClassHolder ch,
 			ClassMember method, int maxStack, int maxLocals) {
 
@@ -794,6 +795,7 @@ final class CodeChunk {
             limitHit(ioe);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		fixLengths(mb, maxStack, maxLocals, codeLength);
 		method.addAttribute("Code", out);
 		

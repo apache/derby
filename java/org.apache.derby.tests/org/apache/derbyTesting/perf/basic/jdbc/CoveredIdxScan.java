@@ -38,6 +38,7 @@ public class CoveredIdxScan extends HeapScan {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite scan = new BaseTestSuite("CoveredIdxScanTests");
         int iterations = 700, repeats = 4;
 
@@ -64,6 +65,7 @@ public class CoveredIdxScan extends HeapScan {
      */
     public void setUp() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4607
         select = prepareStatement("SELECT i1 FROM " + tableName +
         " WHERE i1 > ? and i1 <= ?");
     }
@@ -104,6 +106,7 @@ public class CoveredIdxScan extends HeapScan {
         }
         assertEquals(rowcount,actualCount);
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4607
         commit();
     }
 

@@ -77,6 +77,7 @@ public class RealNestedLoopJoinStatistics
 								boolean oneRowRightSide,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics
@@ -96,6 +97,7 @@ public class RealNestedLoopJoinStatistics
 			rowsReturned,
 			restrictionTime,
 			optimizerEstimatedRowCount,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 			optimizerEstimatedCost,
 			userSuppliedOptimizerOverrides
 			);
@@ -119,6 +121,7 @@ public class RealNestedLoopJoinStatistics
 	{
 		initFormatInfo(depth);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String header = "";
 		if (userSuppliedOptimizerOverrides != null)
 		{ 
@@ -185,6 +188,7 @@ public class RealNestedLoopJoinStatistics
 
 	public java.util.Vector<ResultSetStatistics> getChildren()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		java.util.Vector<ResultSetStatistics> children = new java.util.Vector<ResultSetStatistics>();
 	    children.addElement(leftResultSetStatistics);
 		children.addElement(rightResultSetStatistics);

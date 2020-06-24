@@ -113,6 +113,7 @@ public class BackupRestoreTest
      * @return A test suite.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(BackupRestoreTest.class);
         return new SupportFilesSetup(
                 TestConfiguration.singleUseDatabaseDecorator(suite));

@@ -49,6 +49,7 @@ public class DB_GrantRevoke {
         if ( at10_6 )
         {
             // Generate udt privilege statements
+//IC see: https://issues.apache.org/jira/browse/DERBY-4485
             rs = stmt.executeQuery("SELECT P.GRANTEE, S.SCHEMANAME, A.ALIAS, P.PERMISSION, P.OBJECTTYPE FROM " +
                                    "SYS.SYSPERMS P, SYS.SYSALIASES A, SYS.SYSSCHEMAS S WHERE A.SCHEMAID = " +
                                    "S.SCHEMAID AND P.OBJECTID = A.ALIASID AND A.ALIASTYPE='A'");
@@ -108,6 +109,8 @@ public class DB_GrantRevoke {
 				Logs.reportString("----------------------------------------------\n");
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 			String authName = dblook.addQuotes
 				(dblook.expandDoubleQuotes(rs.getString(1)));
 			String schemaName = dblook.addQuotes
@@ -196,6 +199,7 @@ public class DB_GrantRevoke {
 		throws SQLException
 	{
         // Statement that gets the names of the columns in a given table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4829
         PreparedStatement columnStmt = conn.prepareStatement(
             "SELECT COLUMNNUMBER, COLUMNNAME " +
             "FROM SYS.SYSCOLUMNS C, SYS.SYSTABLES T, SYS.SYSSCHEMAS S " +
@@ -218,6 +222,7 @@ public class DB_GrantRevoke {
 
             // Schema name and table name are parameters to a prepared
             // statement, so quoting is not needed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4829
             String schemaName = rs.getString(2);
             String tableName = rs.getString(3);
 
@@ -291,6 +296,7 @@ public class DB_GrantRevoke {
 			colNames.append(separatorStr(addSeparator));
 			addSeparator = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4829
             String colName = dblook.addQuotes(
                     dblook.expandDoubleQuotes(rsCols.getString(2)));
             colNames.append(colName);
@@ -317,6 +323,7 @@ public class DB_GrantRevoke {
 		grantStmt.append(privTypeToString(privType));
 		grantStmt.append("(");
 		grantStmt.append(mapColumnsToNames(columns, rsCols));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4829
         grantStmt.append(") ON ");
         grantStmt.append(fullName);
 		grantStmt.append(" TO ");
@@ -333,6 +340,7 @@ public class DB_GrantRevoke {
 	public static void generateUDTPrivs(ResultSet rs) throws SQLException
 	{
 		boolean firstTime = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4485
 		while (rs.next()) {
 			String authName = dblook.addQuotes
 				(dblook.expandDoubleQuotes(rs.getString(1)));
@@ -449,6 +457,10 @@ public class DB_GrantRevoke {
 	{
 		boolean firstTime = true;
 		while (rs.next()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 			String authName = dblook.addQuotes
 				(dblook.expandDoubleQuotes(rs.getString(1)));
 			String schemaName = dblook.addQuotes

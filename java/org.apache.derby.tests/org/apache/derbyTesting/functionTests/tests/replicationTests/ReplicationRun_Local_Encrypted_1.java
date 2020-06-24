@@ -59,6 +59,7 @@ public class ReplicationRun_Local_Encrypted_1 extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_Encrypted_1 Suite");
         
@@ -225,6 +226,7 @@ public class ReplicationRun_Local_Encrypted_1 extends ReplicationRun
         util.DEBUG("_connectToSlave");
         ClientDataSourceInterface ds;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");

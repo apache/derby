@@ -70,6 +70,7 @@ public class MergeScan extends SortScan
     MergeSort           sort, 
     TransactionManager  tran,
     SortBuffer          sortBuffer, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     Vector<Long>              mergeRuns,
 	SortObserver		sortObserver,
     boolean             hold)
@@ -182,6 +183,7 @@ public class MergeScan extends SortScan
 
 		// Open a scan on each merge run.
 		int scanindex = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Enumeration<Long> e = mergeRuns.elements();
 		while (e.hasMoreElements())
 		{

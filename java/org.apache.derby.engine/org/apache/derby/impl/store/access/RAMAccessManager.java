@@ -528,8 +528,10 @@ public abstract class RAMAccessManager
     /* package */ void conglomCacheRemoveEntry(long conglomid)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5632
         CacheableConglomerate conglom_entry = (CacheableConglomerate)
             conglom_cache.findCached(conglomid);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         if (conglom_entry != null) {
             conglom_cache.remove(conglom_entry);
@@ -552,6 +554,7 @@ public abstract class RAMAccessManager
      */
     RAMTransactionContext getCurrentTransactionContext() {
         RAMTransactionContext rtc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             (RAMTransactionContext) getContext(
                 AccessFactoryGlobals.RAMXACT_INTERNAL_CONTEXT_ID);
 
@@ -592,6 +595,7 @@ public abstract class RAMAccessManager
         
         // See if there's an access method that supports the desired
         // format type as its primary format type.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         factory = formathash.get(format);
         if (factory != null)
             return factory;
@@ -619,6 +623,7 @@ public abstract class RAMAccessManager
     {
         // See if there's an access method that supports the desired
         // implementation type as its primary implementation type.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         MethodFactory factory = implhash.get(impltype);
         if (factory != null)
 				return factory;
@@ -643,6 +648,7 @@ public abstract class RAMAccessManager
 
 		try {
 			factory = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                (MethodFactory) bootServiceModule(
                     false, this, MethodFactory.MODULE, 
                     impltype, conglomProperties);
@@ -867,6 +873,7 @@ public abstract class RAMAccessManager
         rawstore.createDataWarningFile();
 
         //creating readme in log directory
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         LogFactory logFactory =(LogFactory) findServiceModule(this, rawstore.getLogFactoryModule());
         logFactory.createDataWarningFile();
 
@@ -883,6 +890,7 @@ public abstract class RAMAccessManager
 		// set up the initial values by calling the validate and apply methods.
 		// the map methods are not called as they will have been called
 		// at runtime when the user set the property.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Dictionary<Object, Object> d = new Hashtable<Object, Object>();
 		try {
 			xactProperties.getProperties(tc,d,false/*!stringsOnly*/,false/*!defaultsOnly*/);
@@ -912,8 +920,10 @@ public abstract class RAMAccessManager
      * thrown on error.
      */
     public void startReplicationMaster(String dbmaster, String host, int port,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
                                        String replicationMode)
         throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
         rawstore.startReplicationMaster(dbmaster, host, port, replicationMode);
     }
     
@@ -931,6 +941,7 @@ public abstract class RAMAccessManager
      * thrown on error.
      */
     public void stopReplicationMaster() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
         rawstore.stopReplicationMaster();
     }
 
@@ -938,6 +949,7 @@ public abstract class RAMAccessManager
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize( Securable.FREEZE_DATABASE );
             
 		rawstore.freeze();
@@ -953,12 +965,15 @@ public abstract class RAMAccessManager
 	}
 
     public void backup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
     String  backupDir, 
     boolean wait) 
         throws StandardException
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize
             (
              wait ?
@@ -977,6 +992,7 @@ public abstract class RAMAccessManager
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize
             (
              wait ?
@@ -993,6 +1009,7 @@ public abstract class RAMAccessManager
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize( Securable.DISABLE_LOG_ARCHIVE_MODE );
             
 		rawstore.disableLogArchiveMode(deleteOnlineArchivedLogFiles);
@@ -1004,6 +1021,7 @@ public abstract class RAMAccessManager
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize( Securable.CHECKPOINT_DATABASE );
             
 		rawstore.checkpoint();
@@ -1036,6 +1054,7 @@ public abstract class RAMAccessManager
 
         // Access depends on a Raw Store implementations.  Load it.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         rawstore = (RawStoreFactory) bootServiceModule(
             create, this, RawStoreFactory.MODULE, serviceProperties);
 
@@ -1050,7 +1069,9 @@ public abstract class RAMAccessManager
 		// /protocol/Database/Storage/Access/Interface/T_AccessFactory.java)
 		// If this module has already been booted by the JDBC layer, this will 
 		// have no effect at all.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		bootServiceModule(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             create, this, org.apache.derby.shared.common.reference.Module.PropertyFactory, 
             startParams);
 
@@ -1062,6 +1083,7 @@ public abstract class RAMAccessManager
         // Create the conglom conglom from within a separate system xact
         RAMTransaction tc =
             (RAMTransaction) getAndNameTransaction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 getContextService().getCurrentContextManager(),
                 AccessFactoryGlobals.USER_TRANS_NAME);
 
@@ -1166,8 +1188,10 @@ public abstract class RAMAccessManager
 
         // set up the property validation
         pf = (PropertyFactory) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             findServiceModule(
                 this, org.apache.derby.shared.common.reference.Module.PropertyFactory);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         // set up the transaction properties.  On J9, over NFS, runing on a
         // power PC coprossor, the directories were created fine, but create
@@ -1278,6 +1302,7 @@ public abstract class RAMAccessManager
 	*/
 
 	public Cacheable newCacheable(CacheManager cm) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5632
 		return new CacheableConglomerate(this);
 	}
 
@@ -1289,6 +1314,7 @@ public abstract class RAMAccessManager
      */
     private static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();
@@ -1314,6 +1340,7 @@ public abstract class RAMAccessManager
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Context>()

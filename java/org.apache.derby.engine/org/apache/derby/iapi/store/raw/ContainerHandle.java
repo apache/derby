@@ -27,6 +27,7 @@ import org.apache.derby.shared.common.error.StandardException;
 import java.util.Properties;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	<p>
 	A Container contains a contigious address space of pages, the pages
 	start at page number Container.FIRST_PAGE_NUMBER and are numbered sequentially.
@@ -56,6 +57,7 @@ import java.util.Properties;
     done.  In the example, p1 could have been unlatched after p2 with no ill 	
     effects.
 	</p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 	<p>	<B>Open container modes</B>
 	ContainerHandle.MODE are used to open or create the container.
@@ -88,6 +90,7 @@ import java.util.Properties;
 	does not force the cache.  It is up to the client of raw store to force the
 	cache at the appropriate time - this allows a statement to create and open
 	the container serveral times for bulk loading without logging or doing any
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	synchronous I/O.</LI>
 	<LI>MODE_LOCK_NOWAIT - if set, then don't wait for the container lock, else
 	wait for the container lock.  This flag only dictates whether the lock
@@ -114,6 +117,7 @@ import java.util.Properties;
     update since the last commit or abort.  Temporary containers are private 
     to a transaction and must only be used a single thread within the 
     transaction at any time, these restrictions are not currently enforced.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     </P>
 	<P>
 	When opening a temporary container for update access these additional mode
@@ -216,6 +220,7 @@ public interface ContainerHandle
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 		Release free space to the OS.
 		<P>
         As is possible release any free space to the operating system.  This
@@ -414,6 +419,7 @@ public interface ContainerHandle
 		for (Page p = containerHandle.getFirstPage();
 			 p != null;
 			 p = containerHandle.getNextPage(p.getPageNumber()))
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		</PRE>
 		will guarentee to iterate thru and latched all the valid pages 
 		in the container
@@ -457,6 +463,7 @@ public interface ContainerHandle
 
 	public Page getPageForCompress(
     int     flag,
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     long    pageno) 
 		 throws StandardException;
 
@@ -618,6 +625,7 @@ public interface ContainerHandle
     public SpaceInfo getSpaceInfo() throws StandardException;
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 	   Backup the container to the specified path.
 	   @exception StandardException	Standard Derby error policy
 	*/

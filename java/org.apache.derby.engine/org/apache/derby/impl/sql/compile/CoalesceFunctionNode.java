@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CoalesceFunctionNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -94,6 +95,8 @@ import org.apache.derby.iapi.util.JBitSet;
  * BLOB             { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "BLOB" }
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CoalesceFunctionNode extends ValueNode
 {
 	String	functionName; //Are we here because of COALESCE function or VALUE function
@@ -112,6 +115,8 @@ class CoalesceFunctionNode extends ValueNode
 	 * @param argumentsList	The list of arguments to the coalesce/value function
      * @param cm            The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CoalesceFunctionNode(
             String functionName,
             ValueNodeList argumentsList,
@@ -135,6 +140,7 @@ class CoalesceFunctionNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 					throws StandardException
 	{
@@ -153,8 +159,10 @@ class CoalesceFunctionNode extends ValueNode
 		//find the first non-param argument. The generated method will generate code to call coalesce on this argument
 		for (int index = 0; index < argumentsListSize; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (!argumentsList.elementAt(index).requiresTypeFromContext())
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2016
 				firstNonParameterNodeIdx = index;
 				break;
 			}
@@ -214,6 +222,7 @@ class CoalesceFunctionNode extends ValueNode
 		MethodBuilder cb = acb.getConstructor();
 		cb.pushNewArray(ClassName.DataValueDescriptor, argumentsListSize);
 		cb.setField(arrayField);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		/* Set the array elements that are constant */
 		int numConstants = 0;
@@ -259,6 +268,7 @@ class CoalesceFunctionNode extends ValueNode
 			}
 
 			setArrayMethod.getField(arrayField); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             argumentsList.elementAt(index).generateExpression(acb, setArrayMethod);
 			setArrayMethod.upCast(receiverType);
 			setArrayMethod.setArrayElement(index);
@@ -285,6 +295,7 @@ class CoalesceFunctionNode extends ValueNode
 		*/
 
 		// coalesce will be called on this non-parameter argument
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         argumentsList.elementAt(firstNonParameterNodeIdx).
 			generateExpression(acb, mb);
 
@@ -295,6 +306,7 @@ class CoalesceFunctionNode extends ValueNode
 		//Following is for the second arg. This arg will be used to pass the return value.
 		//COALESCE method expects this to be initialized to NULL SQLxxx type object.
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, receiverType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateNull(mb, getTypeCompiler(), getTypeServices().getCollationType());
 		mb.upCast(ClassName.DataValueDescriptor);
 		mb.putField(field);
@@ -305,6 +317,7 @@ class CoalesceFunctionNode extends ValueNode
 			boolean isNumber = getTypeId().isNumericTypeId();
 			// to leave the DataValueDescriptor value on the stack, since setWidth is void
 			mb.dup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 			mb.push(isNumber ? getTypeServices().getPrecision() : getTypeServices().getMaximumWidth());
 			mb.push(getTypeServices().getScale());
@@ -321,6 +334,7 @@ class CoalesceFunctionNode extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			return
 				"functionName: " + functionName + "\n" +
 				"firstNonParameterNodeIdx: " + firstNonParameterNodeIdx + "\n" +
@@ -339,8 +353,11 @@ class CoalesceFunctionNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
@@ -356,12 +373,14 @@ class CoalesceFunctionNode extends ValueNode
 	 */
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (! isSameNodeKind(o)) {
 			return false;
 		}
 		
 		CoalesceFunctionNode other = (CoalesceFunctionNode)o;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4600
         if (!argumentsList.isEquivalent(other.argumentsList))
 		{
 			return false;
@@ -377,10 +396,12 @@ class CoalesceFunctionNode extends ValueNode
 	 * @throws StandardException on error in the visitor
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v) throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4600
         argumentsList = (ValueNodeList) argumentsList.accept(v);
 	}
 
@@ -412,12 +433,15 @@ class CoalesceFunctionNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4600
         argumentsList.preprocess(
                 numTables,
                 outerFromList,
@@ -438,6 +462,7 @@ class CoalesceFunctionNode extends ValueNode
     public ValueNode remapColumnReferencesToExpressions()
             throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4600
         argumentsList = argumentsList.remapColumnReferencesToExpressions();
         return this;
     }

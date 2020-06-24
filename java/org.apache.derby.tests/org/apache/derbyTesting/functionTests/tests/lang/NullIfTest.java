@@ -135,8 +135,10 @@ public class NullIfTest extends BaseJDBCTestCase {
     public void testAllDatatypesCombinations() throws SQLException {
         Statement s = createStatement();
         for (int firstColumnType = 0; firstColumnType < SQLUtilities.SQLTypes.length; firstColumnType++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
 
             StringBuffer nullIfString = new StringBuffer("SELECT NULLIF("
+//IC see: https://issues.apache.org/jira/browse/DERBY-2463
                     + SQLUtilities.allDataTypesColumnNames[firstColumnType]);
             for (int secondColumnType = 0; secondColumnType < SQLUtilities.SQLTypes.length; secondColumnType++) {
 
@@ -192,8 +194,10 @@ public class NullIfTest extends BaseJDBCTestCase {
      */
     public void testParameterForFirstOperandToNullIf() throws SQLException {
         for (int secondColumnType = 0; secondColumnType < SQLUtilities.SQLTypes.length; secondColumnType++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
 
             String nullIfString = new String("SELECT NULLIF(?,"
+//IC see: https://issues.apache.org/jira/browse/DERBY-2463
                     + SQLUtilities.allDataTypesColumnNames[secondColumnType]
                     + ") from AllDataTypesTable");
             int row = 0;
@@ -382,6 +386,7 @@ public class NullIfTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("NullIfTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("NullIfTest:embedded"));
 
@@ -391,6 +396,7 @@ public class NullIfTest extends BaseJDBCTestCase {
     }
 
     public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(NullIfTest.class);
 
@@ -400,6 +406,7 @@ public class NullIfTest extends BaseJDBCTestCase {
              * 
              */
             protected void decorateSQL(Statement s) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2463
                 SQLUtilities.createAndPopulateAllDataTypesTable(s);
             }
 

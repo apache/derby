@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CursorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -47,6 +48,8 @@ import org.apache.derby.impl.sql.CursorTableReference;
 
 public class CursorNode extends DMLStatementNode
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final static int UNSPECIFIED = 0;
 	public final static int READ_ONLY = 1;
     final static int UPDATE = 2;
@@ -105,6 +108,8 @@ public class CursorNode extends DMLStatementNode
      * @param forMergeStatement True if this cursor is the driving left-join of a MERGE statement
      * @param cm                 The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CursorNode(String         statementType,
                ResultSetNode  resultSet,
                String         name,
@@ -165,6 +170,8 @@ public class CursorNode extends DMLStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return statementType;
@@ -210,12 +217,16 @@ public class CursorNode extends DMLStatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
+//IC see: https://issues.apache.org/jira/browse/DERBY-6008
             if (orderByList != null) {
                 printLabel(depth, "orderByList: "  + depth);
                 orderByList.treePrint(depth + 1);
@@ -255,6 +266,7 @@ public class CursorNode extends DMLStatementNode
 
 		dataDictionary = getDataDictionary();
         checkIndexStats = (dataDictionary.getIndexStatsRefresher(true) != null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
 
 		// This is how we handle queries like: SELECT A FROM T ORDER BY B.
 		// We pull up the order by columns (if they don't appear in the SELECT
@@ -271,8 +283,11 @@ public class CursorNode extends DMLStatementNode
 			orderByList.pullUpOrderByColumns(resultSet);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getCompilerContext().pushCurrentPrivType(getPrivType());
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             FromList    fromList = new FromList(
                     getOptimizerFactory().doJoinOrderOptimization(),
 					getContextManager());
@@ -309,6 +324,7 @@ public class CursorNode extends DMLStatementNode
 
         // Collect tables whose indexes we'll want to check for staleness.
         collectTablesWithPossiblyStaleStats();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
 
 		// bind the order by
 		if (orderByList != null)
@@ -318,6 +334,7 @@ public class CursorNode extends DMLStatementNode
 
 
         bindOffsetFetch(offset, fetchFirst);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
 
 		// bind the updatability
 
@@ -352,6 +369,7 @@ public class CursorNode extends DMLStatementNode
 		    // was declared FOR READ ONLY. This would be pretty terrible, so we are
 		    // breaking the ANSI rules.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 		    if (getLanguageConnectionContext().getStatementContext().isForReadOnly()) {
 			updateMode = READ_ONLY;
 		    } else {
@@ -373,12 +391,15 @@ public class CursorNode extends DMLStatementNode
 
 			// If the target table is a FromBaseTable, mark the updatable
             // columns.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if (updateTable != null)
 			{
                 updateTable.markUpdatableByCursor(updatableColumns);
 				//make sure that alongwith the FromTable, we keep other ResultSetLists
 				//in correct state too. ResultSetMetaData.isWritable looks at this to
 				//return the correct value.
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 				resultSet.getResultColumns().markColumnsInSelectListUpdatableByCursor(
 					updatableColumns);
 			}
@@ -391,11 +412,13 @@ public class CursorNode extends DMLStatementNode
 		{
 			//If this cursor has references to session schema tables, save the names of those tables into compiler context
 			//so they can be passed to execution phase.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			ArrayList<String> sessionSchemaTableNames = getSessionSchemaTableNamesForCursor();
 			if (sessionSchemaTableNames != null)
 				indexOfSessionTableNamesInSavedObjects = getCompilerContext().addSavedObject(sessionSchemaTableNames);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6491
         getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
     }
 
@@ -404,6 +427,7 @@ public class CursorNode extends DMLStatementNode
      * want to check for staleness (or to create).
      */
     private void collectTablesWithPossiblyStaleStats() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
         if (!checkIndexStats) {
             return;
         }
@@ -419,6 +443,7 @@ public class CursorNode extends DMLStatementNode
                 TableDescriptor td = fromTable.getTableDescriptor();
                 if (td.getTableType() == TableDescriptor.BASE_TABLE_TYPE) {
                     if (statsToUpdate == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                         statsToUpdate = new ArrayList<TableDescriptor>();
                     }
                     statsToUpdate.add(td);
@@ -452,6 +477,7 @@ public class CursorNode extends DMLStatementNode
 		int fromListSize = fromList.size();
 		FromTable fromTable;
 		ArrayList<String> sessionSchemaTableNames = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		for( int i = 0; i < fromListSize; i++)
 		{
@@ -459,6 +485,7 @@ public class CursorNode extends DMLStatementNode
 			if (fromTable instanceof FromBaseTable && isSessionSchema(fromTable.getTableDescriptor().getSchemaDescriptor()))
 			{
 				if (sessionSchemaTableNames == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					sessionSchemaTableNames = new ArrayList<String>();
 				sessionSchemaTableNames.add(fromTable.getTableName().getTableName());
 			}
@@ -572,6 +599,7 @@ public class CursorNode extends DMLStatementNode
     @Override
 	public void optimizeStatement() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         resultSet.pushQueryExpressionSuffix();
 		// Push the order by list down to the ResultSet
 		if (orderByList != null)
@@ -587,11 +615,13 @@ public class CursorNode extends DMLStatementNode
 			orderByList = null;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         resultSet.pushOffsetFetchFirst(offset, fetchFirst, hasJDBClimitClause);
         offset = null;
         fetchFirst = null;
 
         super.optimizeStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 
 	}
 
@@ -625,6 +655,7 @@ public class CursorNode extends DMLStatementNode
 			MethodBuilder constructor = acb.getConstructor();
 			constructor.pushThis();
 			constructor.push(indexOfSessionTableNamesInSavedObjects);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			constructor.putField(org.apache.derby.shared.common.reference.ClassName.BaseActivation, "indexOfSessionTableNamesInSavedObjects", "int");
 			constructor.endStatement();
     }
@@ -656,6 +687,8 @@ public class CursorNode extends DMLStatementNode
 
 	// class interface
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getUpdateBaseTableName()
 	{
 		return (updateTable == null) ? null : updateTable.getBaseTableName();
@@ -734,9 +767,11 @@ public class CursorNode extends DMLStatementNode
 		TableDescriptor tableDescriptor;
 		String columnName;
         ResultColumnList rcl = resultSet.getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		    columnName = updatableColumns.get(index);
 		    tableDescriptor = targetTable.getTableDescriptor();
 		    if ( tableDescriptor.getColumnDescriptor(columnName) == null)
@@ -756,6 +791,7 @@ public class CursorNode extends DMLStatementNode
             // columns. However, a correlation name for c13 is ok because it is
             // a read only column.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (ResultColumn rc : rcl) {
                 // Look through each column in the resultset for cursor.
                 if (rc.getSourceTableName() == null) {
@@ -771,6 +807,8 @@ public class CursorNode extends DMLStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getXML()
 	{
 		return null;
@@ -786,6 +824,7 @@ public class CursorNode extends DMLStatementNode
      */
     @Override
     public TableDescriptor[] updateIndexStatisticsFor()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
             throws StandardException {
         if (!checkIndexStats || statsToUpdate == null) {
             return EMPTY_TD_LIST;
@@ -794,6 +833,7 @@ public class CursorNode extends DMLStatementNode
         // Iterate backwards to remove elements, chances are high the stats are
         // mostly up-to-date (minor performance optimization to avoid copy).
         for (int i=statsToUpdate.size() -1; i >= 0; i--) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             TableDescriptor td = statsToUpdate.get(i);
             if (td.getAndClearIndexStatsIsUpToDate()) {
                 statsToUpdate.remove(i);
@@ -817,6 +857,7 @@ public class CursorNode extends DMLStatementNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6263
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

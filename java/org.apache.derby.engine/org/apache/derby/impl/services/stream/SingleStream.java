@@ -74,6 +74,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  *
  */
 public final class SingleStream
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrintWriter>
 {
 
@@ -129,6 +130,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 		// get the header
 		PrintWriterGetHeader header = makeHeader();
 		HeaderPrintWriter hpw = makeHPW(header);
+//IC see: https://issues.apache.org/jira/browse/DERBY-205
 
 		// If hpw == null then no properties were specified for the stream
 		// so use/create the default stream.
@@ -154,7 +156,9 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 		// the type of target is based on which property is used
 		// to set it. choices are file, method, field, stream
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-205
 		String target = PropertyUtil.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 		   getSystemProperty(Property.ERRORLOG_STYLE_PROPERTY);
 		if (target != null) {
 			return makeStyleHPW(target, header);
@@ -169,6 +173,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
                    getSystemProperty(Property.ERRORLOG_METHOD_PROPERTY);
 		if (target!=null) 
 			return makeMethodHPW(target, header, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 
 		target = PropertyUtil.
                    getSystemProperty(Property.ERRORLOG_FIELD_PROPERTY);
@@ -193,6 +198,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 		// See if this needs to be made relative to something ...
 		if (!streamFile.isAbsolute()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			Object monitorEnv = getMonitor().getEnvironment();
 			if (monitorEnv instanceof File)
 				streamFile = new File((File) monitorEnv, fileName);
@@ -206,6 +212,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 				fos = new FileOutputStream(streamFile.getPath(), true);
 			else
 				fos = new FileOutputStream(streamFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             FileUtil.limitAccessToOwner(streamFile);
 		} catch (IOException ioe) {
 			return useDefaultStream(header, ioe);
@@ -213,11 +220,13 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 			return useDefaultStream(header, se);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-205
 		return new BasicHeaderPrintWriter(new BufferedOutputStream(fos), header,
 			true, streamFile.getPath());
 	}
 
 	private HeaderPrintWriter makeMethodHPW(String methodInvocation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 											PrintWriterGetHeader header,
                                             boolean canClose) {
 
@@ -228,6 +237,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 		Throwable t;
 		try {
 			Class<?> theClass = Class.forName(className);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			try {
 				Method theMethod = theClass.getMethod(methodName,  new Class[0]);
@@ -240,6 +250,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 				try {
 					return makeValueHPW(theMethod, theMethod.invoke((Object) null, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 						new Object[0]), header, methodInvocation, canClose);
 				} catch (IllegalAccessException iae) {
 					t = iae;
@@ -263,6 +274,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 	}
 
 	private HeaderPrintWriter makeStyleHPW(String style,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 											PrintWriterGetHeader header) {
 		HeaderPrintWriter res = null;
 		if ("rollingFile".equals(style)) {
@@ -304,6 +316,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 				try {
 					return makeValueHPW(theField, theField.get((Object) null), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 						header, fieldAccess, false);
 				} catch (IllegalAccessException iae) {
 					t = iae;
@@ -336,6 +349,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 	private HeaderPrintWriter makeValueHPW(Member whereFrom, Object value,
 		PrintWriterGetHeader header, String name, boolean canClose) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 
 		if (value instanceof OutputStream)
 			 return new BasicHeaderPrintWriter((OutputStream) value, header, canClose, name);
@@ -365,6 +379,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 	*/
 	private HeaderPrintWriter useDefaultStream(PrintWriterGetHeader header) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-205
 		return new BasicHeaderPrintWriter(System.err, header, false, "System.err");
 	}
 
@@ -372,6 +387,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 		HeaderPrintWriter hpw = useDefaultStream(header);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         while (t != null) {
             Throwable causedBy = t.getCause();
             String causedByStr =
@@ -411,6 +427,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

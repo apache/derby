@@ -102,6 +102,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("UserDefinedAggregatesTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( TestConfiguration.defaultSuite(UserDefinedAggregatesTest.class) );
         suite.addTest( collatedSuite( "en" ) );
@@ -118,6 +119,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
      */
     private static Test collatedSuite(String locale)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("UserDefinedAggregatesTest:territory=" + locale);
 

@@ -62,6 +62,7 @@ public interface OptimizerFactory {
 								  DataDictionary dDictionary,
 								  RequiredRowOrdering requiredRowOrdering,
 								  int numTablesInQuery,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
 								  OptimizerPlan overridingPlan,
 								  LanguageConnectionContext lcc)
 			throws StandardException;

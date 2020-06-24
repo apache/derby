@@ -57,6 +57,7 @@ public class PropertyValidation implements PropertyFactory
 			synchronized (this) {
 
 				for (int i = 0; i < notifyOnSet.size() ; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					PropertySetCallback psc = notifyOnSet.get(i);
 					if (!psc.validate(key, value, d))
 						continue;
@@ -101,6 +102,7 @@ public class PropertyValidation implements PropertyFactory
 		Serializable mappedValue = null;
  		if (notifyOnSet != null) {
 			for (int i = 0; i < notifyOnSet.size() && mappedValue == null; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				PropertySetCallback psc = notifyOnSet.get(i);
 				mappedValue = psc.map(key, value, set);
 			}
@@ -126,6 +128,7 @@ public class PropertyValidation implements PropertyFactory
 
  		if (notifyOnSet != null) {
 			for (int i = 0; i < notifyOnSet.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				PropertySetCallback psc = notifyOnSet.get(i);
 				psc.validate(key, value, set);
 			}
@@ -135,8 +138,10 @@ public class PropertyValidation implements PropertyFactory
 	public synchronized void addPropertySetNotification(PropertySetCallback who){
 
 		if (notifyOnSet == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			notifyOnSet = new Vector<PropertySetCallback>(1,1);
 		notifyOnSet.add(who);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
 	}
 

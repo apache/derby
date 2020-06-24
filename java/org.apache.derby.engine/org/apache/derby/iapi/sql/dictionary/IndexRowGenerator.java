@@ -92,6 +92,9 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 		id = new IndexDescriptorImpl(indexType,
 									isUnique,
 									isUniqueWithDuplicateNulls,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                                     isUniqueDeferrable,
                                     hasDeferrableChecking,
 									baseColumnPositions,
@@ -245,6 +248,7 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	 * @exception  StandardException  Standard exception policy.
      **/
     public int[] getColumnCollationIds(ColumnDescriptorList columnList)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		throws StandardException
     {
         int[] base_cols     = id.baseColumnPositions();
@@ -283,11 +287,15 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
      */
 	public boolean isUniqueWithDuplicateNulls()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		return id.isUniqueWithDuplicateNulls();
 	}
 
     public boolean hasDeferrableChecking()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return id.hasDeferrableChecking();
     }
 
@@ -397,6 +405,7 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 			ExecutionContext	ec;
 
 			ec = (ExecutionContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 					getContext(ExecutionContext.CONTEXT_ID);
 			ef = ec.getExecutionFactory();
 		}
@@ -442,6 +451,7 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

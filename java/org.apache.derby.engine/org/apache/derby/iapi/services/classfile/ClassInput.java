@@ -37,6 +37,7 @@ class ClassInput extends DataInputStream {
 	}
 
     int getU1() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
         return readUnsignedByte();
     }
 

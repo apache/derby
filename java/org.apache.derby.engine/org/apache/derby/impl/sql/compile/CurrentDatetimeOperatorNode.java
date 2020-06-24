@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CurrentDatetimeOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -56,6 +57,8 @@ class CurrentDatetimeOperatorNode extends ValueNode {
 
 	private int whichType;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CurrentDatetimeOperatorNode(int whichType, ContextManager cm) {
         super(cm);
         this.whichType = whichType;
@@ -85,6 +88,8 @@ class CurrentDatetimeOperatorNode extends ValueNode {
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates)
@@ -152,6 +157,7 @@ class CurrentDatetimeOperatorNode extends ValueNode {
 				break;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateDataValue(mb, getTypeCompiler(), 
 				getTypeServices().getCollationType(), (LocalField)null);
 	}
@@ -163,6 +169,7 @@ class CurrentDatetimeOperatorNode extends ValueNode {
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			return "methodName: " + methodName[whichType] + "\n" +
 				super.toString();
 		}
@@ -177,6 +184,7 @@ class CurrentDatetimeOperatorNode extends ValueNode {
      */
     boolean isEquivalent(ValueNode o)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
 			CurrentDatetimeOperatorNode other = (CurrentDatetimeOperatorNode)o;
 			return other.whichType == whichType;

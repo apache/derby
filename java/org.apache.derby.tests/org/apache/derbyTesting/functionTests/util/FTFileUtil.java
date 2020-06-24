@@ -65,6 +65,8 @@ public class FTFileUtil
 	 * @param newName the file's new name
 	*/
 	public static void renameFile(String location, String name , 
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
                                   String newName) throws Exception
 	{
 		final File src = new File(location, name);
@@ -74,6 +76,7 @@ public class FTFileUtil
 		// called through a SQL statement and thus a generated
 		// class. The generated class on the stack has no permissions
 		// granted to it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
                 public Void run() throws Exception {
                     if(!src.renameTo(dst))
@@ -108,6 +111,7 @@ public class FTFileUtil
 		// class. The generated class on the stack has no permissions
 		// granted to it.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return Boolean.toString(PrivilegedFileOpsForTests.exists(fl));
     }
 
@@ -171,6 +175,7 @@ public class FTFileUtil
 		// class. The generated class on the stack has no permissions
 		// granted to it.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(new PrivilegedAction<String>() {
                     public String run()
                     {

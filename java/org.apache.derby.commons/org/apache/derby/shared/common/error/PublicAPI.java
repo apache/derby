@@ -39,6 +39,7 @@ public class PublicAPI
         @return a SQLException wrapped around the original exception
 	 */
 	public static SQLException wrapStandardException(StandardException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         se.markAsPublicAPI();
         return ExceptionFactory.getInstance().getSQLException(
                 se.getMessage(), se.getMessageId(), (SQLException) null,

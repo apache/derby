@@ -79,6 +79,7 @@ public final class InsertOperation extends LogicalPageOperation
 	transient protected ByteArray preparedLog;
 
 	// yyz: revisit later, whether we need preparedLog, maybe everything will be prepared...
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     InsertOperation(
     RawTransaction              t, 
     BasePage                    page, 

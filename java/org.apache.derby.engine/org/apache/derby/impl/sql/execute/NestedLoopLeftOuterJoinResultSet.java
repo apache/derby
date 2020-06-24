@@ -37,6 +37,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  * the right when there is no matching row in the right
  * result set.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 {
 	protected GeneratedMethod emptyRowFun;
@@ -68,6 +69,7 @@ class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -226,6 +228,7 @@ class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 		for (colInCtr = 1, colOutCtr = 1; colInCtr <= leftNumCols;
 			 colInCtr++, colOutCtr++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
             DataValueDescriptor src_col = leftRow.getColumn(colInCtr);
             // Clone the value if it is represented by a stream (DERBY-3650).
             if (src_col != null && src_col.hasStream()) {
@@ -272,6 +275,7 @@ class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
      * class interface
      *
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     NestedLoopLeftOuterJoinResultSet(
 						NoPutResultSet leftResultSet,
 						int leftNumCols,
@@ -286,6 +290,7 @@ class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 					    boolean notExistsRightSide,
  					    double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 						String userSuppliedOptimizerOverrides)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,

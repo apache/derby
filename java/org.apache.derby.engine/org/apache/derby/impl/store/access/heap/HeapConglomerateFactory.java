@@ -171,6 +171,7 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
     int                     segment,
     long                    input_containerid,
     DataValueDescriptor[]   template,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 	ColumnOrdering[]        columnOrder,
     int[]                   collationIds,
     Properties              properties,
@@ -260,6 +261,7 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
             {
                 throw StandardException.newException(
                     SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     container_key.getContainerId());
             }
 
@@ -353,6 +355,7 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
 	{
 		// Find the UUID factory.
 		UUIDFactory uuidFactory = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             getMonitor().getUUIDFactory();
 		
 		// Make a UUID that identifies this conglomerate's format.
@@ -377,6 +380,7 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

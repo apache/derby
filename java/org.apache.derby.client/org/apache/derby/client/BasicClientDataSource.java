@@ -113,6 +113,7 @@ public class BasicClientDataSource
     private final static long serialVersionUID = 1894299584216955554L;
     public final static String className__ =
             "org.apache.derby.client.BasicClientDataSource";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
     // ---------------------------- traceLevel -------------------------------
     //
@@ -1492,6 +1493,7 @@ public class BasicClientDataSource
     private Connection getConnectionX(LogWriter dncLogWriter,
                                       String user, String password)
             throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return ClientAutoloadedDriver.getFactory().newNetConnection(
                 dncLogWriter, user, password, this, -1, false);
 
@@ -1616,6 +1618,7 @@ public class BasicClientDataSource
             String user,
             String password) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             return ClientAutoloadedDriver.getFactory().newClientPooledConnection(ds,
                     dncLogWriter, user, password);
     }
@@ -1664,6 +1667,7 @@ public class BasicClientDataSource
         BasicClientDataSource ds, String user, String password)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return ClientAutoloadedDriver.getFactory().newClientXAConnection(ds,
                 dncLogWriter, user, password);
     }

@@ -243,6 +243,7 @@ public class RealResultSetStatisticsFactory
 			InsertResultSet irs = (InsertResultSet) rs;
 
 			retval = new RealInsertResultSetStatistics(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                                     (int) irs.rowCount,
 									irs.constants.deferred,
 									irs.constants.irgs.length,
@@ -261,6 +262,7 @@ public class RealResultSetStatisticsFactory
 			InsertVTIResultSet iVTIrs = (InsertVTIResultSet) rs;
 
 			retval = new RealInsertVTIResultSetStatistics(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                                     (int) iVTIrs.rowCount,
 									iVTIrs.constants.deferred,
 									iVTIrs.getExecuteTime(), 
@@ -274,6 +276,7 @@ public class RealResultSetStatisticsFactory
 			UpdateResultSet urs = (UpdateResultSet) rs;
 
 			retval = new RealUpdateResultSetStatistics(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                                     (int) urs.rowCount,
 									urs.constants.deferred,
 									urs.constants.irgs.length,
@@ -310,6 +313,7 @@ public class RealResultSetStatisticsFactory
 			}
 
 			retval = new RealDeleteCascadeResultSetStatistics(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                                     (int) dcrs.rowCount,
 									dcrs.constants.deferred,
 									dcrs.constants.irgs.length,
@@ -327,6 +331,7 @@ public class RealResultSetStatisticsFactory
 			DeleteResultSet drs = (DeleteResultSet) rs;
 
 			retval = new RealDeleteResultSetStatistics(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 									(int) drs.rowCount,
 									drs.constants.deferred,
 									drs.constants.irgs.length,
@@ -343,6 +348,7 @@ public class RealResultSetStatisticsFactory
 			DeleteVTIResultSet dVTIrs = (DeleteVTIResultSet) rs;
 
 			retval = new RealDeleteVTIResultSetStatistics(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 									(int) dVTIrs.rowCount,
 									dVTIrs.getExecuteTime(), 
 									getResultSetStatistics(dVTIrs.savedSource)
@@ -408,6 +414,7 @@ public class RealResultSetStatisticsFactory
 											getResultSetStatistics(prrs.source)
 											);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
 		else if (rs instanceof RowCountResultSet)
 		{
 			RowCountResultSet rcrs = (RowCountResultSet) rs;
@@ -617,6 +624,7 @@ public class RealResultSetStatisticsFactory
                     tsrs.closeTime,
                     tsrs.resultSetNumber,
                     tsrs.tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 					tsrs.userSuppliedOptimizerOverrides,
                     tsrs.indexName,
                     tsrs.isConstraint,
@@ -711,6 +719,7 @@ public class RealResultSetStatisticsFactory
 											hlojrs.restrictionTime,
 											hlojrs.optimizerEstimatedRowCount,
 											hlojrs.optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 											hlojrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												hlojrs.leftResultSet),
@@ -738,6 +747,7 @@ public class RealResultSetStatisticsFactory
 											nllojrs.restrictionTime,
 											nllojrs.optimizerEstimatedRowCount,
 											nllojrs.optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 											nllojrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												nllojrs.leftResultSet),
@@ -765,6 +775,7 @@ public class RealResultSetStatisticsFactory
 											hjrs.oneRowRightSide,
 											hjrs.optimizerEstimatedRowCount,
 											hjrs.optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 											hjrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												hjrs.leftResultSet),
@@ -792,6 +803,7 @@ public class RealResultSetStatisticsFactory
 											nljrs.oneRowRightSide,
 											nljrs.optimizerEstimatedRowCount,
 											nljrs.optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 											nljrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												nljrs.leftResultSet),
@@ -838,6 +850,9 @@ public class RealResultSetStatisticsFactory
 											rrs.optimizerEstimatedRowCount,
 											rrs.optimizerEstimatedCost);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		else if (rs instanceof WindowResultSet)
 		{
 			WindowResultSet wrs = (WindowResultSet) rs;
@@ -856,6 +871,7 @@ public class RealResultSetStatisticsFactory
 											getResultSetStatistics(wrs.source)
 											);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
 		else if (rs instanceof SetOpResultSet)
 		{
 			SetOpResultSet srs = (SetOpResultSet) rs;
@@ -1337,6 +1353,7 @@ public class RealResultSetStatisticsFactory
                     dsrs.closeTime,
                     dsrs.resultSetNumber,
                     dsrs.tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 					null,
                     dsrs.indexName,
                     dsrs.isConstraint,

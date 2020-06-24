@@ -50,6 +50,7 @@ public class BrokeredConnection42 extends BrokeredConnection
     }
     
     public BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try {
             return new BrokeredCallableStatement42(statementControl, sql);
         } catch (SQLException sqle) {

@@ -109,6 +109,8 @@ public class LockInterruptTest extends BaseJDBCTestCase {
         }
         assertSQLState(INTERRUPTED, (SQLException) e1);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4967
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         if (hasInterruptibleIO()) {
             println("Skipping assert for t1.InterruptFlagSetOnThrow due " +
                     " to interruptible IO.");
@@ -161,6 +163,8 @@ public class LockInterruptTest extends BaseJDBCTestCase {
                 runWaiter();
             } catch (Throwable t) {
                 throwable = t;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4967
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 InterruptFlagSetOnThrow = interrupted(); // clears also
             }
         };

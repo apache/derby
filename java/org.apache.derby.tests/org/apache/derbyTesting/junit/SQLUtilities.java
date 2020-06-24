@@ -32,6 +32,7 @@ public class SQLUtilities {
 
     public static String[] allDataTypesColumnNames =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2463
             "SMALLINTCOL",
             "INTEGERCOL",
             "BIGINTCOL",
@@ -86,6 +87,7 @@ public class SQLUtilities {
 
         StringBuffer createSQL = new StringBuffer(
                 "create table AllDataTypesTable (");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
         for (int type = 0; type < SQLUtilities.SQLTypes.length - 1; type++) {
             createSQL.append(allDataTypesColumnNames[type] + " " + SQLUtilities.SQLTypes[type]
                     + ",");
@@ -121,6 +123,7 @@ public class SQLUtilities {
         ResultSet rs = s.executeQuery("values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()");
         rs.next();
         String rts = rs.getString(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2478
         rs.close();
         return new RuntimeStatisticsParser(rts);
     }
@@ -136,6 +139,7 @@ public class SQLUtilities {
         ResultSet rs = s.getResultSet();
         if (rs != null)
             JDBC.assertDrainResults(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2478
         RuntimeStatisticsParser parser = getRuntimeStatisticsParser(s2);
         s.close();
         s2.close();
@@ -145,6 +149,7 @@ public class SQLUtilities {
 	// Note: This array is accessed in lang.NullIfTest
 	public static String[] SQLTypes =
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
 	        "SMALLINT",
 	        "INTEGER",
 	        "BIGINT",

@@ -412,6 +412,7 @@ public interface DataDictionary
 	 */
 	public SchemaDescriptor	getSchemaDescriptor(UUID schemaId,
 												int isolationLevel,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3678
 												TransactionController tc)
 						throws StandardException;
 
@@ -426,6 +427,7 @@ public interface DataDictionary
 	 * @exception StandardException
 	 */
 	public boolean existsSchemaOwnedBy(String authid,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 									   TransactionController tc)
 			throws StandardException;
 
@@ -502,6 +504,8 @@ public interface DataDictionary
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void	dropRoleGrant(String roleName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 							  String grantee,
 							  String grantor,
 							  TransactionController tc)
@@ -554,6 +558,7 @@ public interface DataDictionary
 	 * @throws StandardException
 	 */
 	public RoleClosureIterator createRoleClosureIterator
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
 		(TransactionController tc,
 		 String role,
 		 boolean inverse
@@ -617,6 +622,7 @@ public interface DataDictionary
 	 * @exception StandardException		Thrown on failure
 	 */
 	public TableDescriptor		getTableDescriptor(String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 					SchemaDescriptor schema, TransactionController tc)
 						throws StandardException;
 
@@ -768,6 +774,7 @@ public interface DataDictionary
 	 */
 	public void	updateSYSCOLPERMSforDropColumn(UUID tableID,
 			TransactionController tc, ColumnDescriptor columnDescriptor)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 	throws StandardException;
 	
 	
@@ -1216,6 +1223,7 @@ public interface DataDictionary
 				throws StandardException;
 
 	public int[] examineTriggerNodeAndCols(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
 			Visitable actionStmt,
 			String oldReferencingName,
 			String newReferencingName,
@@ -1354,6 +1362,7 @@ public interface DataDictionary
 	 * @throws StandardException
 	 */
 	public String getTriggerActionString(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 			Visitable actionStmt,
 			String oldReferencingName,
 			String newReferencingName,
@@ -1364,6 +1373,7 @@ public interface DataDictionary
 			TableDescriptor triggerTableDescriptor,
 			int triggerEventMask,
             boolean createTriggerTime,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
             List<int[]> replacements,
            	int[] cols)
 	throws StandardException;
@@ -1404,6 +1414,9 @@ public interface DataDictionary
 		TriggerDescriptor 	triggerd,
 		UUID					formerUUID,
 		int[]					colsToSet,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
 		TransactionController	tc
 	) throws StandardException;
 
@@ -1439,6 +1452,7 @@ public interface DataDictionary
 	 */
     @SuppressWarnings("UseOfObsoleteCollectionType")
     public Hashtable<Long, ConglomerateDescriptor>
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         hashAllConglomerateDescriptorsByNumber(TransactionController tc)
             throws StandardException;
 
@@ -1622,6 +1636,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     List<DependencyDescriptor> getDependentsDescriptorList(String dependentID)
 		throws StandardException;
 
@@ -1636,6 +1651,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     List<DependencyDescriptor> getProvidersDescriptorList(String providerID)
 		throws StandardException;
 
@@ -1725,6 +1741,8 @@ public interface DataDictionary
 		Get the list of routines matching the schema and routine name.
 	 */
     public List<AliasDescriptor> getRoutineList(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         String schemaID,
         String routineName,
         char nameSpace) throws StandardException;
@@ -1847,6 +1865,8 @@ public interface DataDictionary
 	 * holds the lock.
 	 */
 	public NumberDataValue 	getSetAutoincrementValue(RowLocation rl,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5687
+//IC see: https://issues.apache.org/jira/browse/DERBY-4437
 											 TransactionController tc,
 											 boolean doUpdate,
 											 NumberDataValue newValue,
@@ -1922,6 +1942,8 @@ public interface DataDictionary
      * @throws StandardException if the sequence does not cycle and its range is exhausted
 	 */
     public void getCurrentValueAndAdvance
+//IC see: https://issues.apache.org/jira/browse/DERBY-5687
+//IC see: https://issues.apache.org/jira/browse/DERBY-4437
         ( String sequenceUUIDstring, NumberDataValue returnValue )
         throws StandardException;
 
@@ -2072,6 +2094,7 @@ public interface DataDictionary
      * actions to PermssionDescriptor's dependents.
      */
     public boolean addRemovePermissionsDescriptor( boolean add,
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
                                                  PermissionsDescriptor perm,
                                                  String grantee,
                                                  TransactionController tc)
@@ -2101,6 +2124,7 @@ public interface DataDictionary
      */
     public TablePermsDescriptor getTablePermissions( UUID tablePermsUUID)
     throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 
     /**
      * Get one user's column privileges for a table.
@@ -2143,6 +2167,7 @@ public interface DataDictionary
      * @exception StandardException
      */
     public ColPermsDescriptor getColumnPermissions( UUID tableUUID,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
             String privTypeStr,
             boolean forGrant,
             String authorizationId)
@@ -2158,6 +2183,7 @@ public interface DataDictionary
      */
     public ColPermsDescriptor getColumnPermissions( UUID colPermsUUID)
     throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 
     /**
      * Get one user's permissions for a routine (function or procedure).
@@ -2260,6 +2286,7 @@ public interface DataDictionary
 	 */
 	public RoleGrantDescriptor getRoleGrantDescriptor(UUID uuid)
 			throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
 	/**
 	 * Get a descriptor for a role grant
@@ -2271,6 +2298,7 @@ public interface DataDictionary
 	 * @throws StandardException error
 	 */
 	public RoleGrantDescriptor getRoleGrantDescriptor(String roleName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 													  String grantee,
 													  String grantor)
 		throws StandardException;
@@ -2302,6 +2330,7 @@ public interface DataDictionary
 	 * @return boolean true if such a grant exists
 	 */
 	public boolean existsGrantToAuthid(String authId,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 									   TransactionController tc)
 				throws StandardException;
 
@@ -2461,6 +2490,7 @@ public interface DataDictionary
     public  BulkInsertCounter   getBulkInsertCounter
         ( String sequenceUUIDString, boolean restart )
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 
     /**
      * Flush the updated values of the BulkInsertCounter to disk and to the original, cached

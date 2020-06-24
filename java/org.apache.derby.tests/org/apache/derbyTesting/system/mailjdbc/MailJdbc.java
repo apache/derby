@@ -33,6 +33,7 @@ public class MailJdbc {
 	public static void main(String[] args) throws Exception {
 		boolean useexistingdb = false;
 		String type = args[0];
+//IC see: https://issues.apache.org/jira/browse/DERBY-4203
 		if (args.length > 1 && args[1].equals("samedb"))
 			useexistingdb = true;
 		System.out.println("Test started with " + type + " driver");

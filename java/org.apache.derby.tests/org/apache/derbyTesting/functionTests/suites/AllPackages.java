@@ -51,7 +51,9 @@ public class AllPackages extends BaseTestCase {
     public static Test suite() throws Exception {
 
         BaseTestSuite suite = new BaseTestSuite("AllPackages");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4638
         for (Iterator it = getTestClasses().iterator(); it.hasNext(); ) {
             Object testClass = it.next();
             if (testClass instanceof String) {
@@ -83,11 +85,13 @@ public class AllPackages extends BaseTestCase {
      */
     private static List getTestClasses() {
         ArrayList<Object> classes = new ArrayList<Object>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         classes.add(org.apache.derbyTesting.functionTests.tests.derbynet._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.lang._Suite.class);
         
         if (shortCircuitFor_derby_7011()) { return classes; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-7011
 
         // DERBY-1903
         // For the largedata test, just run the lite version of the test as
@@ -96,6 +100,7 @@ public class AllPackages extends BaseTestCase {
              org.apache.derbyTesting.functionTests.tests.largedata.LobLimitsLiteTest.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.store._Suite.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         classes.add(org.apache.derbyTesting.functionTests.tests.storetests._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.tools._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.engine._Suite.class);
@@ -135,6 +140,7 @@ public class AllPackages extends BaseTestCase {
 
         // Compatibility tests (MATS)
         classes.add("org.apache.derbyTesting.functionTests.tests.compatibility._Suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2076
 
         return classes;
     }
@@ -149,8 +155,10 @@ public class AllPackages extends BaseTestCase {
         try {
             return invokeSuite(Class.forName(className));
         } catch (LinkageError  e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("SKIPPED: " + className + " - " +
                     e.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3521
         } catch (InvocationTargetException ite) {
             Throwable cause = ite.getCause();
             if (cause instanceof LinkageError) {
@@ -162,6 +170,7 @@ public class AllPackages extends BaseTestCase {
                throw ite;
             }
         } catch (ClassNotFoundException ce) { // Do not add a suite not built.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("SKIPPED: Class not found: " + className +
                     " - " + ce.getMessage());
         }
@@ -176,6 +185,7 @@ public class AllPackages extends BaseTestCase {
      */
     private static Test invokeSuite(Class<?> klass) throws Exception {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return (Test) klass.getMethod("suite").invoke(null);
         } catch (Exception e) {
             System.err.println("Failed to invoke class " + klass.getName());
@@ -192,6 +202,7 @@ public class AllPackages extends BaseTestCase {
      * test suites
      */
     public static String[] getTopLevelSuiteNames() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4638
         List testClasses = getTestClasses();
         String[] names = new String[testClasses.size()];
 

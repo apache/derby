@@ -53,8 +53,10 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
      * Test updating a large clob
      */
     public void testUpdateableStoreReader () throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2806
         getConnection().setAutoCommit (false);
         PreparedStatement ps = prepareStatement ("insert into updateClob " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2712
                 "(id , data) values (? ,?)");
         ps.setInt (1, 2);
         StringBuffer sb = new StringBuffer ();
@@ -179,6 +181,7 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
      */
     public void testMultiplexedOperationProblem()
             throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2806
         getConnection().setAutoCommit(false);
         int length = 266000;
         PreparedStatement ps = prepareStatement(
@@ -221,6 +224,7 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
         lastReadAscii = assertCorrectChar(lastReadAscii, ra.read());
         lastReadChar = assertCorrectChar(lastReadChar, r.read());
         // Close resources.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2806
         r.close();
         ra.close();
         rs.close();
@@ -268,6 +272,7 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
         for (int i = 0; i < 4; i++) {
             sb.append (fill);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2806
         return sb.toString();
     }
 
@@ -285,7 +290,9 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite ts = new BaseTestSuite("ClobUpdatableReaderTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
         ts.addTest(TestConfiguration.defaultSuite(
                     ClobUpdatableReaderTest.class));
         BaseTestSuite encSuite =
@@ -299,6 +306,7 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
      * Cleans up the database.
      */
     protected void tearDown() throws java.lang.Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2806
         rollback();
         Statement stmt = createStatement ();
         stmt.execute ("drop table updateClob");

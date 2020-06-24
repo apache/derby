@@ -31,6 +31,7 @@ package org.apache.derby.client.am;
 public class SqlCode {
     private int code_;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     SqlCode(int code) {
         code_ = code;
     }
@@ -47,6 +48,7 @@ public class SqlCode {
     public final static SqlCode queuedXAError = new SqlCode(-4203);
 
     final static SqlCode disconnectError = new SqlCode(40000);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /** SQL code for SQL state 02000 (end of data). DRDA does not
      * specify the SQL code for this SQL state, but Derby uses 100. */

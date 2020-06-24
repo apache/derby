@@ -49,6 +49,7 @@ public final class OuterJoinTest extends BaseJDBCTestCase
     public static Test suite()
     {
         //Add the test case into the test suite
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("OuterJoinTest Test");
         return TestConfiguration.defaultSuite(OuterJoinTest.class);
     }
@@ -2407,6 +2408,7 @@ public final class OuterJoinTest extends BaseJDBCTestCase
 
      */
     public void testDerby_4471a() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
         setAutoCommit(false);
         Statement s = createStatement();
 
@@ -2925,6 +2927,7 @@ public final class OuterJoinTest extends BaseJDBCTestCase
     * stems from DERBY-4712 (parent issue of DERBY-4736).
     */
     public void testDerby_4736() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4736
         setAutoCommit(false);
         Statement s = createStatement();
 
@@ -3078,6 +3081,7 @@ public final class OuterJoinTest extends BaseJDBCTestCase
     public void testDerby_4736_nullability() throws Exception
     {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4736
 
         Statement st = createStatement();
         ResultSet rs = null;
@@ -3386,6 +3390,8 @@ public final class OuterJoinTest extends BaseJDBCTestCase
     public void testDerby_4798_NPE() throws Exception
     {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4798
+//IC see: https://issues.apache.org/jira/browse/DERBY-3097
 
         Statement st = createStatement();
         ResultSet rs = null;

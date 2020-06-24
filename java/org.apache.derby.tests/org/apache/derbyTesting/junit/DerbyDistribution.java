@@ -90,6 +90,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
      * @see #newInstance(DerbyVersion, File)
      */
     private DerbyDistribution(DerbyVersion version,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5475
                               File[] productionJars, File[] testingJars) {
         if (version == null) {
             throw new NullPointerException("version is null");
@@ -102,6 +103,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
         this.derbyClientJarPath = getPath(root, JAR_CLIENT);
         this.derbyEngineJarPath = getPath(root, JAR_ENGINE);
         this.derbyNetJarPath = getPath(root, JAR_NET);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         this.derbySharedJarPath = getPath(root, JAR_SHARED);
         this.derbyToolsJarPath = getPath(root, JAR_TOOLS);
     }
@@ -134,6 +136,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
 
     /** Returns the path to {@code derbyclient.jar}. */
     public String getDerbyClientJarPath() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         String retval = derbyClientJarPath;
         if (version.atLeast(DerbyVersion.FIRST_JIGSAW_VERSION))
         {
@@ -169,6 +172,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
 
     /** Returns the path to {@code derbyshared.jar}. */
     public String getDerbySharedJarPath() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return derbySharedJarPath;
     }
 
@@ -226,6 +230,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
                 }
             }
             if (!hasJar) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5897
                 BaseTestCase.println("missing jar: " + REQUIRED_JARS[i]);
                 return false;
             }
@@ -303,6 +308,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
     private static String constructJarClasspath(File[] jars) {
         StringBuffer sb = new StringBuffer(512);
         for (int i=0; i < jars.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5475
             try {
                 sb.append(jars[i].getCanonicalPath());
             } catch (IOException ioe) {
@@ -338,6 +344,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
      * @throws IllegalArgumentException if {@code version} is {@code null}
      */
     public static DerbyDistribution newInstance(DerbyVersion version,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6126
                                                 File baseDir) {
         return newInstance(version, baseDir, baseDir);
     }
@@ -364,6 +371,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
                                                 File baseDir, File testDir) {
         File[] productionJars = getProductionJars(baseDir);
         File[] testingJars = getTestingJars(testDir);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<File> tmpJars = new ArrayList<File>();
         tmpJars.addAll(Arrays.asList(productionJars));
         tmpJars.addAll(Arrays.asList(testingJars));
@@ -372,6 +380,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
         }
         // Invalid distribution, ignore it.
         BaseTestCase.println("Distribution deemed invalid (note that running " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6126
                 "off classes isn't supported): " + baseDir.getAbsolutePath() +
                 (baseDir.equals(testDir) ? ""
                                          : ", " + testDir.getAbsolutePath()));

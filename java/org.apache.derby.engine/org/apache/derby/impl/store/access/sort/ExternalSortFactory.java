@@ -131,6 +131,7 @@ public class ExternalSortFactory implements
 	 */
 	protected MergeSort getMergeSort() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		return new MergeSort();
 	}
 
@@ -158,6 +159,7 @@ public class ExternalSortFactory implements
         throws StandardException
 	{
 		MergeSort sort = getMergeSort();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 
         // RESOLVE - mikem change this to use estimatedRows and 
         // estimatedRowSize to come up with a smarter number for sortBufferMax
@@ -360,6 +362,7 @@ public class ExternalSortFactory implements
 	{
 		// Find the UUID factory.
 		UUIDFactory uuidFactory = getMonitor().getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		// Make a UUID that identifies this sort's format.
 		formatUUID = uuidFactory.recreateUUID(FORMATUUIDSTRING);
@@ -397,6 +400,7 @@ public class ExternalSortFactory implements
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

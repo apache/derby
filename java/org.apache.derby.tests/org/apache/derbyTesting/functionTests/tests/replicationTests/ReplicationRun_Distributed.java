@@ -52,11 +52,13 @@ public class ReplicationRun_Distributed extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Distributed Suite");
         
         suite.addTestSuite( ReplicationRun_Distributed.class );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         return SecurityManagerSetup.noSecurityManager(suite);
     }
     
@@ -81,10 +83,12 @@ public class ReplicationRun_Distributed extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 masterDbSubPath); // Distinguishing master/slave
         
         startServer(slaveJvmVersion, derbySlaveVersion,
@@ -115,6 +119,7 @@ public class ReplicationRun_Distributed extends ReplicationRun
                 testClientHost);
         
         // Allow the slave to reach the required state before attempting to start master:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         util.sleep(sleepTime, "Before startMaster");  // startMaster_ij should retry connection? 
         startMaster(jvmVersion, replicatedDb,
                 masterServerHost, // Where the startMaster command must be given
@@ -168,6 +173,7 @@ public class ReplicationRun_Distributed extends ReplicationRun
     throws IOException
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         util.DEBUG("*** Properties -----------------------------------------");
         userDir = System.getProperty("user.dir");
         util.DEBUG("user.dir:          " + userDir);
@@ -189,6 +195,7 @@ public class ReplicationRun_Distributed extends ReplicationRun
         // Now we can get the derby jar path, jvm path etc.
         
         util.printDebug = cp.getProperty("test.printDebug","false").equalsIgnoreCase("true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         util.DEBUG("printDebug: " + util.printDebug);
         
         showSysinfo = cp.getProperty("test.showSysinfo","false").equalsIgnoreCase("true");
@@ -314,6 +321,7 @@ public class ReplicationRun_Distributed extends ReplicationRun
                 +"derby.drda.traceAll=true"+LF;
 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         util.DEBUG("--------------------------------------------------------");
         
         masterPreRepl = new Load("masterPreRepl", cp);
@@ -322,8 +330,10 @@ public class ReplicationRun_Distributed extends ReplicationRun
         masterPostSlave = new Load("masterPostSlave", cp);
         slavePostSlave = new Load("slavePostSlave", cp);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         util.DEBUG("--------------------------------------------------------");
         // for SimplePerfTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
         tuplesToInsertPerf = Integer.parseInt(cp.getProperty("test.inserts","10000"));
         util.DEBUG("tuplesToInsertPerf: " + tuplesToInsertPerf);
         commitFreq = Integer.parseInt(cp.getProperty("test.commitFreq","0")); // "0" is autocommit

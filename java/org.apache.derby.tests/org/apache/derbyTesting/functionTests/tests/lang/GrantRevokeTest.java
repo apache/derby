@@ -58,6 +58,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 	 * statements. Metadata methods test also runs in client/server mode.
 	 */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite();
 		
 		// following is useful for debugging the lock timeout seen in rollback tests,
@@ -75,6 +76,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 	 */
 	public static Test basesuite() {
         Test test = new BaseTestSuite(GrantRevokeTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // DERBY-6238: Dump the contents of the lock table on lock timeout.
         // Helps debug intermittent lock timeouts seen in the test.
@@ -195,6 +197,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		grant("select", "s1", "t1", users[1]);
 		assertSelectPrivilege(true, users[1], "s1", "t1", null);
 		assertSelectPrivilege(false, users[2], "s1", "t1", null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3661
 		assertSelectPrivilege(false, users[2], "s2", "t1", null);
 		assertSelectPrivilege(false, users[2], "s2", "t2", null);
 		revoke("select", "s1", "t1", users[1]);
@@ -217,6 +220,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		assertSelectPrivilege(false, users[4], "s1", "t1", new String[] {"c3"});
 		assertSelectPrivilege(false, users[4], "s1", "t1", null);
 		assertUpdatePrivilege(false, users[4], "S1", "T1", new String[] {"C1"});
+//IC see: https://issues.apache.org/jira/browse/DERBY-2893
 		assertUpdatePrivilege(true, users[4], "S1", "T1", new String[] {"C2", "C3"});
 		assertReferencesPrivilege(true, users[4], "s1", "t1", new String[] {"c1","c2","c3"});
 		revoke("select(c1),update(c3,c2),references(c3,c1,c2)", "s1", "t1", users[4]);
@@ -673,7 +677,9 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "function s1", "nosuch", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5252
         	if ( Locale.getDefault().getLanguage().equals("en") ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3610
         	    assertEquals("'S1.NOSUCH' is not recognized as a function.", e.getMessage());
         	}
         }
@@ -684,7 +690,9 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "function s1", "p1", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5252
             if ( Locale.getDefault().getLanguage().equals("en") ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3610
                 assertEquals("'S1.P1' is not recognized as a function.", e.getMessage());
             }
         }
@@ -703,7 +711,9 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "procedure s1", "nosuch", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5252
         	if ( Locale.getDefault().getLanguage().equals("en") ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3610
         	    assertEquals("'S1.NOSUCH' is not recognized as a procedure.", e.getMessage());
         	}
         }
@@ -714,7 +724,9 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "procedure s1", "f2", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5252
         	if ( Locale.getDefault().getLanguage().equals("en") ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3610
         	    assertEquals("'S1.F2' is not recognized as a procedure.", e.getMessage());
         	}
         }
@@ -780,6 +792,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         try {
         	revoke(users[2], "select", "s1", "t1", "public");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
             assertSQLState("42506", e);
         }
         try {
@@ -799,6 +813,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         }
         
         // clean up
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
+//IC see: https://issues.apache.org/jira/browse/DERBY-3176
         revoke("select", "s1", "t1", "public");
         revoke("all privileges", "s1", "t1", users[1]);
         revoke("all privileges", "s1", "t1", users[2]);
@@ -1265,6 +1281,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	    }
         	} catch (SQLException e) {
         		if (!hasPrivilege) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         			assertSQLState("42502", e);
         		} else {
                     printStackTrace(e);
@@ -1290,6 +1314,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
      */
     public void assertTriggerPrivilege(boolean hasPrivilege, String user, String schema, String table) throws SQLException {
     	
+//IC see: https://issues.apache.org/jira/browse/DERBY-2893
     	Connection c = openUserConnection(user);
     	c.setAutoCommit(false);
     	
@@ -1305,6 +1330,10 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
     			assertSQLState("42500", e);
     		} else {
                 printStackTrace(e);
@@ -1386,6 +1415,10 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
                        hasPrivilege);
 		} catch (SQLException e) {
 			if (!hasPrivilege)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
 				assertSQLState("42504", e);
 			else {
                 printStackTrace(e);
@@ -1428,6 +1461,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	// Derby doesn't currently support the for grant option, the
         	// grantor is always the object owner - in this test, TEST_DBO,
         	// and is_grantable is always 'NO'
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
           	    assertEquals(rs.getString(4),"TEST_DBO");
           	    assertEquals(rs.getString(7),"NO");
           	    if (rs.getString(6).equals(type)) {
@@ -1490,6 +1524,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     			// grantor is always the object owner - in this test, 
     			// TEST_DBO, and getColumnPrivileges casts 'NO' for 
     			// is_grantable for supported column-related privileges
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
 					assertEquals("TEST_DBO", cp.getString(5));
 					assertEquals("NO", cp.getString(8));
 					if (cp.getString(7).equals(type)) {
@@ -1585,6 +1620,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     String[] getAllColumns(String schema, String table) throws SQLException
     {
     	DatabaseMetaData dbmd = getConnection().getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> columnList = new ArrayList<String>();
         ResultSet rs = dbmd.getColumns( (String) null, schema, table, (String) null);
         while(rs.next())

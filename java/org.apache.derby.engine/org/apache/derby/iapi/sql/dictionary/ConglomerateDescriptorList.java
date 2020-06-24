@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ConglomerateDescriptorList extends
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<ConglomerateDescriptor>
 {
 
@@ -72,6 +73,8 @@ public class ConglomerateDescriptorList extends
 		int size = size(), j = 0;
 		ConglomerateDescriptor[] draft = new ConglomerateDescriptor[size];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
 			if (conglomerateNumber == conglomerateDescriptor.getConglomerateNumber())
@@ -98,6 +101,7 @@ public class ConglomerateDescriptorList extends
 	{
 		ConglomerateDescriptor	returnValue = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
 			if (conglomerateName.equals(conglomerateDescriptor.getConglomerateName()))
@@ -125,6 +129,7 @@ public class ConglomerateDescriptorList extends
 	{
 		ConglomerateDescriptor	returnValue = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
 			if (uuid.equals(conglomerateDescriptor.getUUID()))
@@ -151,6 +156,7 @@ public class ConglomerateDescriptorList extends
 		int size = size(), j = 0;
 		ConglomerateDescriptor[] draft = new ConglomerateDescriptor[size];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
 			if (uuid.equals(conglomerateDescriptor.getUUID()))
@@ -176,6 +182,7 @@ public class ConglomerateDescriptorList extends
 	public void dropConglomerateDescriptor(UUID tableID, ConglomerateDescriptor cgDesc) 
 						throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<ConglomerateDescriptor> iterator = iterator();
         while (iterator.hasNext())
 		{
@@ -202,6 +209,7 @@ public class ConglomerateDescriptorList extends
 	public void dropConglomerateDescriptorByUUID(UUID conglomerateID) 
 						throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<ConglomerateDescriptor> iterator = iterator();
         while (iterator.hasNext())
 		{

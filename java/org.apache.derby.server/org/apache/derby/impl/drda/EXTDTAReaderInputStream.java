@@ -43,6 +43,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  * mechanism in DRDA to interrupt a running request, but it didn't seem like a
  * feasible approach in this case).
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
 abstract class EXTDTAReaderInputStream
         extends InputStream {
 

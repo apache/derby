@@ -171,6 +171,7 @@ public class TestDiskHashtable
                                  DataValueDescriptor[][] rows)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         DiskHashtable dht = 
             new DiskHashtable(
                     tc, 
@@ -182,6 +183,7 @@ public class TestDiskHashtable
 
         boolean[] isDuplicate = new boolean[ rows.length];
         boolean[] found = new boolean[ rows.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<Object, Vector<DataValueDescriptor[]>> simpleHash =
             new HashMap<Object, Vector<DataValueDescriptor[]>>(rows.length);
 
@@ -210,6 +212,7 @@ public class TestDiskHashtable
                     REPORT_FAILURE( "  get returned wrong value on key " + j);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             testElements( removeDups, dht, i+1, rows, isDuplicate, found);
         }
         // Remove them
@@ -223,6 +226,7 @@ public class TestDiskHashtable
                 REPORT_FAILURE( "  remove did not delete key " + i);
         }
         testElements( removeDups, dht, 0, rows, isDuplicate, found);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         testLargeTable( dht, keyCols, rows[0]);
         dht.close();
@@ -242,6 +246,7 @@ public class TestDiskHashtable
 
         DataValueDescriptor[] row = new DataValueDescriptor[ aRow.length];
         for( int i = 0; i < row.length; i++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
             row[i] = aRow[i].cloneValue(false);
         
         for( int key0Idx = 0; key0Idx < key0Count; key0Idx++)
@@ -335,6 +340,7 @@ public class TestDiskHashtable
             }
             if( el instanceof DataValueDescriptor[])
                 checkElement( (DataValueDescriptor[]) el, rowCount, rows, found);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             else if (el instanceof List)
             {
                 List v = (List) el;
@@ -398,6 +404,7 @@ public class TestDiskHashtable
             DataValueDescriptor[] row1 = (DataValueDescriptor[]) r1;
             DataValueDescriptor[] row2;
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             if (r2 instanceof List)
             {
                 List v2 = (List) r2;
@@ -419,6 +426,7 @@ public class TestDiskHashtable
             }
             return true;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (r1 instanceof List)
         {
             if (!(r2 instanceof List))

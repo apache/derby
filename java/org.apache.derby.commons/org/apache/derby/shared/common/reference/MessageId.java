@@ -63,6 +63,7 @@ public interface MessageId {
     String LOG_DURABILITY_TESTMODE_NO_SYNC_ERR = "L021"; // hint that error could be because 
                                                          // derby.system.durability was set to test
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4072
     String LOG_CHANGED_DB_TO_READ_ONLY        = "L022"; // a permissions error on log caused us
     													// to change db to read only.
     
@@ -93,8 +94,11 @@ public interface MessageId {
      * When the specified overflow page isn't found while streaming from a
      * page overflow chain (large data values, typically BLOB or CLOB).
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2992
     String STORE_STREAM_OVERFLOW_PAGE_NOT_FOUND = "D015";
     String STORE_PAGE_DUMP                  = "D016";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6320
+//IC see: https://issues.apache.org/jira/browse/DERBY-4923
 
 	/*
 	** ClassManager
@@ -113,8 +117,10 @@ public interface MessageId {
 	/*
 	** Connectivity
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-4601
 	String CONN_SHUT_DOWN_ENGINE		    = "J003"; // shutting down Derby Engine
 	String CONN_DATABASE_IDENTITY			= "J004"; // database identity
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	String CONN_SHUT_DOWN_CLOUDSCAPE		= "J005"; // shut down Derby
     String CONN_DEREGISTER_AUTOLOADEDDRIVER = "J006"; // remove registered AutoloadedDriver
 	String CONN_CREATE_DATABASE				= "J007"; // create database
@@ -127,6 +133,7 @@ public interface MessageId {
 	String CONN_CRYPTO_EXTERNAL_KEY         = "J019"; // external cryptographic key
 	String CONN_BOOT_PASSWORD               = "J020"; // secret cryptographic key
 	String CONN_LOCALE                      = "J021"; // locale for the database
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
 	String CONN_COLLATION                   = "J031"; // collation info for the character datatypes
 	String CONN_USERNAME_ATTR               = "J022"; // user name
 	String CONN_PASSWORD_ATTR               = "J023"; // user password
@@ -138,7 +145,10 @@ public interface MessageId {
     String CONN_NETWORK_SERVER_CLASS_LOAD   = "J101"; // Cannot load the network server constructor
     String CONN_NETWORK_SERVER_START_EXCEPTION = "J102";
     String CONN_NETWORK_SERVER_SHUTDOWN_EXCEPTION = "J103";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
     String OBJECT_CLOSED                                    = "J104";
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
+//IC see: https://issues.apache.org/jira/browse/DERBY-3902
     String CONN_PRECISION_TOO_LARGE                         = "J105";   
     //  following only used in text we print out - see client.am.SqlException:
     String BATCH_POSITION_ID                                = "J107";
@@ -165,13 +175,17 @@ public interface MessageId {
     String CONN_DRDA_QRYOPEN                                = "J129";
     String CONN_DRDA_INVALIDFDOCA                           = "J130";
     String CONN_DRDA_DATASTREAM_SYNTAX_ERROR                = "J131";
+//IC see: https://issues.apache.org/jira/browse/DERBY-851
     String CONN_USERNAME_DESCRIPTION                        = "J132";
     String CONN_PASSWORD_DESCRIPTION                        = "J133";
     /**
      * Error message for negative values for the maxStatements property
      * of data sources supporting statement pooling.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3325
+//IC see: https://issues.apache.org/jira/browse/DERBY-3329
     String CONN_NEGATIVE_MAXSTATEMENTS                      = "J134";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
     String CONN_XA_TRANSACTION_TIMED_OUT                    = "J135";
     String CONN_CLOSE_XA_TRANSACTION_ROLLED_BACK            = "J136";
 
@@ -192,25 +206,30 @@ public interface MessageId {
 	*/
 	String CORE_DATABASE_NOT_AVAILABLE	= "I024"; // Database not available
 	String CORE_DRIVER_NOT_AVAILABLE	= "I025"; // JDBC Driver not available
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 	String JDBC_DRIVER_REGISTER_ERROR 	= "I026"; // Error while registering driver
     /**
      * At the time InputStream.reset was invoked, either no mark was set or the
      * read ahead limit of the mark was exceeded.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
     String STREAM_MARK_UNSET_OR_EXCEEDED                    = "I027";
     /**
      * Error message when the client encounters a read error when reading a
      * user stream, which it is in the process of sending to the server.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
     String STREAM_DRDA_CLIENTSIDE_EXTDTA_READ_ERROR         = "I028";
     /** The stream ended before it was supposed to. */
     String STREAM_PREMATURE_EOF                             = "I029";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
 
     /*
      * Monitor
      */
 
     /** Tell user not to edit service.properties. */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
     String SERVICE_PROPERTIES_DONT_EDIT                     = "M001";
     /** Informational message, service properties restored. */
     String SERVICE_PROPERTIES_RESTORED                      = "M002";
@@ -232,30 +251,42 @@ public interface MessageId {
      */
     String CANNOT_READ_SECURITY_PROPERTY                     = "M008";
     String CANNOT_CREATE_FILE_OR_DIRECTORY                   = "M009";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
     String CANNOT_GET_CLASSLOADER                            = "M00A";
     String CANNOT_SET_CLASSLOADER                            = "M00B";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
     String CANNOT_SET_DAEMON                                 = "M010";
     /*
      * Misc
      */
     String CAUSED_BY = "N001";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
     /*
      * Replication
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
     String REPLICATION_ERROR_BEGIN                       = "R001";
     String REPLICATION_ERROR_END                         = "R002";
     String REPLICATION_SLAVE_STARTED                     = "R003";
     String REPLICATION_SLAVE_STOPPED                     = "R004";
     String REPLICATION_FATAL_ERROR                       = "R005";
     String REPLICATION_SLAVE_LOST_CONN                   = "R006";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3064
     String REPLICATION_MASTER_STARTED                    = "R007";
     String REPLICATION_MASTER_STOPPED                    = "R008";
     String REPLICATION_LOGSHIPPER_EXCEPTION              = "R009";
     String REPLICATION_MASTER_RECONN                     = "R010";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3361
+//IC see: https://issues.apache.org/jira/browse/DERBY-3356
     String REPLICATION_SLAVE_NETWORK_LISTEN              = "R011";    
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
     String REPLICATION_INVALID_CONNECTION_HANDLE         = "R012";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
     String REPLICATION_ONELINE_MSG_HEADER                = "R013";
     String REPLICATION_FAILOVER_SUCCESSFUL               = "R020";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3254
 
 }

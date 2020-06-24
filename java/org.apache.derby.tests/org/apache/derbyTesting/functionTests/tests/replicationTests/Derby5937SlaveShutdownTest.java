@@ -69,6 +69,7 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
         // Likely a jvm issue, so don't run on that OS...
         if (BaseTestCase.isJ9Platform())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             Test test = new BaseTestSuite("Derby5937SlaveShutdownTest");
             return test;
         }

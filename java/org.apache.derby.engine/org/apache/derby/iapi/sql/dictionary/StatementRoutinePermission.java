@@ -54,6 +54,7 @@ public final class StatementRoutinePermission extends StatementPermission
 	 */
 	public UUID getRoutineUUID()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 		return routineUUID;
 	}
 
@@ -62,8 +63,10 @@ public final class StatementRoutinePermission extends StatementPermission
 	 */
 	public void check( LanguageConnectionContext lcc,
 					   boolean forGrant,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 					   Activation activation) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         genericCheck( lcc, forGrant, activation, "EXECUTE" );
 	}
 
@@ -89,6 +92,7 @@ public final class StatementRoutinePermission extends StatementPermission
 	 * @see StatementPermission#getPermissionDescriptor
 	 */
 	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 	throws StandardException
 	{
 		return dd.getRoutinePermissions(routineUUID,authid);
@@ -101,6 +105,7 @@ public final class StatementRoutinePermission extends StatementPermission
 
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		return "StatementRoutinePermission: " + routineUUID;
 	}
 }

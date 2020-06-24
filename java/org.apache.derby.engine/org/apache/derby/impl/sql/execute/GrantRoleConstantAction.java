@@ -83,12 +83,14 @@ class GrantRoleConstantAction extends DDLConstantAction {
         DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
         final String grantor = lcc.getCurrentUserId(activation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
         dd.startWriting(lcc);
 
         for (Iterator rIter = roleNames.iterator(); rIter.hasNext();) {
             String role = (String)rIter.next();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3333
             if (role.equals(Authorizer.PUBLIC_AUTHORIZATION_ID)) {
                 throw StandardException.
                     newException(SQLState.AUTH_PUBLIC_ILLEGAL_AUTHORIZATION_ID);
@@ -98,6 +100,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
                 String grantee = (String)gIter.next();
 
                 // check that role exists
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                 RoleGrantDescriptor rdDef =
                     dd.getRoleDefinitionDescriptor(role);
 
@@ -123,6 +126,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
                     // All ok, we are database owner
                     if (SanityManager.DEBUG) {
                         SanityManager.ASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                             rdDef.getGrantee().equals(grantor),
                             "expected database owner in role grant descriptor");
                         SanityManager.ASSERT(
@@ -135,6 +139,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
                 }
 
                 // Has it already been granted?
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                 RoleGrantDescriptor rgd =
                     dd.getRoleGrantDescriptor(role, grantee, grantor);
 
@@ -163,6 +168,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
                     }
 
                     rgd = ddg.newRoleGrantDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                         dd.getUUIDFactory().createUUID(),
                         role,
                         grantee,
@@ -170,6 +176,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
                         withAdminOption,
                         false);  // not definition
                     dd.addDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
                         rgd,
                         null,  // parent
                         DataDictionary.SYSROLES_CATALOG_NUM,
@@ -208,6 +215,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
         RoleClosureIterator rci =
             dd.createRoleClosureIterator(tc, grantee, false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         String r;
         while ((r = rci.next()) != null) {
             if (role.equals(r)) {

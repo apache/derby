@@ -57,6 +57,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
  * @version 0.1
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 class SYSTABLESRowFactory extends CatalogRowFactory
 {
 	private static final String		TABLENAME_STRING = "SYSTABLES";
@@ -98,9 +99,11 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSTABLESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 		initInfo(SYSTABLES_COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, (boolean[]) null, uuids);
 	}
 
@@ -179,6 +182,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 					tabSType = "V";
 					break;		
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			    case TableDescriptor.SYNONYM_TYPE:
 					tabSType = "A";
 					break;		
@@ -228,6 +232,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 	 * @return corresponding empty index row
 	 * @exception   StandardException thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	ExecIndexRow	buildEmptyIndexRow( int indexNumber,
 											RowLocation rowLocation)
 			throws StandardException
@@ -269,6 +274,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 	 *                       cases) supported for now.
 	 * @exception   StandardException thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3678
 	TupleDescriptor buildDescriptor(
 		ExecRow					row,
 		TupleDescriptor			parentTupleDescriptor,
@@ -307,6 +313,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 		DataDictionary 			dd )
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3678
 		return buildDescriptorBody(
 			row,
 			parentTupleDescriptor,
@@ -366,6 +373,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 			case 'V' :
 				tableTypeEnum = TableDescriptor.VIEW_TYPE;
 				break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			case 'A' :
 				tableTypeEnum = TableDescriptor.SYNONYM_TYPE;
 				break;
@@ -381,6 +389,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 		schemaUUID = getUUIDFactory().recreateUUID(schemaUUIDString);
 		
 		schema = dd.getSchemaDescriptor(schemaUUID, isolationLevel, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3678
 
 		/* 5th column is LOCKGRANULARITY (char(1)) */
 		col = row.getColumn(SYSTABLES_LOCKGRANULARITY);
@@ -422,6 +431,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[]	buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
         return new SystemColumn[] {

@@ -273,6 +273,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)
             TestConfiguration.embeddedSuite(CaseExpressionTest.class);
 
@@ -300,6 +301,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         int row;
 
         for (colType = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
             colType < SQLUtilities.SQLTypes.length;
             colType++)
         {
@@ -524,6 +526,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
      */
     public void testUntypedNulls() throws SQLException {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
 
         // Before DERBY-2002, Derby accepted a CASE expression to have an
         // untyped NULL in all the result branches. Verify that an error

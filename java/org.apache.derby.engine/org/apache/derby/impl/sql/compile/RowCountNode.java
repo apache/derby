@@ -69,6 +69,8 @@ public final class RowCountNode extends SingleChildResultSetNode
      * @param cm                 The context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     RowCountNode(ResultSetNode    childResult,
                  ResultColumnList rcl,
                  ValueNode        offset,
@@ -79,6 +81,7 @@ public final class RowCountNode extends SingleChildResultSetNode
 
         super(childResult, null, cm);
         setResultColumns( rcl );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         this.offset = offset;
         this.fetchFirst = fetchFirst;
@@ -104,6 +107,7 @@ public final class RowCountNode extends SingleChildResultSetNode
         assignResultSetNumber();
 
         setCostEstimate( childResult.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         acb.pushGetResultSetFactoryExpression(mb);
 
@@ -116,6 +120,7 @@ public final class RowCountNode extends SingleChildResultSetNode
         boolean dynamicFetchFirst = false;
 
         // arg4
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
         if (offset != null) {
             generateExprFun(acb, mb, offset);
         } else {
@@ -131,6 +136,7 @@ public final class RowCountNode extends SingleChildResultSetNode
 
         mb.push( hasJDBClimitClause );  // arg6
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         mb.push(getCostEstimate().rowCount()); // arg7
         mb.push(getCostEstimate().getEstimatedCost()); // arg8
 
@@ -143,6 +149,7 @@ public final class RowCountNode extends SingleChildResultSetNode
 
 
     private void generateExprFun(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
         ExpressionClassBuilder ecb,
         MethodBuilder mb,
         ValueNode vn) throws StandardException {

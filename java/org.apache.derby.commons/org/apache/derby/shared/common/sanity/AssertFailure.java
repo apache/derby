@@ -68,6 +68,7 @@ public class AssertFailure extends RuntimeException {
      * additional information about what went wrong.
      **/
     public AssertFailure(String message, Throwable nestedError) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2579
         super(message, nestedError);
         threadDump = dumpThreads();
     }
@@ -130,6 +131,7 @@ public class AssertFailure extends RuntimeException {
      * Tells if generating a thread dump is supported in the running JVM.
      */
     private boolean supportsThreadDump() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5256
         try {
             // This checks that we are on a jvm >= 1.5 where we
             // can actually do threaddumps.
@@ -154,6 +156,7 @@ public class AssertFailure extends RuntimeException {
      */
     private String dumpThreads() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5256
         if (!supportsThreadDump()) {
             return "(Skipping thread dump because it is not " +
                     "supported on JVM 1.4)";
@@ -166,6 +169,7 @@ public class AssertFailure extends RuntimeException {
         // Load the class and method we need with reflection.
         final Method m;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Class<?> c = Class.forName(
                     "org.apache.derby.shared.common.sanity.ThreadDump");
             m = c.getMethod("getStackDumpString", new Class[] {});
@@ -179,6 +183,7 @@ public class AssertFailure extends RuntimeException {
         //Try to get a thread dump and deal with various situations.
         try {
             String dump = (String) AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             (new PrivilegedExceptionAction<Object>(){
                 public Object run() throws
                         IllegalArgumentException,

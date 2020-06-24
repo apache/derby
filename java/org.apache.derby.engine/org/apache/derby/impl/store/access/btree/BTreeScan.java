@@ -234,7 +234,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         throws StandardException
     {
         // startKeyValue init.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         this.init_startKeyValue         = startKeyValue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-404
         if (RowUtil.isRowEmpty(this.init_startKeyValue))
             this.init_startKeyValue = null;
 
@@ -247,7 +249,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         this.init_qualifier             = qualifier;
 
         // stopKeyValue init.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         this.init_stopKeyValue          = stopKeyValue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-404
         if (RowUtil.isRowEmpty(this.init_stopKeyValue))
             this.init_stopKeyValue = null;
 
@@ -266,6 +270,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         scan_position.current_lock_template[this.init_template.length - 1] = 
             scan_position.current_lock_row_loc = (RowLocation)
                 init_template[init_template.length - 1].cloneValue(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
         // Verify that all columns in start key value, stop key value, and
         // qualifiers are present in the list of columns described by the
@@ -287,6 +292,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 // add in start columns
                 if (this.init_startKeyValue != null)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
                     required_cols.grow(this.init_startKeyValue.length);
                     for (int i = 0; i < this.init_startKeyValue.length; i++)
                         required_cols.set(i);
@@ -307,6 +313,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 // FormatableBitSet equals requires the two FormatableBitSets to be of same
                 // length.
                 required_cols.grow(init_scanColumnList.size());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
 
                 if (!required_cols_and_scan_list.equals(required_cols))
                 {
@@ -335,6 +342,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      **/
     protected void positionAtStartForForwardScan(
     BTreeRowPosition    pos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         boolean         exact;
@@ -359,6 +367,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             // Find the starting page and row slot, must start at root and
             // search either for leftmost leaf, or search for specific key.
             ControlRow root = ControlRow.get(this, BTree.ROOTPAGEID); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             // include search of tree in page visited stats.
             stat_numpages_visited += root.getLevel() + 1;
@@ -432,6 +442,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             {
                 latch_released = 
                     !this.getLockingPolicy().lockScanRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
                         this, pos,
                         init_lock_fetch_desc,
                         pos.current_lock_template,
@@ -596,6 +607,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     }
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     Position scan at "start" position.
     <p>
     Positions the scan to the slot just before the first record to be returned
@@ -872,6 +884,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             throw StandardException.newException(
                 SQLState.BTREE_SCAN_NOT_POSITIONED, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 this.scan_state);
         }
 
@@ -879,6 +892,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         if (SanityManager.DEBUG)
         {
             if (pos.current_positionKey == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
                 SanityManager.THROWASSERT(
                     "pos.current_rh  = (" + pos.current_rh + "), " +
                     "pos.current_positionKey = (" + 
@@ -889,6 +903,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             throw StandardException.newException(
                     SQLState.BTREE_SCAN_INTERNAL_ERROR, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     (pos.current_rh == null), 
                     (pos.current_positionKey == null));
         }
@@ -934,6 +949,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
         pos.current_leaf = (LeafControlRow)
                     ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
         if (!sp.resultExact && !missing_row_for_key_ok)
         {
@@ -965,6 +981,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     Initialize the scan for use.
     <p>
     Any changes to this method may have to be reflected in close as well.
@@ -982,7 +999,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     int                             open_mode,
     int                             lock_level,
     BTreeLockingPolicy              btree_locking_policy,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     FormatableBitSet                scanColumnList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     DataValueDescriptor[]           startKeyValue,
     int                             startSearchOperator,
     Qualifier                       qualifier[][],
@@ -1007,12 +1026,14 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                  ContainerHandle.MODE_FORUPDATE);
 
         // Keep track of whether this scan should use update locks.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         this.init_useUpdateLocks = 
             ((open_mode &
                 ContainerHandle.MODE_USE_UPDATE_LOCKS) != 0);
 
         this.init_hold                  = hold;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         this.init_template              = 
             runtime_mem.get_template(getRawTran());
 
@@ -1042,6 +1063,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         
         if (SanityManager.DEBUG)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             SanityManager.ASSERT(
                 TemplateRow.checkColumnTypes(
                     getRawTran().getDataValueFactory(),
@@ -1098,6 +1120,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     @exception  StandardException  Standard exception policy.
     **/
     public boolean delete()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         boolean     ret_val      = false;
@@ -1137,6 +1160,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 // the lock to X.
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
                         this, scan_position,
                         init_lock_fetch_desc,
                         scan_position.current_lock_template,
@@ -1169,6 +1193,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 }
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3216
             if (SanityManager.DEBUG) 
             {
                 // DERBY-2197: Assume no row locking here. If locking policy
@@ -1181,6 +1206,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             }
 
             if (scan_position.current_leaf.page.isDeletedAtSlot(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3216
                     scan_position.current_slot)) 
             {
                 ret_val = false;
@@ -1204,6 +1230,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             // that can be reclaimed.
 
             if (scan_position.current_leaf.page.nonDeletedRecordCount() == 1 &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-3216
                 !(scan_position.current_leaf.getIsRoot() && 
                  scan_position.current_leaf.getLevel() == 0)) 
             {
@@ -1356,6 +1383,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
                 throw StandardException.newException(
                         SQLState.AM_RECORD_NOT_FOUND,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         err_containerid,
                         scan_position.current_rh.getPageNumber(),
                         scan_position.current_rh.getId());
@@ -1371,6 +1401,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             scan_position.current_rh = 
                 scan_position.current_leaf.page.fetchFromSlot(
                 (RecordHandle) null, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
                 scan_position.current_slot, row, 
                 qualify ? init_fetchDesc : null,
                 true);
@@ -1399,6 +1430,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         return;
     }
 
@@ -1407,11 +1439,13 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      */
     public boolean isHeldAfterCommit() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
         return (scan_state == SCAN_HOLD_INIT ||
                 scan_state == SCAN_HOLD_INPROGRESS);
     }
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
     Fetch the row at the current position of the Scan.
     @see ScanController#fetch
 
@@ -1431,6 +1465,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * @exception  StandardException  Standard exception policy.
      */
     public void fetchWithoutQualify(DataValueDescriptor[] row)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         fetch(row, false);
@@ -1450,6 +1485,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * @exception  StandardException  Standard exception policy.
      **/
     public ScanInfo getScanInfo()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         return(new BTreeScanInfo(this));
@@ -1468,6 +1504,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     @exception StandardException Standard exception policy.
     **/
     public boolean isCurrentPositionDeleted()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         boolean     ret_val;
@@ -1513,6 +1552,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         return(ret_val);
     }
 
@@ -1533,6 +1573,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * Not implemented for this class
      */
     public boolean positionAtRowLocation (RowLocation rLoc) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
         throws StandardException 
     {
         throw StandardException.newException(
@@ -1546,9 +1587,11 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     @exception  StandardException  Standard exception policy.
     **/
     public boolean next()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         // Turn this call into a group fetch of a 1 element group.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         fetchNext_one_slot_array[0] = runtime_mem.get_scratch_row(getRawTran());
         boolean ret_val = 
             fetchRows(
@@ -1567,6 +1610,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     Fetch the row at the next position of the Scan.
 
     If there is a valid next position in the scan then
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     the value in the template storable row is replaced
     with the value of the row at the current scan
     position.  The columns of the template row must
@@ -1583,6 +1627,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
     @param row The template row into which the value
     of the next position in the scan is to be stored.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
 
     @return True if there is a next position in the scan,
     false if there isn't.
@@ -1689,6 +1734,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     }
 
     public int fetchNextGroup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     DataValueDescriptor[][] row_array,
     RowLocation[]           old_rowloc_array,
     RowLocation[]           new_rowloc_array)
@@ -1836,6 +1882,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     the original openScan.  The previous template row continues to be used.
 
     @param startKeyValue  An indexable row which holds a
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     (partial) key value which, in combination with the
     startSearchOperator, defines the starting position of
     the scan.  If null, the starting position of the scan
@@ -1941,6 +1988,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     first next operation is attempted.
 
     @param qualifier An array of qualifiers which, applied
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     to each key, restrict the rows returned by the scan.  Rows
     for which any one of the qualifiers returns false are not
     returned by the scan. If null, all rows are returned.
@@ -1961,6 +2009,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     */
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     Fetch the location of the current position in the scan.
     @see ScanController#fetchLocation
 
@@ -2019,6 +2068,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             positionAtDoneScan(scan_position);
 
             super.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
 
             // null out so that these object's can get GC'd earlier.
             this.init_rawtran       = null;

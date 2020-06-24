@@ -40,6 +40,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  */
 
 class DRDAXAProtocol {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
     private DRDAConnThread connThread;
     private DDMReader reader;
@@ -49,6 +50,7 @@ class DRDAXAProtocol {
     private Xid xid;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     DRDAXAProtocol(DRDAConnThread connThread)
     {
         this.connThread = connThread;
@@ -75,6 +77,7 @@ class DRDAXAProtocol {
         boolean readXAFlags = false;
         Xid xid = null;
         // The value -1 means no value of timeout received
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
         long xaTimeout = -1;
         boolean readXATimeout = false;
 
@@ -85,12 +88,14 @@ class DRDAXAProtocol {
             {
                 case CodePoint.XID:
                     xid = parseXID();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     break;
                 case CodePoint.XAFLAGS:
                     xaflags = parseXAFlags();
                     readXAFlags =true;
                     break;
                 case CodePoint.TIMEOUT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
                     xaTimeout = parseXATimeout();
                     readXATimeout = true;
                     break;
@@ -127,6 +132,7 @@ class DRDAXAProtocol {
             case CodePoint.SYNCTYPE_NEW_UOW:
                 // new unit of work for XA
                 // formatId -1 is just a local connection
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
                 startXATransaction(xid, xaflags, xaTimeout);
                 break;
             case CodePoint.SYNCTYPE_END_UOW:
@@ -140,6 +146,7 @@ class DRDAXAProtocol {
             case CodePoint.SYNCTYPE_MIGRATE:
                 // migrate to resync server sync type
                 connThread.codePointNotSupported(codePoint);                
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 break;
             case CodePoint.SYNCTYPE_REQ_COMMIT:
                 // request to commit sync type
@@ -232,6 +239,7 @@ class DRDAXAProtocol {
      */
     private long parseXATimeout() throws DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
         return reader.readNetworkLong();
     }
 
@@ -268,6 +276,7 @@ class DRDAXAProtocol {
                     // In JDBC spec the value 0 means the resource
                     // manager's default value.
                     xaResource.setTransactionTimeout(Integer.MAX_VALUE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 } else if (xaTimeout == -1) {
                     // The timeout value was not specified, so use the default
                     // timeout - see javadoc for XAResource.setTransactionTimeout
@@ -475,6 +484,7 @@ class DRDAXAProtocol {
         int xaRetVal;
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-960
             xaRetVal = xaResource.prepare(xid);
             if (SanityManager.DEBUG)
             {
@@ -511,6 +521,9 @@ class DRDAXAProtocol {
             xaRetVal = processXAException(xe);
         }
         writeSYNCCRD(CodePoint.SYNCTYPE_REQ_FORGET,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                      xaRetVal, null);
     }
 
@@ -714,6 +727,7 @@ class DRDAXAProtocol {
      * @return The ResourceAdapter instance for
      *         the underlying database.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
     ResourceAdapter getResourceAdapter()
     {
         return ((XADatabase)connThread.getDatabase()).getResourceAdapter();
@@ -728,6 +742,7 @@ class DRDAXAProtocol {
     {
         if (xid != null) {
             boolean local  = ( xid.getFormatId() == -1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
             if (!local) {
                 try {
                     XAXactId xid_im = new XAXactId(xid);

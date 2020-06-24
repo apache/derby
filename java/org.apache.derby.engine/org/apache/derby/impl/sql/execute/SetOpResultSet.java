@@ -43,6 +43,7 @@ import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
  * the INTERSECT or EXCEPT of the two input result sets. This also projects out the tag, the last column
  * of the input rows.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class SetOpResultSet extends NoPutResultSetImpl
     implements CursorResultSet
 {
@@ -104,9 +105,11 @@ class SetOpResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "SetOpResultSet already open");
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
 
         leftSource.openCore();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4330
         try {
             rightSource.openCore();
             rightInputRow = rightSource.getNextRowCore();
@@ -135,6 +138,7 @@ class SetOpResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -144,6 +148,7 @@ class SetOpResultSet extends NoPutResultSetImpl
             while( (leftInputRow = leftSource.getNextRowCore()) != null)
             {
                 rowsSeenLeft++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
 
                 DataValueDescriptor[] leftColumns = leftInputRow.getRowArray();
                 if( !all)
@@ -154,6 +159,7 @@ class SetOpResultSet extends NoPutResultSetImpl
                 }
                 int compare = 0;
                 // Advance the right until there are no more right rows or leftRow <= rightRow
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
                 while ( rightInputRow != null && (compare = compare(leftColumns, rightInputRow.getRowArray())) > 0)
                 {
                     rightInputRow = rightSource.getNextRowCore();
@@ -175,6 +181,7 @@ class SetOpResultSet extends NoPutResultSetImpl
                     // The left and right rows are the same
                     if( SanityManager.DEBUG)
                         SanityManager.ASSERT( rightInputRow != null && compare == 0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
                                               "Intersect/Except execution has gotten confused.");
                     if ( all)
                     {
@@ -199,6 +206,7 @@ class SetOpResultSet extends NoPutResultSetImpl
 
         setCurrentRow(leftInputRow);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
         if (currentRow != null) {
            rowsReturned++;
         }
@@ -210,6 +218,7 @@ class SetOpResultSet extends NoPutResultSetImpl
     private void advanceRightPastDuplicates( DataValueDescriptor[] leftColumns)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
         while ((rightInputRow = rightSource.getNextRowCore()) != null)
         {
             rowsSeenRight++;
@@ -227,6 +236,7 @@ class SetOpResultSet extends NoPutResultSetImpl
             int colIdx = intermediateOrderByColumns[i];
             if( leftCols[colIdx].compare( Orderable.ORDER_OP_LESSTHAN,
                                           rightCols[colIdx],
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
                                           true, // nulls should be ordered
                                           intermediateOrderByNullsLow[i],
                                           false))
@@ -283,6 +293,7 @@ class SetOpResultSet extends NoPutResultSetImpl
 		else
 			if (SanityManager.DEBUG)
 				SanityManager.DEBUG("CloseRepeatInfo","Close of SetOpResultSet repeated");
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
 
 		closeTime += getElapsedMillis(beginTime);
 	} // end of close
@@ -342,6 +353,7 @@ class SetOpResultSet extends NoPutResultSetImpl
      */
     public int getOpType()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
         return opType;
     }
 

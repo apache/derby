@@ -48,6 +48,7 @@ public class DestroySlaveDB extends BaseJDBCTestCase
         System.out.println("**** DestroySlaveDB.suite()");
         System.out.println("'DestroySlaveDB' can not be run outside the 'ReplicationRun' framework.");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DestroySlaveDB");
         
         String masterHostName = System.getProperty("test.serverHost", "localhost");

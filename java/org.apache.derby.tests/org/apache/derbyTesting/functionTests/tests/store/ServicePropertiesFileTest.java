@@ -202,12 +202,14 @@ public class ServicePropertiesFileTest
         String db = "spfTestSPFCWB";
         copyDbAs(db);
         createSPFBackup(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
         removeEOFToken(spf, SPF_ENCODING);
         assertPresence(true, true);
 
         // Recover and assert
         connectThenShutdown(db);
         assertNormalPresence();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
         assertEOFToken(spf,SPF_ENCODING);
     }
 
@@ -269,6 +271,7 @@ public class ServicePropertiesFileTest
      */
     private void assertEOFToken(File file, String encoding)
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
         BufferedReader in = new BufferedReader(new InputStreamReader(
                 PrivilegedFileOpsForTests.getFileInputStream(file), encoding));
         String prev = null;
@@ -278,6 +281,7 @@ public class ServicePropertiesFileTest
         }
         in.close();
         assertNotNull("last line is null - empty file?", prev);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
         assertTrue("prev:" + prev +": does not equal " + END_TOKEN, 
                 prev.startsWith(END_TOKEN));
     }
@@ -324,6 +328,7 @@ public class ServicePropertiesFileTest
     private int grepForToken(String token, File file)
             throws IOException {
         int matchingLines = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
         BufferedReader in = new BufferedReader(new InputStreamReader(
                 PrivilegedFileOpsForTests.getFileInputStream(file),
                 SPF_ENCODING));    

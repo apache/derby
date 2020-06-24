@@ -131,6 +131,7 @@ public class ColumnInfo implements Formatable
 					   UUID							oldDefaultUUID,
 					   int							action,
 					   long							autoincStart,
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 					   long							autoincInc,
 					   boolean						autoincCycle,
 					   long							autoinc_create_or_modify_Start_Increment)
@@ -139,13 +140,20 @@ public class ColumnInfo implements Formatable
 		this.dataType = dataType;
 		this.defaultValue = defaultValue;
 		this.defaultInfo = defaultInfo;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.providers = ArrayUtil.copy(providers);
 		this.newDefaultUUID = newDefaultUUID;
 		this.oldDefaultUUID = oldDefaultUUID;
 		this.action = action;
 		this.autoincStart = autoincStart;
 		this.autoincInc = autoincInc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 		this.autoincCycle = autoincCycle;
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 		this.autoinc_create_or_modify_Start_Increment = autoinc_create_or_modify_Start_Increment;
 	}
 
@@ -187,6 +195,7 @@ public class ColumnInfo implements Formatable
         FormatableArrayHolder   fah = (FormatableArrayHolder) fh.get( "providers" );
         if ( fah != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
             providers = fah.getArray(ProviderInfo[].class);
         }
 	}

@@ -29,6 +29,7 @@ import org.apache.derby.client.am.SqlException;
 
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetResultSet extends ClientResultSet {
     // Alias for (NetConnection) super.statement.connection
     private final NetConnection netConnection_;
@@ -146,10 +147,12 @@ class NetResultSet extends ClientResultSet {
         //    the end of data is returned or when an error occurs.  all successfully fetched rows
         //    are returned to the user.  the specific error is not returned until the next fetch.
         while (rowsReceivedInCurrentRowset_ != fetchSize_ &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
                 !netCursor_.allRowsReceivedFromServer() && !isRowsetCursor_ &&
                 sensitivity_ != sensitivity_sensitive_dynamic__ &&
                 sensitivity_ != sensitivity_sensitive_static__) {
             flowFetchToCompleteRowset();
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
             while (netCursor_.calculateColumnOffsetsForRow_(row, true)) {
                 rowsReceivedInCurrentRowset_++;
                 row++;
@@ -172,6 +175,7 @@ class NetResultSet extends ClientResultSet {
         try {
             agent_.beginWriteChain(statement_);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             writeScrollableFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     fetchSize_ - rowsReceivedInCurrentRowset_,
                     scrollOrientation_relative__,
@@ -189,6 +193,7 @@ class NetResultSet extends ClientResultSet {
 
     // ------------------------------- abstract box car methods --------------------------------------
     public void writeFetch_(Section section) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY && fetchSize_ != 0 &&
                 rowsYetToBeReceivedForRowset_ > 0) {
             netAgent_.resultSetRequest_.writeFetch(this,
@@ -255,6 +260,7 @@ class NetResultSet extends ClientResultSet {
      * @exception SqlException
      */
     protected void preClose_() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (netCursor_.getQryclsimpEnabled()) {
             netCursor_.scanDataBufferForEndOfData();
         }
@@ -264,9 +270,11 @@ class NetResultSet extends ClientResultSet {
     // common can we make this the common layer fetch method.  Called by the
     // read/skip Fdoca bytes methods in the net whenever data reads exhaust the
     // internal buffer used by this reply.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void flowFetch() throws DisconnectException, SqlException {
         agent_.beginWriteChain(statement_);
         writeFetch_((generatedSection_ == null) ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                 statement_.getSection() :
                 generatedSection_);
         agent_.flow(statement_);

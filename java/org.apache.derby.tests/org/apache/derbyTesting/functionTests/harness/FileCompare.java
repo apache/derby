@@ -87,6 +87,7 @@ public class FileCompare
 	  try	
 	  {
         Class<?> c = Class.forName(NetServer.getDriverName(framework));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Object o = c.getConstructor().newInstance();
         driverVersionMajor = (Integer) c.getMethod("getMajorVersion").invoke(o);
         driverVersionMinor = (Integer) c.getMethod("getMinorVersion").invoke(o);
@@ -112,6 +113,7 @@ public class FileCompare
             topdir = canondir;
         else {
 			// if this is using product jars, use product_master first
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             String resourceName = "/" + ProductGenusNames.DBMS_INFO;
             InputStream is;
             if (JVMInfo.isModuleAware())
@@ -189,6 +191,7 @@ public class FileCompare
         // If the master is still not found, create an empty master
         if ( is == null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-689
 			is = new ByteArrayInputStream( new byte[] {} );
         }
 		// compress blanks in output columns to make up for column width differences
@@ -207,6 +210,7 @@ public class FileCompare
 		        System.out.println("SED Error: " + cfe.getMessage());
 		    }
 		}	
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         else 
         {
             // read in in fixed format, but write out relying on default encoding
@@ -394,6 +398,7 @@ public class FileCompare
 	// the normal ibm13 search pattern: ibm13 then jdk13.
 
 	String newprefix;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
 	if ((jvmName.startsWith("j9") || (serverJvm != null && serverJvm.startsWith("j9")))
             && (!jvmName.startsWith("j9dee")))
 	{

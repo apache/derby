@@ -70,6 +70,7 @@ public class VirtualRandomAccessFile
     public VirtualRandomAccessFile(DataStoreEntry entry, boolean readOnly)
             throws FileNotFoundException {
         this.entry = entry;
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         _readOnly = readOnly;
         bIn = entry.getInputStream();
         bIn.setPosition(0L);
@@ -87,6 +88,7 @@ public class VirtualRandomAccessFile
 
     public  VirtualRandomAccessFile clone()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         try {
             return new VirtualRandomAccessFile( entry, _readOnly );
         }

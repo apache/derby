@@ -984,6 +984,7 @@ public class Typdef implements Cloneable {
     }
 
     // analyze exception handling some more here
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     Charset getCcsidSbcEncoding() throws DisconnectException {
         if (ccsidSbcEncoding_ == null) {
             ccsidSbcEncoding_ = UTF8ENCODING;
@@ -1028,6 +1029,7 @@ public class Typdef implements Cloneable {
     }
 
     // analyze exception handling some more here
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     Charset getCcsidMbcEncoding() throws DisconnectException {
         if (ccsidMbcEncoding_ == null) {
             ccsidMbcEncoding_ = UTF8ENCODING;
@@ -1038,6 +1040,7 @@ public class Typdef implements Cloneable {
     public Object clone() {
         try {
             return super.clone();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (CloneNotSupportedException e) {
             return null; // this shouldn't happen since we implement the cloneable interface
         }
@@ -1055,6 +1058,7 @@ public class Typdef implements Cloneable {
         }
 
         if (sda == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
             netAgent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(netAgent_,
                     new ClientMessageId(SQLState.NET_INVALID_FDOCA_ID)));
@@ -1069,6 +1073,7 @@ public class Typdef implements Cloneable {
         //    The typdef object should store the java encoding,
         switch (sda.ccsid_) {
         case CCSIDSBC:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
             netCursor.charset_[columnIndex] = getCcsidSbcEncoding();
             netCursor.ccsid_[columnIndex] = this.ccsidSbc_;
             break;
@@ -1102,6 +1107,7 @@ public class Typdef implements Cloneable {
             // otherwise the sda.ccsid_ is a placeholder:
             //  CCSIDMBC, CCSIDDDBC, CCSIDSBC to indicate that
             // the actual ccsid is the connection's ccsid (in protocol lingo the connection's typdef ccsid).
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
             netCursor.charset_[columnIndex] = UTF8ENCODING;
             netCursor.ccsid_[columnIndex] = sda.ccsid_;
             break;

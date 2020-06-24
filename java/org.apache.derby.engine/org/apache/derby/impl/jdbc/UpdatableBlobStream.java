@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.io.InputStreamUtil;
  * it will update itself to point to LOBInputStream and reflect changes made to
  * the Blob after the current position of the stream.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2830
 class UpdatableBlobStream extends InputStream {
     /**
      * Flag to check if it is using stream from LOBStreamControl or from DVD.
@@ -61,6 +62,7 @@ class UpdatableBlobStream extends InputStream {
      * @param is InputStream this class is going to use internally.
      * @throws IOException if an I/O error occurs
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2890
     UpdatableBlobStream (EmbedBlob blob, InputStream is)
             throws IOException {
         // The entire Blob has been requested, hence set length to infinity (or
@@ -81,15 +83,19 @@ class UpdatableBlobStream extends InputStream {
      *            has to be restricted.
      * @throws IOException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2830
     UpdatableBlobStream (EmbedBlob blob, InputStream is, long pos, long len) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2890
             throws IOException {
         this.blob = blob;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2711
         stream = is;
         maxPos = pos + len;
         
         //Skip to the requested position
         //inside the stream.
         if (pos > 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2730
             skip(pos);
         }
     }
@@ -109,8 +115,10 @@ class UpdatableBlobStream extends InputStream {
             try {
                 stream = blob.getBinaryStream();
             } catch (SQLException ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
                 throw Util.newIOException(ex);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
             InputStreamUtil.skipFully(stream, pos);
         }
     }
@@ -134,10 +142,12 @@ class UpdatableBlobStream extends InputStream {
      * @see InputStream#read
      */
     public int read() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2711
         updateIfRequired();
         
         //If the current position inside the stream has exceeded maxPos, the
         //read should return -1 signifying end of stream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2890
         if (pos >= maxPos) {
             return -1;
         }
@@ -174,6 +184,7 @@ class UpdatableBlobStream extends InputStream {
      */
     public int read(byte[] b, int off, int len) throws IOException {
         updateIfRequired();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4061
         long remaining = maxPos - pos;
         // Return EOF if the maximum allowed position has been reached,
         // and we're trying to read at least one byte.
@@ -207,6 +218,7 @@ class UpdatableBlobStream extends InputStream {
      * @see java.io.InputStream#read(byte[])
      */
     public int read(byte[] b) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4061
         return read(b, 0, b.length);
     }
 
@@ -229,6 +241,7 @@ class UpdatableBlobStream extends InputStream {
      * @see java.io.InputStream#skip(long)
      */
     public long skip(long n) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2711
         updateIfRequired();
         long retValue = stream.skip(n);
         if (retValue > 0)

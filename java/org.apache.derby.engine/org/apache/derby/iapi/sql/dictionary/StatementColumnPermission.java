@@ -93,9 +93,11 @@ public class StatementColumnPermission extends StatementTablePermission
 					   Activation activation)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		DataDictionary dd = lcc.getDataDictionary();
 		ExecPreparedStatement ps = activation.getPreparedStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         if (hasPermissionOnTable(lcc, activation, forGrant, ps)) {
 			return;
 		}
@@ -111,6 +113,7 @@ public class StatementColumnPermission extends StatementTablePermission
 													permittedColumns);
 			permittedColumns = addPermittedColumns( dd,
 													false /* non-grantable permissions */,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                                                     currentUserId,
 													permittedColumns);
 		}
@@ -120,6 +123,7 @@ public class StatementColumnPermission extends StatementTablePermission
 												permittedColumns);
 		permittedColumns = addPermittedColumns( dd,
 												true /* grantable permissions */,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                                                 currentUserId,
 												permittedColumns);
 		
@@ -135,7 +139,9 @@ public class StatementColumnPermission extends StatementTablePermission
 			return;
 
 		FormatableBitSet unresolvedColumns = (FormatableBitSet)columns.clone();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		for (int i = unresolvedColumns.anySetBit();
 			 i >= 0;
 			 i = unresolvedColumns.anySetBit(i)) {
@@ -163,6 +169,7 @@ public class StatementColumnPermission extends StatementTablePermission
 			// used.
 			String dbo = dd.getAuthorizationDatabaseOwner();
             rd = dd.getRoleGrantDescriptor(role, currentUserId, dbo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 			if (rd == null) {
 				rd = dd.getRoleGrantDescriptor
@@ -255,6 +262,8 @@ public class StatementColumnPermission extends StatementTablePermission
 					(forGrant
 					 ? SQLState.AUTH_NO_COLUMN_PERMISSION_FOR_GRANT
 					 : SQLState.AUTH_NO_COLUMN_PERMISSION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                     currentUserId,
 					getPrivName(),
 					cd.getColumnName(),
@@ -271,6 +280,7 @@ public class StatementColumnPermission extends StatementTablePermission
 			// another role has been set), we are able to
 			// invalidate the ps or activation (the latter is used
 			// if the current role changes).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 			DependencyManager dm = dd.getDependencyManager();
 			RoleGrantDescriptor rgd =
 				dd.getRoleDefinitionDescriptor(role);
@@ -307,6 +317,7 @@ public class StatementColumnPermission extends StatementTablePermission
 	 * @see StatementPermission#getPermissionDescriptor
 	 */
 	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 	throws StandardException
 	{
 		//If table permission found for authorizationid, then simply return that
@@ -379,6 +390,7 @@ public class StatementColumnPermission extends StatementTablePermission
 	 * @return false if the current role is required
 	 */
 	public boolean allColumnsCoveredByUserOrPUBLIC(String authid,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 												   DataDictionary dd)
 			throws StandardException {
 

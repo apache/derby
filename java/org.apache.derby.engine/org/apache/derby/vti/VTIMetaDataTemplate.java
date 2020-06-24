@@ -303,6 +303,7 @@ public abstract class VTIMetaDataTemplate implements ResultSetMetaData {
      */
     protected SQLException    notImplemented( String methodName )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return new SQLFeatureNotSupportedException( "Unimplemented method: " + methodName );
     }
 }

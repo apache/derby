@@ -74,6 +74,7 @@ public class jdk19 extends jvm {
             sb.append(mx);
         }
         if (classpath!=null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             if (JVMInfo.isModuleAware())
             {
                  sb.append(" -p ");

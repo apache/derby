@@ -172,6 +172,7 @@ public class NetConfiguration {
         // mm = minor version
         // x = protocol MaintenanceVersion
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
         String prdId = DRDAConstants.DERBY_DRDA_CLIENT_ID;
         if (majorVersion < 10) {
             prdId += "0";

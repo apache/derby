@@ -93,6 +93,7 @@ public class GenericConstantActionFactory
      *  @param initiallyDeferred   ncodes IMMEDIATE (false), DEFERRED (true)
 	 */
     public  ConstantAction getSetConstraintsConstantAction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             List<TableName> constraints,
             boolean         initiallyDeferred) {
         return new SetConstraintsConstantAction(constraints, initiallyDeferred);
@@ -202,6 +203,7 @@ public class GenericConstantActionFactory
 		ProviderInfo[]		providerInfo
 	)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return new CreateConstraintConstantAction(
                 constraintName,
                 constraintType,
@@ -265,12 +267,16 @@ public class GenericConstantActionFactory
 		Properties		properties
     )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return new CreateIndexConstantAction(
             forCreateTable,
             unique,
             uniqueWithDuplicateNulls,
             hasDeferrableChecking,
             initiallyDeferred,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             constraintType,
             indexType,
             schemaName,
@@ -327,6 +333,7 @@ public class GenericConstantActionFactory
 	 */
 	public	ConstantAction	getCreateRoleConstantAction(String roleName)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		return new CreateRoleConstantAction(roleName);
 	}
 
@@ -589,6 +596,7 @@ public class GenericConstantActionFactory
      */
     public  ConstraintConstantAction    getAlterConstraintConstantAction
     (
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         String                  constraintName,
         String                  constraintSchemaName,
         boolean[]               characteristics,
@@ -657,6 +665,7 @@ public class GenericConstantActionFactory
 	 */
 	public ConstantAction getDropRoleConstantAction(String roleName)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		return new DropRoleConstantAction(roleName);
 	}
 
@@ -831,6 +840,7 @@ public class GenericConstantActionFactory
 										indexSCOCIs,
 										indexNames,
 										deferred,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                         hasDeferrableChecks,
 										targetProperties,
 										tableID,
@@ -945,6 +955,9 @@ public class GenericConstantActionFactory
 	 *	@param positionedUpdate		is this a positioned update
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 *  @param autoincRowLocation array of row locations into syscolumns for
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 	                              autoincrement columns
 	 *  @param underMerge   True if this is an action of a MERGE statement.
 	 *  @param identitySequenceUUIDString   For 10.11 and higher, the handle on the sequence for the identity column
@@ -953,6 +966,7 @@ public class GenericConstantActionFactory
 	 *  @exception StandardException Thrown on failure
 	 */
 	public	UpdateConstantAction	getUpdateConstantAction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 TableDescriptor     targetTableDesc,
 								StaticCompiledOpenConglomInfo heapSCOCI,
 								IndexRowGenerator[]	irgs,
@@ -968,12 +982,16 @@ public class GenericConstantActionFactory
 								Object         		updateToken,
 								FKInfo[]			fkInfo,
 								TriggerInfo			triggerInfo,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 FormatableBitSet    baseRowReadList,
 								int[]				baseRowReadMap,
 								int[]				streamStorableHeapColIds,
 								int					numColumns,
 								boolean				positionedUpdate,
 								boolean				singleRowSource,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 								RowLocation[]		autoincRowLocation,
 								boolean				underMerge,
 								String		identitySequenceUUIDString
@@ -981,6 +999,7 @@ public class GenericConstantActionFactory
 			throws StandardException
 	{
 		return new UpdateConstantAction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                         targetTableDesc,
 										heapSCOCI,
 										irgs,
@@ -999,6 +1018,9 @@ public class GenericConstantActionFactory
 										numColumns,
 										positionedUpdate,
 										singleRowSource,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 										autoincRowLocation,
 										underMerge,
 										identitySequenceUUIDString
@@ -1008,6 +1030,7 @@ public class GenericConstantActionFactory
 	static protected Authorizer getAuthorizer()
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			getContext(LanguageConnectionContext.CONTEXT_ID);
 		return lcc.getAuthorizer();
 	}
@@ -1116,6 +1139,7 @@ public class GenericConstantActionFactory
 	 * @param grantees The list of grantees
 	 */
 	public ConstantAction getGrantConstantAction( PrivilegeInfo privileges,
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 								List grantees)
 	{
 		return new GrantRevokeConstantAction( true, privileges, grantees);
@@ -1130,6 +1154,7 @@ public class GenericConstantActionFactory
 	 *                  which roles(s) are to be granted
 	 */
 	public ConstantAction getGrantRoleConstantAction(List roleNames,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 													 List grantees)
 	{
 		return new GrantRoleConstantAction(roleNames, grantees);
@@ -1157,6 +1182,7 @@ public class GenericConstantActionFactory
 	 *                  roles are to be revoked
 	 */
 	public ConstantAction getRevokeRoleConstantAction(List roleNames,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 													  List grantees)
 	{
 		return new RevokeRoleConstantAction(roleNames, grantees);
@@ -1205,6 +1231,7 @@ public class GenericConstantActionFactory
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

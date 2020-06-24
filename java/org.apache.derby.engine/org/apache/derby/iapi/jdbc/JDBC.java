@@ -58,6 +58,7 @@ public final class JDBC implements JDBCMBean
     }
     
     public boolean acceptsURL(String url)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         throws SQLException
     {
         return driver.acceptsURL(url);

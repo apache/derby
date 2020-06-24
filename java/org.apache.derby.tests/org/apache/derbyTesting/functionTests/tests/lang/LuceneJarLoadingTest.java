@@ -125,6 +125,7 @@ public class LuceneJarLoadingTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             LuceneJarLoadingTest.class );
 
@@ -192,6 +193,7 @@ public class LuceneJarLoadingTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_002_apiPackage()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );

@@ -110,6 +110,7 @@ public interface Serviceable {
 		If it doesn't make any difference if this work is done on a the user thread
 		immediately or if it is performed by another thread asynchronously
 		later, then return false.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         @return true if this work shold happen immediately on the user thread
 	*/

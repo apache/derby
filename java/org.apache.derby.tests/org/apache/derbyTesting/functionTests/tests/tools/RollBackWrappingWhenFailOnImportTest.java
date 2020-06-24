@@ -42,6 +42,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class RollBackWrappingWhenFailOnImportTest extends BaseJDBCTestCase {
     class MockInternalDriver extends InternalDriver {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
         public class MockConnectionFailWhenRollBack extends EmbedConnection {
 
@@ -57,6 +58,7 @@ public class RollBackWrappingWhenFailOnImportTest extends BaseJDBCTestCase {
         public Connection connect( String url, Properties info, int loginTimeout ) {
             Connection conn = null;
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
                 conn = super.connect( url, info, loginTimeout );
             } catch (Exception e) {
                 //this exception is ignored for mocking
@@ -72,6 +74,7 @@ public class RollBackWrappingWhenFailOnImportTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("RollBackWrappingWhenFailOnImportTest");
         

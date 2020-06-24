@@ -23,6 +23,7 @@
 package org.apache.derby.impl.drda;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     This class defines DSS constants that are shared in the classes implementing
     the DRDA protocol.
 */

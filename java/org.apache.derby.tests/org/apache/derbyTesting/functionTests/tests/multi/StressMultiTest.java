@@ -109,6 +109,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
      * Default run is 10 threads for 10 minutes in each mode
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
         Properties dbprops = new Properties();
         dbprops.put("derby.locks.deadlockTimeout", "2");
         dbprops.put("derby.locks.waitTimeout", "3");
@@ -117,6 +118,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         sysprops.put("derby.storage.keepTransactionLog", "true");
         sysprops.put("derby.language.logStatementText", "true");
         sysprops.put("derby.infolog.append", "true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test embedded = new BaseTestSuite(StressMultiTest.class);
         embedded = new SystemPropertyTestSetup(embedded,sysprops,true);
         embedded = new DatabasePropertyTestSetup(embedded,dbprops);
@@ -129,6 +131,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         // with -Dderby.storage.keepTransactionLog=true if
         // you need to save the transaction log for client.
         Test client = TestConfiguration.clientServerDecorator(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                 new BaseTestSuite(StressMultiTest.class));
         client = newCleanDatabase(new DatabasePropertyTestSetup(client,dbprops));
         Test encrypted = new BaseTestSuite(StressMultiTest.class);
@@ -151,6 +154,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         suite.addTest(newCleanDatabase(unencrypted));
         //Encrypted uses a different database so it needs its own newCleanDatabase
         suite.addTest(Decorator.encryptedDatabase(new DatabasePropertyTestSetup(newCleanDatabase(encrypted),dbprops)));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
 
         return suite;
     }
@@ -181,6 +185,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         THREADS = threads;
         MINUTES = minutes;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
         Properties dbprops = new Properties();
         dbprops.put("derby.locks.deadlockTimeout", "2");
         dbprops.put("derby.locks.waitTimeout", "3");
@@ -190,6 +195,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         sysprops.put("derby.storage.keepTransactionLog", "true");
         sysprops.put("derby.language.logStatementText", "true");
         sysprops.put("derby.infolog.append", "true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test embedded = new BaseTestSuite(StressMultiTest.class);
         embedded = new SystemPropertyTestSetup(embedded,sysprops,true);
         embedded = new DatabasePropertyTestSetup(embedded,dbprops);
@@ -258,6 +264,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         this.getTestConfiguration().setVerbosity(DEBUG);
         
         // Let -Dderby.tests.ThreadsMinutes=TTxMM override.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4429
         String optThreadsMinutes = getSystemProperty(THREADSMINUTES);
         if ( optThreadsMinutes != null )
         { // Syntax: '99x22' meaning 99 threads 22 minutes.
@@ -294,6 +301,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
      */
     public void testStressMulti() throws Throwable{
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
         thrown = null;
         
         StressMultiRunnable[] tct = new StressMultiRunnable[THREADS];
@@ -304,6 +312,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         runTestCaseRunnables (tct);
         tct = null;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
         if (thrown!=null) throw thrown;
      }
 
@@ -343,6 +352,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
      * Handles any exceptions we get in the threads
      */
     private synchronized void handleException(final Throwable t, String message) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
             complete = true; //This stops the threads.
             if (thrown == null) {
                 if(t instanceof AssertionFailedError) {
@@ -375,8 +385,10 @@ public class StressMultiTest extends BaseJDBCTestCase {
             super();
             this.name = name;
             starttime = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
             runtime = minutes*60*1000; //convert minutes to ms
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
                 con = openDefaultConnection();
                 con.setAutoCommit(false);
             } catch (SQLException e) {
@@ -444,6 +456,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
             catch(Throwable t) {
                println("Exception in " + name + ": " + t);
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
                    handleException(t, name + " - " +
                        new Date(System.currentTimeMillis()).toString());
             }
@@ -477,6 +490,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
                         || e.equals("42Y55") || e.equals("42000")
                         || e.equals("40001") || e.equals("40XL1")
                         || e.equals("40XL2") || e.equals("42Y07")
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
                         || e.equals("42Y55")
                         ) {
                     //Ignore these
@@ -554,6 +568,8 @@ public class StressMultiTest extends BaseJDBCTestCase {
         private void select(String table) throws SQLException {
             Statement s = con.createStatement();
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
+//IC see: https://issues.apache.org/jira/browse/DERBY-3789
                 ResultSet rs = s.executeQuery("select * from " + table);
                 JDBC.assertDrainResults(rs);
             } catch (SQLException se) {

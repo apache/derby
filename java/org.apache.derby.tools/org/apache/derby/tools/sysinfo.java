@@ -58,6 +58,7 @@ public class sysinfo {
 
 	/**
 		The genus name for the Apache Derby code. Use this to determine the version of the
+//IC see: https://issues.apache.org/jira/browse/DERBY-982
 		Apache Derby embedded code in derby.jar.
 	*/
 	public static final String DBMS="engine";
@@ -82,6 +83,7 @@ public class sysinfo {
 
 	/**
 	 *	The genus name for the optional tools code. Use this to determine the version of 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		code in derbyoptionaltools.jar
 	 */
 	public static final String OPTIONALTOOLS="optionaltools";
@@ -100,6 +102,7 @@ public class sysinfo {
 	/**
 		gets the major version of the specified code library. 
 		@param genus	which library to get the version of. Valid inputs include
+//IC see: https://issues.apache.org/jira/browse/DERBY-982
 			DBMS, TOOLS, NET, CLIENT
 		@return the major version. Return -1 if the information is not found. 
     */		
@@ -127,6 +130,7 @@ public class sysinfo {
 	/**
 		gets the minor version of the specified code library. 
 		@param genus	which library to get the version of. Valid inputs include
+//IC see: https://issues.apache.org/jira/browse/DERBY-982
 			DBMS, TOOLS, NET, CLIENT.
 		@return the minor version. Return -1 if the information is not found. 
     */	
@@ -153,6 +157,7 @@ public class sysinfo {
 	/**
 		gets the build number for the specified library
 		@param genus which library to get the build number for. Valid inputs are
+//IC see: https://issues.apache.org/jira/browse/DERBY-982
 			DBMS, TOOLS, NET, CLIENT.
 		@return the build number, or ???? if the information is not found.
 	*/

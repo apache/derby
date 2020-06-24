@@ -62,6 +62,7 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                     new PrivilegedAction<Long>() {
                         public Long run() {
@@ -80,10 +81,12 @@ public class PrivilegedFileOpsForTests {
      * @see File#getAbsolutePath
      */
     public static String getAbsolutePath(final File file)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3905
             throws SecurityException {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                 new PrivilegedAction<String>() {
                     public String run() throws SecurityException {
@@ -101,6 +104,7 @@ public class PrivilegedFileOpsForTests {
      * @see File#getAbsolutePath
      */
     public static URI toURI(final File file)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throws SecurityException {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
@@ -124,6 +128,7 @@ public class PrivilegedFileOpsForTests {
      * @see File#createTempFile(String, String, File)
      */
     public static File createTempFile(final String prefix,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5824
                                       final String suffix,
                                       final File directory)
             throws IOException
@@ -156,6 +161,7 @@ public class PrivilegedFileOpsForTests {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<FileInputStream>() {
                 public FileInputStream run() throws FileNotFoundException {
@@ -180,6 +186,7 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                     new PrivilegedAction<Boolean>() {
                         public Boolean run() {
@@ -201,6 +208,7 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                     new PrivilegedAction<Boolean>() {
                         public Boolean run() {
@@ -246,6 +254,7 @@ public class PrivilegedFileOpsForTests {
      * @return {@code true} if successful, {@code false} otherwise
      */
     public static boolean setReadOnly(final File file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5824
         return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
             @Override
             public Boolean run() {
@@ -264,11 +273,13 @@ public class PrivilegedFileOpsForTests {
      *      or the path it is in, are missing
      */
     public static FileReader getFileReader(final File file)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2031
             throws FileNotFoundException {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<FileReader>() {
                         public FileReader run()
@@ -291,11 +302,13 @@ public class PrivilegedFileOpsForTests {
      *      or the path it is in, are missing
      */
     public static FileWriter getFileWriter(final File file)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
             throws IOException {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<FileWriter>() {
                         public FileWriter run()
@@ -315,6 +328,7 @@ public class PrivilegedFileOpsForTests {
      * @see java.io.File#listFiles()
      */
     public static File[] listFiles(File dir) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6865
         return AccessController.doPrivileged(
                 (PrivilegedAction<File[]>) () -> dir.listFiles());
     }
@@ -331,7 +345,9 @@ public class PrivilegedFileOpsForTests {
      * @throws SecurityException
      */    
     public static void copy(final File source, final File target) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3905
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
                 public Void run() throws IOException {
                     recursiveCopy(source,target);
@@ -355,6 +371,7 @@ public class PrivilegedFileOpsForTests {
      * @throws FileNotFoundException
      */
     private static void  recursiveCopy(File source, File target)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
             throws IOException {
     
         // Share the copy buffer between all copy operations.
@@ -375,6 +392,7 @@ public class PrivilegedFileOpsForTests {
                 if (entry.isDirectory()) {
                     copy(entry,targetEntry);
                 } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
                     copySingleFile(entry, targetEntry, buf);
                 }
             }
@@ -393,6 +411,7 @@ public class PrivilegedFileOpsForTests {
      */
     private static void copySingleFile (File source, File target, byte[] buf)
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
 
         // Create a default buffer if necessary.
         if (buf == null) {
@@ -406,6 +425,7 @@ public class PrivilegedFileOpsForTests {
         InputStream in = new FileInputStream(source);
         OutputStream out = new FileOutputStream(target);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         try {
             for (;;) {
                 int read = in.read(buf);
@@ -433,6 +453,7 @@ public class PrivilegedFileOpsForTests {
      */
     public static FileOutputStream getFileOutputStream(final File file)
             throws FileNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4199
         return getFileOutputStream(file, false);
     }
 
@@ -453,10 +474,12 @@ public class PrivilegedFileOpsForTests {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<FileOutputStream>() {
                         public FileOutputStream run()
                                 throws FileNotFoundException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4199
                             return new FileOutputStream(file, append);
                         }
                     });
@@ -477,11 +500,13 @@ public class PrivilegedFileOpsForTests {
      * @see org.apache.derbyTesting.junit.BaseTestCase#assertDirectoryDeleted
      */
     public static File[] persistentRecursiveDelete(final File dir)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
             throws FileNotFoundException {
         // Fail if the directory doesn't exist.
         if (!exists(dir)) {
             throw new FileNotFoundException(getAbsolutePath(dir));
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         final ArrayList<File> notDeleted = new ArrayList<File>();
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
@@ -546,6 +571,7 @@ public class PrivilegedFileOpsForTests {
      * @return A string with file information (human-readable).
      */
     public static String getFileInfo(final File f) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(new PrivilegedAction<String>() {
             public String run() {
                 if (!f.exists()) {

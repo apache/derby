@@ -26,6 +26,7 @@ import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.SqlException;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ResultSetReply extends StatementReply {
     private ResultSetReplyInterface materialResultSetReply_;
 
@@ -37,6 +38,7 @@ class ResultSetReply extends StatementReply {
         materialResultSetReply_ = materialResultSetReply;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readFetch(ResultSetCallbackInterface resultSet) throws SqlException {
         materialResultSetReply_.readFetch(resultSet);
         agent_.checkForChainBreakingException_();
@@ -55,6 +57,7 @@ class ResultSetReply extends StatementReply {
         agent_.checkForChainBreakingException_();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readCursorClose(ResultSetCallbackInterface resultSet)
             throws SqlException {
         materialResultSetReply_.readCursorClose(resultSet);

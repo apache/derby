@@ -52,6 +52,7 @@ public final class ActiveLock extends Lock {
 	/**
 		If true then this lock can be granted even if
 		it is not the first lock request on the wait queue.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		This can occur if the compatibility space already holds
 		a lock on the object.
 	*/
@@ -64,6 +65,7 @@ public final class ActiveLock extends Lock {
 		MT - single thread required
 	*/
 	protected ActiveLock(CompatibilitySpace space, Lockable ref,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 						 Object qualifier) {
 		super(space, ref, qualifier);
 	}
@@ -94,6 +96,7 @@ public final class ActiveLock extends Lock {
 	/**
 		Wait for a lock to be granted, returns when the lock is granted.
 		<P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		The sleep wakeup scheme depends on the two booleans wakeUpNow and potentiallyGranted.
 		  
 		MT - Single thread required - and assumed to be the thread requesting the lock.
@@ -119,6 +122,10 @@ public final class ActiveLock extends Lock {
 				}
 
 			} catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4769
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4967
+//IC see: https://issues.apache.org/jira/browse/DERBY-4967
                 wakeUpNow = Constants.WAITING_LOCK_INTERRUPTED;
 			}
 		}

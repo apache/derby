@@ -126,6 +126,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
      */
     public void testDerby4402AggregateInGroupBy() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4402
     	assertCompileError(
                 "42Y26", "select c1 from test group by sum(c3)");
     	assertCompileError(
@@ -292,6 +293,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "select (cast (c1 as char(2))), count(*) from test " +
                 " group by (cast (c1 as char(2)))",
                 new Object[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         {"1 ", 2}, 
                         {"2 ", 3}});
         
@@ -317,6 +319,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 new int[][] {{1,32}, {2, 21}});
         
         // Conditional Derby-2230.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2230
         verifyQueryResults(
                 "cond",
                 "select case when 1 = 1 then 'z' else substr('abc',1,1) end from test",
@@ -341,6 +344,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "concat+substr",
                 "select substr(c||v, 1, 4), count(*) from alltypes group by substr(c||v, 1, 4)",
                 new Object[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         {"dupl", 14},
                         {"good", 1}});
 
@@ -409,6 +413,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
         verifyQueryResults(
                 "nullif-Q2",
                 "select nullif(c1,c2) from t3 group by nullif(c1,c2)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 new Object[][] { { 5 }, 
                                  { null } });
 
@@ -549,6 +554,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
         Object[] arr = new Object[expected.length];
         for (int i = 0; i < expected.length; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             arr[i] = expected[i];
         }
         return arr;
@@ -616,6 +622,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("GROUP BY expression tests");
         suite.addTestSuite(GroupByExpressionTest.class);
         

@@ -163,6 +163,7 @@ public class Decimal {
             signum = 1;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
         if (precision <= 18) {
             // can be handled by long without overflow.
             long value = packedNybblesToLong(buffer, offset, 0, length * 2 - 1);
@@ -229,6 +230,8 @@ public class Decimal {
             magnitude[14] = (byte) (value[3] >>> 8);
             magnitude[15] = (byte) (value[3]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return new BigDecimal(new BigInteger(signum, magnitude), scale);
         } else {
             // throw an exception here if nibbles is greater than 31
@@ -315,6 +318,7 @@ public class Decimal {
 
         if (precision > 31) {
             // throw an exception here if nibbles is greater than 31
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throw new IllegalArgumentException(
                 msgutil.getTextMessage(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
@@ -330,6 +334,7 @@ public class Decimal {
             signum = 1;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
         if (precision - scale <= 18) {
             // Can be handled by long without overflow.
             // Compute the integer part only.
@@ -362,6 +367,7 @@ public class Decimal {
      */
     public static final int bigDecimalToPackedDecimalBytes(byte[] buffer,
                                                            int offset,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                            BigDecimal b,
                                                            int declaredPrecision,
                                                            int declaredScale)
@@ -381,6 +387,7 @@ public class Decimal {
         if (bigPrecision > 31) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 new SqlCode(-405), "packed decimal");
         }
 
@@ -392,6 +399,7 @@ public class Decimal {
             if (bigWholeIntegerLength > declaredWholeIntegerLength) {
                 throw new SqlException(null,
                     new ClientMessageId(SQLState.NUMERIC_OVERFLOW),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     new SqlCode(-413), b.toString(), "packed decimal");
             }
         }

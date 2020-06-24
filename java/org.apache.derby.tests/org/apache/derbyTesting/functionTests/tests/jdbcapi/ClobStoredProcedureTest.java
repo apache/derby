@@ -49,7 +49,9 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
      * @return the test suite created.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2427
         if (JDBC.vmSupportsJSR169()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "empty: client not supported on JSR169; procs use DriverMgr");
         }
@@ -133,6 +135,7 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
         //remember in setup a locator is already created
         //hence expected value is 2
         assertEquals("The locator values returned by " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3365
             "SYSIBM.CLOBCREATELOCATOR() are incorrect", 2, locator);
         cs.close();
     }
@@ -290,6 +293,7 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
         cs.setInt(1, 1);
         cs.setLong(2, 10L);
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2600
             cs.execute();
         }
         catch(SQLException sqle) {
@@ -324,6 +328,7 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
         cs.setLong(3, newStr.length());
         cs.setString(4, newStr);
         cs.execute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2600
 
         cs.close();
         cs  = prepareCall

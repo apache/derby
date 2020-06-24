@@ -118,6 +118,7 @@ public class BlobAccessTest
      * @return A suite of tests.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite = new BaseTestSuite("BlobAccessTest suite");
         if (!disableSmallBlobs) {
             int iters = 50;
@@ -136,6 +137,7 @@ public class BlobAccessTest
             int iters = 5;
             int reps = 3;
             println("Adding large Blob tests.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite largeSuite = new BaseTestSuite("Large Blob suite");
             largeSuite.addTest(new BlobAccessTest(
                     "testFetchLargeBlobs", iters, reps));
@@ -337,6 +339,7 @@ public class BlobAccessTest
      */
     public void testFetchLargeBlobPieceByPieceModified()
             throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3805
         fetchBlobPieceByPiece(true, FETCH_GETBYTES);
     }
 

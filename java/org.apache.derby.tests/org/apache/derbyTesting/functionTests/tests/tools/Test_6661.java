@@ -89,6 +89,8 @@ public class Test_6661 extends BaseJDBCTestCase
 	public static Test suite()
     {
         BaseTestSuite baseTest = new BaseTestSuite( Test_6661.class, "Test_6661" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6667
+//IC see: https://issues.apache.org/jira/browse/DERBY-6676
         Test        singleUseWrapper = TestConfiguration.singleUseDatabaseDecorator( baseTest );
         Test        cleanDatabaseWrapper = new CleanDatabaseTestSetup( singleUseWrapper );
         Test        supportFileWrapper = new SupportFilesSetup( cleanDatabaseWrapper );

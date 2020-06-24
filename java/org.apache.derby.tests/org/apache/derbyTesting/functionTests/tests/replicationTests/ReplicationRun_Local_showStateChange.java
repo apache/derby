@@ -57,6 +57,7 @@ public class ReplicationRun_Local_showStateChange extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_showStateChange Suite");
         
@@ -78,6 +79,7 @@ public class ReplicationRun_Local_showStateChange extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost, ALL_INTERFACES, masterServerPort,
                 masterDbSubPath);

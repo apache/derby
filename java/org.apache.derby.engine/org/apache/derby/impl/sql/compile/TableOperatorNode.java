@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.TableOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -66,6 +67,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TableOperatorNode(ResultSetNode  leftResultSet,
                       ResultSetNode  rightResultSet,
                       Properties     tableProperties,
@@ -89,7 +92,11 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList rcl)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4365
+//IC see: https://issues.apache.org/jira/browse/DERBY-3757
 	throws StandardException
 	{
 		leftResultSet.bindUntypedNullsToResultColumns(rcl);
@@ -264,6 +271,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -273,6 +282,7 @@ abstract class TableOperatorNode extends FromTable
 			if (leftResultSet != null)
 			{
 				printLabel(depth, "leftResultSet: ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				leftResultSet.treePrint(depth + 1);
 			}
 
@@ -289,6 +299,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @return ResultSetNode	The leftResultSet from this node.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode getLeftResultSet()
 	{
 		return leftResultSet;
@@ -299,6 +311,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @return ResultSetNode	The rightResultSet from this node.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode getRightResultSet()
 	{
 		return rightResultSet;
@@ -316,6 +330,8 @@ abstract class TableOperatorNode extends FromTable
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLeftmostResultSet(ResultSetNode newLeftResultSet)
 	{
 		if (leftResultSet instanceof TableOperatorNode)
@@ -334,6 +350,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @param level		The query block level for this FromTable.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLevel(int level)
 	{
 		super.setLevel(level);
@@ -354,6 +372,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @return	The exposed name for this table.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getExposedName()
 	{
 		return null;
@@ -369,6 +389,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @param nestedInParens	Whether or not this node is nested in parens.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setNestedInParens(boolean nestedInParens)
 	{
 	}
@@ -389,6 +411,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						  FromList fromListParam) 
 							throws StandardException
@@ -416,6 +440,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindVTITables(FromList fromListParam)
 							throws StandardException
 	{
@@ -433,6 +459,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 				throws StandardException
 	{
@@ -460,6 +488,8 @@ abstract class TableOperatorNode extends FromTable
 	 *									directly under a ResultColumn
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void rejectParameters() throws StandardException
 	{
 		leftResultSet.rejectParameters();
@@ -476,6 +506,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
@@ -505,6 +537,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumns(FromList fromListParam)
 					throws StandardException
 	{
@@ -608,6 +642,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -633,6 +669,7 @@ abstract class TableOperatorNode extends FromTable
 		}
 
 		/* Build the referenced table map (left || right) */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setReferencedTableMap( (JBitSet) leftResultSet.getReferencedTableMap().clone() );
         getReferencedTableMap().or(rightResultSet.getReferencedTableMap());
 		getReferencedTableMap().set(tableNumber);
@@ -662,6 +699,7 @@ abstract class TableOperatorNode extends FromTable
     @Override
     void projectResultColumns() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         getResultColumns().doProjection();
     }
     
@@ -688,6 +726,7 @@ abstract class TableOperatorNode extends FromTable
 				throws StandardException
 	{
         setCostEstimate( getOptimizerFactory().getCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* RESOLVE: This is just a stub for now */
 		leftResultSet = leftResultSet.optimize(
@@ -700,6 +739,7 @@ abstract class TableOperatorNode extends FromTable
 											outerRows);
 
 		/* The cost is the sum of the two child costs */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getCostEstimate().setCost(leftResultSet.getCostEstimate().getEstimatedCost(),
 							 leftResultSet.getCostEstimate().rowCount(),
 							 leftResultSet.getCostEstimate().singleScanRowCount() +
@@ -716,6 +756,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		/* Beetle 4454 - union all with another union all would modify access
@@ -743,6 +785,8 @@ abstract class TableOperatorNode extends FromTable
 				 */
 				leftOptimizer.modifyAccessPaths();
 				leftResultSet = (ResultSetNode)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
 					leftOptimizer.getOptimizable(0);
 			}
 			else
@@ -773,6 +817,8 @@ abstract class TableOperatorNode extends FromTable
 				 */
 				rightOptimizer.modifyAccessPaths();
 				rightResultSet = (ResultSetNode)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
 					rightOptimizer.getOptimizable(0);
 			}
 			else
@@ -838,6 +884,8 @@ abstract class TableOperatorNode extends FromTable
 
 		if (sourceResultSet instanceof FromTable)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             FromList optList = new FromList(
                     getOptimizerFactory().doJoinOrderOptimization(),
                     (FromTable)sourceResultSet,
@@ -855,6 +903,7 @@ abstract class TableOperatorNode extends FromTable
 													getDataDictionary(),
 													(RequiredRowOrdering) null,
 													getCompilerContext().getNumTables(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
 													null,
 													  lcc);
 			optimizer.prepForNextRound();
@@ -891,6 +940,7 @@ abstract class TableOperatorNode extends FromTable
 			retval = sourceResultSet;
 
             // dispose of the recursively created optimizer
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceEndQueryBlock(); }
 		}
 		else
@@ -947,11 +997,13 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (leftResultSet != null)
 		{
 			leftResultSet = (ResultSetNode)leftResultSet.accept(v);

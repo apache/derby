@@ -76,11 +76,14 @@ class ColumnInfo {
 					  String tName,
 					  String insertColumnList, 
 					  String vtiColumnIndexes,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
 					  String vtiColumnPrefix,
 					  String[] headerColumnNames)
 		throws SQLException 
 	{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		vtiColumnNames = new ArrayList<String>(1);
 		insertColumnNames = new ArrayList<String>(1);
 		columnTypes = new ArrayList<String>(1);
@@ -88,6 +91,8 @@ class ColumnInfo {
         udtClassNames = new HashMap<String,String>();
 		noOfColumns = 0;
 		this.conn = conn;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
 		this.headerColumnNames=headerColumnNames;
         if (sName == null) {
             // Use the current schema if no schema is specified.
@@ -138,6 +143,8 @@ class ColumnInfo {
 			while (st.hasMoreTokens()) 
 			{
 				int cIndex;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
 				String columnIndex = (st.nextToken()).trim();
 				if("\"".equals(columnIndex.substring(0,1))){
 					
@@ -170,6 +177,8 @@ class ColumnInfo {
 
 	//Check for matchng patterns of column names
 	private int readHeaders(String columnPattern) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
 		throws SQLException
 	{
 	    	if(headerColumnNames!=null){
@@ -226,9 +235,11 @@ class ColumnInfo {
 				insertColumnNames.add(columnName);
 				String sqlType = typeName + getTypeOption(typeName , columnSize , columnSize , decimalDigits);
 				columnTypes.add(sqlType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 jdbcColumnTypes.add((int) dataType);
 				noOfColumns++;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
                 if ( dataType == java.sql.Types.JAVA_OBJECT )
                 {
                     udtClassNames.put( "COLUMN" +  noOfColumns, getUDTClassName( dmd, typeName ) );
@@ -248,6 +259,7 @@ class ColumnInfo {
 
     // look up the class name of a UDT
     private String getUDTClassName( DatabaseMetaData dmd, String sqlTypeName )
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws SQLException
     {
         String className = null;
@@ -270,6 +282,7 @@ class ColumnInfo {
             rs.close();
         }
         catch (Exception e) { throw LoadError.unexpectedError( e ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
 
         if ( className == null ) { className = "???"; }
         
@@ -282,6 +295,7 @@ class ColumnInfo {
 
 		return !(type == java.sql.Types.BIT ||
 				 type == java.sql.Types.OTHER ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                  type == Types.SQLXML );
 	}
 
@@ -325,6 +339,7 @@ class ColumnInfo {
      * Get the column type names.
      */
     public String getColumnTypeNames()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws Exception
     {
         // we use the object serializer logic
@@ -461,6 +476,7 @@ class ColumnInfo {
      */
 	public String getExpectedVtiColumnTypesAsString() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         StringBuffer vtiColumnTypes = new StringBuffer();
         // expected types of data in the import file, based on 
         // the how columns in the data file are  mapped to 
@@ -550,9 +566,11 @@ class ColumnInfo {
      * @see getColumnTypeNames()
      */
     public static String[] getExpectedColumnTypeNames
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         ( String columnTypeNamesString, int noOfColumns )
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList list = (ArrayList)
                 ImportAbstract.destringifyObject( columnTypeNamesString );
 
@@ -582,8 +600,10 @@ class ColumnInfo {
 
         if ( stringMap == null ) { return null; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         HashMap<String,Class<?>> retval = new HashMap<String,Class<?>>();
         Iterator entries = stringMap.entrySet().iterator();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5021
 
         while ( entries.hasNext() )
         {
@@ -592,6 +612,7 @@ class ColumnInfo {
             String className = (String) entry.getValue();
 
             Class<?> classValue = Class.forName( className );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             retval.put( columnName, classValue );
         }

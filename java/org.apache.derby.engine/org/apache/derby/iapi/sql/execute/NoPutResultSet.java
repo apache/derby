@@ -198,6 +198,7 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	 * @exception StandardException thrown on failure.
 	 */
 	public void updateRow(ExecRow row, RowChanger rowChanger)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 			throws StandardException;
 	
 	/**

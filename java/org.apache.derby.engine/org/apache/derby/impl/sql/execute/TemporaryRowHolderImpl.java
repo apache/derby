@@ -50,6 +50,7 @@ import java.util.Properties;
  * It is used for deferred DML processing.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 class TemporaryRowHolderImpl implements TemporaryRowHolder
 {
 	public static final int DEFAULT_OVERFLOWTHRESHOLD = 5;
@@ -72,6 +73,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	private	ResultDescription		resultDescription;
 	/** Activation object with local state information. */
 	Activation						activation;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 
 	private boolean     isUniqueStream;
 
@@ -105,7 +107,10 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 */
 	public TemporaryRowHolderImpl
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 		Activation				activation, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		Properties 				properties, 
 		ResultDescription		resultDescription
 	) 
@@ -127,8 +132,11 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 */
 	public TemporaryRowHolderImpl
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 		Activation				activation, 
 		Properties 				properties, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ResultDescription		resultDescription,
 		boolean                 isUniqueStream
 	) 
@@ -152,8 +160,11 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 */
 	public TemporaryRowHolderImpl
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 		Activation			 	activation, 
 		Properties				properties,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ResultDescription		resultDescription,
 		int 					overflowToConglomThreshold,
 		boolean                 isUniqueStream,
@@ -171,8 +182,11 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 		this.activation = activation;
 		this.properties = properties;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		this.resultDescription = resultDescription;
 		this.isUniqueStream = isUniqueStream;
 		this.isVirtualMemHeap = isVirtualMemHeap;
@@ -209,6 +223,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			if (cols[i] != null)
 			{
 				/* Rows are 1-based, cols[] is 0-based */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                 cloned.setColumn(i + 1, cols[i].cloneHolder());
 			}
 		}
@@ -252,6 +267,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			//In case of unique stream we push every thing into the
 			// conglomerates for time being, we keep one row in the array for
 			// the template.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
             if (!isUniqueStream) {
 				return;  
             }
@@ -260,6 +276,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		if (!conglomCreated)
 		{
 			TransactionController tc = activation.getTransactionController();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 
             // TODO-COLLATE, I think collation needs to get set always correctly
             // but did see what to get collate id when there was no result
@@ -278,6 +295,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
             int collation_ids[] = null;
 
             /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             TODO-COLLATE - if we could count on resultDescription I think the
             following would work.
 
@@ -332,6 +350,9 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 
 		}else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             status = cc.insert(inputRow.getRowArray());
 			if (isVirtualMemHeap)
 				state = STATE_INSERT;
@@ -370,6 +391,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		
 			if(!uniqueIndexCreated)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 				TransactionController tc =
 					activation.getTransactionController();
 				int numKeys = 2;
@@ -378,6 +400,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 				uniqueIndexRow[1] = baseRowLocation;
 				Properties props = makeIndexProperties(uniqueIndexRow, CID);
 				uniqueIndexConglomId =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					tc.createConglomerate(
                         "BTREE",
                         uniqueIndexRow, 
@@ -400,6 +423,9 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			uniqueIndexRow[1] = baseRowLocation;
 			// Insert the row into the secondary index.
 			int status;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             if ((status = uniqueIndex_cc.insert(uniqueIndexRow))!= 0)
 			{
 				if(status == ConglomerateController.ROWISDUPLICATE)
@@ -436,6 +462,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	{
 		if(!positionIndexCreated)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 			TransactionController tc = activation.getTransactionController();
 			int numKeys = 2;
 			position_sqllong = new SQLLongint();
@@ -444,6 +471,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			positionIndexRow[1] = rl;				
 			Properties props = makeIndexProperties(positionIndexRow, CID);
 			positionIndexConglomId =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 tc.createConglomerate(
                     "BTREE",
                     positionIndexRow, 
@@ -468,6 +496,9 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		positionIndexRow[0] = position_sqllong;
 		positionIndexRow[1] = rl;
 		//insert the row location to position index
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         positionIndex_cc.insert(positionIndexRow);
 	}
 
@@ -480,10 +511,13 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	public CursorResultSet getResultSet()
 	{
 		state = STATE_DRAIN;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 		TransactionController tc = activation.getTransactionController();
 		if(isUniqueStream)
 		{
 			return new TemporaryRowHolderResultSet(tc, rowArray,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 												   resultDescription, isVirtualMemHeap,
 												   true, positionIndexConglomId, this);
 		}
@@ -505,6 +539,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	public void truncate() throws StandardException
 	{
 		close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(lastArraySlot == -1);
             SanityManager.ASSERT(state == STATE_UNINIT);
@@ -591,6 +626,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		}
 
 		TransactionController tc = activation.getTransactionController();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 
 		if (uniqueIndexCreated)
 		{
@@ -608,6 +644,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		{
 			tc.dropConglomerate(CID);
 			conglomCreated = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3221
             CID = 0;
 		} 
         else 

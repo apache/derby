@@ -251,6 +251,7 @@ public class RenameTableTest extends BaseJDBCTestCase {
      */
     public  void    test_6672_1() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6672
         Connection  conn = getConnection();
         conn.setAutoCommit( true );
 

@@ -202,6 +202,7 @@ public class BTreeMaxScan extends BTreeScan
             // Find the starting page and row slot, must start at root and
             // search for rightmost leaf.
             ControlRow root = ControlRow.get(this, BTree.ROOTPAGEID); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             // include search of tree in page visited stats.
             stat_numpages_visited += root.getLevel() + 1;
@@ -460,6 +461,8 @@ public class BTreeMaxScan extends BTreeScan
                 // lock current row in max scan, no previous key lock necessary.
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
                         this, pos,
                         init_lock_fetch_desc,
                         pos.current_lock_template,

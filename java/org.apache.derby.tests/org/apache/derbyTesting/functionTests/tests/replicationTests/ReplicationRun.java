@@ -58,6 +58,7 @@ public class ReplicationRun extends BaseTestCase
      */
     final static String REPLICATIONTEST_PROPFILE = "replicationtest.properties";
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
     final static String REPLICATION_MASTER_TIMED_OUT           = "XRE06";
     final static String REPLICATION_SLAVE_STARTED_OK           = "XRE08";
     final static String REPLICATION_DB_NOT_BOOTED              = "XRE11";
@@ -125,6 +126,7 @@ public class ReplicationRun extends BaseTestCase
     static String test_jars = null; // Path for derbyTesting.jar:junit_jar
     
     final static String FS = File.separator;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
     final static String PS = File.pathSeparator;
     
     static boolean showSysinfo = false;
@@ -205,16 +207,19 @@ public class ReplicationRun extends BaseTestCase
      */
     protected void tearDown() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         stopServer(jvmVersion, derbyVersion,
                 slaveServerHost, slaveServerPort);
         
         stopServer(jvmVersion, derbyVersion,
                 masterServerHost, masterServerPort);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Thread t : helperThreads) {
             t.join();
         }
         helperThreads = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         close(masterConn);
         close(slaveConn);
 
@@ -243,6 +248,7 @@ public class ReplicationRun extends BaseTestCase
     public void runBare() throws Throwable {
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4270
 
             super.runBare();
 
@@ -303,6 +309,7 @@ public class ReplicationRun extends BaseTestCase
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
     String useEncryption(boolean create)
     {
         String encryptionString = "";
@@ -334,6 +341,7 @@ public class ReplicationRun extends BaseTestCase
     public void testReplication()
     throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("WARNING: Define in subclass of ReplicationRun. "
                 + "See ReplicationRun_Local for an example.");
     }
@@ -347,6 +355,7 @@ public class ReplicationRun extends BaseTestCase
         
         String dbURL = serverURL( fullDbPath, serverHost, serverPort );
         Connection conn = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
         String lastmsg = null;
         long sleeptime = 200L;
         boolean done = false;
@@ -355,10 +364,13 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                 conn = DriverManager.getConnection(dbURL);
                 done = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
                 util.DEBUG("Ping Got connection after " 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
                         + count +" * "+ sleeptime + " ms.");
                 conn.close();
             }
@@ -371,6 +383,7 @@ public class ReplicationRun extends BaseTestCase
                 lastmsg = errCode + " " + sState + " " + lastmsg 
                         + ". Expected: "+ expectedState;
                 util.DEBUG("Got SQLException: " + lastmsg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
                 if ( (errCode == 40000)
                 && (sState.equalsIgnoreCase(expectedState) ) )
                 {
@@ -390,6 +403,7 @@ public class ReplicationRun extends BaseTestCase
         }
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
     String showCurrentState(String ID, long waitTime,
             String fullDbPath, 
             String serverHost, int serverPort)
@@ -430,9 +444,11 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                 ClientDataSourceInterface ds = configureDataSource(
                     fullDbPath, serverHost, serverPort, useEncryption(false) );
                 Connection conn = ds.getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
                 util.DEBUG("Wait Got connection after " 
                         + (count-1) +" * "+ sleepTime + " ms.");
                 conn.close();
@@ -463,6 +479,8 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                 ClientDataSourceInterface ds = configureDataSource(
                         fullDbPath,
                         serverHost,
@@ -502,6 +520,7 @@ public class ReplicationRun extends BaseTestCase
             }
         }
     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
     void shutdownDb(String jvmVersion, // Not yet used
             String serverHost, int serverPort, 
             String dbPath, String replicatedDb,
@@ -546,6 +565,7 @@ public class ReplicationRun extends BaseTestCase
                 + ") "
                 );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         if ( replicationTest == null ) 
         {
             util.DEBUG("No replicationTest specified. Exitting.");
@@ -570,6 +590,7 @@ public class ReplicationRun extends BaseTestCase
         
         String clientJvm = ReplicationRun.getClientJavaExecutableName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         final boolean isRemote = !testClientHost.equals("localhost");
         final boolean isIjTest = (replicationTest.indexOf(".sql") >= 0);
 
@@ -580,6 +601,7 @@ public class ReplicationRun extends BaseTestCase
         // BaseTestCase.execJavaCmd() gives us. Note that this means we cannot
         // vary versions when running locally.
         if (isRemote) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
             cmd.add(clientJvm);
             cmd.add("-classpath");
             cmd.add(isIjTest ? ijClassPath : testingClassPath);
@@ -611,6 +633,7 @@ public class ReplicationRun extends BaseTestCase
             cmd.add(replicationTest);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         String[] command = util.toStringArray(cmd);
         
         long startTime = System.currentTimeMillis();
@@ -630,6 +653,7 @@ public class ReplicationRun extends BaseTestCase
                     "cd " + workingDir + ";" + util.splice(command, ' '),
                     testClientHost, testUser, "runTest ");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
         
     }
@@ -640,6 +664,7 @@ public class ReplicationRun extends BaseTestCase
             String dbName)
             throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("runTestOnSlave(" + replicationTest
                 + ", " + clientVM
                 + ", " + testClientHost
@@ -650,6 +675,7 @@ public class ReplicationRun extends BaseTestCase
                 );
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         String URL = slaveURL(dbName);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbyTesting.jar"
@@ -659,6 +685,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String clientJvm = ReplicationRun.getSlaveJavaExecutableName();
         
         if ( replicationTest == null ) 
@@ -667,6 +694,7 @@ public class ReplicationRun extends BaseTestCase
             return;
         } 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         final boolean isRemote = !serverHost.equals("localhost");
         final boolean isIjTest = (replicationTest.indexOf(".sql") >= 0);
 
@@ -719,6 +747,7 @@ public class ReplicationRun extends BaseTestCase
                 "cd " + userDir + ";" + util.splice(command, ' '),
                 testClientHost, testUser, "runTestOnSlave ");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
         
     }
@@ -759,12 +788,16 @@ public class ReplicationRun extends BaseTestCase
         
         String clientJvm = ReplicationRun.getClientJavaExecutableName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         final boolean isRemote = !masterHost.equals("localhost");
         final boolean isIjTest = (load.indexOf(".sql") >= 0);
         
         util.DEBUG("load: " + load);
 
         ArrayList<String> cmd = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // For remote tests, we need to specify the Java VM to use and the
         // classpath. For local tests, we'll just use the JVM and the classpath
@@ -824,8 +857,12 @@ public class ReplicationRun extends BaseTestCase
                 );
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         String URL = masterLoadURL(dbSubPath);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 + PS + derbyVersion +FS+ "derbyTesting.jar"
                 // Needed for 'run resource 'createTestProcedures.subsql';' cases?
                 // Nope? what is 'resource'?
@@ -835,11 +872,15 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String clientJvm = ReplicationRun.getClientJavaExecutableName();
         
         String command = null;
         
         if ( masterHost.equals("localhost") )
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         { // Use full classpath when running locally. Can not vary server versions!
             ijClassPath = classPath;
             testingClassPath = classPath;
@@ -847,6 +888,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("stateTest: " + stateTest);
         if ( stateTest.indexOf(".sql") >= 0 )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
             command = clientJvm 
                     + " -Dij.driver=" + DRIVER_CLASS_NAME
                     + " -Dij.connection.startTestClient=" + URL
@@ -887,6 +929,7 @@ public class ReplicationRun extends BaseTestCase
     {
         // Should just do a "connect....;create=true" here, instead of copying in initMaster.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         String URL = masterURL(dbName)
                 +";create=true"
                 +useEncryption(true);
@@ -897,6 +940,7 @@ public class ReplicationRun extends BaseTestCase
             // from the module path after the upgrade tests have unloaded
             // the drivers.
             DriverManager.registerDriver(new ClientDriver());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
             Connection conn = DriverManager.getConnection(URL);
             conn.close();
@@ -906,7 +950,9 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("************************** DERBY-???? Preliminary needs to freeze db before copying to slave and setting replication mode.");
         
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
              URL = masterURL(dbName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
             Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             util.DEBUG("bootMasterDatabase getConnection("+URL+")");
             Connection conn = DriverManager.getConnection(URL);
@@ -923,6 +969,7 @@ public class ReplicationRun extends BaseTestCase
                     masterServerHost, masterServerPort,
                     dbSubPath+FS+dbName);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         util.DEBUG("bootMasterDatabase done.");
     }
 
@@ -948,6 +995,7 @@ public class ReplicationRun extends BaseTestCase
         else
         {
             startMaster_ij(dbName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5318
                     masterHost, 
                     slaveReplInterface, slaveReplPort);
         }
@@ -970,6 +1018,9 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String clientJvm = ReplicationRun.getMasterJavaExecutableName();
         
         String command = clientJvm
@@ -984,6 +1035,8 @@ public class ReplicationRun extends BaseTestCase
                 masterHost, // Must be run on the master!
                 testUser,
                 "startMaster_ij ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG(results);
     }
     private void startMaster_direct(String dbName,
@@ -995,6 +1048,8 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         String URL = masterURL(dbName)
                 +";startMaster=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
@@ -1010,6 +1065,7 @@ public class ReplicationRun extends BaseTestCase
                     /* On 1.5 locking of Drivermanager.class prevents
                      * using DriverManager.getConnection() concurrently
                      * in startMaster and startSlave!
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                     Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                     conn = DriverManager.getConnection(URL);
                      */
@@ -1017,12 +1073,14 @@ public class ReplicationRun extends BaseTestCase
                         +";slaveHost="+slaveReplInterface
                         +";slavePort="+slaveReplPort
                         +useEncryption(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                     ClientDataSourceInterface ds = configureDataSource
                         ( masterDbPath( dbName ), masterHost, masterServerPort, connectionAttributes );
                     conn = ds.getConnection();
                     
                     done = true;
                     conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
                     util.DEBUG("startMaster_direct connected in " + count + " * 100ms.");
                 }
                 catch ( SQLException se )
@@ -1030,9 +1088,12 @@ public class ReplicationRun extends BaseTestCase
                     int errCode = se.getErrorCode();
                     String msg = se.getMessage();
                     String sState = se.getSQLState();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
                     String expectedState = "XRE04";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                     util.DEBUG("startMaster Got SQLException: " 
                             + errCode + " " + sState + " " + msg + ". Expected " + expectedState);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
                     if ( (errCode == 40000)
                     && (sState.equalsIgnoreCase(expectedState) ) )
                     {
@@ -1049,6 +1110,7 @@ public class ReplicationRun extends BaseTestCase
                     }
                     else
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
                         if (REPLICATION_MASTER_TIMED_OUT.equals(sState)) // FIXME! CANNOT_START_MASTER_ALREADY_BOOTED
                         {
                             util.DEBUG("Master already started?");
@@ -1068,6 +1130,7 @@ public class ReplicationRun extends BaseTestCase
      */
     protected Connection getMasterConnection() throws SQLException {
         if (masterConn == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
             String url = masterURL(replicatedDb);
             masterConn = DriverManager.getConnection(url);
         }
@@ -1106,6 +1169,7 @@ public class ReplicationRun extends BaseTestCase
      * executing the sql
      */
     protected void executeOnSlave(String sql) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
          Statement s = getSlaveConnection().createStatement();
          s.execute(sql);
          s.close();
@@ -1131,6 +1195,7 @@ public class ReplicationRun extends BaseTestCase
         }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5318
             startSlave_ij(
                     dbName,
                     slaveClientInterface,
@@ -1146,6 +1211,8 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         String URL = slaveURL(dbName)
                 +";startSlave=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
@@ -1156,6 +1223,8 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String clientJvm = ReplicationRun.getSlaveJavaExecutableName();
         
         String command = clientJvm
@@ -1178,6 +1247,7 @@ public class ReplicationRun extends BaseTestCase
             int slaveReplPort)
             throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         final String URL = slaveURL(dbName)
                 +";startSlave=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
@@ -1189,6 +1259,7 @@ public class ReplicationRun extends BaseTestCase
             final int fSlaveServerPort = slaveServerPort;
             final String fConnAttrs = "startSlave=true"
                                 +";slaveHost="+slaveReplInterface
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
                                 +";slavePort="+slaveReplPort
                                 +useEncryption(false);
             Thread connThread = new Thread(
@@ -1203,9 +1274,12 @@ public class ReplicationRun extends BaseTestCase
                         /*On 1.5 locking of Drivermanager.class prevents
                          * using DriverManager.getConnection() concurrently
                          * in startMaster and startSlave!
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                         Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                         conn = DriverManager.getConnection(URL);
                          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                         ClientDataSourceInterface ds = configureDataSource(
                             fDbPath, fSlaveHost, fSlaveServerPort, fConnAttrs );
                         conn = ds.getConnection();
@@ -1223,6 +1297,7 @@ public class ReplicationRun extends BaseTestCase
             }
             );
             connThread.start();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5517
             registerThread(connThread);
             util.DEBUG("startSlave_direct exit.");
     }
@@ -1238,6 +1313,7 @@ public class ReplicationRun extends BaseTestCase
     {
         if ( host.equalsIgnoreCase("localhost") )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5318
             failOver_direct(dbName);
         }
         else
@@ -1262,6 +1338,7 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String clientJvm = ReplicationRun.getClientJavaExecutableName();
         
         String command = clientJvm
@@ -1277,11 +1354,14 @@ public class ReplicationRun extends BaseTestCase
                 testClientHost,
                 testUser,
                 "failOver_ij ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG(results);
     }
     private void failOver_direct(String dbName)
             throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         String URL = masterURL(dbName)
                 +";failover=true";
                
@@ -1290,18 +1370,21 @@ public class ReplicationRun extends BaseTestCase
             try
             {
                 Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
+//IC see: https://issues.apache.org/jira/browse/DERBY-5318
                 DriverManager.getConnection(URL);
             }
             catch (SQLException se)
             {
                 int errCode = se.getErrorCode();
                 String msg = se.getMessage();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
                 String sState = se.getSQLState();
                 String expectedState = "XRE20";
                 msg = "failOver_direct Got SQLException: " 
                         + errCode + " " + sState + " " + msg 
                         + ". Expected: " + expectedState;
                 util.DEBUG(msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3709
                 BaseJDBCTestCase.assertSQLState(expectedState, se);
             }
    }
@@ -1321,11 +1404,13 @@ public class ReplicationRun extends BaseTestCase
         String p4 = ""; // | /bin/grep '/trunk_slave/jars/'"; // Also used for master...
         String p5 = " | grep -v grep"; // /bin/grep
         String p6 = " | grep -v ssh"; // /bin/grep
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String p7 = " | grep -v bash";  // /bin/grep// Assuming always doing remote command (ssh)
         String p8 = " | gawk '{ print $2 }'"; // /bin/gawk
         String p9 = " | head -1"; // For cases where we also get some error...
         
         String command = p1 + p2 + p3 + p4 + p5 + p6 + p7 /* + p8 */ + ";";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5783
         String result = runUserCommandRemotely(
                 command, serverHost, testUser, "ps");
         util.DEBUG("xFindServerPID: '" + result + "'");
@@ -1339,6 +1424,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("xFindServerPID: " + pid);
         return pid;
     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
     void xStopServer(String serverHost, int serverPID)
     throws InterruptedException
     {
@@ -1357,6 +1443,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("BEGIN verifySlave "+slaveServerHost+":"
                    +slaveServerPort+"/"+slaveDbPath( replicatedDb ) );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         if ( (replicationTest != null) // If 'replicationTest==null' no table was created/filled
                 && simpleLoad )
         {
@@ -1366,6 +1453,7 @@ public class ReplicationRun extends BaseTestCase
             // return;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         ClientDataSourceInterface ds = configureDataSource
             ( slaveDbPath( replicatedDb ), slaveServerHost, slaveServerPort, useEncryption(false) );
         Connection conn = ds.getConnection();
@@ -1373,6 +1461,7 @@ public class ReplicationRun extends BaseTestCase
         simpleVerify(conn);
         conn.close();
         /* BEGIN Distributed repl. tests only */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         if ( !slaveServerHost.equalsIgnoreCase("localhost") ){
         runSlaveVerificationCLient(jvmVersion,
                 testClientHost,
@@ -1387,6 +1476,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("BEGIN verifyMaster " + masterServerHost + ":"
                    +masterServerPort+"/"+masterDbPath( replicatedDb ) );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         if ( (replicationTest != null)  // If 'replicationTest==null' no table was created/filled
                 && simpleLoad )
         {
@@ -1396,6 +1486,7 @@ public class ReplicationRun extends BaseTestCase
             // return;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         ClientDataSourceInterface ds = configureDataSource
             ( masterDbPath( replicatedDb ), masterServerHost, masterServerPort, useEncryption(false) );
         Connection conn = ds.getConnection();
@@ -1403,6 +1494,7 @@ public class ReplicationRun extends BaseTestCase
         simpleVerify(conn);
         conn.close();
         /* BEGIN Distributed repl. tests only */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         if ( !masterServerHost.equalsIgnoreCase("localhost") ){
         runMasterVerificationCLient(jvmVersion,
                 testClientHost,
@@ -1430,6 +1522,7 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         util.DEBUG("runSlaveVerificationCLient");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         if ( replicationVerify != null){
         runTestOnSlave(replicationVerify,
                 jvmVersion,
@@ -1466,6 +1559,7 @@ public class ReplicationRun extends BaseTestCase
      *    {@code null} to run in the same directory as the parent process
      */
     private void runUserCommandLocally(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
             String[] command, String ID, File workingDir) {
         util.DEBUG("");
         final String debugId = "runUserCommandLocally " + ID + " ";
@@ -1476,6 +1570,7 @@ public class ReplicationRun extends BaseTestCase
             
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5808
                 Process proc = execJavaCmd(null, null, command, workingDir);
                 processDEBUGOutput(debugId+"pDo ", proc);
             }
@@ -1503,6 +1598,7 @@ public class ReplicationRun extends BaseTestCase
                 + command
                 ;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         String output = "";
         try {
             Runtime rt = Runtime.getRuntime();
@@ -1542,6 +1638,7 @@ public class ReplicationRun extends BaseTestCase
 
         // If dbDir is specified, start the process in that directory;
         // otherwise, inherit working dir from the main test process.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         final File workingDir = dbDir == null ?
                 null : new File(workingDirName, dbDir);
         util.DEBUG(ID + "workingDir: " + workingDir);
@@ -1560,6 +1657,7 @@ public class ReplicationRun extends BaseTestCase
             );
             util.DEBUG(ID+"************** Do .start().");
             cmdThread.start();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5643
             registerThread(cmdThread);
         }
      
@@ -1569,6 +1667,7 @@ public class ReplicationRun extends BaseTestCase
     
     // FIXME: NB NB Currently only invoked from startSlave_ij (others unused!)
     private void runUserCommandInThreadRemotely(String command,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
             final String host,
             final String testUser,
             String id)
@@ -1583,11 +1682,13 @@ public class ReplicationRun extends BaseTestCase
                 + " as " + testUser);
         
         final String[] envElements = {"CLASS_PATH="+""
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
                 , "PATH="+FS+"home"+FS+testUser+FS+"bin:$PATH" // "/../bin" FIXME!!! All such!
                 };
         
         String workingDirName = System.getProperty("user.home");
         util.DEBUG(ID+"user.home: " + workingDirName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         util.DEBUG(ID+"envElements: " + util.splice(envElements, ' '));
         util.DEBUG(ID+"workingDir: " + workingDirName);
         
@@ -1596,7 +1697,9 @@ public class ReplicationRun extends BaseTestCase
             
             String[] shEnvElements = {"CLASS_PATH="+""
                     , "PATH="+FS+"home"+FS+testUser+FS+"bin:${PATH}"
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
             };
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
             String shellEnv = util.splice(shEnvElements, ';');
             util.DEBUG(ID+"shellEnv: " + shellEnv);
 
@@ -1621,6 +1724,8 @@ public class ReplicationRun extends BaseTestCase
             );
             util.DEBUG(ID+"************** Do .start(). ");
             serverThread.start();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5517
+//IC see: https://issues.apache.org/jira/browse/DERBY-5517
             registerThread(serverThread);
             
         }
@@ -1632,10 +1737,12 @@ public class ReplicationRun extends BaseTestCase
     void initEnvironment()
     throws IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.printDebug = System.getProperty("derby.tests.repltrace", "false")
                                                      .equalsIgnoreCase("true");
         util.DEBUG("printDebug: " + util.printDebug);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("*** ReplicationRun.initEnvironment -----------------------------------------");
         util.DEBUG("*** Properties -----------------------------------------");
         userDir = System.getProperty("user.dir");
@@ -1682,6 +1789,7 @@ public class ReplicationRun extends BaseTestCase
         unFreezeDB = null;
         util.DEBUG("unFreezeDB: " + unFreezeDB);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         simpleLoad = System.getProperty("derby.tests.replSimpleLoad", "true")
                                                      .equalsIgnoreCase("true");
         util.DEBUG("simpleLoad: " + simpleLoad);
@@ -1735,6 +1843,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("junit_jar: " + junit_jar);
         
         test_jars = derbyTestingJar
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 + PS + junit_jar;
         util.DEBUG("test_jars: " + test_jars);
         
@@ -1753,6 +1862,7 @@ public class ReplicationRun extends BaseTestCase
                 +"derby.drda.traceAll=true"+LF;
 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("--------------------------------------------------------");
         
         masterPreRepl = null; // FIXME!
@@ -1761,8 +1871,10 @@ public class ReplicationRun extends BaseTestCase
         masterPostSlave = null; // FIXME!
         slavePostSlave = null; // FIXME!
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("--------------------------------------------------------");
         // for SimplePerfTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
         tuplesToInsertPerf = 10000;
         commitFreq = 1000; // "0" is autocommit
         
@@ -1778,6 +1890,7 @@ public class ReplicationRun extends BaseTestCase
     throws Exception
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5318
         File masterHome = new File(masterDatabasePath, masterDbSubPath);
         File slaveHome = new File(slaveDatabasePath, slaveDbSubPath);
         util.DEBUG("initMaster");
@@ -1788,6 +1901,7 @@ public class ReplicationRun extends BaseTestCase
         if ( host.equalsIgnoreCase("localhost") || localEnv )
         {
             if (PrivilegedFileOpsForTests.exists(masterHome)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5836
                 BaseTestCase.assertDirectoryDeleted(masterHome);
             }
             util.mkDirs(masterHome.getPath()); // Create the directory
@@ -1802,6 +1916,7 @@ public class ReplicationRun extends BaseTestCase
         }
         else
         {            
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
             String command = "mkdir -p "+masterDatabasePath+FS+masterDbSubPath+";"
                 + " cd "+masterDatabasePath+FS+masterDbSubPath+";"
                 + " rm -rf " + dbName + " derby.log;"
@@ -1838,6 +1953,7 @@ public class ReplicationRun extends BaseTestCase
                 testUser,
                 // dbName, // unneccessary?
                 "removeSlaveDBfiles ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG(results);
         
     }
@@ -1846,6 +1962,7 @@ public class ReplicationRun extends BaseTestCase
     {
         
         util.DEBUG("initSlave");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5318
         File slaveHome = new File(slaveDatabasePath, slaveDbSubPath);
         File masterHome = new File(masterDatabasePath, masterDbSubPath);
         File masterDb = new File(masterHome, dbName);
@@ -1878,6 +1995,12 @@ public class ReplicationRun extends BaseTestCase
                 testUser,
                 "initSlave ");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG(results);
         
     }
@@ -1887,6 +2010,7 @@ public class ReplicationRun extends BaseTestCase
             String serverHost,
             String interfacesToListenOn,
             int serverPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
             String dbSubDirPath)
             throws Exception
     {
@@ -1899,10 +2023,12 @@ public class ReplicationRun extends BaseTestCase
                     serverPort,
                     dbSubDirPath); // Distinguishing master/slave
     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
     void startServer(String serverVM, String serverVersion,
             String serverHost,
             String interfacesToListenOn,
             int serverPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
             String dbSubDirPath)
             throws Exception
     {
@@ -1912,13 +2038,16 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG(debugId+"+++ StartServer " + serverVM + " / " + serverVersion);
                 
         String serverClassPath = serverVersion + FS+"derby.jar"
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
                 + PS + serverVersion + FS+"derbynet.jar"
                 + PS + test_jars; // Required if the test (run on the client) 
                                   // defines and uses functions on test classes.
                                   // Example: PADSTRING in StressMultiTest.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         final boolean isRemote = !serverHost.equals("localhost");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4980
         String workingDirName = masterDatabasePath +FS+ dbSubDirPath;
         
         ArrayList<String> ceArray = new ArrayList<String>();
@@ -1948,6 +2077,7 @@ public class ReplicationRun extends BaseTestCase
         ceArray.add( "-noSecurityManager" );
 
         final String[] commandElements = util.toStringArray(ceArray);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
 
         if (!isRemote)
         {
@@ -1964,6 +2094,7 @@ public class ReplicationRun extends BaseTestCase
 
         // Wait for the server to come up in a reasonable time.
         pingServer(serverHost, serverPort);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5643
 
         util.DEBUG(debugId+"--- StartServer ");
         util.DEBUG("");
@@ -1975,6 +2106,7 @@ public class ReplicationRun extends BaseTestCase
             String fullDbDirPath,
             String securityOption) // FIXME? true/false?
     throws Exception
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
     { // Wotk in progress. Not currently used! Only partly tested!
         util.DEBUG("startServer_direct " + serverHost 
                 + " " + interfacesToListenOn +  " " + serverPort
@@ -1989,6 +2121,7 @@ public class ReplicationRun extends BaseTestCase
                 InetAddress.getByName(interfacesToListenOn), serverPort);
         
         server.start(null); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
         pingServer(serverHost, serverPort, 150);
         
         Properties sp = server.getCurrentProperties();
@@ -2004,6 +2137,7 @@ public class ReplicationRun extends BaseTestCase
     void killMaster(String masterServerHost, int masterServerPort)
     throws InterruptedException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("killMaster: " + masterServerHost +":" + masterServerPort);
         if ( masterServerHost.equals("localhost") )
         {
@@ -2044,13 +2178,19 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("+++ stopServer " + serverVM + " / " + serverVersion
                 + " " + debugId);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         String serverJvm = ReplicationRun.getServerJavaExecutableName(serverHost,serverVM);
         String serverClassPath = serverVersion + FS+"derby.jar"
                 + PS + serverVersion + FS+"derbynet.jar";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
 
         final boolean isRemote = !serverHost.equals("localhost");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
 
         ArrayList<String> ceArray = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // For remote tests, we need to specify the Java VM to use and the
         // classpath. For local tests, we'll just use the JVM and the classpath
@@ -2063,6 +2203,7 @@ public class ReplicationRun extends BaseTestCase
         }
         ceArray.add( "-Dderby.infolog.append=true" );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (JVMInfo.isModuleAware())
         {
             ceArray.add("-m");
@@ -2085,11 +2226,14 @@ public class ReplicationRun extends BaseTestCase
             ceArray.add( db_passwd );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         final String[] commandElements = util.toStringArray(ceArray);
         
         final String fullCmd = util.splice(commandElements, ' ');
         util.DEBUG(debugId+"commandElements: " + fullCmd);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
         final boolean serverOnLocalhost =
                 serverHost.equalsIgnoreCase("localhost");
         if (serverOnLocalhost)
@@ -2164,6 +2308,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG(id+"----     ");
 
         int exitCode = proc.waitFor();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5643
         util.DEBUG(id + "process exit status: " + exitCode);
     }
 
@@ -2174,26 +2319,31 @@ public class ReplicationRun extends BaseTestCase
      * @param thread a thread that has been started
      */
     private void registerThread(Thread thread) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5517
         helperThreads.add(thread);
     }
 
     private void pingServer( String hostName, int port)
     throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         util.DEBUG("+++ pingServer: " + hostName +":" + port);
         NetworkServerControl controller =
             new NetworkServerControl(InetAddress.getByName(hostName), port);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5643
         assertTrue("Server did not start in time",
                    NetworkServerTestSetup.pingForServerStart(controller));
         util.DEBUG("--- pingServer: " + hostName +":" + port);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
     void startOptionalLoad(Load load,
             String dbSubPath,
             String serverHost,
             int serverPort)
             throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         String loadString = load.load;
         String database = load.database;
         boolean existingDB = load.existingDB;
@@ -2205,12 +2355,14 @@ public class ReplicationRun extends BaseTestCase
                 );
         if ( loadString == null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
             util.DEBUG("No load supplied!");
             return;
         }
         if ( !existingDB )
         {
             // Create it!
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
             String URL = masterURL(database)
                     +";create=true"; // Creating! No need for encryption here?
             String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
@@ -2220,6 +2372,7 @@ public class ReplicationRun extends BaseTestCase
         { // Use full classpath when running locally. Can not vary server versions!
             ijClassPath = classPath;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
             String clientJvm = ReplicationRun.getClientJavaExecutableName();
             String command = "rm -rf /"+masterDbPath( database )+";" // FIXME! for slave load!
                     + clientJvm // "java"
@@ -2237,6 +2390,7 @@ public class ReplicationRun extends BaseTestCase
         }
         
         // Must run in separate thread!:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
         runLoad(loadString,
                 jvmVersion,
                 testClientHost,
@@ -2247,6 +2401,7 @@ public class ReplicationRun extends BaseTestCase
         
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
     void makeReadyForReplication()
         throws Exception
     {   // Replace the following code in all tests with a call to makeReadyForReplication()!
@@ -2257,6 +2412,7 @@ public class ReplicationRun extends BaseTestCase
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
@@ -2305,6 +2461,7 @@ public class ReplicationRun extends BaseTestCase
      */
     void cleanAllTestHosts()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         util.DEBUG("************************** cleanAllTestHosts() Not yet implemented");
     }
 
@@ -2685,10 +2842,12 @@ test.postStoppedSlaveServer.return=true
     
     ///////////////////////////////////////////////////////////////////////////
     /* Load started in different states of replication. */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
     class Load
     {
         Load(String id, Properties testRunProperties)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
             util.DEBUG("Load(): " + id);
             
             String pid = "test." + id;
@@ -2702,6 +2861,7 @@ test.postStoppedSlaveServer.return=true
                 pid = "test." + id + ".load";
                 load = testRunProperties.getProperty(pid,
                         "org.apache.derbyTesting.functionTests.tests.replicationTests.DefaultLoad");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 util.DEBUG(pid+": " + load);
                 
                 pid = "test." + id + ".database";
@@ -2764,6 +2924,7 @@ test.postStoppedSlaveServer.return=true
         }
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
     void assertException(SQLException se, String expectedSqlState)
     {
         if (se == null ) // Did not get an exception
@@ -2795,6 +2956,7 @@ test.postStoppedSlaveServer.return=true
             String dbPath,
             int _noTuplesToInsert)
         throws SQLException, ClassNotFoundException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         util.DEBUG("_testInsertUpdateDeleteOnMaster: " + serverHost + ":" +
@@ -2825,6 +2987,7 @@ test.postStoppedSlaveServer.return=true
             String dbPath,
             int _noTuplesInserted)
         throws SQLException, ClassNotFoundException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         util.DEBUG("_verifyDatabase: "+serverHost+":"+serverPort+"/"+dbPath);
@@ -2867,6 +3030,7 @@ test.postStoppedSlaveServer.return=true
         return DriverManager.getConnection(connectionURL);
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
     String masterDbPath(String dbName)
     {
         return masterDatabasePath+FS+masterDbSubPath+FS+dbName;
@@ -2903,6 +3067,7 @@ test.postStoppedSlaveServer.return=true
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
     SQLException stopSlave(
         String slaveServerHost,
         int slaveServerPort,
@@ -2927,6 +3092,7 @@ test.postStoppedSlaveServer.return=true
         String subPath,
         String replicatedDb,
         boolean masterServerAlive)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         throws Exception
     {
         util.DEBUG("stopSlave");
@@ -3011,6 +3177,7 @@ test.postStoppedSlaveServer.return=true
     }
     private static String getMasterJavaExecutableName()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         if ( masterServerHost.matches("localhost") )
         {
             return BaseTestCase.getJavaExecutableName();
@@ -3054,6 +3221,7 @@ test.postStoppedSlaveServer.return=true
          int        serverPort,
          String     connectionAttributes
          ) throws ClassNotFoundException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                   InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         ClientDataSourceInterface ds;

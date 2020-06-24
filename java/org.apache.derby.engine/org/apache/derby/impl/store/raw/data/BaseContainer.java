@@ -62,6 +62,7 @@ import java.util.Hashtable;
 	<BR> MT - Mutable - mutable identity : 
 */
 abstract class BaseContainer implements Lockable {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 	/**
 		Identity of the container.
@@ -82,6 +83,7 @@ abstract class BaseContainer implements Lockable {
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-4960
 		Committed Drop state of the container.  If a post commit action
 		determined that the drop container operation is committed, the whole
 		container may be removed and space reclaimed.
@@ -102,6 +104,7 @@ abstract class BaseContainer implements Lockable {
 	*/
 	protected boolean isReusableRecordId = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	BaseContainer() {
 	}
 
@@ -167,6 +170,7 @@ abstract class BaseContainer implements Lockable {
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 		Release free space to the OS.
 		<P>
         As is possible release any free space to the operating system.  This
@@ -213,6 +217,7 @@ abstract class BaseContainer implements Lockable {
                     getContainerId());
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs = ntt.getCompatibilitySpace();
 		// Latch this container, the commit will release the latch
 		ntt.getLockFactory().lockObject(
@@ -220,12 +225,14 @@ abstract class BaseContainer implements Lockable {
 
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
             incrementReusableRecordIdSequenceNumber();						
             compressContainer(ntt, allocHandle);
 		}
 		finally
 		{
             ntt.commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
 
 			ntt.close();
 		}
@@ -299,11 +306,14 @@ abstract class BaseContainer implements Lockable {
         {
 			throw StandardException.newException(
                     SQLState.DATA_ALLOC_NTT_CANT_OPEN, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     getSegmentId(), 
                     getContainerId());
         }
 
 		// Latch this container, the commit will release the latch
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs = ntt.getCompatibilitySpace();
 		ntt.getLockFactory().lockObject(
                 cs, ntt, this, null, C_LockFactory.WAIT_FOREVER);
@@ -758,6 +768,7 @@ abstract class BaseContainer implements Lockable {
 		 throws StandardException;
 
 	protected abstract BasePage getPageForCompress(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     BaseContainerHandle handle,
     int                 flag,
     long                pageno)
@@ -778,6 +789,7 @@ abstract class BaseContainer implements Lockable {
 										boolean isOverflow) throws StandardException;
 
 	protected abstract void compressContainer(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     RawTransaction      t,
     BaseContainerHandle allocHandle)
         throws StandardException;
@@ -886,6 +898,7 @@ abstract class BaseContainer implements Lockable {
      * @exception StandardException Standard Derby error policy 
      */
     protected abstract void encryptOrDecryptContainer(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                                              BaseContainerHandle handle,
                                              String newFilePath,
                                              boolean doEncrypt)

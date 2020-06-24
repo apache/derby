@@ -54,9 +54,11 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
     private static  final   String[]    LEGAL_USERS = { RUTH, READ_ONLY_USER, READ_WRITE_USER };
 
     public  static  final   String      ENGLISH_ANALYZER =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6544
         "org.apache.derbyTesting.functionTests.tests.lang.LuceneCoarseAuthorizationTest.getEnglishAnalyzer";
     public  static  final   String      STANDARD_ANALYZER =
         "org.apache.derbyTesting.functionTests.tests.lang.LuceneCoarseAuthorizationTest.getStandardAnalyzer";
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
@@ -101,6 +103,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             LuceneCoarseAuthorizationTest.class);
 
@@ -110,6 +113,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
 
         Test        coarseTest = new DatabasePropertyTestSetup( authenticatedTest, makeProperties() );
         Test        singleUseTest = TestConfiguration.singleUseDatabaseDecorator( coarseTest );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6544
 
         return singleUseTest;
     }
@@ -161,7 +165,9 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         goodStatement( readWriteConnection, INDEX_POEMS );
 
         String  readPoemsIndex =
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "select p.originalAuthor, i.score\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
@@ -189,10 +195,12 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
              );
 
         String  listIndexes =
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "select schemaName, tableName, columnName, indexDescriptorMaker from table( LuceneSupport.listIndexes() ) l";
         String[][]  defaultIndexList =
             new String[][]
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6544
                 { "RUTH", "POEMS", "POEMTEXT", ENGLISH_ANALYZER },
             };
 
@@ -244,6 +252,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         String[][]  standardIndexList =
             new String[][]
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 { "RUTH", "POEMS", "POEMTEXT", STANDARD_ANALYZER },
             };
 
@@ -292,6 +301,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
     public  static  LuceneIndexDescriptor    getEnglishAnalyzer()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         return new EnglishIndexDescriptor();
     }
     
@@ -315,6 +325,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
     }
     public  static void    dropSchema( Connection conn )   throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         conn.prepareStatement( "drop table poems" ).execute();
     }
     public static void    createPoemsTable( Connection conn )
@@ -332,6 +343,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
              "    constraint poemsKey primary key( poemID, versionStamp )\n" +
              ")\n"
              ).execute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         PreparedStatement   ps = conn.prepareStatement( "insert into poems values ( ?, ?, ?, ?, ? )" );
 
@@ -388,6 +400,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         
         public  Analyzer    getAnalyzer()   throws SQLException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             return LuceneUtils.getAnalyzerForLocale( Locale.US );
         }
     }

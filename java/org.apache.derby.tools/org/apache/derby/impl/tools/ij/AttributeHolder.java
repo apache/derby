@@ -41,6 +41,7 @@ public class AttributeHolder {
     String value;
     String token;
     Vector<String> errors = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
     public String getName(){
       return name;
@@ -72,6 +73,7 @@ public class AttributeHolder {
     }
     void displayErrors(){
       //If no error are found then nothing is displayed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
       Enumeration<String> e = errors.elements();
       //In the first line, show the exact token that was parsed from
       //the URL.

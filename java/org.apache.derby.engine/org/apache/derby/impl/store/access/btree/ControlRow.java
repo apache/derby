@@ -318,6 +318,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 		// Page numbers start out "invalid".  Presumably the caller will
 		// link the page into a page chain as one of its next steps.
 		leftSiblingPageNumber  = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6063
             new SQLLongint(ContainerHandle.INVALID_PAGE_NUMBER);
 		rightSiblingPageNumber = 
             new SQLLongint(ContainerHandle.INVALID_PAGE_NUMBER);
@@ -469,6 +470,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 			return null;
 
 		// Try to get the control row without waiting
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 		cr = ControlRow.getNoWait(btree, pageno);
 		if (cr == null)
 			throw new WaitError();
@@ -503,6 +505,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                     "setLeftSibling got an exception: " +
                     "control_row = " + this +
                     "trying to update field number " + CR_LEFTSIB_COLID + 
@@ -528,6 +531,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 		if (pageno == ContainerHandle.INVALID_PAGE_NUMBER)
 			return null;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 			return ControlRow.get(open_btree, pageno);
 	}
 
@@ -560,6 +564,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                     "setRightSibling got an exception: " +
                     "control_row = " + this +
                     "trying to update field number " + CR_RIGHTSIB_COLID + 
@@ -672,6 +677,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                     "setParent got an exception: " +
                     "control_row = " + this +
                     "trying to update field number " + CR_PARENT_COLID + 
@@ -800,6 +806,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 	public static ControlRow get(OpenBTree open_btree, long pageNumber)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
         return(ControlRow.get(open_btree.container, pageNumber));
 	}
 
@@ -824,6 +831,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
         }
 
 		// Return the corresponding control row.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 		return getControlRowForPage(container, page);
 	}
 
@@ -846,6 +854,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 
 		// Got the page without waiting.  Return the corresponding
 		// control row.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 		return getControlRowForPage(open_btree.container, page);
 	}
 
@@ -890,6 +899,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 
         // call page specific initialization.
         cr.controlRowInit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
         // cache this Control row with the page in the cache.
 		page.setAuxObject(cr);
@@ -923,6 +933,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
     object allocations occur during the execution of this method.
     <P>
     This method performs a binary search on the page and finds the entry i on
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     the page such that entry[i] &lt;= key &lt; entry[i+1].  The result of the search
     is filled into the passed in params structure.
 
@@ -1128,6 +1139,8 @@ public abstract class ControlRow implements AuxObject, TypedFormat
         {
 			// Compare the index row to the key.
 			compare_ret = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 compareIndexRowFromPageToKey(
                     this,
                     midslot,
@@ -1438,6 +1451,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
                SanityManager.ASSERT(btree.getConglomerate().nUniqueColumns <= 
                                     btree.getConglomerate().nKeyFields);
                int compare_result = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                    compareIndexRowToKey(
                        lesser, greater,
                        btree.getConglomerate().nUniqueColumns, 0,
@@ -1503,6 +1517,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
                         (FetchDescriptor) null, true); 
 
                 int r = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                     compareIndexRowToKey(
                         left_lastrow, right_firstrow,
                         btree.getConglomerate().nUniqueColumns,
@@ -2018,6 +2033,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
     public DataValueDescriptor[] getRowTemplate(OpenBTree    open_btree)
 		throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         return(open_btree.getConglomerate().createTemplate(
                     open_btree.getRawTran()));
     }

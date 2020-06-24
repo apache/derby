@@ -34,6 +34,7 @@ public class SqlWarning extends SqlException implements Diagnosable {
 
     private SqlWarning nextWarning_;
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
     SqlWarning(LogWriter logwriter, ClientMessageId msgid, Object... args)
     {
         super(logwriter, msgid, args);
@@ -69,6 +70,7 @@ public class SqlWarning extends SqlException implements Diagnosable {
             getErrorCode());
 
         sqlw.initCause(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
 
         // Set up the nextException chain
         if ( nextWarning_ != null )

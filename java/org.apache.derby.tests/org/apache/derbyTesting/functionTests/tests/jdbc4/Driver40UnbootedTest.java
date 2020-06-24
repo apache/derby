@@ -75,6 +75,7 @@ public class Driver40UnbootedTest extends BaseJDBCTestCase
     {
         if (JDBC.vmSupportsJSR169())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "DriverTest tests java.sql.Driver, not supported with JSR169");
         }
@@ -136,6 +137,7 @@ public class Driver40UnbootedTest extends BaseJDBCTestCase
     {
         if ( !getTestConfiguration().loadingFromJars() ) { return ; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
         String[] command = {
             "-Demma.verbosity.level=silent",
             getClass().getName()
@@ -147,6 +149,7 @@ public class Driver40UnbootedTest extends BaseJDBCTestCase
         
         // Ensure it completes without failures.
         assertEquals(0, spawned.complete());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
 
         assertEquals( SUCCESS, spawned.getFullServerOutput() );
     }

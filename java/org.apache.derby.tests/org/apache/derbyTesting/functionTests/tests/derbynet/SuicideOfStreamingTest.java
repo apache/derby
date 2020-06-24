@@ -84,6 +84,7 @@ public class SuicideOfStreamingTest
      * Unset the debug property.
      */
     public void tearDown()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2054
             throws Exception {
         removeSystemProperty("derby.debug.suicideOfLayerBStreaming");
         super.tearDown();
@@ -134,6 +135,7 @@ public class SuicideOfStreamingTest
             //      may be required.
             return new CleanDatabaseTestSetup(
                     TestConfiguration.clientServerDecorator(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                         new BaseTestSuite(SuicideOfStreamingTest.class,
                                       "SuicideOfStreamingTest")));
         }

@@ -67,6 +67,7 @@ public class AggregatorInfoList extends Vector<AggregatorInfo> implements Format
 	 */
 	public boolean hasDistinct()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (AggregatorInfo aggInfo : this)
 		{
 			if (aggInfo.isDistinct())

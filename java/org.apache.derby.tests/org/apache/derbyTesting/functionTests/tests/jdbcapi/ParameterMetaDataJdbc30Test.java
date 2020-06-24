@@ -53,6 +53,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          */
 
         public ParameterMetaDataJdbc30Test(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2658
                 super(name);
         }
         
@@ -61,6 +62,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 	 * all tests in this class
          */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ParameterMetaDataJdbc30Test");
 
@@ -80,6 +82,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 	private static Test baseSuite(String name)
     	{
             BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         	suite.addTestSuite(ParameterMetaDataJdbc30Test.class);
 
@@ -97,6 +100,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                 // Create procedure used by
                 // testParameterMetadataWithDECIMALParameters() and
                 // testParameterMetadataWithLITERALParameters().
+//IC see: https://issues.apache.org/jira/browse/DERBY-5159
                 stmt.execute(
                     "CREATE PROCEDURE PMDD(IN pmdI_1 DECIMAL(5,3), " +
                     "IN pmdI_2 DECIMAL(4,2), INOUT pmdI_3 DECIMAL(9,0), " +
@@ -149,6 +153,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
       		//parameter 3 is output only
       		cs.registerOutParameter(3,Types.INTEGER);
       		// parameter 4 is input and output
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       		Object x = 1;
       		cs.setObject(4,x, Types.INTEGER);
       		cs.registerOutParameter(4,Types.INTEGER);
@@ -239,6 +244,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
       		 * getParameterMetaData().
 		 */
       		ps = prepareStatement("select * from sys.systables where " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
              			      " CAST(tablename AS VARCHAR(128)) like ? and CAST(tableID AS CHAR(36)) like ?");
       		ps.setString (1, "SYS%");
       		ps.setString (2, "8000001%");
@@ -265,6 +271,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          */
 	public void testBooleanParameters() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         Statement stmt = createStatement();
         stmt.executeUpdate
             (
@@ -272,6 +279,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
              "returns varchar( 100 ) language java parameter style java no sql\n" +
              "external name 'org.apache.derbyTesting.functionTests.tests.lang.BooleanValuesTest.booleanValue'\n"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
         stmt.executeUpdate
             (
              "create table t_boolean( b boolean )"
@@ -300,6 +308,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
         //
         // Test metadata for boolean-valued columns.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
         ps = prepareStatement("insert into t_boolean values(?)");
         ps.setBoolean(1, true);
 
@@ -322,6 +331,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 	public void testBooleanProcedureArgs() throws Exception
     {
         Statement stmt = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
 
         stmt.executeUpdate("create procedure booleanProc" + 
                            "( in inarg boolean, out outarg boolean, inout inoutarg boolean )" + 
@@ -379,6 +389,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
       		//variation 1, testing DERBY-44 
       		PreparedStatement ps = prepareStatement("select * from sys.systables " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
 							"where CAST(tablename AS VARCHAR(128)) like ? escape CAST(? AS VARCHAR(128))");
       		ps.setString (1, "SYS%");
       		ps.setString (2, "");
@@ -399,6 +410,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 			fail("DERBY-44 failed (didn't get SQLSTATE 22019)");
           		rs.close();
       		} catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2658
 			assertSQLState("22019", e);
       		}
 		ps.close();
@@ -420,6 +432,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                  * orig: ps = con.prepareStatement("execute statement systab using values('SYS%','8000001%')");
 		 */
       		PreparedStatement ps = prepareStatement("select * from sys.systables " + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
 							"where CAST(tablename AS VARCHAR(128)) like 'SYS%' and " + 
 							"CAST(tableID AS VARCHAR(128)) like '8000001%'");
 
@@ -530,6 +543,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
 		Statement stmt = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5117
         stmt.executeUpdate("create procedure dummyint( "
                 + "in a integer, in b integer, "
                 + "out c integer, inout d integer) "
@@ -587,6 +601,8 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		}
       		cs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5117
+//IC see: https://issues.apache.org/jira/browse/DERBY-5117
         stmt.execute("drop procedure dummyint");
 	}
 	/**
@@ -604,6 +620,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                	cs.setInt(1,1);
         	cs.setInt(2,1);
 		// parameter 3 is input and output
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Object x = 1;
                 cs.setObject(3,x, Types.INTEGER);
                 cs.registerOutParameter(3,Types.INTEGER);
@@ -673,6 +690,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          */
     public void testParameterMetadataWithTimestampParameters () throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
         Statement stmt = createStatement();
         stmt.execute("CREATE PROCEDURE PMDT(IN pmdI_1 TIMESTAMP, INOUT pmdI_2 TIMESTAMP, OUT pmdI_3 TIMESTAMP) language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.ParameterMetaDataJdbc30Test.dummyString'");
         CallableStatement cs = prepareCall("CALL PMDT(?, ?, ?)");
@@ -887,6 +905,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                 *  DERBY-3039 - ParameterMetaData.isNullable() returns differenet SQLState in Embedded  
                 *  and Network Client 
                 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2658
 		String expectedSQLState = (usingEmbedded())?"XCL13":"XCL14";
 	
 		try {
@@ -988,6 +1007,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
     /** Java method for testing procedures with boolean args */
     public static void booleanProc( boolean inarg, boolean[] outarg, boolean[] inoutarg )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         outarg[ 0 ] = inarg;
         inoutarg[ 0 ] = !inoutarg[ 0 ];
     }

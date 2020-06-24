@@ -63,10 +63,12 @@ public class LanguageDbPropertySetter implements PropertySetCallback
         
 		// Disallow changing sqlAuthorization from true to false or null after
 		// switching to Standard authorization
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		if (key.trim().equals(Property.SQL_AUTHORIZATION_PROPERTY))
 		{
 			LanguageConnectionContext lcc = (LanguageConnectionContext)
 					getContext(LanguageConnectionContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			if (lcc.usesSqlAuthorization() && !Boolean.valueOf((String)value).booleanValue())
 				throw StandardException.newException(SQLState.PROPERTY_UNSUPPORTED_CHANGE,
@@ -112,6 +114,7 @@ public class LanguageDbPropertySetter implements PropertySetCallback
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

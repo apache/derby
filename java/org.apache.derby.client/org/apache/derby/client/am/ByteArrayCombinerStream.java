@@ -74,6 +74,7 @@ public class ByteArrayCombinerStream
      */
     public ByteArrayCombinerStream(ArrayList<byte[]> arraysIn, long length) {
         // Don't allow negative length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         if (length < 0) {
             throw new IllegalArgumentException("Length cannot be negative: " +
                     length);
@@ -84,6 +85,7 @@ public class ByteArrayCombinerStream
             // Copy references to the byte arrays to a new ArrayList.
             int arrayCount = arraysIn.size();
             byte[] tmpArray;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             arrays = new ArrayList<byte[]>(arrayCount);
             // Truncate data if there are more bytes then specified.
             // Done to simplify boundary checking in the read-methods.
@@ -112,6 +114,7 @@ public class ByteArrayCombinerStream
             arrays = null;
         }
         // If we don't have enough data, throw exception.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         if (tmpRemaining > 0) {
             throw new IllegalArgumentException("Not enough data, " + 
                     tmpRemaining + " bytes short of specified length " +
@@ -166,6 +169,7 @@ public class ByteArrayCombinerStream
         } else {
             int toRead = 0;
             while (curArray != null && read < length) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
                 toRead = Math.min(curArray.length - off, length - read);
                 System.arraycopy(curArray, off, buf, offset + read, toRead);
                 read += toRead;

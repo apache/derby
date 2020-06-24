@@ -33,6 +33,8 @@ import java.util.Properties;
 	second. But any put() calls are always made directly to
 	the write object.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5830
+//IC see: https://issues.apache.org/jira/browse/DERBY-4269
     Only the put(), propertyNames() and getProperty() methods are supported
 	by this class.
 */
@@ -62,7 +64,10 @@ public final class DoubleProperties extends Properties {
 	}
 
 	public Enumeration<Object> propertyNames() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         HashSet<Object> names = new HashSet<Object>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5830
+//IC see: https://issues.apache.org/jira/browse/DERBY-4269
         addAllNames(write, names);
         addAllNames(read, names);
         return Collections.enumeration(names);

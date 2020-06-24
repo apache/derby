@@ -21,6 +21,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 /*
 
  Derby - Class org.apache.derbyTesting.functionTests.tests.lang.PredicatePushdownTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
 
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -48,8 +49,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         Properties systemProperties = new Properties();
         systemProperties.setProperty("derby.optimizer.noTimeout","true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("predicatePushdown Test");
         suite.addTest(new SystemPropertyTestSetup(new CleanDatabaseTestSetup(TestConfiguration
                 .embeddedSuite(PredicatePushdownTest.class)),systemProperties));
@@ -158,6 +161,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         // by checking the case of small (~20 row) tables. We
         // should see hash joins and table scans in ALL of these
         // cases. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         st.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
        
       
@@ -183,6 +187,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2", "2", "1", "2" }, { "4", "4", "2", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected table scan", p.usedTableScan());
         assertTrue("Expected hash join", p.usedHashJoin());
@@ -268,6 +273,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "-8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected table scan", p.usedTableScan());
         assertTrue("Expected hash join", p.usedHashJoin());
@@ -1133,6 +1142,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "1", "2", "2", "2" }, { "2", "4", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);  
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1146,6 +1156,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2", "2", "1", "2" }, { "4", "4", "2", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);  
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1165,6 +1176,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);  
         assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
         assertTrue("Expected table scan on T4", p.usedTableScan("T4"));
@@ -1178,6 +1190,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
      
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);  
         assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
         assertTrue("Expected table scan on T4", p.usedTableScan("T4"));
@@ -1195,6 +1208,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2", "4", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);  
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1220,6 +1234,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1242,6 +1257,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected Table Scan ResultSet for T1", p.usedTableScan("T1"));
         assertTrue("Expected Table Scan ResultSet for T2", p.usedTableScan("T2"));
@@ -1268,6 +1284,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         
         
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1289,6 +1306,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "-8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1304,6 +1322,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
  
         JDBC.assertEmpty(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected Table Scan ResultSet for T1", p.usedTableScan("T1"));
         assertTrue("Expected Table Scan ResultSet for T2", p.usedTableScan("T2"));
@@ -1349,6 +1368,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" }};
         
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1368,6 +1388,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "103" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         // DERBY-3819 - this test case consistently fails for 64 bit
         // temporarily (until 3819 is fixed by changing the queries with optimizer directives)
@@ -1399,6 +1420,8 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         
         
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1420,6 +1443,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "3", "6" }, { "4", "-8" }, { "4", "8" }, { "5", "10" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         // Expect to see scalar qualifiers with <= operator for four scans.
         p.findString("Operator: <=", 4);
@@ -1440,6 +1464,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected Table Scan ResultSet for T1", p.usedTableScan("T1"));
         assertTrue("Expected Table Scan ResultSet for T2", p.usedTableScan("T2"));
@@ -1461,6 +1486,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "1", "2", "2", "2" }, { "2", "4", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1487,6 +1513,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1511,6 +1538,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected Hash Join", p.usedHashJoin());
         // Can't
@@ -1542,6 +1570,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "5" },
                 { "4", "8", "4", "16" }, { "5", "10", "5", "6" }};
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1568,6 +1597,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected hash join", p.usedHashJoin());
 
@@ -1628,6 +1658,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "909" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected table scan on T1", p.usedTableScan("T1"));
         assertTrue("Expected table scan on T2", p.usedTableScan("T2"));
@@ -1651,6 +1682,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         expRS = new String[][] { { "9" }};
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1687,6 +1719,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "3", "6", "6", "24" }, { "5", "10", "10", "40" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         // DERBY-3819 - this test case consistently fails for 64 bit
         // temporarily (until 3819 is fixed by changing the queries with optimizer directives)
@@ -1713,6 +1746,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "-8", "4", "16" }, { "4", "8", "4", "16" }};
         
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected hash join", p.usedHashJoin());
  
@@ -1733,6 +1767,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "1", "2", "2", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         // DERBY-3819 - this test case consistently fails for 64 bit
         // temporarily (until 3819 is fixed by changing the queries with optimizer directives)
@@ -1758,6 +1793,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2" }};
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1773,6 +1809,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expColNames = new String[] { "I", "P" };
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected hash join", p.usedHashJoin());
         assertTrue("Expected table scan on T1", p.usedTableScan("T1"));
@@ -1793,6 +1830,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "8", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected distinct scan on T1", p.usedDistinctScan("T1"));
         assertTrue("Expected distinct scan  T3", p.usedDistinctScan("T3"));
@@ -1812,6 +1850,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "2" }, { "6", "3" }, { "6", "3" }, { "8", "4" },
                 { "8", "4" }};
         JDBC.assertFullResultSet(rs, expRS, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected distinct scan on T1", p.usedDistinctScan("T1"));
         assertTrue("Expected distinct scan  T2", p.usedDistinctScan("T2"));
@@ -1835,6 +1874,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expColNames = new String[] { "A", "I" };
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected hash join", p.usedHashJoin());
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
@@ -1855,6 +1895,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
     
 
         JDBC.assertEmpty(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
         assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
@@ -1872,6 +1913,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         p = SQLUtilities.getRuntimeStatisticsParser(st);
         assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
         assertTrue("Expected table scan on T4", p.usedTableScan("T4"));
@@ -2774,6 +2816,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         // Try the direct way first, by looking for 'sun.arch.data.model'
         String dataModel = getSystemProperty("sun.arch.data.model");
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             if (Integer.parseInt(dataModel) == 64)
                 return true;
             else 

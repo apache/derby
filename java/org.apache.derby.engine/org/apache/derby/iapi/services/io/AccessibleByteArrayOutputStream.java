@@ -69,6 +69,7 @@ public class AccessibleByteArrayOutputStream extends ByteArrayOutputStream {
      */
     public void readFrom(InputStream in) throws IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-552
        byte[] buffer = new byte[8192];
         
         for(;;)
@@ -90,6 +91,7 @@ public class AccessibleByteArrayOutputStream extends ByteArrayOutputStream {
      */
     public InputStream getInputStream()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
         return new ByteArrayInputStream(buf, 0, count);
     }
     

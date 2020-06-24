@@ -31,6 +31,7 @@ public class LocalizedOutput extends PrintWriter {
 		super(new OutputStreamWriter(o), true);
 		out = o;
 	}
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
 	LocalizedOutput(OutputStream o, String enc) throws UnsupportedEncodingException {
 		super(new OutputStreamWriter(o, enc), true);
 		out = o;

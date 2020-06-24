@@ -34,6 +34,7 @@ import org.apache.derbyTesting.junit.BaseTestSuite;
  * 
  * Each test against the old release consists of following phases:
    
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
     <OL>
     <LI> Create database with the <B>old</B> release.
     <LI> Boot the database with the <B>new</B> release in soft upgrade mode.
@@ -71,18 +72,21 @@ public class _Suite extends BaseTestCase {
      * To be able to override default values hard-coded for OLD_VERSIONS.
      */
      static final String OLD_VERSIONS_PATH_PROPERTY =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3982
          "derbyTesting.oldVersionsPath";
     /**
      * Property that indicates the location of the
      * old releases.
      */
     static final String OLD_RELEASE_PATH_PROPERTY =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         "derbyTesting.oldReleasePath";
     
     /**
      * The saved location in svn at apache for older releases for testing
      */
     static final String OLD_JAR_URL =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
         "http://svn.apache.org/repos/asf/db/derby/jars";
     
     /**
@@ -125,6 +129,7 @@ public class _Suite extends BaseTestCase {
                 + OLD_RELEASE_PATH_PROPERTY + "=" + UpgradeRun.jarPath
                 + " / " + OLD_VERSIONS_PATH_PROPERTY + "=" + UpgradeRun.oldVersionsPath;
         BaseTestSuite suite = new BaseTestSuite(id);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         old = OldVersions.getSupportedVersions();
         

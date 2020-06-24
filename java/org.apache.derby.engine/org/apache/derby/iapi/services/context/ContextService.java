@@ -63,6 +63,7 @@ public final class ContextService //OLD extends Hashtable
             and this is enforced by synchronization outside the ContextManager.
             E.g for JDBC connections, synchronization at the JDBC level.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         <LI> ContextManagerStack containing ContextManagers - the current
         thread is actively using multiple different ContextManagers,
         with nesting. All ContextManagers in the stack will have
@@ -70,6 +71,7 @@ public final class ContextService //OLD extends Hashtable
         set to -1. This is because nesting is solely represented by
         the stack, with the current context manager on top of the stack.
         This supports multiple levels of nesting across two stacks, e.g.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         C1-&gt;C2-&gt;C2-&gt;C1-&gt;C2.
 		</UL>
 
@@ -77,6 +79,7 @@ public final class ContextService //OLD extends Hashtable
 		fast access to a list of candidate contexts. If one of the contexts has its activeThread
 		equal to the current thread then it is the current context manager.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		If the thread has pushed multiple contexts (e.g. open a new non-nested Derby connection
 		from a server side method) then threadContextList will contain a Stack. The value for each cm
 		will be a push order, with higher numbers being more recently pushed.
@@ -95,6 +98,7 @@ public final class ContextService //OLD extends Hashtable
 		for the lifetime of the request. In this case this variable will contain a  WeakReference.
 		</UL>
         <BR>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Single thread for Connection execution.
         <pre>
         threadContextList.get() == cm
@@ -184,6 +188,7 @@ public final class ContextService //OLD extends Hashtable
 		ContextService.factory = this;
 
 		allContexts = new HashSet<ContextManager>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	}
 
@@ -193,11 +198,13 @@ public final class ContextService //OLD extends Hashtable
 	public static void stop()
     {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		// For some unknown reason, the ContextManager and
 		// ContextService objects will not be garbage collected
 		// without the next two lines.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
         ContextService fact = ContextService.factory;
         if (fact != null) {
             synchronized (fact) {
@@ -229,6 +236,7 @@ public final class ContextService //OLD extends Hashtable
 	public static Context getContext(String contextId)
     {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		ContextManager cm = getFactory().getCurrentContextManager();
@@ -252,6 +260,8 @@ public final class ContextService //OLD extends Hashtable
 	public static Context getContextOrNull(String contextId)
     {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		ContextService csf = factory;
@@ -301,6 +311,7 @@ public final class ContextService //OLD extends Hashtable
 		if (list == null)
 			return null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return ((ContextManagerStack) list).peek();
 	}
 
@@ -345,6 +356,7 @@ public final class ContextService //OLD extends Hashtable
 		}
 
 		if (cm.activeCount != -1) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 			if (--cm.activeCount == 0) {
 				cm.activeThread = null;
                 
@@ -364,6 +376,7 @@ public final class ContextService //OLD extends Hashtable
 		}
 
         ContextManagerStack stack = (ContextManagerStack) tcl.get();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Remove the context manager at the top of the stack.
         stack.pop();
@@ -410,6 +423,8 @@ public final class ContextService //OLD extends Hashtable
 	private boolean addToThreadList(Thread me, ContextManager associateCM) {
 
 		ThreadLocal<Object> tcl = threadContextList;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		if (tcl == null) {
 			// The context service is already stopped.
@@ -429,6 +444,7 @@ public final class ContextService //OLD extends Hashtable
 			return true;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ContextManagerStack stack;
 		if (list instanceof ContextManager) {
             
@@ -449,6 +465,7 @@ public final class ContextService //OLD extends Hashtable
             
             // Nested, need to create a Stack of ContextManagers,
             // the top of the stack will be the active one.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             stack = new ContextManagerStack();
 			tcl.set(stack);
             
@@ -466,6 +483,7 @@ public final class ContextService //OLD extends Hashtable
 		{
             // existing stack, nesting represented
             // by stack entries, not activeCount.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             stack = (ContextManagerStack) list;
 		}
 
@@ -567,6 +585,7 @@ public final class ContextService //OLD extends Hashtable
 
 		synchronized (this) {
             for (ContextManager cm : allContexts) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 				Thread active = cm.activeThread;
 
@@ -576,11 +595,13 @@ public final class ContextService //OLD extends Hashtable
 				if (active == null)
 					continue;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2564
                 final Thread fActive = active;
 				if (cm.setInterrupted(c))
                 {
                     try {
                         AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                 new PrivilegedAction<Void>() {
                                     public Void run()  {
                                         fActive.interrupt();
@@ -600,6 +621,7 @@ public final class ContextService //OLD extends Hashtable
      * Remove a ContextManager from the list of all active
      * contexts managers.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
     synchronized void removeContext(ContextManager cm)
     {
         if (allContexts != null)

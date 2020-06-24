@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ValueNodeList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -40,6 +41,7 @@ import org.apache.derby.iapi.util.JBitSet;
  * e.g. IN list, NOT IN list or BETWEEN in a DML statement.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 {
     ValueNodeList(ContextManager cm) {
@@ -54,6 +56,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addValueNode(ValueNode valueNode) throws StandardException
 	{
 		addElement(valueNode);
@@ -70,6 +74,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     void bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -77,8 +82,10 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode vn = elementAt(index);
             vn = vn.bindExpression(fromList, subqueryList, aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 			setElementAt(vn, index);
 		}
@@ -93,6 +100,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void genSQLJavaSQLTrees()
 		throws StandardException
 	{
@@ -100,8 +109,10 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode valueNode = elementAt(index);
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			if (valueNode.getTypeId().userType())
 			{
 				setElementAt(valueNode.genSQLJavaSQLTree(), index);
@@ -145,6 +156,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DataTypeDescriptor getDominantTypeServices() throws StandardException
 	{
 		DataTypeDescriptor	dominantDTS = null;
@@ -166,6 +179,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 			ValueNode			valueNode;
 
             valueNode = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             // Skip nodes that take their type from the context, if they
             // haven't already been bound to a type.
@@ -176,6 +190,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
 			if (valueNodeDTS.getTypeId().isStringTypeId())
 			{
 				if (firstCollationDerivation == -1)
@@ -205,6 +220,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		//if following if returns true, then it means that we are dealing with 
 		//string operands.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
 		if (firstCollationDerivation != -1)
 		{
 			if (foundCollationMisMatch) {
@@ -232,12 +248,15 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DataTypeDescriptor getTypeServices() throws StandardException
 	{
 		int size = size();
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode valueNode = elementAt(index);
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
@@ -268,6 +287,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 		{
 			ValueNode			valueNode;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             valueNode = elementAt(index);
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
@@ -292,8 +312,11 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 * @param leftOperand	Check for compatibility against this parameter's type
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void compatible(ValueNode leftOperand) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         TypeId leftType = leftOperand.getTypeId();
         TypeCompiler leftTC = leftOperand.getTypeCompiler();
 
@@ -325,6 +348,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void comparable(ValueNode leftOperand) throws StandardException
 	{
 		int			 size = size();
@@ -333,16 +358,20 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 		for (int index = 0; index < size; index++)
 		{
             valueNode = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			/*
 			** Can the types be compared to each other?  If not, throw an
 			** exception.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2569
 			if (! leftOperand.getTypeServices().comparable(valueNode.getTypeServices(),
 									false,
 									getClassFactory()))
 			{
 				throw StandardException.newException(SQLState.LANG_NOT_COMPARABLE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2668
 						leftOperand.getTypeServices().getSQLTypeNameWithCollation(),
 						valueNode.getTypeServices().getSQLTypeNameWithCollation()
 						);
@@ -363,6 +392,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (elementAt(index).getTypeServices().isNullable())
 			{
 				return true;
@@ -382,6 +412,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (elementAt(index).requiresTypeFromContext())
 			{
 				return true;
@@ -401,6 +432,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (! (elementAt(index).requiresTypeFromContext()))
 			{
 				return false;
@@ -420,6 +452,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (! (elementAt(index) instanceof ConstantNode))
 			{
 				return false;
@@ -440,6 +473,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode vNode = elementAt(index);
 			if (!vNode.requiresTypeFromContext() &&
 			    !(vNode instanceof ConstantNode))
@@ -506,6 +540,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
      * @param underNotNode whether or not we are under a NotNode
      * @see ValueNode#eliminateNots(boolean)
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
     void eliminateNots(boolean underNotNode) throws StandardException {
         for (int i = 0; i < size(); i++) {
             setElementAt(elementAt(i).eliminateNots(underNotNode), i);
@@ -519,6 +554,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setParameterDescriptor(DataTypeDescriptor descriptor)
 						throws StandardException
 	{
@@ -526,7 +563,10 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode valueNode = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			if (valueNode.requiresTypeFromContext())
 			{
 				valueNode.setType(descriptor);
@@ -545,6 +585,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
@@ -570,6 +612,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNodeList remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -577,6 +621,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             setElementAt(elementAt(index).remapColumnReferencesToExpressions(),
                          index);
 		}
@@ -596,11 +641,13 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
      * @see ValueNode#isEquivalent(ValueNode)
      */
     boolean isEquivalent(ValueNodeList other) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4600
         if (size() != other.size()) {
             return false;
         }
 
         for (int i = 0; i < size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode vn1 = elementAt(i);
             ValueNode vn2 = other.elementAt(i);
             if (!vn1.isEquivalent(vn2)) {
@@ -624,6 +671,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 		{
 			boolean retcode;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             retcode = elementAt(index).isConstantExpression();
 			if (! retcode)
 			{
@@ -643,6 +691,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 		{
 			boolean retcode;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             retcode = elementAt(index).constantExpression(whereClause);
 			if (! retcode)
 			{
@@ -679,6 +728,8 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 	 * @exception StandardException		Thrown on error
 	 */
     boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates
@@ -690,6 +741,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             pushable = elementAt(index).categorize(referencedTabs, simplePredsOnly) &&
 					   pushable;
 		}

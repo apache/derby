@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.TableElementNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -31,6 +32,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class TableElementNode extends QueryTreeNode
 {
     /////////////////////////////////////////////////////////////////////////
@@ -74,6 +77,8 @@ class TableElementNode extends QueryTreeNode
 	 * @param name	The name of the table element, if any
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TableElementNode(String name, ContextManager cm)
 	{
         super(cm);
@@ -156,6 +161,8 @@ class TableElementNode extends QueryTreeNode
 	 *
 	 * @return String	The name.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getName()
 	{
 		return name;
@@ -175,6 +182,7 @@ class TableElementNode extends QueryTreeNode
 		else if ( this instanceof ConstraintDefinitionNode ) { return AT_DROP_CONSTRAINT; }
 		else if ( this instanceof ModifyColumnNode )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (((ModifyColumnNode)this).kind == ModifyColumnNode.K_DROP_COLUMN)
             {
                 return AT_DROP_COLUMN;

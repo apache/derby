@@ -45,6 +45,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     private DatabaseMetaData meta;
 
     public TestDbMetaData(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1989
         super(name);
     }
 
@@ -73,12 +74,14 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         s.execute("CREATE FUNCTION DUMMY4 ( X VARCHAR(128), Y INTEGER ) "+
                   "RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE "+
                   "JAVA EXTERNAL NAME 'java.some.func'");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         s.execute("CREATE FUNCTION DUMMY5 ( X BOOLEAN ) "+
                   "RETURNS BOOLEAN PARAMETER STYLE JAVA NO SQL LANGUAGE "+
                   "JAVA EXTERNAL NAME 'java.some.func'");
     }
 
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite testSuite = new BaseTestSuite(name);
         testSuite.addTestSuite(TestDbMetaData.class);
         return new CleanDatabaseTestSetup(testSuite) {
@@ -89,7 +92,10 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("TestDbMetaData suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         suite.addTest(baseSuite("TestDbMetaData:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("TestDbMetaData:client")));
@@ -102,6 +108,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     }
 
     public void testAutoCommitFailureClosesAllResultSets() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3422
         if (usingEmbedded()) {
             assertTrue(meta.autoCommitFailureClosesAllResultSets());
         } else {
@@ -135,6 +142,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
                 Types.SMALLINT, Types.VARCHAR };
         JDBC.assertDatabaseMetaDataColumns(rs, ColTypes, new String[] {
             "FUNCTION_CAT", "FUNCTION_SCHEM", "FUNCTION_NAME", "REMARKS",
+//IC see: https://issues.apache.org/jira/browse/DERBY-2983
             "FUNCTION_TYPE", "SPECIFIC_NAME" });
     }
     
@@ -146,6 +154,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         { null, "APP", "DUMMY2", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "APP", "DUMMY3", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "APP", "DUMMY4", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         { null, "APP", "DUMMY5", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
           "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
@@ -225,6 +234,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
 
     public void testGetFunctionsFromSysSchemas() throws SQLException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
         getSysFunctions();
         // Any function in a schema starting with "SYS"
         ResultSet rs = meta.getFunctions(null, "SYS%", null);
@@ -298,6 +308,8 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         // NO catalog (none)
         ResultSet rs = meta.getFunctions("", "", null);
         assertGetFunctionsRs(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2744
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         JDBC.assertEmpty(rs);
     }
 
@@ -319,6 +331,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         ResultSet rs = meta.getFunctionColumns(null, null, "DUMMY%", null);
         assertGetFunctionColumnsRs(rs);
         Object[][] expectedRows = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             { null, "APP", "DUMMY1", "", 4, 5,
               "SMALLINT", 5, 2, 0,
               10, 1, null, null, 0,
@@ -381,6 +394,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         ResultSet rs = meta.getFunctionColumns(null, null, "DUMMY%", "");
         assertGetFunctionColumnsRs(rs);
         Object[][] expectedRows = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             { null, "APP", "DUMMY1", "", 4, 5,
               "SMALLINT", 5, 2, 0,
               10, 1, null, null, 0,
@@ -464,6 +478,10 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         // set when a schema is passed with no match
         ResultSet rs = meta.getSchemas(null, "BLAH");
         assertGetSchemasRs(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2744
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2744
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         JDBC.assertEmpty(rs);
     }
 
@@ -487,6 +505,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
             success = false;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1989
         assertEquals("supportsStoredFunctionsUsingCallSyntax() returned " +
                      "value which doesn't match actual behaviour.",
                      success, meta.supportsStoredFunctionsUsingCallSyntax());
@@ -505,6 +524,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
 
         // IMPORTANT: use auto-commit
         getConnection().setAutoCommit(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3422
 
         ResultSet[] rss = new ResultSet[2];
         // Use different statements so that both result sets are kept open

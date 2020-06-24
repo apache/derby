@@ -37,6 +37,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * this.  A more efficient skip implementation should also be
  * straight-forward.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ClobLocatorReader extends Reader {
     /**
      * Connection used to read Clob from server.
@@ -76,6 +77,7 @@ class ClobLocatorReader extends Reader {
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobLocatorReader(ClientConnection connection, ClientClob clob)
     throws SqlException {
         if (SanityManager.DEBUG) {
@@ -106,8 +108,12 @@ class ClobLocatorReader extends Reader {
      *            retrieved.
      * @param len The length in characters of the partial value to be retrieved.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobLocatorReader(ClientConnection connection, ClientClob clob,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
             long pos, long len) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2622
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());
         }
@@ -115,10 +121,12 @@ class ClobLocatorReader extends Reader {
         this.connection = connection;
         this.clob = clob;
         this.currentPos = pos;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
         if(len != -1) {
             this.maxPos = Math.min(clob.sqlLength(), pos + len - 1);
         }
         else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             this.maxPos = -1;
         }
     }
@@ -145,6 +153,7 @@ class ClobLocatorReader extends Reader {
     public int read(char[] c, int off, int len) throws IOException {
         checkClosed();
         if (len == 0) return 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         if ((off < 0) || (len < 0) || (len > c.length - off)) {
             throw new IndexOutOfBoundsException();
         }
@@ -207,10 +216,12 @@ class ClobLocatorReader extends Reader {
             int actualLength = -1;
             //check if maxPos has been set and calculate actualLength
             //based on that.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             if(maxPos != -1) {
                 //maxPos has been set. use maxPos to calculate the
                 //actual length based on the value set for maxPos.
                 actualLength 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                     = (int )Math.min(len, maxPos - currentPos + 1);
             }
             else {

@@ -29,6 +29,7 @@ import java.io.IOException;
 
 /**
   Class: HandleResult
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
   Purpose: To capture stdout and stderr to a file
   (PrintWriter is used for writing the output)
 */
@@ -41,6 +42,7 @@ public class HandleResult
 	}
 
 	public static String handleResult(int exitCode, InputStream stdout,
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
 	        InputStream stderr, PrintWriter printWriter)
 	        throws IOException
 	{
@@ -60,6 +62,7 @@ public class HandleResult
         if (stdout != null)
         {
     		// reader for stdout
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
         	BufferedReader outReader;
         	if(encoding != null)
         		outReader = new BufferedReader(new InputStreamReader(stdout, encoding));
@@ -86,6 +89,7 @@ public class HandleResult
         if (stderr != null)
         {
             // reader for stderr
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
         	BufferedReader errReader;
         	if(encoding != null)
         		errReader = new BufferedReader(new InputStreamReader(stderr, encoding));

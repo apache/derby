@@ -53,6 +53,7 @@ public class StatementUtil
 			break;
 
 		  default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
 			retval = "UNKNOWN";
 			break;
 		}
@@ -86,6 +87,7 @@ public class StatementUtil
      */
 	public static SchemaDescriptor	getSchemaDescriptor
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
          String schemaName,
          boolean raiseError,
          DataDictionary dataDictionary,

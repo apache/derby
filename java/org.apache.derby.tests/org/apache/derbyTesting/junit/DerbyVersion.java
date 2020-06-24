@@ -124,6 +124,7 @@ public class DerbyVersion
         this.minor = minor;
         this.fixpack = fixpack;
         this.point = point;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5475
         this.simpleVersion = new Version(major, minor);
     }
 

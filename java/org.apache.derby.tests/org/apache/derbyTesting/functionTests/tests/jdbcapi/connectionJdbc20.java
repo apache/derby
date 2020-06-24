@@ -76,6 +76,7 @@ public class connectionJdbc20{
             load_data(connreturn);
             
 			// read the data   of each type with all the possible functions
+//IC see: https://issues.apache.org/jira/browse/DERBY-721
 			ResultSet rs = stmt.executeQuery("select " + 
 							 "c1," + 
 							 "c2," + 
@@ -98,6 +99,7 @@ public class connectionJdbc20{
                         get_using_string(rs, i);
 			
 			get_using_ascii_stream(rs, i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-721
 
                         if(i < 4 ) // only c1 , c2, c3
                         {
@@ -114,6 +116,7 @@ public class connectionJdbc20{
                     System.out.println("Got Different Statement Object");
                 
                 rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-721
 		rs = stmt.executeQuery("select " + 
 				       "c1," + 
 				       "c2," + 

@@ -171,6 +171,7 @@ class CreateTableConstantAction extends DDLConstantAction
         //     table holds.
         //   o create array of collation id's to tell collation id of each
         //     column in table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		template            = RowUtil.getEmptyValueRow(columnInfo.length, lcc);
         int[] collation_ids = new int[columnInfo.length];
 
@@ -205,6 +206,7 @@ class CreateTableConstantAction extends DDLConstantAction
 				"heap", // we're requesting a heap conglomerate
 				template.getRowArray(), // row template
 				null, //column sort order - not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 collation_ids,
 				properties, // properties
 				tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE ?
@@ -287,6 +289,11 @@ class CreateTableConstantAction extends DDLConstantAction
                      defaultUUID,
                      columnInfo[ix].autoincStart,
                      columnInfo[ix].autoincInc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
                      columnInfo[ix].autoinc_create_or_modify_Start_Increment,
                      columnInfo[ix].autoincCycle
                      );
@@ -314,6 +321,11 @@ class CreateTableConstantAction extends DDLConstantAction
                      td,
                      defaultUUID,
                      columnInfo[ix].autoincStart,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
                      columnInfo[ix].autoincInc,
                      columnInfo[ix].autoincCycle
                      );
@@ -422,6 +434,11 @@ class CreateTableConstantAction extends DDLConstantAction
 
 	boolean cycling=false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 	if(info.autoincCycle)
 		cycling=true;
 	

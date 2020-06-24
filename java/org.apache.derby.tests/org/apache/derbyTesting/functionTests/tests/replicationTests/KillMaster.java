@@ -53,6 +53,7 @@ public class KillMaster extends BaseJDBCTestCase
     {
         System.out.println("**** KillMaster.suite()");
         System.out.println("'KillMaster' can not be run outside the 'ReplicationRun' framework.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("KillMaster");
          
         String masterHostName = System.getProperty("test.serverHost", "localhost");
@@ -130,6 +131,7 @@ public class KillMaster extends BaseJDBCTestCase
                 masterServerHost,
                 ReplicationRun.ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 ReplicationRun.masterDbSubPath); // Distinguishing master/slave
                                                   // Will only work if default/initial values are used!
                                                   // MUST BE FULL PATH!!!

@@ -189,6 +189,7 @@ class OptimizerImpl implements Optimizer
 	private boolean usingPredsPushedFromAbove;
 	private boolean bestJoinOrderUsedPredsFromAbove;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
 	OptimizerImpl(OptimizableList optimizableList, 
 				  OptimizablePredicateList predicateList,
 				  DataDictionary dDictionary,
@@ -200,7 +201,9 @@ class OptimizerImpl implements Optimizer
 				  int tableLockThreshold,
 				  RequiredRowOrdering requiredRowOrdering,
                   int numTablesInQuery,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
                   OptimizerPlan overridingPlan,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
                   LanguageConnectionContext lcc )
 		throws StandardException
 	{
@@ -225,6 +228,7 @@ class OptimizerImpl implements Optimizer
 		this.numTablesInQuery = numTablesInQuery;
 		numOptimizables = optimizableList.size();
 		proposedJoinOrder = new int[numOptimizables];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2130
         if (initJumpState() == READY_TO_JUMP)
             firstLookOrder = new int[numOptimizables];
 
@@ -281,6 +285,7 @@ class OptimizerImpl implements Optimizer
         }
 
         // make sure that optimizer overrides are bound and left-deep
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         if ( overridingPlan != null )
         {
             if ( !overridingPlan.isBound() )
@@ -359,6 +364,7 @@ class OptimizerImpl implements Optimizer
 		 * can take advantage of the pushed predicates.
 		 */
 		usingPredsPushedFromAbove = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1073
 		if ((predicateList != null) && (predicateList.size() > 0))
 		{
 			for (int i = predicateList.size() - 1; i >= 0; i--)
@@ -400,6 +406,7 @@ class OptimizerImpl implements Optimizer
          * (most notably, an uninitialized bestCost, which we should never see).
          * DERBY-1905.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2130
         initJumpState();
     }
     
@@ -416,6 +423,7 @@ class OptimizerImpl implements Optimizer
 
     public int getMaxMemoryPerTable()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
         return maxMemoryPerTable;
     }
     
@@ -516,6 +524,8 @@ class OptimizerImpl implements Optimizer
 				// proceed with normal timeout logic.
 				if (firstLookOrder == null)
 					firstLookOrder = new int[numOptimizables];
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 System.arraycopy(
                         bestJoinOrder, 0, firstLookOrder, 0, numOptimizables);
 				permuteState = JUMPING;
@@ -576,6 +586,7 @@ class OptimizerImpl implements Optimizer
 		 * (if the latter is applicable) are greater than bestCost.
 		 */
 		boolean alreadyCostsMore =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1357
 			!bestCost.isUninitialized() &&
 			(currentCost.compare(bestCost) > 0) &&
 			((requiredRowOrdering == null) ||
@@ -638,6 +649,7 @@ class OptimizerImpl implements Optimizer
 			// as we rewind since they may have been clobbered
 			// (as part of the current join order) before we gave
 			// up on jumping.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1365
 			reloadBestPlan = true;
 			rewindJoinOrder();  //fall
 			permuteState = NO_JUMP;  //give up
@@ -774,6 +786,7 @@ class OptimizerImpl implements Optimizer
 					// here.
 						if (joinPosition > 0) {
 							joinPosition--;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1365
 							reloadBestPlan = true;
 							rewindJoinOrder();
 						}
@@ -993,6 +1006,7 @@ class OptimizerImpl implements Optimizer
 					joinPosition--;
 					if (joinPosition >= 0)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1365
 						reloadBestPlan = true;
 						rewindJoinOrder();
 						joinPosition = -1;
@@ -1108,11 +1122,13 @@ class OptimizerImpl implements Optimizer
 	 * subtracting 3.14E40.
 	 */
 	private double recoverCostFromProposedJoinOrder(boolean sortAvoidance)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3214
 		throws StandardException
 	{
 		double recoveredCost = 0.0d;
 		for (int i = 0; i < joinPosition; i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3214
 			if (sortAvoidance)
 			{
 				recoveredCost +=
@@ -1216,11 +1232,13 @@ class OptimizerImpl implements Optimizer
 			** here,try to make some sense of things by adding up costs
 			** as they existed prior to pullMe...
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-3214
 			if (newCost <= 0.0)
 			{
 				if (joinPosition == 0)
 					newCost = 0.0;
 				else
+//IC see: https://issues.apache.org/jira/browse/DERBY-3214
 					newCost = recoverCostFromProposedJoinOrder(false);
 			}
 		}
@@ -1301,6 +1319,7 @@ class OptimizerImpl implements Optimizer
 				}
 
 				// See discussion above for "newCost"; same applies here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3214
 				if (prevEstimatedCost <= 0.0)
 				{
 					if (joinPosition == 0)
@@ -1308,6 +1327,7 @@ class OptimizerImpl implements Optimizer
 					else
 					{
 						prevEstimatedCost =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3214
 							recoverCostFromProposedJoinOrder(true);
 					}
 				}
@@ -1592,6 +1612,7 @@ class OptimizerImpl implements Optimizer
 		
 		// RESOLVE: Should we step through the different join strategies here?
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         while ( true )
         {
             /* Returns true until all access paths are exhausted */
@@ -1827,6 +1848,10 @@ class OptimizerImpl implements Optimizer
 				** of better alternative we look at the row counts.  See
 				** CostEstimateImpl.compare() for more.
 				*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
 				if ((! foundABestPlan) ||
 					(currentCost.compare(bestCost) < 0) ||
 					bestCost.isUninitialized())
@@ -1867,6 +1892,7 @@ class OptimizerImpl implements Optimizer
 					curOpt.considerSortAvoidancePath())
 				{
 					if (requiredRowOrdering.sortRequired(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6148
                             bestRowOrdering,
                             optimizableList,
                             proposedJoinOrder) ==
@@ -1874,6 +1900,10 @@ class OptimizerImpl implements Optimizer
 					{
 						if (tracingIsOn()) { tracer().traceCurrentPlanAvoidsSort( bestCost, currentSortAvoidanceCost ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
 						if ((currentSortAvoidanceCost.compare(bestCost) <= 0)
 							|| bestCost.isUninitialized())
 						{
@@ -1892,6 +1922,7 @@ class OptimizerImpl implements Optimizer
      * Get the unique tuple descriptor of the current access path for an Optimizable.
      */
     private UniqueTupleDescriptor   getTupleDescriptor( Optimizable optimizable )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         throws StandardException
     {
         if ( isTableFunction( optimizable ) )
@@ -1953,6 +1984,8 @@ class OptimizerImpl implements Optimizer
 		*/
 		bestJoinOrderUsedPredsFromAbove = usingPredsPushedFromAbove;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         System.arraycopy(
                 proposedJoinOrder, 0, bestJoinOrder, 0, numOptimizables);
 
@@ -1974,6 +2007,7 @@ class OptimizerImpl implements Optimizer
 		if (tracingIsOn())
 		{
 			if (requiredRowOrdering != null)    { tracer().traceSortNeededForOrdering( planType, requiredRowOrdering ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             tracer().traceRememberingBestJoinOrder
                 ( joinPosition, ArrayUtil.copy( bestJoinOrder ), planType, currentCost, (JBitSet) assignedTableMap.clone() );
 		}
@@ -2222,6 +2256,8 @@ class OptimizerImpl implements Optimizer
 		** If all else fails, and no conglomerate has been picked yet,
 		** pick this one.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ConglomerateDescriptor bestConglomerateDescriptor =
             bestAp.getConglomerateDescriptor();
 
@@ -2337,6 +2373,7 @@ class OptimizerImpl implements Optimizer
 				** path avoid a sort?
 				*/
 				if (requiredRowOrdering.sortRequired(currentRowOrdering,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6148
                                                      assignedTableMap,
                                                      optimizableList,
                                                      proposedJoinOrder)
@@ -2347,6 +2384,14 @@ class OptimizerImpl implements Optimizer
 
 					/* Is this the cheapest sort-avoidance path? */
 					if ((bestCostEstimate == null) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
 						bestCostEstimate.isUninitialized() ||
 						(estimatedCost.compare(bestCostEstimate) < 0))
 					{
@@ -2408,6 +2453,10 @@ class OptimizerImpl implements Optimizer
 		// That check is performed in getNextDecoratedPermutation() of
 		// this class.
 		optimizable.getCurrentAccessPath().setCostEstimate(estimatedCost);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
 
 		/*
 		** Skip this access path if it takes too much memory.
@@ -2440,6 +2489,10 @@ class OptimizerImpl implements Optimizer
 		CostEstimate bestCostEstimate = ap.getCostEstimate();
 
 		if ((bestCostEstimate == null) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
 			bestCostEstimate.isUninitialized() ||
 			(estimatedCost.compare(bestCostEstimate) <= 0))
 		{
@@ -2467,6 +2520,7 @@ class OptimizerImpl implements Optimizer
 				** path avoid a sort?
 				*/
 				if (requiredRowOrdering.sortRequired(currentRowOrdering,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6148
                                                     assignedTableMap,
                                                      optimizableList,
                                                      proposedJoinOrder)
@@ -2477,6 +2531,10 @@ class OptimizerImpl implements Optimizer
 
 					/* Is this the cheapest sort-avoidance path? */
 					if ((bestCostEstimate == null) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
 						bestCostEstimate.isUninitialized() ||
 						(estimatedCost.compare(bestCostEstimate) < 0))
 					{
@@ -2575,6 +2633,8 @@ class OptimizerImpl implements Optimizer
 		// optimizable.
 		finalCostEstimate = getNewCostEstimate(0.0d, 0.0d, 0.0d);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         for (int i = 0; i < bestJoinOrder.length; i++)
 		{
             CostEstimate ce = optimizableList.getOptimizable(bestJoinOrder[i])
@@ -2718,9 +2778,12 @@ class OptimizerImpl implements Optimizer
 	/** @see Optimizer#getLevel */
 	public int getLevel()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
 		return 2;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimateImpl getNewCostEstimate(double theCost,
 							double theRowCount,
 							double theSingleScanRowCount)
@@ -2760,6 +2823,8 @@ class OptimizerImpl implements Optimizer
 				if (savedJoinOrders != null)
 				{
 					savedJoinOrders.remove(planKey);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     if (savedJoinOrders.isEmpty()) {
 						savedJoinOrders = null;
                     }
@@ -2770,6 +2835,7 @@ class OptimizerImpl implements Optimizer
 				// If the savedJoinOrder map already exists, search for the
 				// join order for the target optimizer and reuse that.
 				if (savedJoinOrders == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					savedJoinOrders = new HashMap<Object,int[]>();
 				else
 					joinOrder = savedJoinOrders.get(planKey);
@@ -2779,6 +2845,8 @@ class OptimizerImpl implements Optimizer
 				if (joinOrder == null)
 					joinOrder = new int[numOptimizables];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 System.arraycopy(
                         bestJoinOrder, 0, joinOrder, 0, bestJoinOrder.length);
 
@@ -2794,9 +2862,12 @@ class OptimizerImpl implements Optimizer
 				// for which there was no valid plan.
 				if (savedJoinOrders != null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					joinOrder = savedJoinOrders.get(planKey);
 					if (joinOrder != null)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         System.arraycopy(
                             joinOrder, 0, bestJoinOrder, 0, joinOrder.length);
 					}
@@ -2834,6 +2905,8 @@ class OptimizerImpl implements Optimizer
 	 * @param pList List of predicates to add to this OptimizerImpl's
 	 *  own list for pushing.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addScopedPredicatesToList(PredicateList pList, ContextManager cm)
 		throws StandardException
 	{
@@ -2845,6 +2918,8 @@ class OptimizerImpl implements Optimizer
 		// in this case, there is no 'original' predicateList, so we
 		// can just create one.
             predicateList = new PredicateList(cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		// First, we need to go through and remove any predicates in this
 		// optimizer's list that may have been pushed here from outer queries
@@ -2852,6 +2927,8 @@ class OptimizerImpl implements Optimizer
 		// predicate was pushed from an outer query because it will have
 		// been scoped to the node for which this OptimizerImpl was
 		// created.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         Predicate pred;
 		for (int i = predicateList.size() - 1; i >= 0; i--) {
 			pred = (Predicate)predicateList.getOptPredicate(i);

@@ -116,6 +116,7 @@ public class AddDerbyNature implements IObjectActionDelegate
             IClasspathEntry[] rawClasspath = currentJavaProject
                     .getRawClasspath();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1931
             List<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>(rawClasspath.length+1);            
             for(IClasspathEntry e: rawClasspath) {
             	newEntries.add(e);

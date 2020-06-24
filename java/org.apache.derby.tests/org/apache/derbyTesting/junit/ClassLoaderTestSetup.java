@@ -45,6 +45,7 @@ public class ClassLoaderTestSetup extends BaseJDBCTestSetup {
     }
 
     private static ClassLoader makeClassLoader() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6881
         PrivilegedAction<ClassLoader> pa = () -> new URLClassLoader(new URL[0]);
         return AccessController.doPrivileged(pa);
     }
@@ -54,6 +55,7 @@ public class ClassLoaderTestSetup extends BaseJDBCTestSetup {
         super.setUp();
         TestConfiguration.getCurrent().shutdownEngine();
         oldLoader = getThreadLoader();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6881
         setThreadLoader(makeClassLoader());
     }
 

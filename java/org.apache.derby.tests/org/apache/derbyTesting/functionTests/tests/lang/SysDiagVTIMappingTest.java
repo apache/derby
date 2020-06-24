@@ -61,6 +61,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Diagnostic VTI Table Mappings");
 
@@ -90,6 +91,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
     public void setUp() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2709
         Statement stmt = createStatement();
         stmt.execute("create table app.t1 (i int, c varchar(10))");
         stmt.execute("insert into app.t1 values (1, 'one'), "
@@ -895,6 +897,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         // 2-arg version
         ResultSet rs = st.executeQuery
             ("select * from table(syscs_diag.contained_roles(null, 0))t");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3930
 
         JDBC.assertEmpty(rs);
 
@@ -933,6 +936,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
         String  timestampString = rs.getString( 1 ).trim();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5414
         SimpleDateFormat sdf =
             new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
         Timestamp   timestamp = new Timestamp( sdf.parse( timestampString ).getTime() );
@@ -1006,6 +1010,8 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         cSt.setString(1, "SYSCS_DIAG");
         cSt.setString(2, vtiTableName.toUpperCase());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
         assertStatementError("42X62", cSt);
         
         cSt = prepareCall(

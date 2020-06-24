@@ -84,6 +84,7 @@ class DropSchemaConstantAction extends DDLConstantAction
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4822
 
 		/*
 		** Inform the data dictionary that we are about to write to it.
@@ -97,8 +98,11 @@ class DropSchemaConstantAction extends DDLConstantAction
 		dd.startWriting(lcc);
 
         SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4822
 
         sd.drop(lcc, activation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 
 	}
 

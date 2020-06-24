@@ -44,6 +44,7 @@ import java.util.Hashtable;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 
 class Request {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // byte array buffer used for constructing requests.
     // currently requests are built starting at the beginning of the buffer.
@@ -81,8 +82,11 @@ class Request {
     // construct a request object specifying the minimum buffer size
     // to be used to buffer up the built requests.  also specify the ccsid manager
     // instance to be used when building ddm character data.
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
     Request(NetAgent netAgent, int minSize) {
         netAgent_ = netAgent;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         buffer = ByteBuffer.allocate(minSize);
         clearBuffer();
     }
@@ -110,6 +114,7 @@ class Request {
     // will be expanded by the larger of (2 * current size) or (current size + length).
     // the data from the previous buffer is copied into the larger buffer.
     private final void ensureLength(int length) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         if (length > buffer.remaining()) {
             int newLength =
                 Math.max(buffer.capacity() * 2, buffer.position() + length);
@@ -173,6 +178,7 @@ class Request {
 
         // RQSDSS header is 6 bytes long: (ll)(Cf)(rc)
         ensureLength(6);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
 
         // Save the position of the length bytes, so they can be updated with a
         // different value at a later time.
@@ -193,6 +199,7 @@ class Request {
             }
         }
         buffer.put((byte) dssType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
 
         // Write the request correlation id (two bytes, token rc).
         // use method that writes a short
@@ -219,14 +226,17 @@ class Request {
     }
     
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
                                  long length,
                                  InputStream in,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, SqlException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRIDDTA ||
             netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRPWDDTA) {
             // DERBY-4706
@@ -235,10 +245,12 @@ class Request {
             // state.
             // Throw an exception for now until we're positive the code can be
             // ditched, later this comment/code itself can also be removed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4706
             throw new SqlException(netAgent_.logWriter_,
                     new ClientMessageId(SQLState.NOT_IMPLEMENTED),
                     "encrypted scalar streams");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         }else{
             
             writePlainScalarStream(chained,
@@ -271,24 +283,32 @@ class Request {
      * @throws DisconnectException if a severe error condition is encountered,
      *      causing the connection to be broken
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
                                               long length,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                               InputStream in,
                                               boolean writeNullByte,
                                               int parameterIndex) throws DisconnectException, SqlException {
         // We don't have the metadata available when we create this request
         // object, so we have to check here if we are going to write the status
         // byte or not.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         final boolean writeEXTDTAStatusByte =
                 netAgent_.netConnection_.serverSupportsEXTDTAAbort();
 
         // If the Derby specific status byte is sent, the number of bytes to
         // send differs from the number of bytes to read (off by one byte).
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
         long leftToRead = length;
         long bytesToSend = writeEXTDTAStatusByte ? leftToRead + 1 : leftToRead;
         int extendedLengthByteCount = prepScalarStream(chained,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                                                        chainedWithSameCorrelator,
                                                        writeNullByte,
                                                        bytesToSend);
@@ -304,6 +324,7 @@ class Request {
             bytesToRead--;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         buildLengthAndCodePointForLob(codePoint,
                                       bytesToSend,
                                       writeNullByte,
@@ -313,6 +334,7 @@ class Request {
         do {
             do {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                     bytesRead =
                         in.read(buffer.array(), buffer.position(), bytesToRead);
                 } catch (IOException ioe) {
@@ -340,6 +362,7 @@ class Request {
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     netAgent_.accumulateReadException(
                             new SqlException(
                             netAgent_.logWriter_,
@@ -349,10 +372,12 @@ class Request {
                     return;
                 }
                 if (bytesRead == -1) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
                     status = DRDAConstants.STREAM_TOO_SHORT;
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     netAgent_.accumulateReadException(
                         new SqlException(netAgent_.logWriter_,
                             new ClientMessageId(SQLState.NET_PREMATURE_EOS),
@@ -360,6 +385,7 @@ class Request {
                     return;
                 } else {
                     bytesToRead -= bytesRead;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                     buffer.position(buffer.position() + bytesRead);
                     leftToRead -= bytesRead;
                 }
@@ -371,8 +397,10 @@ class Request {
         // check to make sure that the specified length wasn't too small
         try {
             if (in.read() != -1) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
                 status = DRDAConstants.STREAM_TOO_LONG;
                 // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 netAgent_.accumulateReadException(new SqlException(
                         netAgent_.logWriter_,
                         new ClientMessageId(
@@ -385,9 +413,12 @@ class Request {
                     netAgent_.logWriter_,
                     new ClientMessageId(
                         SQLState.NET_EXCEPTION_ON_STREAMLEN_VERIFICATION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, parameterIndex, e.getMessage()));
         }
         // Write the status byte to the send buffer.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         if (writeEXTDTAStatusByte) {
             writeEXTDTAStatus(status);
         }
@@ -417,9 +448,11 @@ class Request {
      * @throws DisconnectException if a severe error condition is encountered,
      *      causing the connection to be broken
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                               InputStream in,
                                               boolean writeNullByte,
                                               int parameterIndex)
@@ -435,6 +468,7 @@ class Request {
 
         flushExistingDSS();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         ensureLength(DssConstants.MAX_DSS_LEN - buffer.position());
         
         buildDss(true,
@@ -446,6 +480,7 @@ class Request {
         
         int spareInDss;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (writeNullByte) {
             spareInDss = DssConstants.MAX_DSS_LEN - 6 - 4 - 1;
         } else {
@@ -460,6 +495,7 @@ class Request {
             int bytesRead = 0;
             
             while( ( bytesRead = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                      in.read(buffer.array(), buffer.position(), spareInDss)
                      ) > -1 ) {
                 
@@ -473,6 +509,7 @@ class Request {
                     
                     flushScalarStreamSegment();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                     buffer.putShort((short) 0xFFFF);
                     
                     spareInDss = DssConstants.MAX_DSS_LEN - 2;
@@ -481,6 +518,7 @@ class Request {
                 
             }
         } catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             if (writeEXTDTAStatusByte) {
                 writeEXTDTAStatus(DRDAConstants.STREAM_READ_ERROR);
             }
@@ -488,12 +526,15 @@ class Request {
                 new SqlException(netAgent_.logWriter_,
                                  new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
                                  e, parameterIndex, e.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
 
             netAgent_.accumulateReadException(sqlex);
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     return;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         if (writeEXTDTAStatusByte) {
             writeEXTDTAStatus(DRDAConstants.STREAM_OK);
         }
@@ -511,10 +552,13 @@ class Request {
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, 
                                                             SqlException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1388
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
 
         writeScalarStream(chained,
                           chainedWithSameCorrelator,
                           codePoint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
                           length * 2L,
                           EncodedInputStream.createUTF16BEStream(r),
                           writeNullByte,
@@ -525,6 +569,8 @@ class Request {
     final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                  Reader r,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, 
@@ -545,6 +591,7 @@ class Request {
     private final int prepScalarStream(boolean chained,
                                          boolean chainedWithSameCorrelator,
                                          boolean writeNullByte,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
                                          long leftToRead)
             throws DisconnectException {
         int nullIndicatorSize = writeNullByte ? 1 : 0;
@@ -553,6 +600,7 @@ class Request {
 
         // flush the existing DSS segment if this stream will not fit in the send buffer
         if ((10 + extendedLengthByteCount + nullIndicatorSize +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                 leftToRead + buffer.position()) > DssConstants.MAX_DSS_LEN) {
             try {
                 if (simpleDssFinalize) {
@@ -598,7 +646,10 @@ class Request {
                 finalizePreviousChainedDss(true);
             }
             sendBytes(netAgent_.getOutputStream());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             netAgent_.throwCommunicationsFailure(e);
         }
         
@@ -614,6 +665,7 @@ class Request {
         // either at end of data, end of dss segment, or both.
         if (leftToRead != 0) {
             // 32k segment filled and not at end of data.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
             if ((Math.min(2 + leftToRead, 32767)) > buffer.remaining()) {
                 try {
                     sendBytes(netAgent_.getOutputStream());
@@ -623,6 +675,7 @@ class Request {
             }
             dssLengthLocation_ = buffer.position();
             buffer.putShort((short) 0xFFFF);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
             newBytesToRead = (int)Math.min(leftToRead, 32765L);
         }
 
@@ -633,10 +686,18 @@ class Request {
         
         try {
             sendBytes(netAgent_.getOutputStream());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             netAgent_.throwCommunicationsFailure(ioe);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         dssLengthLocation_ = buffer.position();
         return DssConstants.MAX_DSS_LEN;
     }
@@ -663,10 +724,12 @@ class Request {
     private final void padScalarStreamForError(long leftToRead,
                                                  int bytesToRead,
                                                  boolean writeStatus,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
                                                  byte status)
             throws DisconnectException {
         do {
             do {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                 buffer.put((byte) 0x0); // use 0x0 as the padding byte
                 bytesToRead--;
                 leftToRead--;
@@ -676,6 +739,7 @@ class Request {
         } while (leftToRead > 0);
 
         // Append the EXTDTA status flag if appropriate.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         if (writeStatus) {
             writeEXTDTAStatus(status);
         }
@@ -684,6 +748,7 @@ class Request {
     private final void writeExtendedLengthBytes(int extendedLengthByteCount, long length) {
         int shiftSize = (extendedLengthByteCount - 1) * 8;
         for (int i = 0; i < extendedLengthByteCount; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
             buffer.put((byte) (length >>> shiftSize));
             shiftSize -= 8;
         }
@@ -699,6 +764,7 @@ class Request {
 
         finalizeDssLength();
         int pos = dssLengthLocation_ + 3;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         byte value = buffer.get(pos);
         value |= 0x40;
         if (dssHasSameCorrelator) // for blobs
@@ -760,6 +826,7 @@ class Request {
             // new end of the data.
             int dataByte = buffer.position() - 1;
             int shiftOffset = contDssHeaderCount * 2;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
             ensureLength(shiftOffset);
             buffer.position(buffer.position() + shiftOffset);
 
@@ -775,6 +842,7 @@ class Request {
 
                 // perform the shift
                 dataByte -= dataToShift;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                 byte[] array = buffer.array();
                 System.arraycopy(array, dataByte + 1,
                         array, dataByte + shiftOffset + 1, dataToShift);
@@ -792,6 +860,7 @@ class Request {
                 }
 
                 // insert the header's length bytes
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                 buffer.putShort(dataByte + shiftOffset - 1,
                                 (short) twoByteContDssHeader);
 
@@ -809,6 +878,7 @@ class Request {
         }
 
         // insert the length bytes in the 6 byte dss header.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         buffer.putShort(dssLengthLocation_, (short) totalSize);
     }
 
@@ -820,6 +890,7 @@ class Request {
     // Note: this mechanism handles extended length ddms.
     protected final void markLengthBytes(int codePoint) {
         ensureLength(4);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
 
         // save the location of length bytes in the mark stack.
         mark();
@@ -868,6 +939,7 @@ class Request {
 
             // ensure there is enough room in the buffer for the extended length bytes.
             ensureLength(extendedLengthByteCount);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
 
             // calculate the length to be placed in the extended length bytes.
             // this length does not include the 4 byte llcp.
@@ -875,6 +947,7 @@ class Request {
 
             // shift the data to the right by the number of extended length bytes needed.
             int extendedLengthLocation = lengthLocation + 4;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
             byte[] array = buffer.array();
             System.arraycopy(array,
                     extendedLengthLocation,
@@ -901,6 +974,7 @@ class Request {
         }
 
         // write the 2 byte length field (2 bytes before codepoint).
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         buffer.putShort(lengthLocation, (short) length);
     }
 
@@ -925,6 +999,7 @@ class Request {
 
     // insert the padByte into the buffer by length number of times.
     private final void padBytes(byte padByte, int length) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         ensureLength(length);
         for (int i = 0; i < length; i++) {
             buffer.put(padByte);
@@ -941,6 +1016,7 @@ class Request {
     final void buildTripletHeader(int tripletLength,
                                   int tripletType,
                                   int tripletId) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         ensureLength(3);
         buffer.put((byte) tripletLength);
         buffer.put((byte) tripletType);
@@ -965,6 +1041,7 @@ class Request {
                                   int count,
                                   int offset,
                                   boolean mddRequired,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   Hashtable map) {
         if (!mddRequired) {
             writeLidAndLengths(lidAndLengthOverrides, count, offset);
@@ -972,6 +1049,7 @@ class Request {
         // if mdd overrides are required, lookup the protocolType in the map, and substitute
         // the protocolType with the override lid.
         else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
             ensureLength(count * 3);
             int protocolType, overrideLid;
             Object entry;
@@ -979,8 +1057,10 @@ class Request {
                 protocolType = lidAndLengthOverrides[offset][0];
                 // lookup the protocolType in the protocolType->overrideLid map
                 // if an entry exists, replace the protocolType with the overrideLid
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 entry = map.get(protocolType);
                 overrideLid = (entry == null) ? protocolType : ((Integer) entry).intValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                 buffer.put((byte) overrideLid);
                 buffer.putShort((short) lidAndLengthOverrides[offset][1]);
             }
@@ -991,6 +1071,7 @@ class Request {
 
     // insert a big endian unsigned 2 byte value into the buffer.
     final void write2Bytes(int value) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         writeShort((short) value);
     }
 
@@ -1064,6 +1145,7 @@ class Request {
     // passed in as an argument (this value is NOT incremented by 4 before being
     // inserted).
     final void writeLengthCodePoint(int length, int codePoint) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         ensureLength(4);
         buffer.putShort((short) length);
         buffer.putShort((short) codePoint);
@@ -1105,11 +1187,14 @@ class Request {
         
         /* Grab the current CCSID MGR from the NetAgent */ 
         CcsidManager currentCcsidMgr = netAgent_.getCurrentCcsidManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
 
         // We don't know the length of the string yet, so set it to 0 for now.
         // Will be updated later.
         int lengthPos = buffer.position();
         writeLengthCodePoint(0, codePoint);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
 
         int stringByteLength = encodeString(string);
         if (stringByteLength > byteLengthLimit) {
@@ -1159,6 +1244,7 @@ class Request {
     // the length of the llcp.  This method does not handle scenarios which
     // require extended length bytes.
     final void writeScalarBytes(int codePoint, byte[] buff) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         writeScalarBytes(codePoint, buff, 0, buff.length);
     }
 
@@ -1170,6 +1256,7 @@ class Request {
     // the length will contain the length of the data plus the length of the llcp.
     // This method does not handle scenarios which require extended length bytes.
     final void writeScalarBytes(int codePoint, byte[] buff, int start, int length) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         writeLengthCodePoint(length + 4, codePoint);
         ensureLength(length);
         buffer.put(buff, start, length);
@@ -1180,6 +1267,7 @@ class Request {
     // Not: this method is not to be used for truncation and buff.length
     // must be <= paddedLength.
     final void writeScalarPaddedBytes(byte[] buff, int paddedLength, byte padByte) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         writeBytes(buff);
         padBytes(padByte, paddedLength - buff.length);
     }
@@ -1197,6 +1285,7 @@ class Request {
             throws IOException {
         try {
             netAgent_.markWriteChainAsDirty();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
             socketOutputStream.write(buffer.array(), 0, buffer.position());
             socketOutputStream.flush();
         } finally {
@@ -1206,6 +1295,7 @@ class Request {
                 passwordIncluded_ = false;
             }
             if (netAgent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
                 ((NetLogWriter) netAgent_.logWriter_).traceProtocolFlow(
                         buffer.array(),
                         0,
@@ -1229,6 +1319,7 @@ class Request {
                 mask.append(maskChar);
             }
             // try to write mask over password.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
             buffer.position(passwordStart_);
             encodeString(mask.toString());
         } catch (SqlException sqle) {
@@ -1268,6 +1359,7 @@ class Request {
      *      represented by six bytes.
      */
     final void writeLong6Bytes(long v) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         ensureLength(6);
         buffer.putShort((short) (v >> 32));
         buffer.putInt((int) v);
@@ -1307,6 +1399,7 @@ class Request {
     }
 
     // insert a java.math.BigDecimal into the buffer.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final void writeBigDecimal(BigDecimal v,
                                int declaredPrecision,
                                int declaredScale) throws SqlException {
@@ -1318,12 +1411,14 @@ class Request {
     }
 
     final void writeDate(DateTimeValue date) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         ensureLength(10);
         DateTime.dateToDateBytes(buffer.array(), buffer.position(), date);
         buffer.position(buffer.position() + 10);
     }
 
     final void writeTime(DateTimeValue time) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         ensureLength(8);
         DateTime.timeToTimeBytes(buffer.array(), buffer.position(), time);
         buffer.position(buffer.position() + 8);
@@ -1332,6 +1427,7 @@ class Request {
     final void writeTimestamp(DateTimeValue timestamp) throws SqlException {
         boolean supportsTimestampNanoseconds = netAgent_.netConnection_.serverSupportsTimestampNanoseconds();
         int length = DateTime.getTimestampLength( supportsTimestampNanoseconds );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         ensureLength(length);
         DateTime.timestampToTimestampBytes(
                 buffer.array(), buffer.position(),
@@ -1342,6 +1438,7 @@ class Request {
     // insert a java boolean into the buffer.  the boolean is written
     // as a signed byte having the value 0 or 1.
     final void writeBoolean(boolean v) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         write1Byte(v ? 1 : 0);
     }
 
@@ -1350,6 +1447,7 @@ class Request {
     // should this throw SqlException
     // Will write a varchar mixed or single
     //  this was writeLDString
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     final void writeSingleorMixedCcsidLDString(String s, Charset encoding) throws SqlException {
         byte[] b = s.getBytes(encoding);
         if (b.length > 0x7FFF) {
@@ -1357,6 +1455,7 @@ class Request {
                 new ClientMessageId(SQLState.LANG_STRING_TOO_LONG),
                 "32767");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         writeLDBytes(b);
     }
 
@@ -1377,6 +1476,7 @@ class Request {
     // private helper method for writing just a subset of a byte array
     private final void writeLDBytesXSubset( int ldSize, int bytesToCopy, byte[] bytes )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         writeShort((short) ldSize);
         writeBytes(bytes, bytesToCopy);
     }
@@ -1389,6 +1489,8 @@ class Request {
         
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5786
+//IC see: https://issues.apache.org/jira/browse/DERBY-4491
             PublicBufferOutputStream pbos = new PublicBufferOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream( pbos );
 
@@ -1403,6 +1505,7 @@ class Request {
                 (
                  netAgent_.logWriter_, 
                  new ClientMessageId (SQLState.NET_MARSHALLING_UDT_ERROR),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                  e,
                  e.getMessage()
                  );
@@ -1423,6 +1526,7 @@ class Request {
     }
 
     private void buildLengthAndCodePointForLob(int codePoint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
                                                long leftToRead,
                                                boolean writeNullByte,
                                                int extendedLengthByteCount) throws DisconnectException {
@@ -1472,10 +1576,12 @@ class Request {
      * @throws DisconnectException if flushing the buffer fails
      */
     private void writeEXTDTAStatus(byte flag)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws DisconnectException {
         // Write the status byte to the send buffer.
         // Make sure we have enough space for the status byte.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         if (buffer.remaining() == 0) {
             flushScalarStreamSegment(1, 0); // Trigger a flush.
         }

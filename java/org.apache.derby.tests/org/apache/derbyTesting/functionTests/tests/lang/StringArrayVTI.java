@@ -47,6 +47,7 @@ public    class   StringArrayVTI  extends StringColumnVTI
 
     private static  final   String[]    EXPECTED_STACK =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3595
         "deduceGetXXXCaller",
         "getRawColumn",
         "getString",
@@ -182,6 +183,7 @@ public    class   StringArrayVTI  extends StringColumnVTI
     //
     private String  deduceGetXXXCaller() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3595
         StackTraceElement[]     stack = null;
         try {
             stack = (new Throwable()).getStackTrace();
@@ -234,6 +236,7 @@ public    class   StringArrayVTI  extends StringColumnVTI
      */
     private String  locateGetXXXCaller( StackTraceElement[] stack ) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3595
         String[]        actualMethodNames = squeezeMethodNames( stack );
         String[]        expectedMethodNames = EXPECTED_STACK;
         int             actualIdx = findIndex( "getString", actualMethodNames );

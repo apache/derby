@@ -22,6 +22,7 @@
 package org.apache.derby.impl.store.raw.data;
 
 final class RawField {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
 
     private final byte[] data;
 

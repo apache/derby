@@ -376,6 +376,7 @@ public final class SecurityManagerSetup extends TestSetup {
 
 		//We need the junit classes to instantiate this class, so the
 		//following should not cause runtime errors.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         setCodebase(TESTING_JUNIT, getURL(junit.framework.Test.class));
 	
         // Load indirectly so we don't need ant-junit.jar at compile time.
@@ -384,6 +385,7 @@ public final class SecurityManagerSetup extends TestSetup {
         setCodebase(TESTING_ANT, "org.apache.tools.ant.Task");
 
         // variables for lucene jar files
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         URL luceneCore = getURL( "org.apache.lucene.store.FSDirectory" );
         if ( luceneCore != null )
         {
@@ -393,6 +395,8 @@ public final class SecurityManagerSetup extends TestSetup {
 
         // Load indirectly, normally no EMMA jars in the classpath.
         // This property is needed to set correct permissions in policy files.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3445
+//IC see: https://issues.apache.org/jira/browse/DERBY-3153
         URL emma = getURL("com.vladium.emma.EMMAException");
         if (emma != null) {
             classPathSet.setProperty("emma.active", "");
@@ -405,8 +409,10 @@ public final class SecurityManagerSetup extends TestSetup {
          * needed for reading the DTD files.
          */
         setCodebase(JAXP, XML.getJAXPParserLocation());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 		URL testing = getURL(SecurityManagerSetup.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5262
         URL ppTesting = null;
         // Only try to load PackagePrivateTestSuite if the running JVM is
         // Java 1.5 or newer (class version 49 = Java 1.5).
@@ -417,6 +423,7 @@ public final class SecurityManagerSetup extends TestSetup {
 		if (isClasspath) {
             // ppTesting can be null, for instance if 'classes.pptesting' is
             // not on the classpath.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             setCodebase(PACKAGE_PRIVATE_CLASSES, ppTesting);
             isJars = false;
 		}
@@ -429,6 +436,7 @@ public final class SecurityManagerSetup extends TestSetup {
         if (testing.getProtocol().equals("file")) {
            File f = new File(testing.getPath());
            classPathSet.setProperty("derbyTesting.testjarpath", f.getAbsolutePath());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
            classPathSet.setProperty(Property.DERBY_INSTALL_PATH, f.getParentFile().getAbsolutePath());
         }
 
@@ -489,6 +497,7 @@ public final class SecurityManagerSetup extends TestSetup {
      */
     public static Properties getPolicyFilePropertiesForOldHarness()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1791
         return classPathSet;
     }
 	
@@ -497,10 +506,12 @@ public final class SecurityManagerSetup extends TestSetup {
      * If the class cannot be loaded, null is returned.
      */
     public static URL getURL(String className) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         try {
             return getURL(Class.forName(className));
         } catch (ClassNotFoundException e) {
             return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6067
         } catch (NoClassDefFoundError e) {
             return null;
         }
@@ -512,6 +523,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	static URL getURL(final Class cl)
 	{
         return AccessController.doPrivileged(new PrivilegedAction<URL>() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 			public URL run() {
 
@@ -520,6 +532,7 @@ public final class SecurityManagerSetup extends TestSetup {
                  * as can happen with Xalan and/or a JAXP parser), so in that
                  * case we just return null.
                  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
                 if (cl.getProtectionDomain().getCodeSource() == null)
                     return null;
 
@@ -534,11 +547,14 @@ public final class SecurityManagerSetup extends TestSetup {
     private static void uninstallSecurityManager()
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
             AccessController.doPrivileged
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
              new PrivilegedAction<Void>()
              {
                  public Void run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2000
                       System.setSecurityManager(null);
                      return null;
                  }
@@ -559,10 +575,13 @@ public final class SecurityManagerSetup extends TestSetup {
      * @throws IOException if reading or writing a policy resource fails
      */
     private static String getEffectivePolicyResource(String policy1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5631
                                                      String policy2)
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5631
         String resource = policy1;
         if (!NO_POLICY.equals(resource)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5631
             URL url1 = getResourceURL(policy1);
             resource = url1.toExternalForm();
             if (policy2 != null) {
@@ -584,6 +603,7 @@ public final class SecurityManagerSetup extends TestSetup {
      * @throws MalformedURLException if the resource string not a valid URL
      */
     private static URL getResourceURL(final String policy)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5631
             throws MalformedURLException {
         URL url = BaseTestCase.getTestResource(policy);
         if (url == null) {
@@ -617,6 +637,7 @@ public final class SecurityManagerSetup extends TestSetup {
 
         // Read the contents of both policy files and write them out to
         // a new policy file. Construct a somewhat informative file name.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5631
         final File mergedPF = new File(varDir,
                 new File(policy2.getPath()).getName() +
                     "-MERGED_WITH-" +
@@ -637,6 +658,7 @@ public final class SecurityManagerSetup extends TestSetup {
         i2.close();
         o.close();
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                         new PrivilegedExceptionAction<String>() {
                     public String run() throws MalformedURLException {
@@ -652,6 +674,7 @@ public final class SecurityManagerSetup extends TestSetup {
     private static InputStream openStream(final URL resource)
             throws IOException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<InputStream>(){
                         public InputStream run() throws IOException {
@@ -667,6 +690,7 @@ public final class SecurityManagerSetup extends TestSetup {
     /** Creates the specified directory if it doesn't exist. */
     private static void mkdir(final File dir) {
         AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             new PrivilegedAction<Void>() {
                 public Void run() {
                     if (!dir.exists() && !dir.mkdir()) {

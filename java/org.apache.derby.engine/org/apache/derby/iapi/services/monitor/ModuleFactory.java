@@ -181,6 +181,7 @@ public interface ModuleFactory
 		<BR>
 		<B>Do not call directly - use Monitor.startPersistentService()</B>
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 		<P> The poperty set passed in is for boot options for the modules
 		required to start the service. It does not support defining different
 		or new modules implementations.
@@ -277,6 +278,7 @@ public interface ModuleFactory
 
 	/**
 		Return a property from the JVM's system set.
+//IC see: https://issues.apache.org/jira/browse/DERBY-623
 		In a Java2 environment this will be executed as a privileged block
 		if and only if the property starts with 'derby.'.
 		If a SecurityException occurs, null is returned.

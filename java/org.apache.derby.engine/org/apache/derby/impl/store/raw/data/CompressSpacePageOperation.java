@@ -70,6 +70,7 @@ public class CompressSpacePageOperation extends PhysicalPageOperation
      * Constructors for This class:
      **************************************************************************
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     CompressSpacePageOperation(
     AllocPage   allocPage, 
     int         highest_page, 
@@ -182,6 +183,7 @@ public class CompressSpacePageOperation extends PhysicalPageOperation
 				"undo Page is not an allocPage");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
 		((AllocPage)undoPage).undoCompressSpace(
              CLRInstant, newHighestPage, num_pages_truncated);
 	}

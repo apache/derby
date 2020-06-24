@@ -56,6 +56,7 @@ public interface ModuleControl {
 		This attributes properties set has the second default properties set as
 		its default. This set (which could be null) contains the properties
 		that the user set on their DriverManager.getConnection() call, and are thus
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		not owned by Derby code, and thus must not be modified by Derby 
 		code.
 		<P>

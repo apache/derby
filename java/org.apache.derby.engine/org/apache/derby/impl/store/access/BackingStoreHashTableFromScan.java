@@ -100,6 +100,7 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
             initialCapacity,
             loadFactor,
 			skipNullKeyColumns,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
             keepAfterCommit);
         this.includeRowLocations = includeRowLocations;
 

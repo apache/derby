@@ -71,6 +71,7 @@ public interface ClassName
 
 	String Storable = "org.apache.derby.iapi.services.io.Storable";
 	String StandardException = "org.apache.derby.shared.common.error.StandardException";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 	String LanguageConnectionContext = "org.apache.derby.iapi.sql.conn.LanguageConnectionContext";
 	String ConstantAction = "org.apache.derby.iapi.sql.execute.ConstantAction";

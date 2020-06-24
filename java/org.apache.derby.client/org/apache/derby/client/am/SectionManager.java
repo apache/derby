@@ -180,6 +180,7 @@ public class SectionManager {
         positionedUpdateCursorNameToQuerySection_.put(cursorName, section);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void mapCursorNameToResultSet(
             String cursorName,
             ClientResultSet resultSet) {

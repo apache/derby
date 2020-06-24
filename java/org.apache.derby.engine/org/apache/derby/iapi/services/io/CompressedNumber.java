@@ -54,6 +54,7 @@ public abstract class CompressedNumber {
 		Write a compressed integer only supporting signed values.
 		Formats are (with x representing value bits):
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		1 Byte - 00xxxxxx                              Represents the value &lt;= 63 (0x3f)
 		2 Byte - 01xxxxxx xxxxxxxx                     Represents the value &gt; 63 &amp;&amp; &lt;= 16383 (0x3fff)
 		4 byte - 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx   Represents the value &gt; 16383 &amp;&amp; &lt;= MAX_INT
@@ -291,6 +292,7 @@ public abstract class CompressedNumber {
 
 		Formats are (with x representing value bits):
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		2 byte - 00xxxxxx xxxxxxxx                     Represents the value &lt;= 16383 (0x3fff)
 		4 byte - 01xxxxxx xxxxxxxx xxxxxxxx xxxxxxxx   Represents the value &gt; 16383  &amp;&amp; &lt;= 0x3fffffff
 		8 byte - 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx   Represents the value &gt; 0x3fffffff &amp;&amp; &lt;= MAX_LONG

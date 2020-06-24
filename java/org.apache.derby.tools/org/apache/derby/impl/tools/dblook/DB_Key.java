@@ -60,6 +60,7 @@ public class DB_Key {
 		// Non-foreign keys, first.
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT CS.CONSTRAINTNAME, CS.TYPE, " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 			"CS.TABLEID, CS.CONSTRAINTID, CS.SCHEMAID, CS.STATE, CG.DESCRIPTOR, CG.ISCONSTRAINT " +
 			"FROM SYS.SYSCONSTRAINTS CS, SYS.SYSCONGLOMERATES CG, SYS.SYSKEYS K " +
 			"WHERE CS.STATE != 'D' AND CS.CONSTRAINTID = K.CONSTRAINTID AND " +
@@ -68,6 +69,7 @@ public class DB_Key {
 
 		// Now, foreign keys.
 		rs = stmt.executeQuery("SELECT CS.CONSTRAINTNAME, CS.TYPE, CS.TABLEID, " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 			"CS.CONSTRAINTID, CS.SCHEMAID, CS.STATE, CG.DESCRIPTOR, CG.ISCONSTRAINT, " +
 			"K.DELETERULE, K.UPDATERULE, K.KEYCONSTRAINTID FROM SYS.SYSCONSTRAINTS CS, " +
 			"SYS.SYSCONGLOMERATES CG, SYS.SYSFOREIGNKEYS K WHERE CS.STATE != 'D' " +
@@ -99,6 +101,7 @@ public class DB_Key {
 		boolean firstTime = true;
 		while (rs.next()) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 			if (!rs.getBoolean(8))
 			// this row is NOT for a constraint, so skip it.
 				continue;
@@ -121,6 +124,7 @@ public class DB_Key {
 
 			if (rs.getString(2).equals("F")) {
 			// foreign key; we have to figure out the references info.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 				kString.append(makeFKReferenceClause(rs.getString(11),
 					rs.getString(9).charAt(0), rs.getString(10).charAt(0)));
 			}
@@ -165,6 +169,7 @@ public class DB_Key {
 		// For keys, we need to get the column list.
 		sb.append("(");
 		sb.append(dblook.getColumnListFromDescription(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 			tableId, aKey.getString(7)));
 		sb.append(")");
 
@@ -264,6 +269,7 @@ public class DB_Key {
 	 ****/
 
 	static void makeDeferredClauses
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
         ( StringBuffer buffer, ResultSet constraint, int stateColumn )
 		throws SQLException
 	{

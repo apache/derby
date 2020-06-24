@@ -73,6 +73,7 @@ public class AggregateClassLoadingTest extends BaseJDBCTestCase {
 		 * but the tests continue to pass. 
 		 */		
 		return SecurityManagerSetup.noSecurityManager(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new CleanDatabaseTestSetup(
                 new BaseTestSuite(AggregateClassLoadingTest.class,
                                    "AggregateClassLoadingTest")) {

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.TimestampOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -36,6 +37,8 @@ import org.apache.derby.iapi.types.TypeId;
  * The TimestampOperatorNode class implements the timestamp( date, time) function.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class TimestampOperatorNode extends BinaryOperatorNode
 {
 
@@ -73,7 +76,9 @@ class TimestampOperatorNode extends BinaryOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -84,6 +89,7 @@ class TimestampOperatorNode extends BinaryOperatorNode
 
 		//Set the type if there is a parameter involved here 
 		if (leftOperand.requiresTypeFromContext()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			leftOperand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.DATE));
 		}
 		//Set the type if there is a parameter involved here 

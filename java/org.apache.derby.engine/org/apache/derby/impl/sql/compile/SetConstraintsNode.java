@@ -81,6 +81,7 @@ class SetConstraintsNode extends MiscellaneousStatementNode
     }
 
     String formatList(List<TableName> constraints) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (SanityManager.DEBUG) {
             StringBuilder sb = new StringBuilder();
 

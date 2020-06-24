@@ -141,6 +141,7 @@ public class TestPropertyInfo
 		{
 			// get the TableDescriptor for the table
 			td = dd.getTableDescriptor(conglomerateName, sd, tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 
 			// Return an empty Properties if table does not exist or if it is for a view.
 			if ((td == null) || td.getTableType() == TableDescriptor.VIEW_TYPE) { return new Properties(); }

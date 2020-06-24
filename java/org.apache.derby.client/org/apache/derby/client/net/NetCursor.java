@@ -42,6 +42,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 class NetCursor extends Cursor {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     NetResultSet netResultSet_;
     private NetAgent netAgent_;
@@ -57,6 +58,7 @@ class NetCursor extends Cursor {
 
     // key = column position, value = index into extdtaData_
     HashMap<Integer, Integer> extdtaPositions_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
     /**
      * Queue to hold EXTDTA data that hasn't been correlated to its
@@ -79,6 +81,7 @@ class NetCursor extends Cursor {
         super(netAgent);
         netAgent_ = netAgent;
         maximumRowSize_ = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         extdtaPositions_ = new HashMap<Integer, Integer>();
         extdtaData_ = new ArrayList<byte[]>();
     }
@@ -146,10 +149,12 @@ class NetCursor extends Cursor {
             return false;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1382
         if (hasLobs_) {
             extdtaPositions_.clear();  // reset positions for this row
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1313
         NetSqlca[] netSqlca = this.parseSQLCARD(qrydscTypdef_);
         // If we don't have at least one byte in the buffer for the DA null indicator,
         // then we need to send a CNTQRY request to fetch the next block of data.
@@ -164,11 +169,13 @@ class NetCursor extends Cursor {
                     throw new SqlException(netAgent_.logWriter_, 
                             netSqlca[i]);
                 } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
                     if (sqlcode == SqlCode.END_OF_DATA.getCode()) {
                         setAllRowsReceivedFromServer(true);
                         if (netResultSet_ != null && 
                                 netSqlca[i].containsSqlcax()) {
                             netResultSet_.setRowCountEvent(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                     netSqlca[i].getRowCount());
                         }
                     } else if (netResultSet_ != null && sqlcode > 0) {
@@ -206,6 +213,7 @@ class NetCursor extends Cursor {
         // since it's only resetting nextRowPosition_ to position_ and position_ will
         // not change again from this point.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (allRowsReceivedFromServer() &&
             (position_ == lastValidBytePosition_)) {
             markNextRowPosition();
@@ -216,6 +224,7 @@ class NetCursor extends Cursor {
         // If data flows....
         if (daNullIndicator == 0x0) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (SanityManager.DEBUG && receivedDeleteHoleWarning) {
         SanityManager.THROWASSERT("Delete hole warning received: nulldata expected");
         }
@@ -330,6 +339,7 @@ class NetCursor extends Cursor {
             columnDataComputedLength_ = columnDataComputedLength;
             isNull_ = columnDataIsNull;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
             if (!allRowsReceivedFromServer()) {
                 calculateLobColumnPositionsForRow();
                 // Flow another CNTQRY if we are blocking, are using rtnextrow, and expect
@@ -348,6 +358,7 @@ class NetCursor extends Cursor {
             }
         } else {
             if (netResultSet_ != null && netResultSet_.scrollable_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (receivedDeleteHoleWarning) {
             setIsUpdataDeleteHole(rowIndex, true);
         } else {
@@ -367,6 +378,7 @@ class NetCursor extends Cursor {
         // the flag for allRowsReceivedFromServer_ is set, we still want to continue to parse through
         // the data in the dataBuffer.
         // But in the case where fixed row protocol is used,
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (!blocking_ && allRowsReceivedFromServer() &&
             daNullIndicator == 0xFF) {
             return false;
@@ -408,6 +420,7 @@ class NetCursor extends Cursor {
     // If position is already at the end of the buffer, send CNTQRY to get more data.
     private int readFdocaOneByte(int index)
             throws DisconnectException, SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         checkForSplitRowAndComplete(1, index);
         return dataBuffer_[position_++] & 0xff;
@@ -419,6 +432,7 @@ class NetCursor extends Cursor {
     // CNTQRY to get more data.
     private byte[] readFdocaBytes(int length)
             throws DisconnectException, SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         checkForSplitRowAndComplete(length);
 
@@ -434,6 +448,7 @@ class NetCursor extends Cursor {
     // 2 bytes goes past the lastValidBytePosition, send CNTQRY to get more data.
     private int readFdocaTwoByteLength()
             throws DisconnectException, SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         checkForSplitRowAndComplete(2);
         return
@@ -456,6 +471,7 @@ class NetCursor extends Cursor {
     // returns the number of bytes skipped
     private int skipFdocaBytes(int length)
             throws DisconnectException, SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         checkForSplitRowAndComplete(length);
         position_ += length;
@@ -516,11 +532,13 @@ class NetCursor extends Cursor {
         int currentPosition = 0;
 
         for (int i = 0; i < columns_; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             if ((isNonTrivialDataLob(i)) 
                 && (locator(i + 1) == Lob.INVALID_LOCATOR))
             // key = column position, data = index to corresponding data in extdtaData_
             // ASSERT: the server always returns the EXTDTA objects in ascending order
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 extdtaPositions_.put(i + 1, currentPosition++);
             }
         }
@@ -531,6 +549,7 @@ class NetCursor extends Cursor {
         long length = 0L;
 
         if (isNull_[index] ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 (jdbcTypes_[index] != ClientTypes.BLOB &&
                 jdbcTypes_[index] != ClientTypes.CLOB)) {
             return false;
@@ -608,6 +627,7 @@ class NetCursor extends Cursor {
         parseSQLCAXGRP(typdef, netSqlca);
 
         NetSqlca[] sqlCa = parseSQLDIAGGRP();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1313
 
         NetSqlca[] ret_val;
         if (sqlCa != null) {
@@ -704,11 +724,13 @@ class NetCursor extends Cursor {
 
         netSqlca.setSqlerrd(sqlerrd);
         netSqlca.setSqlwarnBytes(sqlwarn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         netSqlca.setSqlerrmcBytes(sqlerrmc);
     }
 
     // SQLDIAGGRP : FDOCA EARLY GROUP
     private NetSqlca[] parseSQLDIAGGRP() throws DisconnectException, SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1313
         if (readFdocaOneByte() == CodePoint.NULLDATA) {
             return null;
         }
@@ -793,6 +815,7 @@ class NetCursor extends Cursor {
     // SQLDCPNAM_s; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     // SQLDCXGRP; PROTOCOL TYPE N-GDA; ENVLID 0xD3; Length Override 1
     private NetSqlca parseSQLDCGRP() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException, SqlException {
         
         int sqldcCode = readFdocaInt(); // SQLCODE
@@ -814,6 +837,7 @@ class NetCursor extends Cursor {
         String sqldcMsg = parseVCS(qrydscTypdef_); // MESSAGE_TEXT
 
         if (sqldcMsg != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             sqlca.setSqlerrmcBytes(sqldcMsg.getBytes());
         }
 
@@ -864,6 +888,7 @@ class NetCursor extends Cursor {
 
     // This is not used for column data.
     private String readFdocaString(int length, Charset encoding)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
             throws SqlException {
         if (length == 0) {
             return null;
@@ -887,9 +912,11 @@ class NetCursor extends Cursor {
 
         // locate the EXTDTA bytes, if any
         Integer extdtaQueuePosition = extdtaPositions_.get(column);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
         if (extdtaQueuePosition != null) {
             //  found, get the data
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             data = extdtaData_.get(extdtaQueuePosition);
         }
 
@@ -914,6 +941,7 @@ class NetCursor extends Cursor {
         // Zero is not a valid locator, it indicates a zero length value
         if ((locator == 0x8000) || (locator == 0x8002) || (locator == 0x8004) || 
                 (locator == 0x8006) || (locator == 0x8008) ||(locator == 0)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             return Lob.INVALID_LOCATOR;
         } else {
             return locator;
@@ -925,6 +953,7 @@ class NetCursor extends Cursor {
      */
     public ClientBlob getBlobColumn_(
             int column,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Agent agent,
             boolean toBePublished) throws SqlException {
 
@@ -935,6 +964,7 @@ class NetCursor extends Cursor {
         // Check for locator
         int locator = locator(column);
         if (locator > 0) { // Create locator-based LOB object
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return new ClientBlob(agent, locator);
         }
         
@@ -956,6 +986,7 @@ class NetCursor extends Cursor {
                 dataOffset = 1;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             blob = new ClientBlob(data, agent, dataOffset);
         } else {
             blob = new ClientBlob(new byte[0], agent, 0);
@@ -970,16 +1001,21 @@ class NetCursor extends Cursor {
      */
     public ClientClob getClobColumn_(
             int column,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Agent agent,
             boolean toBePublished) throws SqlException {
 
         // Only inform the tracker if the Clob is published to the user.
         if (toBePublished) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
             if ( netResultSet_ != null ) { netResultSet_.markLOBAsPublished(column); }
         }
         // Check for locator
         int locator = locator(column);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         if (locator > 0) { // Create locator-based LOB object
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return new ClientClob(agent, locator);
         }
         
@@ -1000,6 +1036,7 @@ class NetCursor extends Cursor {
             } else {
                 dataOffset = 1;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
             clob = new ClientClob(agent, data, charset_[index], dataOffset);
         } else {
             // the locator is not valid, it is a zero-length LOB
@@ -1010,6 +1047,7 @@ class NetCursor extends Cursor {
     }
 
     // this is really an event-callback from NetStatementReply.parseSQLDTARDarray()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void initializeColumnInfoArrays(
             Typdef typdef,
             int columnCount) throws DisconnectException {
@@ -1027,6 +1065,7 @@ class NetCursor extends Cursor {
         // reset the dataBuffer_ before getting more data if cursor is foward-only.
         // getMoreData() is only called in Cursor.next() when current position is
         // equal to lastValidBytePosition_.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (netResultSet_.resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             resetDataBuffer();
         }
@@ -1101,10 +1140,12 @@ class NetCursor extends Cursor {
             SqlException sqlException = null;
             int sqlcode = Utils.getSqlcodeFromSqlca(
                 netResultSet_.queryTerminatingSqlca_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
             if (sqlcode < 0) {
                 sqlException = new SqlException(agent_.logWriter_, netResultSet_.queryTerminatingSqlca_);
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
                 sqlException = new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.NET_QUERY_PROCESSING_TERMINATED));
             }
@@ -1155,6 +1196,7 @@ class NetCursor extends Cursor {
             columnDataPosition = new int[columns_];
             columnDataPositionCache_.add(columnDataPosition);
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             columnDataPosition = columnDataPositionCache_.get(row);
         }
         return columnDataPosition;
@@ -1166,6 +1208,7 @@ class NetCursor extends Cursor {
             columnDataComputedLength = new int[columns_];
             columnDataLengthCache_.add(columnDataComputedLength);
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             columnDataComputedLength = columnDataLengthCache_.get(row);
         }
         return columnDataComputedLength;
@@ -1177,6 +1220,7 @@ class NetCursor extends Cursor {
             columnDataIsNull = new boolean[columns_];
             columnDataIsNullCache_.add(columnDataIsNull);
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             columnDataIsNull = columnDataIsNullCache_.get(row);
         }
         return columnDataIsNull;
@@ -1193,6 +1237,7 @@ class NetCursor extends Cursor {
      * rows are received from the server
      */
     public final void setAllRowsReceivedFromServer(boolean b) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (b && qryclsimpEnabled_) {
             netResultSet_.markClosedOnServer();
         }

@@ -72,6 +72,7 @@ public class DateTimeValue {
      * Create an instance from a {@code java.sql.Timestamp} using the specified
      * {@code java.util.Calendar}.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     DateTimeValue(Date date, Calendar cal) {
         this(initCalendar(cal, date), 0);
     }
@@ -80,6 +81,7 @@ public class DateTimeValue {
      * Create an instance from a {@code java.sql.Time} using the specified
      * {@code java.util.Calendar}.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     DateTimeValue(Time time, Calendar cal) {
         this(initCalendar(cal, time), 0);
     }
@@ -88,6 +90,7 @@ public class DateTimeValue {
      * Create an instance from a {@code java.sql.Timestamp} using the specified
      * {@code java.util.Calendar}.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     DateTimeValue(Timestamp ts, Calendar cal) {
         this(initCalendar(cal, ts), ts.getNanos());
     }

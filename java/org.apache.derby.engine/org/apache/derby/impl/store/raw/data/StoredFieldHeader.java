@@ -683,6 +683,7 @@ public final class StoredFieldHeader
                     CompressedNumber.sizeInt(fieldDataLength);
 
                 if (diffLen != 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3941
                     DataInputUtil.skipFully(in, diffLen);
             } 
 

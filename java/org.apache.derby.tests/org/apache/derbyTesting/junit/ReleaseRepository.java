@@ -171,6 +171,7 @@ public class ReleaseRepository {
         traceit("{ReleaseRepository} " + tmpCandDists.length +
                 " candidate releases at " + reposLocation);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         dists = new ArrayList<DerbyDistribution>(tmpCandDists.length);
         for (int i=0; i < tmpCandDists.length; i++) {
             File dir = tmpCandDists[i];
@@ -192,6 +193,7 @@ public class ReleaseRepository {
                         dir.getAbsolutePath());
                 continue;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6126
             DerbyDistribution dist = DerbyDistribution.newInstance(
                     version, dir);
             // TODO: 10.0.1.2 is considered invalid because it doesn't have a

@@ -67,6 +67,7 @@ public class DerbyObservable
     {
       if (observer == null) { throw new IllegalArgumentException("Null arguments not allowed."); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6891
       if (!_observers.contains(observer)) { _observers.add(observer); }
     }
 

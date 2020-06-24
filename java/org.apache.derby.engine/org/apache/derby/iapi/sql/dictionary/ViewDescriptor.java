@@ -52,6 +52,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
  */
 
 public final class ViewDescriptor extends UniqueTupleDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	implements Dependent, Provider
 {
 	private final int			checkOption;
@@ -242,6 +243,9 @@ public final class ViewDescriptor extends UniqueTupleDescriptor
 			 */
 		    case DependencyManager.CREATE_INDEX:
 		    case DependencyManager.DROP_INDEX:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1489
+//IC see: https://issues.apache.org/jira/browse/DERBY-1909
+//IC see: https://issues.apache.org/jira/browse/DERBY-1926
 		    case DependencyManager.DROP_COLUMN:
 		    case DependencyManager.CREATE_CONSTRAINT:
 		    case DependencyManager.ALTER_TABLE:
@@ -274,9 +278,11 @@ public final class ViewDescriptor extends UniqueTupleDescriptor
 			// anything here. Later in makeInvalid method, we make the
 			// ViewDescriptor drop itself.
 			case DependencyManager.REVOKE_ROLE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 
 			// Only used by Activations
 		    case DependencyManager.RECHECK_PRIVILEGES:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 
 				break;
 				// When REVOKE_PRIVILEGE gets sent to a
@@ -285,6 +291,7 @@ public final class ViewDescriptor extends UniqueTupleDescriptor
 				// may be GPSs needing re-compilation. But Dependents
 				// could also be ViewDescriptors, which then also need
 				// to handle this event.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2594
 			case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 		    	break;
 
@@ -345,6 +352,7 @@ public final class ViewDescriptor extends UniqueTupleDescriptor
 
 				// Only used by Activations
 			case DependencyManager.RECHECK_PRIVILEGES:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 
 				// When REVOKE_PRIVILEGE gets sent to a
 				// TablePermsDescriptor we must also send
@@ -352,6 +360,7 @@ public final class ViewDescriptor extends UniqueTupleDescriptor
 				// may be GPSs needing re-compilation. But Dependents
 				// could also be ViewDescriptors, which then also need
 				// to handle this event.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2594
 		    case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 				break;
 
@@ -359,8 +368,13 @@ public final class ViewDescriptor extends UniqueTupleDescriptor
 				// types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER),
 				// we make the ViewDescriptor drop itself. REVOKE_ROLE also
 				// drops the dependent view.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1489
+//IC see: https://issues.apache.org/jira/browse/DERBY-1909
+//IC see: https://issues.apache.org/jira/browse/DERBY-1926
             case DependencyManager.DROP_COLUMN:
 		    case DependencyManager.REVOKE_PRIVILEGE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 			case DependencyManager.REVOKE_ROLE:
                 
                 TableDescriptor td = 
@@ -472,6 +486,7 @@ public final class ViewDescriptor extends UniqueTupleDescriptor
 
 		/* Drop all table and column permission descriptors */
 		dd.dropAllTableAndColPermDescriptors(td.getUUID(), tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 
 		/* Drop the table */
 		dd.dropTableDescriptor(td, sd, tc);

@@ -79,8 +79,10 @@ public class ConnectionTest
      */
     public void embeddedCreateBlob()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             Blob blob = getConnection().createBlob();
             //Check if the blob is empty
+//IC see: https://issues.apache.org/jira/browse/DERBY-1255
             if(blob.length() > 0)
                 fail("The new Blob should not have more than zero bytes " +
                         "contained in it");
@@ -100,6 +102,7 @@ public class ConnectionTest
      */
     public void embeddedCreateClob()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             Clob clob = getConnection().createClob();
             //check if the Clob is empty
             if(clob.length() > 0)
@@ -108,8 +111,10 @@ public class ConnectionTest
     }
 
     public void testCreateArrayNotImplemented()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1238
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             getConnection().createArrayOf(null, null);
             fail("createArrayOf(String,Object[]) should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
@@ -120,6 +125,7 @@ public class ConnectionTest
     public void testCreateNClobNotImplemented()
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             getConnection().createNClob();
             fail("createNClob() should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
@@ -138,8 +144,10 @@ public class ConnectionTest
     }
 
     public void testCreateStructNotImplemented()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1238
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             getConnection().createStruct(null, null);
             fail("createStruct(String,Object[]) should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
@@ -150,6 +158,7 @@ public class ConnectionTest
     public void testGetClientInfo()
         throws SQLException {
         assertTrue("getClientInfo() must return an empty Properties object", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
                    getConnection().getClientInfo().isEmpty());
     }
     
@@ -230,6 +239,7 @@ public class ConnectionTest
      * @exception SQLException if an error occurs
      */
     public void testGetTypeMapReturnsEmptyMap() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         assertTrue(getConnection().getTypeMap().isEmpty());
     }
     
@@ -238,6 +248,7 @@ public class ConnectionTest
      * @exception SQLException if an error occurs
      */
     public void testGetTypeMapReturnsAsExpected() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Statement s = getConnection().createStatement();
         int ret;
         try {
@@ -254,6 +265,7 @@ public class ConnectionTest
         PreparedStatement ps = getConnection().prepareStatement(
                 "INSERT INTO T1(A1) VALUES (?)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         ArrayList<String> lst = new ArrayList<String>();
         lst.add("First element");
         lst.add("Second element");
@@ -262,6 +274,7 @@ public class ConnectionTest
         ps.execute();     
         
         Map<String, Class<?>> map = getConnection().getTypeMap();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5143
         try {
             map.put("JAVA_UTIL_LIST", List.class);
             fail("returned map should be immutable");
@@ -277,6 +290,7 @@ public class ConnectionTest
         // Create a non-empty map to test setTypeMap(). setTypeMap() raises
         // a feature not supported exception if the map isn't empty.
         map = new HashMap<String, Class<?>>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         map.put("JAVA_UTIL_LIST", List.class);
         
         try {
@@ -322,6 +336,7 @@ public class ConnectionTest
         try {
             getConnection().setClientInfo(p);
             fail("setClientInfo(String,String) should throw "+
+//IC see: https://issues.apache.org/jira/browse/DERBY-1380
                  "SQLClientInfoException");
         } catch (SQLClientInfoException cie) {
             assertSQLState("SQLStates must match", "XCY02", cie);
@@ -341,6 +356,7 @@ public class ConnectionTest
     public void testSetClientInfoString()
         throws SQLException {
         getConnection().setClientInfo(null, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
 
         try {
             getConnection().setClientInfo("foo", null);
@@ -351,6 +367,7 @@ public class ConnectionTest
         try {
             getConnection().setClientInfo("name", "value");
             fail("setClientInfo(String,String) should throw "+
+//IC see: https://issues.apache.org/jira/browse/DERBY-1380
                  "SQLClientInfoException");
         } catch (SQLClientInfoException cie) {
             assertSQLState("SQLState must match 'unsupported'",
@@ -365,6 +382,7 @@ public class ConnectionTest
     
     public void testUnwrapValid()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection unwrappedCon = getConnection().unwrap(Connection.class);
         assertSame("Unwrap returned wrong object.", getConnection(), unwrappedCon);
     }
@@ -387,6 +405,7 @@ public class ConnectionTest
      * Create suite containing client-only tests.
      */
     private static BaseTestSuite clientSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite clientSuite = new BaseTestSuite(name);
         return clientSuite; 
     }
@@ -397,6 +416,7 @@ public class ConnectionTest
     private static BaseTestSuite embeddedSuite(String name) {
         BaseTestSuite embeddedSuite = new BaseTestSuite(name);
         embeddedSuite.addTest(new ConnectionTest(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1255
                     "embeddedCreateBlob"));
         embeddedSuite.addTest(new ConnectionTest(
                     "embeddedCreateClob"));
@@ -410,6 +430,7 @@ public class ConnectionTest
      */
     public static Test suite() {
         BaseTestSuite connSuite = new BaseTestSuite("ConnectionTest suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         BaseTestSuite embedded = new BaseTestSuite("ConnectionTest:embedded");
         embedded.addTestSuite(ConnectionTest.class);
@@ -419,6 +440,8 @@ public class ConnectionTest
         // repeat the embedded tests obtaining a connection from
         // an XA data source.
         embedded = new BaseTestSuite("ConnectionTest:embedded XADataSource");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         embedded.addTestSuite(ConnectionTest.class);
         embedded.addTest(embeddedSuite("ConnectionTest:embedded-only XADataSource"));
         connSuite.addTest(TestConfiguration.connectionXADecorator(embedded));

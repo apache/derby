@@ -45,6 +45,8 @@ public class LOBTypeCompiler extends BaseTypeCompiler
             boolean forDataTypeFunction)
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return  (otherType.isBlobTypeId());
     }
 

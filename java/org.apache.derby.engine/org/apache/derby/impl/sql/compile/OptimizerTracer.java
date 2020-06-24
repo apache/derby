@@ -97,6 +97,7 @@ public	class   OptimizerTracer  implements OptionalTool
         {
             tracer = new DefaultOptTrace();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         else if ( "xml".equals( configurationParameters[ 0 ] ) )
         {
             try {
@@ -112,9 +113,11 @@ public	class   OptimizerTracer  implements OptionalTool
             String  customOptTraceName = configurationParameters[ 1 ];
 
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 ClassFactoryContext cfc = (ClassFactoryContext) getContext( ClassFactoryContext.CONTEXT_ID );
                 ClassFactory    classFactory = cfc.getClassFactory();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = classFactory.loadApplicationClass( customOptTraceName );
                 tracer = (OptTrace) clazz.getConstructor().newInstance();
             }
@@ -150,6 +153,7 @@ public	class   OptimizerTracer  implements OptionalTool
             final   OptTrace    tracer = OptimizerTrace.getOptimizerTracer();
 
             boolean     needsClosing = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
             PrintWriter pw;
             
             if (
@@ -159,6 +163,7 @@ public	class   OptimizerTracer  implements OptionalTool
             {
                 pw = AccessController.doPrivileged
                     (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6635
                      new PrivilegedExceptionAction<PrintWriter>()
                      {
                          public PrintWriter run() throws SQLException
@@ -193,6 +198,7 @@ public	class   OptimizerTracer  implements OptionalTool
             if ( needsClosing ) { pw.close(); }
             
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6635
         catch (Exception e)
         {
             if ( e.getMessage() == null )
@@ -234,6 +240,7 @@ public	class   OptimizerTracer  implements OptionalTool
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

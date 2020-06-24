@@ -93,6 +93,7 @@ public final class PageKey
 
 	public int hashCode() {
         int hash = 7;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3280
         hash = 79 * hash + container.hashCode();
         hash = 79 * hash + (int) (pageNumber ^ (pageNumber >>> 32));
         return hash;

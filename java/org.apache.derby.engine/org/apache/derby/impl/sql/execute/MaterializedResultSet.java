@@ -39,6 +39,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * Return rows from temp table on subsequent scans.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class MaterializedResultSet extends NoPutResultSetImpl
 	implements CursorResultSet
 {
@@ -176,6 +177,7 @@ class MaterializedResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -234,6 +236,7 @@ class MaterializedResultSet extends NoPutResultSetImpl
 
 				tc = activation.getTransactionController();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 				materializedCID = 
                     tc.createConglomerate(
                         "heap",	
@@ -254,6 +257,9 @@ class MaterializedResultSet extends NoPutResultSetImpl
                         TransactionController.ISOLATION_SERIALIZABLE);
 			}
             materializedCC.insert(sourceRow.getRowArray());
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
 
 			createTCTime += getElapsedMillis(beginTCTime);
 		}

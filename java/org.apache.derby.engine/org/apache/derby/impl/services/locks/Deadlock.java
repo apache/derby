@@ -572,6 +572,7 @@ inner:		for (;;) {
      */
     static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

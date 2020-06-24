@@ -77,6 +77,7 @@ public interface CipherFactory
 		throws StandardException;
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-862
 		Verify the external encryption key. Throws exception if unable to verify
 		that the encryption key is the same as that
 		used during database creation or if there are any problems when trying to do the

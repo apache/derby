@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.FromList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -44,6 +45,7 @@ import org.apache.derby.iapi.util.StringUtil;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class FromList extends    QueryTreeNodeVector<ResultSetNode>
                implements OptimizableList
 {
@@ -79,6 +81,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
      * {@code false}.
      * @param cm context manager
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromList(ContextManager cm) {
         super(ResultSetNode.class, cm);
         this.isTransparent = false;
@@ -111,6 +115,9 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
              FromTable fromTable,
              ContextManager cm) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         super(ResultSetNode.class, cm);
         constructorMinion(optimizeJoinOrder);
         addFromTable(fromTable);
@@ -162,6 +169,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final void addFromTable(FromTable fromTable) throws StandardException
 	{
 		/* Don't worry about checking TableOperatorNodes since
@@ -173,6 +182,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		 * user is executing a really dumb query and we won't throw
 		 * and exception - consider it an ANSI extension.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         TableName leftTable;
         TableName rightTable;
 
@@ -183,6 +194,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 			for (int index = 0; index < size; index++)
 			{
                 leftTable = fromTable.getTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
 
                 if(((FromTable) elementAt(index)) instanceof TableOperatorNode) {
                     continue;
@@ -198,6 +210,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         addElement(fromTable);
 	}
 
@@ -254,6 +267,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		// definition. Hence, we need to intercept in the middle on the bindTables
 		// method and save that information in referencesSeesionSchema field.
 		if (referencesSessionSchema) return true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-424
 
 		/* Check for table or VTI name in FROM list */
 		int size = size();
@@ -311,6 +325,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 * @see HalfOuterJoinNode#isJoinColumnForRightOuterJoin
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void isJoinColumnForRightOuterJoin(ResultColumn rc)
 	{
 		FromTable	fromTable;
@@ -321,6 +337,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 			fromTable.isJoinColumnForRightOuterJoin(rc);
 		}
 	}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindTables(DataDictionary dataDictionary,
 							FromList fromListParam) 
 			throws StandardException
@@ -350,6 +368,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 			// in referencesSessionSchema element. The reason for this is that the view will get
 			// replaced by it's view definition and we will loose the information that the statement
 			// was referencing a SESSION schema object. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-424
 			if (fromTable.referencesSessionSchema())
             {
 				referencesSessionSchema = true;
@@ -383,6 +402,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
         //    the constructor for column privilege requires us to pass
         //    a column descriptor, we just choose the first column for
         //    MIN_SELECT_PRIV requirement.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6411
         final CompilerContext cc = getCompilerContext();
         cc.pushCurrentPrivType(Authorizer.MIN_SELECT_PRIV);
         for (int index = 0; index < size; index++) {
@@ -396,6 +416,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
             }
         }
         cc.popCurrentPrivType();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6491
         getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
 	}
 
@@ -407,6 +428,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions( FromList fromListParam )
 					throws StandardException
 	{
@@ -436,6 +459,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
@@ -491,6 +516,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList expandAll(TableName allTableName)
 			throws StandardException
 	{
@@ -627,6 +654,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn bindColumnReference(ColumnReference columnReference)
 				throws StandardException
 	{
@@ -703,6 +732,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 					columnReference.setSourceLevel(currentLevel);
 					columnNameMatch = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 					if (fromTable.isPrivilegeCollectionRequired())
                     {
 						getCompilerContext().addRequiredColumnPriv( resultColumn.getTableColumnDescriptor());
@@ -713,6 +743,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 				else
 				{
 					throw StandardException.newException(SQLState.LANG_AMBIGUOUS_COLUMN_NAME, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-18
 							 columnReference.getSQLColumnName());
 				}
 			}
@@ -737,6 +768,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
                     crtn = fbt.getExposedTableName();
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             columnReference.setQualifiedTableName( crtn );
         }
         
@@ -751,6 +783,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *									directly under a ResultColumn
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void rejectParameters() throws StandardException
 	{
 		FromTable	fromTable;
@@ -796,6 +830,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void preprocess(int numTables,
 						   GroupByList gbl,
 						   ValueNode predicateTree)
@@ -828,15 +864,20 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void flattenFromTables(ResultColumnList rcl,
 								  PredicateList predicateList,
 								  SubqueryList sql,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
                                   GroupByList gbl,
                                   ValueNode havingClause)
 									throws StandardException
 	{
 		boolean			flattened = true;
 		ArrayList<Integer>		flattenedTableNumbers = new ArrayList<Integer>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		if (SanityManager.DEBUG)
 		{
@@ -867,6 +908,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 				{
 					//save the table number of the node to be flattened
                     flattenedTableNumbers.add(ft.getTableNumber());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 
 					/* Remove the node from the list and insert its
 					 * FromList here.
@@ -875,6 +917,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 														rcl,
 														predicateList,
 														sql,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
                                                         gbl,
                                                         havingClause);
 					if (SanityManager.DEBUG)
@@ -910,6 +954,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		/* fix up dependency maps for exists base tables since they might have a
 		 * dependency on this join node
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 		if (!flattenedTableNumbers.isEmpty())
 		{
 			for (int i = 0; i < size(); i++)
@@ -965,6 +1010,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 * @param level		The query block level for this table.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLevel(int level)
 	{
 		int size = size();
@@ -1011,6 +1058,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setProperties(Properties props) throws StandardException
 	{
 		properties = props;
@@ -1020,6 +1069,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		** there is nothing in this properties list that relies on binding
 		** or optimization to validate.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Enumeration<?> e = properties.keys();
 		while (e.hasMoreElements())
 		{
@@ -1101,6 +1151,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 			*/
 			if (sum != ( ( joinOrder.length * (joinOrder.length - 1) ) / 2) )
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 StringBuilder arrayVals = new StringBuilder();
                 for (int i : joinOrder) {
                     arrayVals.append(i);
@@ -1176,6 +1227,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
@@ -1308,7 +1361,10 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 
 		PredicateList predicatesTemp;
         predicatesTemp = new PredicateList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : wherePredicates) {
             predicatesTemp.addPredicate(p);
         }
@@ -1321,6 +1377,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		 */
 		if (rcl != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = rcl.elementAt(0);
 			if (rc.getExpression() instanceof ColumnReference)
 			{
@@ -1387,8 +1444,11 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 			{
 				int existsTableNumber = fbt.getTableNumber();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 for (int i = predicatesTemp.size() - 1; i >= 0; i--)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     AndNode topAndNode =
                             predicatesTemp.elementAt(i).getAndNode();
 
@@ -1410,6 +1470,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 						JBitSet referencedTables = and.getLeftOperand().getTablesReferenced();
 						if (referencedTables.get(existsTableNumber))
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                             predicatesTemp.removeElementAt(i);
 							break;
 						}
@@ -1684,6 +1745,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
                     ( "size() is " + size() + " but should be 1");
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return elementAt(0).updateTargetLockMode();
 	}
 
@@ -1727,7 +1789,11 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 * Set windows field to the supplied value.
 	 * @param windows list of window definitions associated with a SELECT.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setWindows(WindowList windows) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		this.windows = windows;
 	}
 
@@ -1735,6 +1801,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	/**
 	 * @return list of window definitions associated with a SELECT.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     WindowList getWindows() {
 		return windows;
 	}

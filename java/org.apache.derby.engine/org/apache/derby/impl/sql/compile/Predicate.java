@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.Predicate
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -40,6 +41,8 @@ import org.apache.derby.iapi.util.JBitSet;
  */
 
 public final class Predicate extends QueryTreeNode implements OptimizablePredicate,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                                         Comparable<Predicate>
 {
 	/* Top of the predicate */
@@ -73,6 +76,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
      * @param cm            The context manager
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     Predicate(AndNode andNode, JBitSet referencedSet, ContextManager cm)
 	{
         super(cm);
@@ -237,6 +242,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 
 	/** @see OptimizablePredicate#selectivity */
 	public double selectivity(Optimizable optTable)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 		return andNode.getLeftOperand().selectivity(optTable);
@@ -254,6 +260,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
     public int compareTo(Predicate other)
 	{
         Predicate otherPred = other;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/* Not all operators are "equal". If the predicates are on the
 		 * same key column, then a "=" opertor takes precedence over all
@@ -338,6 +346,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @return AndNode	The andNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     AndNode getAndNode()
 	{
 		return andNode;
@@ -348,6 +358,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @param andNode	The new andNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setAndNode(AndNode andNode)
 	{
 		this.andNode = andNode;
@@ -373,6 +385,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @param pushable Whether or not the predicate is pushable.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setPushable(boolean pushable) {
 		this.pushable = pushable;
 	}
@@ -382,6 +396,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @return JBitSet	The referencedSet.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JBitSet getReferencedSet()
 	{
 		return referencedSet;
@@ -413,6 +429,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void categorize() throws StandardException
 	{
 		pushable = andNode.categorize(referencedSet, false);
@@ -426,6 +444,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * @return	The RelationalOperator on the left side of the AND node,
 	 *			if any.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     RelationalOperator getRelop()
 	{
 		
@@ -439,6 +459,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final boolean isOrList()
     {
         return(andNode.getLeftOperand() instanceof OrNode);
@@ -465,6 +487,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final boolean isStoreQualifier()
     {
 		if ((andNode.getLeftOperand() instanceof RelationalOperator) ||
@@ -491,6 +515,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final boolean isPushableOrClause(Optimizable optTable)
         throws StandardException
 	{
@@ -550,6 +576,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	boolean transitiveSearchClauseAdded(RelationalOperator ro)
 	{
         return searchClauses != null &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             searchClauses.contains(ro.getOperator());
 	}
 
@@ -564,11 +591,13 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	void setTransitiveSearchClauseAdded(RelationalOperator ro)
 	{
         if (searchClauses == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             searchClauses = new HashSet<Integer>();
         }
 		/* I have to remember that this ro has been added to this predicate as a
 		 * transitive search clause.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
         searchClauses.add(ro.getOperator());
 	}
 
@@ -676,6 +705,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * is referencing, especially when tracing through code and printing
 	 * assert failure.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String binaryRelOpColRefsToString()
 	{
 		// We only consider binary relational operators here.
@@ -686,6 +717,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		}
 
 		final String DUMMY_VAL = "<expr>";
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         java.lang.StringBuilder sBuf = new java.lang.StringBuilder();
 		BinaryRelationalOperatorNode opNode =
 			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
@@ -694,6 +727,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		if (opNode.getLeftOperand() instanceof ColumnReference)
 		{
 			sBuf.append(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     ((ColumnReference)opNode.getLeftOperand()).getTableName());
             sBuf.append('.');
             sBuf.append(
@@ -728,6 +762,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -746,11 +782,13 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (andNode != null)
 		{
 			andNode = (AndNode)andNode.accept(v);
@@ -764,6 +802,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 */
 
     void copyFields(Predicate otherPred) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		this.equivalenceClass = otherPred.getEquivalenceClass();
 		this.indexPosition = otherPred.getIndexPosition();
@@ -771,6 +811,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		this.stopKey = otherPred.isStopKey();
 		this.isQualifier = otherPred.isQualifier();
         this.searchClauses = otherPred.searchClauses;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 	}
 
@@ -915,6 +956,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		//    <scoped_bin_rel_op> AND TRUE
 		// First create the boolean constant for TRUE.
         ValueNode trueNode = new BooleanConstantNode(true, getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		BinaryRelationalOperatorNode opNode =
 			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
@@ -922,7 +965,10 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		// Create a new op node with left and right operands that point
 		// to the received result set's columns as appropriate.
 		BinaryRelationalOperatorNode newOpNode = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 opNode.kind,
 				opNode.getScopedOperand(
 					BinaryRelationalOperatorNode.LEFT,
@@ -934,6 +980,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 					parentRSNsTables,
 					childRSN,
 					whichRC),
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 opNode.getForQueryRewrite(),
 				getContextManager());
 
@@ -942,6 +990,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 
 		// Create and bind a new AND node in CNF form,
 		// i.e. "<newOpNode> AND TRUE".
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         AndNode newAnd = new AndNode(newOpNode, trueNode, getContextManager());
 		newAnd.postBindFixup();
 
@@ -954,6 +1004,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		newAnd.categorize(tableMap, false);
 
 		// Now put the pieces together to get a new predicate.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         Predicate newPred =
                 new Predicate(newAnd, tableMap, getContextManager());
 
@@ -1069,6 +1121,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 			(BinaryRelationalOperatorNode)andNode.getLeftOperand();
 
         ValueNode operand;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (SanityManager.DEBUG)
 		{
@@ -1186,6 +1240,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		 * to a source result set further down the tree and
 		 * thus we return true.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ValueNode exp;
 		ColumnReference cRef = (ColumnReference)operand;
 		if (cRef.isScoped())

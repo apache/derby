@@ -631,6 +631,8 @@ public class ForBitDataTest extends BaseJDBCTestCase {
         /* testValues fixture */
 	public void testValues() throws SQLException {
                 // Empty the table before inserting 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
+//IC see: https://issues.apache.org/jira/browse/DERBY-3176
                 Statement deleteStmt = createStatement();
                 deleteStmt.execute("delete from FBDVAL.T001");
 		PreparedStatement psI = prepareStatement("INSERT INTO FBDVAL.T001 VALUES(?, ?, ?, ?, ?)");
@@ -881,6 +883,7 @@ public class ForBitDataTest extends BaseJDBCTestCase {
          * Create a suite of tests.
          **/
         public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite = new BaseTestSuite("ForBitTestData");
         	suite.addTest(baseSuite("ForBitTestData:embedded"));
         	suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("ForBitTestData:client")));

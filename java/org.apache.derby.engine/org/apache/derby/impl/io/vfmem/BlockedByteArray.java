@@ -140,9 +140,11 @@ public class BlockedByteArray {
      */
     public synchronized void setLength(final long newLength) {
         // If capacity is requested before any writes has taken place.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4103
         if (blockSize == 0) {
             checkBlockSize((int)Math.min(Integer.MAX_VALUE, newLength));
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5098
         final long currentCapacity = (long)allocatedBlocks * blockSize;
         if (newLength > currentCapacity) {
             // Allocate more blocks.
@@ -187,6 +189,7 @@ public class BlockedByteArray {
             throw new ArrayIndexOutOfBoundsException(len);
         }
         // Increase the capacity if required.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5098
         increaseCapacity(pos + len);
         // Calculate the block number and the index within this block.
         int block = (int)(pos / blockSize);
@@ -224,6 +227,7 @@ public class BlockedByteArray {
             checkBlockSize(0);
         }
         // Increase the capacity if required.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5098
         increaseCapacity(pos);
         // Calculate the block number and the index within this block.
         int block = (int)(pos / blockSize);
@@ -292,10 +296,12 @@ public class BlockedByteArray {
      */
     //@GuardedBy("this")
     private void increaseCapacity(long lastIndex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4103
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(blockSize > 0, "Invalid/unset block size");
         }
         // Safe-guard to avoid overwriting existing data.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5098
         if (lastIndex < (long)allocatedBlocks * blockSize) {
             return;
         }
@@ -308,6 +314,7 @@ public class BlockedByteArray {
             // holder array, we don't fill it with data blocks before needed.
             int growTo = Math.max(
                     // Grow at least ~33%.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4103
                     blocks.length + (blocks.length / 3),
                     // For cases where we need to grow more than 33%.
                     blocksRequired + MIN_HOLDER_GROWTH);

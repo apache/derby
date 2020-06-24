@@ -259,6 +259,7 @@ public class D_BTreeController extends DiagnosticableGeneric
     Properties  prop,
     LevelInfo   level_info[])
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
         String ret_string   = "";
         LevelInfo   total   = new LevelInfo();
 
@@ -318,6 +319,8 @@ public class D_BTreeController extends DiagnosticableGeneric
     Properties  prop,
     LevelInfo   level_info[])
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
         String ret_string   = "";
         long   total_pages  = 0;
         long   total_res    = 0;
@@ -391,17 +394,20 @@ public class D_BTreeController extends DiagnosticableGeneric
     public String diag()
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5224
         OpenBTree   open_btree  = (OpenBTree) this.diag_object;
         ControlRow  root        = null;
         int         tree_height;
         LevelInfo   level_info[] = null;
         String      diag_info    = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 
         
         try
         {
             tree_height = open_btree.getHeight();
             root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             // Allocate a LevelInfo array with one entry per level of the tree.
             level_info = new LevelInfo[tree_height];

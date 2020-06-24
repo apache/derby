@@ -41,6 +41,7 @@ public class ReplicationLogger {
     private final String dbname;
 
     public ReplicationLogger(String dbname) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
         verbose = PropertyUtil.getSystemBoolean(Property.REPLICATION_VERBOSE,
                                                 true);
         this.dbname = dbname;
@@ -88,6 +89,7 @@ public class ReplicationLogger {
      */
     public void logText(String text, boolean writeHeader) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
         if (verbose) {
             if (writeHeader) {
                 Monitor.logTextMessage(MessageId.REPLICATION_ERROR_BEGIN,

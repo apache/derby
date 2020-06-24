@@ -56,6 +56,7 @@ public class ConcurrentImplicitCreateSchema
         CreateTable(int id, int schemaId, 
                     ConcurrentImplicitCreateSchema test) 
             throws SQLException, IllegalAccessException, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    ClassNotFoundException, InstantiationException, NoSuchMethodException,
                    java.lang.reflect.InvocationTargetException
         {

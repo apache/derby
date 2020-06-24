@@ -32,6 +32,7 @@ import java.io.Reader;
  * this stream verifies that the underlying Clob has not
  * changed and if it has it recreates the specific streams.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class UpdateSensitiveClobLocatorReader extends Reader {
     //The ClobLocatorReader instance
     //wrapped inside a BufferedReader
@@ -68,6 +69,7 @@ class UpdateSensitiveClobLocatorReader extends Reader {
      *            this stream.
      */
     protected UpdateSensitiveClobLocatorReader(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientConnection con,
             ClientClob clob) throws SqlException {
 
@@ -106,6 +108,7 @@ class UpdateSensitiveClobLocatorReader extends Reader {
      *
      */
     protected UpdateSensitiveClobLocatorReader(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientConnection con,
             ClientClob clob,
             long pos,

@@ -90,6 +90,7 @@ public class T_FileSystemData extends T_MultiThreadedIterations {
 		 throws StandardException
 	{
 		super.boot(create, startParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		contextService = getContextService();
 	}
 
@@ -127,6 +128,7 @@ public class T_FileSystemData extends T_MultiThreadedIterations {
 		startParams.put(Property.DELETE_ON_CREATE, Boolean.TRUE.toString());
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 								testService, startParams);
 			if (factory == null) {
@@ -1115,6 +1117,7 @@ public class T_FileSystemData extends T_MultiThreadedIterations {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();
@@ -1139,6 +1142,7 @@ public class T_FileSystemData extends T_MultiThreadedIterations {
      * can't call this entry point.
      */
     private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

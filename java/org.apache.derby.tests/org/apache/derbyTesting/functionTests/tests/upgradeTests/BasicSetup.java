@@ -49,6 +49,7 @@ public class BasicSetup extends UpgradeChange {
     
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("Upgrade basic setup");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(new BaseTestSuite(BasicSetup.class));
 
@@ -116,8 +117,10 @@ public class BasicSetup extends UpgradeChange {
             // old version is running in a server and the driver
             // is a client driver corresponding to the current version.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             if (!JVMInfo.isModuleAware())
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
               assertEquals("Old major (driver): ",
                     getOldMajor(), dmd.getDriverMajorVersion());
               assertEquals("Old minor (driver): ",
@@ -198,6 +201,7 @@ public class BasicSetup extends UpgradeChange {
      */
     public void testCreateTable() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
       Connection conn = getConnection();
         Statement stmt = createStatement();
         try {
@@ -209,6 +213,7 @@ public class BasicSetup extends UpgradeChange {
         }
         stmt.executeUpdate("CREATE TABLE T (I INT)");
         TestConfiguration.getCurrent().shutdownDatabase();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         conn.close();
         stmt = createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * from t");
@@ -224,6 +229,7 @@ public class BasicSetup extends UpgradeChange {
      */
     public void testIndex() throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Connection conn = getConnection();
         Statement stmt = createStatement();
         try {
@@ -238,6 +244,7 @@ public class BasicSetup extends UpgradeChange {
         stmt.executeUpdate("INSERT INTO  TI values(2)");
         stmt.executeUpdate("INSERT INTO  TI values(3)");
         TestConfiguration.getCurrent().shutdownDatabase();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         conn.close();
         stmt = createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * from TI ORDER BY I");
@@ -252,6 +259,7 @@ public class BasicSetup extends UpgradeChange {
      */
     public void noConnectionAfterHardUpgrade()
     {              
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         switch (getPhase())
         {
         case PH_POST_HARD_UPGRADE:
@@ -261,6 +269,7 @@ public class BasicSetup extends UpgradeChange {
                     // Check the innermost of the nested exceptions
                     SQLException sqle = getLastSQLException(e);
                     String sqlState = sqle.getSQLState();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                     String message = sqle.getMessage();
                 	// while beta, XSLAP is expected, if not beta, XSLAN
                     String INCOMPATIBLE_VERSION = "XSLAN";
@@ -298,6 +307,11 @@ public class BasicSetup extends UpgradeChange {
      * Otherwise, the database may fail to boot again with the old version.
      */
     public void dropAllTriggerPlans() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
+//IC see: https://issues.apache.org/jira/browse/DERBY-4835
+//IC see: https://issues.apache.org/jira/browse/DERBY-5289
+//IC see: https://issues.apache.org/jira/browse/DERBY-5105
+//IC see: https://issues.apache.org/jira/browse/DERBY-5263
         Statement s = createStatement();
         s.execute("create procedure clear_sps_plans() language java "
                 + "parameter style java external name '"
@@ -540,10 +554,20 @@ public class BasicSetup extends UpgradeChange {
             assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
 
         	preapreFortDERBY5120();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6547
+//IC see: https://issues.apache.org/jira/browse/DERBY-6383
             s.execute("update ATDC_TAB1 set c11=11");
             s.executeUpdate("alter table ATDC_TAB1 add column c113 int");
             //DERBY-5120 has been fixed in 10.8.2.2 and higher and hence we 
             // will not see the buggy behavior on those codelines
+//IC see: https://issues.apache.org/jira/browse/DERBY-5379
+//IC see: https://issues.apache.org/jira/browse/DERBY-5484
+//IC see: https://issues.apache.org/jira/browse/DERBY-5120
+//IC see: https://issues.apache.org/jira/browse/DERBY-5044
+//IC see: https://issues.apache.org/jira/browse/DERBY-5379
+//IC see: https://issues.apache.org/jira/browse/DERBY-5484
+//IC see: https://issues.apache.org/jira/browse/DERBY-5120
+//IC see: https://issues.apache.org/jira/browse/DERBY-5044
             if (oldLessThan(10,8,2,2)) 
                 s.execute("update ATDC_TAB1 set c11=11");
             else
@@ -662,6 +686,10 @@ public class BasicSetup extends UpgradeChange {
         	// in 10.8.2.2 and higher releases where DERBY-5044 and
         	// DERBY-5120 have already been fixed.
         	s.executeUpdate("alter table BKUP1_5044_5120 drop column c112");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5379
+//IC see: https://issues.apache.org/jira/browse/DERBY-5484
+//IC see: https://issues.apache.org/jira/browse/DERBY-5120
+//IC see: https://issues.apache.org/jira/browse/DERBY-5044
             if (oldLessThan(10,8,2,2)) {
                 //Since in releases prior to 10.8.2.2, ALTER TABLE DROP COLUMN 
                 // did not drop dependent trigger, following UPDATE sql will fail 
@@ -812,6 +840,10 @@ public class BasicSetup extends UpgradeChange {
             s.execute("insert into ATDC_13_TAB1_BACKUP values (1,11)");
             s.execute("insert into ATDC_13_TAB2 values (1,11)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5379
+//IC see: https://issues.apache.org/jira/browse/DERBY-5484
+//IC see: https://issues.apache.org/jira/browse/DERBY-5120
+//IC see: https://issues.apache.org/jira/browse/DERBY-5044
             if (oldLessThan(10,8,2,2)) {
                 //In releases prior to 10.8.2.2, following does not detect 
             	// that column c22 is getting used by trigger 
@@ -1472,6 +1504,7 @@ public class BasicSetup extends UpgradeChange {
 
     private int[][] constructPowerSet( int count )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     	ArrayList<int[]> list = new ArrayList<int[]>();
         boolean[]           inclusions = new boolean[ count ];
 
@@ -1530,6 +1563,7 @@ public class BasicSetup extends UpgradeChange {
     private int[][] permute( int[][] original )
     {
         ArrayList<int[]> list = new ArrayList<int[]>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         for ( int i = 0; i < original.length; i++ )
         {

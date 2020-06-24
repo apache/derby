@@ -189,6 +189,7 @@ public interface ScanController extends GenericScanController
 	fetch must be compatible with the number of scan columns
 	requested at the openScan call time.
 	<BR>
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     A fetch can return a sub-set of the scan columns requested
 	at scan open time by supplying a destRow will less elements
 	than the number of requested columns. In this case the N leftmost
@@ -218,6 +219,7 @@ public interface ScanController extends GenericScanController
 		throws StandardException;
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
      The same as fetch, except that the qualifiers passed to the openScan()
      will not be applied. destRow will contain the current row even if it
      has been changed and no longer qualifies.
@@ -331,6 +333,7 @@ public interface ScanController extends GenericScanController
     boolean positionAtRowLocation(RowLocation rl) 
         throws StandardException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
 
     /**
     Replace the (partial) row at the current position of the scan.

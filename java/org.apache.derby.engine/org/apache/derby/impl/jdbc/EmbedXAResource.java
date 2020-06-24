@@ -70,6 +70,7 @@ class EmbedXAResource implements XAResource {
         this.con = con;
         this.ra = ra;
         // Setup the default value for the transaction timeout.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
         this.timeoutSeconds = 0;
     }
     
@@ -101,6 +102,7 @@ class EmbedXAResource implements XAResource {
             // RM also does not know about this xid.
             if (inDoubtCM == null)
                 throw new XAException(XAException.XAER_NOTA);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             ContextService csf = getContextService();
             csf.setCurrentContextManager(inDoubtCM);
             try {
@@ -146,6 +148,7 @@ class EmbedXAResource implements XAResource {
                 throw new XAException(XAException.XAER_PROTO);
             
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
                 tranState.xa_commit(onePhase);
             } catch (SQLException sqle) {
                 throw wrapInXAException(sqle);
@@ -299,6 +302,7 @@ class EmbedXAResource implements XAResource {
                     
                     returnConnectionToResource(tranState, xid_im);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
 					if (SanityManager.DEBUG) {
 						if (con.realConnection != null) {
 							SanityManager.ASSERT(
@@ -314,6 +318,7 @@ class EmbedXAResource implements XAResource {
             } catch (SQLException sqle) {
                 XAException xe = wrapInXAException(sqle);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (ExceptionUtil.
                         isDeferredConstraintViolation(sqle.getSQLState())) {
                     // We are rolling back
@@ -336,6 +341,7 @@ class EmbedXAResource implements XAResource {
      * is equal to Integer.MAX_VALUE it means no timeout.
      */
     public synchronized int getTransactionTimeout() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
         return timeoutSeconds;
     }
 
@@ -463,6 +469,8 @@ class EmbedXAResource implements XAResource {
             if (inDoubtCM == null)
                 throw new XAException(XAException.XAER_NOTA);
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             ContextService csf = getContextService();
             
             csf.setCurrentContextManager(inDoubtCM);
@@ -506,6 +514,7 @@ class EmbedXAResource implements XAResource {
             
             try {
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
                 tranState.xa_rollback();
             } catch (SQLException sqle) {
                 throw wrapInXAException(sqle);
@@ -536,6 +545,7 @@ class EmbedXAResource implements XAResource {
      * values are XAER_RMERR, XAER_RMFAIL, or XAER_INVAL.
      */
     public synchronized boolean setTransactionTimeout(int seconds)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
     throws XAException {
         if (seconds < 0) {
             // throw an exception if invalid value was specified
@@ -550,6 +560,7 @@ class EmbedXAResource implements XAResource {
      */
     private long getDefaultXATransactionTimeout() throws XAException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
             LanguageConnectionContext lcc = getLanguageConnectionContext( con );
             TransactionController tc = lcc.getTransactionExecute();
 
@@ -661,8 +672,10 @@ class EmbedXAResource implements XAResource {
                     // and holdability false (cannot hold cursors across 
                     // XA transactions.
                     con.realConnection.setHoldability(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                             ResultSet.CLOSE_CURSORS_AT_COMMIT);
                     
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
                     getLanguageConnectionContext( con.realConnection ).
                             getTransactionExecute().
                             createXATransactionFromLocalTransaction(
@@ -677,11 +690,13 @@ class EmbedXAResource implements XAResource {
                     throw wrapInXAException(sqle);
                 }
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6741
                 tranState = new XATransactionState
                     (
                      getContextManager( con.realConnection ),
                      con.realConnection, this, xid_im
                      );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
                 if (!ra.addConnection(xid_im, tranState))
                     throw new XAException(XAException.XAER_DUPID);
                 
@@ -728,6 +743,7 @@ class EmbedXAResource implements XAResource {
                         // get this state and store in the connection handle so 
                         // that we can restore the isolation when we are in the 
                         // local mode.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1325
                         try {
 	                    	if (con.currentConnectionHandle != null) {
 	                    		con.currentConnectionHandle.getIsolationUptoDate();
@@ -839,6 +855,7 @@ class EmbedXAResource implements XAResource {
             xaErrorCode = XAException.XA_RBTIMEOUT;
         else if (seErrorCode >=  ExceptionSeverity.SESSION_SEVERITY)
             xaErrorCode = XAException.XAER_RMFAIL;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         else if (ExceptionUtil.isDeferredConstraintViolation(sqlstate)) {
             xaErrorCode = XAException.XA_RBINTEGRITY;
         } else {
@@ -847,6 +864,7 @@ class EmbedXAResource implements XAResource {
         
         xae = new XAException(message);
         xae.errorCode = xaErrorCode;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5542
         xae.initCause(se);
         return xae;
     }
@@ -857,6 +875,8 @@ class EmbedXAResource implements XAResource {
      */
     private static XAException wrapInXAException(StandardException se) {
         return wrapInXAException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
                 TransactionResourceImpl.wrapInSQLException(se));
     }
     
@@ -866,6 +886,7 @@ class EmbedXAResource implements XAResource {
      * @param tranState 
      * @param xid_im 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
     void returnConnectionToResource(XATransactionState tranState,
                                                             XAXactId xid_im) {
         
@@ -927,6 +948,7 @@ class EmbedXAResource implements XAResource {
      * Removes the xid from currently active transactions
      * @param xid_im 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
     void removeXATransaction(XAXactId xid_im) {
         XATransactionState tranState = 
                 (XATransactionState) ra.removeConnection(xid_im);
@@ -945,12 +967,14 @@ class EmbedXAResource implements XAResource {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6741
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }
@@ -980,6 +1004,7 @@ class EmbedXAResource implements XAResource {
 	  */
 	private	LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         return AccessController.doPrivileged
             (
              new PrivilegedAction<LanguageConnectionContext>()
@@ -999,6 +1024,7 @@ class EmbedXAResource implements XAResource {
 	private	LanguageConnectionContext	getLanguageConnectionContext( final EmbedPooledConnection conn )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         if ( lcc == null )
         {
             try {

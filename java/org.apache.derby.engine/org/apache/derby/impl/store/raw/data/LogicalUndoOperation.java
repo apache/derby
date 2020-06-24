@@ -65,6 +65,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public final class LogicalUndoOperation extends PageBasicOperation
         implements Compensation {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
 
 	protected int recordId;				// the record id to call undoOp.undoMe with
 

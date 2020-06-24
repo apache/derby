@@ -53,6 +53,7 @@ public abstract class CursorActivation
 	}
 
     /** @see BaseActivation#decorateResultSet */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
     ResultSet decorateResultSet() throws StandardException {
         // CursorActivation means it's a query that returns rows. Check that
         // the caller is authorized to run SQL read operations.

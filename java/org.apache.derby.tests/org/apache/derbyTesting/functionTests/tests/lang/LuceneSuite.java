@@ -42,7 +42,9 @@ public class LuceneSuite extends BaseTestCase
 
 	public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("LuceneSuite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         Properties  properties = TestConfiguration.getSystemProperties();
         
         //
@@ -66,9 +68,13 @@ public class LuceneSuite extends BaseTestCase
             suite.addTest(LuceneSupportTest.suite());
             suite.addTest(LuceneSupportPermsTest.suite());
             suite.addTest(LuceneCollationTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             suite.addTest(LuceneCoarseAuthorizationTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             suite.addTest(LuceneInMemoryTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             suite.addTest(LuceneBackupTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
             suite.addTest(LuceneJarLoadingTest.suite());
         }
 

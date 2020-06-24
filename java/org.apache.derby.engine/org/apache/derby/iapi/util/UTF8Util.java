@@ -58,6 +58,7 @@ public final class UTF8Util {
         // No need to do the skip in a loop, as Reader.read() returning -1
         // means EOF has been reached.
         // Note that a loop should be used if skip is used instead of read.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2760
         return internalSkip(in, Long.MAX_VALUE).charsSkipped();
     }
 
@@ -74,6 +75,7 @@ public final class UTF8Util {
      */
     public static final long skipFully(InputStream in, long charsToSkip)
             throws EOFException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2760
         SkipCount skipped = internalSkip(in, charsToSkip);
         if (skipped.charsSkipped() != charsToSkip) {
             throw new EOFException("Reached end-of-stream prematurely at " +
@@ -103,6 +105,7 @@ public final class UTF8Util {
      * @throws UTFDataFormatException if an invalid UTF-8 encoding is detected
      */
     private static final SkipCount internalSkip(final InputStream in,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2760
                                                 final long charsToSkip)
             throws IOException {
         long charsSkipped = 0;
@@ -120,6 +123,7 @@ public final class UTF8Util {
                 bytesSkipped++;
             } else if ((c & 0x60) == 0x40) { // 7th bit set, 6th bit unset
                 // Found char of two byte width.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
                 if (InputStreamUtil.skipPersistent(in, 1L) != 1L) {
                     // No second byte present.
                     throw new UTFDataFormatException(
@@ -146,6 +150,7 @@ public final class UTF8Util {
                         skipped = 2;
                     }
                 } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
                     skipped = (int)InputStreamUtil.skipPersistent(in, 2L);
                 }
                 if (skipped != 2) {
@@ -163,6 +168,7 @@ public final class UTF8Util {
         }
         // We don't close the stream, since it might be reused. One example of
         // this is use of Resetable streams.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2760
         return new SkipCount(charsSkipped, bytesSkipped);
     }
 
@@ -182,6 +188,7 @@ public final class UTF8Util {
          * @param byteCount number of bytes
          * @param charCount number of characters
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2760
         SkipCount(long charCount, long byteCount) {
             if (byteCount < 0 || charCount < 0) {
                 // Don't allow negative counts.

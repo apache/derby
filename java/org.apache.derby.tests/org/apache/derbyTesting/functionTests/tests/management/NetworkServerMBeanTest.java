@@ -172,6 +172,7 @@ public class NetworkServerMBeanTest extends MBeanTest {
         // localhost may also be 127.0.0.1
         // serverHost = expected host
         String serverHost = TestConfiguration.getCurrent().getHostName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6294
         if (serverHost.equals("localhost") || serverHost.equals("127.0.0.1") ||
                 serverHost.equals(" 0:0:0:0:0:0:0:1")) {
             String mbeanHost = (String) getAttribute(
@@ -225,6 +226,7 @@ public class NetworkServerMBeanTest extends MBeanTest {
     
     public void testAttributeDrdaStreamOutBufferSize() throws Exception {
         // assuming that the buffer size is 0 (default)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3578
         assertIntAttribute(0,
                 getNetworkServerMBeanObjectName(), 
                 "DrdaStreamOutBufferSize");

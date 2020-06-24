@@ -126,14 +126,18 @@ public class SlaveDatabase extends BasicDatabase {
         throws StandardException {
 
         inReplicationSlaveMode = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3361
+//IC see: https://issues.apache.org/jira/browse/DERBY-3356
         inBoot = true;
         shutdownInitiated = false;
 
         dbname = startParams.getProperty(SlaveFactory.SLAVE_DB);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
 
         // SlaveDatabaseBootThread is an internal class
         SlaveDatabaseBootThread dbBootThread =
             new SlaveDatabaseBootThread(create, startParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3447
         Thread sdbThread = 
                 new Thread(dbBootThread, "derby.slave.boot-" + dbname);
         sdbThread.setDaemon(true);
@@ -142,6 +146,8 @@ public class SlaveDatabase extends BasicDatabase {
         // Check that the database was booted successfully, or throw
         // the exception that caused the boot to fail.
         verifySuccessfulBoot();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3361
+//IC see: https://issues.apache.org/jira/browse/DERBY-3356
 
         inBoot = false;
 
@@ -202,6 +208,7 @@ public class SlaveDatabase extends BasicDatabase {
     }
 
     public AuthenticationService getAuthenticationService()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
         throws StandardException{
         if (inReplicationSlaveMode) {
             // Cannot get authentication service for a database that
@@ -227,6 +234,7 @@ public class SlaveDatabase extends BasicDatabase {
             throw StandardException.
                 newException(SQLState.REPLICATION_STOPSLAVE_NOT_INITIATED);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         pushDbContext(getContextService().
                       getCurrentContextManager());
     }
@@ -266,6 +274,7 @@ public class SlaveDatabase extends BasicDatabase {
     }
 
     public void failover(String dbname) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3428
         if (inReplicationSlaveMode) {
             slaveFac.failover();
             // SlaveFactory#failover will make the
@@ -278,6 +287,7 @@ public class SlaveDatabase extends BasicDatabase {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
                 }
             }
@@ -310,9 +320,11 @@ public class SlaveDatabase extends BasicDatabase {
 
             // The thread needs a ContextManager since two threads
             // cannot share a context
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
             ContextManager bootThreadCm = null;
             try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 bootThreadCm = getContextService().newContextManager();
                 getContextService().
                     setCurrentContextManager(bootThreadCm);
@@ -324,10 +336,12 @@ public class SlaveDatabase extends BasicDatabase {
                 inReplicationSlaveMode = false; 
 
                 if (bootThreadCm != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     getContextService().
                         resetCurrentContextManager(bootThreadCm);
                     bootThreadCm = null;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4269
             } catch (Exception e) {
                 // We get here when SlaveController#stopSlave has been called,
                 // a fatal Derby exception has been thrown, or if a run-time
@@ -358,6 +372,8 @@ public class SlaveDatabase extends BasicDatabase {
      * to fail.
      */
     private void verifySuccessfulBoot() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3361
+//IC see: https://issues.apache.org/jira/browse/DERBY-3356
         while (!(isSlaveFactorySet() && slaveFac.isStarted())) {
             if (bootException != null) {
                 throw bootException;
@@ -365,12 +381,14 @@ public class SlaveDatabase extends BasicDatabase {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
                 }
             }
         }
 
         if (bootException != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4186
 
             // DERBY-4186: This is a corner case. Master made us shut down
             // before the initial connect which establishes the slave has
@@ -398,6 +416,7 @@ public class SlaveDatabase extends BasicDatabase {
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             slaveFac = (SlaveFactory)
                 findServiceModule(this, SlaveFactory.MODULE);
             return true;
@@ -437,6 +456,7 @@ public class SlaveDatabase extends BasicDatabase {
 
             InternalDriver driver = InternalDriver.activeDriver();
             if (driver != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
                 driver.connect( conStr, (Properties) null, 0 );
             }
         } catch (Exception e) {
@@ -458,12 +478,14 @@ public class SlaveDatabase extends BasicDatabase {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

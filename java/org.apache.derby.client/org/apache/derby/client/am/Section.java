@@ -99,6 +99,7 @@ public class Section {
      * @return the package name and consistency token information
      */
     public byte[] getPKGNAMCBytes() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return PKGNAMCBytes != null ?
                PKGNAMCBytes.clone() :
                null;
@@ -125,6 +126,7 @@ public class Section {
 
     // member for positioned update sections only
     String serverCursorNameForPositionedUpdate_ = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     public String getServerCursorNameForPositionedUpdate() {
         return serverCursorNameForPositionedUpdate_;
@@ -144,6 +146,7 @@ public class Section {
         this.clientCursorName_ = clientCursorName;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void free() {
         if (resultSetHoldability_ != -1) {
             this.agent_.sectionManager_.freeSection(this, resultSetHoldability_);

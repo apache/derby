@@ -143,6 +143,7 @@ import java.util.zip.CRC32;
 		int format id
 		int obsolete log file version
 		long the log instant (LogCounter) of the last completed checkpoint
+//IC see: https://issues.apache.org/jira/browse/DERBY-5196
 		   (logfile counter, position)
 		int Derby major version
 		int Derby minor version
@@ -201,12 +202,14 @@ import java.util.zip.CRC32;
 
 	<P>Multithreading considerations:<BR>
 	Log Factory must be MT-safe.
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	<P>
 	Class is final as it has methods with privilege blocks
 	and implements PrivilegedExceptionAction.
 	*/
 
 public final class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 								  Serviceable, java.security.PrivilegedExceptionAction<Object>
 {
 
@@ -348,6 +351,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     //   switchLogFile (both in slave replication mode and after the
     //   database has been fully booted) when a new log file is
     //   allocated.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 	long					 logFileNumber = -1; // current log file number.
 								// Other than during boot and recovery time,
 								// and during initializeReplicationSlaveRole if in
@@ -363,6 +368,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     // Initially set to point to the log file with the latest
     // checkpoint (in boot()). Only used by recovery() after that
     long                     bootTimeLogFileNumber = -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 
 	long					 firstLogFileNumber = -1;
 								// first log file that makes up the active
@@ -681,6 +687,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		// initialize the log writer only after the rawstorefactory is available, 
 		// log writer requires encryption block size info from rawstore factory 
 		// to encrypt checksum log records. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		if (firstLog != null) 
 			logOut = new LogAccessFile(this, firstLog, logBufferSize);
 
@@ -693,6 +700,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         // but not the first one. While the recovery thread waits
         // here, the slave replication thread can perform necessary
         // initialization without causing serialization conflicts.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
         if (inReplicationSlaveMode) {
             synchronized (slaveRecoveryMonitor) {
                 // Recheck inReplicationSlaveMode==true every time
@@ -766,6 +774,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 						if (beginLogFileNumber != null)
                         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 							bootTimeLogFileNumber = 
                                 Long.valueOf(beginLogFileNumber).longValue();
                         }
@@ -873,6 +882,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					long start = 
 						LogCounter.makeLogInstantAsLong(
                             bootTimeLogFileNumber, LOG_FILE_HEADER_SIZE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 
 					// no checkpoint, start redo from the beginning of the 
                     // file - assume this is the first log file
@@ -886,6 +896,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				RawTransaction recoveryTransaction =
                     tf.startTransaction(
                         rawStoreFactory,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                         getContextService().getCurrentContextManager(),
                         AccessFactoryGlobals.USER_TRANS_NAME);
 
@@ -929,6 +940,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 // number anymore. From this point on, logFileNumber
                 // is used for all references to the current log file
                 // number; bootTimeLogFileNumber is no longer used.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
                 logFileNumber = bootTimeLogFileNumber;
 				
 				// if we are only interested in dumping the log, don't alter
@@ -974,6 +986,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 							logFile = getLogFileName(++logFileNumber);
 						}
 					}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4072
 					IOException accessException = null;
 					try
 					{
@@ -982,6 +995,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					catch (IOException ioe)
 					{
 						theLog = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4072
 						accessException = ioe;
 					}
 
@@ -1063,6 +1077,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					{
 						// if datafactory doesn't think it is readonly, we can
 						// do some futher test of our own
+//IC see: https://issues.apache.org/jira/browse/DERBY-4072
 						IOException accessException = null;
 						try
 						{
@@ -1074,6 +1089,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						catch (IOException ioe)
 						{
 							theLog = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4072
                             accessException = ioe;
 						}
                         if (theLog == null || !privCanWrite(logFile))
@@ -1081,6 +1097,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 							if (theLog != null)
 								theLog.close();
 							theLog = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4072
 							Monitor.logTextMessage(MessageId.LOG_CHANGED_DB_TO_READ_ONLY);
 							if (accessException != null)
 								Monitor.logThrowable(accessException);	
@@ -1133,6 +1150,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 							Monitor.logTextMessage(MessageId.LOG_INCOMPLETE_LOG_RECORD,
 								logFile, endPosition, eof);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 							/* Write zeros from incomplete log record to end of file */
 							long nWrites = (eof - endPosition)/logBufferSize;
@@ -1175,6 +1193,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                         // one. DERBY-5937.
                         logOut.close();
                     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 					logOut = new LogAccessFile(this, theLog, logBufferSize);
                 }
 				
@@ -1373,6 +1392,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 checkpointDaemon.subscribe(this, true /*onDemandOnly */);
 
             // use the same daemon for the cache cleaner
+//IC see: https://issues.apache.org/jira/browse/DERBY-3131
             dataFactory.setupCacheCleaner(checkpointDaemon);
         }
 	}
@@ -1435,6 +1455,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			4               |--------------------------------------(end of log)
 			5                                       |-^-|
 			.                                   Checkpoint Log Record
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			---A---&gt;|&lt;-------B---------&gt;|&lt;-------------C-----------
 		</PRE>
 
@@ -1481,6 +1502,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         @param df           The DataFactory to use to do the checkpoint. 
         @param tf           The TransactionFactory to use to do the checkpoint.
         @param wait         If an existing checkpoint is in progress, then if
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
                             wait=true then this routine will wait for the 
                             checkpoint to complete and the do another checkpoint
                             and wait for it to finish before returning.
@@ -1516,6 +1538,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         @param df           The DataFactory to use to do the checkpoint. 
         @param tf           The TransactionFactory to use to do the checkpoint.
         @param wait         If an existing checkpoint is in progress, then if
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
                             wait=true then this routine will wait for the 
                             checkpoint to complete and the do another checkpoint
                             and wait for it to finish before returning.
@@ -1542,6 +1565,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		long approxLogLength;
 
 		boolean     proceed = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
         do
         {
             synchronized (this)
@@ -1649,6 +1673,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 //checkpoint to zero.
 				logWrittenFromLastCheckPoint = 0;
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
             else
 			{
 				//checkpoint is happening without the log switch,
@@ -1674,6 +1699,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			if (needCPTran)
 				cptran = tf.startInternalTransaction(rsf,
 				getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			/////////////////////////////////////////////////////
 			// gather a snapshot of the various interesting points of the log
@@ -1776,6 +1802,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             // If a backup is in progress don't delete the stubs until 
             // it is done. Backup needs to copy all the stubs that 
             // are needed to recover from the backup checkpoint on restore.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
             if(!backupInProgress)
                 df.removeDroppedContainerFileStubs(redoLWM);
 		
@@ -2046,6 +2073,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             {
 				throw StandardException.newException(
                         SQLState.LOG_EXCEED_MAX_LOG_FILE_NUMBER, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         maxLogFileNumber); 
             }
 
@@ -2093,6 +2121,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					// file.
 					
 					logOut.writeEndMarker(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 
 					setEndPosition( endPosition + INT_LENGTH );
 					//set that we are in log switch to prevent flusher 
@@ -2126,6 +2155,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						newLog.seek(endPosition);
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 					logOut = new LogAccessFile(this, newLog, logBufferSize);
 					newLog = null;
 
@@ -2187,6 +2217,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 if (newLogFile != null && privExists(newLogFile))
 				{
                     privDelete(newLogFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5008
 					newLogFile = null;
 				}
 
@@ -2201,6 +2232,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			
             // Replication slave: Recovery thread should be allowed to
             // read the previous log file
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
             if (inReplicationSlaveMode) {
                 allowedToReadFileNumber = logFileNumber-1;
                 synchronized (slaveRecoveryMonitor) {
@@ -2223,6 +2255,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		@exception IOException Failed to flush to the log
 	*/
 	private void flushBuffer(long fileNumber, long wherePosition)
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		throws IOException, StandardException
 	{
 		synchronized (this) {
@@ -2262,6 +2295,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		long firstLogNeeded;
 		if ((firstLogNeeded = getFirstLogNeeded(checkpoint))==-1)
 			return;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3562
 		truncateLog(firstLogNeeded);
 	}
 
@@ -2277,6 +2311,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		// when  backup is in progress, log files that are yet to
         // be copied to the backup should not be deleted,  even 
         // if they are not required  for crash recovery.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1113
         if(backupInProgress) {
             long logFileNeededForBackup = logFileToBackup;
             // check if the log file number is yet to be copied 
@@ -2346,6 +2381,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		// one truncation at a time
 		synchronized (this)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
 			firstLogNeeded = 
                 (checkpoint != null ? 
                      LogCounter.getLogFileNumber(checkpoint.undoLWM()) : -1);
@@ -2382,6 +2418,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         using the checksum we find that the control file
         is hosed then we  use the mirror file, which will have
         the control data written at last check point.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5196
 
 		see comment at beginning of file for log control file format.
 
@@ -2422,6 +2459,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		daos.writeInt(jbmsVersion.getBuildNumberAsInt());
 
 		byte flags = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
 		if (onDiskBeta) 
             flags |= IS_BETA_FLAG;
         
@@ -2586,6 +2624,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 // If yes, then on a boot error we report that this setting is
                 // probably the cause for the error and also log a warning
                 // in the derby.log that this mode was set previously
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
                 wasDBInDurabilityTestModeNoSync = 
                     (flags & IS_DURABILITY_TESTMODE_NO_SYNC_FLAG) != 0;
 
@@ -2671,6 +2710,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		if (upgradeNeeded)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			if (isFullUpgrade(startParams,
 				ProductVersionHolder.simpleVersionString(onDiskMajorVersion, onDiskMinorVersion, onDiskBeta))) {
 
@@ -2701,6 +2741,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     */
 	private void createLogDirectory() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1039
 		StorageFile logDir = 
             logStorageFactory.newStorageFile(LogFactory.LOG_DIRECTORY_NAME);
 
@@ -2716,6 +2757,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             
         }else {
             // create the log directory.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
             IOException ex = null;
             boolean created = false;
             try {
@@ -2781,6 +2823,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		logDir = logStorageFactory.newStorageFile( LogFactory.LOG_DIRECTORY_NAME);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1039
         if (!privExists(logDir))
 		{
 			throw StandardException.newException(
@@ -2979,9 +3022,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		Used by scan to switch to the next log file
 
 		<P> MT- read only </p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 
 		<p> When the database is in slave replication mode only:
 		Assumes that only recover() will call this method after
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 		initializeReplicationSlaveRole() has been called, and until slave
 		replication has ended. If this changes, the current
 		implementation will fail.</p>
@@ -3041,6 +3087,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         }
         // </SLAVE REPLICATION CODE>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         long instant = LogCounter.makeLogInstantAsLong(filenumber,
                                                        LOG_FILE_HEADER_SIZE);
         return getLogFileAtPosition(instant);
@@ -3154,8 +3201,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         // Is the database booted in replication slave mode?
         String mode = startParams.getProperty(SlaveFactory.REPLICATION_MODE);
         if (mode != null && mode.equals(SlaveFactory.SLAVE_MODE)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3051
             inReplicationSlaveMode = true; 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
             slaveRecoveryMonitor = new Object();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
         } else if (mode != null && mode.equals(SlaveFactory.SLAVE_PRE_MODE)) {
             inReplicationSlavePreMode = true;
         }
@@ -3176,6 +3226,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1039
         if(create) {
             getLogStorageFactory();
             createLogDirectory();
@@ -3209,11 +3260,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         		
 		//if user does not set the right value for the log buffer size,
 		//default value is used instead.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		logBufferSize =  PropertyUtil.getSystemInt(org.apache.derby.shared.common.reference.Property.LOG_BUFFER_SIZE, 
 												   LOG_BUFFER_SIZE_MIN, 
 												   LOG_BUFFER_SIZE_MAX, 
 												   DEFAULT_LOG_BUFFER_SIZE);
 		jbmsVersion = getMonitor().getEngineVersion();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		
 		String logArchiveMode = 
@@ -3244,6 +3297,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         // If derby.system.durability=test is set,then set flag to 
         // disable sync of log records at commit and log file before 
         // data page makes it to disk
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
         if (Property.DURABILITY_TESTMODE_NO_SYNC.equalsIgnoreCase(
                PropertyUtil.getSystemProperty(Property.DURABILITY_PROPERTY)))
         {
@@ -3291,6 +3345,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			{
                 if (privExists(logControlFileName))
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
 					checkpointInstant = 
                         readControlFile(logControlFileName, startParams);
 
@@ -3309,6 +3364,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     }
 						
 					if (checkpointInstant == LogCounter.INVALID_LOG_INSTANT &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-1241
 										privExists(getMirrorControlFileName()))
                     {
 						checkpointInstant =
@@ -3360,6 +3416,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					// blow away the log file if possible
                     if (!privDelete(logFile) && logFileNumber == 1)
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
                         logErrMsgForDurabilityTestModeNoSync();
 						throw StandardException.newException(
                             SQLState.LOG_INCOMPATIBLE_FORMAT, dataDirectory);
@@ -3409,6 +3466,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
                         if (!privDelete(logFile))
                         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
                             logErrMsgForDurabilityTestModeNoSync();
 							throw StandardException.newException(
                                     SQLState.LOG_INCOMPATIBLE_FORMAT,
@@ -3449,11 +3507,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}
 				else
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4072
 					Monitor.logTextMessage(MessageId.LOG_CHANGED_DB_TO_READ_ONLY);
 					Monitor.logThrowable(new Exception("Error writing control file"));
 					// read only database
 					ReadOnlyDB = true;
 					logOut = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 					firstLog = null;
 				}
 
@@ -3485,6 +3545,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						  RawStoreFactory.DERBY_STORE_MINOR_VERSION_1))
 			maxLogFileNumber = LogCounter.DERBY_10_0_MAX_LOGFILE_NUMBER;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 		bootTimeLogFileNumber = logFileNumber;
 	} // end of boot
 
@@ -3492,6 +3553,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     {
         if( logDevice == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             DataFactory df = (DataFactory) findServiceModule( this, DataFactory.MODULE);
             logStorageFactory = (WritableStorageFactory) df.getStorageFactory();
         }
@@ -3535,6 +3597,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					logOut.flushLogAccessFile();
 					logOut.close();
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 				catch (IOException ioe) {}
 				catch(StandardException se){}
 				logOut = null;
@@ -3585,6 +3648,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         // when  backup is in progress, log files that are yet to
         // be copied to the backup should not be deleted,  even 
         // if they are not required  for crash recovery.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1113
         if(backupInProgress) {
             long logFileNeededForBackup = logFileToBackup;
             // check if the log file number is yet to be copied 
@@ -3665,6 +3729,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		String cpInterval;
 		if(set == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			lsInterval=PropertyUtil.getSystemProperty(org.apache.derby.shared.common.reference.Property.LOG_SWITCH_INTERVAL);
 			cpInterval=PropertyUtil.getSystemProperty(org.apache.derby.shared.common.reference.Property.CHECKPOINT_INTERVAL);
 		}else
@@ -3769,6 +3834,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			byte[] optionalData, int optionalDataOffset, int optionalDataLength) 
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
         if (inReplicationSlavePreMode) {
             // Return the *current* end of log without adding the log
             // record to the log file. Effectively, this call to
@@ -3860,6 +3926,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     {
 						throw StandardException.newException(
                                 SQLState.LOG_EXCEED_MAX_LOG_FILE_SIZE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                 logFileNumber, 
                                 endPosition, 
                                 length, 
@@ -4021,6 +4088,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					// slave replication mode, however, log records
 					// received from the master may have been
 					// written to the log.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 					if (recoveryNeeded && inRedo && !inReplicationSlaveMode) 
 					{
 						return;
@@ -4093,6 +4161,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                         // (i.e., wherePosition ==
                         // LogCounter.INVALID_LOG_INSTANT has already
                         // been checked)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3051
                         if (inReplicationMasterMode) {
                             masterFactory.flushedTo(LogCounter.
                                        makeLogInstantAsLong(fileNumber,
@@ -4111,6 +4180,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     ioe,
                     getLogFileName(logFileNumber).getPath()));
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5003
             catch (NullPointerException e) {
                 if (SanityManager.DEBUG) {
                     SanityManager.DEBUG_PRINT("DERBY-5003 [1]:", this.toString());
@@ -4140,6 +4210,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			if (Performance.MEASURE)
 				mon_syncCalls++;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
 			if (isWriteSynced)
 			{
 				//LogAccessFile.flushDirtyBuffers() will allow only one write
@@ -4148,6 +4219,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
 				if (!logNotSynced)
 				    logOut.syncLogAccessFile();
 			}
@@ -4174,6 +4246,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 ioe,
                 getLogFileName(logFileNumber).getPath()));
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5003
         catch (NullPointerException e) {
             if (SanityManager.DEBUG) {
                 SanityManager.DEBUG_PRINT("DERBY-5003 [2]", this.toString());
@@ -4259,6 +4332,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             try
             {
                 raf.sync();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
 
                 // the sync succeed, so return
                 break;
@@ -4274,12 +4348,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 }
                 catch( InterruptedException ie )
                 {   
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
                 }
 
                 if( i > 20 )
                 {
                     throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                                 SQLState.LOG_FULL, ioe);
                 }
             }
@@ -4342,6 +4418,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     public void setDatabaseEncrypted(boolean isEncrypted, boolean flushLog)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if (flushLog)  {
             flushAll();
         }
@@ -4436,6 +4513,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						  byte[] ciphertext, int outputOffset)
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
         return rawStoreFactory.encrypt(cleartext, offset, length, 
                                        ciphertext, outputOffset, false);
 	}
@@ -4460,6 +4538,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 	   returns the length that will make the data to be multiple of encryption
 	   block size based on the given length. Block cipher algorithms like DES 
 	   and Blowfish ..etc  require their input to be an exact multiple of the block size.
@@ -4535,6 +4614,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 	   Check to see if a database has been upgraded to the required
 	   level in order to use a store feature.
 	   @param requiredMajorVersion  required database Engine major version
@@ -4617,6 +4697,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	*/
 	protected void logErrMsg(String msg)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
        	logErrMsgForDurabilityTestModeNoSync();
 		Monitor.logTextMessage(MessageId.LOG_BEGIN_ERROR);
 		Monitor.logMessage(msg);
@@ -4629,6 +4710,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	*/
 	protected void logErrMsg(Throwable t)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
 		logErrMsgForDurabilityTestModeNoSync();
 		if (corrupt != null)
 		{
@@ -4658,6 +4740,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      */
     private void logErrMsgForDurabilityTestModeNoSync()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
         if (logNotSynced || wasDBInDurabilityTestModeNoSync)
         {
             Monitor.logTextMessage(
@@ -4674,6 +4757,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      */
 	private void printErrorStack(Throwable t)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-237
 		ErrorStringBuilder esb = 
             new ErrorStringBuilder(Monitor.getStream().getHeader());
 		esb.stackTrace(t);
@@ -4704,12 +4788,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			String TestPartialLogWrite = PropertyUtil.getSystemProperty(TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES);
 			if (TestPartialLogWrite != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
 				bytesToWrite = Integer.parseInt(TestPartialLogWrite);
 			}
 
 			Monitor.logMessage("TEST_LOG_INCOMPLETE_LOG_WRITE: writing " + bytesToWrite + 
 				   " bytes out of " + length + " + " + LOG_RECORD_OVERHEAD + " log record");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 			long instant;
 			try
 			{
@@ -4839,6 +4925,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			{
 				String RecordToFillLog = PropertyUtil.getSystemProperty(TEST_RECORD_TO_FILL_LOG);
 				if (RecordToFillLog != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
 					test_numRecordToFillLog = Integer.parseInt(RecordToFillLog);
 				else
 					test_numRecordToFillLog = 100;
@@ -4857,6 +4944,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	*/
 	public StorageRandomAccessFile getLogFileToSimulateCorruption(long filenum) throws IOException, StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		if (SanityManager.DEBUG)
 		{
 			//long filenum = LogCounter.getLogFileNumber(logInstant);
@@ -4880,6 +4968,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
          *               unlogged operations need not be logged.
          */
         public boolean inReplicationMasterMode() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3551
             return inReplicationMasterMode;
         }
 	
@@ -4934,6 +5023,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	*/
 	public static final String TEST_RECORD_TO_FILL_LOG = 
         SanityManager.DEBUG ? "derbyTesting.unittest.recordToFillLog" : null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-891
 
 	/**
 	 * Set to true if we want to simulate max possible log file number is 
@@ -4953,11 +5043,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			logArchived = true;
 			AccessFactory af = 
             (AccessFactory)getServiceModule(this, AccessFactory.MODULE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			if (af != null)
 			{
 				TransactionController tc = null;
 				tc = af.getTransaction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                         getContextService().getCurrentContextManager());
 				tc.setProperty(Property.LOG_ARCHIVE_MODE , "true", true);
 			}
@@ -4968,13 +5060,17 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	public void disableLogArchiveMode() throws StandardException
 	{
 		AccessFactory af = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             (AccessFactory)getServiceModule(this, AccessFactory.MODULE);
 		if (af != null)
 		{
 			TransactionController tc = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			tc = af.getTransaction(getContextService().getCurrentContextManager());
 			tc.setProperty(Property.LOG_ARCHIVE_MODE , "false", true);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         logArchived = false;
 	}
 
@@ -5031,6 +5127,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}	
 				catch (InterruptedException ie)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
 				}	
 			}
@@ -5045,6 +5148,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			toFile = new File(toDir,fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
 				throw StandardException.newException(
                     SQLState.RAWSTORE_ERROR_COPYING_FILE, fromFile, toFile);
 			}
@@ -5054,11 +5158,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			toFile = new File(toDir,fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
 				throw StandardException.newException(
                     SQLState.RAWSTORE_ERROR_COPYING_FILE, fromFile, toFile);
 			}
 
 			// find the first log file number that is active
+//IC see: https://issues.apache.org/jira/browse/DERBY-1113
 			logFileToBackup = getFirstLogNeeded(currentCheckpoint);
 		}
 
@@ -5076,12 +5182,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         throws StandardException
 	{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1113
 		while(logFileToBackup <= lastLogFileToBackup)
 		{
 			StorageFile fromFile = getLogFileName(logFileToBackup);
 			File toFile = new File(toDir, fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
 				throw StandardException.newException(
                     SQLState.RAWSTORE_ERROR_COPYING_FILE, fromFile, toFile);
 			}
@@ -5107,6 +5215,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         // Without this force, the backup may end up with page versions 
         // in the backup without their associated log records.
         flush(logFileNumber, endPosition);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
 
 		if (logArchived)
 		{
@@ -5119,6 +5228,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			// if we see a log file with fuzzy end, we think that is the 
 			// end of the recovery.
 			switchLogFile();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
 			lastLogFileToBackup = getLogFileNumber() - 1;
 		}
         else
@@ -5184,6 +5294,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      * @throws org.apache.derby.shared.common.error.StandardException 
      */
 	public void checkpointInRFR(LogInstant cinstant, long redoLWM,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3562
 								long undoLWM, DataFactory df)
 								throws StandardException
 	{
@@ -5208,6 +5319,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		//remove the stub files
 		df.removeDroppedContainerFileStubs(new LogCounter(redoLWM));
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-3562
 		if (inReplicationSlaveMode) {
 			truncateLog(LogCounter.getLogFileNumber(undoLWM));
 		}
@@ -5225,6 +5337,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      * never thrown here.
      */
     public void startReplicationMasterRole(MasterFactory masterFactory) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3051
         throws StandardException {
         this.masterFactory = masterFactory;
         synchronized(this) {
@@ -5241,7 +5354,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     public void stopReplicationMasterRole() {
         inReplicationMasterMode = false;
         masterFactory = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3447
         if(logOut != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
             logOut.stopReplicationMasterRole();
         }
     }
@@ -5282,6 +5397,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     protected void checkForReplication(LogAccessFile log) {
         if (inReplicationMasterMode) {
             log.setReplicationMasterRole(masterFactory);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
         } else if (inReplicationSlaveMode) {
             log.setReplicationSlaveRole();
         }
@@ -5320,8 +5436,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      */
     public void initializeReplicationSlaveRole()
         throws StandardException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
             SanityManager.ASSERT(inReplicationSlaveMode, 
                                  "This method should only be used when"
                                  + " in slave replication mode");
@@ -5332,6 +5451,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
          * end position in that file
          */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
         try {
             // Find the log file with the highest file number on disk
             while (getLogFileAtBeginning(logFileNumber+1) != null) {
@@ -5396,6 +5517,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             // do nothing
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3254
         inReplicationSlaveMode = false;
         synchronized (slaveRecoveryMonitor) {
             slaveRecoveryMonitor.notify();
@@ -5434,6 +5556,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		//check if the user requested for restore/recovery/create from backup
 		backupPath = properties.getProperty(Attribute.CREATE_FROM);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1039
         if (backupPath != null) {
             isCreateFrom = true;
         } else {
@@ -5481,6 +5604,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					//it may be just a file, try deleting it
 					if(!privDelete(logDir))
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1039
 						throw StandardException.newException(
                             SQLState.UNABLE_TO_REMOVE_DATA_DIRECTORY,
                             getLogDirPath( logDir));
@@ -5519,6 +5643,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			logSwitchRequired = true;
 
             // log is restored from backup.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1039
             return true;
 		} else {
             // log is not restored from backup.
@@ -5725,6 +5850,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
     protected boolean privMkdirs(StorageFile file) throws IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
         this.action = 4;
         this.activeFile = file;
         try {
@@ -5766,6 +5892,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 
 	private synchronized boolean privCopyFile(StorageFile from, File to)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             throws StandardException
 	{
 		action = 6;
@@ -5777,6 +5904,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		}
         catch (java.security.PrivilegedActionException pae)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             if (pae.getCause() instanceof StandardException) {
                 throw (StandardException)pae.getCause();
             }
@@ -5835,6 +5963,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		switch (action) {
 		case 0:
 			// SECURITY PERMISSION - MP1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 			return activeFile.exists();
 		case 1:
 			// SECURITY PERMISSION - OP5
@@ -5844,6 +5973,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			// dependening on the value of activePerms
             boolean exists = activeFile.exists();
             Object result = activeFile.getRandomAccessFile(activePerms);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
             if (!exists) {
                 activeFile.limitAccessToOwner();
@@ -5852,6 +5982,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             return result;
 		case 3:
 			// SECURITY PERMISSION - OP4
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 			return activeFile.canWrite();
 		case 4:
 			// SECURITY PERMISSION - OP4
@@ -5861,6 +5992,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 activeFile.limitAccessToOwner();
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             return created;
 		case 5:
 			// SECURITY PERMISSION - MP1
@@ -5886,6 +6018,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     @Override
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     public String toString() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5003
         StringBuilder sb = new StringBuilder();
         if (SanityManager.DEBUG) { // to reduce footprint in insane code
             sb.append("LogToFile: [\n");
@@ -5961,12 +6094,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

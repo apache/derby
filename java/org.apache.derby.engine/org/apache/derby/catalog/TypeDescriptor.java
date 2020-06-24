@@ -74,6 +74,7 @@ public interface TypeDescriptor
      */
     TypeDescriptor DOUBLE = DataTypeDescriptor.DOUBLE.getCatalogType();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
 
 	///////////////////////////////////////////////////////////////////////
 	//
@@ -103,6 +104,7 @@ public interface TypeDescriptor
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-319
 	  Returns the maximum width of the type IN BYTES.  This is the
 	  maximum number of bytes that could be returned for this type
 	  if the corresponding getXXX() method is used.  For example,

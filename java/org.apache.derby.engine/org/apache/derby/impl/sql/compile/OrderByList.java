@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.OrderByList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -47,6 +48,7 @@ import org.apache.derby.iapi.util.JBitSet;
  * and the last column in the list is the least significant.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class OrderByList extends OrderedColumnList<OrderByColumn>
 						implements RequiredRowOrdering {
 
@@ -76,7 +78,9 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
      * @param cm The context manager
     */
    OrderByList(ResultSetNode rs, ContextManager cm) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
        super(OrderByColumn.class, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6009
        this.isTableValueCtorOrdering =
                 (rs instanceof UnionNode &&
                 ((UnionNode)rs).tableConstructor()) ||
@@ -88,6 +92,8 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 	
 		@param column	The column to add to the list
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addOrderByColumn(OrderByColumn column)
 	{
 		addElement(column);
@@ -111,7 +117,10 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 	
 		@param position	The column to get from the list
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     OrderByColumn getOrderByColumn(int position) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(position >=0 && position < size());
         }
@@ -126,6 +135,8 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 	 * 	@param target	The underlying result set
 	 *	@exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindOrderByColumns(ResultSetNode target)
 					throws StandardException {
 
@@ -133,6 +144,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 		resultToSort = target;
 
 		/* Only 1012 columns allowed in ORDER BY clause */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (size() > Limits.DB2_MAX_ELEMENTS_IN_ORDER_BY)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
@@ -141,6 +153,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
         for (OrderByColumn obc : this)
 		{
 			obc.bindOrderByColumn(target, this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 
 			/*
 			** Always sort if we are ordering on an expression, and not
@@ -169,8 +182,10 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 	 *
 	 * @param gap   column which has been removed from the result column list
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 	void closeGap(int gap)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (OrderByColumn obc : this)
 		{
 			obc.collapseAddedColumnGap(gap);
@@ -184,12 +199,15 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 		@param target	The underlying result set
 	
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void pullUpOrderByColumns(ResultSetNode target)
 					throws StandardException {
 
 		/* Remember the target for use in optimization */
 		resultToSort = target;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (OrderByColumn obc : this)
 		{
 			obc.pullUpOrderByColumn(target);
@@ -211,6 +229,8 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 		if (SanityManager.DEBUG)
 		{
             int rclSize = sourceRCL.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if (size() > rclSize)
 			{
 				SanityManager.THROWASSERT(
@@ -223,6 +243,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (elementAt(index).getResultColumn() !=
                 sourceRCL.elementAt(index))
 			{
@@ -240,6 +261,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 	 */
 	void resetToSourceRCs()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (OrderByColumn obc : this)
 		{
 			obc.resetToSourceRC();
@@ -258,8 +280,11 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 		throws StandardException
 	{
         ResultColumnList newRCL = new ResultColumnList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/* The new RCL starts with the ordering columns */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (OrderByColumn obc : this)
 		{
 			newRCL.addElement(obc.getResultColumn());
@@ -286,6 +311,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 			 loc >= 0;
 			 loc--)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (elementAt(loc).constantColumn(whereClause))
 			{
 				removeElementAt(loc);
@@ -304,6 +330,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 		/* Walk the list backwards so we can remove elements safely */
 		for (int loc = size() - 1; loc > 0; loc--)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             OrderByColumn obc = elementAt(loc);
 			int           colPosition = obc.getColumnPosition();
 
@@ -379,6 +406,8 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 		child.generate(acb, mb);
 
 		resultSetNumber = cc.getNextResultSetNumber();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 
 		// is a distinct query
 		mb.push(false);
@@ -390,6 +419,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 
 		// row allocator
         mb.push(acb.addItem(child.getResultColumns().buildRowTemplate()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
 		mb.push(child.getResultColumns().getTotalColumnSize());
 
@@ -404,6 +434,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getSortResultSet",
 							ClassName.NoPutResultSet, 9);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 
 	}
 
@@ -415,6 +446,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
      * @exception StandardException     Thrown on error
      */
     public int sortRequired(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6148
         RowOrdering rowOrdering,
         OptimizableList optimizableList,
         int[] proposedJoinOrder) throws StandardException
@@ -460,6 +492,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
             // non-NULL values, then a sort is required, as the index holds
             // NULL values unconditionally higher than non-NULL values
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
             if (obc.isNullsOrderedLow())
 				return RequiredRowOrdering.SORT_REQUIRED;
 
@@ -565,6 +598,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 					 * from those multiple scans may not be ordered correctly.
 					 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6148
                    for (int i=0;
                         i < proposedJoinOrder.length &&
                             proposedJoinOrder[i] != -1; // -1: partial order
@@ -831,7 +865,10 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 	public String toString() {
 
         StringBuilder buff = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (columnOrdering != null) {
 			for (int i = 0; i < columnOrdering.length; i++) {
 				buff.append("[" + i + "] " + columnOrdering[i] + "\n");
@@ -848,6 +885,8 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
 	}
 
 	public int getResultSetNumber() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		return resultSetNumber;
 	}
 
@@ -856,6 +895,7 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
      * {@literal <table value constructor>}, i.e. a {@code VALUES} clause.
      */
     public boolean isTableValueCtorOrdering() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6009
         return isTableValueCtorOrdering;
     }
 }

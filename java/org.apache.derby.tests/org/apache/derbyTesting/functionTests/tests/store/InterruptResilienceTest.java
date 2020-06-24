@@ -58,7 +58,9 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     protected static Test makeSuite(String name)
     {
         BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         Test est = TestConfiguration.embeddedSuite(
             InterruptResilienceTest.class);
         Test cst = TestConfiguration.clientServerSuite(
@@ -75,6 +77,8 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         // interest if the test passes. Setting the stream error level 
         // so we don't get those javacores.
         p.put("derby.stream.error.extendedDiagSeverityLevel", "50000");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4463
+//IC see: https://issues.apache.org/jira/browse/DERBY-5028
 
         suite.addTest(
                 new SystemPropertyTestSetup(est, p, true));
@@ -88,10 +92,12 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     {
         String testName = "InterruptResilienceTest";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4463
         if (isIBMJVM()) {
             if (getSystemProperty("java.version").startsWith("1.4.2"))
             {
                 println("InterruptResilienceTest skipped for this VM, cf. DERBY-5074/5109");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                 return new BaseTestSuite(testName);
             }
         }
@@ -102,6 +108,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             return new BaseTestSuite(testName);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4974
         if (hasInterruptibleIO()) {
             println("Test skipped due to interruptible IO.");
             println("This is default on Solaris/Sun Java <= 1.6, use " +
@@ -115,6 +122,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     protected void setUp()
             throws java.lang.Exception {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             clazz.getConstructor().newInstance();
         } catch (Exception e) {
@@ -158,9 +166,11 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             throws java.lang.Exception {
 
         DriverManager.setLoginTimeout( 0 );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
 
         // Forget about uncommitted changes
         rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5104
 
         // Drop the tables created in setUp() if they still exist
         dropTable("t1");
@@ -181,6 +191,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         long lost = 0;
         try {
             insert = c.prepareStatement("insert into t1 values (?)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
             // About 75000 iterations is needed to see any concurrency
             // wait on RawDaemonThread during recovery, cf.
@@ -194,6 +205,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                 // safe for interrupts (on Solaris only) yet.
                 Thread.currentThread().interrupt();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 insert.setLong(1, i);
                 insert.executeUpdate();
 
@@ -202,6 +214,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         } finally {
             // always clear flag
             Thread.interrupted();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4814
 
             if (insert != null) {
                 try {
@@ -217,6 +230,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     public void testRAFWriteInterrupted () throws SQLException {
         Statement s = createStatement();
         s.executeUpdate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             "create procedure tstRAFWriteInterrupted () modifies sql data " +
             "external name 'org.apache.derbyTesting.functionTests" +
             ".tests.store.InterruptResilienceTest.tstRAFwriteInterrupted' " +
@@ -238,6 +252,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         Connection c = DriverManager.getConnection("jdbc:default:connection");
 
         ArrayList<WorkerThread> workers = new ArrayList<WorkerThread>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         ArrayList<InterruptorThread> interruptors =
                 new ArrayList<InterruptorThread>();
@@ -321,10 +336,12 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         // Wait till here to start works, so interruptors don't get too late to
         // the game
         for (int i = 0; i < workers.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             workers.get(i).start();
         }
 
         for (int i = 0; i < workers.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             WorkerThread w = workers.get(i);
             w.join();
 
@@ -398,6 +415,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             try {
                 c.setAutoCommit(false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 String pStmtText =
                     readertest ?
                     "select * from mtTab where i=?" :
@@ -421,6 +439,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                         // checkCancellationFlag, we must be prepared to
                         // reestablish connection.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                         try {
                             ResultSet rs = s.executeQuery();
                             rs.next();
@@ -468,6 +487,8 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                                 retries++;
                                 continue;
                             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5223
+//IC see: https://issues.apache.org/jira/browse/DERBY-5223
                                 fail("expected 08000", e);
                             }
                         }
@@ -479,12 +500,14 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
                         c.commit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5152
                         if (interrupted()) {
                             interruptsSeen++;
                         }
                     }
                 }
                 s.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5223
             } catch (Throwable e) {
                 this.e = e;
             } finally {
@@ -545,6 +568,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     // client/server as well, otherwise we would just interrupt the client
     // thread. This SP correponds to #testLongQueryInterrupt
     public static void tstInterruptLongQuery() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         Connection c = DriverManager.getConnection("jdbc:default:connection");
         Statement s = c.createStatement();
 
@@ -588,6 +612,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     // client/server as well, otherwise we would just interrupt the client
     // thread. This SP correponds to #testInterruptBatch
     public static void tstInterruptBatch() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         Connection c = DriverManager.getConnection("jdbc:default:connection");
         Statement s = c.createStatement();
         s.executeUpdate("create table tmp(i int)");
@@ -649,6 +674,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
 
     public void testInterruptShutdown() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5152
         if (!usingEmbedded()) {
             // Only meaningful for embedded.
             return;

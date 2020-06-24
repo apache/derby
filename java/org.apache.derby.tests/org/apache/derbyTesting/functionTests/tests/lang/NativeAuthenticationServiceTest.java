@@ -245,6 +245,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             if ( _localAuthentication ) { authenticationProvider = authenticationProvider + ":LOCAL"; }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5688
         result.put( UPGRADE_TO_BETA_PROPERTY, "true" );
         result.put( PROVIDER_PROPERTY, authenticationProvider );
 
@@ -326,6 +327,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             "Embedded" :
             "Client/Server";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
         return "[ " + dbLocation + authType + local + authOverrides + embedded + " ]";
     }
 
@@ -345,6 +347,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     public static Test suite() throws Exception
     {
         BaseTestSuite suite = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         //
         // Special version of the test which uses an encrypted database for credentials.
@@ -357,6 +360,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 (
                  (
                   new NativeAuthenticationServiceTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
                   ( JAR_ENCRYPTED, NATIVE, LOCAL, DONT_DISABLE_AUTH )
                   ).decorate( false )
                  );
@@ -395,6 +399,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static Test allConfigurations(boolean clientServer) throws Exception
     {
         BaseTestSuite suite = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         //
         // No authentication. 
@@ -403,6 +408,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             (
              (
               new NativeAuthenticationServiceTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
               ( NONE, NO_AUTH, SYSTEM_WIDE, DONT_DISABLE_AUTH )
               ).decorate( clientServer )
              );
@@ -414,6 +420,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             (
              (
               new NativeAuthenticationServiceTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
               ( FILE, NATIVE, LOCAL, DISABLE_AUTHORIZATION )
               ).decorate( clientServer )
              );
@@ -432,6 +439,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             (
              (
               new NativeAuthenticationServiceTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
               ( FILE, NATIVE, SYSTEM_WIDE, DISABLE_AUTHORIZATION )
               ).decorate( clientServer )
              );
@@ -456,6 +464,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 (
                  (
                   new NativeAuthenticationServiceTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
                   ( JAR, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH )
                   ).decorate( clientServer )
                  );
@@ -474,6 +483,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 (
                  (
                   new NativeAuthenticationServiceTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
                   ( CLASSPATH, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH )
                   ).decorate( clientServer )
                  );
@@ -569,6 +579,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, THIRTEENTH_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FOURTEENTH_DB );
         result = _fifteenthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FIFTEENTH_DB, true );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5741
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -603,6 +614,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         else
         {
             vetCoreBehavior();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
             vetCasing();
             vetSystemWideOperations();
 
@@ -870,6 +882,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             vetProtocol( jarDBName( _credentialsDBLocation ) );
         
             // database accessed via classpath subprotocol
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
             vetProtocol( classpathDBName() );
         }
         
@@ -1010,6 +1023,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // only run this if we are using NATIVE authentication and the DBO's creds are already
         // in the credentials DB. this is just to make sure that we are in a database where
         // the DBO's creds already exist.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
         if ( !_nativeAuthentication ) { return; }
         if ( _localAuthentication ) { return; }
 
@@ -1324,6 +1338,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // to the missing classname NATIVE. we only check this for the embedded
         // case because the network scrunches exceptions together and we lose
         // the structure which allows us to look for nested SQLStates.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5741
         if ( isEmbedded() )
         {
             Connection  fifteenthConn = openConnection( FIFTEENTH_DB, dbo, true, null );
@@ -1509,6 +1524,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         // normalize the user name
         userName = userName.toUpperCase();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
 
         try {
             while ( rs.next() )
@@ -1579,10 +1595,12 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         {
             if ( shouldFail && (t instanceof SQLException) )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5741
                 SQLException se = (SQLException) t;
                 StringBuffer    buffer = new StringBuffer();
 
                 ArrayList<String> actualSQLStates = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
                 //  ok if the sqlstate is one of the expected ones
                 for ( int i = 0; i < expectedSQLStates.length; i++ )
@@ -1608,6 +1626,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     }
     // look for a sql state in a SQLException and its chained exceptions. returns true if found
     private boolean    vetSQLState
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
       ( SQLException actual, String expectedSQLState, ArrayList<String> actualSQLStates )
         throws Exception
     {
@@ -1636,6 +1655,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         reportConnectionAttempt( dbName, user, getPassword( user ), true );
 
         String  expectedSQLState = DBO.equals( user ) ? DBO_PASSWORD_EXPIRING : PASSWORD_EXPIRING;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5647
 
         conn = openConnection( dbName, user, true, null );
 
@@ -1644,6 +1664,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         if ( expiring )
         {
             assertNotNull( tagError( "Should have seen a warning" ), warning );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5647
             assertSQLState( expectedSQLState, warning );
         }
         else

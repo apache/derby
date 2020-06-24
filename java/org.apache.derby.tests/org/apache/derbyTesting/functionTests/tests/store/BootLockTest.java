@@ -51,8 +51,10 @@ public class BootLockTest extends BaseJDBCTestCase {
     private final static String dbName = "BootLockTestDB";
     private final static String dbDir = DEFAULT_DB_DIR + File.separator + dbName;
     public static String minionCompleteFileName = BootLockTest.dbDir + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4985
         File.separator + "minionComplete";
     private final static String dbLockFile = dbDir + File.separator +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4667
     DataFactory.DB_LOCKFILE_NAME;
     private final static String dbExLockFile = dbDir + File.separator +
     DataFactory.DB_EX_LOCKFILE_NAME;
@@ -60,6 +62,7 @@ public class BootLockTest extends BaseJDBCTestCase {
     
     private static String[] cmd = new String[]{
         "org.apache.derbyTesting.functionTests.tests.store.BootLockMinion",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6651
         dbName,
     };
 
@@ -83,6 +86,7 @@ public class BootLockTest extends BaseJDBCTestCase {
      * @return The test suite
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("BootLockTest");
         suite.addTest(decorateTest());
         return suite;
@@ -97,9 +101,11 @@ public class BootLockTest extends BaseJDBCTestCase {
     private static Test decorateTest() {
 
         Test test = new BaseTestSuite(BootLockTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         if (JDBC.vmSupportsJSR169() && !isJ9Platform()) {
             // PhoneME requires forceDatabaseLock
+//IC see: https://issues.apache.org/jira/browse/DERBY-4179
             Properties props = new Properties();
             props.setProperty("derby.database.forceDatabaseLock", "true");
             test = new SystemPropertyTestSetup(test, props, true);
@@ -117,8 +123,10 @@ public class BootLockTest extends BaseJDBCTestCase {
 
         Process p = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4667
         p = execJavaCmd(cmd);
         waitForMinionBoot(p,MINION_WAIT_MAX_MILLIS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4987
 
         // We now know minion has booted
 
@@ -146,6 +154,7 @@ public class BootLockTest extends BaseJDBCTestCase {
             }
         }
         // Since all went OK, no need to keep the minion log file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6651
         File minionLog = new File(DEFAULT_DB_DIR, "BootLockMinion.log");
         assertTrue(minionLog.delete());
 
@@ -174,6 +183,7 @@ public class BootLockTest extends BaseJDBCTestCase {
         BufferedReader minionSysErr = new BufferedReader(
             new InputStreamReader(p.getErrorStream()));
         String minionErrLine= null ;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4985
         File checkFile = new File(minionCompleteFileName);
         do {
             if (checkFile.exists()) { 
@@ -193,6 +203,7 @@ public class BootLockTest extends BaseJDBCTestCase {
         
         // If we got here, the database did not boot. Try to print the error.
         failmsg.append(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4987
                 "Minion did not start or boot db in " +
                 (MINION_WAIT_MAX_MILLIS/1000) +
                 " seconds.\n");                

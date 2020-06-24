@@ -156,6 +156,7 @@ final class AutoPositioningStream extends BinaryToRawStream {
             }
         }
         catch (StandardException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throw Util.newIOException(se);
         }
     }

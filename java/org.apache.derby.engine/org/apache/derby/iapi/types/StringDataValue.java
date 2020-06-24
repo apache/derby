@@ -38,6 +38,7 @@ public interface StringDataValue extends ConcatableDataValue
 	/**
 	  For a character string type, the collation derivation should always be 
 	  "explicit"(not possible in Derby 10.3), "implicit" or "none". We will 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
 	  start by setting it to "implicit" in TypeDescriptorImpl. At runtime, only 
 	  character string types which are results of aggregate methods dealing 
 	  with operands with different collation types should have a collation 
@@ -248,5 +249,6 @@ public interface StringDataValue extends ConcatableDataValue
 	 * Stuff a StringDataValue with a Clob.
 	 */
 	public void setValue( Clob value )
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 		throws StandardException;
 }

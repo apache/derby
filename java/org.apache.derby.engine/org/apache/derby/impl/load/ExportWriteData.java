@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.io.FileUtil;
 
 final class ExportWriteData extends ExportWriteDataAbstract
 	implements java.security.PrivilegedExceptionAction<Object> {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	private String outputFileName;
 	private String lobsFileName;
@@ -57,6 +58,8 @@ final class ExportWriteData extends ExportWriteDataAbstract
     private char[] charBuf;
 
 	//writes data into the o/p file using control file properties
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 	ExportWriteData(String outputFileName, ControlInfo controlFileReader)
 		throws Exception {
 		this.outputFileName = outputFileName;
@@ -100,26 +103,31 @@ final class ExportWriteData extends ExportWriteDataAbstract
     outputFileName = FileUtil.stripProtocolFromFileName( outputFileName );
     if ( lobsInExtFile ) { lobsFileName = FileUtil.stripProtocolFromFileName( lobsFileName ); }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-2456
     FileOutputStream anOutputStream = null;
     BufferedOutputStream buffered = null;
     FileOutputStream lobOutputStream = null;
 
     try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         File outputFile = new File(outputFileName);
         anOutputStream = new FileOutputStream(outputFileName);
         FileUtil.limitAccessToOwner(outputFile);
 
         buffered = new BufferedOutputStream(anOutputStream);
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
         aStream = dataCodeset == null ?
     		new OutputStreamWriter(buffered) :
     		new OutputStreamWriter(buffered, dataCodeset);    	        
 
         // if lobs are exported to an external file, then 
         // setup the required streams to write lob data.
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         if (lobsInExtFile) 
         {
             // setup streams to write large objects into the external file. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             File lobsFile =  new File(lobsFileName);
             if (lobsFile.getParentFile() == null) {
                 // lob file name is unqualified. Make lobs file 
@@ -133,6 +141,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
             lobOutputStream = new FileOutputStream(lobsFile);
             FileUtil.limitAccessToOwner(lobsFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
             lobOutBinaryStream = new BufferedOutputStream(lobOutputStream);
 
@@ -176,6 +185,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
   *  data file
  	* @exception	Exception if there is an error
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
   void writeColumnDefinitionOptionally(String[] columnNames,
   											  String[] columnTypes)
   														throws Exception {
@@ -183,6 +193,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
     //do uppercase because the ui shows the values as True and False
     if (columnDefinition.toUpperCase(java.util.Locale.ENGLISH).equals(ControlInfo.INTERNAL_TRUE.toUpperCase(java.util.Locale.ENGLISH))) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
        String tempStr="";
        //put the start and stop delimiters around the column name and type
        for (int i=0; i<columnNames.length; i++) {
@@ -239,6 +250,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
      * @return Location where the column data written in the external file. 
      * @exception Exception  if any error occurs while writing the data.  
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     String writeBinaryColumnToExternalFile(InputStream istream) 
         throws Exception
     {
@@ -248,6 +260,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
         long blobSize = 0;
         int noBytes = 0 ;
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         if (istream != null ) {
             noBytes = istream.read(byteBuf) ;
             while(noBytes != -1) 
@@ -306,6 +319,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
         long clobSize = 0;
         int noChars = 0 ;
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         if (ir != null ) {
             noChars = ir.read(charBuf) ;
             while(noChars != -1) 
@@ -376,6 +390,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
   public void noMoreRows() throws IOException {
     aStream.flush();
     aStream.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     if (lobsInExtFile) {
         // close the streams associated with lob data.
         if (lobOutBinaryStream != null) {

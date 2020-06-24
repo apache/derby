@@ -129,6 +129,7 @@ class RAFContainer4 extends RAFContainer {
      * {@code RandomAccessFile}, {@code null} otherwise
      */
     private FileChannel getChannel(StorageRandomAccessFile file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
         if (file instanceof RandomAccessFile) {
             /** XXX - this cast isn't testing friendly.
              * A testing class that implements StorageRandomAccessFile but isn't
@@ -179,10 +180,12 @@ class RAFContainer4 extends RAFContainer {
             SanityManager.ASSERT(iosInProgress == 0,
                     "Container opened while IO operations are in progress. "
                     + "This should not happen.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
             SanityManager.ASSERT(fileData == null, "fileData isn't null");
             SanityManager.ASSERT(ourChannel == null, "ourChannel isn't null");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5312
         currentIdentity = newIdentity;
         return super.openContainer(newIdentity);
     }
@@ -197,10 +200,12 @@ class RAFContainer4 extends RAFContainer {
             SanityManager.ASSERT(iosInProgress == 0,
                     "Container created while IO operations are in progress. "
                     + "This should not happen.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
             SanityManager.ASSERT(fileData == null, "fileData isn't null");
             SanityManager.ASSERT(ourChannel == null, "ourChannel isn't null");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5312
         currentIdentity = newIdentity;
         super.createContainer(newIdentity);
     }
@@ -227,6 +232,7 @@ class RAFContainer4 extends RAFContainer {
             // ignored, so we should not complain about starting a close
             // while there are IOs in progress if it is being dropped
             // anyway.
+//IC see: https://issues.apache.org/jira/browse/DERBY-801
             SanityManager.ASSERT( (iosInProgress == 0)
                     || getCommittedDropState(),
                     "Container closed while IO operations are in progress. "
@@ -428,6 +434,7 @@ class RAFContainer4 extends RAFContainer {
                     }
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 if (offset == -1L) {
                     // Normal page read doesn't specify offset,
                     // so use one computed from page number.
@@ -451,6 +458,7 @@ class RAFContainer4 extends RAFContainer {
             }
 
             if (dataFactory.databaseEncrypted() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 pageNumber != FIRST_ALLOC_PAGE_NUMBER &&
                 pageNumber != -1L /* getEmbryonicPage */)
             {
@@ -490,6 +498,7 @@ class RAFContainer4 extends RAFContainer {
         // thread can do its thing.
         boolean stealthMode = Thread.holdsLock(allocCache);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(!Thread.holdsLock(this));
         }
@@ -512,6 +521,8 @@ class RAFContainer4 extends RAFContainer {
                     }
 
                     try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5498
+//IC see: https://issues.apache.org/jira/browse/DERBY-5498
                         channelCleanupMonitor.wait(
                             InterruptStatus.INTERRUPT_RETRY_SLEEP);
                     } catch (InterruptedException e) {
@@ -527,6 +538,7 @@ class RAFContainer4 extends RAFContainer {
         boolean success = false;
         int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5185
       try {
         while (!success) {
             try {
@@ -550,9 +562,12 @@ class RAFContainer4 extends RAFContainer {
                 success = true;
 
             } catch (ClosedChannelException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5325
+//IC see: https://issues.apache.org/jira/browse/DERBY-5325
                 handleClosedChannel(e, stealthMode, retries--);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5185
       } finally {
         if (stealthMode) {
             // don't touch threadsInPageIO
@@ -735,6 +750,7 @@ class RAFContainer4 extends RAFContainer {
                             "already waited " + timesWaited + " times");
                     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5498
                     if (timesWaited > InterruptStatus.MAX_INTERRUPT_RETRIES) {
                         // Max, give up, probably way too long anyway,
                         // but doesn't hurt?
@@ -743,6 +759,7 @@ class RAFContainer4 extends RAFContainer {
                     }
 
                     try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5498
                         channelCleanupMonitor.wait(
                             InterruptStatus.INTERRUPT_RETRY_SLEEP);
                     } catch (InterruptedException we) {
@@ -778,6 +795,7 @@ class RAFContainer4 extends RAFContainer {
             // have raced past the interrupted thread, so let's wait a
             // bit before we attempt a new I/O.
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5498
                 Thread.sleep(InterruptStatus.INTERRUPT_RETRY_SLEEP);
             } catch (InterruptedException we) {
                 // This thread is getting hit, too..
@@ -852,6 +870,7 @@ class RAFContainer4 extends RAFContainer {
             if (stealthMode) {
                 // don't touch threadsInPageIO
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 threadsInPageIO--;
             }
 
@@ -874,6 +893,11 @@ class RAFContainer4 extends RAFContainer {
                     break;
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4920
+//IC see: https://issues.apache.org/jira/browse/DERBY-5185
+//IC see: https://issues.apache.org/jira/browse/DERBY-5185
+//IC see: https://issues.apache.org/jira/browse/DERBY-5185
+//IC see: https://issues.apache.org/jira/browse/DERBY-5185
                 if (retries-- == 0) {
                     // Clean up state and throw
                     restoreChannelInProgress = false;
@@ -885,8 +909,12 @@ class RAFContainer4 extends RAFContainer {
             }
 
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5498
                 Thread.sleep(InterruptStatus.INTERRUPT_RETRY_SLEEP);
             } catch (InterruptedException te) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 InterruptStatus.setInterrupted();
             }
         }
@@ -910,6 +938,7 @@ class RAFContainer4 extends RAFContainer {
                 while (true) {
                     synchronized(this) {
                         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5312
                             reopen();
                         } catch (Exception newE) {
                             // Something else failed - shutdown happening?
@@ -932,6 +961,7 @@ class RAFContainer4 extends RAFContainer {
                     }
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 if (stealthMode) {
                     // don't touch threadsInPageIO
                 } else {
@@ -954,17 +984,20 @@ class RAFContainer4 extends RAFContainer {
          throws IOException, StandardException
     {
         FileChannel ioChannel;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
         synchronized (this) {
             // committed and dropped, do nothing.
             // This file container may only be a stub
             if (getCommittedDropState())
                 return;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
             ioChannel = getChannel();
         }
 
         if (SanityManager.DEBUG) {
             if (pageNumber == FIRST_ALLOC_PAGE_NUMBER) {
                 // page 0
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 SanityManager.ASSERT(Thread.holdsLock(this));
             } else {
                 SanityManager.ASSERT(!Thread.holdsLock(this));
@@ -1026,6 +1059,7 @@ class RAFContainer4 extends RAFContainer {
                      */
                     if (getCommittedDropState()) {
                         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                             debugTrace(
                                 "write to a dropped and " +
                                 "closed container discarded.");
@@ -1078,6 +1112,7 @@ class RAFContainer4 extends RAFContainer {
                 }
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         } else {
             // iochannel was not initialized, fall back to original method.
             super.writePage(pageNumber, pageData, syncPage);
@@ -1112,6 +1147,7 @@ class RAFContainer4 extends RAFContainer {
 
         boolean success = false;
         final boolean stealthMode = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5325
 
         while (!success) {
 
@@ -1125,6 +1161,7 @@ class RAFContainer4 extends RAFContainer {
                 writeFull(ByteBuffer.wrap(bytes), ioChannel, offset);
                 success = true;
             } catch (ClosedChannelException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5325
                 handleClosedChannel(e, stealthMode, -1 /* NA */);
             }
         }
@@ -1149,6 +1186,7 @@ class RAFContainer4 extends RAFContainer {
     {
         FileChannel ioChannel = getChannel(file);
         if (ioChannel != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             byte[] buffer = new byte[AllocPage.MAX_BORROWED_SPACE];
             readPage(-1L, buffer, offset);
             return buffer;
@@ -1170,11 +1208,13 @@ class RAFContainer4 extends RAFContainer {
      * @throws StandardException If thread is interrupted.
      */
     private void readFull(ByteBuffer dstBuffer,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4960
                           FileChannel srcChannel,
                           long position)
             throws IOException, StandardException
     {
         while(dstBuffer.remaining() > 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             if (srcChannel.read(dstBuffer,
                                     position + dstBuffer.position()) == -1) {
                 throw new EOFException(
@@ -1207,8 +1247,10 @@ class RAFContainer4 extends RAFContainer {
      * @throws StandardException If thread is interrupted.
      */
     private void writeFull(ByteBuffer srcBuffer,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4960
                            FileChannel dstChannel,
                            long position)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             throws IOException
     {
         while(srcBuffer.remaining() > 0) {

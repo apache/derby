@@ -68,6 +68,7 @@ public class OnlineCompressTest extends BaseTest
 
         cstmt.execute();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         if (commit_operation)
             conn.commit();
     }
@@ -126,6 +127,7 @@ public class OnlineCompressTest extends BaseTest
         int row_count = 0;
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
             for (int i = start_value; row_count < num_rows; row_count++, i++)
             {
                 insert_stmt.setInt(1, i);               // keycol
@@ -455,9 +457,12 @@ public class OnlineCompressTest extends BaseTest
         System.out.println("ERROR: for " + num_rows + " row  test. Expected " + expected_val + ", but got " + actual_val );
         System.out.println("before_info:");
         System.out.println(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         "    IS_INDEX         =" + before_info[SPACE_INFO_IS_INDEX]     + 
         "\n    NUM_ALLOC        =" + before_info[SPACE_INFO_NUM_ALLOC]    +
         "\n    NUM_FREE         =" + before_info[SPACE_INFO_NUM_FREE]     +
+//IC see: https://issues.apache.org/jira/browse/DERBY-1187
+//IC see: https://issues.apache.org/jira/browse/DERBY-1188
         "\n    NUM_UNFILLED     =" + before_info[SPACE_INFO_NUM_UNFILLED] +
         "\n    PAGE_SIZE        =" + before_info[SPACE_INFO_PAGE_SIZE]    +
         "\n    ESTIMSPACESAVING =" + before_info[SPACE_INFO_ESTIMSPACESAVING]);
@@ -554,6 +559,7 @@ public class OnlineCompressTest extends BaseTest
 
         conn.commit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         testProgress("end deleteAllRows," + num_rows + " row test.");
     }
 
@@ -653,6 +659,7 @@ public class OnlineCompressTest extends BaseTest
             createAndLoadLongTable(conn, create_table, table_name, num_rows);
         else
             createAndLoadTable(conn, create_table, table_name, num_rows, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
 
         // dump_table(conn, schemaName, table_name, false);
 
@@ -773,6 +780,7 @@ public class OnlineCompressTest extends BaseTest
         executeQuery(conn, "delete from " + table_name, true);
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         // compress all space and commit.
         callCompress(conn, "APP", table_name, true, true, true, true);
@@ -781,6 +789,9 @@ public class OnlineCompressTest extends BaseTest
         if (long_table)
             createAndLoadLongTable(conn, create_table, table_name, num_rows);
         else
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
             createAndLoadTable(conn, create_table, table_name, num_rows, 0);
         conn.commit();
 
@@ -834,6 +845,7 @@ public class OnlineCompressTest extends BaseTest
         conn.commit();
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         // check the table.  Note that this will accumulate locks and
         // will commit the transaction.
@@ -1078,6 +1090,8 @@ public class OnlineCompressTest extends BaseTest
 	 * @exception  StandardException  Standard exception policy.
      **/
     private void test5_load(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1187
+//IC see: https://issues.apache.org/jira/browse/DERBY-1188
     Connection  conn,
     String      schemaName,
     String      table_name,
@@ -1170,6 +1184,7 @@ public class OnlineCompressTest extends BaseTest
             conn, "delete from " + table_name + " where onehalf = 0", true);
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         if (verbose)
             testProgress("deleted every other row, now calling compress.");
@@ -1206,6 +1221,7 @@ public class OnlineCompressTest extends BaseTest
             conn, "delete from " + table_name + " where onethird = 0", true);
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         if (verbose)
             testProgress("deleted every third row, now calling compress.");
@@ -1242,6 +1258,7 @@ public class OnlineCompressTest extends BaseTest
             (num_rows / 2), true);
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         if (verbose)
             testProgress("deleted top half of the rows, now calling compress.");
@@ -1288,6 +1305,7 @@ public class OnlineCompressTest extends BaseTest
             conn, "delete from " + table_name + " where keycol < 500 ", true);
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         if (verbose)
             testProgress("deleted keys < 500, now calling compress.");
@@ -1403,6 +1421,7 @@ public class OnlineCompressTest extends BaseTest
 
         // compress with no deletes should not affect size
         int[] ret_before = getSpaceInfo(conn, "APP", table_name, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         callCompress(conn, "APP", table_name, true, true, true, true);
         int[] ret_after  = getSpaceInfo(conn, "APP", table_name, true);
 
@@ -1419,12 +1438,16 @@ public class OnlineCompressTest extends BaseTest
         testProgress("no delete case complete.");
 
         // delete all the rows.
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         ret_before = getSpaceInfo(conn, "APP", table_name, true);
         executeQuery(conn, "delete from " + table_name, true);
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         conn.commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2549
 
         if (verbose)
             testProgress("deleted all rows, now calling compress.");
@@ -1462,6 +1485,7 @@ public class OnlineCompressTest extends BaseTest
      * <p>
      **/
     private void test7(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2549
     Connection  conn,
     String      test_name,
     String      table_name)
@@ -1498,6 +1522,8 @@ public class OnlineCompressTest extends BaseTest
             conn, "delete from " + table_name + " where keycol < 1000", true);
 
         callWaitForPostCommit(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
 
         conn.commit();
 
@@ -1520,12 +1546,16 @@ public class OnlineCompressTest extends BaseTest
         // test2(conn, "test2", "TEST2");
         test3(conn, "test3", "TEST3");
         // test4(conn, "test4", "TEST4");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1187
+//IC see: https://issues.apache.org/jira/browse/DERBY-1188
         test5(conn, "test5", "TEST5");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2549
         test6(conn, "test6", "TEST6");
         test7(conn, "test7", "TEST7");
     }
 
     public static void callWaitForPostCommit(Connection conn) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
             throws SQLException {
         CallableStatement cstmt = 
                 conn.prepareCall(
@@ -1542,6 +1572,7 @@ public class OnlineCompressTest extends BaseTest
    		ij.getPropertyArg(argv); 
         Connection conn = ij.startJBMS();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6502
         Statement stmt = conn.createStatement();
         // Create a procedure to be called before checking on contents
         // to ensure that the background worker thread has completed 

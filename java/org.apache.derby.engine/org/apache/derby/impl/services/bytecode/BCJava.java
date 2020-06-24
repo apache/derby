@@ -283,6 +283,8 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 
 		} catch (StandardException se) {
 			if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", se);
 			}
 
@@ -328,6 +330,7 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
      * can't call this entry point.
      */
     private  static  Object  startSystemModule( final String factoryInterface )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

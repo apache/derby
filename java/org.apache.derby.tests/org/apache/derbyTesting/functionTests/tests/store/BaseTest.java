@@ -112,6 +112,7 @@ public abstract class BaseTest
      * Simple wrapper to execute a sql string.
      **/
     public void executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
     Connection  conn,
     String      stmt_str,
     boolean     commit_query)
@@ -231,6 +232,7 @@ public abstract class BaseTest
     String dump_table(
     Connection  conn,
     String      schemaName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     String      tableName,
     boolean     commit_transaction)
 		throws SQLException
@@ -270,6 +272,7 @@ public abstract class BaseTest
 
         rs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         if (commit_transaction)
             conn.commit();
 
@@ -318,6 +321,7 @@ public abstract class BaseTest
         // order by
         //     tabname, type desc, mode, cnt, lockname;
         String lock_query = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-571
             "select cast(l.xid as char(8)) as xid, cast(username as char(8)) as username, cast(t.type as char(8)) as trantype, cast(l.type as char(8)) as type, cast(lockcount as char(3)) as cnt, cast(mode as char(4)) as mode, cast(tablename as char(12)) as tabname, cast(lockname as char(10)) as lockname, state, status from SYSCS_DIAG.LOCK_TABLE l right outer join SYSCS_DIAG.LOCK_TABLE t on l.xid = t.xid where l.tableType <> 'S' ";
         if (!include_system_locks)
             lock_query += "and t.type='UserTransaction' ";
@@ -422,6 +426,8 @@ public abstract class BaseTest
 		throws SQLException
     {
         String stmt_str = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1187
+//IC see: https://issues.apache.org/jira/browse/DERBY-1188
             "select conglomeratename, isindex, numallocatedpages, numfreepages, numunfilledpages, pagesize, estimspacesaving from new org.apache.derby.diag.SpaceTable('" +
             tableName + "') t where isindex = 0";
         PreparedStatement space_stmt = conn.prepareStatement(stmt_str);
@@ -439,6 +445,8 @@ public abstract class BaseTest
 
         int[] ret_info = new int[SPACE_INFO_NUMCOLS];
         String conglomerate_name        = rs.getString(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1187
+//IC see: https://issues.apache.org/jira/browse/DERBY-1188
         for (int i = 0; i < SPACE_INFO_NUMCOLS; i++)
         {
             ret_info[i] = rs.getInt(i + 2);
@@ -459,6 +467,8 @@ public abstract class BaseTest
             System.out.println(
                 "Space information for " + schemaName + "." + tableName + ":");
             System.out.println(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1187
+//IC see: https://issues.apache.org/jira/browse/DERBY-1188
                 "isindex = " + ret_info[SPACE_INFO_IS_INDEX]);
             System.out.println(
                 "num_alloc = " + ret_info[SPACE_INFO_NUM_ALLOC]);
@@ -488,6 +498,8 @@ public abstract class BaseTest
      **/
     protected int total_pages(int[] space_info)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1187
+//IC see: https://issues.apache.org/jira/browse/DERBY-1188
         return(space_info[SPACE_INFO_NUM_FREE] + 
                space_info[SPACE_INFO_NUM_ALLOC]);
     }

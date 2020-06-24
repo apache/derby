@@ -142,6 +142,7 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 								   LanguageConnectionContext lcc)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1787
 		if (user.equals(dd.getAuthorizationDatabaseOwner())) return;
 		
 		//  check view specific
@@ -206,6 +207,7 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         String currentUser = lcc.getCurrentUserId(activation);
 		TransactionController tc = lcc.getTransactionExecute();
 		SchemaDescriptor sd = td.getSchemaDescriptor();
@@ -260,9 +262,12 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 			String grantee = (String) itr.next();
 			if( tablePermsDesc != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1539
 				if (dd.addRemovePermissionsDescriptor( grant, tablePermsDesc, grantee, tc))
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1582
 					privileges_revoked = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2594
 					dd.getDependencyManager().invalidateFor
 						(tablePermsDesc,
 						 DependencyManager.REVOKE_PRIVILEGE, lcc);
@@ -291,6 +296,7 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 						// TableDescriptor itself, so we must send
 						// INTERNAL_RECOMPILE_REQUEST to the TableDescriptor's
 						// Dependents.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3736
 						dd.getDependencyManager().invalidateFor
 							(td,
 							 DependencyManager.INTERNAL_RECOMPILE_REQUEST,

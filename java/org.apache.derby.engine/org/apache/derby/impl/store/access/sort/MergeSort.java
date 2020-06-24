@@ -50,6 +50,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 **/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 class MergeSort implements Sort
 {
 	/*
@@ -114,6 +115,7 @@ class MergeSort implements Sort
 	protected boolean columnOrderingAscendingMap[];
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
     A lookup table to speed up lookup of nulls-low ordering of a column, 
 	**/
 	protected boolean columnOrderingNullsLowMap[];
@@ -297,6 +299,8 @@ class MergeSort implements Sort
 			// Dump the rows in the sort buffer to a merge run.
 			long containerId = createMergeRun(tran, sortBuffer);
 			mergeRuns.addElement(containerId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 			// If there are more merge runs than we can sort
 			// at once with our sort buffer, we have to reduce
@@ -342,6 +346,7 @@ class MergeSort implements Sort
 		// which will give us any in-progress merge
 		// runs, if there are any.
 		if (inserter != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 			inserter.completedInserts();
 		inserter = null;
 
@@ -412,6 +417,7 @@ class MergeSort implements Sort
 			Object columnVal = 
                 RowUtil.getColumn(template, (FormatableBitSet) null, colid);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5077
             if (columnVal == null)
 				return false;
 		}
@@ -451,6 +457,8 @@ class MergeSort implements Sort
                 Object col2 = template[colid];
                 if (col1 == null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4413
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
 					SanityManager.THROWASSERT(
 						"col[" + colid + "]  is null");
 				}
@@ -479,6 +487,9 @@ class MergeSort implements Sort
 		// ordering array.
         for (int i = 0; i < colsToCompare; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             if (i == colsToCompare - 1 && sortObserver.deferrable()) {
                 if (sortObserver.deferred()) {
                     // Last column, which is RowLocation. We compared equal
@@ -498,6 +509,7 @@ class MergeSort implements Sort
 
 			// If the columns don't compare equal, we're done.
 			// Return the sense of the comparison.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
 			if ((r = r1[colid].compare(r2[colid], nullsLow)) 
                     != 0)
 			{
@@ -543,7 +555,10 @@ class MergeSort implements Sort
         // to change throughout a sort.
         columnOrderingMap          = new int[columnOrdering.length];
         columnOrderingAscendingMap = new boolean[columnOrdering.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
         columnOrderingNullsLowMap  = new boolean[columnOrdering.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-4413
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
         for (int i = 0; i < columnOrdering.length; i++)
         {
             columnOrderingMap[i] = columnOrdering[i].getColumnId();
@@ -577,6 +592,7 @@ class MergeSort implements Sort
 	An inserter is closing.
 	**/
 	void doneInserting(MergeInserter inserter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		SortBuffer sortBuffer, Vector<Long> mergeRuns)
 	{
         if (SanityManager.DEBUG)
@@ -609,6 +625,7 @@ class MergeSort implements Sort
 	}
 
 	void doneScanning(Scan scan, SortBuffer sortBuffer,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<Long> mergeRuns)
 	{
 		this.mergeRuns = mergeRuns;
@@ -627,6 +644,7 @@ class MergeSort implements Sort
 		if (mergeRuns != null)
 		{
 			Enumeration<Long> e = mergeRuns.elements();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			try 
 			{
@@ -635,6 +653,7 @@ class MergeSort implements Sort
 
 				while (e.hasMoreElements())
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					long containerId = (e.nextElement()).longValue();
 					rawTran.dropStreamContainer(segmentId, containerId);
 				}
@@ -673,6 +692,7 @@ class MergeSort implements Sort
 	private void multiStageMerge(TransactionManager tran)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Enumeration<Long> e;
 		//int iterations = 0; // DEBUG (nat)
 		int maxMergeRuns = sortBuffer.capacity();
@@ -733,6 +753,7 @@ class MergeSort implements Sort
 				properties, msRowSource);
 
 			mergeRuns.addElement(id);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 			// Drop the conglomerates in the merge subset
 			e = subset.elements();

@@ -95,6 +95,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("AutoGenJDBC30Test");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("AutoGenJDBC30Test:embedded"));
 
@@ -112,6 +113,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     private static Test baseSuite(String name) {
 
         BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         if (!JDBC.vmSupportsJDBC3()) {
             // empty suite
@@ -224,6 +226,8 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     public void testUpdateManyRowsAfterOneRowKey() throws SQLException
     {
         // Do a one-row insert into a table with an auto-generated key.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
         Statement s = createStatement();
         s.execute("insert into t11_AutoGen(c11) values (99)", Statement.RETURN_GENERATED_KEYS);
         int expected=1;
@@ -555,6 +559,8 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         Statement s = createStatement();
         s.execute("insert into t11_AutoGen(c11) values(999)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
         String sqlStmt="update t11_AutoGen set c12=default where c11=999";
         s.execute(sqlStmt, Statement.RETURN_GENERATED_KEYS);
         int keyval = getKeyValue (s.getGeneratedKeys());
@@ -1054,10 +1060,12 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         // Valid (typical) usage.
 
         int [] colIndexes = new int [] { 2 };
+//IC see: https://issues.apache.org/jira/browse/DERBY-2631
         testUserGivenColumns(colIndexes, null, 1);
         
 
         // Mulitple columns. one not an identity column.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         colIndexes = new int[] {1,2};
         testUserGivenColumnsError(colIndexes, null);
         
@@ -1120,6 +1128,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         testUserGivenColumns(null, colNames, 1);
 
         // column name array is of length > 1
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         colNames = new String[] {"C12","C13"};
         testUserGivenColumnsError(null, colNames);
              
@@ -1187,6 +1196,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     public void testUserGivenColumnsEmpty() throws SQLException
     {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
 
         String sql="insert into t11_AutoGen(c11) values (99)";
 
@@ -1267,6 +1277,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
             s.getGeneratedKeys());
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         PreparedStatement ps;
         ps = prepareStatement(sql, (String[]) null);
         ps.execute();
@@ -1399,6 +1410,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         boolean useIndexes = (colIndexes != null);
         String expectedSQLState = (useIndexes ? "X0X0E" : "X0X0F");
         // Derby client will only give an error if colNames array is not of length 1.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         if (usingDerbyNetClient() && colNames != null && 
                 colNames.length != 1)
             expectedSQLState = "X0X0D";
@@ -1520,6 +1532,8 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public int getKeyValue (ResultSet r) throws SQLException
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
     {if(r==null) System.out.println("it is null");
         JDBC.assertGeneratedKeyResultSet("AutoGenJDBC30Test.getKeyValue", r);
         

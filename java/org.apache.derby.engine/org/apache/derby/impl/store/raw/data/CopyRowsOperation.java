@@ -72,6 +72,7 @@ public class CopyRowsOperation extends PhysicalPageOperation {
 
 	transient protected ByteArray preparedLog; 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     CopyRowsOperation(RawTransaction t, BasePage destPage, BasePage srcPage,
 							 int destSlot, int num_rows,
 							 int srcSlot, int[] recordIds)

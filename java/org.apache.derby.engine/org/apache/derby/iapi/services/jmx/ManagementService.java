@@ -72,6 +72,7 @@ public interface ManagementService extends ManagementMBean {
      * @throws StandardException on error
      */
     public <T> Object registerMBean(T bean,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<T> beanInterface,
             String keyProperties)
             throws StandardException;
@@ -92,5 +93,6 @@ public interface ManagementService extends ManagementMBean {
      * @return the quoted value
      * @see javax.management.ObjectName#quote(String)
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
     String quotePropertyValue(String value);
 }

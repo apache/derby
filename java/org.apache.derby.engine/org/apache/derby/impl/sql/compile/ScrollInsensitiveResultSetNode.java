@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ScrollInsensitiveResultSetNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -36,6 +37,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 {
 	/**
@@ -52,6 +55,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
                             Properties tableProperties,
                             ContextManager cm) {
         super(childResult, tableProperties, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( rcl );
 	}
 
@@ -66,6 +70,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 	{
 		if (SanityManager.DEBUG)
             SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -78,6 +83,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 
 		// Get the cost estimate for the child
 		setCostEstimate( childResult.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		int erdNumber = acb.addItem(makeResultDescription());
 
@@ -85,6 +91,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 
 		childResult.generate(acb, mb);
 		acb.pushThisAsActivation(mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(getResultSetNumber());
 		mb.push(getResultColumns().size());
 
@@ -96,6 +103,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getScrollInsensitiveResultSet",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 						ClassName.NoPutResultSet, 7);
 	}
 }

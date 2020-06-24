@@ -92,6 +92,7 @@ public class ErrorStringBuilder
 
 			t.printStackTrace(printWriter);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 			if (t instanceof java.sql.SQLException) {
 				Throwable next = ((java.sql.SQLException)t).getNextException();
 				t = (next == null) ? t.getCause() : next;

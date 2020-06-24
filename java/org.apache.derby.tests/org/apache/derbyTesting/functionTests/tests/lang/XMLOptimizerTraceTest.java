@@ -84,8 +84,10 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
     public static Test suite()
     {
         String[]    testFiles = new String[] { "functionTests/tests/lang/" + SAVED_TRACE_NAME };
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
 
         BaseTestSuite suite = new BaseTestSuite("XMLOptimizerTraceTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( TestConfiguration.defaultSuite( XMLOptimizerTraceTest.class ) );
  
@@ -187,6 +189,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
                  );
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         if ( !tableExists( conn, "T1" ) )
         {
             goodStatement
@@ -232,6 +235,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
         File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
 
         SupportFilesSetup.deleteFile( traceFile );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6635
 
         // turn on xml-based optimizer tracing and run some queries
         goodStatement
@@ -323,8 +327,10 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
 
         // use planCost to examine an outer join
         vetOuterJoin( conn );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
         // verify that you can't overwrite an existing file with xml output (DERBY-6635)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6635
         goodStatement
             (
              conn,
@@ -333,6 +339,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
         expectExecutionError
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
              FILE_EXISTS,
              "call syscs_util.syscs_register_tool( 'optimizerTracing', false, '" + traceFile.getPath() + "' )"
               );
@@ -351,6 +358,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
      */
     public void test_02_xmlVTI() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
         Connection conn = getConnection();
         File    traceFile = SupportFilesSetup.getReadOnly( SAVED_TRACE_NAME );
         URL     traceURL = SupportFilesSetup.getReadOnlyURL( SAVED_TRACE_NAME );
@@ -599,8 +607,10 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
      */
     private void vetOuterJoin( Connection conn ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
         SupportFilesSetup.deleteFile( traceFile );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6635
 
         // turn on xml-based optimizer tracing
         goodStatement

@@ -38,9 +38,11 @@ public abstract class ExceptionFactory {
         // the need for more than one implementation ever arises again, the
         // code below should be changed to load the correct factory for the
         // run-time platform.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6253
         String impl = "org.apache.derby.impl.jdbc.SQLExceptionFactory";
         ExceptionFactory factory = null;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(impl);
             factory = (ExceptionFactory) clazz.getConstructor().newInstance();
         } catch (Exception e) {
@@ -71,6 +73,7 @@ public abstract class ExceptionFactory {
      */
     public abstract SQLException getSQLException(String message, String messageId,
             SQLException next, int severity, Throwable cause, Object... args);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6253
 
     /**
      * Construct an SQLException whose message and severity are derived from
@@ -83,5 +86,6 @@ public abstract class ExceptionFactory {
      * @return an SQLException
      */
     public abstract SQLException getSQLException(String messageId,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6253
             SQLException next, Throwable cause, Object... args);
 }

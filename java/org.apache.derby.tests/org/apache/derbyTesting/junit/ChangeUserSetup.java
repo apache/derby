@@ -28,6 +28,7 @@ import junit.framework.Test;
  * Optionally the passwordToken can be changed as well. 
  * 
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2215
 final class ChangeUserSetup extends ChangeConfigurationSetup {
     
     private final String user;

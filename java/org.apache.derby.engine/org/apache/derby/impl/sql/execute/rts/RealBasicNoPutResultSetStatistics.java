@@ -131,6 +131,7 @@ abstract class RealBasicNoPutResultSetStatistics
 	{
 		return	subIndent +
             MessageService.getTextMessage(SQLState.RTS_OPT_EST_RC,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 optimizerEstimatedRowCount) + "\n" +
 				subIndent +
             MessageService.getTextMessage(SQLState.RTS_OPT_EST_COST,
@@ -145,6 +146,7 @@ abstract class RealBasicNoPutResultSetStatistics
 	 * @return java.util.Vector	A vector of objects.
 	 */
   public Vector<ResultSetStatistics> getChildren(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     return new Vector<ResultSetStatistics>();
   }
 	/**
@@ -165,6 +167,7 @@ abstract class RealBasicNoPutResultSetStatistics
 	 */
   public long getChildrenTime(){
     long childrenTime = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-73
     java.util.Enumeration e = getChildren().elements();
     while (e.hasMoreElements()){
       childrenTime = childrenTime + ((RealBasicNoPutResultSetStatistics)e.nextElement()).getTotalTime();
@@ -218,6 +221,7 @@ abstract class RealBasicNoPutResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                              // the number of index updates 
            null,                           // lock mode
@@ -243,6 +247,7 @@ abstract class RealBasicNoPutResultSetStatistics
     {
         return new XPLAINResultSetTimingsDescriptor(
            (UUID)timingID,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.constructorTime,
            this.openTime,
            this.nextTime,

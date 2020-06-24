@@ -31,6 +31,7 @@ import org.apache.derbyTesting.junit.BaseTestSuite;
  * will not be run.
  * <BR>
     10.1 Upgrade issues
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
 
     <UL>
     <LI> testProcedureSignature - Routines with explicit Java signatures.
@@ -40,6 +41,7 @@ import org.apache.derbyTesting.junit.BaseTestSuite;
 public class Changes10_1 extends UpgradeChange {
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Upgrade changes for 10.1");
         
         suite.addTestSuite(Changes10_1.class);
@@ -68,6 +70,7 @@ public class Changes10_1 extends UpgradeChange {
      */
     public void testProcedureSignature() throws SQLException
     {      
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
        Statement s = createStatement();
         switch (getPhase())
         {

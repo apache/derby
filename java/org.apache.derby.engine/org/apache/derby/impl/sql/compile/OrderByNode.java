@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.OrderByNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -35,6 +36,8 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  * is required.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class OrderByNode extends SingleChildResultSetNode
 {
 
@@ -68,6 +71,7 @@ class OrderByNode extends SingleChildResultSetNode
         // (Copy maintains ResultColumn.expression for now.)
         final ResultColumnList prRCList =
             childRes.getResultColumns().copyListAndObjects();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( childRes.getResultColumns() );
         childRes.setResultColumns(prRCList);
 
@@ -86,11 +90,14 @@ class OrderByNode extends SingleChildResultSetNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 
 			if (orderByList != null)
 			{
@@ -101,6 +108,7 @@ class OrderByNode extends SingleChildResultSetNode
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 	ResultColumnDescriptor[] makeResultDescriptors()
 	{
 	    return childResult.makeResultDescriptors();
@@ -117,6 +125,7 @@ class OrderByNode extends SingleChildResultSetNode
 							throws StandardException
 	{
 		// Get the cost estimate for the child
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCostEstimate() == null)
 		{
 			setCostEstimate( childResult.getFinalCostEstimate() );
@@ -135,6 +144,7 @@ class OrderByNode extends SingleChildResultSetNode
 		// code generation for the PRN above us will fail when calling
 		// resultColumns.generateCore -> VCN.generateExpression, cf. the Sanity
 		// assert in VCN.generateExpression on sourceResultSetNumber >= 0.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setResultSetNumber( orderByList.getResultSetNumber() );
 		getResultColumns().setResultSetNumber(getResultSetNumber());
 	}

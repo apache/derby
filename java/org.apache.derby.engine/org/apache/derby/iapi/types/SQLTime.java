@@ -91,6 +91,7 @@ public final class SQLTime extends DataType
 
     public int estimateMemoryUsage()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3173
         return BASE_MEMORY_USAGE;
     } // end of estimateMemoryUsage
 
@@ -140,6 +141,7 @@ public final class SQLTime extends DataType
                 // Set Calendar to current date and time
                 // to pick up the current date. Time portion
                 // will be overridden by this value's time.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1985
                 cal.setTimeInMillis(System.currentTimeMillis());
             }
             
@@ -513,6 +515,7 @@ public final class SQLTime extends DataType
                 else if( hour > 12)
                     throw StandardException.newException( SQLState.LANG_DATE_RANGE_EXCEPTION);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3173
             parser.checkEnd();
             encodedTime = computeEncodedTime( hour, minute, second);
         }
@@ -554,6 +557,7 @@ public final class SQLTime extends DataType
 	 * Set the value from a correctly typed Time object.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue) throws StandardException
 	{
 		setValue((Time) theValue);
@@ -605,6 +609,7 @@ public final class SQLTime extends DataType
 		restoreToNull();
 		if (theValue != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             DatabaseContext databaseContext = (DatabaseContext) DataValueFactoryImpl.getContext(DatabaseContext.CONTEXT_ID);
             parseTime( theValue,
                        false,
@@ -617,6 +622,7 @@ public final class SQLTime extends DataType
 	** SQL Operators
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
     NumberDataValue nullValueInt() {
         return new SQLInteger();
     }
@@ -665,6 +671,7 @@ public final class SQLTime extends DataType
 	public NumberDataValue getHours(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -680,6 +687,7 @@ public final class SQLTime extends DataType
 	public NumberDataValue getMinutes(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -695,6 +703,7 @@ public final class SQLTime extends DataType
 	public NumberDataValue getSeconds(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {    
@@ -764,6 +773,7 @@ public final class SQLTime extends DataType
         
         // Derby's SQL TIME type only has second resolution
         // so pass in 0 for nano-seconds
+//IC see: https://issues.apache.org/jira/browse/DERBY-1985
         return getTime(cal, encodedTime, 0);
 	}
     
@@ -931,6 +941,7 @@ public final class SQLTime extends DataType
       */
     public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-203
 		      ps.setTime(position, getTime((Calendar) null));
    }
 
@@ -950,6 +961,7 @@ public final class SQLTime extends DataType
      * @exception StandardException
      */
     public DateTimeDataValue timestampAdd( int intervalType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
                                            NumberDataValue intervalCount,
                                            java.sql.Date currentDate,
                                            DateTimeDataValue resultHolder)

@@ -41,6 +41,7 @@ public class Derby6662Test extends BaseJDBCTestCase {
     protected void tearDown() throws Exception
     {
       super.tearDown();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6662
       dropInMemoryDb();
     }
     
@@ -53,6 +54,7 @@ public class Derby6662Test extends BaseJDBCTestCase {
     
     public void testOptionalToolMetaData() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6662
         Connection conn = obtainConnection();
         // register the database metadata wrapper
         goodStatement( conn, "call syscs_util.syscs_register_tool" +
@@ -129,6 +131,7 @@ public class Derby6662Test extends BaseJDBCTestCase {
             sb.append('/');
             sb.append("memory:");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6662
         sb.append("DBMDTestDb");
         return sb;
     }

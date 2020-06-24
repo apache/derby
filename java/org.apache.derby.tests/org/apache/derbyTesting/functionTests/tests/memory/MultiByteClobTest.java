@@ -141,8 +141,13 @@ public class MultiByteClobTest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("MultiByteClobTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3818
         suite.addTest(baseSuite("MultiByteClobTest:embedded"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3818
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
+//IC see: https://issues.apache.org/jira/browse/DERBY-3769
         suite.addTest(TestConfiguration
             .clientServerDecorator(baseSuite("MultiByteClobTest:client")));
         Properties p = new Properties();
@@ -157,6 +162,7 @@ public class MultiByteClobTest extends BaseJDBCTestCase {
      * @param name name for the suite.
      */
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(MultiByteClobTest.class);
         return new CleanDatabaseTestSetup(DatabasePropertyTestSetup

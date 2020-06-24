@@ -113,6 +113,7 @@ public abstract class jvm {
     public int imajor = 0;
     public int iminor = 0;
     String hostName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 
 	// security defaults relative to WS
 	// not used if jvmargs serverCodeBase are set
@@ -177,8 +178,10 @@ public abstract class jvm {
 	
     public Vector<String> getCommandLine()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> v = new Vector<String>();
         v.addElement(javaCmd);
+//IC see: https://issues.apache.org/jira/browse/DERBY-323
         v.addElement("-Duser.language=en");
         v.addElement("-Duser.country=US");
         if ( (flags != null) && (flags.length()>0) )
@@ -213,6 +216,7 @@ public abstract class jvm {
      */
     public static jvm getJvm(String jvmName) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	    jvm result = null;
         Class<?> clazz;
         try {
@@ -277,6 +281,7 @@ public abstract class jvm {
 		int j = javaVersion.indexOf('.', i+1);
 		majorVersion = javaVersion.substring(0, i);
 		minorVersion = javaVersion.substring(i+1, j);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Integer minor = Integer.valueOf(minorVersion);
 		iminor = minor.intValue();
 		Integer major = Integer.valueOf(majorVersion);
@@ -305,6 +310,7 @@ public abstract class jvm {
 		// need to strip off the java directory  assuming it's something
 		// like ibm14/jre or ibm14
 		int havejre=jhome.indexOf(sep + "jre");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2265
 		if (havejre > 0)
 		{
 			wshome = jhome.substring(0,jhome.indexOf(sep + "jre"));
@@ -320,6 +326,7 @@ public abstract class jvm {
 
 	public static String findCodeBase(boolean[] isJar)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         String classpath = JVMInfo.isModuleAware() ?
             JVMInfo.getSystemModulePath() : System.getProperty("java.class.path");
 		char sep = '/';
@@ -331,6 +338,7 @@ public abstract class jvm {
 			String location = zip[i].getLocation().replace('\\','/');
 			if (location.indexOf("derbynet.jar") != -1)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
 				isJar[0] = true;
 				return location.substring(0,location.lastIndexOf(sep));
 			}
@@ -354,6 +362,7 @@ public abstract class jvm {
 	}
 	
     static Vector<String> getSecurityProps(Vector<String> D)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             throws ClassNotFoundException, IOException
 	{
 		if (D == null)
@@ -365,6 +374,7 @@ public abstract class jvm {
 		String serverCodeBase = System.getProperty("serverCodeBase");
 		boolean[] isJar = new boolean[1];
 		if (serverCodeBase == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
 			serverCodeBase = findCodeBase(isJar);
    
         
@@ -390,6 +400,7 @@ public abstract class jvm {
 		D.addElement("java.security.manager");
 		D.addElement("java.security.policy=" + pf.getAbsolutePath());
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-1791
         Properties jusetup =
             SecurityManagerSetup.getPolicyFilePropertiesForOldHarness();
         // Take the definitions from the way JUnit tests
@@ -410,6 +421,7 @@ public abstract class jvm {
 		D.addElement("derbyTesting.serverhost=" + hostName);
 		// in the case of testing with a remote host, this is irrelevant, 
 		// when testing 'normal' it is also localhost:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1791
 		D.addElement("derbyTesting.clienthost=" + hostName);	 	
 		
 		return D;

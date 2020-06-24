@@ -2,6 +2,7 @@
 
    Derby - Class SimpleApp
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -128,7 +129,9 @@ public class SimpleApp
          * in an array list for convenience.
          */
         Connection conn = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<Statement> statements = new ArrayList<Statement>(); // list of Statements, PreparedStatements
+//IC see: https://issues.apache.org/jira/browse/DERBY-6459
         PreparedStatement psInsert;
         PreparedStatement psUpdate;
         Statement s;
@@ -314,6 +317,8 @@ public class SimpleApp
 
             if (framework.equals("embedded"))
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3187
+//IC see: https://issues.apache.org/jira/browse/DERBY-2216
                 try
                 {
                     // the shutdown=true attribute shuts down Derby

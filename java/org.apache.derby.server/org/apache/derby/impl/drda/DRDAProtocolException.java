@@ -33,10 +33,12 @@ package org.apache.derby.impl.drda;
 import java.util.Hashtable;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class DRDAProtocolException extends Exception
 {
     
     /* Static values, used in constructor if there is no associated 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
        Error Code or the codepoint argument.
     */
     
@@ -109,6 +111,7 @@ class DRDAProtocolException extends Exception
        DRDAProtocolExceptionInfo for each of our messages.
     */
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     errorInfoTable = new Hashtable<String, DRDAProtocolExceptionInfo>();
     
     errorInfoTable.put(
@@ -197,12 +200,14 @@ class DRDAProtocolException extends Exception
     // condition detected at the target system.
     errorInfoTable.put(DRDA_AgentError,
                new DRDAProtocolExceptionInfo(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1456
                              CodePoint.AGNPRMRM,
                              CodePoint.SVRCOD_PRMDMG,
                              NO_ASSOC_ERRCD,
                              false));
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2166
     errorInfoTable.put(DRDA_Timeout,
                new DRDAProtocolExceptionInfo(
                              0,
@@ -227,6 +232,7 @@ class DRDAProtocolException extends Exception
      *
      */
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     DRDAProtocolException(String msgid,
                                     DRDAConnThread agent, 
                                     int cpArg, 
@@ -255,6 +261,7 @@ class DRDAProtocolException extends Exception
             this.svrcod = ((Integer)args[0]).intValue();
             this.rdbnam = (String)args[1];
             // retrieve the server diagnostic error message 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1456
             String srvdgn = (String)args[2];
             msg = "Execution failed because of Permanent Agent Error: SVRCOD = " +
                 java.lang.Integer.toHexString(this.svrcod) +
@@ -276,6 +283,7 @@ class DRDAProtocolException extends Exception
                 + messageid +
                 "; CODPNT arg  = " + java.lang.Integer.toHexString(cpArg)  +
                 "; Error Code Value = " + java.lang.Integer.toHexString(errCdArg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2796
             if (msgid.equals(DRDA_Proto_SYNTAXRM)) {
                 msg += ". Plaintext connection attempt from an SSL enabled client?";
             }
@@ -306,11 +314,13 @@ class DRDAProtocolException extends Exception
                                    agent.getSession().drdaID, 
                                    msg);
             NetworkServerControlImpl s = agent.getServer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1743
             s.consoleExceptionPrintTrace(this);
         }
     }
     
     // Constructor with no additional args
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     DRDAProtocolException(String msgid,
                                     DRDAConnThread agent, 
                                     int cpArg, 
@@ -335,7 +345,9 @@ class DRDAProtocolException extends Exception
         int svrcod, String rdbnam, String srvdgn)
     {
         if ( SanityManager.DEBUG )
+//IC see: https://issues.apache.org/jira/browse/DERBY-1751
             agent.trace("agentError in " + agent);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
         Object[] oa = {svrcod, rdbnam, srvdgn};
         return new DRDAProtocolException(DRDA_AgentError,
                                         agent,
@@ -394,6 +406,7 @@ class DRDAProtocolException extends Exception
      */
     public String getMessage()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1456
         return msg;
     }
 }
@@ -404,6 +417,7 @@ class DRDAProtocolException extends Exception
  * *NOT* disconnect the connection.
  * See DRDAConnThread.run()
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2166
 class DRDASocketTimeoutException extends DRDAProtocolException {
     DRDASocketTimeoutException(DRDAConnThread t) {
         super(DRDA_Timeout,t,0,0);

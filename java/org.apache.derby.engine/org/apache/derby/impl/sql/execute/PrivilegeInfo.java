@@ -69,6 +69,7 @@ public abstract class PrivilegeInfo
 		throws StandardException
 	{
 		if (!user.equals(sd.getAuthorizationId()) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-1787
 				!user.equals(dd.getAuthorizationDatabaseOwner()))
 			throw StandardException.newException(SQLState.AUTH_NOT_OWNER,
 									  user,
@@ -90,6 +91,7 @@ public abstract class PrivilegeInfo
 	protected void addWarningIfPrivilegeNotRevoked( Activation activation,
 													boolean grant,
 													boolean privileges_revoked,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1582
 													String grantee) 
 	{
 		if(!grant && !privileges_revoked)

@@ -134,6 +134,7 @@ public class backupRestore1
 		System.out.println("testing rollforward recovery");
 		try{
 			//perform rollforward recovery and do some inserts again
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			Connection conn = TestUtil.getConnection("wombat", "rollForwardRecoveryFrom=extinout/mybackup/wombat");
 			//run consistenct checker
 			Statement stmt = conn.createStatement();
@@ -148,6 +149,7 @@ public class backupRestore1
 
             conn.commit();
 			conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			TestUtil.getConnection("wombat", "shutdown=true");
 		}
         catch( SQLException se)
@@ -166,6 +168,7 @@ public class backupRestore1
 		RandomAccessFile rfs = null;
 		boolean alreadyShutdown = false;
 		try{
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			Connection conn = TestUtil.getConnection("wombat", null);
 								
 			//just open to a file in existing backup, so that rename will fail on
@@ -180,6 +183,7 @@ public class backupRestore1
             backupStmt.execute();
             backupStmt.close();
 			conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			TestUtil.getConnection("wombat", "shutdown=true");
 		}catch(SQLException se)
 		{
@@ -205,6 +209,8 @@ public class backupRestore1
 		{
 			try{
 				//shutdown 
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 				TestUtil.getConnection("wombat", "shutdown=true");
 			}catch(SQLException se){
 				if (se.getSQLState() != null && se.getSQLState().equals("08006"))
@@ -222,6 +228,7 @@ public class backupRestore1
 			if(rfs != null )
 				rfs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			Connection conn = TestUtil.getConnection("wombat", "restoreFrom=extinout/mybackup/wombat");
 			
 			//run consistenct checker
@@ -242,6 +249,7 @@ public class backupRestore1
 
 		//now take a backup again , just to make all is well in the system.
 		try{
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			Connection conn = TestUtil.getConnection("wombat", null);
 			
             CallableStatement backupStmt = conn.prepareCall(
@@ -253,6 +261,7 @@ public class backupRestore1
 			Statement stmt = conn.createStatement();
 			stmt.execute("VALUES (ConsistencyChecker())");
 			conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			TestUtil.getConnection("wombat", "shutdown=true");
 		}catch(SQLException se)
 		{

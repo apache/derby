@@ -371,6 +371,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public void testAlterTable() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2036
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         Statement s = createStatement();
         s.executeUpdate("ALTER TABLE EMC.CONTACTS ADD COLUMN OK SMALLINT");
         JDBC.assertFullResultSet(
@@ -411,6 +414,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public void testClassPathRollback() throws SQLException, MalformedURLException
     {        
+//IC see: https://issues.apache.org/jira/browse/DERBY-2033
         getConnection().setAutoCommit(false);
         replaceJar("dcl_emc2.jar", "EMC.MAIL_APP");
 
@@ -543,6 +547,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         ps.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2033
+//IC see: https://issues.apache.org/jira/browse/DERBY-2083
         signersTests(getConnection());
         
     }
@@ -645,6 +651,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public void testCreateDatabaseJar() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2033
+//IC see: https://issues.apache.org/jira/browse/DERBY-2083
         CallableStatement cs = prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
         cs.executeUpdate();
@@ -660,8 +668,10 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
 
         cs.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         final String db = getTestConfiguration().getDefaultDatabaseName();
         AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         (new java.security.PrivilegedExceptionAction<Void>() {
             public Void run() throws Exception {
                 createArchive("dclt.jar", new File(backupDir, db), "dbro");;
@@ -679,6 +689,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     public void testDatabaseInJar() throws SQLException
     {
         File jarFile = SupportFilesSetup.getReadOnly("dclt.jar");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
         String dbName = "jar:(" +
                 PrivilegedFileOpsForTests.getAbsolutePath(jarFile) + ")dbro";
         
@@ -700,6 +711,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public void testLoadJavaClassIndirectly() throws SQLException, MalformedURLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
         loadJavaClass(
                 "org.apache.derbyTesting.databaseclassloader.cracker.C1.simple",
                 "38000");
@@ -820,6 +832,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
             assertStatementError("25502", s,
                     "CALL EMC.ADDCONTACT(3, 'really@is_read_only.gov')");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-552
             getResourceTests(conn);
             
             // DERBY-553: Disabled on Java 5 due to JVM bug
@@ -855,6 +868,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public void testClassLoadOrdering() throws SQLException, MalformedURLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2331
         Statement s = createStatement();
         
         s.executeUpdate("CREATE SCHEMA OT");
@@ -894,6 +908,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         installJar("dcl_ot2.jar", "OT.OT2");
         installJar("dcl_ot3.jar", "OT.OT3");
               
+//IC see: https://issues.apache.org/jira/browse/DERBY-2331
         checkLoading("123");
         checkLoading("132");
         checkLoading("213");
@@ -946,6 +961,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         // Tests the classes loaded indirectly by
         // code in an installed jar file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2331
         checkCorrectLoader("OrderObject1", ps1, ps2, ps3);
         checkCorrectLoader("OrderObject2", ps1, ps2, ps3);
         checkCorrectLoader("OrderObject3", ps1, ps2, ps3);
@@ -985,6 +1001,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public void testIndirectLoading() throws SQLException, MalformedURLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2331
         Statement s = createStatement();
         
         s.executeUpdate("CREATE SCHEMA ID");
@@ -1031,6 +1048,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     public void testTableFunctionInJar() throws SQLException, MalformedURLException
     {
         String jarName = "EMC.DUMMY_VTI";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4126
 
         installJar("dummy_vti.jar", jarName );
 
@@ -1067,6 +1085,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
              "language java\n" +
              "parameter style DERBY_JDBC_RESULT_SET\n" +
              "reads sql data\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5352
              "external name 'MissingClass.dummyVTI'\n"
              );
 
@@ -1104,6 +1123,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
 
         // drop the useless function
         s.executeUpdate( "drop function dummyVTI2\n" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5352
 
         setDBClasspath(null);
         
@@ -1335,6 +1355,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         // setting the change does see it!
         // 
         getConnection().close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
         getTestConfiguration().shutdownDatabase(); 
     }
     
@@ -1344,6 +1365,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     private static void createArchive(String jarName, File dbDir, String dbName)
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2033
+//IC see: https://issues.apache.org/jira/browse/DERBY-2083
 
         assertTrue(dbDir.isDirectory());
 

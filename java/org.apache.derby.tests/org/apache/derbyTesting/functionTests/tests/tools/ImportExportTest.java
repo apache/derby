@@ -44,9 +44,11 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	
 	public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("ImportExportTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // disabled on weme6.1 due at the moment due 
         // to problems with security exceptions.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2342
         if (JDBC.vmSupportsJSR169())
         {
             return new BaseTestSuite();
@@ -60,11 +62,14 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(ImportExportTest.class, name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3863
 		Test test = new SupportFilesSetup(suite, new String[] {"functionTests/testData/ImportExport/TwoLineBadEOF.dat"} );
 		return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
                 s.execute( "create type Price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java" );
                 s.execute( "create type hashmap external name 'java.util.HashMap' language java" );
 
@@ -86,6 +91,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 						   "COLUMN7 DOUBLE PRECISION , COLUMN8 INT , COLUMN9 BIGINT , COLUMN10 NUMERIC , " +
 						   "COLUMN11 REAL , COLUMN12 SMALLINT , COLUMN13 TIME , COLUMN14 TIMESTAMP , "+
 						   "COLUMN15 SMALLINT , COLUMN16 VARCHAR(1), COLUMN17 PRICE)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3863
                 s.execute("create table T4 (   Account int,    Name   char(30), Jobdesc char(40), " +
                            "Company varchar(35), Address1 varchar(40), Address2 varchar(40), " +
                            "City    varchar(20), State   char(5), Zip char(10), Country char(10), " +
@@ -103,14 +109,18 @@ public class ImportExportTest extends BaseJDBCTestCase {
      * Set up the test environment.
      */
     protected void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5112
         resetTables();
     }
 	
 	public void testImportFromNonExistantFile() {
 		try {
             doImport("Z", null, "T1", null, null, null, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
 		} catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 			assertSQLState("XIE04", e);
 		}
 	}
@@ -118,8 +128,11 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	public void testNullDataFile() {
 		try {
             doImport(null, null, "T1", null, null, null, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
 		} catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 			assertSQLState("XIE05", e);
 		}
 	}
@@ -159,6 +172,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	public void testInvalidEncoding() throws Exception {
 		try {
             doImportAndExport(null, "T1", "^", "#", "INAVALID ENCODING");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE0I", e);
@@ -169,8 +183,11 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		try {
             doImportFromFile("extin/TwoLineBadEOF.dat", null, "T4",
                              null, null, "US-ASCII", 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3784
             fail();
 		} catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 			assertSQLState("XIE0E", e);
 		}
 	}
@@ -280,6 +297,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
      */
     public void testCastingProblem() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         final String fileName = SupportFilesSetup.
                 getReadWrite("castCheck.dat").getPath();
 
@@ -411,6 +429,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	private void resetTables() throws Exception {
 		runSQLCommands("delete from t1");
 		runSQLCommands("delete from t2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
 		runSQLCommands("delete from t5");
 		runSQLCommands("delete from t6");
 		runSQLCommands("INSERT INTO T1 VALUES (null,'aa',1,'a',DATE('1998-06-30'),"+

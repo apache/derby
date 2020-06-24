@@ -120,6 +120,7 @@ public abstract class T_Generic implements UnitTest, ModuleControl
 		
 		catch (Throwable t)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 			FAIL(t.toString());
 			t.printStackTrace(out.getPrintWriter());
 			return false;

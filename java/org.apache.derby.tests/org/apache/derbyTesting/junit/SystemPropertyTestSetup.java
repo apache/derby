@@ -46,6 +46,7 @@ public class SystemPropertyTestSetup extends TestSetup {
 	 * @param newValues properties to be set
 	 */
 	public SystemPropertyTestSetup(Test test,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
 			Properties newValues,
 			boolean staticProperties)
 	{
@@ -76,6 +77,7 @@ public class SystemPropertyTestSetup extends TestSetup {
      */
     public static Test singleProperty(Test test, String property, String value)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6233
         return singleProperty(test, property, value, false);
     }
 
@@ -114,6 +116,7 @@ public class SystemPropertyTestSetup extends TestSetup {
         // Shutdown the engine before setting the properties. This
         // is because the properties may change authentication settings
         // to NATIVE authentication and we may be missing a credentials DB.
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (staticProperties) {
             // Use deregister == false here lest in client server mode
             // we try to connect to a network server without an embedded
@@ -176,6 +179,7 @@ public class SystemPropertyTestSetup extends TestSetup {
                 change = !old.equals(value);
                 
                 //Reference equality is ok here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5342
     			if (values != oldValues)
     			   oldValues.setProperty(key, old);
     		}

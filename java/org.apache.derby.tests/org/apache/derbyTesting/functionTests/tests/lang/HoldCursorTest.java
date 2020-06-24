@@ -47,6 +47,7 @@ public class HoldCursorTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("HoldCursorTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite(true));
         suite.addTest(baseSuite(false));
@@ -57,6 +58,7 @@ public class HoldCursorTest extends BaseJDBCTestCase {
     private static Test baseSuite(boolean embeddedMode) {
         String name = "HoldCursorTest:" + (embeddedMode ? "embedded" : "client");
         BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Add tests that every JVM jdk1.4 or above should be able to run.
         suite.addTestSuite(HoldCursorTest.class);

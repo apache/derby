@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.AlterTableNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -44,6 +45,8 @@ import org.apache.derby.impl.sql.execute.CreateConstraintConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class AlterTableNode extends DDLStatementNode
 {
 	// The alter table action
@@ -111,6 +114,8 @@ class AlterTableNode extends DDLStatementNode
      * @param cm Context manager
      * @exception StandardException
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     AlterTableNode(TableName tableName,
                    ContextManager cm) throws StandardException {
         super(tableName, cm);
@@ -252,6 +257,7 @@ class AlterTableNode extends DDLStatementNode
 		if (SanityManager.DEBUG)
 		{
 			return super.toString() +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				"objectName: " + getObjectName() + "\n" +
 				"lockGranularity: " + lockGranularity + "\n" +
 				"compressTable: " + compressTable + "\n" +
@@ -279,8 +285,13 @@ class AlterTableNode extends DDLStatementNode
 	 * @param depth		The depth to indent the sub-nodes
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 			if (tableElementList != null) {
 				printLabel(depth, "tableElementList: ");
 				tableElementList.treePrint(depth + 1);
@@ -346,6 +357,7 @@ public String statementToString()
 		//If we are dealing with add column character type, then set that 
 		//column's collation type to be the collation type of the schema.
 		//The collation derivation of such a column would be "implicit".
+//IC see: https://issues.apache.org/jira/browse/DERBY-2530
 		if (changeType == ADD_TYPE) {//the action is of type add.
 			if (tableElementList != null) {//check if is is add column
 				for (int i=0; i<tableElementList.size();i++) {
@@ -359,6 +371,7 @@ public String statementToString()
                         //
 
                         if ( cdn.hasGenerationClause() && ( cdn.getType() == null ) ) { continue; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
 
                         if ( cdn.getType() == null )
                         {
@@ -383,6 +396,7 @@ public String statementToString()
 			tableElementList.validate(this, dd, baseTable);
 
 			/* Only 1012 columns allowed per table */
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			if ((tableElementList.countNumberOfColumns() + baseTable.getNumberOfColumns()) > Limits.DB2_MAX_COLUMNS_IN_TABLE)
 			{
 				throw StandardException.newException(SQLState.LANG_TOO_MANY_COLUMNS_IN_TABLE_OR_VIEW,
@@ -406,6 +420,7 @@ public String statementToString()
 
 		//If the sum of backing indexes for constraints in alter table statement and total number of indexes on the table
 		//so far is more than 32767, then we need to throw an exception 
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		if ((numBackingIndexes + baseTable.getTotalNumberOfIndexes()) > Limits.DB2_MAX_INDEXES_ON_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEXES_ON_TABLE, 
@@ -432,6 +447,7 @@ public String statementToString()
 			 * the check constraints and generation clauses.
 			 */
 			if  (numGenerationClauses > 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4145
             { tableElementList.bindAndValidateGenerationClauses( schemaDescriptor, fromList, generatedColumns, baseTable ); }
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
             if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
@@ -534,9 +550,11 @@ public String statementToString()
 		{
 			conActions = new ConstraintConstantAction[numConstraints];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
 			tableElementList.genConstraintActions(false, conActions, getRelativeName(), schemaDescriptor,
 												  getDataDictionary());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4244
 			for (int conIndex = 0; conIndex < conActions.length; conIndex++)
 			{
 				ConstraintConstantAction cca = conActions[conIndex];

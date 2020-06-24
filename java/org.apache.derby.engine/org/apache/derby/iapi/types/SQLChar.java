@@ -147,6 +147,7 @@ public class SQLChar
      */
     protected static final StreamHeaderGenerator CHAR_HEADER_GENERATOR =
             new CharStreamHeaderGenerator();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 
     /**************************************************************************
      * Fields of the class
@@ -466,6 +467,7 @@ public class SQLChar
 
         try 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return Float.parseFloat(getString().trim());
         } 
         catch (NumberFormatException nfe) 
@@ -492,6 +494,7 @@ public class SQLChar
 
         try 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return Double.parseDouble(getString().trim());
         } 
         catch (NumberFormatException nfe) 
@@ -638,6 +641,7 @@ public class SQLChar
      * @exception StandardException     Thrown on error
      */
     public InputStream  getStream() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         if (!hasStream()) {
             throw StandardException.newException(
                     SQLState.LANG_STREAM_INVALID_ACCESS, getTypeName());
@@ -678,6 +682,7 @@ public class SQLChar
             if (stream instanceof Resetable && stream instanceof ObjectInput) {
                 try {
                     // Skip the encoded byte length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4040
                     InputStreamUtil.skipFully(stream, 2);
                     // Decode the whole stream to find the character length.
                     return (int)UTF8Util.skipUntilEOF(stream);
@@ -709,6 +714,7 @@ public class SQLChar
      * @throws StandardException the wrapping exception
      */
     protected void throwStreamingIOException(IOException ioe)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             throws StandardException {
 		throw StandardException.
 			newException(SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION,
@@ -740,6 +746,7 @@ public class SQLChar
                 // data is stored in the char[] array
 
                 value = new String(rawData, 0, len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-302
                 if (len > RETURN_SPACE_THRESHOLD) {
                     // free up this char[] array to reduce memory usage
                     rawData = null;
@@ -776,6 +783,7 @@ public class SQLChar
                     throw StandardException.newException(
                             SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, 
                             ioe, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4465
                             String.class.getName());
                 }
             }
@@ -845,6 +853,7 @@ public class SQLChar
 
     /**
         Writes a non-Clob data value to the modified UTF-8 format used by Derby.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 
         The maximum stored size is based upon the UTF format
         used to stored the String. The format consists of
@@ -941,6 +950,7 @@ public class SQLChar
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         StreamHeaderGenerator header = getStreamHeaderGenerator();
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(!header.expectsCharCount());
@@ -1012,6 +1022,7 @@ public class SQLChar
      * @throws IOException if writing to the destination stream fails
      */
     protected final void writeClobUTF(ObjectOutput out)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             throws IOException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(!isNull());
@@ -1078,6 +1089,7 @@ public class SQLChar
     public void readExternalFromArray(ArrayInputStream in) 
         throws IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         resetForMaterialization();
         int utfLen = (((in.read() & 0xFF) << 8) | (in.read() & 0xFF));
         if (rawData == null || rawData.length < utfLen) {
@@ -1104,6 +1116,7 @@ public class SQLChar
      * @throws IOException if reading from the source fails
      */
     protected void readExternalClobFromArray(ArrayInputStream in, int charLen)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             throws IOException {
         resetForMaterialization();
         if (rawData == null || rawData.length < charLen) {
@@ -1162,6 +1175,7 @@ public class SQLChar
             // OR
             // The original string was a 0 length string.
             requiredLength = in.available();
+//IC see: https://issues.apache.org/jira/browse/DERBY-302
             if (requiredLength < minGrowBy)
                 requiredLength = minGrowBy;
         }
@@ -1177,6 +1191,7 @@ public class SQLChar
 
         // Set these to null to allow GC of the array if required.
         rawData = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         resetForMaterialization();
         int count = 0;
         int strlen = 0;
@@ -1233,6 +1248,7 @@ readingLoop:
                 // for char, growby 64 seems reasonable, but for varchar
                 // clob 4k or 32k is performant and hence
                 // growBy() is override correctly to ensure this
+//IC see: https://issues.apache.org/jira/browse/DERBY-302
                 if (growby < minGrowBy)
                     growby = minGrowBy;
 
@@ -1309,6 +1325,7 @@ readingLoop:
                                            ((char3 & 0x3F) << 0));
             }
             else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 throw new UTFDataFormatException(
                         "Invalid code point: " + Integer.toHexString(c));
             }
@@ -1331,6 +1348,7 @@ readingLoop:
      */
     protected int growBy()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-302
         return GROWBY_FOR_CHAR;  //seems reasonable for a char
     }
     /**
@@ -1340,6 +1358,7 @@ readingLoop:
     public void restoreToNull()
     {
         value = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5162
         _clobValue = null;
         stream = null;
         rawLength = -1;
@@ -1401,6 +1420,7 @@ readingLoop:
      *  objectify a stream.
      */
     public DataValueDescriptor cloneHolder() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
         if ((stream == null) && (_clobValue == null)) {
             return cloneValue(false);
         }
@@ -1442,6 +1462,7 @@ readingLoop:
     /** @see StringDataValue#getValue(RuleBasedCollator) */
     public StringDataValue getValue(RuleBasedCollator collatorForComparison)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2534
         if (collatorForComparison == null)
         {//null collatorForComparison means use UCS_BASIC for collation
             return this;            
@@ -1581,6 +1602,7 @@ readingLoop:
     */
     public void setBigDecimal(BigDecimal bigDecimal)  throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
         if (bigDecimal == null)
             setToNull();
         else
@@ -1884,6 +1906,7 @@ readingLoop:
         */
         if ( (_clobValue == null ) && (getString() == null) )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
             return;
         }
 
@@ -1944,6 +1967,7 @@ readingLoop:
                 warning.initCause(se);
 
                 StatementContext statementContext = (StatementContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     DataValueFactoryImpl.getContext(ContextId.LANG_STATEMENT);
                 statementContext.getActivation().
                         getResultSet().addWarning(warning);
@@ -1954,6 +1978,7 @@ readingLoop:
             */
             setValue(getString().substring(0, desiredWidth));
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
         return;
     }
 
@@ -2235,6 +2260,7 @@ readingLoop:
                 StringDataValue result)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5246
         if (result == null)
         {
             result = (StringDataValue) getNewNull();
@@ -2324,6 +2350,10 @@ readingLoop:
         // of the char array may be different than the
         // length we should be using (i.e. getLength()).
         // see getCharArray() for more info
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
         char[] evalCharArray = getCharArray();
         char[] patternCharArray = ((SQLChar)pattern).getCharArray();
         char[] escapeCharArray = (((SQLChar) escape).getCharArray());
@@ -2395,7 +2425,9 @@ readingLoop:
         {
             throw StandardException.newException(
                     SQLState.LANG_INVALID_PARAMETER_FOR_SEARCH_POSITION, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
                     getString(), mySearchFrom,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     startVal);
         }
         
@@ -2972,6 +3004,7 @@ readingLoop:
 
         if (stream != null) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4754
                 return getString();
             } catch (Exception e) {
                 return e.toString();
@@ -3000,6 +3033,7 @@ readingLoop:
         catch (StandardException se)
         {
             if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                 SanityManager.THROWASSERT("Unexpected exception", se);
             return 0;
         }
@@ -3021,6 +3055,7 @@ readingLoop:
 
         // Find 1st non-blank from the right
         int lastNonPadChar = lvalue.length() - 1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3981
         while (lastNonPadChar >= 0 && lvalue.charAt(lastNonPadChar) == PAD) {
             lastNonPadChar--;
         }
@@ -3047,6 +3082,8 @@ readingLoop:
         } catch (StandardException se) {
             // ignore exceptions, like we do in hashCode()
             if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                 SanityManager.THROWASSERT("Unexpected exception", se);
             }
         }
@@ -3080,6 +3117,7 @@ readingLoop:
     protected RuleBasedCollator getCollatorForCollation() 
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
         if (SanityManager.DEBUG) {
             // Sub-classes that support collation will override this method,
             // do don't expect it to be called here in the base class.
@@ -3096,6 +3134,7 @@ readingLoop:
         if (localeFinder == null)
         {
             DatabaseContext dc = (DatabaseContext) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 DataValueFactoryImpl.getContext(DatabaseContext.CONTEXT_ID);
             if( dc != null)
                 localeFinder = dc.getDatabase();
@@ -3168,6 +3207,7 @@ readingLoop:
      * @return A stream header generator.
      */
     public StreamHeaderGenerator getStreamHeaderGenerator() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         return CHAR_HEADER_GENERATOR;
     }
 

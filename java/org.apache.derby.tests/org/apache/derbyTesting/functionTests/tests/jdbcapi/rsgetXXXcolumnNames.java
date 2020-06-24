@@ -31,6 +31,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 public class rsgetXXXcolumnNames {
 
     public static void main(String[] args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-229
         test1(args);
     }
     
@@ -53,6 +54,7 @@ public class rsgetXXXcolumnNames {
                         stmt = con.createStatement(); 
 
                         // first cleanup in case we're using useprocess false
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
                         String[] testObjects = {"table caseiscol"};
                         TestUtil.cleanUpTest(stmt, testObjects);
 

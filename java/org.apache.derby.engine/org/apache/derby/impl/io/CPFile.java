@@ -34,6 +34,7 @@ import java.security.PrivilegedAction;
  * This class provides a class path based implementation of the StorageFile interface. It is used by the
  * database engine to access persistent data and transaction logs under the classpath subsubprotocol.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6535
 class CPFile extends InputStreamFile<CPStorageFactory>
 {
 
@@ -64,6 +65,7 @@ class CPFile extends InputStreamFile<CPStorageFactory>
      */
     public boolean exists()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
     	return getURL() != null;
     } // end of exists
 
@@ -86,6 +88,7 @@ class CPFile extends InputStreamFile<CPStorageFactory>
      */
     public InputStream getInputStream( ) throws FileNotFoundException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
         InputStream is = null;
         ClassLoader cl = getContextClassLoader(Thread.currentThread());
         if (cl != null) {
@@ -121,6 +124,7 @@ class CPFile extends InputStreamFile<CPStorageFactory>
 
         ClassLoader cl = getContextClassLoader(Thread.currentThread());
         if (cl != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6534
             URL myURL = getResource(cl, path);
             if (myURL != null)
                 return myURL;
@@ -133,6 +137,7 @@ class CPFile extends InputStreamFile<CPStorageFactory>
         // null as a return from Class.getClassLoader()
         // to indicate the system/bootstrap classloader.
         if (cl != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
             return getResource(cl, path);
         } else {
             return getSystemResource(path);
@@ -171,6 +176,7 @@ class CPFile extends InputStreamFile<CPStorageFactory>
      * Privileged wrapper for {@code ClassLoader.getResourceAsStream(String)}.
      */
     private static InputStream getResourceAsStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5615
             final ClassLoader cl, final String name) {
         return AccessController.doPrivileged(
                 new PrivilegedAction<InputStream>() {

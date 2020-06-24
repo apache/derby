@@ -55,7 +55,10 @@ public class EmbedResultSet42 extends EmbedResultSet
         ( int columnIndex, Object x, SQLType targetSqlType, int scaleOrLength )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         checkIfClosed("updateObject");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         updateObject( columnIndex, x, Util42.getTypeAsInt( targetSqlType ) );
         adjustScale( columnIndex, scaleOrLength );
     }
@@ -65,6 +68,7 @@ public class EmbedResultSet42 extends EmbedResultSet
         throws SQLException
     {
         checkIfClosed("updateObject");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         updateObject( columnName, x, Util42.getTypeAsInt( targetSqlType ) );
     }
 
@@ -72,6 +76,9 @@ public class EmbedResultSet42 extends EmbedResultSet
         ( String columnName, Object x, SQLType targetSqlType, int scaleOrLength )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         checkIfClosed("updateObject");
         updateObject( findColumnName( columnName ), x, targetSqlType, scaleOrLength );
     }

@@ -46,6 +46,7 @@ public class ShutdownMasterServerByOsKill extends ShutdownMaster
         
         setEnv();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ShutdownMasterServerByOsKillCtrl");
 

@@ -38,6 +38,7 @@ import org.apache.derbyTesting.system.optimizer.StaticValues;
 public class DataUtils {
 	public static void dropObjects(Connection conn, boolean verbose) throws SQLException {
 		Statement stmt = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 		if (verbose)
 			System.out.println("Dropping existing Tables and Views...");
 		for (int i=0;i<TestViews.dropViews.size();i++){
@@ -65,6 +66,7 @@ public class DataUtils {
 	}
 	public static void createObjects(Connection conn,boolean verbose) throws SQLException {
 		Statement stmt = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 		if (verbose)
 			System.out.println("Creating Tables...");
 		for (int i = 1; i <= StaticValues.NUM_OF_TABLES; i++) {
@@ -86,6 +88,7 @@ public class DataUtils {
 
 			}
 		}// end for
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 		if (verbose)
 			System.out.println("Creating Views...");
 		for (int i=0;i<TestViews.createViews.size();i++){
@@ -115,6 +118,7 @@ public class DataUtils {
 					totalRows = rs.getInt(1);
 				}
 				if (totalRows >= StaticValues.NUM_OF_ROWS) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 					if (verbose)
 						System.out.println(" InsertData.insert_data() => "
 							+ totalRows + " exists in table " + tableName
@@ -141,6 +145,7 @@ public class DataUtils {
 								throw sqe;
 							}
 						}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 						if (verbose)
 							System.out.println("Rows deleted from " + tableName + "= "
 								+ stmt.executeUpdate("DELETE FROM " + tableName));
@@ -180,6 +185,7 @@ public class DataUtils {
 					}
 					ps.close();
 					conn.commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 					if (verbose)
 						System.out.println("Inserted " + (k - 1) + " rows into "
 							+ tableName + " in "

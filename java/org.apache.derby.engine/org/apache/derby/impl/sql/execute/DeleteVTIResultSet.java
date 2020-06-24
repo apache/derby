@@ -42,6 +42,7 @@ import java.util.Properties;
  * and triggers to be executed based on the c's and t's
  * compiled into the insert plan.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class DeleteVTIResultSet extends DMLVTIResultSet
 {
 
@@ -76,6 +77,7 @@ class DeleteVTIResultSet extends DMLVTIResultSet
 	protected void openCore() throws StandardException
 	{
 		ExecRow row = getNextRowCore(sourceResultSet);
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 		if (row != null)
 		{
@@ -99,7 +101,10 @@ class DeleteVTIResultSet extends DMLVTIResultSet
 		{
 			activation.clearIndexScanInfo();
             if( null == rowHolder)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
                 rowHolder =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
                     new TemporaryRowHolderImpl(activation, new Properties(),
                                                (ResultDescription) null);
 		}

@@ -180,6 +180,7 @@ public class EncryptContainerOperation implements Undoable
         // restore the container to the state it was before the encrytpion.
         BaseDataFileFactory bdff = 
             (BaseDataFileFactory) ((RawTransaction) tran).getDataFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         EncryptOrDecryptData ed = new EncryptOrDecryptData(bdff);
         ed.restoreContainer(containerId);
         releaseResource(tran);

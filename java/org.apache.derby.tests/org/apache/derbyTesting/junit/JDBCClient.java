@@ -47,8 +47,10 @@ public final class JDBCClient {
             "org.apache.derby.jdbc.EmbeddedDriver", 
 
             JDBC.vmSupportsJNDI() ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
             "org.apache.derby.jdbc.EmbeddedDataSource":
             "org.apache.derby.jdbc.BasicEmbeddedDataSource40",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
 
             JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource":
@@ -67,6 +69,7 @@ public final class JDBCClient {
     {
         if (JDBC.vmSupportsJDBC4())
             return EMBEDDED_40;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         if (JDBC.vmSupportsJDBC3())
             return EMBEDDED_30;
         
@@ -84,6 +87,7 @@ public final class JDBCClient {
             JDBC.vmSupportsJDBC4() ?
             (JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.ClientDataSource40" :
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             "org.apache.derby.jdbc.BasicClientDataSource40") :
              "org.apache.derby.jdbc.ClientDataSource",
 
@@ -115,8 +119,12 @@ public final class JDBCClient {
      * client for Derby).
      */
     static final JDBCClient DB2CLIENT= new JDBCClient(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3763
             "DB2Client",
             "com.ibm.db2.jcc.DB2Driver",
+//IC see: https://issues.apache.org/jira/browse/DERBY-2036
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             null, null, null,
             "jdbc:derby:net://");
     
@@ -125,6 +133,9 @@ public final class JDBCClient {
     */
     public boolean isEmbedded()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2036
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
     	return getName().startsWith("Embedded");
     }
     /**
@@ -174,6 +185,9 @@ public final class JDBCClient {
      * @return class name for ConnectionPoolDataSource implementation.
      */
     public String getConnectionPoolDataSourceClassName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2036
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return poolDsClassName;
     }
 
@@ -210,6 +224,9 @@ public final class JDBCClient {
      * Create a JDBC client definition.
      */
     private JDBCClient(String frameWork, String driverClassName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2036
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
                        String dataSourceClassName,
                        String connectionPoolDataSourceClassName,
                        String xaDataSourceClassName,

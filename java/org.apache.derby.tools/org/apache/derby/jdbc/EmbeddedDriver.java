@@ -42,6 +42,7 @@ import org.apache.derby.impl.jdbc.Util;
 	The driver automatically supports the correct JDBC specification version
 	for the Java Virtual Machine's environment.
 	<UL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-2132
 	<LI> JDBC 4.0 - Java SE 6
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
 	</UL>
@@ -67,6 +68,7 @@ import org.apache.derby.impl.jdbc.Util;
 	that Derby will be booted on any Java Virtual Machine.
 
 	<P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-2132
 	Note that you do not need to manually load the driver this way if you are
 	running on Jave SE 6 or later. In that environment, the driver will be
 	automatically loaded for you when your application requests a connection to
@@ -92,6 +94,7 @@ import org.apache.derby.impl.jdbc.Util;
 public class EmbeddedDriver  implements Driver {
 
 	static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		JDBCBoot.boot();
 	}
 
@@ -111,6 +114,7 @@ public class EmbeddedDriver  implements Driver {
     @see java.sql.Driver
 	*/
 	public boolean acceptsURL(String url) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 		return getDriverModule().acceptsURL(url);
 	}
 
@@ -122,6 +126,7 @@ public class EmbeddedDriver  implements Driver {
 	public Connection connect(String url, Properties info)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 		return getDriverModule().connect(url, info);
 	}
 
@@ -133,6 +138,7 @@ public class EmbeddedDriver  implements Driver {
 	public  DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 		return getDriverModule().getPropertyInfo(url, info);
 	}
 
@@ -142,6 +148,7 @@ public class EmbeddedDriver  implements Driver {
      */
 	public int getMajorVersion() {
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 			return (getDriverModule().getMajorVersion());
 		}
 		catch (SQLException se) {
@@ -192,6 +199,7 @@ public class EmbeddedDriver  implements Driver {
 
     public  Logger getParentLogger() throws SQLFeatureNotSupportedException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
     }
 	

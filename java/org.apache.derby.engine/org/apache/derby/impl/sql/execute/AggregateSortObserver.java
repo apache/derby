@@ -120,6 +120,7 @@ class AggregateSortObserver extends BasicSortObserver
 			for (int i = 0; i < aggsToInitialize.length; i++)
 			{
 				GenericAggregator aggregator = aggsToInitialize[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 				UserDataValue wrapper = ((UserDataValue)returnRow[aggregator.aggregatorColumnId]);
 				if (SanityManager.DEBUG)
 				{

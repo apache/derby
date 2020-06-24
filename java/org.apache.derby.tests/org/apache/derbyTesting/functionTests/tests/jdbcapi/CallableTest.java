@@ -130,6 +130,7 @@ public class CallableTest extends BaseJDBCTestCase {
         "OUT P9 DECIMAL(14,4)) EXTERNAL NAME '" + 
         CallableTest.class.getName() + ".bigDecimalInAndOutProc' " +
         "NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA",
+//IC see: https://issues.apache.org/jira/browse/DERBY-2304
 
         "CREATE PROCEDURE BATCH_UPDATE_PROC " +
         "(P1 INT, P2 INT) MODIFIES SQL DATA " +
@@ -154,6 +155,7 @@ public class CallableTest extends BaseJDBCTestCase {
           "(maxcol NUMERIC(31,15), mincol NUMERIC(15,15), nulcol NUMERIC)"},
 
         // BATCH_UPDATE is used by BATCH_UPDATE_PROC
+//IC see: https://issues.apache.org/jira/browse/DERBY-2304
         { "BATCH_TABLE", 
           "CREATE TABLE BATCH_TABLE " +
           "(id int, tag varchar(32), " +
@@ -171,6 +173,7 @@ public class CallableTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("CallableTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("CallableTest:embedded"));
 
@@ -194,6 +197,7 @@ public class CallableTest extends BaseJDBCTestCase {
     private static Test baseSuite(String name) {
 
         BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Add tests that every JVM should be able to run.
         suite.addTestSuite(CallableTest.class);
@@ -206,6 +210,7 @@ public class CallableTest extends BaseJDBCTestCase {
                 (new CallableTest("xtestUpdateLongBinaryProc"));
 
             // Tests that require DriverManager and batch update.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2304
             suite.addTest
                 (new CallableTest("xtestBatchUpdate"));
             suite.addTest
@@ -307,6 +312,7 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     public void testIsolationLevelChangeAfterFunctionCall()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3496
             throws SQLException {
         CallableStatement cs = prepareCall("? = CALL NO_IN_ONE_OUT_FUNC()");
         cs.registerOutParameter(1, java.sql.Types.INTEGER);
@@ -475,6 +481,7 @@ public class CallableTest extends BaseJDBCTestCase {
 
         assertSameDate(d, cal1, cs.getDate(5, cal2), cal2);
         assertSameTime(t, cal1, cs.getTime(6, cal2), cal2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5172
         vetTimestamp(ts, cal1, cs.getTimestamp(7, cal2), cal2);
     }
 
@@ -543,6 +550,7 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     private void vetTimestamp(Timestamp original, Calendar cal1,
                               Timestamp returned, Calendar cal2) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5172
 
         // Initialize cal1 with values from the original timestamp.
         cal1.clear();
@@ -671,6 +679,7 @@ public class CallableTest extends BaseJDBCTestCase {
     public void xtestBatchUpdate() throws SQLException
     {
         // Setup table data
+//IC see: https://issues.apache.org/jira/browse/DERBY-2304
         Statement stmt = createStatement();
         stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(1, 'STRING_1',10)");
         stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(2, 'STRING_2',0)");
@@ -897,6 +906,7 @@ public class CallableTest extends BaseJDBCTestCase {
      * xtestNumericBoundariesProc, methods.
      */
     public void assertDecimalSameValue(String message, String expected_s, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2304
         BigDecimal actual)
     {
         BigDecimal expected = (new BigDecimal(expected_s));
@@ -1135,6 +1145,7 @@ public class CallableTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public static void batchUpdateProc (int id, int id_newval)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2304
         throws SQLException
     {
         Connection conn = 
@@ -1154,6 +1165,7 @@ public class CallableTest extends BaseJDBCTestCase {
     
     public void testsetURL() throws SQLException, MalformedURLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6291
     	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
     	try {
     		URL domain = new URL("http://www.apache.org");

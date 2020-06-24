@@ -1,5 +1,6 @@
 /*
      Derby - WwdEmbedded.java
+//IC see: https://issues.apache.org/jira/browse/DERBY-2839
 
        Licensed to the Apache Software Foundation (ASF) under one
            or more contributor license agreements.  See the NOTICE file
@@ -130,6 +131,7 @@ public class WwdEmbedded
             /*       Catch all exceptions and pass them to 
              *       the Throwable.printStackTrace method  */
             System.out.println(" . . . exception thrown:");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1997
             e.printStackTrace(System.out);
          }
          System.out.println("Getting Started With Derby JDBC program ending.");

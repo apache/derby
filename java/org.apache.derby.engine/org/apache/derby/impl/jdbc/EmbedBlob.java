@@ -68,6 +68,7 @@ import java.io.IOException;
 
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3576
 final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 {
     /**
@@ -132,6 +133,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      *
      */
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
      EmbedBlob(byte [] blobBytes,EmbedConnection con) throws SQLException {
         super(con);
          try {
@@ -154,6 +156,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
       This constructor should only be called by EmbedResultSet.getBlob
     */
     protected EmbedBlob(DataValueDescriptor dvd, EmbedConnection con)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5760
         throws StandardException, SQLException
     {
         super(con);
@@ -163,6 +166,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             SanityManager.ASSERT(!dvd.isNull(), "blob is created on top of a null column");
 
         /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-4102
            We support three scenarios at this point:
             a) The Blob value is already represented as bytes in memory.
                This is the case for small Blobs (less than 32 KB).
@@ -174,10 +178,13 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                stream and store it temporarily until it is either discarded or
                inserted into the database.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         if (dvd.hasStream()) { // Cases b) and c)
             streamPositionOffset = handleStreamValue(dvd.getStream(), con);
         } else { // a) Blob already materialized in memory
             materialized = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             streamPositionOffset = Integer.MIN_VALUE;
             // copy bytes into memory so that blob can live after result set
             // is closed
@@ -189,11 +196,17 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 control = new LOBStreamControl (
                             getEmbedConnection(), dvdBytes);
             } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5760
                 throw Util.setStreamFailure(e);
             }
         }
         //add entry in connection so it can be cleared 
         //when transaction is not valid
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         con.addLOBReference (this);
     }
 
@@ -209,6 +222,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      *      data to temporary storage fails
      */
     private int handleStreamValue(InputStream dvdStream, EmbedConnection con)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5760
             throws StandardException, SQLException {
         int offset = 0;
         // b) Resetable stream
@@ -224,24 +238,30 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
              implementing the getStream() method for dvd.getStream(), does not
              guarantee this for us
              */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(dvdStream instanceof Resetable);
             }
             // Create a position aware stream on top of dvdStream so we can
             // more easily move back and forth in the Blob.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3970
                 myStream = new PositionedStoreStream(dvdStream);
                 // The BinaryToRawStream will read the encoded length bytes.
                 BinaryToRawStream tmpStream =
                         new BinaryToRawStream(myStream, con);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
                 offset = (int)myStream.getPosition();
                 // Check up front if the stream length is specified.
                 streamLength = tmpStream.getLength();
                 tmpStream.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3970
             } catch (StandardException se) {
                 if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
                     throw StandardException
                             .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3768
                 } else {
                     throw se;
                 }
@@ -252,8 +272,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         // c) Non-resetable stream
         //    This is most likely a stream coming in from the user, and we
         //    don't have any guarantees on how it behaves.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         } else {
             // The code below will only work for RawToBinaryFormatStream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4102
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
                         dvdStream instanceof RawToBinaryFormatStream,
@@ -262,6 +284,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             // The source stream isn't resetable, so we have to write it to a
             // temporary location to be able to support the Blob operations.
             materialized = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
             offset = Integer.MIN_VALUE;
             try {
                 control = new LOBStreamControl(getEmbedConnection());
@@ -282,9 +305,11 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 }
                 tmpStream.close();
             } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5760
                 throw Util.setStreamFailure(ioe);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         return offset;
     }
 
@@ -318,16 +343,19 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             // Nothing to do here, except checking if the position is valid.
             if (logicalPos >= control.getLength()) {
                 throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         SQLState.BLOB_POSITION_TOO_LARGE, logicalPos);
             }
         } else {
             // Reposition the store stream, account for the length field offset.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
             try {
                 this.myStream.reposition(
                         logicalPos + this.streamPositionOffset);
             } catch (EOFException eofe) {
                 throw StandardException.newException(
                         SQLState.BLOB_POSITION_TOO_LARGE, eofe,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         logicalPos);
             }
         }
@@ -347,6 +375,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      *      fails
      */
     private int read(long pos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             throws IOException, StandardException {
         int c;
         if (materialized) {
@@ -377,6 +406,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         try {
             if (materialized)
                 return control.getLength ();
@@ -384,6 +414,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         catch (IOException e) {
             throw Util.setStreamFailure (e);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3768
         if (streamLength != -1)
             return streamLength;
         
@@ -407,11 +438,13 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 }
 
                 streamLength = InputStreamUtil.skipUntilEOF(tmpStream);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
 
                 tmpStream.close();
                 // Save for future uses.
 
                 restoreIntrFlagIfSeen(pushStack, ec);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
                 return streamLength;
             }
@@ -463,16 +496,20 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         {
             if (startPos < 1)
                 throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.BLOB_BAD_POSITION, startPos);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1516
             if (length < 0)
                 throw StandardException.newException(
                     SQLState.BLOB_NONPOSITIVE_LENGTH, length);
 
             byte[] result;
             // if the blob is materialized
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             if (materialized) {
                  result = new byte [length];
                  int sz = control.read (result, 0, result.length, startPos - 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                  if (sz == -1) {
                      InterruptStatus.restoreIntrFlagIfSeen();
                      return new byte [0];
@@ -493,6 +530,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     if (pushStack)
                         setupContextStack();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
                     setBlobPosition(startPos-1);
                     // read length bytes into a string
                     result = new byte[length];
@@ -511,6 +549,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                         System.arraycopy(result,0,result2,0,n);
 
                         restoreIntrFlagIfSeen(pushStack, ec);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
                         return result2;
                     }
@@ -524,8 +563,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         }
         catch (StandardException e)
         {  // if this is a setPosition exception then we ran out of Blob
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
             if (e.getMessageId().equals(SQLState.BLOB_LENGTH_TOO_LONG))
                 e = StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.BLOB_POSITION_TOO_LARGE, startPos);
             throw handleMyExceptions(e);
         }
@@ -560,8 +603,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         try
         {
             // if we have byte array, not a stream
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             if (materialized)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 java.io.InputStream result = control.getInputStream(0);
                 return result;
             }
@@ -571,6 +616,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 
                 synchronized (getConnectionSynchronization())
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     EmbedConnection ec = getEmbedConnection();
                     pushStack = !ec.isClosed();
                     if (pushStack)
@@ -578,6 +624,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 
                     // Reset stream, because AutoPositionigStream wants to read
                     // the encoded length bytes.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
                     myStream.resetStream();
                     UpdatableBlobStream result = new UpdatableBlobStream(
                         this,
@@ -627,8 +674,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         {
             if (start < 1)
                 throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.BLOB_BAD_POSITION, start);
             if (pattern == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
                 throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
             if (pattern.length == 0)
                 return start; // match DB2's SQL LOCATE function
@@ -641,6 +690,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 if (pushStack)
                     setupContextStack();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
                 long pos = setBlobPosition(start -1);
                 // look for first character
                 int lookFor = pattern[0];
@@ -649,6 +699,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 while (true)
                 {
                     c = read(pos++); // Note the position increment.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     if (c == -1) { // run out of stream
                         restoreIntrFlagIfSeen(pushStack, ec);
                         return -1;
@@ -692,6 +743,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * @return {@code true} if a match is found, {@code false} if not.
      */
     private boolean checkMatch(byte[] pattern, long pos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             throws IOException, StandardException {
        // check whether rest matches
        // might improve performance by reading more
@@ -722,6 +774,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         checkValidity();
         
         boolean pushStack = false;
@@ -729,22 +785,29 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         {
             if (start < 1)
                 throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.BLOB_BAD_POSITION, start);
             if (pattern == null)
                 throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
 
             synchronized (getConnectionSynchronization())
             {
                 EmbedConnection ec = getEmbedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
                 pushStack = !ec.isClosed();
                 if (pushStack)
                     setupContextStack();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
                 long pos = setBlobPosition(start-1);
                 // look for first character
                 byte[] b;
                 try
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
                 { // pattern is not necessarily a Derby Blob
                     b = pattern.getBytes(1,1);
                 }
@@ -752,6 +815,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 {
                     throw StandardException.newException(SQLState.BLOB_UNABLE_TO_READ_PATTERN);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 if (b == null || b.length < 1) { // the 'empty' blob
                     restoreIntrFlagIfSeen(pushStack, ec);
                     return start; // match DB2's SQL LOCATE function
@@ -761,6 +825,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 long curPos;
                 while (true)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
                     c = read(pos++); // Note the position increment.
                     if (c == -1) {  // run out of stream
                         restoreIntrFlagIfSeen(pushStack, ec);
@@ -803,6 +868,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * @return {@code true} if a match is found, {@code false} if not.
      */
     private boolean checkMatch(Blob pattern, long pos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             throws IOException, StandardException {
         // check whether rest matches
         // might improve performance by reading buffer at a time
@@ -862,6 +928,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     @SuppressWarnings("deprecation")
     protected void finalize()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         if (!materialized)
             myStream.closeStream();
     }
@@ -893,6 +960,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * @since 1.4
 	 */
 	public int setBytes(long pos, byte[] bytes) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             return setBytes(pos, bytes, 0, bytes.length);
 	}
 
@@ -923,6 +991,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 
         if (pos - 1 > length())
             throw Util.generateCsSQLException(SQLState.BLOB_POSITION_TOO_LARGE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     pos);
         if (pos < 1)
             throw Util.generateCsSQLException(SQLState.BLOB_BAD_POSITION,
@@ -952,10 +1021,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 control.copyData(myStream, length());
                 control.write(bytes, offset, len, pos - 1);
                 myStream.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3768
                 streamLength = -1;
                 materialized = true;
             }
             return len;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
         } catch (StandardException se) {
@@ -978,6 +1049,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             checkValidity ();
             if (pos - 1 > length())
                 throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.BLOB_POSITION_TOO_LARGE, pos);
             if (pos < 1)
                 throw Util.generateCsSQLException(
@@ -991,6 +1063,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                                             getEmbedConnection());
                     control.copyData (myStream, pos - 1);
                     myStream.close ();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3768
                     streamLength = -1;
                     materialized = true;
                     return control.getOutputStream(pos - 1);
@@ -1016,10 +1089,13 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     * @exception SQLException Feature not implemented for now.
 	*/
 	public void truncate(long len)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
                                         throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             if (len > length())
                 throw Util.generateCsSQLException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.BLOB_LENGTH_TOO_LONG, len);
             try {
                 if (materialized) {
@@ -1030,6 +1106,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     control = new LOBStreamControl (getEmbedConnection());
                     control.copyData (myStream, len);
                     myStream.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3768
                     streamLength = -1;
                     materialized = true;
                 }
@@ -1037,6 +1114,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             catch (IOException e) {
                 throw Util.setStreamFailure (e);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
             catch (StandardException se) {
                 throw Util.generateCsSQLException (se);
             }
@@ -1057,8 +1138,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * the Blob's resources
      */
     public void free()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1180
         throws SQLException {
         //calling free() on a already freed object is treated as a no-op
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         if (!isValid) return;
         
         //now that free has been called the Blob object is no longer
@@ -1066,6 +1149,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         isValid = false;
         
         // Remove entry from connection if a locator has been created.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3768
         if (this.locator != 0) {
             localConn.removeLOBMapping(locator);
         }
@@ -1075,10 +1159,13 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         //if it is a stream then close it.
         //if a array of bytes then initialize it to null
         //to free up space
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
         if (!materialized) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             myStream.closeStream();
             myStream = null;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             try {
                 control.free ();
                 control = null;
@@ -1107,11 +1194,13 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         checkValidity();
         
         if (pos <= 0) {
             throw Util.generateCsSQLException(
                     SQLState.BLOB_BAD_POSITION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     pos);
         }
         if (length < 0) {
@@ -1119,13 +1208,16 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     SQLState.BLOB_NONPOSITIVE_LENGTH,
                     length);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
         if (length > (this.length() - (pos -1))) {
             throw Util.generateCsSQLException(
                     SQLState.POS_AND_LENGTH_GREATER_THAN_LOB,
                     pos, length);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2730
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2830
             return new UpdatableBlobStream(this,
                                             getBinaryStream(),
                                             pos-1,
@@ -1145,7 +1237,9 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     private void checkValidity() throws SQLException{
         //check for connection to maintain sqlcode for closed
         //connection
+//IC see: https://issues.apache.org/jira/browse/DERBY-2729
         getEmbedConnection().checkIfClosed();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         if(!isValid)
             throw newSQLException(SQLState.LOB_OBJECT_INVALID);
     }
@@ -1155,6 +1249,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * @return true if materialized else false
      */
     boolean isMaterialized () {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2711
         return materialized;
     }
 
@@ -1164,9 +1259,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * @return The locator identifying this lob.
      */
     public int getLocator() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
+//IC see: https://issues.apache.org/jira/browse/DERBY-3354
         if (locator == 0) {
             locator = localConn.addLOBMapping(this);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3365
         return locator;
     }
 }

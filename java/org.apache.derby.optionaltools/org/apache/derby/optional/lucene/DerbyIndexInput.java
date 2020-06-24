@@ -40,6 +40,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
  * Lucene IndexInput.
  * </p>
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6621
 class DerbyIndexInput   extends IndexInput
 {
     /////////////////////////////////////////////////////////////////////
@@ -95,6 +96,7 @@ class DerbyIndexInput   extends IndexInput
         super(description);
 
         setConstructorFields( file );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         _offset = offset;
         if (length == null) {
@@ -123,6 +125,7 @@ class DerbyIndexInput   extends IndexInput
                 }
              }
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         } catch (PrivilegedActionException pae) {
             throw (IOException) pae.getCause();
         }

@@ -53,6 +53,7 @@ public class ClientConnectionPoolDataSourceTest
     public void testMaxStatementsProperty() throws Exception {
         ClientConnectionPoolDataSourceInterface cDs;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             clazz = Class.forName("org.apache.derby.jdbc.ClientConnectionPoolDataSource");
@@ -87,6 +88,7 @@ public class ClientConnectionPoolDataSourceTest
      */
     public void testGetConnectionNoStatementPooling()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         ClientConnectionPoolDataSourceInterface cDs =
             (ClientConnectionPoolDataSourceInterface)J2EEDataSource.
                 getConnectionPoolDataSource();
@@ -104,6 +106,7 @@ public class ClientConnectionPoolDataSourceTest
      */
     public void testGetConnectionWithStatementPooling()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         ClientConnectionPoolDataSourceInterface cDs =
             (ClientConnectionPoolDataSourceInterface)J2EEDataSource.
                 getConnectionPoolDataSource();
@@ -121,7 +124,10 @@ public class ClientConnectionPoolDataSourceTest
      */
     private void verifyConnection(ClientConnectionPoolDataSourceInterface cDs)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3325
         J2EEDataSource.setBeanProperty(cDs, "createDatabase", "create");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3325
+//IC see: https://issues.apache.org/jira/browse/DERBY-3306
         PooledConnection pc = cDs.getPooledConnection();
         // Get a connection and make sure we can access the database.
         Connection con = pc.getConnection();

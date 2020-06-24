@@ -41,6 +41,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * (Any duplicate elimination is performed above this ResultSet.)
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class UnionResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
 
@@ -88,6 +89,8 @@ class UnionResultSet extends NoPutResultSetImpl
      * had the same description.
 	 */
 	public ResultDescription getResultDescription() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 	    return source1.getResultDescription();
 	}
 
@@ -102,6 +105,7 @@ class UnionResultSet extends NoPutResultSetImpl
 	    	SanityManager.ASSERT( ! isOpen, "UnionResultSet already open");
 
         source1.openCore();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4330
         isOpen = true;
 		numOpens++;
 
@@ -115,6 +119,7 @@ class UnionResultSet extends NoPutResultSetImpl
  	 *	@exception StandardException thrown on failure
 	 */
 	public ExecRow	getNextRowCore() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

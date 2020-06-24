@@ -188,6 +188,7 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
      * for a lock timeout whether diagnostics are on or not.
      */
     public void testDerby3678 ()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3678
             throws SQLException
     {
         Connection c1 = openUserConnection("newuser");
@@ -217,6 +218,7 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
      */
     public void testOtherImplicitSchemaCreation () throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-48
         Connection c1 = openUserConnection("newuser");
         c1.setAutoCommit(false);
         Statement s1 = c1.createStatement();
@@ -332,6 +334,7 @@ protected void  tearDown() throws Exception {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("LazyDefaultSchemaCreationTest");
 
@@ -360,6 +363,7 @@ protected void  tearDown() throws Exception {
                   2,   // deadlock timeout
                   1)); // wait timeout
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3678
             suites[i].addTest
                 (DatabasePropertyTestSetup.setLockTimeouts
                  (new DatabasePropertyTestSetup

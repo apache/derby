@@ -53,6 +53,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * d) Whether the method is exempted in the NetworkClient
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
 class ExemptBlobMD {
     // The Name of the method
     private String methodName_;
@@ -136,6 +137,7 @@ public class BlobTest
     //on a LOB.
     
     private static final ExemptBlobMD [] emd = new ExemptBlobMD [] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         new ExemptBlobMD( "getBinaryStream", new Class[] { long.class,long.class }
                                                                    ,true,true ),
         new ExemptBlobMD( "setBinaryStream", new Class[] { long.class },false,true ),
@@ -168,11 +170,14 @@ public class BlobTest
 
         // Life span of Blob objects are limited by the transaction.  Need
         // autocommit off so Blob objects survive closing of result set.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         getConnection().setAutoCommit(false);
     }
 
     protected void tearDown() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
         if (blob != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2707
             blob.free();
             blob = null;
         }
@@ -184,7 +189,9 @@ public class BlobTest
      * Builds the HashSet which will be used to test whether the given methods
      * can be exempted or not
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
     void buildHashSet() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
         Class<Blob> iface = Blob.class;
         for(int i=0;i<emd.length;i++) {
             try {
@@ -209,6 +216,8 @@ public class BlobTest
     public void testFreeandMethodsAfterCallingFree()
         throws SQLException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
         blob = BlobClobTestSetup.getSampleBlob(getConnection());
         
         //call the buildHashSetMethod to initialize the
@@ -216,6 +225,7 @@ public class BlobTest
         //from throwing a SQLException after free has been called
         //on the Clob object.
         buildHashSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
 
         blob.free();
         //testing the idempotence of the free() method
@@ -375,6 +385,7 @@ public class BlobTest
             return Boolean.FALSE;
         }
         if (type == Character.TYPE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return (char) 0;
         }
         if (type == Byte.TYPE) {
@@ -406,6 +417,7 @@ public class BlobTest
      * @throws Exception
      */
     public void testGetBinaryStreamLong()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2444
     throws Exception {
         byte[] BYTES1 = {
             0x65, 0x66, 0x67, 0x68, 0x69,
@@ -433,6 +445,7 @@ public class BlobTest
         InputStream is_2 = new java.io.ByteArrayInputStream(BYTES1,1,5);
 
         assertEquals(is_2,is_1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
 
         rs.close();
         st.close();
@@ -448,6 +461,7 @@ public class BlobTest
      * @throws SQLException if something goes wrong
      */
     public void testGetBinaryStreamLongLastByte()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
             throws IOException, SQLException {
         int length = 5000;
         // Insert a Blob
@@ -558,6 +572,7 @@ public class BlobTest
         catch(SQLException sqle) {
             // The SQLState for the exception thrown when pos > length of Blob
             // is XJ076
+//IC see: https://issues.apache.org/jira/browse/DERBY-2444
             assertSQLState("XJ087", sqle);
         }
 
@@ -595,6 +610,7 @@ public class BlobTest
      * This is a repro for DERBY-4061, where we ended up with an infinite loop.
      */
     public void testGetBinaryStreamLongDrain()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4061
             throws IOException, SQLException {
         initializeLongBlob(); // Ignoring id for now, use instance variable.
         InputStream in = blob.getBinaryStream(2000, 5000);
@@ -618,6 +634,7 @@ public class BlobTest
          //The bytes that will be used
          //to do the inserts into the
          //Blob.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
          byte[] bytes1 = {
             0x65, 0x66, 0x67, 0x68, 0x69,
             0x69, 0x68, 0x67, 0x66, 0x65
@@ -701,6 +718,7 @@ public class BlobTest
      * byte array in memory.
      */
     public void testSetBytesReturnValueSmall()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3871
             throws SQLException {
         Blob myBlob = getConnection().createBlob();
         byte[] byteBatch = new byte[] {
@@ -774,6 +792,7 @@ public class BlobTest
     public void testLockingAfterFree() throws SQLException
     {
         int id = initializeLongBlob();  // Opens blob object
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
         executeParallelUpdate(id, true); // Test that timeout occurs
         
         // Test that update goes through after the blob is closed
@@ -924,10 +943,12 @@ public class BlobTest
      * @throws IOException if writing to the destination stream fails
      */
     public static void transferAlphabetData(OutputStream writer, long length)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3871
             throws IOException {
         byte[] buffer = new byte[8*1024];
         int bytesRead = 0;
         LoopingAlphabetStream contents = new LoopingAlphabetStream(length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3871
         while ((bytesRead = contents.read(buffer)) > 0) {
             writer.write(buffer, 0, bytesRead);
         }
@@ -943,6 +964,7 @@ public class BlobTest
      * @throws IOException if reading from the stream fails
      */
     public static int getLastByteInStream(InputStream is, int expectedCount)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
             throws IOException {
         int read = 0;
         byte[] buf = new byte[256];

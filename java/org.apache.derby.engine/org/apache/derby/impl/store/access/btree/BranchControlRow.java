@@ -213,6 +213,7 @@ public class BranchControlRow extends ControlRow
         // Get the root page back, and perform a split following the
         // branch row which would not fit.
         ControlRow root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(root.page.isLatched());
@@ -413,6 +414,7 @@ public class BranchControlRow extends ControlRow
             // Find the child page for the shrink key.
 
             BranchRow branch_template =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 BranchRow.createEmptyTemplate(
                     open_btree.getRawTran(),
                     open_btree.getConglomerate());
@@ -601,6 +603,7 @@ public class BranchControlRow extends ControlRow
                 "page is not latched:");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5604
         if ((this.page.recordCount() - 1 >= BTree.maxRowsPerPage) ||
             (!this.page.spaceForInsert(splitrow, (FormatableBitSet) null,
 				AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD)))
@@ -625,6 +628,7 @@ public class BranchControlRow extends ControlRow
 				parent = (BranchControlRow)
                     ControlRow.get(open_btree, BTree.ROOTPAGEID);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
 				return(parent.splitFor(
                         open_btree, template, null, splitrow, flag));
@@ -668,6 +672,7 @@ public class BranchControlRow extends ControlRow
 
             // Read in the branch row which is at the split point.
             BranchRow split_branch_row =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 BranchRow.createEmptyTemplate(
                     open_btree.getRawTran(),
                     open_btree.getConglomerate());
@@ -697,6 +702,7 @@ public class BranchControlRow extends ControlRow
                 // there is no way to know the state of the tree, so the
                 // current split pass recursion must end.
                 return(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
                     BranchControlRow.restartSplitFor(
                         open_btree, template, parent, this,
                         newbranchrow.getRow(), splitrow, flag));
@@ -716,6 +722,7 @@ public class BranchControlRow extends ControlRow
 			// Allocate a new branch page and link it to the
 			// right of the current page.
 			BranchControlRow newbranch =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 BranchControlRow.allocate(open_btree, childpage,
                     this.getLevel(), parent);
 			newbranch.linkRight(open_btree, this);
@@ -739,6 +746,7 @@ public class BranchControlRow extends ControlRow
             newbranchrow.setPageNumber(newbranch.page.getPageNumber());
 
             BranchRow branch_template =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 BranchRow.createEmptyTemplate(
                     open_btree.getRawTran(),
                     open_btree.getConglomerate());
@@ -841,6 +849,7 @@ public class BranchControlRow extends ControlRow
 			// Decide whether we're following the current page or the new page.
 			BranchControlRow pagetofollow;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
             if (compareIndexRowToKey(
                     splitrow, 
                     split_branch_row.getRow(),
@@ -889,6 +898,7 @@ public class BranchControlRow extends ControlRow
 
         // RESOLVE (mikem) - should this be passed in?
         BranchRow branch_template =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             BranchRow.createEmptyTemplate(
                     open_btree.getRawTran(),
                     open_btree.getConglomerate());
@@ -1201,6 +1211,7 @@ public class BranchControlRow extends ControlRow
             // rows from the root, and remain at the old root's level.
             // Its parent is the root.
             branch =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 BranchControlRow.allocate(
                     open_btree, leftchild, root.getLevel(), root);
 
@@ -1420,6 +1431,7 @@ public class BranchControlRow extends ControlRow
                 child_pageno_buf);
 
             child_control_row =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 ControlRow.get(open_btree, child_pageno_buf.getLong());
         }
 
@@ -1440,6 +1452,7 @@ public class BranchControlRow extends ControlRow
     public ControlRow getLeftChild(OpenBTree open_btree)
             throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
          return(ControlRow.get(open_btree, this.getLeftChildPageno()));
     }
 
@@ -1465,6 +1478,7 @@ public class BranchControlRow extends ControlRow
         // last branch row to find the rightmost child.
         right_child = 
             (num_slots == 1 ? 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 ControlRow.get(open_btree, this.getLeftChildPageno()) :
                 getChildPageAtSlot(open_btree, (num_slots - 1)));
 
@@ -1522,6 +1536,7 @@ public class BranchControlRow extends ControlRow
 		throws StandardException
     {
         return(BranchRow.createEmptyTemplate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     open_btree.getRawTran(),
                     open_btree.getConglomerate()).getRow());
     }

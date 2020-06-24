@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.AllResultColumn
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -33,6 +34,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class AllResultColumn extends ResultColumn
 {
 	private TableName		tableName;
@@ -70,16 +73,20 @@ class AllResultColumn extends ResultColumn
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			SanityManager.ASSERT(getColumnDescriptor() == null,
 					"columnDescriptor is expected to be non-null");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return new AllResultColumn(tableName, getContextManager());
 	}
 
 
     @Override
     public TableName getTableNameObject() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
         return tableName;
     }
 

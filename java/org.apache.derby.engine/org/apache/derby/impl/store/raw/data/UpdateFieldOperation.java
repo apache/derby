@@ -78,6 +78,7 @@ public final class UpdateFieldOperation extends LogicalPageOperation
 
 	transient protected ByteArray preparedLog;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     UpdateFieldOperation(
     RawTransaction      t, 
     BasePage            page, 

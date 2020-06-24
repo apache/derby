@@ -68,11 +68,14 @@ public class CorruptDiskStorageFactory extends CorruptBaseStorageFactory
 	 */
 	WritableStorageFactory getRealStorageFactory()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5542
 		String dirStorageFactoryClass =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 "org.apache.derby.impl.io.DirStorageFactory";
 		
 		WritableStorageFactory storageFactory = null;
 		try{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Class<?> storageFactoryClass = Class.forName(dirStorageFactoryClass);
 			storageFactory = 
                 (WritableStorageFactory) storageFactoryClass.getConstructor().newInstance();

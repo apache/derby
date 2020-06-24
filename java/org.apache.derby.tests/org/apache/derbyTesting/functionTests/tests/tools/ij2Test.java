@@ -41,6 +41,7 @@ public class ij2Test extends ScriptTestCase {
     public static Test suite() {        
         Properties props = new Properties();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5368
         props.setProperty("derby.infolog.append", "true");  
         props.setProperty("ij.protocol", "jdbc:derby:");
         props.setProperty("ij.database", "wombat;create=true");
@@ -50,6 +51,7 @@ public class ij2Test extends ScriptTestCase {
         test = TestConfiguration.singleUseDatabaseDecorator(test, "wombat1");
         test = new CleanDatabaseTestSetup(test);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ij2Scripts");
         suite.addTest(test);
 

@@ -45,6 +45,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
  */
 abstract class CanonTestCase extends BaseJDBCTestCase {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1726
     final static String DEFAULT_ENCODING = "US-ASCII";
     final String outputEncoding;
 
@@ -74,6 +75,7 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
         rawBytes.close();
 
         byte[] testRawBytes = rawBytes.toByteArray();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4732
         rawBytes = null;
         BufferedReader cannonReader = null;
         BufferedReader testOutput = null;
@@ -84,6 +86,7 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
 
             InputStream canonStream = openTestResource(canonURL);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4732
             cannonReader = new BufferedReader(
                     new InputStreamReader(canonStream, outputEncoding));
 
@@ -113,6 +116,7 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
         } catch (Throwable t) {
             dumpForFail(testRawBytes);
             throw t;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4732
         } finally {
             if (cannonReader != null) {
                 try {
@@ -144,6 +148,7 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
         File folder = getFailureFolder();
         final File outFile = new File(folder, getName() + ".out");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         OutputStream outStream = AccessController
                 .doPrivileged(new PrivilegedExceptionAction<OutputStream>() {
                     public OutputStream run() throws IOException {

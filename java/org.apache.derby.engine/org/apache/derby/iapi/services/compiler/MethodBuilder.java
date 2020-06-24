@@ -62,6 +62,7 @@ public interface MethodBuilder {
 	/**
 		Push a parameter value.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,param_value
 		</PRE>
@@ -72,6 +73,7 @@ public interface MethodBuilder {
 	/**
 		Push a byte constant onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,byte_value
 		</PRE>
@@ -90,6 +92,7 @@ public interface MethodBuilder {
 	/**
 		Push a short constant onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,short_value
 		</PRE>
@@ -99,6 +102,7 @@ public interface MethodBuilder {
 	/**
 		Push a int constant onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,int_value
 		</PRE>
@@ -108,6 +112,7 @@ public interface MethodBuilder {
 	/**
 		Push a long constant onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,long_value
 		</PRE>
@@ -117,6 +122,7 @@ public interface MethodBuilder {
 	/**
 		Push a float constant onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,float_value
 		</PRE>
@@ -126,6 +132,7 @@ public interface MethodBuilder {
 	/**
 		Push a double constant onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,double_value
 		</PRE>
@@ -135,6 +142,7 @@ public interface MethodBuilder {
 	/**
 		Push a String constant onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,String_value
 		</PRE>
@@ -144,6 +152,7 @@ public interface MethodBuilder {
 	/**
 		Push a typed null onto the stack
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,null
 		</PRE>
@@ -166,6 +175,7 @@ public interface MethodBuilder {
 		This call requires the instance (reference) to be pushed by the caller.
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,field_ref  =&gt;
 		      ...,field_value
 		</PRE>
@@ -176,6 +186,8 @@ public interface MethodBuilder {
 	/**
 		Push the contents of the described static field onto the stack.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,field_value
 		</PRE>
@@ -183,6 +195,7 @@ public interface MethodBuilder {
 	public void getStaticField(String declaringClass, String fieldName, String fieldType);
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 	Pop the top stack value and store it in the local field. 
 	This call pushes the this instance required to access the field itself.
 	This call does not leave any value on the stack.
@@ -212,6 +225,9 @@ public interface MethodBuilder {
 		Like the Java language 'field = value', this leaves the value on the stack.
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,value  =&gt;
 		      ...,value
 		</PRE>
@@ -224,6 +240,7 @@ public interface MethodBuilder {
 		Like the Java language 'field = value', this leaves the value on the stack.
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,field_ref,value  =&gt;
 		      ...,value
 		</PRE>
@@ -238,6 +255,7 @@ public interface MethodBuilder {
 		calls.
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ... =&gt; [unchanged]
 		      ...
 		</PRE>
@@ -253,6 +271,7 @@ public interface MethodBuilder {
 		to the newly created object.
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,value* =&gt; [numArgs number of values will be popped]
 		      ...,new_ref
 		</PRE>
@@ -265,6 +284,7 @@ public interface MethodBuilder {
 		Create an instance of an array and push it onto the stack. 
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,array_ref
 		</PRE>
@@ -278,6 +298,8 @@ public interface MethodBuilder {
 	/**
 		Push this onto the stack.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...  =&gt;
 		      ...,this_ref
 		</PRE>
@@ -289,6 +311,7 @@ public interface MethodBuilder {
 		by upcasting method parameters. It does not put any casting code into the
 		byte code stream. Can only be used for refrences.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,ref =&gt;
 		      ...,ref
 		</PRE>
@@ -299,6 +322,7 @@ public interface MethodBuilder {
 		Cast the top stack value. Correctly down-casts a reference or casts
 		a primitive type (e.g. int to short).
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,value =&gt;
 		      ...,cast_value
 		</PRE>
@@ -311,6 +335,7 @@ public interface MethodBuilder {
 		Pop the top stack value and push a boolean that is the result of
 		an instanceof check on the popped reference.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,ref =&gt;
 		      ...,boolean_value
 		</PRE>.
@@ -319,7 +344,9 @@ public interface MethodBuilder {
 	
 	/**
 	 * Pop the top value off the stack
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ..., value =&gt;
 		      ...
 		</PRE>.
@@ -349,6 +376,8 @@ public interface MethodBuilder {
 		on the stack. If the stack contains a single
 		value then that is popped and used as the returned value.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack value =&gt;
 		      :empty:
 		or
@@ -361,6 +390,7 @@ public interface MethodBuilder {
 	public void methodReturn();
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		Initiate a conditional sequence.
 		The top value on the stack (a reference) is popped and compared to 'null'.
 		If the value is null then the code following this call until the startElseCode()
@@ -381,11 +411,13 @@ public interface MethodBuilder {
 
 		Each path through the ?: statement must leave the stack at the same depth
 		as the other.
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		<BR>
 		If the if or else code pops values from the stack that were before the conditional
 		value, then they must use the same number of values from the stack.
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,ref =&gt;
 		      ...
 		</PRE>.
@@ -395,6 +427,7 @@ public interface MethodBuilder {
 	public void conditionalIfNull();
 	
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		Initiate a conditional sequence.
 		The top value on the stack must be a boolean and will be popped. If it
 		is true then the code following this call until the startElseCode()
@@ -403,6 +436,7 @@ public interface MethodBuilder {
 		and restrictions.
 
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,boolean_value =&gt;
 		      ...
 		</PRE>.
@@ -410,6 +444,7 @@ public interface MethodBuilder {
 	public void conditionalIf();
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		Complete the true code path of a conditional.
 	*/
 	public void startElseCode();
@@ -477,6 +512,8 @@ public interface MethodBuilder {
 		<PRE>
 		static methods
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,value* =&gt; [numArgs number of values will be popped]
 		      ...,return_value [void methods will not push a value]
 
@@ -493,6 +530,7 @@ public interface MethodBuilder {
 		Call super(). Caller must only add this to a constructor.
 		<PRE>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ... =&gt;
 		      ... 
 		</PRE>
@@ -503,6 +541,7 @@ public interface MethodBuilder {
 	/**
 		Pop an array refrence off the stack and push an element from that array.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,array_ref =&gt;
 		      ...,value
 		</PRE>
@@ -514,6 +553,7 @@ public interface MethodBuilder {
 	/**
 		Pop an array reference off the stack, store a value in the array at the passed in offset.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,array_ref, value =&gt;
 		      ...
 		</PRE>
@@ -526,6 +566,7 @@ public interface MethodBuilder {
 	/**
 		Swap the top two values on the stack.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,valueA,valueB =&gt;
 		      ...,valueB,valueA
 		</PRE>
@@ -535,6 +576,7 @@ public interface MethodBuilder {
 	/**
 		Duplicate the top value on the stack.
 		<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ...,value =&gt;
 		      ...,value,value
 		</PRE>

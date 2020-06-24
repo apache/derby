@@ -77,6 +77,7 @@ public final class SQLDate extends DataType
 
     public int estimateMemoryUsage()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3173
         return BASE_MEMORY_USAGE;
     } // end of estimateMemoryUsage
 
@@ -95,6 +96,7 @@ public final class SQLDate extends DataType
 		//format is [yyy]y-mm-dd e.g. 1-01-01, 9999-99-99
 		if (!isNull())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3173
 			return encodedDateToString(encodedDate);
 		}
 		else
@@ -114,6 +116,7 @@ public final class SQLDate extends DataType
 			return null;
 		}
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1985
         return new Timestamp(getTimeInMillis(cal));
     }
 
@@ -507,6 +510,7 @@ public final class SQLDate extends DataType
 	 * Set the value from a correctly typed Date object.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue) throws StandardException
 	{
 		setValue((Date) theValue);
@@ -554,6 +558,7 @@ public final class SQLDate extends DataType
 
 		if (theValue != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             DatabaseContext databaseContext = (DatabaseContext) DataValueFactoryImpl.getContext(DatabaseContext.CONTEXT_ID);
             parseDate( theValue,
                        false,
@@ -566,6 +571,7 @@ public final class SQLDate extends DataType
 	** SQL Operators
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
     NumberDataValue nullValueInt() {
         return new SQLInteger();
     }
@@ -594,6 +600,7 @@ public final class SQLDate extends DataType
 	public NumberDataValue getMonth(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {
@@ -609,6 +616,7 @@ public final class SQLDate extends DataType
 	public NumberDataValue getDate(NumberDataValue result)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-729
         if (isNull()) {
             return nullValueInt();
         } else {
@@ -701,6 +709,7 @@ public final class SQLDate extends DataType
 	 */
 	public Date getDate( Calendar cal)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1985
         if (isNull())
             return null;
         
@@ -882,6 +891,7 @@ public final class SQLDate extends DataType
                 return new SQLDate();
             if( operand instanceof SQLDate)
                 return (SQLDate) operand.cloneValue(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
             if( operand instanceof SQLTimestamp)
             {
@@ -937,6 +947,7 @@ public final class SQLDate extends DataType
       */     
     public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-203
                   ps.setDate(position, getDate((Calendar) null));
      }
 
@@ -956,6 +967,7 @@ public final class SQLDate extends DataType
      * @exception StandardException
      */
     public DateTimeDataValue timestampAdd( int intervalType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
                                            NumberDataValue intervalCount,
                                            java.sql.Date currentDate,
                                            DateTimeDataValue resultHolder)

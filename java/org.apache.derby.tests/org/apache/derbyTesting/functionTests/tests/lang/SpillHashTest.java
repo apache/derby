@@ -88,6 +88,7 @@ public class SpillHashTest extends BaseJDBCTestCase {
 	public static Test suite() {
         // suite of tests with light load on the tables
         BaseTestSuite light = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // suite of tests with heavy load on the tables
         BaseTestSuite heavy = new BaseTestSuite();
@@ -141,6 +142,7 @@ public class SpillHashTest extends BaseJDBCTestCase {
 			}
 		};
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite = new BaseTestSuite();
 		
 		mainSuite.addTest(lightSetup);

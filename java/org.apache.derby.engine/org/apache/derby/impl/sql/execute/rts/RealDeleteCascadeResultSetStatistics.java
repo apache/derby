@@ -56,6 +56,7 @@ public class RealDeleteCascadeResultSetStatistics
 								)
 	{
 		super(rowCount, deferred, indexesUpdated, tableLock, executeTime, sourceResultSetStatistics);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.dependentTrackingArray = ArrayUtil.copy(dependentTrackingArray);
 	}
 

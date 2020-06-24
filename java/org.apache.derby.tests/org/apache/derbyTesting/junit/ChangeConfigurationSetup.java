@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2215
 abstract class ChangeConfigurationSetup extends TestSetup {
     
     private TestConfiguration old;

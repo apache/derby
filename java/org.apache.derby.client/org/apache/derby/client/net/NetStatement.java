@@ -30,9 +30,11 @@ import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.client.ClientAutoloadedDriver;
 
 class NetStatement implements MaterialStatement {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     ClientStatement statement_;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // Alias for (NetConnection) statement_.connection
     NetConnection netConnection_;
@@ -59,6 +61,7 @@ class NetStatement implements MaterialStatement {
     }
 
     // Relay constructor for NetPreparedStatement.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     NetStatement(
             ClientStatement statement,
             NetAgent netAgent,
@@ -85,6 +88,7 @@ class NetStatement implements MaterialStatement {
         netAgent_ = netAgent;
         netConnection_ = netConnection;
         statement_ = statement;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         statement_.setMaterialStatement(this);
     }
 
@@ -94,7 +98,9 @@ class NetStatement implements MaterialStatement {
 
     // Called by abstract Connection.createStatement().newStatement() for jdbc 2 statements with scroll attributes
     NetStatement(NetAgent netAgent, NetConnection netConnection, int type, int concurrency, int holdability) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         this(ClientAutoloadedDriver.getFactory().newStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  netAgent,
                  netConnection,
                  type,

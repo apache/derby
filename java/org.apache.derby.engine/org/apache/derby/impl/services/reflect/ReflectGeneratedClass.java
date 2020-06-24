@@ -45,6 +45,7 @@ public final class ReflectGeneratedClass extends LoadedGeneratedClass {
 
 	public ReflectGeneratedClass(ClassFactory cf, Class jvmClass) {
 		super(cf, jvmClass);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		methodCache = new Hashtable<String,GeneratedMethod>();
 	}
 

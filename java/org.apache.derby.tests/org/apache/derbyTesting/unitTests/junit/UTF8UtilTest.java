@@ -86,6 +86,7 @@ public class UTF8UtilTest
         InputStream ascii = new LoopingAlphabetStream(length);
         InputStream modUTF8 = new ReaderToUTF8Stream(
                                     new LoopingAlphabetReader(length),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                                     length, 0, TYPENAME,
                                     new CharStreamHeaderGenerator());
         modUTF8.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
@@ -107,6 +108,7 @@ public class UTF8UtilTest
         final int charLength = 5;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(charLength, UTF8Util.skipUntilEOF(in));
@@ -123,6 +125,7 @@ public class UTF8UtilTest
         final int charLength = 127019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 charLength, 0, TYPENAME, new ClobStreamHeaderGenerator(true));
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(charLength, UTF8Util.skipUntilEOF(in));
@@ -139,6 +142,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         // Returns count in bytes, we are using CJK chars so multiply length
@@ -157,6 +161,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 charLength, 0, TYPENAME, new ClobStreamHeaderGenerator(true));
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         try {
@@ -178,6 +183,7 @@ public class UTF8UtilTest
         final int charLength = 10;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         in.skip(1L); // Skip one more byte to trigger a UTF error.
@@ -197,6 +203,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.tamil()),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         // Skip encoded length added by ReaderToUTF8Stream.
         in.skip(HEADER_LENGTH);
@@ -218,6 +225,7 @@ public class UTF8UtilTest
      * two bytes present. However, only one byte is provided.
      */
     public void testMissingSecondByteOfTwo()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2760
             throws IOException {
         // 0xdf = 11011111
         byte[] data = {'a', (byte)0xdf};
@@ -317,6 +325,7 @@ public class UTF8UtilTest
      * Returns a suite of tests.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(UTF8UtilTest.class, "UTF8Util tests");
     }
 }

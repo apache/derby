@@ -118,6 +118,7 @@ public class D_LockControl implements Diagnosticable
 	*/
 
 	static void debugLock(String type, CompatibilitySpace compatibilitySpace,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 						  Object group, Lockable ref, Object qualifier,
 						  int timeout) {
 
@@ -169,6 +170,7 @@ public class D_LockControl implements Diagnosticable
 
 	static String debugLockString(CompatibilitySpace compatibilitySpace,
 								  Object group, Lockable ref) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 
 		if (SanityManager.DEBUG) {
 
@@ -189,6 +191,7 @@ public class D_LockControl implements Diagnosticable
 
 
 	static String debugLockString(CompatibilitySpace compatibilitySpace,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 								  Object group, Lockable ref,
 								  Object qualifier, int timeout) {
 
@@ -198,6 +201,7 @@ public class D_LockControl implements Diagnosticable
 
 			debugAppendObject(sb, " Lockable ", ref);
 			debugAppendObject(sb, " Qualifier=", qualifier);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 			debugAppendObject(sb, " CompatibilitySpace=", compatibilitySpace);
 			debugAppendObject(sb, " Group=", group);
 

@@ -60,6 +60,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
     public static Test suite() {
 
         BaseTestSuite suite = new BaseTestSuite("LocalizedScripts");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Note that it doesn't really make sense to run with network 
         // server/client, as LocalizedConnectionAttributes.sql has a hardcoded
@@ -69,6 +70,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
         // statement automatically invokes DriverManager.
         if (JDBC.vmSupportsJSR169())
             return suite;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite localizedTests =
             new BaseTestSuite("LocalizedScripts:embedded");
         localizedTests.addTest(getSuite());
@@ -98,6 +100,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("localized scripts");
         Properties uiProps = new Properties();
 
@@ -115,6 +118,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
         // not be saved in the 'fail' directory.
         // We can't rely on an additionalDatabaseDecorator because 'detest'
         // is not just a logical, but a physical db name.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         removeDirectory(
             TestConfiguration.getCurrent().getDatabasePath("detest"));
         super.tearDown();

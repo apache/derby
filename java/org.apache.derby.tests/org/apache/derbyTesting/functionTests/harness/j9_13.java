@@ -68,6 +68,7 @@ public class j9_13 extends jvm {
 
         StringBuffer sb = new StringBuffer();
         Vector<String> v = super.getCommandLine();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         appendOtherFlags(sb);
         String s = sb.toString();

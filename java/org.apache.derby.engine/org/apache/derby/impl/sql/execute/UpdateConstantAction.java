@@ -73,6 +73,9 @@ public class UpdateConstantAction extends WriteCursorConstantAction
     private String columnNames[];
 
     String  identitySequenceUUIDString;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 
     /**
      * An array of row location objects (0 based), one for each
@@ -122,7 +125,11 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	 *  @param identitySequenceUUIDString   For 10.11 and higher, the handle on the sequence for the identity column
 	 */
     UpdateConstantAction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 TableDescriptor     targetTableDesc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
                                 StaticCompiledOpenConglomInfo heapSCOCI,
                                 IndexRowGenerator[]	irgs,
                                 long[]				indexCIDS,
@@ -168,8 +175,12 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 		this.changedColumnIds = changedColumnIds;
 		this.positionedUpdate = positionedUpdate;
 		this.numColumns = numColumns;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.schemaName = targetTableDesc.getSchemaName();
         this.tableName = targetTableDesc.getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         this.columnNames = targetTableDesc.getColumnNamesArray();
         this.autoincIncrement = targetTableDesc.getAutoincIncrementArray();
         this.identitySequenceUUIDString = identitySequenceUUIDString;
@@ -211,6 +222,9 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 		changedColumnIds = ArrayUtil.readIntArray(in);
 		positionedUpdate = in.readBoolean();
 		numColumns = in.readInt();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 		autoincIncrement = ArrayUtil.readLongArray(in);
 		identitySequenceUUIDString = (String) in.readObject();
 	}
@@ -227,6 +241,9 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 		ArrayUtil.writeIntArray(out,changedColumnIds);
 		out.writeBoolean(positionedUpdate);
 		out.writeInt(numColumns);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 		ArrayUtil.writeLongArray(out, autoincIncrement);
 		out.writeObject( identitySequenceUUIDString );
 	}
@@ -240,6 +257,7 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 
 	// CLASS METHODS
     public String getSchemaName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return schemaName;
     }
 

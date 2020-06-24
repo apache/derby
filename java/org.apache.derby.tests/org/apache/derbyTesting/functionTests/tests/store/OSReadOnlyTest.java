@@ -82,6 +82,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
 
     protected static Test baseSuite(String name) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite readonly = new BaseTestSuite("OSReadOnly");
         BaseTestSuite suite = new BaseTestSuite(name);
         readonly.addTestSuite(OSReadOnlyTest.class);
@@ -92,6 +93,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("OSReadOnlyTest");
         suite.addTest(baseSuite("OSReadOnlyTest:embedded"));
         suite.addTest(TestConfiguration
@@ -104,6 +106,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
      * on OS level, the database reacts as if it's in 'ReadOnly' mode
      */
     public void testOSReadOnly() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5824
         if (!supportsSetReadOnly()) {
             // If we can modify files after File.setReadOnly() has been
             // called on them, the test database will not actually be
@@ -141,9 +144,11 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         // so far, we were just playing. Now for the test.
         String phDbName = getPhysicalDbName();
         // copy the database to one called 'readOnly'
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         moveDatabaseOnOS(phDbName, "readOnly");
         // change filePermissions on readOnly, to readonly.
         changeFilePermissions("readOnly");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         createDummyLockFile("readOnly");
         
         DataSource ds = JDBCDataSource.getDataSource();
@@ -156,6 +161,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         // copy the database to one called 'readWrite' 
         // this will have the default read/write permissions upon
         // copying
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         moveDatabaseOnOS("readOnly", "readWrite");
         ds = JDBCDataSource.getDataSource();
         JDBCDataSource.setBeanProperty(ds, "databaseName", "singleUse/readWrite");
@@ -164,9 +170,11 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         shutdownDB(ds);
         
         // do it again...
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         moveDatabaseOnOS("readWrite", "readOnly2");
         // change filePermissions on readOnly, to readonly.
         changeFilePermissions("readOnly2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         createDummyLockFile("readOnly2");
         
         ds = JDBCDataSource.getDataSource();
@@ -177,6 +185,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         shutdownDB(ds);
         
         // testharness will try to remove the original db; put it back
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         moveDatabaseOnOS("readOnly2", phDbName);
     }
 
@@ -191,6 +200,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
      * @throws IOException if an unexpected error happens
      */
     private boolean supportsSetReadOnly() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5824
         File tmp = PrivilegedFileOpsForTests.createTempFile(
                 "tmp", null, currentDirectory());
         PrivilegedFileOpsForTests.setReadOnly(tmp);
@@ -218,6 +228,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
      */
     private String getPhysicalDbName() {
         String pdbName =TestConfiguration.getCurrent().getJDBCUrl();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return pdbName.substring(pdbName.lastIndexOf("oneuse"));
     }
     
@@ -269,6 +280,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
                     insertIntValue + ", '" + insertStringValue + "')");
                 fail("expected an error indicating the db is readonly");
             } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
                 if (!(sqle.getSQLState().equals("25502") || 
                         // on iseries / OS400 machines, when file/os 
                         // permissions are off, we may get error 40XD1 instead
@@ -288,7 +300,9 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
      * @throws IOException if the copy fails
      */
     private void moveDatabaseOnOS(String fromwhere, String todir)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4804
         File from_dir = constructDbPath(fromwhere);
         File to_dir = constructDbPath(todir);
 
@@ -308,6 +322,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
     private void createDummyLockFile(String dbDir) {
         final File f = new File(constructDbPath(dbDir), "db.lck");
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
             public Void run() {
                 if (!f.exists()) {
@@ -357,6 +372,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
             return false;
         final File sdirectory = directory;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
             new java.security.PrivilegedAction<Boolean>() {
                 public Boolean run() {
@@ -387,6 +403,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
                     // again, which means we cannot delete the directory and
                     // its content...
                     //success &= sdirectory.setReadOnly();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     return success;
                 }
             });        

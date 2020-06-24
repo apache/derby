@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.MethodCallNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -103,6 +104,8 @@ abstract class MethodCallNode extends JavaValueNode
 	*/
 	String[] methodParameterTypes;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     MethodCallNode(String methodName, ContextManager cm) {
         super(cm);
         this.methodName = methodName;
@@ -119,6 +122,7 @@ abstract class MethodCallNode extends JavaValueNode
      * StaticMethodCallNodes.
      * </p>
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
     TableName getFullName()
 	{
 		return  null;
@@ -156,6 +160,8 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addParms(List<ValueNode> parameterList) throws StandardException
 	{
 		methodParms = new JavaValueNode[parameterList.size()];
@@ -181,6 +187,7 @@ abstract class MethodCallNode extends JavaValueNode
 	  *
 	  *	@return	the Classes of our parameters
 	  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6621
     Class<?>[]  getMethodParameterClasses()
 	{ 
 		ClassInspector ci = getClassFactory().getClassInspector();
@@ -219,6 +226,7 @@ abstract class MethodCallNode extends JavaValueNode
 	void getCorrelationTables(JBitSet correlationMap)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<ColumnReference> getCRs =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 		accept(getCRs);
@@ -238,6 +246,8 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -292,6 +302,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 	final void bindParameters(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -313,10 +324,12 @@ abstract class MethodCallNode extends JavaValueNode
 					methodParms[parm] =
 						methodParms[parm].bindExpression(
                             fromList, subqueryList, aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 					if (routineInfo == null)
 						signature[ parm ] = methodParms[ parm ].getJSQLType();
                     
+//IC see: https://issues.apache.org/jira/browse/DERBY-6691
                     SelectNode.checkNoWindowFunctions(methodParms[parm], "method argument");
 				}
 			}
@@ -352,6 +365,8 @@ abstract class MethodCallNode extends JavaValueNode
 		throws StandardException
 	{
 		/* Put the parameter type names into a single string */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         StringBuilder   parmTypes = new StringBuilder();
         int     paramCount = signature.length;
 		for (int i = 0; i < paramCount; i++)
@@ -587,6 +602,7 @@ abstract class MethodCallNode extends JavaValueNode
             // the argument into a wrapper object. So, for instance, this converts a primitive "int"
             // into a "java.lang.Integer".
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6511
             if (
                 ClassInspector.primitiveType( argumentType ) &&
                 parameterType.equals( JSQLType.getWrapperClassName( JSQLType.getPrimitiveID( argumentType ) ) )
@@ -659,6 +675,7 @@ abstract class MethodCallNode extends JavaValueNode
         // must strip another array level off of out and in/out parameters
         if ( routineInfo != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             if ( routineInfo.getParameterModes()[ firstVarargIdx ] != (ParameterMetaData.parameterModeIn) )
             {
                 varargType = stripOneArrayLevel( varargType );
@@ -755,6 +772,8 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void    setNullParameterInfo(String[] parmTypeNames)
 			throws StandardException
 	{
@@ -766,6 +785,7 @@ abstract class MethodCallNode extends JavaValueNode
 				/* Set the type information in the null constant node */
 				DataTypeDescriptor dts = DataTypeDescriptor.getSQLDataTypeDescriptor(parmTypeNames[i]);
 				((SQLToJavaValueNode)methodParms[i]).value.setType(dts);
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 
 				/* Set the correct java type name */
 				methodParms[i].setJavaTypeName(parmTypeNames[i]);
@@ -926,6 +946,7 @@ abstract class MethodCallNode extends JavaValueNode
 				else
 				{
 			 		requiredType = returnTypeId.getCorrespondingJavaTypeName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3119
 
 					if (!requiredType.equals(typeName)) {
 						switch (returnType.getJDBCTypeId()) {
@@ -953,6 +974,7 @@ abstract class MethodCallNode extends JavaValueNode
                 // allow subtypes of ResultSet too
                 try {
                     Class<?> actualType = classInspector.getClass( typeName );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
                     foundCorrectType = ResultSet.class.isAssignableFrom( actualType );
                 }
@@ -989,6 +1011,7 @@ abstract class MethodCallNode extends JavaValueNode
 					int parameterMode = routineInfo.getParameterModes()[ getRoutineArgIdx( i ) ];
 
 					switch (parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                     case (ParameterMetaData.parameterModeIn):
 						break;
                     case (ParameterMetaData.parameterModeInOut):
@@ -1260,6 +1283,7 @@ abstract class MethodCallNode extends JavaValueNode
 			if (methodParms[index] instanceof SQLToJavaValueNode)
 			{
 				SQLToJavaValueNode stjvn = (SQLToJavaValueNode) methodParms[index];
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 				if (stjvn.value.requiresTypeFromContext())
 				{
 					isParam[index] = true;
@@ -1290,6 +1314,8 @@ abstract class MethodCallNode extends JavaValueNode
 						// as it (incorrectly but historically always has) maps a DECIMAL to a double. 
 
 						switch (ctid.getJDBCTypeId()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4657
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
 						case java.sql.Types.BOOLEAN:
 						case java.sql.Types.SMALLINT:
 						case java.sql.Types.INTEGER:
@@ -1308,6 +1334,7 @@ abstract class MethodCallNode extends JavaValueNode
 		        case JSQLType.JAVA_CLASS: return jsqlType.getJavaClassName();
 
 		        case JSQLType.JAVA_PRIMITIVE: return JSQLType.getPrimitiveName( jsqlType.getPrimitiveKind() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4293
 
 		        default:
 
@@ -1326,6 +1353,8 @@ abstract class MethodCallNode extends JavaValueNode
 		int					count = signature.length;
 		String[] 			primParmTypeNames = new String[ count ];
         JSQLType            jsqlTyp;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		for (int i = 0; i < count; i++)
 		{
@@ -1348,6 +1377,8 @@ abstract class MethodCallNode extends JavaValueNode
 
 
                             TypeId  ctid = mapToTypeID( jsqlTyp );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 							if ((ctid.isNumericTypeId() && !ctid.isDecimalTypeId()) || ctid.isBooleanTypeId())
 							{
@@ -1362,6 +1393,8 @@ abstract class MethodCallNode extends JavaValueNode
 
 		            case JSQLType.JAVA_CLASS:
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         primParmTypeNames[i] = jsqlTyp.getJavaClassName();
 						break;
 
@@ -1445,6 +1478,7 @@ abstract class MethodCallNode extends JavaValueNode
     @Override
     DataTypeDescriptor getDataType() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
         if ( routineInfo != null )
         {
             TypeDescriptor td = routineInfo.getReturnType();
@@ -1466,6 +1500,8 @@ abstract class MethodCallNode extends JavaValueNode
 	 * 
 	 * @return	The method parameters
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JavaValueNode[] getMethodParms()
 	{
 		return methodParms;
@@ -1479,6 +1515,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

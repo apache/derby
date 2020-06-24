@@ -77,6 +77,7 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Test    cleanTest = new CleanDatabaseTestSetup
             (
@@ -658,6 +659,11 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
 		// Support cycle option after altering the table.
         goodStatement( conn, "create table t( a int generated always as identity(start with 2147483647 cycle), b int)" );
 	goodStatement( conn, "alter table t alter column a set increment by 4" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 	goodStatement( conn ,"insert into t( b ) values ( 1 ), ( 2 )" );
         
 
@@ -686,6 +692,11 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
         goodStatement( conn, "create table t( a int generated always as identity(increment by 2 cycle), b int)" );
 	goodStatement( conn, "alter table t alter column a restart with 2147483647" );
     goodStatement( conn ,"insert into t( b ) values ( 1 ), ( 2 )" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 
 	goodStatement( conn, "drop table t" );
 		// Alter table works fine without cycling with cycle option in the syntax.
@@ -708,6 +719,7 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
              );
 
 	goodStatement( conn, "drop table t" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6935
 	goodStatement( conn, "create table t( A_6852 int generated always as identity(start with 7 increment by 2 cycle), b_6852 int)" );
 		//SELECT from sys.syscolumns with cycle option
         // ADDING AUTOINCREMENTCYCLE Derby-6905

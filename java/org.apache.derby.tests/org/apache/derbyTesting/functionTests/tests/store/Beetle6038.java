@@ -37,9 +37,11 @@ public class Beetle6038  {
 		throws Exception
 	{
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(driver);
         clazz.getConstructor().newInstance();
 		String dburl = "jdbc:derby:Beetle6038Db;create=true;dataEncryption=true;bootPassword=Thursday;encryptionAlgorithm=DES/CBC/NoPadding";
+//IC see: https://issues.apache.org/jira/browse/DERBY-417
 
 		Connection conn = DriverManager.getConnection(dburl);
 		conn.close();
@@ -48,6 +50,7 @@ public class Beetle6038  {
 
 		// read in the properties in the service.properties file of the db
 		Properties serviceProperties = new Properties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-577
 		String systemhome =  System.getProperty("derby.system.home");
 		File f = new File(systemhome + File.separatorChar + "Beetle6038Db" + File.separatorChar + "service.properties");
 		serviceProperties.load(new FileInputStream(f.getCanonicalPath()));

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ResultSetNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -77,6 +78,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	// query. Subclasses will set this value where appropriate.
 	private CostEstimate		candidateFinalCostEstimate;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode(ContextManager cm) {
         super(cm);
     }
@@ -122,6 +125,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 			if (resultColumns != null)
 			{
 				printLabel(depth, "resultColumns: ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				resultColumns.treePrint(depth + 1);
 			}
 		}
@@ -135,6 +139,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 
     /** Set whether this is a cursor target table */
     void    setCursorTargetTable( boolean yesOrNo ) { cursorTargetTable = yesOrNo; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
     /** Get the scratch estimate */
     CostEstimate    getScratchCostEstimate() { return scratchCostEstimate; }
@@ -162,6 +167,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return	The CostEstimate for this ResultSetNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getCostEstimate()
 	{
 		return costEstimate;
@@ -169,17 +176,21 @@ public abstract class ResultSetNode extends QueryTreeNode
 
     /** Set the CostEstimate for this ResultSetNode */
     void    setCostEstimate( CostEstimate ce ) { costEstimate = ce; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 	/**
 	 * Get the final CostEstimate for this ResultSetNode.
 	 *
 	 * @return	The final CostEstimate for this ResultSetNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			if (candidateFinalCostEstimate == null)
 			{
 				SanityManager.THROWASSERT(
@@ -203,6 +214,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void assignResultSetNumber() throws StandardException
 	{
 		resultSetNumber = getCompilerContext().getNextResultSetNumber();
@@ -221,6 +234,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 							FromList fromListParam) 
 							throws StandardException {
@@ -239,6 +254,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindVTITables(FromList fromListParam)
 		throws StandardException {
 		return this;
@@ -253,6 +270,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -271,6 +290,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
@@ -290,6 +311,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -315,11 +338,13 @@ public abstract class ResultSetNode extends QueryTreeNode
         // sub-class. For all other nodes, just go through the result columns
         // and set the type for dynamic parameters.
         for (int i = 0; i < resultColumns.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = resultColumns.elementAt(i);
             ValueNode re = rc.getExpression();
 
             if (re != null && re.requiresTypeFromContext()) {
                 ResultColumn typeCol = typeColumns.elementAt(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
                 re.setType(typeCol.getTypeServices());
             }
         }
@@ -328,6 +353,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	/**
 	 * Remember that this node is the source result set for an INSERT.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setInsertSource()
 	{
 		insertSource = true;
@@ -344,6 +371,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 {
@@ -365,6 +394,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getAllResultColumns(TableName allTableName)
 					throws StandardException
 	{
@@ -388,6 +419,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getMatchingColumn(
 						ColumnReference columnReference)
 						throws StandardException
@@ -415,6 +448,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
 		throws StandardException
 	{
@@ -425,6 +460,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 		 */
 		if (resultColumns.elementAt(0) instanceof AllResultColumn)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
            resultColumn = new ResultColumn("", null, getContextManager());
 		}
 		else if (onlyConvertAlls)
@@ -433,9 +470,11 @@ public abstract class ResultSetNode extends QueryTreeNode
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             resultColumn = resultColumns.elementAt(0);
 	
 			/* Nothing to do if query is already select TRUE ... */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5501
             if (resultColumn.getExpression().isBooleanTrue() &&
                     resultColumns.size() == 1)
 			{
@@ -443,6 +482,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 			}
 		}
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
        BooleanConstantNode booleanNode =
                 new BooleanConstantNode(true, getContextManager());
 
@@ -464,6 +505,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return FromList
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromList getFromList()
 		throws StandardException
 	{
@@ -482,6 +525,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
@@ -541,6 +586,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 			if (targetTableDescriptor != null)
 			{
 				resultColumns.bindResultColumnsByName(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         targetTableDescriptor, statement);
 			}
 			else
@@ -563,6 +610,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList rcl)
 				throws StandardException
 	{
@@ -587,6 +636,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -614,6 +665,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
@@ -634,6 +687,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
@@ -720,6 +775,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
@@ -741,6 +798,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		/* Default behavior is to do nothing */
@@ -757,6 +816,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return The modified query tree
 	 * @exception StandardException        Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths(PredicateList predList)
 		throws StandardException
 	{
@@ -764,6 +825,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		return modifyAccessPaths();
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 	ResultColumnDescriptor[] makeResultDescriptors()
 	{
 	    return resultColumns.makeResultDescriptors();
@@ -792,6 +854,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param newRCL		The new ResultColumnList for this ResultSetNode
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setResultColumns(ResultColumnList newRCL)
 	{
 		resultColumns = newRCL;
@@ -802,6 +866,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return ResultColumnList for this ResultSetNode
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getResultColumns()
 	{
 		return resultColumns;
@@ -812,6 +878,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param newRTM	The new referencedTableMap for this ResultSetNode
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setReferencedTableMap(JBitSet newRTM)
 	{
 		referencedTableMap = newRTM;
@@ -833,6 +901,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param passedMap	The table map to fill in.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void fillInReferencedTableMap(JBitSet passedMap)
 	{
 	}
@@ -845,6 +915,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *									directly under a ResultColumn
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void rejectParameters() throws StandardException
 	{
 		/* Okay if no resultColumns yet - means no parameters there */
@@ -864,6 +936,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown if an XML value found
 	 *									directly under a ResultColumn
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void rejectXMLValues() throws StandardException
 	{
 		if (resultColumns != null)
@@ -876,10 +950,13 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Rename generated result column names as '1', '2' etc... These will be the result
 	 * column names seen by JDBC clients.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void renameGeneratedResultNames() throws StandardException
 	{
 		for (int i=0; i<resultColumns.size(); i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = resultColumns.elementAt(i);
 			if (rc.isNameGenerated())
 				rc.setName(Integer.toString(i+1));
@@ -891,6 +968,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 		if it is the one controlling the statement -- i.e., it is
 		the outermost result set node for the statement.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markStatementResultSet()
 	{
 		statementResultSet = true;
@@ -914,10 +993,16 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
+//IC see: https://issues.apache.org/jira/browse/DERBY-3
+//IC see: https://issues.apache.org/jira/browse/DERBY-4433
+//IC see: https://issues.apache.org/jira/browse/DERBY-1644
 	ResultSetNode enhanceRCLForInsert(
 			InsertNode target, boolean inOrder, int[] colMap)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (!inOrder ||
                 resultColumns.visibleSize() < target.resultColumnList.size()) {
 			return generateProjectRestrictForInsert(target, colMap);
@@ -958,6 +1043,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
+//IC see: https://issues.apache.org/jira/browse/DERBY-3
+//IC see: https://issues.apache.org/jira/browse/DERBY-4433
+//IC see: https://issues.apache.org/jira/browse/DERBY-1644
 				newResultColumn = genNewRCForInsert(
 						target.targetTableDescriptor,
 						target.targetVTI,
@@ -990,6 +1079,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 		throws StandardException
 	{
         ResultColumn newResultColumn;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		// the i-th column's value was not specified, so create an
 		// expression containing its default value (null for now)
@@ -1012,6 +1105,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	    
 	    //Column has constant default value , 
 	    //if it have defaultInfo and not be autoincrement.
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
             if (defaultInfo != null && ! colDesc.isAutoincrement())
             {
                 //RESOLVEPARAMETER - skip the tree if we have the value
@@ -1034,7 +1128,10 @@ public abstract class ResultSetNode extends QueryTreeNode
                         String defaultText = defaultInfo.getDefaultText();
                         ValueNode defaultTree = parseDefault(defaultText);
                         defaultTree = defaultTree.bindExpression
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                             (getFromList(), (SubqueryList) null, (List<AggregateNode>) null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         newResultColumn = new ResultColumn(
                                 defaultTree.getTypeServices(),
                                 defaultTree,
@@ -1052,6 +1149,8 @@ public abstract class ResultSetNode extends QueryTreeNode
             }
             else if (colDesc.isAutoincrement())
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 newResultColumn =
                         new ResultColumn(colDesc, null, getContextManager());
                 newResultColumn.setAutoincrementGenerated();
@@ -1081,10 +1180,18 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return a ProjectRestrictNode whos RCL matches the target RCL
 	 */
 	private ResultSetNode generateProjectRestrictForInsert(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
+//IC see: https://issues.apache.org/jira/browse/DERBY-3
+//IC see: https://issues.apache.org/jira/browse/DERBY-4433
+//IC see: https://issues.apache.org/jira/browse/DERBY-1644
 			InsertNode target, int[] colMap)
 		throws StandardException
 	{
 		// our newResultCols are put into the bound form straight away.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ResultColumnList
                 newResultCols = new ResultColumnList(getContextManager());
 
@@ -1107,6 +1214,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 				oldResultColumn =
 						resultColumns.getResultColumn(colMap[index] + 1);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 newColumnReference = new ColumnReference(
                         oldResultColumn.getName(), null, getContextManager());
 
@@ -1130,6 +1239,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 				// column descriptors into the result, we grab it from there.
 				// alternatively, we could do what the else clause does,
 				// and look it up in the DD again.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                newResultColumn = new ResultColumn(
 						dtd,
 						newColumnReference,
@@ -1156,6 +1267,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 		 *		   top of the query tree which has ColumnReferences under
 		 *		   its ResultColumnList prior to expression push down.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return new ProjectRestrictNode(this,
                                        newResultCols,
                                        null,
@@ -1176,6 +1289,8 @@ public abstract class ResultSetNode extends QueryTreeNode
          )
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ValueNode dummy = new UntypedNullConstantNode(getContextManager());
         ResultColumn newResultColumn =
             new ResultColumn(colDesc.getType(), dummy, getContextManager());
@@ -1222,6 +1337,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 		Visitable qt = p.parseStatement(values);
 		if (SanityManager.DEBUG)
 		{
@@ -1240,6 +1356,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         defaultTree = ((CursorNode) qt).getResultSetNode().getResultColumns().
                 elementAt(0).getExpression();
 
@@ -1259,6 +1376,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	public ResultDescription makeResultDescription()
 	{
 	    ResultColumnDescriptor[] colDescs = makeResultDescriptors();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 
 	    return getExecutionFactory().getResultDescription(colDescs, null);
 	}
@@ -1327,6 +1445,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode genProjectRestrict()
 				throws StandardException
 	{
@@ -1343,6 +1463,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 		prRCList.genVirtualColumnNodes(this, resultColumns);
 
 		/* Finally, we create the new ProjectRestrictNode */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return new ProjectRestrictNode(
 								this,
 								prRCList,
@@ -1351,6 +1475,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 								null,	/* Project subquery list */
 								null,	/* Restrict subquery list */
 								null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                 getContextManager());
 	}
 
@@ -1377,6 +1503,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode genProjectRestrict(int numTables)
 				throws StandardException
 	{
@@ -1419,6 +1547,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		mb.push(false);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getNormalizeResultSet",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 					ClassName.NoPutResultSet, 6);
 	}
 
@@ -1437,6 +1566,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode changeAccessPath() throws StandardException
 	{
 		return this;
@@ -1521,6 +1652,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 
     /** Get the optimizer being used on this result set */
     Optimizer   getOptimizer()  { return optimizer; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
     /** Set the optimizer for use on this result set */
     void    setOptimizer( Optimizer opt ) { optimizer = opt; }
@@ -1545,11 +1677,13 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (resultColumns != null)
 		{
 			resultColumns = (ResultColumnList)resultColumns.accept(v);
@@ -1564,6 +1698,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode considerMaterialization(JBitSet outerTables)
 		throws StandardException
 	{
@@ -1647,6 +1783,7 @@ public abstract class ResultSetNode extends QueryTreeNode
      */
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
         if (SanityManager.DEBUG)
         {
             SanityManager.THROWASSERT(
@@ -1745,6 +1882,7 @@ public abstract class ResultSetNode extends QueryTreeNode
      *
      * @exception StandardException         Thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
     void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)
@@ -1847,6 +1985,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if ((aggregates.get(index)).isDistinct()) {
                 count++;
             }
@@ -1857,6 +1997,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 	// It may be we have a SELECT view underneath a LOJ.
 	// Return null for now.. we don't do any optimization.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JBitSet LOJgetReferencedTables(int numTables)
 				throws StandardException
 	{

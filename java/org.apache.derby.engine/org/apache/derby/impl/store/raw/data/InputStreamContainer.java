@@ -46,6 +46,7 @@ import java.io.DataInputStream;
 */
 
 final class InputStreamContainer extends FileContainer  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
     private StorageFile containerPath;
     
@@ -53,6 +54,7 @@ final class InputStreamContainer extends FileContainer  {
 	 * Constructors
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	InputStreamContainer(BaseDataFileFactory factory) {
 		super(factory);
 		canUpdate = false;
@@ -90,11 +92,13 @@ final class InputStreamContainer extends FileContainer  {
 			// just opened the stream and the first allocation page
 			// is located at the beginning of the file.
 			readHeader(getEmbryonicPage(dis));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
 
 			return true;
 
         } catch (IOException ioe) {
             throw StandardException.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1958
                 newException(SQLState.FILE_CONTAINER_EXCEPTION, 
                              ioe,
                              new Object[] {getIdentity().toString(),
@@ -108,6 +112,7 @@ final class InputStreamContainer extends FileContainer  {
 		}
 	} // end of openContainer
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	void closeContainer()
     {
 		containerPath = null;
@@ -138,6 +143,7 @@ final class InputStreamContainer extends FileContainer  {
 	protected void truncatePages(long lastValidPagenum)
     {
 		// Nothing to do since we are inherently read-only.
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 		return;
     }
     
@@ -150,6 +156,7 @@ final class InputStreamContainer extends FileContainer  {
 		Create a new container, all references to identity must be through the
 		passed in identity, this object will no identity until after this method returns.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	void createContainer(ContainerKey newIdentity) throws StandardException {
 		// RESOLVE - probably should throw an error ...
 	}
@@ -206,6 +213,7 @@ final class InputStreamContainer extends FileContainer  {
 			is = getInputStream();
 
 			InputStreamUtil.skipFully(is, pageOffset);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
 
 			InputStreamUtil.readFully(is, pageData, 0, pageSize);
 
@@ -263,10 +271,12 @@ final class InputStreamContainer extends FileContainer  {
      * @throws StandardException STORE_FEATURE_NOT_IMPLEMENTED
      */
 	protected void encryptOrDecryptContainer(BaseContainerHandle handle,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                                              String newFilePath,
                                              boolean doEncrypt)
 	    throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         throw StandardException.newException(
                 SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
 	}

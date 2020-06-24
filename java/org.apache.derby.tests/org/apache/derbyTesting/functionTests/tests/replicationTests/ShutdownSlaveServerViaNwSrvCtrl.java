@@ -48,6 +48,7 @@ public class ShutdownSlaveServerViaNwSrvCtrl extends ShutdownSlave
         
         setEnv();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ShutdownSlaveServerViaNwSrvCtrl");
 

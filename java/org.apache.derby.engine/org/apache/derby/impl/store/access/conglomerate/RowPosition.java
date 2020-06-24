@@ -70,6 +70,7 @@ public class RowPosition
         current_rh              = null;
         current_slot            = Page.INVALID_SLOT_NUMBER;
         current_rh_qualified    = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         current_pageno          = ContainerHandle.INVALID_PAGE_NUMBER;
     }
 
@@ -81,6 +82,7 @@ public class RowPosition
 
     public final void positionAtPrevSlot()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
         current_slot--;
         current_rh   = null;
     }
@@ -104,6 +106,7 @@ public class RowPosition
             ret_string = 
                 ";current_slot=" + current_slot +
                 ";current_rh=" + current_rh +
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
                 ";current_pageno=" + current_pageno +
                 ";current_page=" + 
                     (current_page == null ? 

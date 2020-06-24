@@ -28,6 +28,7 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils42;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 class NetResultSet42 extends NetResultSet
 {
     

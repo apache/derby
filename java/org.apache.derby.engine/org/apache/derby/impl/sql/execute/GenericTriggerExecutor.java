@@ -104,6 +104,8 @@ abstract class GenericTriggerExecutor
 
     private SPSDescriptor getWhenClause() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		if (!whenClauseRetrieved)
 		{
 			whenClauseRetrieved = true;
@@ -195,6 +197,7 @@ abstract class GenericTriggerExecutor
 			}
 
 			// save the active statement context for exception handling purpose
+//IC see: https://issues.apache.org/jira/browse/DERBY-2195
 			StatementContext active_sc = lcc.getStatementContext();
 			
 			/*
@@ -212,6 +215,7 @@ abstract class GenericTriggerExecutor
                 // This is a substatement; for now, we do not set any timeout
                 // for it. We might change this behaviour later, by linking
                 // timeout to its parent statement's timeout settings.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 				ResultSet rs = ps.executeSubStatement
 					(activation, spsActivation, false, 0L);
 
@@ -284,6 +288,7 @@ abstract class GenericTriggerExecutor
 				StatementContext sc = lcc.getStatementContext();
 				
 				/* make sure that the cleanup is on the new SC */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5736
 				if (sc != null && active_sc != sc)
 				{
 					sc.cleanupOnError(e);

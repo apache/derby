@@ -27,6 +27,7 @@ import junit.framework.Test;
  * Base class for JDBC JUnit test decorators.
  */
 public abstract class BaseJDBCTestSetup
+//IC see: https://issues.apache.org/jira/browse/DERBY-2000
     extends BaseTestSetup {
 	
 	public BaseJDBCTestSetup(Test test) {
@@ -46,6 +47,7 @@ public abstract class BaseJDBCTestSetup
      */
     public final TestConfiguration getTestConfiguration()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
     	return TestConfiguration.getCurrent();
     }
     
@@ -69,6 +71,8 @@ public abstract class BaseJDBCTestSetup
     			return conn;
     		conn = null;
     	}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
     	return conn = getTestConfiguration().openDefaultConnection();
     }
     
@@ -90,6 +94,7 @@ public abstract class BaseJDBCTestSetup
     protected void tearDown()
     throws java.lang.Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5705
         clearConnection();
     }
 
@@ -99,6 +104,8 @@ public abstract class BaseJDBCTestSetup
      */
     void clearConnection() throws SQLException {
         JDBC.cleanup(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         conn = null;
     }
 }

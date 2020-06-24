@@ -64,6 +64,7 @@ public class NetHarnessJavaTest extends HarnessJavaTest {
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("derbynet: old harness java tests");
         

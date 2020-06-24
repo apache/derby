@@ -77,6 +77,7 @@ public class T_TWC
 		switchTransactionContext();
 		try {
 		if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 			SanityManager.ASSERT(
 				!lf.areLocksHeld(tran.getCompatibilitySpace()),
 				"Transaction holds locks.");

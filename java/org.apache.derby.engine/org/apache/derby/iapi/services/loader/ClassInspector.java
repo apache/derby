@@ -78,6 +78,7 @@ public class ClassInspector
 	public boolean instanceOf(String className, Object obj)
 		throws ClassNotFoundException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Class<?> clazz = getClass(className);
 		// is className an untyped null
 		if (clazz == null)
@@ -99,6 +100,7 @@ public class ClassInspector
 	{
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Class<?> toClass = getClass(toClassName);
 			// is toClass an untyped null
 			if (toClass == null) {
@@ -132,6 +134,7 @@ public class ClassInspector
 	public boolean accessible(String className)
 		throws ClassNotFoundException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Class<?> theClass = getClass(className);
 		if (theClass == null)
 			return false;
@@ -362,6 +365,7 @@ public class ClassInspector
 		Exception e = null;
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Class<?> receiverClass = getClass(receiverType);
 			if (receiverClass == null)
 				return null;
@@ -451,6 +455,8 @@ public class ClassInspector
 									boolean[] isParam)
 						throws ClassNotFoundException, StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Class<?> receiverClass = getClass(receiverType);
 		if (receiverClass == null)
 			return null;
@@ -520,6 +526,7 @@ public class ClassInspector
         throws StandardException
 	{
         if ( implementation == null ) { return null; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6243
 
         Type[]  genericInterfaces = implementation.getGenericInterfaces();
         for ( Type genericInterface : genericInterfaces )
@@ -573,6 +580,7 @@ public class ClassInspector
      * @throws StandardException on error
 	 */
     public Class<?>[] getGenericParameterTypes(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Class parameterizedType, Class implementation )
         throws StandardException
 	{
@@ -596,6 +604,7 @@ public class ClassInspector
             return null;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return parameterTypes.toArray(new Class<?>[parameterTypes.size()]);
     }
 
@@ -863,6 +872,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		if (ambiguous)
 		{
 			/* Put the parameter type names into a single string */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 			StringBuffer parmTypesString = new StringBuffer();
 			for (int i = 0; i < paramClasses.length; i++)
 			{
@@ -899,6 +909,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
         @param className Name of class
         @return the class
 		@exception ClassNotFoundException Class cannot be found, or
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
 		a SecurityException or LinkageException was thrown loading the class.
 	*/
 	public Class<?> getClass(String className) throws ClassNotFoundException {
@@ -1055,6 +1066,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
         //
         // OUT and INOUT args are arrays. Compare the cell types rather than the array types.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4958
         if ( fromClass.isArray() && toClass.isArray() )
         {
             return classConvertableFromTo( fromClass.getComponentType(), toClass.getComponentType(), mixTypes );
@@ -1185,6 +1197,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
      * parameterized type.
      */
     private Class[][] findTypeBounds(ParameterizedType pt) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6243
         Type[] actualTypeArguments = pt.getActualTypeArguments();
         int argCount = actualTypeArguments.length;
         Class[][] retval = new Class[argCount][];

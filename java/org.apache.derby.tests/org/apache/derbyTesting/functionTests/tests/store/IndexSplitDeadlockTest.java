@@ -70,6 +70,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         // Rollback all uncommitted operations so that we don't hold any
         // locks that may block the other threads.
         rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (AsyncThread thread : threads) {
             thread.waitFor();
         }
@@ -78,6 +79,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         // All the other threads have finished. Now, remove everything from
         // the APP schema so that we don't leave anything around for subsequent
         // tests.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4218
         setAutoCommit(false); // required by JDBC.dropSchema()
         JDBC.dropSchema(getConnection().getMetaData(), "APP");
 
@@ -362,6 +364,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         // insert more values. Both threads should wait until the other thread
         // has reached the barrier before continuing.
         final Barrier barrier = new Barrier(2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5440
 
         // Lock a row on the first page in a different thread to stop the
         // index scan. Then split the first leaf by inserting many values
@@ -377,6 +380,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
                 // it can go ahead with the index scan. Wait here until the
                 // main thread has started the scan.
                 barrier.await();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5440
 
                 // The main thread has started the index scan. Give it a
                 // second to get to the row we have locked.
@@ -395,6 +399,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         });
 
         // Prepare the index scan.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5440
         ResultSet rs = s.executeQuery(
                 "select * from t --DERBY-PROPERTIES constraint=C");
 
@@ -480,6 +485,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         // thread. They should both wait for the other thread to reach the
         // barrier point before continuing.
         final Barrier barrier = new Barrier(2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5440
 
         // Hold a lock in a different thread to stop the index scan, then
         // split the first leaf (on which the scan is positioned) before the
@@ -493,6 +499,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
                 // Tell the main thread we have locked the row, and wait for
                 // it to start the index scan.
                 barrier.await();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5440
 
                 // Give the index scan time to get to the row we have locked.
                 Thread.sleep(1000);
@@ -648,6 +655,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         // when the other thread is ready. Don't wait more than a minute
         // as something must have gone wrong.
         int totalWait = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6146
         do {
             totalWait += 500;
             Thread.sleep(500);
@@ -667,6 +675,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     private int numlocks() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6146
         Statement s = createStatement();
         ResultSet rs = s.executeQuery("SELECT count(*) from syscs_diag.lock_table");
         rs.next();

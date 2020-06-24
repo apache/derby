@@ -38,6 +38,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class StatementJdbc30Test extends BaseJDBCTestCase {
     private static final String CLIENT_SUITE_NAME = 
         "StatementJdbc30Test:client";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3198
 
     /**
      * Create a test with the given name.
@@ -56,20 +57,24 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("StatementJdbc30Test");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("StatementJdbc30Test:embedded"));
         suite
                 .addTest(TestConfiguration
                         .clientServerDecorator(baseSuite(CLIENT_SUITE_NAME)));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3198
 
         return suite;
     }
 
     private static Test baseSuite(String name) {
         BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTestSuite(StatementJdbc30Test.class);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3198
         if  (name.equals(CLIENT_SUITE_NAME)) {
             // These test CAN be run in embedded mode as well, but
             // they're only meaningful in c/s mode and also take quite
@@ -127,6 +132,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
 
         Statement stmt = createStatement();
         assertFalse(stmt.getMoreResults(Statement.CLOSE_CURRENT_RESULT));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 
     }
 
@@ -140,6 +146,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
 
         Statement stmt = createStatement();
         stmt.executeUpdate("insert into tab1 values(2, 3, 4.1)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                 Statement.NO_GENERATED_KEYS);
         assertNull("Expected NULL ResultSet after stmt.execute()", stmt
                 .getGeneratedKeys());
@@ -199,6 +206,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
     public void testSelectNoGenKeys() throws SQLException {
 
         Statement stmt = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         stmt.execute("select * from tab1", Statement.NO_GENERATED_KEYS);
         assertNull("Expected NULL ResultSet after stmt.execute()", stmt
                 .getGeneratedKeys());
@@ -222,6 +230,8 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
             stmt.execute("insert into tab1 values(2, 3, 4.1)", columnIndexes);
             fail("FAIL -- executeUpdate should have failed...");
         } catch (SQLException ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2942
+//IC see: https://issues.apache.org/jira/browse/DERBY-2942
             assertFailedExecuteUpdateForColumnIndex(ex);
         }
     }
@@ -236,6 +246,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
         // In network client we only check columnIndex array length,
         // so throw a different error.
         if (usingDerbyNetClient()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
             assertSQLState("X0X0D", ex);
         } else {
             assertSQLState("X0X0E", ex);
@@ -252,6 +263,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
         // Derby client complains that the array is too long.
         // Embedded is smart enough to know which column caused the problem.
         if (usingDerbyNetClient()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
             assertSQLState("X0X0D", ex);
         } else {
             assertSQLState("X0X0F", ex);
@@ -275,6 +287,8 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
                         columnNames);
                 fail("FAIL -- executeUpdate should have failed...");
             } catch (SQLException ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2942
+//IC see: https://issues.apache.org/jira/browse/DERBY-2942
                 assertFailedExecuteUpdateForColumnName(ex);
             }
         
@@ -285,6 +299,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
      * more than 32000 times, even when query timeout is enabled.
      */
     public void xtestMultiExecWithQueryTimeout() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3198
         Statement stmt = createStatement();
         stmt.setQueryTimeout(10);
         for (int i = 0; i < 33000; ++i) {

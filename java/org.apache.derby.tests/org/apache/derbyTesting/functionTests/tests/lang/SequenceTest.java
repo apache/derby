@@ -57,6 +57,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
      * Construct top level suite in this JUnit test
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(SequenceTest.class, "Sequence Test");
 
@@ -182,6 +183,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         Connection alphaCon = openUserConnection(ALPHA);
         Statement stmtAlpha = alphaCon.createStatement();
         stmtAlpha.executeUpdate("CREATE SEQUENCE alpha_seq");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4393
 
         Connection betaCon = openUserConnection(BETA);
         Statement stmtBeta = betaCon.createStatement();
@@ -289,6 +291,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         Statement s = createStatement();
         s.executeUpdate("CREATE SEQUENCE mySeq1");
         s.execute("SELECT NEXT VALUE FOR mySeq1 from sys.systables");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5116
         s.execute("DROP SEQUENCE mySeq1 restrict");
     }
 
@@ -363,6 +366,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
     public void test_12_clauseOrder() throws Exception
     {
         Connection conn = openUserConnection(ALPHA);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4539
 
         goodSequence
             (
@@ -554,6 +558,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
     public void test_15_5254() throws Exception
     {
         Connection conn = openUserConnection(ALPHA);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5254
 
         goodStatement( conn, "create table t_5254( cycle int, minvalue int, maxvalue int )" );
         goodStatement( conn, "drop table t_5254" );
@@ -648,6 +653,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
      */
     public void test_17_6554() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
         Connection alphaConn = openUserConnection( ALPHA );
         Connection betaConn = openUserConnection( BETA );
 
@@ -710,6 +716,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
     public void test_17_6554_cacheEviction() throws Exception
     {
         Connection control = openUserConnection( TEST_DBO );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
 
         // set the size of the sequence generator cache to 5 entries.
         // bounce the database so that the value takes effect.

@@ -102,6 +102,7 @@ public class ShExLockable implements Lockable
             return false;
         // No containerId, but need something in there so it can print
 		attributes.put(VirtualLockTable.CONTAINERID, -1); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		attributes.put(VirtualLockTable.LOCKNAME, this.toString() );
 

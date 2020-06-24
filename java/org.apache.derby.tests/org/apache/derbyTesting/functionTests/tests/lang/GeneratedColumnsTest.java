@@ -92,6 +92,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             GeneratedColumnsTest.class);
 
@@ -119,6 +120,9 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      * DERBY-6414 - support updating identity columns with DEFAULT keyword.
      */
     public void testDerby_6414() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         Statement s = createStatement();
         ResultSet rs = null;
         setAutoCommit(false);
@@ -510,6 +514,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      */
     public void testDerby_4426() throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
         Statement s = createStatement();
         ResultSet rs = null;
         setAutoCommit(false);
@@ -602,6 +607,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
             RoutineAliasInfo    rai = (RoutineAliasInfo) rs.getObject( 5 );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3570
             if ( isSystemAlias ) { assertFalse( aliasName, rai.isDeterministic() ); }
         }
 
@@ -1077,6 +1083,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3931
              "create function f_bt_minus\n" +
              "(\n" +
              "    a int\n" +
@@ -1134,6 +1141,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3931
              "create table t1_trig( a int, b int generated always as ( f_bt_minus(a) ), c int )\n"
              );
         goodStatement
@@ -1257,6 +1265,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
                  { "before_insert_statement_trigger: [ -1, -1, -1 ]" },
                  { "after_insert_row_trigger: [ 1, -1, null ]" },
                  { "after_insert_row_trigger: [ 2, -2, null ]" },
+//IC see: https://issues.apache.org/jira/browse/DERBY-4779
                  { "after_insert_row_trigger: [ 3, -3, null ]" },
                  { "after_insert_statement_trigger: [ -1, -1, -1 ]" },
              }
@@ -1310,6 +1319,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3931
              "create function f_bfk_minus\n" +
              "(\n" +
              "    a int\n" +
@@ -1339,6 +1349,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3931
              "create table t4_for( a int, b int generated always as ( f_bfk_minus(a) ) references t3_for( b ), c int )"
              );
         
@@ -1457,6 +1468,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_010_updateDefaultLiteral()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3922
         throws Exception
     {
         Connection  conn = getConnection();
@@ -2691,6 +2703,8 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              "create table t_cc_varchar\n" +
              "(\n" +
              "    a varchar( 10 ),\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
              "    b char( 5 ) generated always as( cast(upper( a ) as char(5))),\n" +
              "    c char( 10 ) generated always as( upper( a ) ),\n" +
              "    d char( 15 ) generated always as( upper( a ) ),\n" +
@@ -2797,6 +2811,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
              "create table t_atac_3( a varchar( 5 ), b varchar( 5 ) generated always as ( cast(upper( a ) as varchar(5)) ) )"
              );
         goodStatement
@@ -3783,6 +3798,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_022_omitDatatype()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
         throws Exception
     {
         Connection  conn = getConnection();
@@ -4627,6 +4643,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_023_drivingSelect()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3950
         throws Exception
     {
         Connection  conn = getConnection();
@@ -5529,6 +5546,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_029_derby_4145()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4145
         throws Exception
     {
         expectCompilationError
@@ -5544,6 +5562,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_030_derby_4146()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4146
         throws Exception
     {
         Connection  conn = getConnection();
@@ -5714,6 +5733,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         assertResults
             (
                 conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4460
                 "select * from t_4413 order by i, j",
                 new String[][]
                 {
@@ -5729,6 +5749,8 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     }
 
     public void test_derby_4425()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4425
+//IC see: https://issues.apache.org/jira/browse/DERBY-4419
         throws Exception
     {
         Connection conn = getConnection();
@@ -5746,6 +5768,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     // Derby 4779
     public void test_derby_4779()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4779
         throws Exception
     {
     	Connection conn = getConnection();
@@ -5762,6 +5785,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
          "parameter style java\n" +
          "deterministic\n" +
          "no sql\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5304
          "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.signum'\n"
         );
 
@@ -5811,6 +5835,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     // Derby 5749
     public void test_derby_5749()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
         throws Exception
     {
         Connection conn = getConnection();
@@ -5848,6 +5873,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     // Derby 6346
     public void test_derby_6346()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6346
         throws Exception
     {
         Connection conn = getConnection();
@@ -6108,6 +6134,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     // read the counter of the number of times that the minus function has been
     // called
     private int readMinusCounter( Connection conn )
+//IC see: https://issues.apache.org/jira/browse/DERBY-3932
         throws Exception
     {
         PreparedStatement   ps = chattyPrepare( conn, "values ( f_readMinusCounter() )" );
@@ -6211,6 +6238,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         _minusCounter++;
 
         if ( a == null ) { return null; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         else { return -a.intValue(); }
     }
     
@@ -6221,6 +6249,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     public static   int signum( int i )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5304
         if ( i > 0 ) { return 1; }
         else if ( i == 0 ) { return 0; }
         else { return -1; }
@@ -6238,6 +6267,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
         for ( int i = 0; i < count; i++ )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             rows[ i ] = new String[] { _triggerReports.get( i ) };
         }
 

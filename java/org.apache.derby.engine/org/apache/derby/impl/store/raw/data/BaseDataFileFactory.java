@@ -116,6 +116,7 @@ that file was made to inherit from this one.
 **/
 
 public class BaseDataFileFactory
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     implements DataFactory, CacheableFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction<Object>
 {
 
@@ -239,6 +240,7 @@ public class BaseDataFileFactory
 	public BaseDataFileFactory() 
     {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6636
         SecurityUtil.checkDerbyInternalsPrivilege();
 	}
 
@@ -253,6 +255,7 @@ public class BaseDataFileFactory
 		if (serviceType == null)
 			return false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 		if (!handleServiceType(serviceType))
 			return false;
 
@@ -266,10 +269,13 @@ public class BaseDataFileFactory
         throws StandardException 
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		jbmsVersion = getMonitor().getEngineVersion();
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-4715
 		jvmVersion = buildJvmVersion();
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5240
 		osInfo = buildOSinfo();
 		
 		jarCPath = jarClassPath(getClass());
@@ -277,6 +283,7 @@ public class BaseDataFileFactory
 		dataDirectory = startParams.getProperty(PersistentService.ROOT);
 
 		UUIDFactory uf = getMonitor().getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		identifier = uf.createUUID();
 
@@ -310,6 +317,7 @@ public class BaseDataFileFactory
         }
 
         // you can't encrypt a database if the Lucene plugin is loaded
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         if ( luceneLoaded() )
         {
             String  encryptionProp = startParams.getProperty( Attribute.DATA_ENCRYPTION );
@@ -359,6 +367,7 @@ public class BaseDataFileFactory
             {
                 // restoreFrom and createFrom operations also need to know if database 
                 // is encrypted
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
                 String dataEncryption = 
                     startParams.getProperty(Attribute.DATA_ENCRYPTION);
                 databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
@@ -391,13 +400,16 @@ public class BaseDataFileFactory
 
 		//Log the OS info
 		logMsg(osInfo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5240
 
 		//Log derby.system.home It will have null value if user didn't set it
+//IC see: https://issues.apache.org/jira/browse/DERBY-4853
 		logMsg(Property.SYSTEM_HOME_PROPERTY+"=" + 
 				PropertyUtil.getSystemProperty(Property.SYSTEM_HOME_PROPERTY));
 		
 		//Log properties related to redirection of derby.log 
 		String target = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 			PropertyUtil.getSystemProperty(Property.ERRORLOG_STYLE_PROPERTY);
 		if (target != null)
 			logMsg(Property.ERRORLOG_STYLE_PROPERTY+"=" + target);
@@ -424,8 +436,10 @@ public class BaseDataFileFactory
 
 
 		CacheFactory cf = (CacheFactory) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             startSystemModule(
                 org.apache.derby.shared.common.reference.Module.CacheFactory);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         // Initialize the page cache
 	    int pageCacheSize = getIntParameter(
@@ -436,6 +450,7 @@ public class BaseDataFileFactory
                     RawStoreFactory.PAGE_CACHE_SIZE_MAXIMUM);
 
 		pageCache =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3734
             cf.newCacheManager(
                 this, "PageCache", pageCacheSize / 2, pageCacheSize);
 
@@ -453,6 +468,7 @@ public class BaseDataFileFactory
 
         // Register MBeans that allow users to monitor the page cache
         // and the container cache.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         pageCache.registerMBean(dataDirectory);
         containerCache.registerMBean(dataDirectory);
 
@@ -466,10 +482,12 @@ public class BaseDataFileFactory
 		}
 
 		droppedTableStubInfo = new Hashtable<LogInstant,Object[]>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         // If derby.system.durability=test then set flags to disable sync of
         // data pages at allocation when file is grown, disable sync of data
         // writes during checkpoint
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
         if (Property.DURABILITY_TESTMODE_NO_SYNC.equalsIgnoreCase(
             PropertyUtil.getSystemProperty(Property.DURABILITY_PROPERTY)))
         {
@@ -519,10 +537,14 @@ public class BaseDataFileFactory
 		}
 
 		boolean logBootTrace = PropertyUtil.getSystemBoolean(Property.LOG_BOOT_TRACE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4873
 		logMsg(LINE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4755
 		logMsg(new Date() +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4598
+//IC see: https://issues.apache.org/jira/browse/DERBY-4601
                     getIdentifier(),
                     getRootDirectory(),
                     // print object and ide of classloader.
@@ -556,6 +578,7 @@ public class BaseDataFileFactory
 
 		if (isReadOnly())		// do enough to close all files, then return 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5916
 			if (storageFactory != null)
 				storageFactory.shutdown();
 			return;
@@ -727,9 +750,11 @@ public class BaseDataFileFactory
                     (ContainerHandle.MODE_UNLOGGED | 
                      ContainerHandle.MODE_CREATE_UNLOGGED);
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 
 				// make sure everything is logged if logArchived is turn on
 				// clear all UNLOGGED flag
+//IC see: https://issues.apache.org/jira/browse/DERBY-3551
 				if (logFactory.logArchived() || 
                                         logFactory.inReplicationMasterMode()) {
 					mode &= ~(ContainerHandle.MODE_UNLOGGED |
@@ -747,6 +772,7 @@ public class BaseDataFileFactory
 						((mode & ContainerHandle.MODE_CREATE_UNLOGGED) == 
 						 ContainerHandle.MODE_CREATE_UNLOGGED))									   
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 						if (!t.blockBackup(false)) {
 							// when a backup is in progress transaction can not
                             // block the backup, so convert  unlogged opens 
@@ -1513,6 +1539,7 @@ public class BaseDataFileFactory
     Cacheable newContainerObject()
     {
         if( supportsRandomAccess)
+//IC see: https://issues.apache.org/jira/browse/DERBY-801
             return newRAFContainer(this);
         else
             return new InputStreamContainer( this);
@@ -1662,6 +1689,7 @@ public class BaseDataFileFactory
 	*/
 	private synchronized void removeStubs()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5916
         if( storageFactory != null) 
         {
             actionCode = REMOVE_STUBS_ACTION;
@@ -1720,6 +1748,7 @@ public class BaseDataFileFactory
 		{
 			synchronized(droppedTableStubInfo)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				for (Enumeration<LogInstant> e = droppedTableStubInfo.keys(); 
                      e.hasMoreElements(); ) 
 				{
@@ -1807,6 +1836,7 @@ public class BaseDataFileFactory
         }
 
 		logFactory = (LogFactory)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			bootServiceModule(
                 create, this, 
                 rawStoreFactory.getLogFactoryModule(), startParams);
@@ -1822,6 +1852,7 @@ public class BaseDataFileFactory
         try
         {
             PersistentService ps = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 getMonitor().getServiceProvider(type);
             return ps != null && ps.hasStorageFactory();
         }
@@ -1963,6 +1994,7 @@ public class BaseDataFileFactory
             // write it out for future reference
             fileLockOnDB.writeUTF(myUUID.toString()); 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
             fileLockOnDB.sync();
             fileLockOnDB.seek(0);
             // check the UUID
@@ -2021,6 +2053,7 @@ public class BaseDataFileFactory
                 {
 
                     String warningMsg = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                       MessageService.getTextMessage(
                           SQLState.DATA_MULTIPLE_JBMS_WARNING, args);
 
@@ -2045,10 +2078,13 @@ public class BaseDataFileFactory
                     fileLockOnDB.close();
                 fileLockOnDB = fileLock.getRandomAccessFile( "rw");
                 fileLock.limitAccessToOwner();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
                 // write it out for future reference
                 fileLockOnDB.writeUTF(myUUID.toString()); 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
                 fileLockOnDB.sync();
                 fileLockOnDB.close();
             }
@@ -2121,6 +2157,7 @@ public class BaseDataFileFactory
             StorageFile fileLock = 
                 storageFactory.newStorageFile(DB_LOCKFILE_NAME);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-32
             fileLock.delete();
         }
 
@@ -2148,6 +2185,7 @@ public class BaseDataFileFactory
     /** {@inheritDoc} */
     public void setDatabaseEncrypted(boolean isEncrypted)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         databaseEncrypted = isEncrypted;
 	}
 
@@ -2161,6 +2199,7 @@ public class BaseDataFileFactory
 		 throws StandardException
 	{
 		return rawStoreFactory.encrypt(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
                     cleartext, offset, length, 
                     ciphertext, outputOffset, 
                     newEngine);
@@ -2181,6 +2220,7 @@ public class BaseDataFileFactory
     /** {@inheritDoc} */
     public void decryptAllContainers(RawTransaction t)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         EncryptOrDecryptData containerDecrypter = new EncryptOrDecryptData(this);
         containerDecrypter.decryptAllContainers(t);
     }
@@ -2209,10 +2249,12 @@ public class BaseDataFileFactory
      **/
     private static String jarClassPath(final Class cls)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return AccessController.doPrivileged( new PrivilegedAction<String>()
         {
           public String run()
           {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4715
               CodeSource cs = null;
               try {
                   cs = cls.getProtectionDomain().getCodeSource();
@@ -2221,6 +2263,7 @@ public class BaseDataFileFactory
                   return se.getMessage();
               }
   
+//IC see: https://issues.apache.org/jira/browse/DERBY-4944
               if ( cs == null || cs.getLocation() == null )
                   return null;        
       
@@ -2238,8 +2281,10 @@ public class BaseDataFileFactory
      * security exception.
      */
     private static String buildOSinfo () {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     	return AccessController.doPrivileged(new PrivilegedAction<String>(){
     		public String run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5240
     			String osInfo = "";
     			try {
     				String currentProp = PropertyUtil.getSystemProperty("os.name");
@@ -2265,6 +2310,7 @@ public class BaseDataFileFactory
      * security exception.
      */
     private static String buildJvmVersion () {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return AccessController.doPrivileged( new PrivilegedAction<String>()
         {
            public String run()
@@ -2278,6 +2324,7 @@ public class BaseDataFileFactory
                      jvmversion += "\njava.runtime.version=" + currentProp;
                  if ((currentProp = PropertyUtil.getSystemProperty("java.fullversion")) != null)
                      jvmversion += "\njava.fullversion=" + currentProp ;         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4853
                  if ((currentProp = PropertyUtil.getSystemProperty("user.dir")) != null)
                      jvmversion += "\nuser.dir=" + currentProp ;         
               }
@@ -2338,6 +2385,7 @@ public class BaseDataFileFactory
 	void fileToRemove( StorageFile file, boolean remove) 
     {
 		if (postRecoveryRemovedFiles == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			postRecoveryRemovedFiles = new Hashtable<String,StorageFile>();
         String path = null;
         synchronized( this)
@@ -2399,6 +2447,7 @@ public class BaseDataFileFactory
      * Set up the cache cleaner for the container cache and the page cache.
      */
     public void setupCacheCleaner(DaemonService daemon) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3131
         containerCache.useDaemonService(daemon);
         pageCache.useDaemonService(daemon);
     }
@@ -2471,6 +2520,8 @@ public class BaseDataFileFactory
 				}
 				catch (InterruptedException ie)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
 				}
 			}
@@ -2509,6 +2560,7 @@ public class BaseDataFileFactory
 		 * transaction log.
 		 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		String[] files = getContainerNames();
 		
 		if (files != null) {
@@ -2583,6 +2635,7 @@ public class BaseDataFileFactory
      * with other privileged actions execution in this class.
      * @return An array of all the file names in seg0.
      **/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
     synchronized String[] getContainerNames()
 	{
         actionCode = GET_CONTAINER_NAMES_ACTION;
@@ -2622,6 +2675,7 @@ public class BaseDataFileFactory
          * This will fail with a security exception unless the database engine 
          * and all its callers have permission to read the backup directory.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         String[] bfilelist = AccessController.doPrivileged(
                                             new PrivilegedAction<String[]>() {
                                                 public String[] run() {
@@ -2640,8 +2694,10 @@ public class BaseDataFileFactory
                     final File bsegdir = new File(backupRoot , bfilelist[i]);
                     boolean bsegdirExists = (
                             AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                                 new PrivilegedAction<Boolean>() {
                                     public Boolean run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5641
                                         return Boolean.valueOf(bsegdir.exists());
                                     }
                             })).booleanValue();
@@ -2651,6 +2707,7 @@ public class BaseDataFileFactory
                             AccessController.doPrivileged(
                             new PrivilegedAction<Boolean>() {
                                 public Boolean run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5641
                                     return Boolean.valueOf(bsegdir.isDirectory());
                                 }
                             })).booleanValue();
@@ -2710,6 +2767,7 @@ public class BaseDataFileFactory
             for (int i = 0; i < cfilelist.length; i++) 
             {
                 //delete only the seg* directories in the database home
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 if(cfilelist[i].startsWith("seg") || Database.LUCENE_DIR.equals( cfilelist[i] ))
                 {
                     csegdir = storageFactory.newStorageFile( cfilelist[i]);
@@ -2728,6 +2786,7 @@ public class BaseDataFileFactory
         for (int i = 0; i < bfilelist.length; i++) 
         {
             //copy only the seg* directories and copy them from backup
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             if (bfilelist[i].startsWith("seg") || Database.LUCENE_DIR.equals( bfilelist[i] ))
             {
                 csegdir = storageFactory.newStorageFile( bfilelist[i]);
@@ -2777,6 +2836,7 @@ public class BaseDataFileFactory
 
     /** Return true if the Lucene plugin is loaded */
     public  boolean luceneLoaded()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws StandardException
     {
         try {
@@ -2922,6 +2982,7 @@ public class BaseDataFileFactory
                     }
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             return maxnum;
 		} // end of case FIND_MAX_CONTAINER_ID_ACTION
 
@@ -2941,6 +3002,7 @@ public class BaseDataFileFactory
 
         case POST_RECOVERY_REMOVE_ACTION:
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			for (Enumeration<StorageFile> e = postRecoveryRemovedFiles.elements(); 
                     e.hasMoreElements(); )
             {
@@ -2976,6 +3038,7 @@ public class BaseDataFileFactory
         case RESTORE_DATA_DIRECTORY_ACTION:
             privRestoreDataDirectory();
             return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		case GET_CONTAINER_NAMES_ACTION:
         {
             StorageFile seg = storageFactory.newStorageFile( "seg0");
@@ -2997,6 +3060,7 @@ public class BaseDataFileFactory
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

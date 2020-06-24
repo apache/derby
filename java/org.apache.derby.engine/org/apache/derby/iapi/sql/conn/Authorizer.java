@@ -128,6 +128,7 @@ public interface Authorizer
 
 	/**
 	  Verify the connected user possesses the indicated permissions
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
 
 	  @param requiredPermissionsList    the required permissions
 	  @param activation holds the execution logic

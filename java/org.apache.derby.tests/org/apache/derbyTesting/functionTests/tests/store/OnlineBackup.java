@@ -42,6 +42,7 @@ public class OnlineBackup implements Runnable{
     private Throwable backupError = null;
     private String backupPath;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
 	OnlineBackup(String dbName, String backupPath) {
 		this.dbName = dbName;
         this.backupPath = backupPath;
@@ -55,6 +56,7 @@ public class OnlineBackup implements Runnable{
 	 * 
 	 */
 	public void run()	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
         backupFailed = false;
 		try {
 			performBackup();
@@ -75,6 +77,7 @@ public class OnlineBackup implements Runnable{
 	 * Backup the database
 	 */
 	void performBackup() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 		Connection conn = TestUtil.getConnection(dbName , "");
 		CallableStatement backupStmt = 	
 			conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
@@ -104,6 +107,7 @@ public class OnlineBackup implements Runnable{
 	public void waitForBackupToBegin() throws Exception{
 		synchronized(this) {
 			//wait for backup to begin
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
 			while (!beginBackup) {
                 // if the backup failed for some reason throw error, don't go
                 // into wait state.
@@ -128,6 +132,7 @@ public class OnlineBackup implements Runnable{
 				} else {
 
 					//wait for backup to finish
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
 					while (!endBackup) 
                     {
                         // if the backup failed for some reason throw error, don't go
@@ -159,6 +164,7 @@ public class OnlineBackup implements Runnable{
 	 */
 	public void createFromBackup(String newDbName) throws SQLException {
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
         Connection conn = TestUtil.getConnection(newDbName,  
                                         "createFrom=" +
                                         backupPath + "/" + 
@@ -173,6 +179,7 @@ public class OnlineBackup implements Runnable{
      */
     public void restoreFromBackup() throws SQLException {
        
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
         Connection conn = TestUtil.getConnection(dbName,  
                                         "restoreFrom=" +
                                         backupPath + "/" + 

@@ -77,6 +77,7 @@ public abstract class LoadedGeneratedClass
 			t = iae;
 		} catch (java.lang.reflect.InvocationTargetException ite) {
 			t = ite;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		} catch (NoSuchMethodException le) {
 			t = le;
 		} catch (LinkageError le) {

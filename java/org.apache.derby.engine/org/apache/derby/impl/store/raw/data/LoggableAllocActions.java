@@ -120,6 +120,7 @@ public class LoggableAllocActions implements AllocationActions {
     int             num_pages_truncated)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         Loggable lop = null;
         
         // DERBY-606. As part of the fix for DERBY-606, negative values can be 

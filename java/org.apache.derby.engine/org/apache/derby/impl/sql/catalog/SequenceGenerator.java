@@ -238,6 +238,7 @@ public class SequenceGenerator
     {
         Long    startValue;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         if ( restart ) { startValue = _RESTART_VALUE; }
         else if ( _isExhausted ) { startValue = null; }
         else { startValue = _currentValue; }
@@ -328,6 +329,7 @@ public class SequenceGenerator
     {
         Long currentValue = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         if ( !_isExhausted ) { currentValue = _currentValue; }
         
         return currentValue;

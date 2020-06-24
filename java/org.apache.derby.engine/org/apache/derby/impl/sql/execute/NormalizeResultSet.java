@@ -40,6 +40,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * result set for the entire statement.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class NormalizeResultSet extends NoPutResultSetImpl
 	implements CursorResultSet
 {
@@ -175,6 +176,7 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -443,6 +445,7 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	 * @see NoPutResultSet#updateRow
 	 */
 	public void updateRow (ExecRow row, RowChanger rowChanger)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 			throws StandardException {
 		source.updateRow(row, rowChanger);
 	}
@@ -451,6 +454,7 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	 * @see NoPutResultSet#markRowAsDeleted
 	 */
 	public void markRowAsDeleted() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		source.markRowAsDeleted();
 	}
 

@@ -74,6 +74,7 @@ public class OfflineBackupTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         if (JDBC.vmSupportsJSR169()) {
             return new BaseTestSuite(
                 "Empty OfflineBackupTest (uses DriverManager)");

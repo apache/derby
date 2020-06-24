@@ -160,6 +160,7 @@ public class MasterController
      * Will stop the replication master service.
      */
     public void stop() { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3447
         try {
             stopMaster();
         } catch (StandardException se) {
@@ -204,6 +205,7 @@ public class MasterController
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
             slaveAddr = new SlaveAddress(slavehost, slaveport);
         } catch (UnknownHostException uhe) {
             throw StandardException.newException
@@ -217,22 +219,27 @@ public class MasterController
         dataFactory = dataFac;
         logFactory = logFac;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
         repLogger = new ReplicationLogger(dbname);
         getMasterProperties();
         logBuffer = new ReplicationLogBuffer(logBufferSize, this);
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3051
             logFactory.startReplicationMasterRole(this);
         
             rawStoreFactory.unfreeze();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3384
 
             setupConnection();
 
             if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
                 logShipper = new AsynchronousLogShipper(logBuffer,
                                                         transmitter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
                                                         this,
                                                         repLogger);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3447
                 logShipper.setDaemon(true);
                 logShipper.start();
             }
@@ -272,11 +279,13 @@ public class MasterController
         try {
             logShipper.flushBuffer();
         } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
             repLogger.
                 logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, ioe);
         } catch(StandardException se) {
             repLogger.
                 logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, se);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3364
         } finally {
             teardownNetwork();
         }
@@ -298,6 +307,7 @@ public class MasterController
 
         //acknowledgment returned from the slave containing
         //the status of the failover performed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3254
         ReplicationMessage ack = null;
         
         //A failover stops the master controller and shuts down
@@ -315,6 +325,7 @@ public class MasterController
             //acknowledgement.
             ReplicationMessage mesg = new ReplicationMessage(
                         ReplicationMessage.TYPE_FAILOVER, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
             ack = transmitter.sendMessageWaitForReply(mesg);
         } catch (IOException ioe) {
             handleFailoverFailure(ioe);
@@ -334,12 +345,14 @@ public class MasterController
             //The exception thrown is of Database Severity, this shuts
             //down the master database.
             teardownNetwork();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3364
 
             //If we require an exception of Database Severity to shutdown the
             //database to shutdown the database we need to unfreeze first
             //before throwing the exception. Unless we unfreeze the shutdown
             //hangs.
             rawStoreFactory.unfreeze();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3428
 
             throw StandardException.newException
                     (SQLState.REPLICATION_FAILOVER_SUCCESSFUL, dbname);  
@@ -355,6 +368,7 @@ public class MasterController
      * Load relevant system property: replication log buffer size
      */
     private void getMasterProperties() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
         logBufferSize =
             PropertyUtil.getSystemInt(Property.REPLICATION_LOG_BUFFER_SIZE,
                                       DEFAULT_LOG_BUFFER_SIZE);
@@ -390,6 +404,7 @@ public class MasterController
      */
     private void handleFailoverFailure(Throwable t) 
     throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3364
         teardownNetwork();
         rawStoreFactory.unfreeze();
         if (t != null) {
@@ -414,16 +429,19 @@ public class MasterController
      **/
     public void appendLog(long greatestInstant,
                           byte[] log, int logOffset, int logLength){
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
 
         try {
             logBuffer.appendLog(greatestInstant, log, logOffset, logLength);
         } catch (LogBufferFullException lbfe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3064
             try {
                 logShipper.forceFlush();
                 // Either the forceFlush succeeded in sending a chunk of log
                 // (making room for this log chunk in the buffer), or
                 // forceFlush did not succeed (in which case replication is
                 // stopped)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3567
                 logBuffer.appendLog(greatestInstant, log,
                                     logOffset, logLength);
             } catch (LogBufferFullException lbfe2) {
@@ -475,6 +493,7 @@ public class MasterController
             if (transmitter != null) {
                 transmitter.tearDown();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
             transmitter = new ReplicationMessageTransmit(slaveAddr);
             
             // getHighestShippedInstant is -1 until the first log
@@ -499,6 +518,7 @@ public class MasterController
         } catch (IOException ioe) {
             throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, ioe, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
                      dbname, getHostName(), String.valueOf(getPortNumber()));
         } catch (StandardException se) {
             throw se;
@@ -519,14 +539,17 @@ public class MasterController
      * @return an instance of the transmitter used to transmit messages to the
      *         slave.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3509
     ReplicationMessageTransmit handleExceptions(Exception exception) {
         if (exception instanceof IOException) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
             repLogger.logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION,
                                exception);
             Monitor.logTextMessage(MessageId.REPLICATION_MASTER_RECONN, dbname);
             
             while (active) {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
                     transmitter = new ReplicationMessageTransmit(slaveAddr);
                     // see comment in setupConnection
                     if (logShipper != null &&
@@ -549,6 +572,7 @@ public class MasterController
                     continue;
                 } catch (Exception e) {
                     printStackAndStopMaster(e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3509
                     return null;
                 }
             }
@@ -581,6 +605,7 @@ public class MasterController
      * Used to notify the log shipper that a log buffer element is full.
      */
     public void workToDo() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3359
         logShipper.workToDo();
     }
 
@@ -591,6 +616,7 @@ public class MasterController
     private void teardownNetwork() {
 
         if (logShipper != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3235
             logShipper.stopLogShipment();
         }
 
@@ -621,6 +647,7 @@ public class MasterController
      * 
      * @return a master database name
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3437
     String getDbName() {
         return this.dbname;
     }
@@ -632,6 +659,7 @@ public class MasterController
      *         connected to.
      */
     private String getHostName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
         return slaveAddr.getHostAddress().getHostName();
     }
     

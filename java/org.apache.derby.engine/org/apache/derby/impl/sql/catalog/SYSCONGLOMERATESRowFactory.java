@@ -106,11 +106,13 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		,"80000016-00d0-fd77-3ed8-000a0a0b1900"	// SYSCONGLOMERATES_INDEX3
 	};
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 	SYSCONGLOMERATESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
 		initInfo(SYSCONGLOMERATES_COLUMN_COUNT, 
 				 TABLENAME_STRING, indexColumnPositions, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 				 uniqueness, uuids );
 	}
 
@@ -155,6 +157,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 				schemaID = conglomerate.getSchemaID().toString();	
 			}
 			tabID = conglomerate.getTableID().toString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			conglomNumber = conglomerate.getConglomerateNumber();
 			conglomName = conglomerate.getConglomerateName();
 			conglomUUIDString = conglomerate.getUUID().toString();
@@ -179,6 +182,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 
 		/* 3rd column is CONGLOMERATENUMBER (long) */
 		row.setColumn(3, new SQLLongint(conglomNumber));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 4th column is CONGLOMERATENAME (varchar(128)) 
 		** If null, use the tableid so we always
@@ -189,6 +193,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 
 		/* 5th  column is ISINDEX (boolean) */
 		row.setColumn(5, new SQLBoolean(supportsIndex));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 6th column is DESCRIPTOR
 		*  (user type org.apache.derby.catalog.IndexDescriptor)
@@ -204,6 +209,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 
 		/* 7th column is ISCONSTRAINT (boolean) */
 		row.setColumn(7, new SQLBoolean(supportsConstraint));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 8th column is CONGLOMERATEID (UUID - char(36)) */
 		row.setColumn(8, new SQLChar(conglomUUIDString));
@@ -430,6 +436,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 	 */
     	        
 	public SystemColumn[]	buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
             return new SystemColumn[] {

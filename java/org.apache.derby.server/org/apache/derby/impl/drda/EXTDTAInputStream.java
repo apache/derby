@@ -45,6 +45,7 @@ import org.apache.derby.impl.jdbc.Util;
  *  
  */
 class EXTDTAInputStream extends InputStream {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
     private InputStream binaryInputStream = null;
  
@@ -56,6 +57,7 @@ class EXTDTAInputStream extends InputStream {
     //
     
     /** ResultSet that contains the stream*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2941
     EngineResultSet rs;
     /** Column index starting with 1 */
     int columnNumber;
@@ -80,6 +82,7 @@ class EXTDTAInputStream extends InputStream {
 
     private EXTDTAInputStream(Clob clob, int ndrdaType ) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         _clob = clob;
         this.ndrdaType = ndrdaType;
     }
@@ -141,6 +144,7 @@ class EXTDTAInputStream extends InputStream {
      *             DRDAConstants.DRDA_TYPE_LOBCMIXED
      */
     public static EXTDTAInputStream getEXTDTAStream(CallableStatement cs, int column, int drdaType)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         throws SQLException
     {
 
@@ -158,6 +162,7 @@ class EXTDTAInputStream extends InputStream {
             return new EXTDTAInputStream( clob, ndrdaType );
         default:
             badDRDAType( ndrdaType );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             return null;
         }
     }
@@ -180,6 +185,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.io.InputStream#available()
      */
     public int available() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         return binaryInputStream.available();
     }
 
@@ -191,6 +198,7 @@ class EXTDTAInputStream extends InputStream {
     public void close() throws IOException {
         
         if (binaryInputStream != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             binaryInputStream.close();
         binaryInputStream = null;
         
@@ -202,6 +210,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     public boolean equals(Object arg0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         return binaryInputStream.equals(arg0);
     }
 
@@ -211,6 +221,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.lang.Object#hashCode()
      */
     public int hashCode() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         return binaryInputStream.hashCode();
     }
 
@@ -220,6 +232,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.io.InputStream#mark(int)
      */
     public void mark(int arg0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         binaryInputStream.mark(arg0);
     }
 
@@ -229,6 +243,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.io.InputStream#markSupported()
      */
     public boolean markSupported() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         return binaryInputStream.markSupported();
     }
 
@@ -238,6 +254,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.io.InputStream#read(byte[])
      */
     public int read(byte[] arg0) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         return binaryInputStream.read(arg0);
     }
 
@@ -247,6 +265,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.io.InputStream#read(byte[], int, int)
      */
     public int read(byte[] arg0, int arg1, int arg2) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         return binaryInputStream.read(arg0, arg1, arg2);
     }
 
@@ -256,6 +276,8 @@ class EXTDTAInputStream extends InputStream {
      * @see java.io.InputStream#reset()
      */
     public void reset() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         binaryInputStream.reset();
     }
 
@@ -265,6 +287,7 @@ class EXTDTAInputStream extends InputStream {
      * @see java.io.InputStream#skip(long)
      */
     public long skip(long arg0) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2686
         if (arg0 < 0L) {
             return 0L;
         }
@@ -274,6 +297,7 @@ class EXTDTAInputStream extends InputStream {
 
     protected boolean isEmptyStream() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         return (length() == 0);
     }
     private long length() throws SQLException
@@ -293,24 +317,29 @@ class EXTDTAInputStream extends InputStream {
      *
      */
     public  void initInputStream()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     throws SQLException
     {
 
     InputStream is = null;
     Reader r = null;
     // BLOBS
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
     if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         is = getBinaryStream();
         if (is == null) { return; }
     }
         // CLOBS
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
     else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
     {
         try {
             
             r = getCharacterStream();
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             if(r == null){
                     return;
             }
@@ -326,11 +355,14 @@ class EXTDTAInputStream extends InputStream {
             }
             
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         else { badDRDAType( ndrdaType ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2941
     if (! is.markSupported()) {
         is = new BufferedInputStream(is);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     this.binaryInputStream=is;
     }
     private InputStream getBinaryStream() throws SQLException
@@ -359,6 +391,7 @@ class EXTDTAInputStream extends InputStream {
     //
     @SuppressWarnings("deprecation")
     protected void finalize() throws Throwable{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     close();
     }
 
@@ -372,6 +405,7 @@ class EXTDTAInputStream extends InputStream {
      */
     public boolean isNull() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         if ( rs != null ) { return rs.isNull(columnNumber); }
         else { return (_clob == null) && (_blob == null); }
     }

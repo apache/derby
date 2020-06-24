@@ -75,6 +75,7 @@ public abstract class RealJoinResultSetStatistics
 										long restrictionTime,
 										double optimizerEstimatedRowCount,
 										double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 										String userSuppliedOptimizerOverrides
 										)
 	{
@@ -94,6 +95,7 @@ public abstract class RealJoinResultSetStatistics
 		this.rowsSeenRight = rowsSeenRight;
 		this.rowsReturned = rowsReturned;
 		this.restrictionTime = restrictionTime;
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;	
 	}
 
@@ -113,6 +115,7 @@ public abstract class RealJoinResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                           // index updates
            null,                           // lock mode
@@ -138,6 +141,7 @@ public abstract class RealJoinResultSetStatistics
     {
         return new XPLAINResultSetTimingsDescriptor(
            (UUID)timingID,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.constructorTime,
            this.openTime,
            this.nextTime,

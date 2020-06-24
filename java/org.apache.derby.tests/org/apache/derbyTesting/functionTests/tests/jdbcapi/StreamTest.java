@@ -139,6 +139,7 @@ public class StreamTest extends BaseJDBCTestCase {
         } catch(SQLException se) {
             assertSQLState(LANG_STREAM_RETRIEVED_ALREADY, se);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2005
         rs.close();
         st.close();
     }
@@ -161,6 +162,7 @@ public class StreamTest extends BaseJDBCTestCase {
         } catch(SQLException se) {
             assertSQLState(LANG_STREAM_RETRIEVED_ALREADY, se);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2005
         rs.close();
         st.close();
     }
@@ -179,6 +181,7 @@ public class StreamTest extends BaseJDBCTestCase {
      */
     public void testDerby4531() throws SQLException {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4531
 
         Statement s = createStatement();
         s.executeUpdate("create table tDerby4531(c clob(200))");

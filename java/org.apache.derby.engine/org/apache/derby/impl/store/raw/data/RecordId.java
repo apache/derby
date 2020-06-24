@@ -249,6 +249,7 @@ public final class RecordId implements RecordHandle {
 	*/
 	public int hashCode() {
         int hash = 7;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3280
         hash = 89 * hash + pageId.hashCode();
         hash = 89 * hash + recordId;
         return hash;
@@ -286,6 +287,7 @@ public final class RecordId implements RecordHandle {
 
 		attributes.put(VirtualLockTable.CONTAINERID, 
 					   pageId.getContainerId().getContainerId());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		attributes.put(VirtualLockTable.LOCKNAME,
 					   "(" + pageId.getPageNumber() + "," + recordId + ")");

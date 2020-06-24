@@ -40,12 +40,14 @@ public class _Suite
             throws Exception {
 
         BaseTestSuite suite = new BaseTestSuite("jdbc.impl package-private");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(SmallTemporaryClobTest.suite());
         suite.addTest(BiggerTemporaryClobTest.suite());
         suite.addTest(SmallStoreStreamClobTest.suite());
         suite.addTest(BiggerStoreStreamClobTest.suite());
         suite.addTest(UTF8ReaderTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
 
         return suite;
     }

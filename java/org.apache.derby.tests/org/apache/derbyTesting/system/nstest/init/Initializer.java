@@ -52,6 +52,7 @@ public class Initializer {
 		// point, we just need to get a connection to the database
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println(thread_id
 					+ " is getting a connection to the database...");
 
@@ -60,6 +61,7 @@ public class Initializer {
 						NsTest.prop);
 			} else {
 				if(NsTest.driver_type.equalsIgnoreCase("DerbyClient")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 					NsTest.logger.println("-->Using derby client url");
 					conn = DriverManager.getConnection(NsTest.clientDbURL,
 							NsTest.prop);
@@ -81,6 +83,7 @@ public class Initializer {
 
 				conn.setAutoCommit(false);
 			} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println("FAIL: " + thread_id
 						+ "'s setAutoCommit() failed:");
 				printException("setAutoCommit() in Initializer", e);
@@ -93,6 +96,7 @@ public class Initializer {
 				//NsTest.logger.println("Intializer.java: exited add_one_row: "
 				//		+ numInserts + " rows");
 			} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println(" FAIL: " + thread_id
 						+ " unexpected exception:");
 				printException("add_one_row() in Initializer", e);
@@ -105,6 +109,7 @@ public class Initializer {
 			try {
 				conn.commit();
 			} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger
 						.println("FAIL: " + thread_id + "'s commit() failed:");
 				printException("commit in Initializer", e);
@@ -120,6 +125,7 @@ public class Initializer {
 	// stack traces that are not
 	// ****mixed but rather one exception printed at a time
 	public synchronized void printException(String where, Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( NsTest.justCountErrors() )
         {
             NsTest.addError( e );
@@ -141,6 +147,7 @@ public class Initializer {
 						+ " SQLSTATE: " + m);
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5465
 		if (e.getMessage() == null) {
 			e.printStackTrace( NsTest.logger );
 		}

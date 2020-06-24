@@ -83,6 +83,7 @@ public class DataSourceSerializationTest
      */
     public void serTestEmbeddedDataSource()
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJNDI()) {
             final String EMBEDDED_CLASS = "EmbeddedDataSource";
             deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1, true);
@@ -93,6 +94,7 @@ public class DataSourceSerializationTest
             deSerializeDs(EMBEDDED_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         final String EMBEDDED_CLASS = "BasicEmbeddedDataSource40";
         deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
         
@@ -105,6 +107,7 @@ public class DataSourceSerializationTest
      */
     public void serTestEmbeddedConnectionPoolDataSource()
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJNDI()) {
             final String EMBEDDED_CLASS = "EmbeddedConnectionPoolDataSource";
             deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1, true);
@@ -116,6 +119,7 @@ public class DataSourceSerializationTest
         }
 
         final String EMBEDDED_CLASS =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                 "BasicEmbeddedConnectionPoolDataSource40";
         deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
     }
@@ -127,6 +131,7 @@ public class DataSourceSerializationTest
      */
     public void serTestEmbeddedXADataSource()
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJNDI()) {
             final String EMBEDDED_CLASS = "EmbeddedXADataSource";
             deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1, true);
@@ -137,6 +142,7 @@ public class DataSourceSerializationTest
             deSerializeDs(EMBEDDED_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         final String EMBEDDED_CLASS = "BasicEmbeddedXADataSource40";
         deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
     }
@@ -148,6 +154,7 @@ public class DataSourceSerializationTest
      */
     public void serTestClientDataSource()
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJNDI()) {
             final String CLIENT_CLASS = "ClientDataSource";
             // No client driver for Derby 10.0
@@ -158,6 +165,7 @@ public class DataSourceSerializationTest
             deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         final String CLIENT_CLASS = "BasicClientDataSource40";
         deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
@@ -169,6 +177,7 @@ public class DataSourceSerializationTest
      */
     public void serTestClientConnectionPoolDataSource()
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJNDI()) {
             final String CLIENT_CLASS = "ClientConnectionPoolDataSource";
             // No client driver for Derby 10.0
@@ -179,6 +188,7 @@ public class DataSourceSerializationTest
             deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
          
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         final String CLIENT_CLASS = "BasicClientConnectionPoolDataSource40";
         deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
@@ -190,6 +200,7 @@ public class DataSourceSerializationTest
      */
     public void serTestClientXADataSource()
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJNDI()) {
             final String CLIENT_CLASS = "ClientXADataSource";
             // No client driver for Derby 10.0
@@ -200,6 +211,7 @@ public class DataSourceSerializationTest
             deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
          
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         final String CLIENT_CLASS = "BasicClientXADataSource40";
         deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
@@ -222,6 +234,7 @@ public class DataSourceSerializationTest
      * @throws Exception on a number of error conditions
      */
     private void deSerializeDs(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             String className, String version, boolean dsHasJNDI)
             throws Exception {
 
@@ -236,10 +249,12 @@ public class DataSourceSerializationTest
         fname.append(version);
         fname.append(".ser");
         println( "Deserializing " + fname.toString() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         // De-serialize the data source.
         InputStream is;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             is = AccessController.doPrivileged(
                   new PrivilegedExceptionAction<InputStream>() {
                 public InputStream run() throws FileNotFoundException {
@@ -252,9 +267,11 @@ public class DataSourceSerializationTest
                 throw (FileNotFoundException)e.getException();
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3415
         assertNotNull("FileInputStream is null", is);
         Object dsObj = null;
         DataSource ds = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         Object dsRef = null;
         // Used to preserve original error information in case of exception when 
         // closing the input stream.
@@ -277,6 +294,7 @@ public class DataSourceSerializationTest
             ds.setLoginTimeout(newTimeout);
             assertEquals(newTimeout, ds.getLoginTimeout());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             if (dsHasJNDI) {
                 // Recreate the data source using reference.
                 dsRef = ois.readObject();
@@ -295,6 +313,7 @@ public class DataSourceSerializationTest
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (dsHasJNDI) {
             // Recreate ds via the Reference's factory class.  We use
             // reflection here to make the test runnable for non JNDI
@@ -306,6 +325,7 @@ public class DataSourceSerializationTest
                     "getFactoryClassName", null);
             String factoryClassName =
                     (String)getFactoryClassName.invoke(dsRef, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(factoryClassName);
             Object factory = clazz.getConstructor().newInstance();
             Method getObjectInstance =
@@ -331,6 +351,7 @@ public class DataSourceSerializationTest
      * @return A test suite.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("DataSourceSerializationTest");
 
@@ -398,6 +419,7 @@ public class DataSourceSerializationTest
                 filePrefix + "ClientConnectionPoolDataSource40-10_10_1_0.ser",
                 filePrefix + "ClientXADataSource-10_10_1_0.ser",
                 filePrefix + "ClientXADataSource40-10_10_1_0.ser",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                 filePrefix + "BasicEmbeddedDataSource40-10_10_1_0.ser",
                 filePrefix +
                     "BasicEmbeddedConnectionPoolDataSource40-10_10_1_0.ser",
@@ -408,6 +430,7 @@ public class DataSourceSerializationTest
                 filePrefix + "BasicClientXADataSource40-10_10_1_0.ser",
 
                 // 10.11 resources
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
                 filePrefix + "EmbeddedDataSource-10_11_1_0.ser",
                 filePrefix + "EmbeddedDataSource40-10_11_1_0.ser",
                 filePrefix + "EmbeddedConnectionPoolDataSource-10_11_1_0.ser",

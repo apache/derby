@@ -135,6 +135,7 @@ public interface DateTimeDataValue extends DataValueDescriptor
      *
      * @exception StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
     DateTimeDataValue timestampAdd( int intervalType,
                                     NumberDataValue intervalCount,
                                     java.sql.Date currentDate,

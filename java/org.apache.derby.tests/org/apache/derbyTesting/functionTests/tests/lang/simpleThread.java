@@ -47,6 +47,7 @@ public class simpleThread extends Thread {
                 _wait = waitTime;
                 _myCount = getCount();
                 _query = query;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5708
                 start();
         }
 
@@ -107,6 +108,7 @@ public class simpleThread extends Thread {
 
             String query = "SELECT * from people ORDER by name";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5708
             Thread[] threads = {
                 new simpleThread(query,0),
                 new simpleThread(query,10000),

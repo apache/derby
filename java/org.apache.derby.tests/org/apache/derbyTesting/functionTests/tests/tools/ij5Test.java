@@ -43,6 +43,7 @@ public class ij5Test extends ScriptTestCase {
         // And as we're trying to test ij.showNoConnectionsAtStart=false, 
         // we cannot get the same output with non-JSR-169 platforms. So,
         // return an empty suite (i.e. don't run with JSR 169).
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         if (JDBC.vmSupportsJSR169()) {
             return new BaseTestSuite(
                 "empty: cannot obtain expected output with JSR169");

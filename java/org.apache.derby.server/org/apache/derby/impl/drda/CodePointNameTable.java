@@ -26,10 +26,12 @@ package org.apache.derby.impl.drda;
   It is arranged in alphabetical order.
 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 class CodePointNameTable extends java.util.Hashtable<Integer, String>
 {
   CodePointNameTable ()
   {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
     put(CodePoint.ABNUOWRM, "ABNUOWRM");
     put(CodePoint.ACCRDB, "ACCRDB");
     put(CodePoint.ACCRDBRM, "ACCRDBRM");
@@ -165,6 +167,7 @@ class CodePointNameTable extends java.util.Hashtable<Integer, String>
 
   String lookup (int codePoint)
   {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     return get(codePoint);
   }
 

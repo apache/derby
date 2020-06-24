@@ -76,6 +76,7 @@ public class Changes10_6 extends UpgradeChange {
      */
     public static Test suite(int phase) {
         BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.6");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTestSuite(Changes10_6.class);
         return new SupportFilesSetup((Test) suite);
@@ -164,6 +165,7 @@ public class Changes10_6 extends UpgradeChange {
             // is remote and the alias descriptor will not serialize
             // across the client/server connection. Skip the following test.
             if (JVMInfo.isModuleAware()) { break; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
             returnType = getTypeDescriptor( rs.getObject( 1 ) );
             actualJdbcType = getJDBCTypeId( returnType );

@@ -128,34 +128,46 @@ public	class DD_Version implements	Formatable
 			return "10.0";
 		case DataDictionary.DD_VERSION_DERBY_10_1:
 			return "10.1";
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		case DataDictionary.DD_VERSION_DERBY_10_2:
 			return "10.2";
 		case DataDictionary.DD_VERSION_DERBY_10_3:
 			return "10.3";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3036
 		case DataDictionary.DD_VERSION_DERBY_10_4:
 			return "10.4";
 		case DataDictionary.DD_VERSION_DERBY_10_5:
 			return "10.5";
 		case DataDictionary.DD_VERSION_DERBY_10_6:
 			return "10.6";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4657
 		case DataDictionary.DD_VERSION_DERBY_10_7:
 			return "10.7";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
 		case DataDictionary.DD_VERSION_DERBY_10_8:
 			return "10.8";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5016
 		case DataDictionary.DD_VERSION_DERBY_10_9:
 			return "10.9";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5688
 		case DataDictionary.DD_VERSION_DERBY_10_10:
 			return "10.10";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6104
 		case DataDictionary.DD_VERSION_DERBY_10_11:
 			return "10.11";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6588
 		case DataDictionary.DD_VERSION_DERBY_10_12:
 			return "10.12";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6811
 		case DataDictionary.DD_VERSION_DERBY_10_13:
 			return "10.13";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6911
 		case DataDictionary.DD_VERSION_DERBY_10_14:
 			return "10.14";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6941
 		case DataDictionary.DD_VERSION_DERBY_10_15:
 			return "10.15";
+//IC see: https://issues.apache.org/jira/browse/DERBY-7010
 		case DataDictionary.DD_VERSION_DERBY_10_16:
 			return "10.16";
 		default:
@@ -203,6 +215,7 @@ public	class DD_Version implements	Formatable
 
 		} else {
            
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			if (isFullUpgrade(startParams, dictionaryVersion.toString())) {
 				performMajorUpgrade = true;
 			} else {
@@ -215,6 +228,7 @@ public	class DD_Version implements	Formatable
 
 		if (performMajorUpgrade) {
 			// real upgrade changes. Get user name of current user.
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 			String userName = IdUtil.getUserNameFromURLProps(startParams);
 			doFullUpgrade(tc, dictionaryVersion.majorVersionNumber,IdUtil.getUserAuthorizationId(userName));
             //DERBY-5996(Create readme files (cautioning users against 
@@ -226,6 +240,7 @@ public	class DD_Version implements	Formatable
 			bootingDictionary.af.createReadMeFiles();
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-541
 		if (!minorOnly && !isReadOnly) {
 			// apply changes that can be made and will continue to work
 			// against previous version.
@@ -321,6 +336,7 @@ public	class DD_Version implements	Formatable
 		Do full upgrade.  Apply changes that can NOT be safely made in soft upgrade.
 		
 		<BR>
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		<B>Upgrade items for every new release</B>
 		<UL>
 		<LI> Drop and recreate the stored versions of the JDBC database metadata queries
@@ -353,6 +369,7 @@ public	class DD_Version implements	Formatable
 		//This is to make sure that we have the stored versions of JDBC database
 		//metadata queries matching with this release of the engine.
 		bootingDictionary.updateMetadataSPSes(tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1107
 
 		/*
 		 * OLD Cloudscape 5.1 upgrade code, Derby does not support
@@ -376,8 +393,10 @@ public	class DD_Version implements	Formatable
 		
 		*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         HashSet<String>  newlyCreatedRoutines = new HashSet<String>();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3191
 		if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_3)
 		{
 			// Add new system catalogs created for roles
@@ -385,6 +404,7 @@ public	class DD_Version implements	Formatable
 				tc, DataDictionary.SYSROLES_CATALOG_NUM);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2613
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
         {
             // add catalogs 1st, subsequent procedure adding may depend on
@@ -405,6 +425,7 @@ public	class DD_Version implements	Formatable
             // since 10.0.  Will not work to upgrade any db previous to 10.0,
             // thus only checks for 10.0 rather than <= 10.0.
             bootingDictionary.create_10_1_system_procedures(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4127
                 tc,
                 newlyCreatedRoutines,
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
@@ -425,6 +446,8 @@ public	class DD_Version implements	Formatable
                     tc, DataDictionary.SYSPERMS_CATALOG_NUM);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
         {
             // On upgrade from versions before 10.2, create system procedures
@@ -436,6 +459,7 @@ public	class DD_Version implements	Formatable
 
 			if (SanityManager.DEBUG)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2613
 				SanityManager.ASSERT((aid != null), 
                     "Failed to get new Database Owner authorization");
             }
@@ -445,6 +469,7 @@ public	class DD_Version implements	Formatable
 
             // make sure we flag that we need to add permissions to the
             // following pre-existing routines:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4127
             newlyCreatedRoutines.add( "SYSCS_INPLACE_COMPRESS_TABLE" );
             newlyCreatedRoutines.add( "SYSCS_GET_RUNTIMESTATISTICS" );
             newlyCreatedRoutines.add( "SYSCS_SET_RUNTIMESTATISTICS" );
@@ -496,6 +521,7 @@ public	class DD_Version implements	Formatable
             bootingDictionary.upgradeSYSROUTINEPERMS_10_6( tc );
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5688
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_8)
         {
             // On upgrade from versions before 10.9, create system procedures
@@ -511,9 +537,11 @@ public	class DD_Version implements	Formatable
             // sql (schema, schema object) parts of the file name to remove
             // path delimiters. ALso, we now use no schema subdirectories since
             // there is no chance of name collision with the UUID.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
             bootingDictionary.upgradeJarStorage(tc);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5688
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_9)
         {
             // On upgrade from versions before 10.10, create system procedures
@@ -545,10 +573,17 @@ public	class DD_Version implements	Formatable
             bootingDictionary.create_10_12_system_procedures( tc, newlyCreatedRoutines );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6892
 	if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_12)
         {
             // On upgrade from versions before 10.13, create system procedures
             // added in 10.13.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 	    bootingDictionary.create_10_13_system_procedures(	 tc, newlyCreatedRoutines );
         }
 
@@ -592,6 +627,7 @@ public	class DD_Version implements	Formatable
 			// match the version we are using.  We don't want to do this for lower 
 			// database versions because on reverting to the previous version the 
 			// SPSes won't be restored.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1107
 			if (fromVersion.majorVersionNumber >= DataDictionary.DD_VERSION_DERBY_10_5)
 				bootingDictionary.updateMetadataSPSes(tc);
 
@@ -623,6 +659,7 @@ public	class DD_Version implements	Formatable
 			// invalidate all the procedures we need to indicate that
 			// any procedure we read off disk is automatically invalid,
 			// so we do not try to load the generated class.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 			bootingDictionary.setReadOnlyUpgrade();
 		}
 
@@ -665,6 +702,7 @@ public	class DD_Version implements	Formatable
 		SchemaDescriptor		sd = bootingDictionary.getSystemSchemaDescriptor();
 		TableDescriptor			td = bootingDictionary.getTableDescriptor(
 											crf.getCatalogName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 											sd, tc);
 		ConglomerateDescriptor[]	cds = td.getConglomerateDescriptors();
 		for (int index = 0; index < cds.length; index++)
@@ -739,6 +777,7 @@ public	class DD_Version implements	Formatable
 
 		jbmsVersion.getMinorVersion()*100 +jbmsVersion.getMaintVersion() + (jbmsVersion.isBeta() ? 0 : 1) + 2
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		5.0.22 =&gt; (0*100) + 22 + 2 =  24 - (5.0 has a unique major number)
 		5.1.2  =&gt; (1*100) + 2 + 2  = 104 - (5.1 has a unique major number) 
 
@@ -756,6 +795,7 @@ public	class DD_Version implements	Formatable
 	private int getJBMSMinorVersionNumber() 
 	{
 		ProductVersionHolder jbmsVersion = DataDictionaryImpl.getMonitor().getEngineVersion();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		return jbmsVersion.getMinorVersion()*100 +jbmsVersion.getMaintVersion() + (jbmsVersion.isBeta() ? 0 : 1) + 2;
 	}
@@ -851,6 +891,7 @@ public	class DD_Version implements	Formatable
      * can't call this entry point.
      */
     private  static  boolean isFullUpgrade( final Properties startParams, final String oldVersionInfo )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

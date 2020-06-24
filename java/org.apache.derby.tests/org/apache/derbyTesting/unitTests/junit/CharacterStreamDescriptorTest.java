@@ -44,6 +44,7 @@ public class CharacterStreamDescriptorTest
      * Tests the default values set by the builder.
      */
     public void testDefaultValues() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
         InputStream emptyStream = new ByteArrayInputStream(new byte[] {});
         CharacterStreamDescriptor.Builder b =
                 new CharacterStreamDescriptor.Builder().stream(emptyStream);
@@ -61,6 +62,7 @@ public class CharacterStreamDescriptorTest
     }
 
     public void testSetValues() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
         final long charLength = 1023;
         final long byteLength = 1023*2;
         final long curBytePos = 4;
@@ -87,6 +89,7 @@ public class CharacterStreamDescriptorTest
         assertEquals(charLength, csd.getCharLength());
         assertEquals(maxCharLen, csd.getMaxCharLength());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
         PositionedStream emptyPS = new PositionedTestStream(curBytePos);
         // Set only a few values.
         csd = new CharacterStreamDescriptor.Builder().bufferable(true).
@@ -99,6 +102,7 @@ public class CharacterStreamDescriptorTest
         // Set data offset and update the character position accordingly.
         csd = new CharacterStreamDescriptor.Builder().bufferable(true).
                 positionAware(true).dataOffset(dataOffset).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
                 curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).
                 stream(emptyPS.asInputStream()).build();
         assertEquals(true, csd.isBufferable());
@@ -110,6 +114,7 @@ public class CharacterStreamDescriptorTest
     }
 
     public void testCopyState() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
         final long charLength = 1023;
         final long byteLength = 1023*2;
         final long curBytePos = 4;
@@ -158,6 +163,7 @@ public class CharacterStreamDescriptorTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(CharacterStreamDescriptorTest.class,
                 "CharacterStreamDescriptorTest suite");
     }

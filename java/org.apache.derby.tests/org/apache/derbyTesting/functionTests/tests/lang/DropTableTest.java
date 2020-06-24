@@ -241,6 +241,7 @@ public final class DropTableTest extends BaseJDBCTestCase {
         assertStatementError("42X01", st, " drop view vt1 restrict");
         assertStatementError("42X01", st, " drop view vt1 cascade");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4438
         st.executeUpdate( "drop view vvt1"); // Clean up.
         st.executeUpdate( "drop view  vt1"); // Clean up.
         st.executeUpdate( "drop table  t1"); // Clean up.
@@ -315,6 +316,7 @@ public final class DropTableTest extends BaseJDBCTestCase {
         
         st1.close();
         st.executeUpdate("drop table T1"); // Clean up
+//IC see: https://issues.apache.org/jira/browse/DERBY-4438
 
         //pretend all of the above didn't happen
         setAutoCommit(true);

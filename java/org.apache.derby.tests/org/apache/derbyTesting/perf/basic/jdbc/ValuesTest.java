@@ -42,6 +42,7 @@ public class ValuesTest extends JDBCPerfTestCase{
         int iterations = 100000;
         int repeats = 4;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ValuesTest");
         
         // To add embed tests.

@@ -86,6 +86,7 @@ public class VarargsTest  extends GeneratedColumnsHelper
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("UserDefinedAggregatesTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( TestConfiguration.defaultSuite( VarargsTest.class ) );
 

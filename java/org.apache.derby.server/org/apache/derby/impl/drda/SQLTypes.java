@@ -26,6 +26,7 @@ import java.sql.Types;
 import org.apache.derby.shared.common.reference.DRDAConstants;
 
 class SQLTypes {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
   // define final statics for the fdoca type codes here!!!
 
@@ -62,6 +63,7 @@ class SQLTypes {
       else
         return 0;
         //throw new BugCheckException ("Encountered unexpected float length");
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
     case DRDAConstants.DB2_SQLTYPE_DECIMAL:            // can map to either NUMERIC or DECIMAL!!! @sxg
     case DRDAConstants.DB2_SQLTYPE_ZONED:              // can map to either NUMERIC or DECIMAL!!! @sxg
     case DRDAConstants.DB2_SQLTYPE_NUMERIC:            // can map to either NUMERIC or DECIMAL!!! @sxg
@@ -99,6 +101,7 @@ class SQLTypes {
     case DRDAConstants.DB2_SQLTYPE_DBCLOB:  // large object character DBCS
       return java.sql.Types.CLOB;
     case DRDAConstants.DB2_SQLTYPE_BLOB:    // large object bytes
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         case DRDAConstants.DB2_SQLTYPE_BLOB_LOCATOR:
         case DRDAConstants.DB2_SQLTYPE_CLOB_LOCATOR:
         case DRDAConstants.DB2_SQLTYPE_DBCLOB_LOCATOR:
@@ -131,6 +134,7 @@ class SQLTypes {
 
     static protected int mapJdbcTypeToDB2SqlType (int jdbctype, boolean nullable, AppRequester appRequester,
                                                int[] outlen)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
      throws SQLException
   {
       int nullAddVal =0;
@@ -143,15 +147,18 @@ class SQLTypes {
 
       switch(jdbctype)
       {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
           case Types.BOOLEAN:
               if ( appRequester.supportsBooleanValues() )
               {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                   return DRDAConstants.DB2_SQLTYPE_BOOLEAN + nullAddVal;
               }
               else
               {
                   return DRDAConstants.DB2_SQLTYPE_SMALL + nullAddVal;
               }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
           case java.sql.Types.BIT:
           case java.sql.Types.TINYINT:
           case java.sql.Types.SMALLINT:
@@ -179,6 +186,7 @@ class SQLTypes {
 
           case java.sql.Types.VARCHAR:
           case java.sql.Types.VARBINARY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
               return  DRDAConstants.DB2_SQLTYPE_VARCHAR + nullAddVal;
           case java.sql.Types.LONGVARBINARY:
               return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
@@ -191,6 +199,7 @@ class SQLTypes {
               {
                   return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
               }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
           case java.sql.Types.BLOB:
               return DRDAConstants.DB2_SQLTYPE_BLOB + nullAddVal;
           case java.sql.Types.CLOB:

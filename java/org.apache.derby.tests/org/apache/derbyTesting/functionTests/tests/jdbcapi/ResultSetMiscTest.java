@@ -123,6 +123,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isCurrency(3));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(3));
         assertTrue(met.isSigned(3));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
         assertEquals(15, met.getColumnDisplaySize(3));
         assertEquals("R", met.getColumnLabel(3));
         assertEquals("R", met.getColumnName(3));
@@ -148,6 +149,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isCurrency(4));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(4));
         assertTrue(met.isSigned(4));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
         assertEquals(24, met.getColumnDisplaySize(4));
         assertEquals("D", met.getColumnLabel(4));
         assertEquals("D", met.getColumnName(4));
@@ -198,6 +200,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isCurrency(7));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(7));
         assertFalse(met.isSigned(7));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
         assertEquals(29, met.getColumnDisplaySize(7));
         assertEquals("TS", met.getColumnLabel(7));
         assertEquals("TS", met.getColumnName(7));
@@ -206,6 +209,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertEquals("APP", met.getSchemaName(7));
         assertEquals("", met.getCatalogName(7));
         assertEquals(java.sql.Types.TIMESTAMP, met.getColumnType(7));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
         assertEquals(29, met.getPrecision(7));
         assertEquals(9, met.getScale(7));
         assertEquals("TIMESTAMP", met.getColumnTypeName(7));
@@ -270,6 +274,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isAutoIncrement(10));
         assertFalse(met.isCaseSensitive(10));
         assertTrue(met.isSearchable(10));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2423
         assertFalse(met.isCurrency(10));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(10));
         assertTrue(met.isSigned(10));
@@ -430,6 +435,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertTrue(met.isSearchable(16));
         assertFalse(met.isCurrency(16));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(16));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2425
         assertFalse(met.isSigned(16));       
         assertEquals(2147483647, met.getColumnDisplaySize(16));
         assertEquals("BL", met.getColumnLabel(16));
@@ -764,6 +770,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("ResultSetTest2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("ResultSetTest2:embedded"));
 
@@ -773,6 +780,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
     }
 
     public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(ResultSetMiscTest.class);
 

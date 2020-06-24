@@ -91,6 +91,7 @@ public final class TriggerNewTransitionRows extends org.apache.derby.vti.Updatab
    }
     
    public int getResultSetConcurrency() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         return ResultSet.CONCUR_READ_ONLY;
    }
    

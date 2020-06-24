@@ -183,16 +183,19 @@ public class StatementPoolingTest
         final String simpleName = names[names.length -1];
         if (JDBC.vmSupportsJDBC4() && !expectedName.endsWith("40")) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6613
             if (JDBC.vmSupportsJDBC42()
                     && expectedName.contains("Statement"))
             {
                 expectedName += "42";
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             else if (usingEmbedded())
             {
                 expectedName += "40";
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3431
         assertEquals(expectedName, simpleName);
     }
 
@@ -286,6 +289,7 @@ public class StatementPoolingTest
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
         // Statement pooling only works within a single pooled connection.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
         Connection con = getCachingConnection();
         assertEquals("Unexpected default holdability",
                 ResultSet.HOLD_CURSORS_OVER_COMMIT, con.getHoldability());
@@ -295,6 +299,7 @@ public class StatementPoolingTest
         if (closeConnection) {
             con.close();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
         con = getCachingConnection();
         assertEquals("Holdability not reset",
                 ResultSet.HOLD_CURSORS_OVER_COMMIT, con.getHoldability());
@@ -340,6 +345,7 @@ public class StatementPoolingTest
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
         // Statement pooling only works within a single pooled connection.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
         Connection con = getCachingConnection();
         assertEquals("Unexpected default isolation level",
                 Connection.TRANSACTION_READ_COMMITTED,
@@ -356,6 +362,7 @@ public class StatementPoolingTest
         if (closeConnection) {
             con.close();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
         con = getCachingConnection();
         assertEquals("Isolation level not reset",
                 Connection.TRANSACTION_READ_COMMITTED,
@@ -384,14 +391,17 @@ public class StatementPoolingTest
      */
     public void testCachingLogicalConnectionCloseLeavesPhysicalStatementsOpen()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3596
         final String SELECT_SQL = "select * from clcclso";
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
         // Statement pooling only works within a single pooled connection.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
         Connection con = getCachingConnection();
         con.setAutoCommit(false);
         Statement stmt = createStatement();
         stmt.executeUpdate("create table clcclso (id int)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3596
         PreparedStatement ps = con.prepareStatement(SELECT_SQL);
         con.commit();
         con.close();
@@ -408,7 +418,9 @@ public class StatementPoolingTest
         commit();
         // If an exception is thrown here, statement pooling is disabled or not
         // working correctly.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
         con = getCachingConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3596
         ps = con.prepareStatement(SELECT_SQL); // From cache.
         try {
             // Should fail here because the referenced table has been deleted.
@@ -565,6 +577,7 @@ public class StatementPoolingTest
     public void testTemporaryTablesAreDeletedInNewLogicalConnection()
             throws SQLException {
         Connection lcOne = getCachingConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
 
         // Create the first logical connection and the temporary table.
         Statement stmt = lcOne.createStatement();
@@ -578,6 +591,7 @@ public class StatementPoolingTest
         lcOne.close();
 
         // Create the second logical connection and try to query the temp table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
         Connection lcTwo = getCachingConnection();
         stmt = lcTwo.createStatement();
         try {
@@ -630,6 +644,7 @@ public class StatementPoolingTest
      * one that created the result set.
      */
     public void testGetStatementCallable()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3446
             throws SQLException {
         doTestGetStatement(prepareCall("values 7653"));
     }
@@ -838,6 +853,7 @@ public class StatementPoolingTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("StatementPoolingTest suite");
         BaseTestSuite baseSuite =
             new BaseTestSuite(StatementPoolingTest.class);
@@ -912,12 +928,14 @@ public class StatementPoolingTest
         private PooledConnection pooledConnection;
         
         public Connection getConnection(int cacheSize) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6086
                 throws SQLException {
             if (pooledConnection == null || curCacheSize != cacheSize) {
                 close();
                 ConnectionPoolDataSource cpDs =
                         J2EEDataSource.getConnectionPoolDataSource();
                 J2EEDataSource.setBeanProperty(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         cpDs, "maxStatements", cacheSize);
                 J2EEDataSource.setBeanProperty(
                         cpDs, "createDatabase", "create");

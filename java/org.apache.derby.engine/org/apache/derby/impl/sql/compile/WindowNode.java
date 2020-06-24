@@ -46,6 +46,8 @@ public abstract class WindowNode extends QueryTreeNode
      *
      * @exception StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     WindowNode(String windowName, ContextManager cm) throws StandardException
     {
         super(cm);

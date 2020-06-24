@@ -68,6 +68,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      */
     private static final String POLICY_FILE_NAME1
         = "org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest1.policy";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
 
     /**
      * Some directory paths for testing DatabasePermissions.
@@ -175,10 +176,12 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         // this suite cannot be constructed with automatic test extraction
         // (by passing a class argument); instead, the tests need to be added
         // manually since some of them require their own policy file
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("SystemPrivilegesPermissionTest");
 
         // add API tests for the basic security framework classes
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
         suite.addTest(
             new SystemPrivilegesPermissionTest("testSystemPrincipal"));
         suite.addTest(
@@ -212,6 +215,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         //
         // As of Java 9, you can't subvert access controls via this ruse.
         // Only run this test on Java 8.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         if (isJava8())
         {
             suite.addTest
@@ -260,6 +264,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     public void testSystemPermission() {
         // test SystemPermission with null name argument
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
             new SystemPermission(null, null);
             fail("expected NullPointerException");
         } catch (NullPointerException ex) {
@@ -268,6 +273,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
 
         // test SystemPermission with empty name argument
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
             new SystemPermission("", null);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
@@ -317,6 +323,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                      new SystemPermission("server", "CoNtRoL,control")
                              .getActions());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
         String[] validNames = {
             SystemPermission.ENGINE,
             SystemPermission.JMX,
@@ -518,6 +526,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests SystemPermissions against the Policy.
      */
     public void policyTestSystemPermissionGrants() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
         final Permission shutdown
             = new SystemPermission(
                 SystemPermission.SERVER,
@@ -750,6 +759,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests DatabasePermissions against the Policy.
      */
     public void policyTestDatabasePermissionGrants() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
         final DatabasePermission[] relDirPathPerms
             = new DatabasePermission[relDirPaths.length];
         for (int i = 0; i < relDirPaths.length; i++) {
@@ -1108,8 +1118,10 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Runs a privileged user action for a given principal.
      */
     private <T> void execute(SystemPrincipal principal,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                          PrivilegedAction<T> action,
                          boolean isGrantExpected) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         println("");
         println("    testing action " + action + " for principal " + principal);
         
@@ -1121,6 +1133,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             if (!isGrantExpected) {
                 fail("expected AccessControlException");
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             println("        successfully executed action " + action + " for principal " + principal);
         } catch (AccessControlException ace) {
             //println("    Yikes! " + ace.getMessage());
@@ -1153,6 +1166,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests DatabasePermission.hashCode() and .equals().
      */
     private void checkHashCodeAndEquals(Permission[] dbp0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
                                         Permission[] dbp1)
         throws IOException {
         //assert(dbp0.length == dbp1.length)
@@ -1175,6 +1189,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests DatabasePermission.implies().
      */
     private void checkImplies(Permission[] dbp0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
                               Permission[] dbp1,
                               boolean[][] impls)
         throws IOException {
@@ -1196,6 +1211,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      */
     private void checkDistinctPermissions(Permission[] set)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
         for (int i = 0; i < set.length; i++)
         {
             Permission pi = set[i];
@@ -1228,6 +1245,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         assertEquals(p1.hashCode(), p2.hashCode());
         
         assertTrue(p1.implies(p2));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6716
         assertTrue(p2.implies(p1));
     }
     
@@ -1235,6 +1253,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Represents a Shutdown server and engine action.
      */
     public class ShutdownAction
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         implements PrivilegedAction<Void> {
         protected final Permission permission;
 
@@ -1258,6 +1277,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Represents a Create Database action.
      */
     public class CreateDatabaseAction
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         implements PrivilegedAction<Void> {
         protected final Permission permission;
 
@@ -1266,6 +1286,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         }
 
         public Void run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             println("    checking access " + permission + ":");
             AccessController.checkPermission(permission);
             println("    granted access " + this);
@@ -1302,6 +1323,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Represents a Privileged User action.
      */
     static public class RunAsPrivilegedUserAction<T>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         implements PrivilegedAction<T> {
         final private SystemPrincipal principal;
         final private PrivilegedAction<? extends T> action;
@@ -1342,6 +1364,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             // permission.  In contrast, doAsPrivileged() with a null ACC
             // seems to effectively ignore the caller's protection domain, so
             // the check now only depends on the principal's permissions.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return Subject.doAsPrivileged(subject, action, null);
             //Subject.doAs(subject, action);
         }

@@ -59,8 +59,11 @@ public class JoinTest extends BaseJDBCTestCase {
      *
      */
     public void testNullabilityInValues() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4365
+//IC see: https://issues.apache.org/jira/browse/DERBY-3757
         Statement s = createStatement();
         assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4405
         		VALUES_WITH_NULL, s,
         		"select a.* from (values (null)) a left outer join "+
         		"(values ('a')) b on 1=1");
@@ -78,6 +81,7 @@ public class JoinTest extends BaseJDBCTestCase {
         };
         JDBC.assertUnorderedResultSet(s.executeQuery(
         		"select a.* from (values ('a'),('b'),(cast(null as char(1)))) "
+//IC see: https://issues.apache.org/jira/browse/DERBY-4405
         		+ "a left outer join (values ('c'),('d')) b on 1=1"),
         		expectedResult);
     }
@@ -981,6 +985,7 @@ public class JoinTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testDerby4387() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4387
         setAutoCommit(false);
         Statement s = createStatement();
         ResultSet rs;
@@ -1025,6 +1030,7 @@ public class JoinTest extends BaseJDBCTestCase {
      * null intolerant predicate. It uses a slimmed down toursdb dataset.
      */
     public void testDerby_4405() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4405
         setAutoCommit(false);
         Statement s = createStatement();
 
@@ -1852,6 +1858,9 @@ public class JoinTest extends BaseJDBCTestCase {
      * preprocessing step of the optimizer.
      */
     public void testDerby_4679() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
+//IC see: https://issues.apache.org/jira/browse/DERBY-2526
+//IC see: https://issues.apache.org/jira/browse/DERBY-3023
         setAutoCommit(false);
         Statement s = createStatement();
 
@@ -1894,6 +1903,7 @@ public class JoinTest extends BaseJDBCTestCase {
                   "values ('dddd', '_5ZDlwWTeEd-Q8aOqWJPEIQ')," +
                   "       ('bbbb', '_5nN9mmTeEd-Q8aOqWJPEIQ')");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
         ResultSet rs = s.executeQuery(
             "select distinct t1.ITEM_ID, t1.state_id, t1.JZ_DISCRIMINATOR" +
             "    from " +
@@ -2012,6 +2022,7 @@ public class JoinTest extends BaseJDBCTestCase {
      * 
      */
     public void testDerby_4695() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4695
         setAutoCommit(false);
         Statement s = createStatement();
 

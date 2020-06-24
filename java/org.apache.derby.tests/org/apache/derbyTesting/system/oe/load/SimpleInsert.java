@@ -91,6 +91,7 @@ public class SimpleInsert implements Load {
      */
     void setupConnection(Connection conn, short scale) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
         this.conn = conn;
         conn.setAutoCommit(false);
         conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -123,6 +124,7 @@ public class SimpleInsert implements Load {
         // load item table
         itemTable(1, Load.ITEM_COUNT);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
         for (short w = 1; w <= scale; w++) {
             populateForOneWarehouse(w);
         }
@@ -386,6 +388,7 @@ public class SimpleInsert implements Load {
         int[] cid = random.randomIntPerm(Load.CUSTOMER_COUNT_W
                 / Load.DISTRICT_COUNT_W);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
         for (int o_id = 1; o_id <= cid.length; o_id++) {
             psO.setInt(1, o_id);
             psO.setInt(4, cid[o_id-1]);
@@ -409,6 +412,7 @@ public class SimpleInsert implements Load {
             psNO.setShort(2, d);
             psNO.setShort(3, w);
             for (int ol_number = 1; ol_number <= o_ol_cnt; ol_number++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
 
                 psOL.setInt(1, o_id);
                 psOL.setInt(4, ol_number);
@@ -416,6 +420,7 @@ public class SimpleInsert implements Load {
                 // OL_I_ID random within [1 .. 100,000]
                 psOL.setInt(5, random.randomInt(1, Load.ITEM_COUNT));
                 psOL.setShort(6, w);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
                 if (o_id <= Load.NEWORDERS_BREAKPOINT) {
                     psOL.setTimestamp(7, o_entry_d);
                     psOL.setString(9, "0.00");
@@ -427,6 +432,7 @@ public class SimpleInsert implements Load {
                 psOL.setString(10, random.randomAString24());
                 psOL.executeUpdate();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
             if (o_id > Load.NEWORDERS_BREAKPOINT) {
                 psNO.setInt(1, o_id);
                 psNO.executeUpdate();
@@ -444,6 +450,7 @@ public class SimpleInsert implements Load {
     }
 
     public void setSeed(long seed) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         this.seed = seed;
     }
 

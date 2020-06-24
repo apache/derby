@@ -105,6 +105,8 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 		throws StandardException
 	{
 		dropConstraint(consDesc, skipCreate,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			(List<ConstantAction>)null, activation, lcc, clearDeps);
 	}
 
@@ -122,6 +124,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 	 *  ex. when dropping a table).
 	 */
 	void dropConstraint(ConstraintDescriptor consDesc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		TableDescriptor skipCreate, List<ConstantAction> newConglomActions,
 		Activation activation, LanguageConnectionContext lcc,
 		boolean clearDeps) throws StandardException
@@ -270,6 +273,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
      *
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3456
     void recreateUniqueConstraintBackingIndexAsUniqueWhenNotNull(
     ConglomerateDescriptor      cd,
     TableDescriptor             td,
@@ -281,6 +285,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
         Properties prop = new Properties ();
         loadIndexProperties(lcc, cd, prop);
         ArrayList<ConstantAction> list = new ArrayList<ConstantAction>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         // drop the existing index.
         dropConglomerate(cd, td, false, list, activation, lcc);
@@ -306,10 +311,14 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
                         false,          // not part of create table 
                         false,          // not unique
                         true,           // create as unique when not null index
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                         cd.getIndexDescriptor().hasDeferrableChecking(),
                         false,          // deferred or not: shouldn't matter
                                         // since we know we already have a
                                         // unique index
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                         DataDictionary.UNIQUE_CONSTRAINT,
                         cd.getIndexDescriptor().indexType(), 
                         td.getSchemaName(), 

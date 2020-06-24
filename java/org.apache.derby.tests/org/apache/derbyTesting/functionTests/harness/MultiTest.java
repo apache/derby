@@ -125,6 +125,7 @@ public class MultiTest
 		suite.init();
 	
 		log = openFile(outputDir, testName + ".log");
+//IC see: https://issues.apache.org/jira/browse/DERBY-647
 
 		try
 		{
@@ -147,6 +148,7 @@ public class MultiTest
 			String tester = "Tester" + (i+1);
 			try 
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-647
 				LocalizedOutput out = openFile(outputDir, tester + ".out");
 				testers[i] = new mtTester(tester, suite, out, log);
 			} catch (IOException e) {
@@ -162,6 +164,7 @@ public class MultiTest
 		log.println("total memory is "+Runtime.getRuntime().totalMemory());
 		log.println("free memory  is "+Runtime.getRuntime().freeMemory());
 		// Delete the .out files for Testers that did not report errors.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1230
 		for (i = 0; i < max; i++)
 		{
 			if ( testers[i].noFailure() )
@@ -289,6 +292,7 @@ public class MultiTest
 		** Now stop everyone that hasn't already stopped.
 		* First get thread dumps for jdk 15.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-3503
 		TestUtil.dumpAllStackTracesIfSupported(log);
 		for (i = 0; i < MAX_WAIT_FOR_COMPLETION && (tg.isDestroyed() == false ); i++) 
 		{ 
@@ -388,6 +392,7 @@ public class MultiTest
 	{
 		
 		java.io.File file = new java.io.File(dir, fileName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-647
 
 		return new LocalizedOutput(new FileOutputStream(file));
 	}
@@ -412,6 +417,7 @@ public class MultiTest
 		while (e.hasMoreElements())
 		{
 			testCase = (mtTestCase)e.nextElement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-647
 			String testName = testCase.getFile();
 			System.out.println("...running "+descr+" via "+testName);
 			String logFileName = 

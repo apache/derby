@@ -56,6 +56,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
   */
 class IndexChanger
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
     final private IndexRowGenerator irg;
 	//Index Conglomerate ID
     final private long indexCID;
@@ -118,6 +121,9 @@ class IndexChanger
 		 throws StandardException
 	{
 		this.irg = irg;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         this.deferrable = irg.hasDeferrableChecking(); // cache value
                                                        // for speed..
 		this.indexCID = indexCID;
@@ -132,6 +138,9 @@ class IndexChanger
 		this.activation = activation;
 		this.indexName = indexName;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         this.lcc = (activation != null) ?
                 activation.getLanguageConnectionContext() : null;
         // activation will be null when called from DataDictionary
@@ -366,7 +375,9 @@ class IndexChanger
                 Object[] args = new Object[2];
                 args[0] = ourIndexRow.getRowArray()[ourIndexRow.getRowArray().length - 1];
                 args[1] = indexCID;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 Monitor.getStream().println(MessageService.getTextMessage(
                     SQLState.LANG_IGNORE_MISSING_INDEX_ROW_DURING_DELETE, 
                     args));
@@ -418,6 +429,9 @@ class IndexChanger
 			** row holder (the description is needed when the row
 			** holder is going to be handed to users for triggers).
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 			rowHolder = new TemporaryRowHolderImpl(activation, properties,
 												   (ResultDescription) null);
 		}
@@ -441,6 +455,8 @@ class IndexChanger
     // do not share an index with other constraints and explicit indexes, so the
     // mapping back from index conglomerate to constraint is one-to-one.
     private UUID getUniqueConstraintId() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         if (uniqueConstraintId == null) {
             DataDictionary dd = lcc.getDataDictionary();
             ConglomerateDescriptor cd = dd.getConglomerateDescriptor(indexCID);
@@ -472,6 +488,9 @@ class IndexChanger
         int insertStatus;
 
         final DataValueDescriptor[] rowArray = row.getRowArray();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
 
         if (deferrable) {
             insertStatus = indexCC.insert(row.getRowArray());
@@ -490,6 +509,8 @@ class IndexChanger
             // constitute duplicates (not always the case), and check those keys
             // again at commit time.
             final boolean deferred = lcc.isEffectivelyDeferred(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                     lcc.getCurrentSQLSessionContext(activation),
                     getUniqueConstraintId());
             // TODO add assert getUniqueConstraintId() != null
@@ -497,6 +518,8 @@ class IndexChanger
             ScanController idxScan = tc.openScan(
                     indexCID,
                     false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     (deferred ?
                      TransactionController.OPENMODE_LOCK_ROW_NOWAIT :
                      0),
@@ -524,6 +547,8 @@ class IndexChanger
             } catch (StandardException e) {
                 if ((e.getSQLState().equals(SQLState.LOCK_TIMEOUT) ||
                      e.getSQLState().equals(SQLState.DEADLOCK)) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                      deferred)  {
                     // Assume there is a duplicate, so we'll check again at
                     // commit time.
@@ -546,6 +571,8 @@ class IndexChanger
             }
 
             if (duplicate) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 if (deferred) {
                     // Save duplicate row so we can check at commit time there is
                     // no longer any duplicate.
@@ -554,6 +581,8 @@ class IndexChanger
                         DeferredConstraintsMemory.rememberDuplicate(
                             lcc,
                             deferredDuplicates,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                             getUniqueConstraintId(),
                             row.getRowArray());
                 } else { // the constraint is not deferred, so throw
@@ -593,6 +622,9 @@ class IndexChanger
 				StandardException.newException(
 				SQLState.LANG_DUPLICATE_KEY_CONSTRAINT, indexOrConstraintName, tableName);
 			throw se;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         } else {
             if (SanityManager.DEBUG) {
                 if (insertStatus != 0) {
@@ -731,6 +763,9 @@ class IndexChanger
 	{
 		setOurIndexRow(newRow, baseRowLocation);
 		//defer inserts if its on unique or UniqueWhereNotNull index
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         if (irg.isUnique() ||
             irg.isUniqueWithDuplicateNulls() ||
             irg.hasDeferrableChecking())

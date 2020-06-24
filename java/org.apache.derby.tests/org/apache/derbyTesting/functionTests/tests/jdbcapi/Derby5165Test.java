@@ -62,6 +62,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
             
             test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db" );
             test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
             test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db3" );
             test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db4");
             
@@ -121,6 +122,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         // time out.
         Statement s2 = c2.createStatement();
         try { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
             ResultSet rs = s2.executeQuery("select * from " + tableName);
             //System.out.println("Contents of T:");
             while (rs.next()) {
@@ -159,6 +161,8 @@ public class Derby5165Test extends BaseJDBCTestCase {
         Connection conn = xac.getConnection();
         // step 1 - perform insert with XA, using Xid xid1 
         Statement s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
         String tableName = "d5165t";
         createAndLoadTable(conn, tableName, true);
         conn.commit();
@@ -196,6 +200,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         // timed out.
         Statement s2 = c2.createStatement();
         try { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
             ResultSet rs = s2.executeQuery("select * from " + tableName);
             while (rs.next()) {
                 //    System.out.println(rs.getInt(1));
@@ -221,6 +226,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         // implying a crash when the jvm is done
         // This will force the connect to recover the database.
         // Pass in the name of the database to be used.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
                 "functionTests.tests.jdbcapi.Derby5165Test.launchUpdate",
                 "d5165db3");
@@ -276,6 +282,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         xar.start(xid1, XAResource.TMNOFLAGS);
         Connection c1 = xac.getConnection();
         Statement s1 = c1.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
         s1.execute("update " + tableName + " set x = 2 where x = 1");
         xar.end(xid1, XAResource.TMSUCCESS);
 
@@ -338,6 +345,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         Connection c1 = xac.getConnection();
         Statement s1 = c1.createStatement();
         // insert
+//IC see: https://issues.apache.org/jira/browse/DERBY-6727
         s1.execute("insert into " + tableName + " values 2");
         xar.end(xid1, XAResource.TMSUCCESS);
 

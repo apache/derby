@@ -58,6 +58,7 @@ public class MergeScanRowSource extends MergeScan implements ScanControllerRowSo
     MergeSort           sort, 
     TransactionManager  tran,
     SortBuffer          sortBuffer, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     Vector<Long>              mergeRuns,
 	SortObserver		sortObserver,
     boolean             hold)
@@ -103,6 +104,7 @@ public class MergeScanRowSource extends MergeScan implements ScanControllerRowSo
 
     public boolean needsRowLocationForDeferredCheckConstraints()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return false;
     }
 
@@ -125,6 +127,7 @@ public class MergeScanRowSource extends MergeScan implements ScanControllerRowSo
 	}
 
     public void offendingRowLocation(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             RowLocation rl, long containdId) throws StandardException {
         if (SanityManager.DEBUG) {
             SanityManager.NOTREACHED();

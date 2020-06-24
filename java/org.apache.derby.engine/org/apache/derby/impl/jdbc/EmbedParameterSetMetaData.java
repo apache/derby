@@ -75,6 +75,7 @@ public class EmbedParameterSetMetaData implements ParameterMetaData {
    		checkPosition(param);
 
    		if (types[param - 1].isNullable())
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             return (ParameterMetaData.parameterNullable);
    		else
             return (ParameterMetaData.parameterNoNulls);
@@ -112,6 +113,7 @@ public class EmbedParameterSetMetaData implements ParameterMetaData {
 			outparamPrecision = pvs.getPrecision(param);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5062
         if (outparamPrecision == -1)
         {
             return DataTypeUtilities.getPrecision(types[param - 1]);
@@ -200,6 +202,7 @@ public class EmbedParameterSetMetaData implements ParameterMetaData {
    		//bug 4857 - only the return parameter is of type OUT. All the other output
    		//parameter are IN_OUT (it doesn't matter if their value is set or not).
    		if ((param == 1) && pvs.hasReturnOutputParameter())//only the first parameter can be of return type
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 return (ParameterMetaData.parameterModeOut);
    		return pvs.getParameterMode(param);
     }
@@ -215,6 +218,7 @@ public class EmbedParameterSetMetaData implements ParameterMetaData {
 			/* This message matches the one used by the DBMS */
 			throw Util.generateCsSQLException(
             SQLState.LANG_INVALID_PARAM_POSITION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             parameterIndex, paramCount);
 		}
     }
@@ -231,6 +235,7 @@ public class EmbedParameterSetMetaData implements ParameterMetaData {
      * a wrapper for an object with the given interface.
      */
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         return iface.isInstance(this);
     }
 

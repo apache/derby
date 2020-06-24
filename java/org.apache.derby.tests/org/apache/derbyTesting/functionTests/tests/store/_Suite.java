@@ -50,17 +50,26 @@ public class _Suite extends BaseTestCase  {
     public static Test suite() {
 
         BaseTestSuite suite = new BaseTestSuite("store");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(BootAllTest.suite());
         suite.addTest(ClassLoaderBootTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3663
         suite.addTest(StreamingColumnTest.suite());
         suite.addTest(Derby3625Test.suite());
         suite.addTest(Derby4577Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         suite.addTest(InterruptResilienceTest.suite());
         suite.addTest(Derby4676Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4179
+//IC see: https://issues.apache.org/jira/browse/DERBY-4646
+//IC see: https://issues.apache.org/jira/browse/DERBY-4647
         suite.addTest(BootLockTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5305
         suite.addTest(UpdateLocksTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3735
         suite.addTest(PositionedStoreStreamTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3837
         suite.addTest(OSReadOnlyTest.suite());
         suite.addTest(BackupRestoreTest.suite());
         suite.addTest(OfflineBackupTest.suite());
@@ -68,40 +77,60 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ClobReclamationTest.suite());
         suite.addTest(IndexSplitDeadlockTest.suite());
         suite.addTest(HoldCursorJDBC30Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4038
         suite.addTest(AccessTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4939
+//IC see: https://issues.apache.org/jira/browse/DERBY-5131
         suite.addTest(AutomaticIndexStatisticsTest.suite());
         suite.addTest(Derby5582AutomaticIndexStatisticsTest.suite());
         suite.addTest(AutomaticIndexStatisticsMultiTest.suite());
         suite.addTest(BTreeMaxScanTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5127
         suite.addTest(MadhareTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5156
         suite.addTest(LongColumnTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5282
         suite.addTest(RowLockBasicTest.suite());
         suite.addTest(RecoveryTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5382
         suite.addTest(OCRecoveryTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5301
         suite.addTest(TableLockBasicTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
         suite.addTest(ServicePropertiesFileTest.suite());
         suite.addTest(Derby5234Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         suite.addTest(KeepDisposableStatsPropertyTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5630
         suite.addTest(LockTableVtiTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5977
         suite.addTest(StoreScriptsTest.suite());
         suite.addTest(Derby4923Test.suite());
         suite.addTest(SpaceTableTest.suite());
         
         /* Tests that only run in sane builds */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3842
         if (SanityManager.DEBUG) {
             suite.addTest(HoldCursorExternalSortJDBC30Test.suite());
         }
 
         // Encryption only supported for Derby in J2SE/J2EE environments.
         // J2ME (JSR169) does not support encryption.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1001
         if (JDBC.vmSupportsJDBC3()) {
             // Add tests of basic functionality on encrypted databases.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2644
             suite.addTest(EncryptionKeyAESTest.suite());
             suite.addTest(EncryptionKeyBlowfishTest.suite());
             suite.addTest(EncryptionKeyDESTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3711
             suite.addTest(EncryptionAESTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2687
+//IC see: https://issues.apache.org/jira/browse/DERBY-5622
             suite.addTest(EncryptDatabaseTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5934
             suite.addTest(CryptoCrashRecoveryTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             suite.addTest(DecryptDatabaseTest.suite());
         }
 

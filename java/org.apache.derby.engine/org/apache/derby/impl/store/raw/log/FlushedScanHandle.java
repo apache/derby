@@ -136,6 +136,7 @@ public class FlushedScanHandle implements ScanHandle
 		{
 			int dataLength = rawInput.readInt();
 			readOptionalData = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2118
 			rawInput.setLimit(dataLength);
 			return rawInput;
 		}

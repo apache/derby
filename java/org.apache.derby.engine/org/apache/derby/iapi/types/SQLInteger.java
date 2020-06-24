@@ -115,6 +115,7 @@ public final class SQLInteger
 		if (isNull())
 			return null;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			return value;
 	}
 
@@ -305,6 +306,7 @@ public final class SQLInteger
 		else
 		{
 		    try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
 		        value = Integer.parseInt(theValue.trim());
 			} catch (NumberFormatException nfe) {
 			    throw invalidFormat();

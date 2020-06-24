@@ -94,6 +94,7 @@ public final class DataStore {
      *      {@code false} otherwise.
      */
     public boolean scheduledForDeletion() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
         return this.deleteMe;
     }
 
@@ -111,6 +112,7 @@ public final class DataStore {
      */
     public DataStoreEntry createEntry(String iPath, boolean isDir) {
         // Normalize the path.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         final String nPath = new File(iPath).getPath();
         synchronized (LOCK) {
             if (files.containsKey(nPath)) {
@@ -119,6 +121,7 @@ public final class DataStore {
             // Make sure the the parent directories exists.
             String[] parents = getParentList(nPath);
             for (int i=parents.length -1; i >= 0; i--) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 DataStoreEntry entry = files.get(parents[i]);
                 if (entry == null) {
                     return null;
@@ -139,12 +142,14 @@ public final class DataStore {
      *      or were created, {@code false} otherwise
      */
     public boolean createAllParents(String path) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         final String nPath = new File(path).getPath();
         // Iterate through the list and create the missing parents.
         String[] parents = getParentList(nPath);
         synchronized (LOCK) {
             for (int i=parents.length -1; i >= 0; i--) {
                 String subPath = parents[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 DataStoreEntry entry = files.get(subPath);
                 if (entry == null) {
                     createEntry(subPath, true);
@@ -167,9 +172,11 @@ public final class DataStore {
      * @return {@code true} if the entry was deleted, {@code false} otherwise.
      */
     public boolean deleteEntry(String iPath) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         final String nPath = new File(iPath).getPath();
         DataStoreEntry entry;
         synchronized (LOCK) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             entry = files.remove(nPath);
             if (entry != null) {
                 if (entry.isDirectory()) {
@@ -181,6 +188,7 @@ public final class DataStore {
                     }
                     // Check if we just deleted the service root. Normally the
                     // service would be deleted using deleteAll.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
                     if (nPath.equals(databaseName) &&
                             files.get(databaseName) == null) {
                         // Service root deleted, mark this store for removal.
@@ -203,6 +211,7 @@ public final class DataStore {
     public DataStoreEntry getEntry(String iPath) {
         synchronized (LOCK) {
             // Use java.io.File to normalize the path.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             return files.get(new File(iPath).getPath());
         }
     }
@@ -217,6 +226,7 @@ public final class DataStore {
     public boolean deleteAll(String iPath) {
         final String nPath = new File(iPath).getPath();
         synchronized (LOCK) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             DataStoreEntry entry = files.remove(nPath);
             if (entry == null) {
                 // Delete root doesn't exist.
@@ -224,6 +234,7 @@ public final class DataStore {
             } else if (entry.isDirectory()) {
                 // Delete root is a directory.
                 boolean deleted = _deleteAll(nPath);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
                 if (files.get(databaseName) == null) {
                     // The service root has been deleted, which means that all
                     // the data has been deleted. Mark this store for removal.
@@ -250,11 +261,13 @@ public final class DataStore {
             throw new IllegalArgumentException(
                     "The empty string is not a valid path");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         String nPath = new File(iPath).getPath();
         // Make sure the search path ends with the separator.
         if (nPath.charAt(nPath.length() -1) != SEP) {
             nPath += SEP;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<String> children = new ArrayList<String>();
         synchronized (LOCK) {
             Iterator<String> paths = files.keySet().iterator();
@@ -262,6 +275,7 @@ public final class DataStore {
             while (paths.hasNext()) {
                 candidate = paths.next();
                 if (candidate.startsWith(nPath)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                     candidate = candidate.substring(nPath.length());
                     // don't include grandchildren
                     if ( candidate.indexOf( PathUtil.SEP_STR ) < 0 )
@@ -283,12 +297,14 @@ public final class DataStore {
      *      file already existed or the existing file doesn't exist.
      */
     public boolean move(StorageFile currentFile, StorageFile newFile) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         final String currentPath = new File(currentFile.getPath()).getPath();
         final String newPath = new File(newFile.getPath()).getPath();
         synchronized (LOCK) {
             if (files.containsKey(newPath)) {
                 return false;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             DataStoreEntry current = files.remove(currentPath);
             if (current == null) {
                 return false;
@@ -303,6 +319,7 @@ public final class DataStore {
      */
     public void purge() {
         synchronized (LOCK) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Iterator<DataStoreEntry> fileIter = files.values().iterator();
             while (fileIter.hasNext()) {
                 (fileIter.next()).release();
@@ -327,6 +344,7 @@ public final class DataStore {
         if (prefixPath.charAt(prefixPath.length() -1) != SEP) {
             prefixPath += SEP;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<String> toDelete = new ArrayList<String>();
         Iterator<String> paths = files.keySet().iterator();
         // Find all the entries to delete.
@@ -341,7 +359,9 @@ public final class DataStore {
         // Iterate through all entries found and release them.
         Iterator keys = toDelete.iterator();
         while (keys.hasNext()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             DataStoreEntry entry = files.remove((String)keys.next());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
             entry.release();
         }
         return true;
@@ -368,7 +388,9 @@ public final class DataStore {
      * @return A list of parents.
      */
     private String[] getParentList(String path) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<String> parents = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         String parent = path;
         // Build the list of parents.
         while ((parent = new File(parent).getParent()) != null) {

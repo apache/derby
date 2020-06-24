@@ -55,6 +55,8 @@ public class TestUtil {
 	//Used for JSR169
 	public static boolean HAVE_DRIVER_CLASS;
 	static{
+//IC see: https://issues.apache.org/jira/browse/DERBY-398
+//IC see: https://issues.apache.org/jira/browse/DERBY-597
 		try{
 			Class.forName("java.sql.Driver");
 			HAVE_DRIVER_CLASS = true;
@@ -171,6 +173,7 @@ public class TestUtil {
 	{
 		if (framework != UNKNOWN_FRAMEWORK)
 			return framework;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
               String frameworkString = AccessController.doPrivileged
                   (new PrivilegedAction<String>() {
                           public String run() {
@@ -180,6 +183,7 @@ public class TestUtil {
                    );              
 		// last attempt to get useprocess to do networkserver stuff.
 		// If a suite has useprocess, it's possible there was no property set.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 		if (frameworkString == null)
 		{
 		   String useprocessFramework = RunTest.framework;
@@ -204,6 +208,7 @@ public class TestUtil {
 	    Get URL prefix for current framework.
 		
 		@return url, assume localhost - unless set differently in System property - 
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 		             and assume port 1527 for Network Tests
 		@see #getJdbcUrlPrefix(String server, int port)
 		
@@ -219,6 +224,7 @@ public class TestUtil {
     */
     public static String getHostName()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         String hostName = AccessController.doPrivileged
             (new PrivilegedAction<String>() {
                     public String run() {
@@ -269,6 +275,9 @@ public class TestUtil {
 	*/
 	public static void loadDriver() throws Exception
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-918
+//IC see: https://issues.apache.org/jira/browse/DERBY-934
+//IC see: https://issues.apache.org/jira/browse/DERBY-797
               final String driverName;
 		framework = getFramework();
 		switch (framework)
@@ -284,6 +293,9 @@ public class TestUtil {
 			case DERBY_NET_CLIENT_FRAMEWORK:
 				driverName = "org.apache.derby.jdbc.ClientDriver";
 				break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-918
+//IC see: https://issues.apache.org/jira/browse/DERBY-934
+//IC see: https://issues.apache.org/jira/browse/DERBY-797
                       default: 
                             driverName=  "org.apache.derby.jdbc.EmbeddedDriver";
                             break;
@@ -315,6 +327,7 @@ public class TestUtil {
 	 */
     public static DataSource getDataSource(Properties attrs)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         String classname =
             getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource40";
         return (DataSource) getDataSourceWithReflection(classname, attrs);
@@ -330,6 +343,7 @@ public class TestUtil {
 	 */
     public static XADataSource getXADataSource(Properties attrs)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         String classname =
             getDataSourcePrefix() + XA_DATASOURCE_STRING + "DataSource40";
         return (XADataSource) getDataSourceWithReflection(classname, attrs);
@@ -345,6 +359,7 @@ public class TestUtil {
 	 *  @return datasource for current framework
 	 */
     public static ConnectionPoolDataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             getConnectionPoolDataSource(Properties attrs)
 	{
         String classname = getDataSourcePrefix() +
@@ -391,6 +406,7 @@ public class TestUtil {
 		
 		if (specialAttributes == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			specialAttributes = new Hashtable<String, Class[]>();
 			specialAttributes.put("portNumber",INT_ARG_TYPE);
 			specialAttributes.put("driverType",INT_ARG_TYPE);
@@ -401,11 +417,14 @@ public class TestUtil {
 		}
 		
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(classname);
             ds = clazz.getConstructor().newInstance();
 
 		// for remote server testing, check whether the hostName is set for the test
 		// if so, and serverName is not yet set explicitly for the datasource, set it now
+//IC see: https://issues.apache.org/jira/browse/DERBY-434
+//IC see: https://issues.apache.org/jira/browse/DERBY-1052
 		String hostName = getHostName();
 		if ( (!isEmbeddedFramework()) && (hostName != null ) && (attrs.getProperty("serverName") == null) )
 			attrs.setProperty("serverName", hostName);
@@ -421,6 +440,7 @@ public class TestUtil {
 			if (argType  == INT_ARG_TYPE)
 			{
 				args = new Integer[] 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				{ Integer.valueOf(value) };	
 			}
 			else if (argType  == BOOLEAN_ARG_TYPE)
@@ -493,6 +513,7 @@ public class TestUtil {
 	  public static String sqlNameFromJdbc(int jdbcType) {
 		switch (jdbcType) {
 			case Types.BIT 		:  return "Types.BIT";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN  : return "Types.BOOLEAN";
 			case Types.TINYINT 	:  return "Types.TINYINT";
 			case Types.SMALLINT	:  return "SMALLINT";
@@ -528,6 +549,7 @@ public class TestUtil {
 	  public static String getNameFromJdbcType(int jdbcType) {
 		switch (jdbcType) {
 			case Types.BIT 		:  return "Types.BIT";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN  : return "Types.BOOLEAN";
 			case Types.TINYINT 	:  return "Types.TINYINT";
 			case Types.SMALLINT	:  return "Types.SMALLINT";
@@ -715,6 +737,7 @@ public class TestUtil {
 			// Check if setSavepoint() is present to decide whether the version
 			// is > 2.0.
 			conn.getClass().getMethod("setSavepoint", null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1546
 			DatabaseMetaData meta = conn.getMetaData();
 			Method method =
 				meta.getClass().getMethod("getJDBCMajorVersion", null);
@@ -728,6 +751,7 @@ public class TestUtil {
 	}
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
         Drop the test objects passed in as a string identifying the
         type of object (e.g. TABLE, PROCEDURE) and its name.
         Thus, for example, a testObject array could be:
@@ -766,6 +790,7 @@ public class TestUtil {
      * @throws IllegalAccessException on failure to load driver.
      */
     public static Connection getConnection(String databaseName, String connAttrs)
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
     	throws SQLException {
         try {
             Connection conn;
@@ -792,6 +817,8 @@ public class TestUtil {
                         break;
                 } 
                 // q: do we need a privileged action here, like in loadDriver?
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = Class.forName(driverName);
                 clazz.getConstructor().newInstance();
 				
@@ -800,6 +827,7 @@ public class TestUtil {
                 if (framework == DERBY_NET_FRAMEWORK)
                 {
                     if (( connAttrs == null) || ((connAttrs != null) && (connAttrs.indexOf("user") < 0)))
+//IC see: https://issues.apache.org/jira/browse/DERBY-993
                         url += ":" + "user=APP;password=APP;retrieveMessagesFromServerOnGetMessage=true;";
                 }
                 conn = DriverManager.getConnection(url);
@@ -825,6 +853,7 @@ public class TestUtil {
     		System.out.println("FAILure: Not allowed to use class");
     		ille.printStackTrace();
     		return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     	} catch (NoSuchMethodException ille) {
     		System.out.println("FAILure: No such constructor");
     		ille.printStackTrace();
@@ -837,6 +866,8 @@ public class TestUtil {
     }
     
     public static Connection getDataSourceConnection (Properties prop) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-398
+//IC see: https://issues.apache.org/jira/browse/DERBY-597
 		DataSource ds = TestUtil.getDataSource(prop);
 		try {
 			Connection conn = ds.getConnection();
@@ -863,6 +894,7 @@ public class TestUtil {
 	//Used by metadata tests for DatabaseMetadata.getURL
 	public static boolean compareURL(String url) {
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-398
 		if(isEmbeddedFramework()) {
 			if(url.compareTo("jdbc:derby:wombat") == 0)
 				return true;
@@ -899,7 +931,9 @@ public class TestUtil {
 	 */
     public static void dumpAllStackTracesIfSupported(PrintWriter log)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3503
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			String version = AccessController.doPrivileged
 				(new PrivilegedAction<String>(){
 						public String run(){
@@ -911,6 +945,7 @@ public class TestUtil {
 			JavaVersionHolder j=  new JavaVersionHolder(version); 
 			
 			if (j.atLeast(1,5)){
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 				Class<?> c = Class.forName("org.apache.derbyTesting.functionTests.util.ThreadDump");
 				final Method m = c.getMethod("getStackDumpString",new Class[] {});
 				

@@ -22,6 +22,7 @@
 package org.apache.derby.catalog;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
  <p>An interface for describing a default for a column or parameter in Derby systems.</p>
  */
 public interface DefaultInfo

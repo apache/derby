@@ -111,6 +111,7 @@ public class mtTester implements Runnable
 		{
 			log.println(name + ": stopping on request after " + numIterations +
 						" iterations");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1230
 			testOK = true;
 		}
 	}
@@ -121,6 +122,7 @@ public class mtTester implements Runnable
 	}
 	public boolean noFailure()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1230
 		return testOK;
 	}
 }

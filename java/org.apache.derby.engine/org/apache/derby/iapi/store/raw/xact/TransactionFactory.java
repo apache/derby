@@ -109,7 +109,9 @@ public interface TransactionFactory extends Corruptable {
 	*/
 	public RawTransaction startNestedReadOnlyUserTransaction(
     RawStoreFactory rsf,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     RawTransaction parentTransaction,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
     CompatibilitySpace compatibilitySpace,
     ContextManager  contextMgr,
     String          transName)
@@ -139,6 +141,7 @@ public interface TransactionFactory extends Corruptable {
 	*/
 	public RawTransaction startNestedUpdateUserTransaction(
     RawStoreFactory rsf,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     RawTransaction parentTransaction,
     ContextManager  contextMgr,
     String          transName,
@@ -335,6 +338,7 @@ public interface TransactionFactory extends Corruptable {
 	 */
 	public boolean blockBackupBlockingOperations(boolean wait) 
 		throws StandardException ;
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 
 	/**
 	 * Backup completed. Allow backup blocking operations. 

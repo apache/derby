@@ -37,6 +37,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * first call to next().
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class ScalarAggregateResultSet extends GenericAggregateResultSet
 	implements CursorResultSet 
 {
@@ -69,6 +70,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     ScalarAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,
@@ -79,6 +81,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 				    double optimizerEstimatedRowCount,
 				    double optimizerEstimatedCost) throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.isInSortedOrder = isInSortedOrder;
 		// source expected to be non-null, mystery stress test bug
@@ -125,6 +128,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 		}
 
 		sourceExecIndexRow = (ExecIndexRow) getRowTemplate().getClone();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
         source.openCore();
 
@@ -152,6 +156,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

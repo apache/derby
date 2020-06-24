@@ -42,6 +42,7 @@ public class DbSetup {
 		boolean finished = false;
 
 		NsTest.logger.println("dbSetup.doIt() starting...");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 		try {
 			conn.setAutoCommit(false);
@@ -57,6 +58,7 @@ public class DbSetup {
 					+ " where tablename = 'NSTESTTAB'");
 			if (rs.next()) {
 				rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println("table 'NSTESTTAB' already exists");
 				finished = true;
 				NsTest.schemaCreated = true; // indicates to other classes
@@ -74,6 +76,7 @@ public class DbSetup {
 		// if we reach here then the table does not exist, so we create it
 		if (finished == false) {
 			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger
 				.println("creating table 'NSTESTTAB' and corresponding indices");
 				s.execute("create table nstesttab (" + "id int,"
@@ -86,6 +89,7 @@ public class DbSetup {
 						+ "t_timestamp timestamp," + "t_varchar varchar(100),"
 						+ "t_clob clob(1K)," + "t_blob blob(10K),"
 						+ "serialkey bigint generated always as identity, "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 						+ "sequenceColumn bigint, "
 						+ "unique (serialkey)) ");
 
@@ -113,9 +117,11 @@ public class DbSetup {
 				s
 				.execute("create index t_serialkey_ind on nstesttab (serialkey)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                 NsTest.logger.println( "Creating nstesttab_seq sequence" );
                 s.execute( "create sequence nstesttab_seq as bigint start with 0" );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger
 				.println("creating table 'NSTRIGTAB' and corresponding indices");
 				s.execute("create table NSTRIGTAB (" + "id int,"
@@ -127,6 +133,7 @@ public class DbSetup {
 						+ "t_smallint smallint," + "t_time time,"
 						+ "t_timestamp timestamp," + "t_varchar varchar(100),"
 						+ "t_clob clob(1K)," + "t_blob blob(10K),"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 						+ "serialkey bigint, "
 						+ "sequenceColumn bigint )");
 				// create trigger
@@ -138,9 +145,11 @@ public class DbSetup {
 						+ "OLDROW.T_FLOAT, OLDROW.T_INT,OLDROW.T_LONGINT, OLDROW.T_numeric_large,"
 						+ "OLDROW.T_real,OLDROW.T_smallint,OLDROW.T_time,OLDROW.T_timestamp,OLDROW.T_varchar,"
 						+ "OLDROW.T_clob,OLDROW.T_blob, "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 						+ "OLDROW.serialkey, "
 						+ "OLDROW.sequenceColumn )");
 			} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                 if ( NsTest.justCountErrors() ) { NsTest.printException( DbSetup.class.getName(), e ); }
 				else { e.printStackTrace( NsTest.logger ); }
 				NsTest.logger
@@ -162,6 +171,7 @@ public class DbSetup {
 	// stack traces that are not
 	// ****mixed but rather one exception printed at a time
 	public static synchronized void printException(String where, Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( NsTest.justCountErrors() )
         {
             NsTest.addError( e );
@@ -183,6 +193,7 @@ public class DbSetup {
 						+ " SQLSTATE: " + m);
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5465
 		if (e.getMessage() == null) {
 			NsTest.logger.println("NULL error message detected");
 			NsTest.logger.println("Here is the NULL exection - " + e.toString());

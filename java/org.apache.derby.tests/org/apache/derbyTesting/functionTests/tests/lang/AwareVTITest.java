@@ -76,6 +76,7 @@ public class AwareVTITest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             AwareVTITest.class);
         Test        result = new CleanDatabaseTestSetup( suite );
@@ -139,6 +140,7 @@ public class AwareVTITest  extends GeneratedColumnsHelper
     public void test_02_StringColumnVTI() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
 
         String[][]  rows = new String[][]
             {
@@ -174,6 +176,7 @@ public class AwareVTITest  extends GeneratedColumnsHelper
     public void test_03_ArchiveVTI() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
 
         goodStatement
             (
@@ -242,6 +245,7 @@ public class AwareVTITest  extends GeneratedColumnsHelper
     {
         public  UnnamedColumnsVTI( String[][] rows )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
             super( null, rows );
         }
     }

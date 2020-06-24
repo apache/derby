@@ -140,6 +140,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
     private boolean isImplemented() throws NoSuchMethodException {
         // Check if the method is implemented in one of the Derby classes
         // that the JDBC object belongs to.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Class<?> c = decorator_.getClosedObject().getClass();
                 c != null; c = c.getSuperclass()) {
             if (c.getName().startsWith("org.apache.derby.")) {
@@ -163,7 +164,9 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
     /** Creates a suite with all tests in the class. */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ClosedObjectTest suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
         suite.addTest(baseSuite(false));
         suite.addTest(baseSuite(true));
         return suite;
@@ -179,6 +182,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @exception Exception if an error occurs while building the test suite
      */
     private static Test baseSuite(boolean network) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite topSuite = new BaseTestSuite(
             "ClosedObjectTest:" + (network ? "client" : "embedded"));
 
@@ -194,6 +198,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
             // Plain connection pool test.
             topSuite.addTest(poolSuite(Collections.emptyMap()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
 
             // The client driver has a variant of connection pool that caches
             // and reuses JDBC statements. Test it here by setting the
@@ -203,6 +208,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                         "maxStatements", Integer.valueOf(5))));
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite xaSuite = new BaseTestSuite("ClosedObjectTest XA");
             XADataSourceDecorator xaDecorator = new XADataSourceDecorator(xaSuite);
             topSuite.addTest(xaDecorator);
@@ -222,6 +228,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @return a suite
      */
     private static Test poolSuite(Map dsProps) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite poolSuite = new BaseTestSuite(
                 "ClosedObjectTest ConnectionPoolDataSource");
         PoolDataSourceDecorator poolDecorator =
@@ -243,6 +250,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
     private static void fillDataSourceSuite(BaseTestSuite suite,
                                             DataSourceDecorator dsDecorator)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite rsSuite = new BaseTestSuite("Closed ResultSet");
         ResultSetObjectDecorator rsDecorator =
             new ResultSetObjectDecorator(rsSuite, dsDecorator);
@@ -286,6 +294,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                                         ObjectDecorator decorator,
                                         Class iface)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2324
         Method[] methods = iface.getMethods();
         for (int i = 0; i < methods.length; i++) {
             ClosedObjectTest cot = new ClosedObjectTest(methods[i], decorator);
@@ -326,6 +335,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
             return Boolean.FALSE;
         }
         if (type == Character.TYPE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return (char) 0;
         }
         if (type == Byte.TYPE) {
@@ -373,6 +383,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
         /** Tears down the test environment. */
         protected void tearDown() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             object_ = null;
         }
 
@@ -415,6 +427,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                 throw sqle;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2324
             if (sqle.getSQLState().startsWith("0A")) {
                 // method is not supported, so we don't expect closed object
                 // exception
@@ -519,6 +532,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          */
         public void tearDown() throws Exception {
             stmt_.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             stmt_ = null;
             super.tearDown();
         }
@@ -539,6 +554,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                 String methodString=method.getName();
                 if (methodString.indexOf("(") > 1 )
                     methodString=methodString.substring(0, (methodString.length() -2));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                 assertTrue("method = " + method.toString() + ", but message: " + sqle.getMessage(),
                            sqle.getMessage().indexOf(methodString) > 0); 
                 // everything is OK, do nothing
@@ -588,6 +604,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
             throws SQLException
         {
             String sqlState = sqle.getSQLState();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1395
             if (sqlState.equals("XJ012")) {
                 // expected, do nothing
             } else {
@@ -723,6 +740,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         protected void checkSQLState(Method method, SQLException sqle)
             throws SQLException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2324
             if (method.getName().equals("setClientInfo") &&
                     method.getParameterTypes().length == 1 &&
                     method.getParameterTypes()[0] == Properties.class) {
@@ -763,6 +781,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         public final void setUp() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2324
              connection_ = newConnection();
         }
 
@@ -795,6 +814,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         public final void tearDown() throws SQLException {
             connection_.rollback();
             connection_.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             connection_ = null;
         }
 
@@ -805,9 +826,12 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             DataSource ds = JDBCDataSource.getDataSource();
             // make sure the database is created when running the test
             // standalone
+//IC see: https://issues.apache.org/jira/browse/DERBY-2324
             JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
                                            "create=true");
             return ds.getConnection();
@@ -829,6 +853,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          */
         public PoolDataSourceDecorator(Test test, Map dsProps) {
             super(test);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
             this.dsProps = dsProps;
         }
 
@@ -840,7 +865,10 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
             for (Iterator it = dsProps.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry e = (Map.Entry) it.next();
                 J2EEDataSource.setBeanProperty(
@@ -873,6 +901,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             XADataSource ds = J2EEDataSource.getXADataSource();
             XAConnection xac = ds.getXAConnection();
             return xac.getConnection();

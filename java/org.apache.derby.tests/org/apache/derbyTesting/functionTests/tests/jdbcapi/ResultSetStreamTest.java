@@ -60,6 +60,7 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
     public void testInsertData() throws SQLException, Exception {
         try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             AccessController.doPrivileged(
                     new PrivilegedExceptionAction<Void>() {
                 public Void run() throws SQLException, FileNotFoundException,
@@ -165,6 +166,7 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
     public void testBinaryStreamProcessing() throws SQLException, Exception {
         try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             AccessController.doPrivileged(
                     new PrivilegedExceptionAction<Void>() {
                 public Void run() throws SQLException, FileNotFoundException,
@@ -415,6 +417,7 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
      * @throws SQLException if something goes wrong
      */
     public void testSetMaxFieldSizeLarge()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             throws IOException, SQLException {
         // Insert test data.
         int id = 1;
@@ -476,6 +479,7 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
     }
 
     public static Test basesuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(ResultSetStreamTest.class, name);
 
@@ -483,12 +487,14 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
                 "functionTests/testData/ResultSetStream/littleclob.utf",
                 "functionTests/testData/ResultSetStream/short.utf",
                 "functionTests/testData/ResultSetStream/resultsetStream.gif" });
+//IC see: https://issues.apache.org/jira/browse/DERBY-3990
 
         return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {
 
                 s.execute("create table t2 (len int, data LONG VARCHAR FOR BIT DATA)");
                 s.execute("create table t3(text_data clob)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 s.execute("create table setMaxFieldSize(id int unique, " +
                         "dVarchar VARCHAR(32672), dClob clob)");
 
@@ -497,6 +503,7 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ResultSetStreamTest");
         suite.addTest(basesuite("ResultSetStreamTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(basesuite("ResultSetStreamTest:client")));

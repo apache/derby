@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BaseColumnNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -40,6 +41,8 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class BaseColumnNode extends ValueNode
 {
 	private String	columnName;
@@ -58,6 +61,8 @@ class BaseColumnNode extends ValueNode
      * @param cm Context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BaseColumnNode(
             String columnName,
             TableName tableName,
@@ -81,6 +86,7 @@ class BaseColumnNode extends ValueNode
 		if (SanityManager.DEBUG)
 		{
 			return "columnName: " + columnName + "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				"tableName: " +
 				( ( tableName != null) ?
 						tableName.toString() :
@@ -99,6 +105,8 @@ class BaseColumnNode extends ValueNode
 	 * @return	The name of this column
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getColumnName()
 	{
 		return columnName;
@@ -114,6 +122,8 @@ class BaseColumnNode extends ValueNode
 	 * 		supplied name.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getTableName()
 	{
 		return ( ( tableName != null) ? tableName.getTableName() : null );
@@ -128,8 +138,11 @@ class BaseColumnNode extends ValueNode
 	 * @return	The schema name for this column's table
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSchemaName() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		return ( ( tableName != null) ? tableName.getSchemaName() : null );
 	}
 
@@ -173,8 +186,10 @@ class BaseColumnNode extends ValueNode
      */
     boolean isEquivalent(ValueNode o)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
 			BaseColumnNode other = (BaseColumnNode)o;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5010
 			return other.tableName.equals(tableName)
 			&& other.columnName.equals(columnName);
 		} 

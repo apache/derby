@@ -65,6 +65,7 @@ public class XML {
      */
     private static final String HELPER_FILE_LOCATION =
         "org/apache/derbyTesting/functionTests/tests/lang/xmlTestFiles/";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
 
     /**
      * Return true if the classpath contains JAXP and
@@ -83,6 +84,7 @@ public class XML {
      */
     public static boolean classpathMeetsXMLReqs()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
         return HAVE_XPATH;
     }
 
@@ -100,6 +102,7 @@ public class XML {
      *  file's content.
      */
     public static void insertFile(Connection conn, String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
         String colName, String fName, int numRows)
         throws IOException, SQLException, PrivilegedActionException
     {
@@ -226,6 +229,7 @@ public class XML {
         try {
             Class<?> factoryClass =
                     Class.forName("javax.xml.xpath.XPathFactory");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
 
             Method newFactory =
                     factoryClass.getMethod("newInstance");
@@ -243,6 +247,8 @@ public class XML {
 
     private static boolean checkJAXPImplementation() {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<?> factoryClass =
                     Class.forName("javax.xml.parsers.DocumentBuilderFactory");
             Method newFactory =
@@ -272,10 +278,12 @@ public class XML {
          * parser in the classpath, the result for J2ME would be
          * be a NoClassDefFound error (DERBY-2153).
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         if (!classpathHasJAXP())
             return null;
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<?> jaxpFinderClass = Class.forName("org.apache.derbyTesting.junit.JAXPFinder");
             Method locatorMethod = jaxpFinderClass.getDeclaredMethod("getJAXPParserLocation");
 

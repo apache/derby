@@ -69,6 +69,7 @@ public class ShutdownWithoutDeregisterPermissionTest extends BaseJDBCTestCase {
         while (found == null && drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
             if (driver.getClass().getName().startsWith(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                     "org.apache.derby.iapi.jdbc.AutoloadedDriver")) {
                 found = driver;
             }

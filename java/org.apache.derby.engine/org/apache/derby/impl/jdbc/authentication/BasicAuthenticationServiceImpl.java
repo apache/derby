@@ -81,6 +81,7 @@ public final class BasicAuthenticationServiceImpl
 		String authenticationProvider = PropertyUtil.getPropertyFromSet(
 					properties,
 					org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 		if ( (authenticationProvider != null) &&
 			 (authenticationProvider.length() != 0) &&
@@ -185,6 +186,7 @@ public final class BasicAuthenticationServiceImpl
 		// be retrieved at the datbase level only).
 		//
         String userNameProperty =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
           org.apache.derby.shared.common.reference.Property.USER_PROPERTY_PREFIX.concat(
                         userName);
 
@@ -197,6 +199,7 @@ public final class BasicAuthenticationServiceImpl
             {
                 // hash passed-in password
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5693
                     passedUserPassword = hashPasswordUsingStoredAlgorithm(
                             userName, userPassword, definedUserPassword);
                 } catch (StandardException se) {
@@ -235,6 +238,7 @@ public final class BasicAuthenticationServiceImpl
             try {
                 Properties props = getDatabaseProperties();
                 if (props != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5693
                     hashUsingDefaultAlgorithm(
                             userName, userPassword, props);
                 }
@@ -293,6 +297,7 @@ public final class BasicAuthenticationServiceImpl
             throws StandardException
     {
         if (storedPassword.startsWith( PasswordHasher.ID_PATTERN_SHA1_SCHEME )) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5693
             return hashPasswordSHA1Scheme(password);
         }
         else

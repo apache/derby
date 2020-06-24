@@ -63,10 +63,12 @@ public class Import extends ImportAbstract{
      * @exception SQLException on error
 	 */
 	public Import(String inputFileName, String columnDelimiter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                   String characterDelimiter,  String codeset, 
                   int noOfColumnsExpected,  String columnTypes, 
                   boolean lobsInExtFile,
                   int importCounter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
                   String columnTypeNames, String udtClassNamesString ) throws SQLException 
 	{
 		try{
@@ -80,12 +82,14 @@ public class Import extends ImportAbstract{
 												   columnDelimiter, codeset);
             this.lobsInExtFile = lobsInExtFile;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             _importers.put( importCounter, this );
             
 			doImport();
 
 		}catch(Exception e)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3068
 			throw importError(e);
 		}
 	}
@@ -123,14 +127,18 @@ public class Import extends ImportAbstract{
 	 */
 
 	public static void importTable(Connection connection, String schemaName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                                    String tableName, String inputFileName,  
                                    String columnDelimiter, 
                                    String characterDelimiter,String codeset, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6892
                                    short replace, boolean lobsInExtFile, short... extraArgs)
 		throws SQLException {
 
 
         /** Make sure that the current user has permission to perform this operation */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             if ( lobsInExtFile )
             {
@@ -143,6 +151,8 @@ public class Import extends ImportAbstract{
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
         if(extraArgs.length>0){
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6892
              skip=extraArgs[0];
 	     if(skip<0) throw PublicAPI.wrapStandardException(StandardException.newException
 				(SQLState.LANG_INVALID_NUMBEROF_HEADER_LINES)); 
@@ -181,6 +191,7 @@ public class Import extends ImportAbstract{
      * @exception SQLException on errors
 	 */
 	public static void importData(Connection connection, String schemaName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                                   String tableName, String insertColumnList, 
                                   String columnIndexes, String inputFileName, 
                                   String columnDelimiter, 
@@ -190,6 +201,7 @@ public class Import extends ImportAbstract{
 		throws SQLException 
 	{
         /** Make sure that the current user has permission to perform this operation */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             if ( lobsInExtFile )
             {
@@ -201,6 +213,10 @@ public class Import extends ImportAbstract{
             }
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
 	if(extraArgs.length>0){
 	    skip=extraArgs[0];
 	    if(skip<0) throw PublicAPI.wrapStandardException(StandardException.newException
@@ -224,7 +240,9 @@ public class Import extends ImportAbstract{
 	 *
 	 */
     private static void performImport
+//IC see: https://issues.apache.org/jira/browse/DERBY-2193
         (Connection connection, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
          String schemaName, 
          String insertColumnList, 
          String columnIndexes,
@@ -237,6 +255,7 @@ public class Import extends ImportAbstract{
          boolean lobsInExtFile)
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Integer     importCounter = bumpImportCounter();
         
         try {
@@ -251,11 +270,14 @@ public class Import extends ImportAbstract{
             
             ColumnInfo columnInfo = new ColumnInfo(connection , schemaName ,
                                                    tableName, insertColumnList, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
                                                    columnIndexes, COLUMNNAMEPREFIX,readHeaders(inputFileName ,
 												characterDelimiter,
 												columnDelimiter,
 												codeset));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
             String columnTypeNames = null;
             String udtClassNames = null;
             try {
@@ -278,6 +300,7 @@ public class Import extends ImportAbstract{
             sb.append(",") ;
             sb.append(quoteStringArgument(codeset));
             sb.append(", ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             sb.append( columnInfo.getExpectedNumberOfColumnsInFile());
             sb.append(", ");
             sb.append(quoteStringArgument(
@@ -286,6 +309,7 @@ public class Import extends ImportAbstract{
             sb.append(lobsInExtFile);
             sb.append(", ");
             sb.append( importCounter.intValue() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
             sb.append(", ");
             sb.append(quoteStringArgument( columnTypeNames ) );
             sb.append(", ");
@@ -319,6 +343,7 @@ public class Import extends ImportAbstract{
             else
                 insertColumnNames = "";
             String insertSql = "INSERT INTO " + entityName +  insertColumnNames + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
                 " --DERBY-PROPERTIES insertMode=" + insertModeValue + "\n" +
                 " SELECT " + cNamesWithCasts + " from " + 
                 importvti + " AS importvti" ;
@@ -357,6 +382,8 @@ public class Import extends ImportAbstract{
     
     //Read the header lines to get column names to identify columns by name
     private static String[] readHeaders(String inputFileName ,String characterDelimiter,String columnDelimiter,String codeset) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
 	throws SQLException
 	{
 	try {
@@ -395,7 +422,10 @@ public class Import extends ImportAbstract{
 	/** virtual method from the abstract class
 	 * @exception	Exception on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	ImportReadData getImportReadData() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6892
 		return new ImportReadData(inputFileName, controlFileReader, skip);
 	}
 
@@ -405,6 +435,7 @@ public class Import extends ImportAbstract{
      */
     private static  synchronized    int bumpImportCounter()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2193
         return ++_importCounter;
     }
     
@@ -419,8 +450,10 @@ public class Import extends ImportAbstract{
         if ( importer != null ) { lineNumber = importer.getCurrentLineNumber(); }
         
         StandardException se = StandardException.newException
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             ( SQLState.UNEXPECTED_IMPORT_ERROR, lineNumber, inputFile, t.getMessage() );
         se.initCause(t);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 
         return PublicAPI.wrapStandardException(se);
     }

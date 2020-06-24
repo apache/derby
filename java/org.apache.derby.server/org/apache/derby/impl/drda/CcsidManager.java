@@ -47,6 +47,7 @@ abstract class CcsidManager
    * @param str The Java String from which to obtain the length.
    * @return The length in bytes of the String str.
    */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
   abstract int getByteLength (String str);
   
   // Convert a Java String into bytes for a particular ccsid.
@@ -55,6 +56,7 @@ abstract class CcsidManager
   // @return A new byte array representing the String in a particular ccsid.
   abstract byte[] convertFromJavaString (String sourceString);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
 
     /**
      * Convert a Java String into bytes for a particular ccsid.
@@ -64,6 +66,7 @@ abstract class CcsidManager
      * @param buffer        The buffer to convert the String into.
      */
     abstract void convertFromJavaString(String sourceString, ByteBuffer buffer);
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
 
   // Convert a byte array representing characters in a particular ccsid into a Java String.
   //

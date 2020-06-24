@@ -44,6 +44,8 @@ public class maintversion2props
         Properties p = new Properties();
         p.load(is);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-7020
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	    String maint = "";
         maint = p.getProperty("derby.version.maint");
         if (maint == null)

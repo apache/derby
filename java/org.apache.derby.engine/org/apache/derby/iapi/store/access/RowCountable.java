@@ -54,6 +54,7 @@ public interface RowCountable
      */
     public long getEstimatedRowCount()
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
 
     /**
      * Set the total estimated number of rows in the container.
@@ -81,5 +82,6 @@ public interface RowCountable
      */
     public void setEstimatedRowCount(long count)
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
 
 }

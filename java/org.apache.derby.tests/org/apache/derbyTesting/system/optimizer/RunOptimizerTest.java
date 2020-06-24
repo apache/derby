@@ -54,6 +54,7 @@ public class RunOptimizerTest {
 		boolean reset=false;
 		boolean verbose=false;
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 			String mode=System.getProperty("derby.optimizertest.mode");
 			if(mode!=null){
 				if(mode.equalsIgnoreCase("client")){
@@ -65,6 +66,7 @@ public class RunOptimizerTest {
 				}
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3845
 			File dir = new File("testdb");
 			if((!dir.exists())){
 				reset=true; // If nonexisting must always .init and .createObjects
@@ -72,6 +74,7 @@ public class RunOptimizerTest {
 
 			System.out.println("Running test with url "+jdbcurl);
 			if(args.length>0){
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 				for(int i=0;i<args.length;i++){
 					if(args[i].equalsIgnoreCase("-reset"))
 						reset=true;
@@ -87,6 +90,7 @@ public class RunOptimizerTest {
 				}
 			
 			Class.forName(driverClass);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3845
 			if (reset) { // Must also be done if db nonexisting
                 System.out.println("Initializing db ...");
 				conn = DriverManager.getConnection(jdbcurl);
@@ -140,6 +144,7 @@ public class RunOptimizerTest {
 	}
 	private static void printResults(){
 		System.out.println("\n\n========================= R E S U L T S =========================\n");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 			for(int i=0;i<QueryList.getQList().size();i++){
 			System.out.println("\n________________________________________________________________________________________________");
 			GenericQuery gq=(GenericQuery)QueryList.getQList().get(i);

@@ -226,6 +226,7 @@ public class Derby3625Test extends StoreBaseTest
     
     protected static Test baseSuite(String name) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby3625Test.class);
         return new CleanDatabaseTestSetup(
@@ -262,6 +263,7 @@ public class Derby3625Test extends StoreBaseTest
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Derby3625Test");
         suite.addTest(baseSuite("Derby36625Test:embedded"));
         return suite;

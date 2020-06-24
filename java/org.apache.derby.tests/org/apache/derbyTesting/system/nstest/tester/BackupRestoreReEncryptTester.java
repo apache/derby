@@ -85,6 +85,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 			// Get the connection. It will be closed at the end of the loop
 			connex = getConnection();
 			if (connex == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println("FAIL: " + getThread_id()
 						+ " could not get the database connection");
 				return; // quit
@@ -101,6 +102,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 			} catch (Exception e) {
 				message = getTimestamp() + "FAILED - BackUp thread doBackup"
 						+ getThread_id() + " threw " + e;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println(message);
 				log(message);
 				printException("call to doBackup() in BackupThread ", e);
@@ -123,6 +125,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 						+ " call to doRestoreandReEncrypt() in BackupThread FAILED "
 						+ e.getSQLState() + " " + e);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				e.printStackTrace( logger );
 			}
 
@@ -141,6 +144,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
             // first check if there are still active tester threads, so 
             // we do not make backups on an unchanged db every 10 mins for
             // the remainder of MAX_ITERATIONS.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
             if (NsTest.numActiveTestThreads() > 1)
             {
                 log("active test threads > 1, backup will continue in 10 minutes");
@@ -155,6 +159,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 		}// end of for (int i=0;...)
 
 		NsTest.logger.println("Thread " + getThread_id() + " is now terminating");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 	}// end of startTesting()
 
@@ -182,6 +187,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 					+ getThread_id() + " threw " + e;
 			log(message);
 			printException("call to doConsistCheck() in BackupThread ", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			e.printStackTrace( logger );
 		}
 		log("--------------------- B A C K U P  S E C T I O N  E N D ----------------------------");
@@ -229,6 +235,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 		} catch (SQLException e) {
 			log(getTimestamp() + " FAILURE ! to restore database " + dbUrl);
 			e.printStackTrace( logger );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 		}
 
@@ -313,6 +320,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 		logger.write(msg + "\n");
 		logger.flush();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		NsTest.logger.println(msg);
 	}
 }

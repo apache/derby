@@ -69,8 +69,10 @@ public class CopySuppFiles
 		}
                 // need to make a guess so we copy text files to local encoding
                 // on non-ascii systems...
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
 		        if ((fileName.indexOf("sql") > 0) || (fileName.indexOf("txt") > 0) || (fileName.indexOf(".view") > 0) || (fileName.indexOf(".policy") > 0) || (fileName.indexOf(".multi") > 0) || (fileName.indexOf(".properties") > 0))
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
                     BufferedReader inFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
                     PrintWriter pw = new PrintWriter
                        ( new BufferedWriter(new FileWriter(suppFile), 10000), true );

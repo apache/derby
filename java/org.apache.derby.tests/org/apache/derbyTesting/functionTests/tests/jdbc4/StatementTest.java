@@ -68,6 +68,7 @@ public class StatementTest
      */
     protected void setUp() 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         getConnection().setAutoCommit(false);
         // Create a default statement.
         stmt = createStatement();
@@ -85,6 +86,8 @@ public class StatementTest
         // Close default statement
         if (stmt != null) {
             stmt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             stmt = null;
         }
 
@@ -148,6 +151,7 @@ public class StatementTest
         // Close the connection. We must commit/rollback first, or else a
         // "Invalid transaction state" exception is raised.
         rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con = getConnection();
         con.close();
         assertTrue("Connection should be closed after close()", 
@@ -177,6 +181,7 @@ public class StatementTest
             con.close();
             fail("Invalid transaction state exception was not thrown");
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2065
             String expectedState =
                 SQLStateConstants.INVALID_TRANSACTION_STATE_ACTIVE_SQL_TRANSACTION;
             assertSQLState(expectedState, sqle);
@@ -208,6 +213,8 @@ public class StatementTest
         try {
             stmt.executeQuery("select count(*) from stmtTable");
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-843
+//IC see: https://issues.apache.org/jira/browse/DERBY-1198
             assertEquals("Unexpected SQL state for performing " +
                     "operations on a closed statement.",
                     SQLStateConstants.CONNECTION_EXCEPTION_CONNECTION_DOES_NOT_EXIST,
@@ -218,6 +225,7 @@ public class StatementTest
     }
 
     public void testIsWrapperForStatement() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1536
         assertTrue(stmt.isWrapperFor(Statement.class));
     }
 
@@ -269,6 +277,7 @@ public class StatementTest
      * Tests isPoolable, setPoolable, and the default poolability.
      */
     public void testPoolable() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1235
         assertFalse("Statement cannot be poolable by default", 
                     stmt.isPoolable()); 
         stmt.setPoolable(true);
@@ -286,6 +295,8 @@ public class StatementTest
     {
         SQLException    se = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         PreparedStatement ps = prepareStatement
             (
              "select columnnumber from sys.syscolumns c, sys.systables t\n" +
@@ -315,6 +326,7 @@ public class StatementTest
      */
     public void testCompletionClosure_jdbc4_1_implicitRSClosure() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Connection  conn = getConnection();
         conn.setHoldability( ResultSet.CLOSE_CURSORS_AT_COMMIT );
         conn.setAutoCommit( true );
@@ -365,6 +377,7 @@ public class StatementTest
     public void testLargeUpdate_jdbc4_2() throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         largeUpdate_jdbc4_2( conn );
     }
@@ -376,6 +389,7 @@ public class StatementTest
         // This test makes use of a debug entry point which is a NOP
         // in an insane production build.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (!SanityManager.DEBUG)    { return; }
         else { println( "Running largeUpdate_jdbc4_2() on debug code." ); }
 
@@ -395,11 +409,13 @@ public class StatementTest
         largeUpdateTest( sw, (long) Integer.MAX_VALUE );
         largeUpdateTest( sw, 0L);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         largeBatchTest( sw, (long) Integer.MAX_VALUE );
         largeBatchTest( sw, 0L);
 
         largeMaxRowsTest( sw,  ((long) Integer.MAX_VALUE) + 1L );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         largeBatchUpdateExceptionTest( sw, ((long) Integer.MAX_VALUE) + 1L );
     }
     private static  void    largeUpdateTest( StatementWrapper sw, long rowCountBase )
@@ -409,12 +425,14 @@ public class StatementTest
         // This test makes use of a debug entry point which is a NOP
         // in an insane production build.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (!SanityManager.DEBUG)    { return; }
         else { println( "Running largeUpdateTest() on debug code." ); }
 
         // poke the rowCountBase into the engine. all returned row counts will be
         // increased by this amount
         setRowCountBase( sw.getWrappedStatement(), false, rowCountBase );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         largeUpdateTest( sw, rowCountBase, 1L );
         largeUpdateTest( sw, rowCountBase, 3L );
@@ -462,6 +480,7 @@ public class StatementTest
         assertEquals( longAnswer, sw.getLargeUpdateCount() );
     }
     private static  void    largeBatchTest( StatementWrapper sw, long rowCountBase )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         throws Exception
     {
         //
@@ -469,6 +488,7 @@ public class StatementTest
         // in an insane production build.
         //
         if (!SanityManager.DEBUG)    { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 
         println( "Large batch test with rowCountBase = " + rowCountBase );
         
@@ -476,6 +496,7 @@ public class StatementTest
         // increased by this amount
         sw.getWrappedStatement().clearBatch();
         setRowCountBase( sw.getWrappedStatement(), false, rowCountBase );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         long[]  expectedResult = new long[] { rowCountBase + 1L, rowCountBase + 1L, rowCountBase + 2L };
 
@@ -495,6 +516,7 @@ public class StatementTest
         sw.getWrappedStatement().addBatch( "insert into bigintTable( col2 ) values ( 3 ), ( 4 )" );
     }
     private static  void    largeMaxRowsTest( StatementWrapper sw, long maxRows )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         throws Exception
     {
         //
@@ -502,6 +524,7 @@ public class StatementTest
         // in an insane production build.
         //
         if (!SanityManager.DEBUG)    { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 
         println( "Large max rows test with maxRows = " + maxRows );
 
@@ -511,6 +534,7 @@ public class StatementTest
         sw.getWrappedStatement().execute( "insert into bigintTable( col2 ) values ( 1 ), ( 2 ), ( 3 ), ( 4 ), ( 5 )" );
         
         setRowCountBase( sw.getWrappedStatement(), usingDerbyNetClient(), maxRows - expectedRowCount );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         sw.setLargeMaxRows( maxRows );
         
@@ -519,12 +543,14 @@ public class StatementTest
         while( rs.next() ) { rowCount++; }
         rs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         setRowCountBase( sw.getWrappedStatement(), usingDerbyNetClient(), 0L );
         
         assertEquals( expectedRowCount, rowCount );
         assertEquals( maxRows, sw.getLargeMaxRows() );
     }
     private static  void    largeBatchUpdateExceptionTest( StatementWrapper sw, long rowCountBase )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         throws Exception
     {
         //
@@ -532,6 +558,7 @@ public class StatementTest
         // in an insane production build.
         //
         if (!SanityManager.DEBUG)    { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 
         println( "Large batch update exception test with rowCountBase = " + rowCountBase );
         
@@ -576,10 +603,12 @@ public class StatementTest
     {
         if ( onClient )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
             ClientStatement.setFetchedRowBase( rowCountBase );
         }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             stmt.execute( "call setRowCountBase( " + rowCountBase + " )" );
         }
     }
@@ -601,6 +630,7 @@ public class StatementTest
      * Create test suite for StatementTest.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("StatementTest suite");
         // Decorate test suite with a TestSetup class.
         suite.addTest(new StatementTestSetup(
@@ -628,6 +658,7 @@ public class StatementTest
 
         public  StatementWrapper( Statement wrappedStatement )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             _wrappedStatement = wrappedStatement;
         }
 
@@ -636,6 +667,7 @@ public class StatementTest
         // New methods added by JDBC 4.2
         public  long[] executeLargeBatch() throws SQLException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             return ((long[]) invoke
                 (
                  "executeLargeBatch",
@@ -658,6 +690,7 @@ public class StatementTest
                 (
                  "executeLargeUpdate",
                  new Class[] { String.class, Integer.TYPE },
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                  new Object[] { sql, autoGeneratedKeys }
                  )).longValue();
         }
@@ -681,6 +714,7 @@ public class StatementTest
         }
         public  long getLargeMaxRows() throws SQLException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             return ((Long) invoke
                 (
                  "getLargeMaxRows",
@@ -699,10 +733,12 @@ public class StatementTest
         }
         public  void setLargeMaxRows( long max ) throws SQLException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             invoke
                 (
                  "setLargeMaxRows",
                  new Class[] { Long.TYPE },
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                  new Object[] { max }
                  );
         }
@@ -735,6 +771,7 @@ public class StatementTest
     /** Set the base which is used for returned row counts and fetched row counters */
     public  static  void    setRowCountBase( long newBase )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         EmbedResultSet.setFetchedRowBase( newBase );
         RowUtil.setRowCountBase( newBase );
     }

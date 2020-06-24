@@ -49,6 +49,7 @@ class IndexInfoImpl
 	 * @param indexNumber			(0-based) number of index within catalog's indexes
 	 * @param crf					CatalogRowFactory for the catalog
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	IndexInfoImpl(int indexNumber, CatalogRowFactory crf)
 	{
         this.crf = crf;
@@ -61,6 +62,7 @@ class IndexInfoImpl
 	 *
 	 * @return long	The conglomerate number for the index.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 	long getConglomerateNumber()
 	{
 		return conglomerateNumber;
@@ -71,6 +73,7 @@ class IndexInfoImpl
 	 *
 	 * @param conglomerateNumber	The conglomerateNumber for the index.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 	void setConglomerateNumber(long conglomerateNumber)
 	{
 		this.conglomerateNumber = conglomerateNumber;
@@ -81,8 +84,10 @@ class IndexInfoImpl
 	 *
 	 * @return String	The index name for the index.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 	String getIndexName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 		return crf.getIndexName(indexNumber);
 	}
 
@@ -93,6 +98,7 @@ class IndexInfoImpl
 	 */
 	int getColumnCount()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 		return crf.getIndexColumnCount(indexNumber);
 	}
 
@@ -101,6 +107,7 @@ class IndexInfoImpl
 	 *
 	 * @return IndexRowGenerator	The IRG for this index.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 	IndexRowGenerator getIndexRowGenerator()
 	{
 		return irg;
@@ -111,6 +118,7 @@ class IndexInfoImpl
 	 *
 	 * @param irg			The IndexRowGenerator for this index.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 	void setIndexRowGenerator(IndexRowGenerator irg)
 	{
 		this.irg = irg;
@@ -126,6 +134,7 @@ class IndexInfoImpl
 	 */
 	int getBaseColumnPosition(int colNumber)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 		return crf.getIndexColumnPositions(indexNumber)[colNumber];
 	}
 
@@ -136,6 +145,7 @@ class IndexInfoImpl
 	 */
 	boolean isIndexUnique()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 		return crf.isIndexUnique(indexNumber);
 	}
 }

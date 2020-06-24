@@ -40,6 +40,7 @@ public class LogicalPreparedStatement42 extends LogicalPreparedStatement
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
     public LogicalPreparedStatement42 (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             PreparedStatement physicalPs,
             StatementKey stmtKey,
             StatementCacheInteractor cacheInteractor ) {

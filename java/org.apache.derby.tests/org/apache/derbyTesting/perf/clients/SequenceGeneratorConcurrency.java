@@ -61,6 +61,9 @@ public class SequenceGeneratorConcurrency
             _tablesPerGenerator = Runner.getLoadOpt( "tablesPerGenerator", 1 );
             _insertsPerTransaction = Runner.getLoadOpt( "insertsPerTransaction", 1 );
             //If no identityTest is specified, then do sequence testing.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
+//IC see: https://issues.apache.org/jira/browse/DERBY-5426
+//IC see: https://issues.apache.org/jira/browse/DERBY-4526
             _runIdentityTest = ( Runner.getLoadOpt( "identityTest", 0 ) == 1);
             _debugging = ( Runner.getLoadOpt( "debugging", 0 ) == 1 );
         }
@@ -88,6 +91,9 @@ public class SequenceGeneratorConcurrency
             buffer.append( " generators = " + _numberOfGenerators );
             buffer.append( ", tablesPerGenerator = " + _tablesPerGenerator );
             buffer.append( ", insertsPerTransaction = " + _insertsPerTransaction );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
+//IC see: https://issues.apache.org/jira/browse/DERBY-5426
+//IC see: https://issues.apache.org/jira/browse/DERBY-4526
             buffer.append( ", identityTest = " + _runIdentityTest );
             buffer.append( ", debugging = " + _debugging );
             buffer.append( " )" );
@@ -125,9 +131,13 @@ public class SequenceGeneratorConcurrency
 
             for ( int sequence = 0; sequence < numberOfGenerators; sequence++ )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
+//IC see: https://issues.apache.org/jira/browse/DERBY-5426
+//IC see: https://issues.apache.org/jira/browse/DERBY-4526
             	if (!runIdentityTest)
                     runDDL( conn, "create sequence " + makeSequenceName( sequence ) );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
                 for ( int table = 1; table <= tablesPerGenerator; table++ )
                 {
                 	if (runIdentityTest)
@@ -174,9 +184,11 @@ public class SequenceGeneratorConcurrency
         {
             _clientNumber = _clientCount++;
             _transactionCount = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             _errorLog = new HashMap<String, int[]>();
             _loadOptions = new LoadOptions();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
             _psArray = new PreparedStatement[ _loadOptions.getNumberOfGenerators() ] [ _loadOptions.getTablesPerGenerator() + 1 ];
             _randomNumberGenerator = new Random();
 
@@ -207,6 +219,9 @@ public class SequenceGeneratorConcurrency
                     PreparedStatement ps;
                     String valuesClause = "values ( next value for " + sequenceName + " )";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
+//IC see: https://issues.apache.org/jira/browse/DERBY-5426
+//IC see: https://issues.apache.org/jira/browse/DERBY-4526
                     if ( table == 0 ){
                     	if(!runIdentityTest) 
                         	ps = prepareStatement( _conn, debugging, valuesClause );
@@ -238,6 +253,7 @@ public class SequenceGeneratorConcurrency
 
             int rowNumber = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
             PreparedStatement ps = null;
             ResultSet rs = null;
             
@@ -263,6 +279,7 @@ public class SequenceGeneratorConcurrency
                     
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
             catch (Throwable t)
             {
                 debugPrint
@@ -270,6 +287,7 @@ public class SequenceGeneratorConcurrency
                      "Error on client " + _clientNumber +
                      " on sequence " + sequence +
                      " in transaction " + _transactionCount +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
                      " on row " + rowNumber +
                      ": " + t.getMessage()
                      );
@@ -290,6 +308,7 @@ public class SequenceGeneratorConcurrency
 
         private ResultSet close( ResultSet rs, boolean debugging )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
             try {
                 if ( rs != null ) { rs.close(); }
             }
@@ -324,6 +343,7 @@ public class SequenceGeneratorConcurrency
 
         public void printReport(PrintStream out)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             for (String key : _errorLog.keySet()) {
                 int[] value = (int[]) _errorLog.get( key );
 

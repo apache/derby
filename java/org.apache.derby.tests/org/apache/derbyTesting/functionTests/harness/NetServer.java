@@ -43,6 +43,8 @@ public class NetServer
     String javaCmd;
     String jvmflags;
     String framework;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 	String appsRequiredPassword;
 	int timeout=60;
     static String hostName;
@@ -71,7 +73,9 @@ public class NetServer
 
     
     static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
     	hostName=TestUtil.getHostName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 	m =  new Hashtable<String, Object[]>();
 	// Hashtable is keyed on framework name and has 
 	// an array of the framework prefix, suffix, driver, port  and 
@@ -83,21 +87,25 @@ public class NetServer
 	     "",                                            // suffix
 	     "com.ibm.db2.jcc.DB2Driver",                   //driver
 	     "1527",                                        // port
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	     serverArgs("start"),                        
 	     serverArgs("shutdown"),
 	     null});                                        //shutdown2
 
 	url = "jdbc:derby://" + hostName + ":1527/";  
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 
 	m.put("DerbyNetClient", new Object[]
 	    {url,                 //prefix
 	     "",                                            // suffix
 	     "org.apache.derby.jdbc.ClientDriver",           //driver
 	     "1527",                                        // port
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	     serverArgs("start"),                        
 	     serverArgs("shutdown"),
 	     null});                                        //shutdown2
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 	url = "jdbc:db2://" + hostName + ":50000/";
 	m.put("DB2jcc", new Object[]
 	    {url,                //prefix
@@ -128,6 +136,7 @@ public class NetServer
      */
     private static String[] serverArgs(String serverCommand)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         ArrayList<String> argList = new ArrayList<String>();
         boolean isModuleAware = JVMInfo.isModuleAware();
 
@@ -153,6 +162,8 @@ public class NetServer
     }
 
     public NetServer(File homeDir, String jvmName, String clPath,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 					 String javaCmd, String jvmflags, String framework,
 					 boolean startServer, String appsRequiredPassword)
 	throws Exception
@@ -164,6 +175,7 @@ public class NetServer
         this.jvmflags = jvmflags;
 	this.framework = framework;
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-6400
     if (jvmflags != null && jvmflags.length() > 0)
     {
         int start=jvmflags.indexOf("-Dtimeout");
@@ -178,6 +190,8 @@ public class NetServer
 
 	    // if authentication is required to shutdown server we need password
 	    // for user APP (the dbo).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
     	this.appsRequiredPassword = appsRequiredPassword;
 	frameworkInfo =  (Object[]) m.get(framework);
 	
@@ -188,6 +202,7 @@ public class NetServer
     }
     public void start() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
       if (! startServer)
 	  {
 		System.out.println("startServer = false. Bypass server startup");
@@ -210,6 +225,7 @@ public class NetServer
 		else if (javaCmd != null)
 		    jvm.setJavaCmd(javaCmd);
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		Vector<String> jvmProps = new Vector<String>();
 		if ( (clPath != null) && (clPath.length()>0) )
 		    jvm.setClasspath(clPath);
@@ -226,6 +242,7 @@ public class NetServer
         // For some platforms (like Mac) the process exec command
         // must be a string array; so we build this with a Vector
         // first because some strings (paths) could have spaces
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 	Vector<String> vCmd = jvm.getCommandLine();
 	for (int i = 0; i < startcmd.length; i++)
 	    vCmd.addElement(startcmd[i]);
@@ -266,6 +283,7 @@ public class NetServer
  			}
  			else	
  			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
  				Socket s = new Socket(hostName, this.port);
  				s.close();
 				break;
@@ -300,6 +318,7 @@ public class NetServer
 		
 		if (networkServer == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			Class<?> serverClass = Class.forName(NETWORK_SERVER_CLASS_NAME);
 			Constructor<?> serverConstructor = serverClass.getConstructor();
 			networkServer = serverConstructor.newInstance();
@@ -321,6 +340,7 @@ public class NetServer
 						 + framework);
 	jvm jvm = null; // to quiet the compiler
 	jvm = jvm.getJvm(jvmName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 	Vector<String> jvmCmd = jvm.getCommandLine();
 	
 	Vector<String> connV = new Vector<String>();
@@ -333,6 +353,8 @@ public class NetServer
 		if (stopcmd1 == null)
 		    return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 		if (appsRequiredPassword != null) {
 			String[] modifiedStopCmd = new String[stopcmd1.length + 4];
 			System.arraycopy(stopcmd1, 0, modifiedStopCmd, 0, stopcmd1.length);
@@ -354,6 +376,7 @@ public class NetServer
 		}		    
 		
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		Vector<String> stopV = new Vector<String>();
 		for (int i = 0; i < jvmCmd.size(); i++)
 		{
@@ -363,6 +386,7 @@ public class NetServer
 		Process prconn = Runtime.getRuntime().exec(connCmd);
 		// Give the server sixty seconds to shutdown.
 		TimedProcess tp = new TimedProcess(prconn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6400
 		tp.waitFor(timeout);
 		
 		String[] stopcmd2 = (String[]) frameworkInfo[STOP_CMD2_POS];
@@ -384,6 +408,7 @@ public class NetServer
 		// Try a TimedProcess as Phil did for the WLServer
 		tp = new TimedProcess(pr);
 		// In case the Server didn't shut down, force it to ...
+//IC see: https://issues.apache.org/jira/browse/DERBY-6400
 		tp.waitFor(timeout);
 		
 		// Finish and close the redirected out and err files

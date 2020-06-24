@@ -52,6 +52,7 @@ public  class   Wrapper41Statement
     public Wrapper41Statement( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EngineStatement ) { _engineStatement = (EngineStatement) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         else if ( wrapped instanceof ClientStatement ) { _netStatement = (ClientStatement) wrapped; }
         else if ( wrapped instanceof LogicalPreparedStatement ) { _logicalStatement = (LogicalPreparedStatement) wrapped; }
         else { throw nothingWrapped(); }

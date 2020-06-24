@@ -197,6 +197,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
             assertEquals(1, rs.getFetchSize());
 
         rs.setFetchSize(5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2411
         assertEquals(5,rs.getFetchSize());
       
         assertEquals(ResultSet.FETCH_FORWARD,rs.getFetchDirection());
@@ -215,6 +216,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         // Verify that result set from statement is
         // scroll insensitive and read only
         rs = ps_f_r.executeQuery();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2411
         assertEquals(ResultSet.TYPE_FORWARD_ONLY, rs.getType());
         
         assertEquals(ResultSet.CONCUR_READ_ONLY,rs.getConcurrency());
@@ -530,6 +532,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
             assertEquals("XJ062", sqle.getSQLState());
 
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2411
         rs.close();
         s_i_r.close();
         

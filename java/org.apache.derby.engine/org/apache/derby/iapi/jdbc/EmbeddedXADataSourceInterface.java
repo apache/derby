@@ -37,6 +37,9 @@ public interface EmbeddedXADataSourceInterface extends EmbeddedDataSourceInterfa
 
     /** Added by Java 9 */
     public default ShardingKeyBuilder createShardingKeyBuilder()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
         throws SQLException
     {
         throw new java.sql.SQLFeatureNotSupportedException();

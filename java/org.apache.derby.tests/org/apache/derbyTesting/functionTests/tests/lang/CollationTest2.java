@@ -59,6 +59,7 @@ T9: (TODO) test create conglomerate triggered by java/engine/org/apache/derby/im
 T10: (DONE) alter table compress with indexes
 T11: (DONE) alter table drop column with indexes
 T12: (DONE) alter table add column with index
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 T13: (DONE) bulk insert into empty table, with and without indexes
 T14: (DONE) bulk insert replace, with and without indexes
 
@@ -82,6 +83,7 @@ T24: (DONE) DERBY-2669 If no territory attribute is specified at create
             of Database.
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
 <p>
 NOTE: The prefix "ci_test" is used for tests that require a case insensitive
       collation order.
@@ -502,6 +504,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
     private void checkParamQuery(
     String      query, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
     String[]      param,
     int    paramNumber,
     String[][]  expectedResult, 
@@ -529,6 +532,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
 
         // re-execute it to test path through the cache
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
         for (int i=0; i < paramNumber;i++)
         {
         	ps.setString(i+1, param[i]);
@@ -584,6 +588,7 @@ public class CollationTest2 extends BaseJDBCTestCase
     String      schemaName, 
     String      tableName, 
     String      fileName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2703
     String      colDel, 
     String      charDel, 
     String      codeset,
@@ -713,6 +718,7 @@ public class CollationTest2 extends BaseJDBCTestCase
             "CREATE TABLE CUSTOMER(" +
                 "D1 CHAR(200), D2 CHAR(200), D3 CHAR(200), D4 INT, " + 
                 "ID INT, NAME VARCHAR(40), NAME2 VARCHAR(40))");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
         PreparedStatement ps = 
             prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
@@ -738,6 +744,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
     private void addSomeMoreCustomers( int counter ) throws SQLException
     { addSomeMoreCustomers( counter, true, true ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
 
     private void addSomeMoreCustomers( int counter, boolean useD1, boolean useD2 ) throws SQLException
     {
@@ -940,6 +947,7 @@ public class CollationTest2 extends BaseJDBCTestCase
      * rules could cause this to happen as well.
      */
     public void ci_testDerby5367()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
             throws SQLException {
         assertFalse(isDatabaseBasicCollation());
         setAutoCommit(true);
@@ -1061,6 +1069,7 @@ public class CollationTest2 extends BaseJDBCTestCase
             // now check prepared query
 
             // '<' test
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME FROM CUSTOMER where NAME < ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
@@ -1073,6 +1082,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '<=' test
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME FROM CUSTOMER where NAME <= ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
@@ -1085,6 +1095,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '=' test
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME FROM CUSTOMER where NAME = ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
@@ -1097,6 +1108,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '>=' test
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME FROM CUSTOMER where NAME >= ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
@@ -1109,6 +1121,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '>' test
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME FROM CUSTOMER where NAME > ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
@@ -1133,6 +1146,7 @@ public class CollationTest2 extends BaseJDBCTestCase
      **/
     private void checkTwoPersistentCompare(
     int[]       expected_order)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         throws SQLException
     {
         Statement s  = createStatement();
@@ -1290,6 +1304,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // varchar column - constant pattern
             checkLangBasedQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2717
                 "SELECT ID, NAME_VARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_VARCHAR LIKE '" + LIKE_TEST_CASES[i] + "'",
                 full_row_single_value(
@@ -1298,6 +1313,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // varchar column - parameter pattern
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME_VARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_VARCHAR LIKE ?",
@@ -1318,6 +1334,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // long varchar column - parameter
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_LONGVARCHAR LIKE ?",
@@ -1338,6 +1355,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // clob column - parameter
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME_CLOB FROM CUSTOMER WHERE NAME_CLOB LIKE ?",
                 new String[] {LIKE_TEST_CASES[i]},
@@ -1359,6 +1377,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // char column, char includes blank padding so alter all these
             // tests cases to match for blanks at end also.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
             checkParamQuery(
                 "SELECT ID, NAME_CHAR FROM CUSTOMER WHERE NAME_CHAR LIKE ?",
                 new String[] {LIKE_CHAR_TEST_CASES[i] + "%"},
@@ -1378,6 +1397,7 @@ public class CollationTest2 extends BaseJDBCTestCase
             "SELECT * from SYS.SYSCOLUMNS where COLUMNNAME like ?";
         String zero_row_syscat_query_param2 = 
             "SELECT * from SYS.SYSCOLUMNS where ? like COLUMNNAME";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
         String zero_row_syscat_query_param3 = 
             "SELECT count(*) from SYS.SYSCOLUMNS where ? like ?";
 
@@ -1401,6 +1421,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
                     zero_row_syscat_query_param3, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
                     new String[] {"nonmatching", "matching"}, 2, 
                     new String[][] {{"0"}}, true);
         }
@@ -1416,6 +1437,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
                     zero_row_syscat_query_param3, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2777
                     new String[] {"nonmatching", "123"}, 2, 
                     new String[][] {{"0"}}, true);
         }
@@ -1489,6 +1511,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         throws SQLException 
     {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
 
         setUpTable();
 
@@ -1535,6 +1558,8 @@ public class CollationTest2 extends BaseJDBCTestCase
         runQueries(db_index, null, null);
 
         addSomeMoreCustomers( 100 );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
 
         dropTable();
 
@@ -1574,6 +1599,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         // import empty_file.dat into EMPTY_TABLE 
         doImportTable(
                 "APP", "EMPTY_TABLE", emptyFileName, "|", "`", null, 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
 
         commit();
 
@@ -1757,6 +1783,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         PreparedStatement ps = prepareStatement("insert into t values ?");
         for (int i = 0; i < rows.length; i++) {
             ps.setString(1, rows[i]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2703
             ps.executeUpdate();
         }
         ps.close();
@@ -1871,6 +1898,7 @@ public class CollationTest2 extends BaseJDBCTestCase
      * of conglomerates.
      */
     private void runDerby5530TruncateIndex()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5530
             throws SQLException {
         setAutoCommit(false);
         Statement s = createStatement();
@@ -1967,9 +1995,11 @@ public class CollationTest2 extends BaseJDBCTestCase
         runLikeTests(db_index);
 
         runDerby5530TruncateNoIndex();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5530
 
         runDerby5530TruncateIndex();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
         dropTable();
         runAlterTableDropColumn(db_index);
 
@@ -2035,13 +2065,17 @@ public class CollationTest2 extends BaseJDBCTestCase
     {
         // only test in embedded mode, all tests are server side actions.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("CollationTest2");
         suite.addTest(new CollationTest2("testDefaultCollation"));
         suite.addTest(collatedTest("en", "testEnglishCollation"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         suite.addTest(caseInsensitiveCollationSuite());
         
         // Only add tests for other locales if they are in fact supported 
         // by the jvm.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
+//IC see: https://issues.apache.org/jira/browse/DERBY-3176
         Locale[] availableLocales = Collator.getAvailableLocales();
         boolean norwegian = false; 
         boolean polish = false;
@@ -2088,9 +2122,11 @@ public class CollationTest2 extends BaseJDBCTestCase
      * @return A suite of tests.
      */
     private static Test caseInsensitiveCollationSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Case insensitive specific tests");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         suite.addTest(new CollationTest2("ci_testDerby5367")); 
         return Decorator.territoryCollatedCaseInsensitiveDatabase(
                 suite, "en_US");

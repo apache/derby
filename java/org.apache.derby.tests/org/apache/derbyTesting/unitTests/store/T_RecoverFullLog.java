@@ -170,6 +170,7 @@ public class T_RecoverFullLog extends T_Generic {
 		try {
 
 			contextService = getContextService();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			File ifile = new File(infoPath);
 			
@@ -195,6 +196,7 @@ public class T_RecoverFullLog extends T_Generic {
 				// remove the service directory to ensure a clean run
 				startParams.put(Property.DELETE_ON_CREATE, Boolean.TRUE.toString());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 																  testService,
 																  startParams);
@@ -246,9 +248,12 @@ public class T_RecoverFullLog extends T_Generic {
 				if (recoveryFail)
 				{
 					SanityManager.DEBUG_SET(LogToFile.TEST_LOG_FULL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 					System.setProperty(LogToFile.TEST_RECORD_TO_FILL_LOG, "10");
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				if (!startPersistentService(testService, startParams))
 					throw T_Fail.testFailMsg("Monitor didn't know how to restart service: " + testService);
 				factory = (RawStoreFactory) findService(getModuleToTestProtocolName(), testService);
@@ -699,6 +704,8 @@ public class T_RecoverFullLog extends T_Generic {
 	{
 		SanityManager.DEBUG_SET(LogToFile.TEST_LOG_FULL);
 		System.setProperty(LogToFile.TEST_RECORD_TO_FILL_LOG, "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 
 		Transaction t = t_util.t_startTransaction();
 		try
@@ -873,12 +880,14 @@ public class T_RecoverFullLog extends T_Generic {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

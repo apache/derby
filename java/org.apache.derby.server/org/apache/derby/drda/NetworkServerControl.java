@@ -36,8 +36,10 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
 /** 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     <P>
     NetworkServerControl provides the ability to start a Network Server or 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3195
     connect to a running Network Server to shutdown, configure or retrieve 
     diagnostic information.  With the exception of ping, these commands 
     can  only be performed from the  machine on which the server is running.  
@@ -45,7 +47,9 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     arguments:
     </P>
     <UL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     <LI>start [-h &lt;host&gt;] [-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]:  This starts the Network
+//IC see: https://issues.apache.org/jira/browse/DERBY-3195
     Server on the port/host specified or on localhost, port 1527 if no
     host/port is specified and no properties are set to override the 
     defaults. By default a security manager with a default security policy will 
@@ -66,13 +70,16 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     classpath and version information about the Network Server, 
     the JVM and the Derby engine. 
     </LI>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5509
 
     <LI>runtimeinfo [-h &lt;host] [-p &lt;portnumber] [-ssl &lt;sslmode&gt;]: This prints
     extensive debbugging information about sessions, threads, 
     prepared statements, and memory usage for the running Network Server.
     </LI>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     <LI>logconnections {on | off} [-h &lt;host&gt;] [-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]:  
+//IC see: https://issues.apache.org/jira/browse/DERBY-809
     This turns logging of connections on or off.  
     Connections are logged to derby.log. 
     Default is off.</LI>
@@ -109,12 +116,15 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     The following is a list of properties that can be set for 
     NetworkServerControl:
     </P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     <UL><LI>derby.drda.portNumber=&lt;port number&gt;: This property 
     indicates which port should be used for the Network Server. </LI>
 
     <LI>derby.drda.host=&lt;host name  or ip address &gt;: This property 
     indicates the ip address to which NetworkServerControl should connect. </LI>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5509
 
     <LI>derby.drda.traceDirectory=&lt;trace directory&gt;: This property 
     indicates where to put trace files. </LI>
@@ -124,7 +134,9 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
     <LI>derby.drda.logConnections=true:  This property turns on logging
     of connections. Default is connections are not logged.</LI>
+//IC see: https://issues.apache.org/jira/browse/DERBY-809
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     <LI>derby.drda.minThreads=&lt;value&gt;: If this property
     is set, the &lt;value&gt; number of threads will be created when the Network Server is
     booted. </LI>
@@ -150,6 +162,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 <P><B>Examples.</B></P>
 
     <P>This is an example of shutting down the server on port 1621.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     </P>
     <PRE> 
     java org.apache.derby.drda.NetworkServerControl shutdown -p 1621
@@ -161,6 +174,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     java org.apache.derby.drda.NetworkServerControl  trace on -s 3 
     </PRE>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3195
     <P>This is an example of starting and then shutting down the Network 
        Server on port 1621 on machine myhost   
     </P>
@@ -302,6 +316,7 @@ public class NetworkServerControl{
      */
     public static void main(String args[]) {
         NetworkServerControlImpl server = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-214
 
         //
         // The following variable lets us preserve the error printing behavior
@@ -321,8 +336,11 @@ public class NetworkServerControl{
             int     command = server.parseArgs( args );
 
             // Java 7 and above: file permission restriction
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
             if (command == NetworkServerControlImpl.COMMAND_START) {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
                     AccessController.doPrivileged((PrivilegedAction<Void>) () ->
                     {
                         System.setProperty(
@@ -340,6 +358,7 @@ public class NetworkServerControl{
             // In order to run secure-by-default, we install a security manager
             // if one isn't already installed. This feature is described by DERBY-2196.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-2196
             if ( needsSecurityManager( server, command ) )
             {
                 verifySecurityState( server );
@@ -356,12 +375,14 @@ public class NetworkServerControl{
         catch (Exception e)
         {
             //if there was an error, exit(1)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             if ((e.getMessage() == null) ||
                 !e.getMessage().equals(NetworkServerControlImpl.UNEXPECTED_ERR) ||
                 printErrors
             )
             {
                 if (server != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5413
                     server.consoleExceptionPrint(e);
                 else
                     e.printStackTrace();  // default output stream is System.out
@@ -602,6 +623,7 @@ public class NetworkServerControl{
           
     protected void setClientLocale(String locale)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         serverImpl.setClientLocale( locale );
     }
 
@@ -626,6 +648,7 @@ public class NetworkServerControl{
             (
              (System.getSecurityManager() == null) &&
              (command == NetworkServerControlImpl.COMMAND_START) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-3083
              (!server.runningUnsecure())
              );
    }
@@ -679,6 +702,7 @@ public class NetworkServerControl{
         // SocketPermissions. This is an internal property which customers
         // may not override.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6438
         System.setProperty(Property.DERBY_SECURITY_PORT,
                            String.valueOf(server.getPort()));
 
@@ -708,6 +732,7 @@ public class NetworkServerControl{
         System.setSecurityManager( securityManager );
 
         // Report success.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5908
         if (securityManager.equals(System.getSecurityManager())) {
             String successMessage = server.localizeMessage(
                     "DRDA_SecurityInstalled.I", null);
@@ -801,6 +826,7 @@ public class NetworkServerControl{
     {
         // Note: This method is expected to run only when no security manager
         //       has been installed, hence no use of privileged blocks.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5908
         ProtectionDomain pd = NetworkServerControl.class.getProtectionDomain();
         CodeSource cs = pd.getCodeSource();
         if (cs == null) {
@@ -836,6 +862,7 @@ public class NetworkServerControl{
         // Otherwise, we have the directory prefix for our url.
         //
         String directoryPrefix = extForm.substring(0, idx);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5908
 
         return directoryPrefix;
     }

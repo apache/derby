@@ -101,6 +101,8 @@ public class ParserImpl implements Parser
         {
 	    SQLParserTokenManager tm = (SQLParserTokenManager) getTokenManager();
 	    /* returned a cached Parser if already exists, otherwise create */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         SQLParser p = cachedParser;
 	    if (p == null) {
 		p = new SQLParser(tm);
@@ -184,6 +186,7 @@ public class ParserImpl implements Parser
 			// As a workaround, the cachedParser object is cleared to ensure
 			// that the exception does not have any side effect.
 			// TODO : Remove the following line if javacc-152 is fixed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2103
 			cachedParser = null;
 		    throw StandardException.newException(SQLState.LANG_LEXICAL_ERROR, e.getMessage());
 		}

@@ -39,6 +39,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
     // create own policy file
     private static final String POLICY_FILE_NAME =
         "org/apache/derbyTesting/functionTests/tests/derbynet/GetCurrentPropertiesTest.policy";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
 
     public GetCurrentPropertiesTest(String name) {
         super(name);
@@ -46,6 +47,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test test = new BaseTestSuite(GetCurrentPropertiesTest.class);
         test = TestConfiguration.clientServerDecorator(test);
 
@@ -53,6 +55,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         // Grant ALL FILES execute, and getPolicy permissions,
         // as well as write for the trace files.
         test = new SecurityManagerSetup(test, POLICY_FILE_NAME);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
 
         // return suite; to ensure that nothing interferes with setting of
         // properties, wrap in singleUseDatabaseDecorator 
@@ -83,6 +86,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
 
         Enumeration expectedProps = expectedValues.propertyNames();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         while (expectedProps.hasMoreElements()) {
             String propName = (String)expectedProps.nextElement();
             String propVal = (String)p.get(propName);
@@ -157,12 +161,15 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         expectedValues.setProperty("derby.drda.traceAll","true");
         p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
         Enumeration expectedProps = expectedValues.propertyNames();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         while (expectedProps.hasMoreElements()) {
             String propName = (String) expectedProps.nextElement();
             String propVal = (String)p.get(propName);
             //for debug
             println(expectedValues.getProperty(propName));
             println(propVal);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             assertEquals
               (
                "Unexpected value for property " + propName,

@@ -85,6 +85,7 @@ public class ElementFacade {
     public List<String> getTextListByTagName(String tag) throws Exception {
         NodeList matchingTags = root.getElementsByTagName(tag);
         final int length = matchingTags.getLength();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
         ArrayList<String> tagValues = new ArrayList<String>();
         for (int i = 0; i < length; ++i) {
             tagValues.add(matchingTags.item(i).getFirstChild().getNodeValue());

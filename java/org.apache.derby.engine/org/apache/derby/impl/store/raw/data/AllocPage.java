@@ -82,6 +82,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 	(non-first) alloc page have N == 0.
 
 	<PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                              [ borrowed ]
 	+----------+-------------+---+---------+-------------------+-------------+--------+
 	| FormatId | page header | N | N bytes | alloc extend rows | slot offset |checksum|
@@ -98,6 +99,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 	first physical byte of the container.  Subsequent allocation pages are
 	chained via the nextAllocPageOffset.  Each allocation page is expected to
 	manage at least 1000 user pages (for 1K page size) so this chaining may not
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	be a severe performance hit.  The logical -&gt; physical mapping of an
 	allocation page is stored in the previous allocation page.  The container
 	object will need to maintain this mapping.
@@ -574,6 +576,7 @@ public class AllocPage extends StoredPage
             {
 				throw StandardException.newException(
                         SQLState.DATA_CHANGING_CONTAINER_INFO, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         oldN, 
                         N);
             }
@@ -596,6 +599,7 @@ public class AllocPage extends StoredPage
 	*/
 	public static void ReadContainerInfo(byte[] containerInfo,
 										 byte[] epage)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6504
 	throws StandardException
 	{
 		int N = (int)epage[BORROWED_SPACE_OFFSET];
@@ -614,6 +618,7 @@ public class AllocPage extends StoredPage
 
 		if (N != 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6504
 		    try {
 		        System.arraycopy(
 		                epage, BORROWED_SPACE_OFFSET+BORROWED_SPACE_LEN,
@@ -945,6 +950,7 @@ public class AllocPage extends StoredPage
      * Handle undo of compress space operation.
      **/
 	protected void undoCompressSpace(
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
     LogInstant  instant,
     int         new_highest_page,
     int         num_pages_truncated)

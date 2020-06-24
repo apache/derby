@@ -51,6 +51,7 @@ interface StatementRequestInterface {
 
     public void writeExecute(NetPreparedStatement materialPreparedStatement,
                              Section section,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                              ColumnMetaData parameterMetaData,
                              Object[] inputs,
                              int numInputColumns,
@@ -90,5 +91,6 @@ interface StatementRequestInterface {
 
 
     public void writeSetSpecialRegister(Section section, ArrayList sqlsttList)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException;
 }

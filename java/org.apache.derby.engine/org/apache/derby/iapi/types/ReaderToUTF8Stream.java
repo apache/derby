@@ -125,6 +125,7 @@ public final class ReaderToUTF8Stream
                               int valueLength,
                               int numCharsToTruncate,
                               String typeName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                               StreamHeaderGenerator headerGenerator) {
         this.reader = new LimitReader(appReader);
         this.charsToTruncate = numCharsToTruncate;
@@ -133,7 +134,9 @@ public final class ReaderToUTF8Stream
         this.hdrGen = headerGenerator;
 
         int absValueLength = Math.abs(valueLength);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4661
         reader.setLimit(absValueLength);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         if (SanityManager.DEBUG) {
             // Check the type name
             // The national types (i.e. NVARCHAR) are not used/supported.
@@ -147,6 +150,7 @@ public final class ReaderToUTF8Stream
         // requirement during encoding/insertion.
         // Be conservative, assume three bytes per char.
         int bz = 32*1024; // 32 KB default
+//IC see: https://issues.apache.org/jira/browse/DERBY-4661
         if (absValueLength < bz / 3) {
             // Enforce a minimum size of the buffer, otherwise read may loop
             // indefinitely (must enter for loop in fillBuffer to detect EOF).
@@ -177,6 +181,7 @@ public final class ReaderToUTF8Stream
     public ReaderToUTF8Stream(Reader appReader,
                               int maximumLength,
                               String typeName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                               StreamHeaderGenerator headerGenerator) {
         this(appReader, -1 * maximumLength, 0, typeName, headerGenerator);
         if (maximumLength < 0) {
@@ -210,6 +215,7 @@ public final class ReaderToUTF8Stream
 		// first read
 		if (blen < 0)
             fillBuffer(FIRST_READ);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 
 		while (boff == blen)
 		{
@@ -257,6 +263,7 @@ public final class ReaderToUTF8Stream
         // first read
 		if (blen < 0)
             fillBuffer(FIRST_READ);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 
 		int readCount = 0;
 
@@ -313,6 +320,7 @@ public final class ReaderToUTF8Stream
      */
 	private void fillBuffer(int startingOffset) throws IOException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         if (startingOffset == FIRST_READ) {
             // Generate the header. Provide the char length only if the header
             // encodes a char count and we actually know the char count.
@@ -330,6 +338,7 @@ public final class ReaderToUTF8Stream
         // starts, it shall point at the next byte the stream will deliver on
         // the next iteration of read or skip.
         boff = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
 
 		if (off == 0)
 			multipleBuffer = true;
@@ -362,6 +371,7 @@ public final class ReaderToUTF8Stream
 
 		// 6! need to leave room for a three byte UTF8 encoding
 		// and 3 bytes for our special end of file marker.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4661
         for (; off <= buffer.length - READ_BUFFER_RESERVATION; )
 		{
 			int c = reader.read();
@@ -370,6 +380,7 @@ public final class ReaderToUTF8Stream
 				break;
 			}
             charCount++; // Increment the character count.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 
 			if ((c >= 0x0001) && (c <= 0x007F))
             {
@@ -413,6 +424,7 @@ public final class ReaderToUTF8Stream
         if (charsToTruncate > 0)
         {
             reader.setLimit(charsToTruncate);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
             truncate();
         }
         
@@ -456,6 +468,7 @@ public final class ReaderToUTF8Stream
         // can put the correct length into the stream.
         if (!multipleBuffer) {
             int newValueLen = -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             if (hdrGen.expectsCharCount()) {
                 if (SanityManager.DEBUG && charCount == 0) {
                     SanityManager.ASSERT(eof);
@@ -484,10 +497,12 @@ public final class ReaderToUTF8Stream
      */
     private boolean canTruncate() {
         // Only a few types can be truncated, default is to not allow.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         if (typeName.equals(TypeId.CLOB_NAME)) {
             return true;
         } else if (typeName.equals(TypeId.VARCHAR_NAME)) {
             return true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         } else if (typeName.equals(TypeId.CHAR_NAME)) {
             return true;
         }
@@ -508,8 +523,10 @@ public final class ReaderToUTF8Stream
             } else if (c != SPACE) {
                 throw new DerbyIOException(
                     MessageService.getTextMessage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                         SQLState.LANG_STRING_TRUNCATION,
                         typeName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                         "<stream-value>", // Don't show the whole value.
                         String.valueOf(Math.abs(valueLength))),
                     SQLState.LANG_STRING_TRUNCATION);
@@ -542,6 +559,7 @@ public final class ReaderToUTF8Stream
        // from the reader object 
        // reader.getLimit() returns the remaining bytes available
        // on this stream
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
        return (buffer.length > remainingBytes ? remainingBytes : buffer.length);
     }
 

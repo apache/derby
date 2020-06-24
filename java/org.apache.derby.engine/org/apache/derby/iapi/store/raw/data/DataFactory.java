@@ -269,6 +269,7 @@ public interface DataFactory extends Corruptable {
 		@exception StandardException Standard Derby Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 					   byte[] ciphertext, int outputOffset, 
                        boolean newEngine)
 		 throws StandardException ;
@@ -289,6 +290,7 @@ public interface DataFactory extends Corruptable {
      * @param t the transaction that is decrypting the container
      * @exception StandardException Standard Derby Error Policy
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
     void decryptAllContainers(RawTransaction t)
             throws StandardException;
 
@@ -397,6 +399,7 @@ public interface DataFactory extends Corruptable {
      * @return the root directory of the data storage area
      */
     String getRootDirectory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
 
 	public void	stop();
 

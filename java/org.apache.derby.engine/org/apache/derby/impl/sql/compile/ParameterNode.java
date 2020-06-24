@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ParameterNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -112,6 +113,8 @@ public class ParameterNode extends ValueNode
 	 * @param defaultValue				The default value for this parameter
      * @param cm                        The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ParameterNode(int parameterNumber,
                   DataValueDescriptor defaultValue,
                   ContextManager cm) {
@@ -138,6 +141,7 @@ public class ParameterNode extends ValueNode
 	 *			are bound.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-738
 	void setDescriptors(DataTypeDescriptor[] descriptors)
 	{
 		userParameterTypes = descriptors;
@@ -149,6 +153,8 @@ public class ParameterNode extends ValueNode
 	 * @param descriptor	The DataTypeServices to set for this parameter
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
 		/* Make sure the type is nullable. */
@@ -167,6 +173,7 @@ public class ParameterNode extends ValueNode
 		//an infinite loop if this setType ends up calling the local
 		//setType method
 		super.setType(descriptor);
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 
 		if ( getJSQLType() == null ) { setJSQLType(  new JSQLType( descriptor ) ); }
 	}
@@ -175,6 +182,8 @@ public class ParameterNode extends ValueNode
 	 * Mark this as a return output parameter (e.g.
 	 * ? = CALL myMethod())
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setReturnOutputParam(ValueNode valueNode)
 	{
 		returnOutputParameter = valueNode;
@@ -208,6 +217,8 @@ public class ParameterNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates)
@@ -378,6 +389,8 @@ public class ParameterNode extends ValueNode
 	} // End of generateExpression
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TypeId getTypeId() throws StandardException
 	{
 		return (returnOutputParameter != null) ?
@@ -406,6 +419,8 @@ public class ParameterNode extends ValueNode
 	 */
     static void generateParameterValueSet(ExpressionClassBuilder acb,
 								   int		numberOfParameters,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                    List<ParameterNode>     parameterList)
 		throws StandardException
 	{
@@ -419,6 +434,8 @@ public class ParameterNode extends ValueNode
 			*/
             boolean
                 hasReturnParam = (parameterList.get(0)).isReturnOutputParam();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/*
 			** Generate the following:
@@ -489,6 +506,7 @@ public class ParameterNode extends ValueNode
     @Override
     boolean requiresTypeFromContext()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		return true;
 	}
 	

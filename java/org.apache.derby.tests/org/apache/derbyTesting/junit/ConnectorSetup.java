@@ -38,9 +38,11 @@ final class ConnectorSetup extends ChangeConfigurationSetup {
     TestConfiguration getNewConfiguration(TestConfiguration old) {
         // Copy the current configuration
         TestConfiguration newConfig = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
             new TestConfiguration(old);
         
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(connectorClass);
             newConfig.connector = (Connector) clazz.getConstructor().newInstance();
         } catch (Exception e) {

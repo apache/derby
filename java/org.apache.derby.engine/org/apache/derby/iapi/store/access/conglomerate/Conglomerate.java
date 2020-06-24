@@ -84,6 +84,7 @@ public interface Conglomerate extends Storable, DataValueDescriptor
 	public void addColumn(
     TransactionManager  xact_manager,
     int                 column_id,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Storable            template_column,
     int                 collation_id)
         throws StandardException;
@@ -308,6 +309,7 @@ public interface Conglomerate extends Storable, DataValueDescriptor
     int                             lock_level,
     LockingPolicy                   locking_policy,
     int                             isolation_level,
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 	FormatableBitSet				scanColumnList,
     DataValueDescriptor[]	        startKeyValue,
     int                             startSearchOperator,

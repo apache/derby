@@ -54,6 +54,7 @@ public class SingleRecordUpdateClient implements Client {
      * @param tables the number of tables in the test
      */
     public SingleRecordUpdateClient(int records, int tables) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         this(records, tables, Types.VARCHAR, false, false);
     }
 
@@ -99,6 +100,7 @@ public class SingleRecordUpdateClient implements Client {
     public void doWork() throws SQLException {
         PreparedStatement ps = pss[r.nextInt(pss.length)];
         int seed = r.nextInt();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         if (dataType == Types.VARCHAR) {
             ps.setString(1, SingleRecordFiller.randomString(seed));
         } else if (dataType == Types.BLOB) {

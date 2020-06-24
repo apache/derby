@@ -108,6 +108,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
                     " JSR169", JDBC.vmSupportsJSR169());
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rs.updateBlob(8, (Blob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
@@ -120,6 +121,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rs.updateBlob("c", (Blob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
@@ -132,6 +134,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rs.updateClob(8, (Clob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
@@ -144,6 +147,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rs.updateClob("c", (Clob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
@@ -153,6 +157,10 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
                         " yet.");
             }
         } catch (SQLException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
             assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
@@ -222,6 +230,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             throws Exception
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rs.updateBlob("c", (Blob) null);
             fail("FAIL - rs.updateBlob() on a read-only result set" +
                 "should not have succeeded");

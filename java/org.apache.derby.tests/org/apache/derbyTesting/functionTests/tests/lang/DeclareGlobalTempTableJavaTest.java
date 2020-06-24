@@ -55,6 +55,7 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2895
 	return TestConfiguration.defaultSuite(DeclareGlobalTempTableJavaTest.class);
     }
     protected void setUp() throws Exception {
@@ -761,6 +762,7 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
      *  @throws SQLException 
      */
     public void testTempTableDDLRollbackbehaviour1() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2895
         Statement s = createStatement();
         s.executeUpdate("declare global temporary table SESSION.t1(c11 int, c12 int) on commit preserve rows  not logged");
         JDBC.assertSingleValueResultSet(s.executeQuery("select count(*) from SESSION.t1") , "0");
@@ -1175,6 +1177,7 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
      * See DERBY-5614.
      */
     public void testVtiInsertIntoGTT()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5614
             throws SQLException {
         Statement s = createStatement();
         s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE SESSION.vtitogtt(" +
@@ -1218,6 +1221,7 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         // Query the meta data to avoid filling the log with lots of
         // table-not-found error messages.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5614
         ResultSet rs = getConnection().getMetaData().getTables(
                 null, "SESSION", "%", null);
         while (rs.next()) {

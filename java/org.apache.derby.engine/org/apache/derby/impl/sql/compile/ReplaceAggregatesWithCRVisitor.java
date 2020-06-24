@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ReplaceAggregatesWithCRVisitor
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -50,6 +51,7 @@ class ReplaceAggregatesWithCRVisitor implements Visitor
 	}
 
     ReplaceAggregatesWithCRVisitor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         ResultColumnList rcl, int tableNumber, Class<?> skipOverClass)
 	{
 		this.rcl = rcl;
@@ -66,6 +68,7 @@ class ReplaceAggregatesWithCRVisitor implements Visitor
 	 * @param rcl the result column list
 	 * @param nodeToSkip don't examine anything below nodeToSkip
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, Class<?> nodeToSkip)
 	{
 		this.rcl = rcl;
@@ -118,6 +121,7 @@ class ReplaceAggregatesWithCRVisitor implements Visitor
 	
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 

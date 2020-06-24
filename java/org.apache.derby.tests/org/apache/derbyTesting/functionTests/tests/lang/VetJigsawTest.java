@@ -54,6 +54,7 @@ public class VetJigsawTest extends BaseJDBCTestCase
         "derbyrun.jar",
         "derbyshared.jar",
         "derbytools.jar",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         "derbyTesting.jar",
     };
 
@@ -183,6 +184,8 @@ public class VetJigsawTest extends BaseJDBCTestCase
              "insert into zipClasses\n" +
              "  select directory, '" + fullJarFileName + "', name\n" +
              "  from table(zipFile('" + fullJarFileName + "')) t\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6934
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
              "  where name like '%.class' and name <> 'module-info.class'"
              );
     }
@@ -218,6 +221,7 @@ public class VetJigsawTest extends BaseJDBCTestCase
           "from zipClasses\n" +
           "where packageName = '" + packageName + "'\n" +
           "order by zipFileName, className\n";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         StringBuffer localBuffer = new StringBuffer();
         int zipsWithClasses = 0;
           
@@ -243,6 +247,7 @@ public class VetJigsawTest extends BaseJDBCTestCase
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (zipsWithClasses > 1)
         {
             buffer

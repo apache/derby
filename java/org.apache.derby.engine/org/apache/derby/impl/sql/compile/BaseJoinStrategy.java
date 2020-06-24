@@ -88,6 +88,7 @@ abstract class BaseJoinStrategy implements JoinStrategy {
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         mb.push(resultRowTemplate);
 		mb.push(innerTable.getResultSetNumber());
 
@@ -121,6 +122,7 @@ abstract class BaseJoinStrategy implements JoinStrategy {
 		//User may have supplied optimizer overrides in the sql
 		//Pass them onto execute phase so it can be shown in 
 		//run time statistics.
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		if (innerTable.getProperties() != null)
 			mb.push(PropertyUtil.sortProperties(innerTable.getProperties()));
 		else

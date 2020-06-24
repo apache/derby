@@ -248,6 +248,8 @@ public class BaseTypeIdImpl implements Formatable
             // will lose the format id. This can happen if you pass one of these
             // objects across the network. Here we recover the format id.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if ( TypeId.BOOLEAN_NAME.equals( unqualifiedName ) ) {
                 return StoredFormatIds.BOOLEAN_TYPE_ID_IMPL; }
             else if ( TypeId.BIGINT_NAME.equals( unqualifiedName ) ) {
@@ -363,6 +365,7 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.BOOLEAN_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.BOOLEAN_NAME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4868
               JDBCTypeId = Types.BOOLEAN;
               break;
 
@@ -384,6 +387,8 @@ public class BaseTypeIdImpl implements Formatable
               JDBCTypeId = Types.TINYINT;
               break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
           case StoredFormatIds.BIGINT_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.BIGINT_NAME;
@@ -435,6 +440,7 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.CLOB_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.CLOB_NAME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
               JDBCTypeId = Types.CLOB;
               break;
 
@@ -459,6 +465,7 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.BLOB_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.BLOB_NAME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
               JDBCTypeId = Types.BLOB;
               break;
 
@@ -483,6 +490,7 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.XML_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.XML_NAME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
               JDBCTypeId = Types.SQLXML;
               break;
 

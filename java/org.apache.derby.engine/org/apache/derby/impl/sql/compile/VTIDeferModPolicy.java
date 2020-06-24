@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.VTIDeferModPolicy
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -88,6 +89,7 @@ class VTIDeferModPolicy implements Visitor
             if( statementType == DeferModification.UPDATE_STATEMENT)
             {
                 // Apply the columnRequiresDefer method to updated columns not in the where clause.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 for (String s : deferralSearch.columns) {
                     if (deferralControl.columnRequiresDefer(
                             statementType, s, false)) {
@@ -120,6 +122,7 @@ class VTIDeferModPolicy implements Visitor
         tableNumber = targetVTI.getTableNumber();
         if( statementType == DeferModification.UPDATE_STATEMENT && columnNames != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
             columns.addAll(Arrays.asList(columnNames));
         }
     }
@@ -137,6 +140,7 @@ class VTIDeferModPolicy implements Visitor
                     String columnName = cr.getColumnName();
                     if( statementType == DeferModification.DELETE_STATEMENT)
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                         if (columns.add(columnName))
                         {
                             if( deferralControl.columnRequiresDefer( statementType, columnName, true))
@@ -199,6 +203,7 @@ class VTIDeferModPolicy implements Visitor
 
     public boolean visitChildrenFirst(Visitable node)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
         return false;
     }
 } // end of class VTIDeferModPolicy

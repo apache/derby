@@ -55,6 +55,7 @@ public final class JDBCStatementCache {
     //@GuardedBy("this");
     private final
         LinkedHashMap<StatementKey, PreparedStatement> statements;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /**
      * Creates a new, empty JDBC statement cache.
@@ -85,6 +86,7 @@ public final class JDBCStatementCache {
             SanityManager.ASSERT(statementKey != null,
                                  "statementKey is not supposed to be null");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return statements.remove(statementKey);
     }
 
@@ -98,6 +100,7 @@ public final class JDBCStatementCache {
      */
     public synchronized boolean cacheStatement(
                                         StatementKey statementKey,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                         PreparedStatement ps) {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(statementKey != null,
@@ -121,6 +124,8 @@ public final class JDBCStatementCache {
     //@NotThreadSafe
     private static class BoundedLinkedHashMap
             extends LinkedHashMap<StatementKey, PreparedStatement> {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         /** Maximum number of entries. */
         private final int maxSize;
@@ -150,8 +155,11 @@ public final class JDBCStatementCache {
          *      <code>false</code> if not.
          */
         protected boolean removeEldestEntry(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Map.Entry<StatementKey, PreparedStatement> eldest) {
             final boolean remove = size() > maxSize;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3324
             if (remove && eldest != null) {
                 try {
                     eldest.getValue().close();

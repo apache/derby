@@ -36,6 +36,7 @@ public  class  DerbySQLIntegrityConstraintViolationException
 	}
 
        public  DerbySQLIntegrityConstraintViolationException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6803
 			String reason,
 			String SQLState,
 			int vendorCode,

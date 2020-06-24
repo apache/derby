@@ -98,6 +98,7 @@ class CreateSchemaConstantAction extends DDLConstantAction
 	public void	executeConstantAction( Activation activation )
 						throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-48
 		TransactionController tc = activation.
 			getLanguageConnectionContext().getTransactionExecute();
 
@@ -149,6 +150,7 @@ class CreateSchemaConstantAction extends DDLConstantAction
 		String thisAid = aid;
 		if (thisAid == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             thisAid = lcc.getCurrentUserId(activation);
 		}
 

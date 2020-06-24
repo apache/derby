@@ -36,6 +36,7 @@ abstract class ClassSizeCatalog extends Hashtable<String, int[]> {
         // try to compile it. This may fail because ClassSizeCatalogImpl.java
         // is not created until everything else has been compiled. Bury
         // ClassSizeCatalogImpl in a string.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         String className = ClassSizeCatalog.class.getName() + "Impl";
         try {
             Class<?> clazz = Class.forName(className);

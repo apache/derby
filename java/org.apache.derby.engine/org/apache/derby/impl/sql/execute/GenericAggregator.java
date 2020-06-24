@@ -86,6 +86,7 @@ class GenericAggregator
 		}
 
 		UserDataValue aggregatorColumn = (UserDataValue) row.getColumn(aggregatorColumnId + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 		ExecAggregator ua = (ExecAggregator) aggregatorColumn.getObject();
 		if (ua == null)
@@ -305,6 +306,7 @@ class GenericAggregator
 		{
 			try
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				Class<?> aggregatorClass = cf.loadApplicationClass(aggInfo.getAggregatorClassName());
                 Constructor<?> constructor = aggregatorClass.getConstructor();
 				Object agg = constructor.newInstance();
@@ -315,6 +317,7 @@ class GenericAggregator
                     (
                      cf,
                      aggInfo.getAggregateName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
                      aggInfo.getResultDescription().getColumnInfo( 0 ).getType()
                      );
 

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.TableElementList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -60,6 +61,7 @@ import org.apache.derby.impl.sql.execute.IndexConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class TableElementList extends QueryTreeNodeVector<TableElementNode>
 {
 	private int				numColumns;
@@ -90,9 +92,11 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 * of the character string types in create table node
 	 * @param sd
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
 	void setCollationTypesOnCharacterStringColumns(SchemaDescriptor sd)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode te : this)
 		{
             if (te instanceof ColumnDefinitionNode)
@@ -108,6 +112,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 * of a character string column.
 	 * @param sd
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
 	void setCollationTypeOnCharacterStringColumn(SchemaDescriptor sd, ColumnDefinitionNode cdn )
         throws StandardException
     {
@@ -121,6 +126,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
         DataTypeDescriptor  dtd = cdn.getType();
         if ( dtd == null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if ( !cdn.hasGenerationClause() )
             {
                 throw StandardException.newException
@@ -152,6 +159,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 		int numAutoCols = 0;
 
 		int			size = size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         HashSet<String> columnNames = new HashSet<String>(size + 2, 0.999f);
         HashSet<String> constraintNames = new HashSet<String>(size + 2, 0.999f);
 		//all the primary key/unique key constraints for this table
@@ -175,6 +183,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 					if (cd.getConstraintType() == DataDictionary.PRIMARYKEY_CONSTRAINT ||
 					cd.getConstraintType() == DataDictionary.UNIQUE_CONSTRAINT)
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                         constraints.add(cd);
                     }
 				}
@@ -185,6 +194,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 		if (ddlStmt instanceof CreateTableNode)
 			tableType = ((CreateTableNode)ddlStmt).tableType;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode tableElement : this)
 		{
 			if (tableElement instanceof ColumnDefinitionNode)
@@ -196,6 +206,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 				{
 					throw StandardException.newException(SQLState.LANG_LONG_DATA_TYPE_NOT_ALLOWED, cdn.getColumnName());
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 				checkForDuplicateColumns(ddlStmt, columnNames, cdn.getColumnName());
 				cdn.checkUserType(td);
 				cdn.bindAndValidateDefault(dd, td);
@@ -247,6 +258,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 				String destName = null;
 				String[] destColumnNames = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 for (int i = 0; i < constraints.size(); i++)
 				{
 
@@ -269,13 +281,16 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 						throw StandardException.newException(SQLState.LANG_MULTIPLE_CONSTRAINTS_WITH_SAME_COLUMNS,
 						cdn.getConstraintMoniker(), destName);
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 constraints.add(cdn);
 			}
 
 			/* Make sure that there are no duplicate constraint names in the list */
             checkForDuplicateConstraintNames(ddlStmt, constraintNames, cdn.getConstraintMoniker());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 			/* Make sure that the constraint we are trying to drop exists */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (cdn.getConstraintType() == DataDictionary.DROP_CONSTRAINT ||
                 cdn.getConstraintType() == DataDictionary.MODIFY_CONSTRAINT)
 			{
@@ -290,6 +305,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
 					String dropSchemaName = cdn.getDropSchemaName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-158
 					SchemaDescriptor sd = dropSchemaName == null ? td.getSchemaDescriptor() :
 											getSchemaDescriptor(dropSchemaName);
 
@@ -299,6 +315,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 										false);
 					if (cd == null)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         throw StandardException.newException(SQLState.LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT,
 								(sd.getSchemaName() + "."+ dropConstraintName),
 								td.getQualifiedName());
@@ -321,6 +338,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
                 // unique constraints on nullable columns added in 10.4, 
                 // disallow until database hard upgraded at least to 10.4.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
                 if (!dd.checkVersion(
                         DataDictionary.DD_VERSION_DERBY_10_4, null))
                 {
@@ -356,6 +374,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
     public  void    validatePrimaryKeyNullability()
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode tableElement : this)
 		{
 			if (! (tableElement.hasConstraint()))
@@ -392,6 +411,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	{
 		int	numConstraints = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode element : this)
 		{
             if (element instanceof ConstraintDefinitionNode &&
@@ -411,6 +431,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	{
 		int	numGenerationClauses = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode element : this)
 		{
             if (element instanceof ColumnDefinitionNode &&
@@ -447,6 +468,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (elementAt(index).getElementType() == TableElementNode.AT_DROP_COLUMN)
 			{
                 String columnName = elementAt(index).getName();
@@ -455,6 +477,11 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 								columnName,
 								td.getColumnDescriptor( columnName ).getType(),
                                 null, null, null, null, null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 								ColumnInfo.DROP, 0, 0, false, 0);
 				break;
 			}
@@ -503,13 +530,20 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 							   (coldef.isAutoincrementColumn() ? 
 								coldef.getAutoincrementStart() : 0),
 							   (coldef.isAutoincrementColumn() ? 
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 								coldef.getAutoincrementIncrement() : 0),
 							   (coldef.isAutoincrementColumn() ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
  								coldef.getAutoincrementCycle() : false),
 							   (coldef.isAutoincrementColumn() ? 
 								coldef.getAutoinc_create_or_modify_Start_Increment() : -1));
 
 			/* Remember how many constraints that we've seen */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (coldef.hasConstraint())
 			{
 				numConstraints++;
@@ -526,6 +560,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void appendNewColumnsToRCL(FromBaseTable table)
 		throws StandardException
 	{
@@ -533,6 +569,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 		ResultColumnList rcl = table.getResultColumns();
 		TableName		 exposedName = table.getTableName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 		for (int index = 0; index < size; index++)
 		{
 			if (elementAt(index) instanceof ColumnDefinitionNode)
@@ -542,6 +580,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 				ValueNode		valueNode;
 
 				/* Build a ResultColumn/BaseColumnNode pair for the column */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 valueNode = new BaseColumnNode(cdn.getColumnName(),
 									  		exposedName,
 											cdn.getType(),
@@ -566,6 +606,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	void bindAndValidateCheckConstraints(FromList fromList)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         FromBaseTable table = (FromBaseTable) fromList.elementAt(0);
         CompilerContext cc = getCompilerContext();
 
@@ -610,6 +651,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
 				// Tell the compiler context to only allow deterministic nodes
 				cc.setReliability( CompilerContext.CHECK_CONSTRAINT );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 checkTree = checkTree.bindExpression(
                         fromList, (SubqueryList) null, aggregates);
 
@@ -643,6 +685,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 			 */
             ResultColumnList rcl = table.getResultColumns();
             int numReferenced = rcl.countReferencedColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ResultColumnList refRCL = new ResultColumnList(getContextManager());
 			rcl.copyReferencedColumnsToNewList(refRCL);
 
@@ -651,6 +695,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 			 */
 			if (cdn.getColumnList() != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 String colName = cdn.getColumnList().elementAt(0).getName();
 				if (numReferenced > 1 ||
                     !colName.equals(refRCL.elementAt(0).getName()))
@@ -680,21 +725,26 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4145
 	void bindAndValidateGenerationClauses( SchemaDescriptor sd, FromList fromList, FormatableBitSet generatedColumns, TableDescriptor baseTable )
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         FromBaseTable    table = (FromBaseTable) fromList.elementAt(0);
         ResultColumnList tableColumns = table.getResultColumns();
         int              columnCount = table.getResultColumns().size();
 
         // complain if a generation clause references another generated column
         findIllegalGenerationReferences( fromList, baseTable );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4145
 
         generatedColumns.grow( columnCount + 1 );
         
         CompilerContext cc = getCompilerContext();
 
         ArrayList<AggregateNode> aggregates = new ArrayList<AggregateNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         for (TableElementNode element : this)
 		{
@@ -736,10 +786,12 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 				// Tell the compiler context to forbid subqueries and
 				// non-deterministic functions.
 				cc.setReliability( CompilerContext.GENERATION_CLAUSE_RESTRICTION );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 generationTree = generationClauseNode.bindExpression(
                         fromList, (SubqueryList) null, aggregates);
 
                 SelectNode.checkNoWindowFunctions(generationClauseNode, "generation clause");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6690
 
                 //
                 // If the user did not declare a type for this column, then the column type defaults
@@ -750,6 +802,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
                 //
                 DataTypeDescriptor  generationClauseType = generationTree.getTypeServices();
                 DataTypeDescriptor  declaredType = cdn.getType();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
                 if ( declaredType == null )
                 {
                     cdn.setType( generationClauseType );
@@ -781,6 +834,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
                 }
 
 				// no aggregates, please
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 if (!aggregates.isEmpty())
 				{
 					throw StandardException.newException( SQLState.LANG_AGGREGATE_IN_GENERATION_CLAUSE, cdn.getName());
@@ -816,6 +870,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
             for ( int i = 0; i < numReferenced; i++ )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 referencedColumnNames[i] =
                     rcl.elementAt(generationClauseColumnReferences[i] - 1).
                         getName();
@@ -843,9 +898,11 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 * @param baseTable  Table descriptor if this is an ALTER TABLE statement.
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4145
 	void findIllegalGenerationReferences( FromList fromList, TableDescriptor baseTable )
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<ColumnDefinitionNode>   generatedColumns = new ArrayList<ColumnDefinitionNode>();
         HashSet<String>     names = new HashSet<String>();
 
@@ -861,6 +918,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
         }
         
         // find all of the generated columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode element : this)
 		{
 			ColumnDefinitionNode cdn;
@@ -871,6 +929,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
 			if (!cdn.hasGenerationClause()) { continue; }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4145
             generatedColumns.add( cdn );
             names.add( cdn.getColumnName() );
         }
@@ -880,6 +939,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
         int    count = generatedColumns.size();
         for ( int i = 0; i < count; i++ )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ColumnDefinitionNode    cdn = generatedColumns.get( i );
             GenerationClauseNode    generationClauseNode = cdn.getGenerationClauseNode();
             List<ColumnReference>   referencedColumns =
@@ -923,6 +984,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
         // loop through the foreign keys, looking for keys which violate the
         // rulse we're enforcing
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode element : this)
 		{
 			if (! (element instanceof FKConstraintDefinitionNode))
@@ -959,6 +1021,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
             // SET DEFAULT or whose update rule is ON UPDATE CASCADE.
             // See if any of the key columns are generated columns.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (ResultColumn keyCol : fk.getColumnList())
             {
                 String keyColName = keyCol.getName();
@@ -984,6 +1047,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
 	void genConstraintActions(boolean forCreateTable,
 				ConstraintConstantAction[] conActions,
 				String tableName,
@@ -993,6 +1057,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	{
 		int conActionIndex = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode ten : this)
 		{
 			String[]	columnNames = null;
@@ -1035,6 +1100,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
                 // "unique with duplicate null" backing index for constraints 
                 // that contain at least one nullable column.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 				if (constraintDN.constraintType ==
 					DataDictionary.UNIQUE_CONSTRAINT && 
 					(dd.checkVersion(
@@ -1057,6 +1123,9 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 						forCreateTable,
 						unique,
                         uniqueWithDuplicateNulls,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                         cChars[0], // deferrable?
                         cChars[1], // initiallyDeferred?
 						null, constraintDN,
@@ -1071,6 +1140,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 					indexAction = genIndexAction(
 						forCreateTable,
 						constraintDN.requiresUniqueIndex(), false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                         cChars[0],
                         cChars[1],
 						null, constraintDN,
@@ -1081,6 +1151,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
 			if (constraintType == DataDictionary.DROP_CONSTRAINT)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
                 if (SanityManager.DEBUG)
                 {
                     // Can't drop constraints on a create table.
@@ -1098,6 +1169,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 												 constraintDN.getDropBehavior(),
                                                  constraintDN.getVerifyType());
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             else if (constraintType == DataDictionary.MODIFY_CONSTRAINT) {
                 conActions[conActionIndex] =
                     getGenericConstantActionFactory().
@@ -1116,6 +1188,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 				ProviderList apl = constraintDN.getAuxiliaryProviderList();
 				ConstraintInfo refInfo = null;
                 ProviderInfo[]  providerInfos;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 				if (constraintDN instanceof FKConstraintDefinitionNode)
 				{
@@ -1142,7 +1216,9 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 						getCreateConstraintConstantAction(
 												 constraintName, 
 											     constraintType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                                  cChars,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
                                                  forCreateTable,
 												 tableName, 
 												 ((td != null) ? td.getUUID() : (UUID) null),
@@ -1235,6 +1311,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
 		if (constraintType == DataDictionary.DROP_CONSTRAINT)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
             if (SanityManager.DEBUG)
             {
                 if (forCreateTable)
@@ -1258,11 +1335,16 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 				isAscending[i] = true;
 
 			return	getGenericConstantActionFactory().getCreateIndexConstantAction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
                     forCreateTable, 
                     isUnique, 
                     isUniqueWithDuplicateNulls,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                     hasDeferrableChecking,
                     initiallyDeferred,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                     constraintType,
                     "BTREE", // indexType
                     sd.getSchemaName(),
@@ -1309,6 +1391,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
         int approxLength = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : cdn.getColumnList())
         {
             String colName = rc.getName();
@@ -1347,6 +1430,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 * @exception StandardException		Thrown on error
 	 */
 	private void checkForDuplicateColumns(DDLStatementNode ddlStmt,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 									Set<String> seenNames,
 									String colName)
 			throws StandardException
@@ -1375,6 +1459,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 * @exception StandardException		Thrown on error
 	 */
 	private void checkForDuplicateConstraintNames(DDLStatementNode ddlStmt,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 									Set<String> seenNames,
 									String constraintName)
 			throws StandardException
@@ -1440,6 +1525,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 	 */
 	private void setColumnListToNotNull(ConstraintDefinitionNode cdn)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : cdn.getColumnList())
 		{
             findColumnDefinition(rc.getName()).setNullability(false);
@@ -1458,6 +1544,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
     ConstraintDefinitionNode    cdn, 
     TableDescriptor             td) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : cdn.getColumnList())
         {
             String colName = rc.getName();
@@ -1477,6 +1564,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
     private void checkForNullColumns(ConstraintDefinitionNode cdn, TableDescriptor td) throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : cdn.getColumnList())
         {
             DataTypeDescriptor dtd = (td == null) ?
@@ -1486,12 +1574,14 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
             // todo dtd may be null if the column does not exist, we should check that first
             if (dtd != null && dtd.isNullable())
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
                 String errorState = 
                    (getLanguageConnectionContext().getDataDictionary()
                         .checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
                     ? SQLState.LANG_ADD_PRIMARY_KEY_ON_NULL_COLS
                     : SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 throw StandardException.newException(errorState, rc.getName());
             }
         }
@@ -1526,6 +1616,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
      * not in the list.
      */
     private ColumnDefinitionNode findColumnDefinition(String colName) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TableElementNode te : this) {
             if (te instanceof ColumnDefinitionNode) {
                 ColumnDefinitionNode cdn = (ColumnDefinitionNode) te;

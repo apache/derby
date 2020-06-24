@@ -375,6 +375,7 @@ class NetStatementReply extends NetPackageReply
 
         // the result set summary component consists of a result set reply message.
         List<Section> sectionAL = parseRSLSETRM();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // following the RSLSETRM is an SQLCARD or an SQLDTARD.  check for a
         // TYPDEFNAM or TYPDEFOVR before looking for these objects.
@@ -408,6 +409,7 @@ class NetStatementReply extends NetPackageReply
         NetResultSet[] resultSets = new NetResultSet[numberOfResultSets];
         for (int i = 0; i < numberOfResultSets; i++) {
             // parse the result set component of the stored procedure reply.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             NetResultSet netResultSet =
                     parseResultSetCursor(statementI, sectionAL.get(i));
             resultSets[i] = netResultSet;
@@ -430,10 +432,12 @@ class NetStatementReply extends NetPackageReply
     // SQL Column Information Reply data object, followed by a Query Descriptor.
     // There may also be Query Data or an End of Query Reply Message.
     private NetResultSet parseResultSetCursor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             StatementCallbackInterface statementI,
             Section section) throws DisconnectException {
         // The first item returne is an OPNQRYRM.
         NetResultSet netResultSet = parseOPNQRYRM(statementI, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
 
         // The next to be returned is an OBJDSS so check for any TYPDEF overrides.
         int peekCP = parseTypdefsOrMgrlvlovrs();
@@ -477,6 +481,7 @@ class NetStatementReply extends NetPackageReply
     private void parseOpenQuery(StatementCallbackInterface statementI)
             throws DisconnectException {
         NetResultSet netResultSet = parseOPNQRYRM(statementI, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
 
         NetSqlca sqlca = null;
         int peekCP = peekCodePoint();
@@ -485,6 +490,7 @@ class NetStatementReply extends NetPackageReply
             peekCP = parseTypdefsOrMgrlvlovrs();
 
             if (peekCP == CodePoint.SQLDARD) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 ColumnMetaData columnMetaData = ClientAutoloadedDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
                 NetSqlca netSqlca = parseSQLDARD(columnMetaData, false);  // false means do not skip SQLDARD bytes
 
@@ -532,6 +538,7 @@ class NetStatementReply extends NetPackageReply
         statementI.completeOpenQuery(sqlca, netResultSet);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void parseEndQuery(ResultSetCallbackInterface resultSetI)
             throws DisconnectException {
         parseENDQRYRM(resultSetI);
@@ -541,6 +548,7 @@ class NetStatementReply extends NetPackageReply
     }
 
     private void parseOpenQueryFailure(StatementCallbackInterface statementI)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         parseOPNQFLRM(statementI);
         parseTypdefsOrMgrlvlovrs();
@@ -687,6 +695,10 @@ class NetStatementReply extends NetPackageReply
     }
 
     private void parseExecuteError(StatementCallbackInterface statementI)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
@@ -724,6 +736,7 @@ class NetStatementReply extends NetPackageReply
     }
 
     private void parseExecuteSetStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             StatementCallbackInterface statement) throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
@@ -781,6 +794,7 @@ class NetStatementReply extends NetPackageReply
      */
     private NetResultSet parseOPNQRYRM(StatementCallbackInterface statementI,
                                          boolean isOPNQRYreply)
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         throws DisconnectException
     {
         // these need to be initialized to the correct default values.
@@ -901,15 +915,19 @@ class NetStatementReply extends NetPackageReply
 
         // hack for now until event methods are used below
         ClientStatement statement = (ClientStatement) statementI;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         // if there is a cached Cursor object, then use the cached cursor object.
         NetResultSet rs = null;
         if (statement.cachedCursor_ != null) {
             statement.cachedCursor_.resetDataBuffer();
             ((NetCursor) statement.cachedCursor_).extdtaData_.clear();
+//IC see: https://issues.apache.org/jira/browse/DERBY-796
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 rs = (NetResultSet)ClientAutoloadedDriver.getFactory().newNetResultSet
                         (netAgent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         (NetStatement) statement.getMaterialStatement(),
                         statement.cachedCursor_,
                         qryprctyp, //protocolType, CodePoint.FIXROWPRC | 
@@ -929,8 +947,10 @@ class NetStatementReply extends NetPackageReply
             }
         } else {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 rs = (NetResultSet)ClientAutoloadedDriver.getFactory().newNetResultSet
                         (netAgent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         (NetStatement) statement.getMaterialStatement(),
                         new NetCursor(netAgent_, qryprctyp),
                         qryprctyp, //protocolType, CodePoint.FIXROWPRC | 
@@ -950,8 +970,10 @@ class NetStatementReply extends NetPackageReply
         }
 
         // QRYCLSIMP only applies to OPNQRY, not EXCSQLSTT
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         final boolean qryclsimp =
             isOPNQRYreply &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             (rs.resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) &&
             netAgent_.netConnection_.serverSupportsQryclsimp();
         rs.netCursor_.setQryclsimpEnabled(qryclsimp);
@@ -1087,8 +1109,10 @@ class NetStatementReply extends NetPackageReply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
             new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
             MessageUtil.getCompleteMessage(MessageId.CONN_DRDA_QRYOPEN,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME,
                 (Object [])null)));
     }
@@ -1162,6 +1186,7 @@ class NetStatementReply extends NetPackageReply
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean pkgsnlstReceived = false;
         List<Section> pkgsnlst = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         parseLengthAndMatchCodePoint(CodePoint.RSLSETRM);
         pushLengthOnCollectionStack();
@@ -1209,6 +1234,7 @@ class NetStatementReply extends NetPackageReply
     //   FDODSC - required
     //   FDODTA - required
     private NetSqlca parseSQLDTARD(NetSqldta netSqldta)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         boolean fdodscReceived = false;
         boolean fdodtaReceived = false;
@@ -1314,6 +1340,7 @@ class NetStatementReply extends NetPackageReply
                 // i.e. from integer to char.
                 int columns = peekTotalColumnCount(tripletLength);
                 // peek ahead to get the total number of columns.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 cursor.initializeColumnInfoArrays(
                     netAgent_.targetTypdef_, columns);
                 columnCount += parseSQLDTAGRPdataLabelsAndUpdateColumn(cursor, columnCount, tripletLength);
@@ -1462,12 +1489,14 @@ class NetStatementReply extends NetPackageReply
     // DSCERRCD_42 - RLO fails to reference a required GDA or RLO.
     private void descriptorErrorDetected() throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
             new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
             MessageUtil.getCompleteMessage(MessageId.CONN_DRDA_INVALIDFDOCA,
                 SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
                 (Object [])null)));
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void parseQRYDTA(NetResultSet netResultSet) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.QRYDTA);
         if (longValueForDecryption_ == null) {
@@ -1497,6 +1526,7 @@ class NetStatementReply extends NetPackageReply
     }
 
     private NetSqlca parseFDODTA(NetCursor netCursor)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.FDODTA);
         int ddmLength = getDdmLength();
@@ -1510,6 +1540,7 @@ class NetStatementReply extends NetPackageReply
     }
 
     private void parseFastSQLDTARDdata(NetCursor netCursor)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         netCursor.dataBufferStream_ = getFastData(netCursor.dataBufferStream_);
         netCursor.dataBuffer_ = netCursor.dataBufferStream_.toByteArray();
@@ -1538,6 +1569,7 @@ class NetStatementReply extends NetPackageReply
         netCursor.lastValidBytePosition_ = netCursor.dataBuffer_.length;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void copyEXTDTA(NetCursor netCursor) throws DisconnectException {
         try {
             parseLengthAndMatchCodePoint(CodePoint.EXTDTA);
@@ -1550,8 +1582,10 @@ class NetStatementReply extends NetPackageReply
                 longValueForDecryption_ = null;
             }
             netCursor.extdtaData_.add(data);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (OutOfMemoryError e) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 new ClientMessageId(SQLState.NET_LOB_DATA_TOO_LARGE_FOR_JVM), e));
         }
     }
@@ -1565,6 +1599,7 @@ class NetStatementReply extends NetPackageReply
     //
     // Only called for generated secctions from a callable statement.
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     Section parsePKGNAMCSN(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.PKGNAMCSN);
         if (skip) {
@@ -1627,6 +1662,7 @@ class NetStatementReply extends NetPackageReply
                             : NetConfiguration.PKG_IDENTIFIER_MAX_LEN);
             if (scldtaLen < NetConfiguration.PKG_IDENTIFIER_FIXED_LEN || 
             		scldtaLen > maxRDBlength) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
                 agent_.accumulateChainBreakingReadExceptionAndThrow(
                     new DisconnectException(agent_,
                         new ClientMessageId(
@@ -1645,6 +1681,8 @@ class NetStatementReply extends NetPackageReply
             if (scldtaLen < 18 || scldtaLen > 255) {
                 agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                     new ClientMessageId(SQLState.NET_SQLCDTA_INVALID_FOR_RDBCOLID),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     scldtaLen));
                 return null;
             }
@@ -1658,6 +1696,7 @@ class NetStatementReply extends NetPackageReply
             if (scldtaLen < 18 || scldtaLen > 255) {
                 agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                     new ClientMessageId(SQLState.NET_SQLCDTA_INVALID_FOR_PKGID),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     scldtaLen));
                 return null; // To make compiler happy.
             }
@@ -1673,6 +1712,7 @@ class NetStatementReply extends NetPackageReply
         } else {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                 new ClientMessageId(SQLState.NET_PGNAMCSN_INVALID_AT_SQLAM),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 ddmLength, netAgent_.targetSqlam_));
             return null;  // To make compiler happy.
         }
@@ -1765,6 +1805,7 @@ class NetStatementReply extends NetPackageReply
     // within one or more packages.
     private List<Section> parsePKGSNLST() throws DisconnectException {
         ArrayList<Section> pkgsnlst = new ArrayList<Section>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         parseLengthAndMatchCodePoint(CodePoint.PKGSNLST);
         pushLengthOnCollectionStack();
@@ -1782,6 +1823,7 @@ class NetStatementReply extends NetPackageReply
     }
 
     private int parseSQLRSLRD(List<Section> sections)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SQLRSLRD);
         return parseSQLRSLRDarray(sections);
@@ -1883,6 +1925,7 @@ class NetStatementReply extends NetPackageReply
     // information about result sets returned as reply data in the response to
     // an EXCSQLSTT command that invokes a stored procedure
     private int parseSQLRSLRDarray(List<Section> sections)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             throws DisconnectException {
         int numOfResultSets = parseSQLNUMROW();
         for (int i = 0; i < numOfResultSets; i++) {
@@ -1909,6 +1952,7 @@ class NetStatementReply extends NetPackageReply
     // procedure
     private ColumnMetaData parseSQLCINRDarray() throws DisconnectException {
         ColumnMetaData columnMetaData = ClientAutoloadedDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         parseSQLDHROW(columnMetaData);
 
@@ -2030,6 +2074,7 @@ class NetStatementReply extends NetPackageReply
         columnMetaData.nullable_[columnNumber] = Utils.isSqlTypeNullable(sqlType);
         columnMetaData.sqlCcsid_[columnNumber] = ccsid;
         columnMetaData.types_[columnNumber] =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientTypes.mapDERBYTypeToDriverType(
                 true, sqlType, columnLength, ccsid);
             // true means isDescribed
@@ -2048,6 +2093,7 @@ class NetStatementReply extends NetPackageReply
     {
         int jdbcType = columnMetaData.types_[columnNumber];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (!(jdbcType == ClientTypes.JAVA_OBJECT) ||
             !netAgent_.netConnection_.serverSupportsUDTs()) {
 
@@ -2299,6 +2345,7 @@ class NetStatementReply extends NetPackageReply
         int vcs_length = readFastUnsignedShort();
         if (vcm_length > 0 && vcs_length > 0) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
                 new ClientMessageId(SQLState.NET_VCM_VCS_LENGTHS_INVALID)));
         } else if (vcs_length > 0) {
             stringToBeSet = readFastString(vcs_length, netAgent_.targetTypdef_.getCcsidSbcEncoding());
@@ -2317,6 +2364,7 @@ class NetStatementReply extends NetPackageReply
         int vcs_length = readUnsignedShort();
         if (vcm_length > 0 && vcs_length > 0) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
                 new ClientMessageId(SQLState.NET_VCM_VCS_LENGTHS_INVALID)));
         } else if (vcs_length > 0) {
             stringToBeSet = readString(vcs_length, netAgent_.targetTypdef_.getCcsidSbcEncoding());
@@ -2332,6 +2380,7 @@ class NetStatementReply extends NetPackageReply
         // but we will set it to the default.
 
         if (qryattscr == 0xF0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return ResultSet.TYPE_FORWARD_ONLY;
         }
 
@@ -2349,6 +2398,7 @@ class NetStatementReply extends NetPackageReply
         // we want to set it to the actual concurrency.
         switch (qryattupd) {
         case CodePoint.QRYRDO:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return ResultSet.CONCUR_READ_ONLY;
         case CodePoint.QRYUPD:
             return ResultSet.CONCUR_UPDATABLE;
@@ -2359,6 +2409,8 @@ class NetStatementReply extends NetPackageReply
 
     private int calculateResultSetHoldability(int sqlcsrhld) {
         if (sqlcsrhld == 0xF0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return ResultSet.CLOSE_CURSORS_AT_COMMIT;
         } else {
             return ResultSet.HOLD_CURSORS_OVER_COMMIT;

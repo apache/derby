@@ -38,9 +38,11 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
   private final HashMap udtClasses;
 
   public ImportResultSetMetaData(int numberOfColumns, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                                  String[] columnNames,
                                  int[] columnWidths, 
                                  int[] tableColumnTypes,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
                                  String[] columnTypeNames,
                                  HashMap udtClasses ) {
     this.numberOfColumns = numberOfColumns;
@@ -106,6 +108,7 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
             // CHAR FOR BIT DATA 
             colType = java.sql.Types.BINARY;
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         case java.sql.Types.JAVA_OBJECT: 
             // User-defined type
             colType = java.sql.Types.JAVA_OBJECT;
@@ -124,6 +127,7 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
   }
 	public int getColumnDisplaySize(int column) {
     if (columnWidths == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
        return Limits.DB2_VARCHAR_MAXWIDTH;
     else
        return columnWidths[column-1];
@@ -131,12 +135,14 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
 
 	public  String getColumnTypeName(int column) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
 		return columnTypeNames[ column - 1 ];
 	}
 
     /**
      * Get the class bound to a UDT column.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6621
     Class getUDTClass( int column ) throws SQLException
     {
         String columnName = getColumnName( column );

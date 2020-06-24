@@ -39,6 +39,7 @@ public class ReferentialActionsTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("ReferentialActionsTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // DERBY-2353: Need to set derby.language.logQueryPlan to expose the
         // bug (got a NullPointerException when writing the plan to derby.log)

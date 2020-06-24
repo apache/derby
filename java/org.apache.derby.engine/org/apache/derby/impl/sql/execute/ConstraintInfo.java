@@ -227,6 +227,7 @@ public class ConstraintInfo implements ConsInfo
 		}
 	
 		return dd.getTableDescriptor(tableName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 				getReferencedTableSchemaDescriptor(dd), null);
 	}
 

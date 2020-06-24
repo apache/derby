@@ -152,13 +152,16 @@ abstract class ConnectionChild {
 	}
 
     static SQLException newSQLException(String messageId, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         return EmbedConnection.newSQLException(messageId, args);
     }
 
     protected static void restoreIntrFlagIfSeen(
         boolean pushStack, EmbedConnection ec) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         if (pushStack) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
             InterruptStatus.restoreIntrFlagIfSeen( getLCC( ec ) );
         } else {
             // no lcc if connection is closed:
@@ -169,6 +172,7 @@ abstract class ConnectionChild {
 	/**
 	  *	Get and cache the LanguageConnectionContext for this connection.
 	  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 	LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
 	{
         if ( lcc == null ) { lcc = getLCC( conn ); }
@@ -180,6 +184,7 @@ abstract class ConnectionChild {
 	  */
 	static LanguageConnectionContext	getLCC( final EmbedConnection conn )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         return AccessController.doPrivileged
             (
              new PrivilegedAction<LanguageConnectionContext>()

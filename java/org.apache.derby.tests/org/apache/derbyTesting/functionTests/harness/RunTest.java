@@ -190,6 +190,7 @@ public class RunTest
 	public static void main(String[] args)
 		throws Exception
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-323
 		Locale.setDefault(Locale.US);
 		skiptestReason.setLength(0); // 0 out for useprocess
 		// Determine the test type
@@ -213,6 +214,7 @@ public class RunTest
 		    System.exit(1);
 		}
 		// If useprocess=false RunList calls this main method with 7 arguments...
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 		if (args.length == 7)
 		{
 		    defaultPackageName = args[1];
@@ -222,6 +224,7 @@ public class RunTest
 		    isSuiteRun = true;
 		    suiteName = args[5];
 		    //System.out.println("suiteName: " + suiteName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 		    framework=args[6];		    
 		    // initializing startServer to true (which it would be if we'd
 		    // run with useprocess=true) or network server will not get started
@@ -248,6 +251,7 @@ public class RunTest
             System.setProperties(sp);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1605
         JavaVersionHolder	jvhs = getProperties(sp);
 		boolean				isJDBC4 = jvhs.atLeast( 1, 6 );
 
@@ -260,6 +264,8 @@ public class RunTest
 
         // Check for properties files, including derby.properties
         // and if needed, build the -p string to pass to the test
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
         AppsRequiredPassword creds = new AppsRequiredPassword();
         String propString = createPropString(creds);
 
@@ -286,6 +292,7 @@ public class RunTest
             // before going further, get the policy file copied and if
             // needed, modify it with the test's policy file
             composePolicyFile();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
             String spacedJvmFlags = jvmflags;
             // we now replace any '^' in jvmflags with ' '
             if ((jvmflags != null) && (jvmflags.indexOf("^")>0))
@@ -293,6 +300,7 @@ public class RunTest
                 spacedJvmFlags = spaceJvmFlags(jvmflags);   
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6400
             if (!(timeoutStr.isEmpty()) && !(timeoutStr==null) && (timeout >= 0)) {
                 if  (spacedJvmFlags != null)
                     spacedJvmFlags = "-Dtimeout=" + timeoutStr + " " + spacedJvmFlags;
@@ -312,6 +320,8 @@ public class RunTest
                 }
 
                 ns = new NetServer(baseDir, jvmnetjvm, classpathServer, null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
                                    spacedJvmFlags,framework, startServer,
                                    creds.password);
             }
@@ -333,6 +343,7 @@ public class RunTest
             // if useprocess=false and we're in a suite, start network server if it's not running 
             // and leave serverNeedsStopping=false, unless startServer=false, then, 
             // if network server is running, stop it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
             if ((!useprocess) && (isSuiteRun))
             {            	   
                 boolean started = false;
@@ -378,6 +389,7 @@ public class RunTest
         }
             
         // Stop the Network server if necessary
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 		if (serverNeedsStopping)
 		{
 		    ns.stop();
@@ -398,6 +410,7 @@ public class RunTest
                     {
                         Sed sed = new Sed();
                         sed.exec(tmpOutFile,finalOutFile, isSed, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
                                         NetServer.isClientConnection(framework), isI18N, isJDBC4);
 		    }
 		    catch (ClassFormatError cfe)
@@ -468,6 +481,7 @@ public class RunTest
     		pwDiff.flush();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         generateUTF8OutFile(finalOutFile);
         
 		// Cleanup files
@@ -495,6 +509,7 @@ public class RunTest
         if ( useprocess )
 		{
             // Build the test command
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
             String[] testCmd = 
         		buildTestCommand(propString, systemHome, scriptPath);
             execTestProcess(testCmd);
@@ -516,6 +531,7 @@ public class RunTest
         userdir = sp.getProperty("user.dir");
         
         // reset defaultPackageName (for useprocess=false)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
         if (useprocess == false)
           defaultPackageName = "/org/apache/derbyTesting/";
             
@@ -534,6 +550,9 @@ public class RunTest
         int index = scriptName.lastIndexOf('/');
         if (index == -1) // no test directory was specified
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-918
+//IC see: https://issues.apache.org/jira/browse/DERBY-934
+//IC see: https://issues.apache.org/jira/browse/DERBY-797
             if ( (!testType.equals("sql")) && (!testType.equals("java")) && (!testType.equals("junit")))
             {
                 System.out.println("Test argument should be of the form: <dir>/<test>.<ext>");
@@ -564,6 +583,9 @@ public class RunTest
         // Get the test name without the extension
         testBase = scriptFileName.substring(0, scriptFileName.lastIndexOf("."+testType));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-918
+//IC see: https://issues.apache.org/jira/browse/DERBY-934
+//IC see: https://issues.apache.org/jira/browse/DERBY-797
 		if (testType.equals("java") || testType.equals("junit"))
 		{
                     //get the javaPath
@@ -593,6 +615,7 @@ public class RunTest
             
         if ( (outputdir == null) || (outputdir.length()==0) )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
         	if (File.separatorChar == '\\')
             {
                 //need to replace / in path with \ for windows
@@ -684,6 +707,9 @@ public class RunTest
 
         // For certain test types, locate script file based on scriptName
         // Then determine the actual test name and directory
+//IC see: https://issues.apache.org/jira/browse/DERBY-918
+//IC see: https://issues.apache.org/jira/browse/DERBY-934
+//IC see: https://issues.apache.org/jira/browse/DERBY-797
         if ( (!testType.equals("java")) &&
              (!testType.equals("junit")) &&
              (!testType.equals("unit")) && 
@@ -703,6 +729,7 @@ public class RunTest
 
             // Read the test file and copy it to the outDir
             // except for multi tests (for multi we just need to locate it)
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
             BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             if (upgradetest)
 		
@@ -754,6 +781,7 @@ public class RunTest
     		baseDir = new File(userdir, commonDBHome);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
         else if ( (!useprocess) && isSuiteRun && ((usesystem==null) || (usesystem.length()<=0)) )
         {
             String suite = (suiteName.substring(0,suiteName.indexOf(':')));
@@ -830,6 +858,7 @@ public class RunTest
         // this is probably always going to be testBase
         if ( testOutName == null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3294
             testOutName = testBase;
         }
 
@@ -837,6 +866,7 @@ public class RunTest
         tmpOutFile = new File(outDir, testOutName + ".tmp");
         // Always create a.tmpmstr copy of the master file in local encoding.
         // With network server, this gets adjusted for displaywidth 
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         tempMasterName = testOutName+".tmpmstr";
 		UTF8OutName = testOutName+".utf8out";
 		// Define the .out file which will be created by massaging the tmp.out
@@ -870,6 +900,7 @@ public class RunTest
         // Delete any old .out or .tmp files
         if (tmpOutFile.exists())
             status = tmpOutFile.delete();
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         tempMasterFile = new File(outDir, tempMasterName);
         if (tempMasterFile.exists())
             status = tempMasterFile.delete();
@@ -907,6 +938,7 @@ public class RunTest
         
         // before doing anything else, get jvmflags, evaluate any -D 
         // see if there is anything useful to the test harness in jvmflags
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
         if ((jvmflags != null) && (jvmflags.length() > 0))
         {
             StringTokenizer st = new StringTokenizer(jvmflags,"^");
@@ -924,6 +956,7 @@ public class RunTest
         }
         
         searchCP = sp.getProperty("ij.searchClassPath");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 		String frameworkp = sp.getProperty("framework");
 		if (frameworkp != null)
 			framework = frameworkp;
@@ -933,15 +966,18 @@ public class RunTest
 			framework = "";
 		else
 			driverName = NetServer.getDriverName(framework);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1214
         String junitXAProp = sp.getProperty ("derbyTesting.xa.single");
         if (junitXAProp != null && junitXAProp.equals ("true")) {
             junitXASingle = true;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
         hostName = sp.getProperty("hostName");
         // force hostName to localhost if it is not set
         if (hostName == null)
            hostName="localhost";
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         String generateUTF8OutProp = sp.getProperty("generateUTF8Out");
         if (generateUTF8OutProp != null && generateUTF8OutProp.equals("true"))
         	generateUTF8Out = true;
@@ -972,6 +1008,7 @@ public class RunTest
 		//System.out.println("jvmName is: " + jvmName);
 		if ( (jvmName == null) || (jvmName.length()==0) || (jvmName.equals("jview")))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
 		    javaVersion = System.getProperty(RunList.SPEC_VERSION);
 		    //System.out.println("javaVersion is: " + javaVersion);
 		}
@@ -1006,10 +1043,12 @@ public class RunTest
                         {
                             jvmName = "j9_foundation";
                         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
                         else if (System.getProperty("com.ibm.oti.configuration").equals("foun11"))
                         {
                             jvmName = "j9_foundation11";
                         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
                         else if (System.getProperty("com.ibm.oti.configuration").equals("dee"))
                         {
                             jvmName = "j9dee15";
@@ -1040,10 +1079,14 @@ public class RunTest
 
         // create a JavaVersionHolder for the java.specification.version - 
         // used to control Sed-ing for JDBC4 & up
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
         String specversion = (sp.getProperty(RunList.SPEC_VERSION));
         JavaVersionHolder jvhs = new JavaVersionHolder(specversion);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1605
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
         testEncoding = sp.getProperty("derbyTesting.encoding");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1348
         upgradejarpath = sp.getProperty("derbyTesting.jar.path");
         if ((testEncoding != null) && (!jvmName.equals("jdk15")))
         {
@@ -1076,9 +1119,11 @@ public class RunTest
 		        upgradetest = true;
 		}
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
         if ( framework.equals("DerbyNet") && (! jvmName.startsWith("j9_foundation")))
 		{	
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			Class<?> c = null;
 			Method m = null;
 			Object o = null;
@@ -1086,6 +1131,7 @@ public class RunTest
  			try	
 			{
 				c = Class.forName("com.ibm.db2.jcc.DB2Driver");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				o = c.getConstructor().newInstance();
 				m = c.getMethod("getMajorVersion", null);
 				i = (Integer)m.invoke(o, null);
@@ -1167,6 +1213,7 @@ public class RunTest
 		canonpath = sp.getProperty("canonpath");
 
 		testOutName = sp.getProperty("testoutname");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		useOutput = Boolean.valueOf(sp.getProperty("useoutput","true")).booleanValue();
 		outcopy = Boolean.valueOf(sp.getProperty("outcopy","false")).booleanValue();
 		mtestdir = sp.getProperty("mtestdir"); // used by multi tests
@@ -1191,6 +1238,7 @@ public class RunTest
 		// startServer should be false.
 		if (!hostName.equals("localhost"))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-817
         	    startServer=false;
 		}
 		
@@ -1256,6 +1304,7 @@ public class RunTest
 
 		// Some tests will not run well in a suite with use process false 
 		// with some frameworks, so skip
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 		if (!useprocess && !skiptest )
 		{
 		    String tsuiteName = null;
@@ -1298,6 +1347,7 @@ public class RunTest
 		if (uscdb != null && uscdb.equals("true"))
 			useCommonDB = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1605
 		return jvhs;
     }
 
@@ -1369,6 +1419,7 @@ clp.list(System.out);
 
         // j9 will run out of memory with the default cache size (100), so
         // forcing it lower unless set in _derby.properties file for a specific test
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
         if (jvmName.startsWith("j9") && (!jvmName.equalsIgnoreCase("j9dee15")))
         {
             if (clp.getProperty("derby.language.statementCacheSize")==null)
@@ -1430,9 +1481,12 @@ clp.list(System.out);
 
 //System.out.println("clPropFile: " + clPropFile.getPath());
             bos = new BufferedOutputStream(new FileOutputStream(clPropFile));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
             clp.store(bos, "Derby Properties");
         	bos.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
             String auth = clp.getProperty(
                 "derby.connection.requireAuthentication");
 
@@ -1459,6 +1513,7 @@ clp.list(System.out);
         //    substitute=pattern1;substitute1,pattern2;substitute2,...,patternn;substituten
         //  No commas or semicolons can be allowed in the patterns/subsitutes.  //
        
+//IC see: https://issues.apache.org/jira/browse/DERBY-1462
         if ( testType.equals("multi") )
         	isSed = loadTestResource("multi/stress/" + testBase + "_sed.properties");
         else
@@ -1596,6 +1651,7 @@ clp.list(System.out);
 		
 //System.out.println("appPropFile: " + appPropFile.getPath());
             bos = new BufferedOutputStream(new FileOutputStream(appPropFile));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
             ap.store(bos, "App Properties");
             bos.close();
             
@@ -1606,6 +1662,7 @@ clp.list(System.out);
             String apppropsjvmflags = ap.getProperty("jvmflags");
             if (apppropsjvmflags != null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4860
                 if (jvmflags != null && jvmflags.length() > 0)
                     jvmflags = apppropsjvmflags + "^" + jvmflags;
                 else
@@ -1652,6 +1709,7 @@ clp.list(System.out);
         		try
         		{
             		bos = new BufferedOutputStream(new FileOutputStream(appPropFile));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
             		ap.store(bos, "Test Properties");
             		bos.close();
                 }
@@ -1692,6 +1750,7 @@ clp.list(System.out);
                 jvmnet = true;
 
             String excludeJcc = ap.getProperty("excludeJCC");
+//IC see: https://issues.apache.org/jira/browse/DERBY-632
             if ( framework.equals("DerbyNet") )
             {	
                 try {
@@ -1710,8 +1769,10 @@ clp.list(System.out);
             {
             	if (jvmName.equals("j9_foundation"))
             		testJVM = "foundation";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
             	else if (jvmName.equals("j9_foundation11"))
             		testJVM = "foundation";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
                 else if (jvmName.equalsIgnoreCase("j9dee15"))
                     testJVM = "j9dee15";
             	else
@@ -1732,6 +1793,7 @@ clp.list(System.out);
 				startServer =false;
 			
 	        //Check derbyTesting.encoding property
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
 	        if(testEncoding == null) {
 	            testEncoding = ap.getProperty("derbyTesting.encoding");
 	            // only bother if we have jdk15, otherwise we'll be skipping
@@ -1739,6 +1801,7 @@ clp.list(System.out);
 	            {
 	                    jvmflags = (jvmflags==null?"":jvmflags+" ") 
 	                                + "-Dfile.encoding=" + testEncoding; 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
 	                    ap.put("file.encoding",testEncoding);
 	            }
 	        }
@@ -1754,6 +1817,7 @@ clp.list(System.out);
 	        }
 
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
 	        if (NetServer.isJCCConnection(framework)
 	        		|| "true".equalsIgnoreCase(ap.getProperty("noSecurityManager")))
 	        	runWithoutSecurityManager = true;
@@ -1791,6 +1855,8 @@ clp.list(System.out);
                     copyOutDir = outDir;
                 else if ( (runDir != null) && (runDir.exists()) )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1366
+//IC see: https://issues.apache.org/jira/browse/DERBY-577
                     copyOutDir = runDir;
                 }
                 else
@@ -1816,6 +1882,7 @@ clp.list(System.out);
 				if(copySupportFiles)
 				   CopySuppFiles.copyFiles(copyOutDir, suppFiles);
     		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
     		else
     		{
 				// for useprocess false, set ext* (back) to null, or it
@@ -1848,6 +1915,7 @@ clp.list(System.out);
         while (st.hasMoreTokens())
         {
 	        String token = st.nextToken();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
             if (! (token.startsWith("-"))) { sb.append(dintro); }
             sb.append(token);
             sb.append(" ");
@@ -2026,6 +2094,7 @@ clp.list(System.out);
         //printWriter = null;
 
         //Always cleanup the script files - except when keepfiles is true
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         if ( !(script == null) && (script.exists()) && (!keepfiles) )
         {
             status = script.delete();
@@ -2055,6 +2124,7 @@ clp.list(System.out);
                 tmpOutFile = null;
             status = finalOutFile.delete();
             if (skiptest == false)
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
                 status = diffFile.delete();           
             // delete the copied (and for Network Server, modified) master file 
             tempMasterFile = new File(outDir, tempMasterName);
@@ -2083,8 +2153,10 @@ clp.list(System.out);
 
                 // delete the directories where external input/output files 
                 // were created
+//IC see: https://issues.apache.org/jira/browse/DERBY-298
                 if (extInDir!=null) deleteFile(extInDir);
                 if (extOutDir!=null) deleteFile(extOutDir);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
                 if (extInOutDir!=null) deleteFile(extInOutDir);
             }
         }
@@ -2113,6 +2185,7 @@ clp.list(System.out);
             System.out.println(f.getName() + " is null");
             return;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
         if (!f.exists())
         {
             System.out.println(f.getName() + " does not exist; harness error");
@@ -2127,6 +2200,7 @@ clp.list(System.out);
 	    else
 	    {
 	        // Could not delete; this could be a non-empty directory
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 	        if (!f.isDirectory())
 	        { 
 	            System.out.println("Could not delete file " + f.getName() + ", going on");
@@ -2214,6 +2288,7 @@ clp.list(System.out);
     {
         PrintWriter tmpPw = new PrintWriter(bos);
         // reader for stderr
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         BufferedReader errReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String s = null;
         int lines = 0;
@@ -2248,6 +2323,7 @@ clp.list(System.out);
     }
 
 	public static void
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 	addStandardTestJvmProps(Vector<String> testJvmProps,String derbySystemHome,
 							String userDirName, jvm jvm)
 	{
@@ -2279,7 +2355,9 @@ clp.list(System.out);
         if ( (classpath != null) && (classpath.length()>0) )
             jvm.setClasspath(classpath);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		Vector<String> jvmProps = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3294
 		if ( testType.equals("java"))
 		    addStandardTestJvmProps(jvmProps,systemHome,
 			    outDir.getCanonicalPath(),null);		    
@@ -2292,6 +2370,7 @@ clp.list(System.out);
 		
         if ( (testJavaFlags != null) && (testJavaFlags.length()>0) )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             String parsedFlags = setTestJavaFlags(testJavaFlags);
             StringTokenizer st = new StringTokenizer(parsedFlags," ");
             while (st.hasMoreTokens())
@@ -2307,14 +2386,17 @@ clp.list(System.out);
         if ( (framework != null) )
         {
             jvmProps.addElement("framework=" + framework);
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
             if ((hostName != null) && (!hostName.equals("localhost")))
             		jvmProps.addElement("hostName=" + hostName);
         }
         
         if (junitXASingle)
             jvmProps.addElement ("derbyTesting.xa.single=true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1214
 
         // if we're not jdk15, don't, we'll skip
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
         if ((testEncoding != null) && (jvmName.equals("jdk15")))
         {
             jvmProps.addElement("derbyTesting.encoding=" + testEncoding);
@@ -2330,12 +2412,14 @@ clp.list(System.out);
                         "-Dfile.encoding=UTF-8";
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1348
         if (upgradejarpath != null)
             jvmProps.addElement("derbyTesting.jar.path=" + upgradejarpath);
             
         if ( (jvmflags != null) && (jvmflags.length()>0) )
         {
             // We now replace any '^' in jvmflags with ' '
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
             if (jvmflags.indexOf("^")>0)
             {
                 jvmflags = spaceJvmFlags(jvmflags);
@@ -2351,6 +2435,7 @@ clp.list(System.out);
             
             // MultiTest is special case, so pass on properties
             // related to encryption to MultiTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-236
             jvmProps.addElement("encryption="+encryption);
             Properties props = new Properties();
             // parse and get only the special properties that are needed for the url 
@@ -2363,14 +2448,17 @@ clp.list(System.out);
         jvm.setD(jvmProps);
        
         // set security properties
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
         if (!runWithoutSecurityManager)
             jvm.setSecurityProps();
         else
         	System.out.println("-- SecurityManager not installed --");
 
         Vector<String> v = jvm.getCommandLine();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         boolean isModuleAware = JVMInfo.isModuleAware();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (isModuleAware)
         {
             v.add("-p");
@@ -2392,6 +2480,7 @@ clp.list(System.out);
             // To get the same result for ibm141 & jdk14*, the harness needs to
             // force the console encoding to Cp1252 for ij tests - unless 
             // we're on non-ascii systems.
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
             String isNotAscii = System.getProperty("platform.notASCII");
             if (isI18N) {
                 // DERBY-244: Use UTF-8 console encoding for the i18n tests to
@@ -2401,6 +2490,7 @@ clp.list(System.out);
                 v.addElement("-Dconsole.encoding=Cp1252" );
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             String executableClass = "org.apache.derby.tools." + ij;
             
             if (isModuleAware)
@@ -2426,6 +2516,7 @@ clp.list(System.out);
         }
         else if ( testType.equals("java") )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             String testClass = (javaPath.length() > 0) ?
                 javaPath + "." + testBase : testBase;
 
@@ -2451,6 +2542,9 @@ clp.list(System.out);
             v.addElement("-p");
             v.addElement(propString);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-918
+//IC see: https://issues.apache.org/jira/browse/DERBY-934
+//IC see: https://issues.apache.org/jira/browse/DERBY-797
         else if (testType.equals("junit"))
         {
             v.addElement("junit.textui.TestRunner");
@@ -2485,6 +2579,7 @@ clp.list(System.out);
 
     public static String spaceJvmFlags(String caretedJvmFlags)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
     	String spacedJvmFlags = "";
     	// there must at least be one
     	StringTokenizer st = new StringTokenizer(jvmflags,"^");
@@ -2679,6 +2774,7 @@ clp.list(System.out);
         ptmp.put("derby.infolog.append", "true");
         // for framework tests, we may need to pick up the hostName 
         // passed on on command line to individual tests...
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
         if (framework.startsWith("DerbyNet"))
         	ptmp.put("hostName=", hostName);
         System.setProperties(ptmp);
@@ -2711,6 +2807,7 @@ clp.list(System.out);
             ijarg[1] = propString;
             ijarg[2] = scriptPath;
             // direct the standard output and error to the print stream for the .tmp file
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
             PrintStream stdout = System.out;
             PrintStream stderr = System.err;
             System.setOut(ps);
@@ -2748,11 +2845,13 @@ clp.list(System.out);
 			ptmp.put("usesystem", "");
 			System.setProperties(ptmp);
 			// Reset System.out and System.err
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 			System.setOut(stdout);
 			System.setErr(stderr);
         }
         else if (testType.equals("java"))
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 	    if (javaPath == null)
 	            javaPath = "org.apache.derbyTesting.functionTests.tests." + testDirName;
 	    
@@ -2762,7 +2861,9 @@ clp.list(System.out);
             Class[] classArray = new Class[1];
             classArray[0] = args.getClass();
             String testName = javaPath + "." + testBase;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<?> JavaTest = Class.forName(testName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
             PrintStream stdout = System.out;
             PrintStream stderr = System.err;
             System.setOut(ps);
@@ -2771,6 +2872,7 @@ clp.list(System.out);
             Method testMain = JavaTest.getMethod("main", classArray);
             Object[] argObj = new Object[1];
             argObj[0] = args;
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 			RunClass testObject = new RunClass(testMain, argObj);
 			Thread testThread = new Thread(testObject);
 			try
@@ -2782,6 +2884,7 @@ clp.list(System.out);
 				}
 				else
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 					testThread.join(timeout * 60 * 1000);
 				}
 			}
@@ -2800,6 +2903,7 @@ clp.list(System.out);
 				// ignore the errors, they are expected.
 			}
 	        // Reset System.out and System.err
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
 	        System.setOut(stdout);
 	        System.setErr(stderr);
         }
@@ -2828,6 +2932,7 @@ clp.list(System.out);
         else if (testType.equals("unit"))
         {
             // direct the standard output and error to the print stream for the .tmp file
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
             PrintStream stdout = System.out;
             PrintStream stderr = System.err;
             System.setOut(ps);
@@ -2848,6 +2953,7 @@ clp.list(System.out);
         }
         else if (testType.equals("junit"))
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
             PrintStream stdout = System.out;
             PrintStream stderr = System.err;
             System.setOut(ps);
@@ -2874,8 +2980,10 @@ clp.list(System.out);
             // do if invoked in a separate process (useprocess=true).
            
             // Load the test class
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<?> testClass = Class.forName(testName);
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite junitTestSuite = null;
             
             try{
@@ -2900,6 +3008,7 @@ clp.list(System.out);
             }
             else{
                 System.out.println(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                     "Not able to extract JUnit BaseTestSuite from " +
                     "test class " + testName);
             }
@@ -2944,6 +3053,7 @@ clp.list(System.out);
      * @return InputStream for the resource
      */
     public static InputStream loadTestResource(String loc) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return RunTest.class.getResourceAsStream(testResourceHome + loc); 
     }
     
@@ -2980,12 +3090,14 @@ clp.list(System.out);
     {
     	// SecurityManager not currently work with older j9 and useProcess=false
     	// need to disable to allow tests to run.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
    	if (jvmName.startsWith("j9") && (!jvmName.equals("j9_foundation11")))
    		return false;
     	
     	boolean installedSecurityManager = false;
     	// Set up the SecurityManager in this JVM for this test.
     	boolean haveSecurityManagerAlready = System.getSecurityManager() != null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
         if (runWithoutSecurityManager)
         {
         	// Test doesn't run with a SecurityManager,
@@ -3000,6 +3112,7 @@ clp.list(System.out);
     	{
         	// Get the set of -D options that would be needed
         	// for a spawned VM and convert them to system properties.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             for (String dashDOpt : jvm.getSecurityProps(null))
     	    {
     	    	if ("java.security.manager".equals(dashDOpt))
@@ -3024,6 +3137,7 @@ clp.list(System.out);
     // It is assumed that if one runs with this property, keepfiles should be true.
     private static void generateUTF8OutFile(File FinalOutFile) throws IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         if (generateUTF8Out) 
         {
             keepfiles=true;

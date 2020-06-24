@@ -58,6 +58,7 @@ public class BlobUpdatableStreamTest extends BaseJDBCTestCase {
         blob.truncate (l);
         int ret = is.read();
         //should not be able to read after truncated value
+//IC see: https://issues.apache.org/jira/browse/DERBY-2830
         assertEquals ("stream update failed", -1, ret);
         byte [] buffer = new byte [1024];
         for (int i = 0; i < buffer.length; i++)
@@ -82,7 +83,9 @@ public class BlobUpdatableStreamTest extends BaseJDBCTestCase {
     }
 
     public static Test suite () {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
         return TestConfiguration.defaultSuite (
+//IC see: https://issues.apache.org/jira/browse/DERBY-2830
                 BlobUpdatableStreamTest.class);
     }
 

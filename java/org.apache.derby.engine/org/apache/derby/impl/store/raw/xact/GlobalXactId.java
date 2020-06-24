@@ -43,6 +43,7 @@ public class GlobalXactId extends GlobalXact implements GlobalTransactionId
      * Constructors for This class:
      **************************************************************************
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6184
     GlobalXactId(
 						int     format_id,
 						byte[]  global_id,
@@ -149,6 +150,7 @@ public class GlobalXactId extends GlobalXact implements GlobalTransactionId
      * Obtain the global transaction identifier as an array of bytes.
      * @return a byte array containing the global transaction identifier
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6184
     byte[] getGlobalTransactionId()
     {
         return(global_id);

@@ -91,6 +91,7 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
     // Implementation of CollationElementsInterface interface
 
     public boolean hasSingleCollationElement() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2699
         return holderForCollationSensitiveInfo.hasSingleCollationElement();
     }
 
@@ -111,6 +112,7 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", se);
 			return null;
 		}
@@ -143,6 +145,7 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
 	 */
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2534
 		if (collatorForComparison != null)
 		{
 			//non-null collatorForComparison means use this collator sensitive
@@ -162,6 +165,7 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
 	 protected int stringCompare(SQLChar char1, SQLChar char2)
 	 throws StandardException
 	 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
 		 return holderForCollationSensitiveInfo.stringCompare(char1, char2);
 	 }
 
@@ -205,6 +209,7 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
 	 * @exception StandardException		Thrown on error
 	 */
 	public BooleanDataValue like(DataValueDescriptor pattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
 			DataValueDescriptor escape) throws StandardException
 	{
 		return(holderForCollationSensitiveInfo.like(pattern, escape));

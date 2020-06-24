@@ -125,6 +125,7 @@ public class RealDistinctScanStatistics
 			  indent + MessageService.getTextMessage(
 				SQLState.RTS_DISTINCT_SCAN_RS_USING,
 				tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
 				isConstraint ? "constraint" : "index",
 				indexName);
 		}
@@ -195,6 +196,8 @@ public class RealDistinctScanStatistics
 			scanInfo +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_START_POSITION) +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			":\n" + StringUtil.ensureIndent(startPosition, depth + 2) + "\n" +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_STOP_POSITION) +

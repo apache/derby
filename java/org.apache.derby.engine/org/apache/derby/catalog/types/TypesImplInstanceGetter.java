@@ -33,6 +33,8 @@ public class TypesImplInstanceGetter extends FormatableInstanceGetter {
                   case StoredFormatIds.INT_TYPE_ID_IMPL:
                   case StoredFormatIds.SMALLINT_TYPE_ID_IMPL:
                   case StoredFormatIds.TINYINT_TYPE_ID_IMPL:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                   case StoredFormatIds.BIGINT_TYPE_ID_IMPL:
                   case StoredFormatIds.DOUBLE_TYPE_ID_IMPL:
                   case StoredFormatIds.REAL_TYPE_ID_IMPL:

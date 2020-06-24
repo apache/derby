@@ -42,10 +42,12 @@ public class insertMaps {
 	public static void main(String[] args) throws Exception {
 
 		System.out.println("Loading the Derby jdbc driver...");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(CSdriver);
         clazz.getConstructor().newInstance();
 	
 		System.out.println("Getting Derby database connection...");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5438
 		Connection connCS = DriverManager.getConnection(dbURLCS);
 		System.out.println("Successfully got the Derby database connection...");
 
@@ -55,6 +57,7 @@ public class insertMaps {
 		connCS.close();
 
 		// Shut down the database cleanly before exiting.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5437
 		try {
 			DriverManager.getConnection(dbURLCS + ";shutdown=true");
 		} catch (SQLException sqle) {

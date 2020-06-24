@@ -49,6 +49,7 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
     }
 
    public static Test basesuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(CheckToursDBTest.class, name);
         Test test = new SupportFilesSetup(suite, new String[] {
                 "functionTests/tests/demo/cupisle.gif",
@@ -58,9 +59,11 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3294
         if ( JDBC.vmSupportsJSR169())
             // Test executes PreparedStatement.setBigDecimal, which
             // is not supported with JSR169
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                         return new BaseTestSuite(
                 "empty CheckToursDBTest - *.setBigDecimal " +
                 "not supported with JSR169");
@@ -183,6 +186,7 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
     public void insertMapsPrivileged() throws Exception {
         try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                 public Object run() throws SQLException, FileNotFoundException,
                         IOException {

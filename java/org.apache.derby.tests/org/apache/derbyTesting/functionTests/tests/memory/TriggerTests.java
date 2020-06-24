@@ -326,6 +326,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTrigger() throws SQLException{	
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -346,6 +347,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTriggerStoredProc() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -421,6 +423,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteAfterTriggerStoredProc() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -494,6 +497,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTriggerStoredProc() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -557,6 +561,8 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTriggerStoredProc() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -632,6 +638,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteBeforeTriggerStoredProc() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -708,6 +715,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTriggerStoredProc() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -796,6 +804,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2DeleteAfterTriggerAccessLOB() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -927,6 +936,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2UpdateAfterTriggerUpdatedLOB() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -988,6 +998,11 @@ public class TriggerTests extends BaseJDBCTestCase {
 		ps.setInt(1, 1);
         ps.executeUpdate();
 		commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
    		runtest2InsertTriggerTest();
 	}
 	
@@ -1003,6 +1018,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2DeleteBeforeTriggerAccessLOB() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -1243,6 +1259,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test4UpdateAfterTriggerAccessLOB() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -1322,6 +1339,21 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test4UpdateBeforeTrigger() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         if (isDerby1482Fixed == false)
             return;
 
@@ -1375,6 +1407,8 @@ public class TriggerTests extends BaseJDBCTestCase {
 		s.execute("create trigger trigger1 NO CASCADE BEFORE INSERT on table1 " +
 			"select updates from table2 where table2.id = 1");
 		commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
    		runtest1InsertTriggerTest();		       	
 	}
 	 
@@ -1417,6 +1451,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	public void test5UpdateAfterTriggerNoReferencingClause() throws SQLException{
         basicSetup();
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
 		s.execute("create trigger trigger1 AFTER UPDATE of status on table1 " +
 				"update table2 set updates = updates + 1 where table2.id = 1");
 		commit();
@@ -1432,6 +1467,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	public void test5UpdateBeforeTriggerNoReferencingClause() throws SQLException{
         basicSetup();
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
 		s.execute("create trigger trigger1 NO CASCADE BEFORE UPDATE of status on table1 " +
 				"select updates from table2 where table2.id = 1");
 		commit();

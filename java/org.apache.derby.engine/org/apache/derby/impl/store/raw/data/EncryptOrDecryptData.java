@@ -72,6 +72,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
     private StorageFile actionDestStorageFile;
 
     public EncryptOrDecryptData(BaseDataFileFactory dataFactory) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         this.dataFactory = dataFactory;
         this.storageFactory = dataFactory.getStorageFactory();
     }
@@ -135,6 +136,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
 
                 ContainerKey ckey = new ContainerKey(segmentId,
                                                      containerId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 encryptOrDecryptContainer(t, ckey, doEncrypt);
             }
 
@@ -161,6 +163,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
      * @exception StandardException Standard Derby error policy
      */
     private void encryptOrDecryptContainer(RawTransaction t,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                                            ContainerKey ckey,
                                            boolean doEncrypt)
         throws StandardException
@@ -181,6 +184,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
         if (SanityManager.DEBUG )
             SanityManager.ASSERT(containerHdl != null);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         EncryptContainerOperation lop =
             new EncryptContainerOperation(containerHdl);
         t.logAndDo(lop);
@@ -220,6 +224,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
         // get rid of the container entry from conatainer cache
         if (!dataFactory.getContainerCache().discard(ckey)) {
             if (SanityManager.DEBUG )
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 SanityManager.THROWASSERT("unable to discard a container " +
                                           ckey + " from the container cache");
         }
@@ -248,6 +253,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
      * temporary versions of the container file.
      */
     private StorageFile getFile(ContainerKey containerId, boolean old) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         return storageFactory.newStorageFile(getFilePath(containerId,
                                                          old));
     }
@@ -268,6 +274,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
 
     private boolean isOldContainerFile(String fileName) {
         // Old versions start with prefix "o" and ends with ".dat".
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         return (fileName.startsWith("o") && fileName.endsWith(".dat"));
     }
 
@@ -289,6 +296,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
      * @param ckey the key of the container that needs to be restored.
      * @exception StandardException Standard Derby error policy
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
     void restoreContainer(ContainerKey containerId)
         throws StandardException
     {
@@ -344,6 +352,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
      * on the database.
      */
     public void removeOldVersionOfContainers()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             throws StandardException {
         // Find the old version of the container files and delete them.
         String[] files = dataFactory.getContainerNames();
@@ -355,6 +364,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
                     StorageFile oldFile = getFile(files[i]);
                     if (!privDelete(oldFile)) {
                         throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5886
                                   SQLState.FILE_CANNOT_REMOVE_ENCRYPT_FILE,
                                   oldFile);
                     }
@@ -390,6 +400,9 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
         actionCode = STORAGE_FILE_RENAME_ACTION;
         actionStorageFile = fromFile;
         actionDestStorageFile = destFile;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Boolean ret = AccessController.doPrivileged(this);
         actionStorageFile = null;
         actionDestStorageFile = null;
@@ -405,6 +418,7 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
         switch(actionCode)
         {
         case STORAGE_FILE_EXISTS_ACTION:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             return actionStorageFile.exists();
         case STORAGE_FILE_DELETE_ACTION:
             return actionStorageFile.delete();

@@ -43,6 +43,7 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 
  */
 class ConnectionEnv {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	Hashtable<String,Session> sessions = new Hashtable<String,Session>();
 	private Session currSession;
 	private String tag;
@@ -61,12 +62,14 @@ class ConnectionEnv {
 		failure does not prevent object creation.
 	 */
     void init(LocalizedOutput out) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		Connection c = util.startJBMS(null,null);
 
 		// only load up ij.connection.* properties if there is
 		// only one ConnectionEnv in the system.
 		if (only) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Properties p = AccessController.doPrivileged(new PrivilegedAction<Properties>() {
             	public Properties run() {
                 	return System.getProperties();
@@ -123,6 +126,7 @@ class ConnectionEnv {
     int newNum = 0;
     boolean newConnectionNameOk = false;
     String newConnectionName = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     Enumeration<String> e;
     while (!newConnectionNameOk){
       newConnectionName = Session.DEFAULT_NAME + newNum;
@@ -141,6 +145,7 @@ class ConnectionEnv {
 		return currSession;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	Hashtable<String,Session> getSessions() {
 		return sessions;
 	}
@@ -166,6 +171,7 @@ class ConnectionEnv {
 	}
 
 	void removeSession(String name) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Session s = sessions.remove(name);
 		s.close();
 		if (currSession == s)
@@ -176,6 +182,7 @@ class ConnectionEnv {
 		if (sessions == null || sessions.size() == 0)
 			return;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			for (Enumeration<String> e = sessions.keys(); e.hasMoreElements(); ) {
 				String n = e.nextElement();
 				removeSession(n);

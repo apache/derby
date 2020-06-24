@@ -47,6 +47,7 @@ public class ShutdownSlaveServer extends ShutdownSlave
         
         setEnv();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ShutdownSlaveServer");
         suite.addTest(ShutdownSlaveServer.suite(masterServerHost, masterServerPort));
         return (Test)suite;

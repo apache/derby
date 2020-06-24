@@ -63,6 +63,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
     public InternationalConnectTest(String name) {
         super(name);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         databasesForCleanup = new ArrayList<String>();
     }
 
@@ -144,6 +145,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             println("Loading JDBC driver " + driverClass);
             // load the driver
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = Class.forName(driverClass);
                 clazz.getConstructor().newInstance();
             } catch (ClassNotFoundException cnfe) {
@@ -158,6 +160,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
                 throw new SQLException("Failed to load JDBC driver '" 
                         + driverClass + "', InstantiationException: " 
                         + ie.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             } catch (NoSuchMethodException ie) {
                 throw new SQLException("Failed to load JDBC driver '" 
                         + driverClass + "', InstantiationException: " 
@@ -183,6 +186,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         String url = null;
 
         //Test Chinese database name
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;create=true");
         
         conn = DriverManager.getConnection(url);
@@ -223,9 +227,11 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         J2EEDataSource.setBeanProperty(ds, "databaseName", "\u4e10");
         J2EEDataSource.setBeanProperty(ds, "createDatabase", "create");        
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         XAConnection xaconn = ds.getXAConnection();
         Connection conn = xaconn.getConnection();
         conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5722
         xaconn.close();
   
         // Chinese user
@@ -257,9 +263,11 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         J2EEDataSource.setBeanProperty(ds, "databaseName", "\u4e10");
         J2EEDataSource.setBeanProperty(ds, "createDatabase", "create");        
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         PooledConnection poolConn = ds.getPooledConnection();
         Connection conn = poolConn.getConnection();
         conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5722
         poolConn.close();
  
         // Chinese user
@@ -277,6 +285,10 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         poolConn.close();
         
         /* Add the created database for cleanup by tearDown() */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4836
+//IC see: https://issues.apache.org/jira/browse/DERBY-4836
+//IC see: https://issues.apache.org/jira/browse/DERBY-4836
+//IC see: https://issues.apache.org/jira/browse/DERBY-4836
         databasesForCleanup.add("\u4e10");
     }
 
@@ -289,6 +301,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
      */
     public void testFailureOnNonExistentDatabase() throws SQLException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
         String url = TestConfiguration.getCurrent().getJDBCUrl(
                 "abcdefghijklmnopq\u00E5");
         try {
@@ -312,6 +325,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
                                 .getJDBCUrl(databasesForCleanup.get(i) + ";shutdown=true");
             try {
                 DriverManager.getConnection(shutdownUrl);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4836
                 fail("Database didn't shut down");
             } catch (SQLException se) {
                 // ignore shutdown exception
@@ -323,6 +337,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         
         /* Clear the array list as new fixtures will add other databases */
         databasesForCleanup = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5722
 
         super.tearDown();
     }

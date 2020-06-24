@@ -63,6 +63,7 @@ public interface MaterialStatement {
 
     public abstract void writeSetSpecialRegister_(
         Section section, ArrayList sqlsttList) throws SqlException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     public abstract void readSetSpecialRegister_() throws SqlException;
 

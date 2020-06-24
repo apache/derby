@@ -30,6 +30,7 @@ public class ClientTypes {
     // -------------------------------- Driver types -------------------------------------------------
 
     final static int BIT        =  Types.BIT;          // -7;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // Not currently supported as a DERBY column type.  Mapped to SMALLINT.
     //final static int TINYINT   = Types.TINYINT;       // -6;
@@ -61,6 +62,7 @@ public class ClientTypes {
     public final static int LONGVARCHAR = Types.LONGVARCHAR;   // -1;
 
     final static int DATE = Types.DATE;          // 91;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     final static int TIME = Types.TIME;          // 92;
 
@@ -84,6 +86,7 @@ public class ClientTypes {
     
     static String getTypeString(int type)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
         switch (type )
         {
             case BIGINT:        return "BIGINT";
@@ -106,9 +109,11 @@ public class ClientTypes {
             case VARBINARY:     return "VARBINARY";
             case VARCHAR:       return "VARCHAR";
             // Types we don't support:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.ARRAY: return "ARRAY";
             case Types.DATALINK: return "DATALINK";
             case Types.REF: return "REF";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             case Types.ROWID: return "ROWID";
             case Types.SQLXML: return "SQLXML";
             case Types.STRUCT: return "STRUCT";
@@ -119,6 +124,7 @@ public class ClientTypes {
 
     static public int mapDERBYTypeToDriverType(boolean isDescribed, int sqlType, long length, int ccsid) {
         switch (Utils.getNonNullableSqlType(sqlType)) { // mask the isNullable bit
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
         case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
             return BOOLEAN;
         case DRDAConstants.DB2_SQLTYPE_SMALL:
@@ -139,6 +145,7 @@ public class ClientTypes {
             } else {
                 return 0;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
         case DRDAConstants.DB2_SQLTYPE_DECIMAL:            // can map to either NUMERIC or DECIMAL
         case DRDAConstants.DB2_SQLTYPE_NUMERIC:            // can map to either NUMERIC or DECIMAL
             return DECIMAL;
@@ -170,6 +177,7 @@ public class ClientTypes {
         case DRDAConstants.DB2_SQLTYPE_TIMESTAMP:
             return TIMESTAMP;
         case DRDAConstants.DB2_SQLTYPE_CLOB:    // large object character SBCS/Mixed
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return ClientTypes.CLOB;
         case DRDAConstants.DB2_SQLTYPE_BLOB:    // large object bytes
             return Types.BLOB;

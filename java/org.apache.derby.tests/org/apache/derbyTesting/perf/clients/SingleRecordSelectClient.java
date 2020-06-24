@@ -54,6 +54,7 @@ public class SingleRecordSelectClient implements Client {
      * @param tables the number of tables in the test
      */
     public SingleRecordSelectClient(int records, int tables) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         this(records, tables, Types.VARCHAR, false, false);
     }
 
@@ -76,6 +77,7 @@ public class SingleRecordSelectClient implements Client {
         r = new Random();
         pss = new PreparedStatement[tables];
         dataType = type;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         if (secIndex && nonIndexed) {
             throw new IllegalArgumentException(
                 "Cannot select on both secondary index and non-index column");
@@ -110,6 +112,7 @@ public class SingleRecordSelectClient implements Client {
         ResultSet rs = ps.executeQuery();
         rs.next();
         rs.getInt(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         fetchTextColumn(rs, 2);
         rs.close();
         conn.commit();

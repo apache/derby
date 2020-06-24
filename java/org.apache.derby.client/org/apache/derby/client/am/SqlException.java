@@ -86,6 +86,7 @@ public class SqlException extends Exception implements Diagnosable {
     protected SqlException nextException_;
     
     public static final String CLIENT_MESSAGE_RESOURCE_NAME =
+//IC see: https://issues.apache.org/jira/browse/DERBY-838
         "org.apache.derby.loc.clientmessages";
     
     /**
@@ -117,7 +118,9 @@ public class SqlException extends Exception implements Diagnosable {
      *   messages
      */
     public static MessageUtil getMessageUtil() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
         if ( msgutil_ == null ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             msgutil_ = new MessageUtil(MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME);
         }
         
@@ -160,11 +163,13 @@ public class SqlException extends Exception implements Diagnosable {
      *      is chained into the nextException chain.  Otherwise it is chained
      *      using initCause().
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     SqlException(LogWriter logwriter,
         ClientMessageId msgid, Object[] args, Throwable cause)
     {
         this(
             logwriter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1069
             cause,
             getMessageUtil().getCompleteMessage(
                 msgid.msgid,
@@ -175,6 +180,7 @@ public class SqlException extends Exception implements Diagnosable {
 
     // Use the following SQLExceptions when you want to override the error
     // code that is derived from the severity of the message id.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
         SqlCode sqlcode, Throwable t) {
         this(logWriter, msgid, args, t);
@@ -182,6 +188,7 @@ public class SqlException extends Exception implements Diagnosable {
     }
 
     public SqlException(LogWriter logWriter, ClientMessageId msgid,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                         SqlCode sqlcode, Object... args) {
         this(logWriter, msgid, args, sqlcode, (Throwable)null);
     }
@@ -197,6 +204,7 @@ public class SqlException extends Exception implements Diagnosable {
     }
     
     public SqlException(LogWriter logwriter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                         ClientMessageId msgid,
                         Object... args)
     {
@@ -210,12 +218,15 @@ public class SqlException extends Exception implements Diagnosable {
      * @param sqlca the SQLCA sent from the server
      */
     public SqlException(LogWriter logWriter, Sqlca sqlca) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         this(sqlca, 0, true);
         // only set the error code for the first exception in the chain (we
         // don't know the error code for the rest)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
         errorcode_ = sqlca.getErrorCode();
         if ( logWriter != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             logWriter.traceDiagnosable(SqlException.this);
         }
     }
@@ -253,6 +264,7 @@ public class SqlException extends Exception implements Diagnosable {
     private SqlException(LogWriter logWriter, String reason, String sqlState,
         int errorCode)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
         this(logWriter, (Throwable)null, reason, sqlState, errorCode);
     }
 
@@ -265,6 +277,7 @@ public class SqlException extends Exception implements Diagnosable {
         setThrowable(throwable);
         
         if (logWriter != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             logWriter.traceDiagnosable(SqlException.this);
         }
         
@@ -289,6 +302,7 @@ public class SqlException extends Exception implements Diagnosable {
             setNextException((SQLException) throwable );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         if (throwable != null) {
             initCause(throwable);
         }
@@ -322,9 +336,12 @@ public class SqlException extends Exception implements Diagnosable {
                         
         // When we have support for JDBC 4 SQLException subclasses, this is
         // where we decide which exception to create
+//IC see: https://issues.apache.org/jira/browse/DERBY-1140
         SQLException sqle = exceptionFactory.getSQLException(getMessage(), getSQLState(), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6803
             getErrorCode(), getArgs());
         sqle.initCause(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
 
         // Set up the nextException chain
         if ( nextException_ != null )
@@ -342,6 +359,7 @@ public class SqlException extends Exception implements Diagnosable {
     // when getMessage() is called.
     // Called by the Agent.
     void setBatchPositionLabel(int index) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3902
         batchPositionLabel_ = getMessageUtil().getTextMessage(MessageId.BATCH_POSITION_ID) + 
             index + ": ";
     }
@@ -357,6 +375,7 @@ public class SqlException extends Exception implements Diagnosable {
     }
 
     private Object []getArgs() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6803
         if( sqlca_ != null )
             return ((Sqlca)sqlca_).getArgs(messageNumber_);
         return null;
@@ -364,6 +383,7 @@ public class SqlException extends Exception implements Diagnosable {
 
     @Override
     public String getMessage() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         if ( wrappedException_ != null )
         {
             return wrappedException_.getMessage();
@@ -379,6 +399,7 @@ public class SqlException extends Exception implements Diagnosable {
         // the connection and JDBC not being retrievable (hence why it is
         // being cached here).
         if (sqlca_ != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
             cachedMessage_ = message_ =
                     ((Sqlca) sqlca_).getJDBCMessage(messageNumber_);
         }
@@ -407,6 +428,7 @@ public class SqlException extends Exception implements Diagnosable {
             return wrappedException_.getSQLState();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         return sqlstate_;
     }
 
@@ -416,6 +438,7 @@ public class SqlException extends Exception implements Diagnosable {
             return wrappedException_.getErrorCode();
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         return errorcode_;
     }
 
@@ -452,6 +475,7 @@ public class SqlException extends Exception implements Diagnosable {
         else
         {
             // Add this exception to the end of the chain
+//IC see: https://issues.apache.org/jira/browse/DERBY-860
             SqlException theEnd = this;
             while (theEnd.nextException_ != null) {
                 theEnd = theEnd.nextException_;
@@ -465,6 +489,7 @@ public class SqlException extends Exception implements Diagnosable {
      * we encountered an underlying Java exception
      */
     static SqlException javaException(LogWriter logWriter, Throwable e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
         return new SqlException(logWriter, 
             new ClientMessageId (SQLState.JAVA_EXCEPTION), 
             new Object[] {e.getClass().getName(), e.getMessage()}, e);
@@ -476,6 +501,7 @@ public class SqlException extends Exception implements Diagnosable {
     SqlException copyAsUnchainedSQLException(LogWriter logWriter) {
         if (sqlca_ != null) {
             // server error
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
             return new SqlException(sqlca_, messageNumber_, false);
         } else {
             return new SqlException(logWriter, getMessage(), getSQLState(), getErrorCode()); // client error
@@ -487,6 +513,7 @@ public class SqlException extends Exception implements Diagnosable {
 // for common ResultSet data conversion exceptions.
 
 class ColumnTypeConversionException extends SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
     ColumnTypeConversionException(LogWriter logWriter, String targetType,
         String sourceType) {
         super(logWriter,
@@ -498,6 +525,7 @@ class ColumnTypeConversionException extends SqlException {
 // An intermediate exception encapsulation to provide code-reuse
 // for common CrossConverters data conversion exceptions.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
 class OutsideRangeForDataTypeException extends SqlException {
     OutsideRangeForDataTypeException(LogWriter logWriter, String instance) {
         super(logWriter,

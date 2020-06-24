@@ -14,6 +14,7 @@ import org.apache.derbyTesting.junit.JDBC;
 
 /*
 Class org.apache.derbyTesting.functionTests.tests.store.Derby4577Test
+//IC see: https://issues.apache.org/jira/browse/DERBY-4770
 
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -304,6 +305,7 @@ public class Derby4577Test extends StoreBaseTest
     
     protected static Test baseSuite(String name) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby4577Test.class);
         return new CleanDatabaseTestSetup(
@@ -337,6 +339,7 @@ public class Derby4577Test extends StoreBaseTest
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Derby4577Test");
         suite.addTest(baseSuite("Derby4577Test:embedded"));
         return suite;

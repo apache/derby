@@ -46,6 +46,7 @@ public abstract class NumberDataType extends DataType
 									 implements NumberDataValue
 {
     static final BigDecimal MAXLONG_PLUS_ONE =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             BigDecimal.valueOf(Long.MAX_VALUE).add(BigDecimal.ONE);
     static final BigDecimal MINLONG_MINUS_ONE =
             BigDecimal.valueOf(Long.MIN_VALUE).subtract(BigDecimal.ONE);
@@ -63,6 +64,7 @@ public abstract class NumberDataType extends DataType
             return minus(result);
 
         if(result == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5224
             result = (NumberDataValue)getNewNull();
         
         result.setValue(this);
@@ -96,6 +98,7 @@ public abstract class NumberDataType extends DataType
 
         if( this.isNegative() )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             if( doubleValue == -0.0d )
             {
                 doubleValue = 0.0d;
@@ -405,6 +408,7 @@ public abstract class NumberDataType extends DataType
 	 * Used for TINYINT, SMALLINT, INTEGER.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue) throws StandardException
 	{
 		setValue(((Integer) theValue).intValue());
@@ -421,6 +425,7 @@ public abstract class NumberDataType extends DataType
 
 		// See comment in SQLDecimal.getLong()
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		if (   (bigDecimal.compareTo(NumberDataType.MINLONG_MINUS_ONE) == 1)
 			&& (bigDecimal.compareTo(NumberDataType.MAXLONG_PLUS_ONE) == -1)) {
 
@@ -459,6 +464,7 @@ public abstract class NumberDataType extends DataType
 	{
         boolean invalid = Float.isNaN(v) || Float.isInfinite(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
         if (v < Limits.DB2_SMALLEST_REAL ||
             v > Limits.DB2_LARGEST_REAL ||
             (v > 0 && v < Limits.DB2_SMALLEST_POSITIVE_REAL) ||
@@ -502,6 +508,7 @@ public abstract class NumberDataType extends DataType
         float fv = (float)v;
 
         boolean invalid =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             Double.isNaN(v) ||
             Double.isInfinite(v) ||
             (fv == 0.0f && v != 0.0d); // too small to represent as REAL
@@ -570,7 +577,9 @@ public abstract class NumberDataType extends DataType
      * @return false if dictionary is new enough, see DD_Version.
      */
      private static boolean useDB2Limits() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
          LanguageConnectionContext lcc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
              (LanguageConnectionContext)getContextOrNull(
                  LanguageConnectionContext.CONTEXT_ID);
          if (lcc != null) {
@@ -591,6 +600,7 @@ public abstract class NumberDataType extends DataType
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

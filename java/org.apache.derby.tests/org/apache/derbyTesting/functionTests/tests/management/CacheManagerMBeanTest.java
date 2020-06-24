@@ -45,6 +45,7 @@ public class CacheManagerMBeanTest extends MBeanTest {
     private final static int DEFAULT_STATEMENT_CACHE_SIZE = 100;
 
     private static String[] ALL_ATTRIBUTES = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         "CollectAccessCounts", "HitCount", "MissCount", "EvictionCount",
         "MaxEntries", "AllocatedEntries", "UsedEntries"
     };
@@ -139,6 +140,7 @@ public class CacheManagerMBeanTest extends MBeanTest {
         names = queryMBeans(pattern);
         assertEquals("Incorrect number of MBeans found in " + names,
                      3, names.size());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
 
         // Shut down the database.
         TestConfiguration.getCurrent().shutdownDatabase();
@@ -167,6 +169,7 @@ public class CacheManagerMBeanTest extends MBeanTest {
         assertLongAttribute(0, name, "HitCount");
         assertLongAttribute(0, name, "MissCount");
         assertLongAttribute(0, name, "EvictionCount");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         assertLongAttribute(DEFAULT_PAGE_CACHE_SIZE, name, "MaxEntries");
         // Cannot reliably tell how many entries to expect.
         // More than 0 for sure.
@@ -216,6 +219,7 @@ public class CacheManagerMBeanTest extends MBeanTest {
         assertLongAttribute(0, name, "HitCount");
         assertLongAttribute(0, name, "MissCount");
         assertLongAttribute(0, name, "EvictionCount");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         assertLongAttribute(DEFAULT_CONTAINER_CACHE_SIZE, name, "MaxEntries");
         // Cannot reliably tell how many entries to expect.
         // More than 0 for sure.
@@ -229,6 +233,7 @@ public class CacheManagerMBeanTest extends MBeanTest {
      * Test the {@code CacheManagerMBean} for the statement cache.
      */
     public void testStatementCache() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         getConnection(); // boot the database
         Set<ObjectName> names =
                 queryMBeans(createObjectName("StatementCache", null));
@@ -327,6 +332,7 @@ public class CacheManagerMBeanTest extends MBeanTest {
      * base lacks SystemPermission("engine", "monitor").
      */
     public void withoutPermsTest() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         getConnection(); // boot the database
         Set<ObjectName> names =
                 queryMBeans(createObjectName("StatementCache", null));

@@ -75,6 +75,7 @@ final class UpdateLoader implements LockOwner {
         // class loading mechanism, javax. ones are not. However
         // allowing database applications to override jvm classes
         // seems a bad idea.
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
         "javax.",
         
         // Allowing an application to possible override the engine's
@@ -102,8 +103,10 @@ final class UpdateLoader implements LockOwner {
 
         this.normalizeToUpper = normalizeToUpper;
 		this.parent = parent;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		lf = (LockFactory) getServiceModule(parent, Module.LockFactory);
 		compat = (lf != null) ? lf.createCompatibilitySpace(this) : null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
 
 		if (verbose) {
 			vs = Monitor.getStream();
@@ -118,6 +121,7 @@ final class UpdateLoader implements LockOwner {
 
 	private void initializeFromClassPath(String classpath) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 		final String[][] elements = IdUtil.parseDbClassPath(classpath);
 		
 		final int jarCount = elements.length;
@@ -127,6 +131,7 @@ final class UpdateLoader implements LockOwner {
             // Creating class loaders is a restricted operation
             // so we need to use a privileged block.
             AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             (new java.security.PrivilegedAction<Object>(){
                 
                 public Object run(){    
@@ -138,6 +143,7 @@ final class UpdateLoader implements LockOwner {
             });
         }
 		if (vs != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5885
 			vs.println(MessageService.getTextMessage(MessageId.CM_CLASS_LOADER_START, classpath ));
 		}
 		
@@ -146,6 +152,7 @@ final class UpdateLoader implements LockOwner {
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2331
 		Load the class from the class path. Called by JarLoader
         when it has a request to load a class to fulfill
         the sematics of derby.database.classpath.
@@ -189,6 +196,7 @@ final class UpdateLoader implements LockOwner {
                 // Refuse to load classes from restricted name spaces
                 // That is classes in those name spaces can be not
                 // loaded from installed jar files.
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
                 for (int i = 0; i < RESTRICTED_PACKAGES.length; i++)
                 {
                     if (className.startsWith(RESTRICTED_PACKAGES[i]))
@@ -268,6 +276,8 @@ final class UpdateLoader implements LockOwner {
 			return null;
 		} finally {
 			if (unlockLoader) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 				lf.unlock(compat, this, classLoaderLock, ShExQual.SH);
 			}
 		}
@@ -297,6 +307,7 @@ final class UpdateLoader implements LockOwner {
         
         // first close the existing jar file opens
         close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 
 		if (reload) {
 			initializeFromClassPath(thisClasspath);
@@ -310,11 +321,13 @@ final class UpdateLoader implements LockOwner {
 			return false;
 
 		ClassFactoryContext cfc = (ClassFactoryContext) getContextOrNull(ClassFactoryContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		// This method can be called from outside of the database
 		// engine, in which case tc will be null. In that case
 		// we lock the class loader only for the duration of
 		// the loadClass().
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace lockSpace = null;
 		
 		if (cfc != null) {
@@ -344,6 +357,7 @@ final class UpdateLoader implements LockOwner {
 	void close() {
 
 		for (int i = 0; i < jarList.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 			jarList[i].setInvalid();
 		}
 
@@ -382,6 +396,7 @@ final class UpdateLoader implements LockOwner {
 		throws StandardException {
 
 		ClassFactoryContext cfc = (ClassFactoryContext) getContextOrNull(ClassFactoryContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		PersistentSet ps = cfc.getPersistentSet();
 		
@@ -401,6 +416,7 @@ final class UpdateLoader implements LockOwner {
 		if (jarReader == null) {
 
 			ClassFactoryContext cfc = (ClassFactoryContext) getContextOrNull(ClassFactoryContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			jarReader = cfc.getJarReader(); 
 		}
@@ -419,6 +435,7 @@ final class UpdateLoader implements LockOwner {
     
     public boolean isNestedOwner()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
         return false;
     }
 
@@ -434,12 +451,14 @@ final class UpdateLoader implements LockOwner {
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Context>()
              {
                  public Context run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getContextOrNull( contextID );
                  }
              }

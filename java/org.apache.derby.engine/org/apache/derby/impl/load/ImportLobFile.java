@@ -53,6 +53,7 @@ class ImportLobFile
      * @param lobFile the file which has the LOB Data.
      * @param dataCodeset the code set to use char data in the file.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     ImportLobFile(File lobFile, String dataCodeset) throws Exception {
         this.dataCodeset = dataCodeset;
         openLobFile(lobFile);
@@ -71,9 +72,11 @@ class ImportLobFile
         try {
             // open the lob file under a privelged block.
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 lobRaf = AccessController.doPrivileged
                 (new java.security.PrivilegedExceptionAction<RandomAccessFile>(){
                         public RandomAccessFile run() throws IOException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                             return new RandomAccessFile(lobFile, "r");
                         }   
                     }
@@ -82,6 +85,7 @@ class ImportLobFile
                 throw pae.getException();
             }
         } catch (FileNotFoundException ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             throw PublicAPI.wrapStandardException(
                       StandardException.newException(
                       SQLState.LOB_DATA_FILE_NOT_FOUND, 
@@ -136,6 +140,8 @@ class ImportLobFile
         // wrap a reader on top of the stream, so that calls 
         // to read the clob data from the file can read the 
         // with approapriate  data code set. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
         lobReader = dataCodeset == null ?
     		new InputStreamReader(lobLimitIn) : 
             new InputStreamReader(lobLimitIn, dataCodeset);    
@@ -160,6 +166,8 @@ class ImportLobFile
      * @exception  IOException  on any I/O error.     
      */
     public java.io.Reader getCharacterStream(long offset, long length) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
         throws IOException 
     {
         lobInputStream.seek(offset);

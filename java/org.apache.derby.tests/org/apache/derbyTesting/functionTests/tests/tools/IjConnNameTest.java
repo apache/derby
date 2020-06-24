@@ -46,6 +46,7 @@ public class IjConnNameTest extends ScriptTestCase {
     }    
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("IjConnNameTest");
         
         // Test does not run on J2ME
@@ -71,6 +72,7 @@ public class IjConnNameTest extends ScriptTestCase {
         // attempt to get rid of the extra database.
         // this also will get done if there are failures, and the database will
         // not be saved in the 'fail' directory.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         removeDirectory(
             TestConfiguration.getCurrent().getDatabasePath("lemming"));
         super.tearDown();

@@ -130,6 +130,7 @@ class PermissionsCacheable implements Cacheable
 					AliasDescriptor ad = dd.getAliasDescriptor( routinePermsKey.getRoutineUUID());
 					SchemaDescriptor sd = dd.getSchemaDescriptor( ad.getSchemaUUID(),
 											  ConnectionUtil.getCurrentLCC().getTransactionExecute());
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 					if (sd.isSystemSchema() && !sd.isSchemaWithGrantableRoutines())
 						permissions = new RoutinePermsDescriptor( dd,
 																  routinePermsKey.getGrantee(),
@@ -141,6 +142,7 @@ class PermissionsCacheable implements Cacheable
 																  routinePermsKey.getGrantee(),
 																  Authorizer.SYSTEM_AUTHORIZATION_ID,
 																  routinePermsKey.getRoutineUUID(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 																  true);
 				}
 				catch( java.sql.SQLException sqle)

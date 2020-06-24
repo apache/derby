@@ -2,6 +2,7 @@
 
    Derby - Class SimpleNetworkClientSample
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -78,6 +79,7 @@ public class SimpleNetworkClientSample
         private static final String DERBY_CLIENT_URL= "jdbc:derby://localhost:"+ NETWORKSERVER_PORT+"/"+DBNAME+";create=true";
 
         // Default to using the Derby Client JDBC Driver for database connections
+//IC see: https://issues.apache.org/jira/browse/DERBY-247
         String url = DERBY_CLIENT_URL;
         String jdbcDataSource = DERBY_CLIENT_DS;
 
@@ -161,8 +163,10 @@ public class SimpleNetworkClientSample
 	public javax.sql.DataSource getClientDataSource(String database, String user, String
 									  password) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Class<?> nsDataSource = Class.forName(jdbcDataSource);
 		DataSource ds = (DataSource) nsDataSource.getConstructor().newInstance();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		// can also include Derby URL attributes along with the database name
 		Class[] methodParams = new Class[] {String.class};
@@ -188,6 +192,7 @@ public class SimpleNetworkClientSample
 		// port on which Network Server is listening
 		methodParams = new Class[] {int.class};
 		Method portnumber = nsDataSource.getMethod("setPortNumber", methodParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		args = new Object[] {1527};
 		portnumber.invoke(ds, args);
 
@@ -209,11 +214,13 @@ public class SimpleNetworkClientSample
 		Properties properties = new java.util.Properties();
 
 		// The user and password properties are a must, required by JCC
+//IC see: https://issues.apache.org/jira/browse/DERBY-4276
 		properties.setProperty("user","derbyuser");
 		properties.setProperty("password","pass");
 
 		// Get database connection  via DriverManager api
 		Connection conn = DriverManager.getConnection(url,properties); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-247
 
 		return conn;
 	}

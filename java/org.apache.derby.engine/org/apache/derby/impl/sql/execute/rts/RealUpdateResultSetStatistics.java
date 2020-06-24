@@ -147,6 +147,7 @@ public class RealUpdateResultSetStatistics
 	 *
 	 */
   public String getNodeName(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
     return "Update";
   }
   
@@ -178,6 +179,7 @@ public class RealUpdateResultSetStatistics
            getRSXplainType(),
            getRSXplainDetails(),
            null,                              // the number of opens
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.indexesUpdated,
            null,                           // lock mode
            this.tableLock?"T":"R",

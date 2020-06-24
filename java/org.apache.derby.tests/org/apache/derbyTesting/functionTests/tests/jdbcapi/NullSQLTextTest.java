@@ -56,6 +56,7 @@ public class NullSQLTextTest extends BaseJDBCTestCase {
      * all tests in this class
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("NullSQLTextTest");
         
         suite.addTest(baseSuite("NullSQLTextTest:embedded"));
@@ -68,6 +69,7 @@ public class NullSQLTextTest extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         
         suite.addTestSuite(NullSQLTextTest.class);
@@ -320,6 +322,7 @@ public class NullSQLTextTest extends BaseJDBCTestCase {
     
     private static String SQLSTATE_SYNTAX_ERROR = "42X01";
     public void testExecuteEmptyString() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5806
         try {
             createStatement().execute("");
             fail("Statement expected to fail");

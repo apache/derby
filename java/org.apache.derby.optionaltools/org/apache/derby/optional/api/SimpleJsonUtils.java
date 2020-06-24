@@ -146,6 +146,7 @@ public abstract class SimpleJsonUtils
      * @throws SQLException on error
      */
     public static JSONArray readArray( Reader reader )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         throws SQLException
     {
         JSONParser  parser = new JSONParser();
@@ -155,6 +156,7 @@ public abstract class SimpleJsonUtils
             obj = parser.parse( reader );
         }
         catch( Throwable t) { throw ToolUtilities.wrap( t ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
         if ( (obj == null) || !(obj instanceof JSONArray) )
         {
@@ -201,7 +203,9 @@ public abstract class SimpleJsonUtils
         try {
             return readArray( new InputStreamReader( inputStream, characterSetName ) );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (UnsupportedEncodingException uee) { throw ToolUtilities.wrap( uee ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         finally
         {
             try {
@@ -240,6 +244,7 @@ public abstract class SimpleJsonUtils
              );
         }
         catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
         return readArrayFromStream( fis, characterSetName );
     }
@@ -273,6 +278,7 @@ public abstract class SimpleJsonUtils
              }
              );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
         
         return readArrayFromStream( inputStream, characterSetName );
@@ -287,6 +293,7 @@ public abstract class SimpleJsonUtils
      */
     public static Clob arrayToClob( JSONArray array )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         if ( array == null ) { return null; }
         else { return new HarmonySerialClob( array.toJSONString() ); }
     }

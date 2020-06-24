@@ -24,6 +24,7 @@ package org.apache.derby.jdbc;
 import javax.sql.DataSource;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    <P>
    This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
    separate datasources for Java 5 and Java 6.
@@ -33,6 +34,7 @@ import javax.sql.DataSource;
    @deprecated Use {@link ClientDataSource} instead.
  */
 public class ClientDataSource40 extends ClientDataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     implements DataSource /* compile-time check for 4.1 extension */
 {
    private static final long serialVersionUID = -3936981157692787843L;

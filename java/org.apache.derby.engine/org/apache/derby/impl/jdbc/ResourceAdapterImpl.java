@@ -67,9 +67,11 @@ public class ResourceAdapterImpl
 		// loaded.
 
         connectionTable = new Hashtable<XAXactId, XATransactionState>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		AccessFactory af = 
 			(AccessFactory)findServiceModule(this, AccessFactory.MODULE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		rm = (XAResourceManager) af.getXAResourceManager();
 
@@ -80,6 +82,7 @@ public class ResourceAdapterImpl
 	{
 		active = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Enumeration<XATransactionState> e = connectionTable.elements();
                 e.hasMoreElements(); ) {
 
@@ -115,6 +118,7 @@ public class ResourceAdapterImpl
 		// put this into the transaction table, if the xid is already
 		// present as an in-doubt transaction, we need to remove it from
 		// the run time list
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         connectionTable.put(xid, (XATransactionState) conn);
 		return true;
 	}
@@ -128,6 +132,7 @@ public class ResourceAdapterImpl
 	/** @see org.apache.derby.iapi.jdbc.ResourceAdapter#cancelXATransaction(XAXactId, String)
 	 */
 	public void cancelXATransaction(XAXactId xid, String messageId)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
 	throws XAException
 	{
 		XATransactionState xaState = (XATransactionState) findConnection(xid);
@@ -150,6 +155,7 @@ public class ResourceAdapterImpl
      * can't call this entry point.
      */
     private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

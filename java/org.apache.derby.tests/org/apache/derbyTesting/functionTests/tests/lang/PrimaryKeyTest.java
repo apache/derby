@@ -36,6 +36,7 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
 		super(name);
 	}
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(PrimaryKeyTest.class);
 	}
 
@@ -276,6 +277,7 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
 	}
 
     public void testDerby5111() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5111
         final Statement s = createStatement();
         s.executeUpdate("create table t1 (t1_id integer not null, " +
                 "t0_id integer not null, value varchar(75) not null)");

@@ -39,6 +39,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 The purpose of this test is to reproduce JIRA DERBY-715:
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3624
 Sometimes a deadlock would be incorrectly reported as a timeout.  The
 bug seemed to always reproduce at least once if the following test
 was run (at least one of the iterations in the loop would get an
@@ -51,6 +52,7 @@ public class st_derby715 extends BaseJDBCTestCase {
     private List<Throwable> errors;
 
     public st_derby715(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         super(name);
     }
 
@@ -160,6 +162,7 @@ public class st_derby715 extends BaseJDBCTestCase {
             // Wait till the other thread has completed reading and is ready
             // to insert a row.
             barrier.await();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3624
 
             println(id + " before inserting into " + writeTable);
             stmt.execute("insert into " + writeTable + " values (1)");

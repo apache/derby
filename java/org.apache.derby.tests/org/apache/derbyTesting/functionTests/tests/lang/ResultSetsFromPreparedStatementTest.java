@@ -419,8 +419,10 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      * @return whether the table is locked exclusively
      */
     private boolean hasTableXLock(String table) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
         PreparedStatement ps = prepareStatement(
             "select count(*) from syscs_diag.lock_table where tablename=? " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
             "and CAST(type AS CHAR(5))='TABLE' and CAST(mode AS CHAR(1))='X'");
         ps.setString(1, table);
         ResultSet rs = ps.executeQuery();
@@ -462,6 +464,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         try { s.executeUpdate("drop table dept"); } catch (SQLException e) {}
 
         // DERBY-4330 tables:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4330
         try {
             if (c3 != null && !c3.isClosed()) {
                 c3.rollback();
@@ -470,6 +473,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         } catch (SQLException e) {
         }
         c3 = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5709
 
         try { s.executeUpdate(
                 "drop table APP.FILECHANGES"); } catch (SQLException e) {}
@@ -499,6 +503,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite
             ("Create ResultSets from PreparedStatements");
         suite.addTestSuite(ResultSetsFromPreparedStatementTest.class);
@@ -598,6 +603,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             ("values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY"+
              "('some.property.name')");
         for (int i = 0; i < 20; ++i) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             final Integer I = i;
             cs.setObject(2, I);
             cs.execute();
@@ -815,6 +821,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         };
 
         for (int i = 0; i < expected.length; ++i) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             tst.setString(1, Integer.toString(i) +"_");
             ResultSet rs = tst.executeQuery();
             assertResultSet("?="+i+"_", expected[i], rs);
@@ -893,9 +900,11 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             {{ null }}
         };
         for (int i = 0; i < expected.length; ++i) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             tst.setString(1,Integer.toString(i) +"_");
             ResultSet rs = tst.executeQuery();
             JDBC.assertUnorderedResultSet(rs, expected[i], false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
 
             // Re-execute tst with the same parameters
             rs = tst.executeQuery();
@@ -1028,6 +1037,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                                                        PreparedStatement del)
             throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         final Integer i0 = 0;
         Object[][][][] expected = new Object[][][][] {
             {
@@ -1627,6 +1637,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      * level between executions.
      */
     public void testUpdateResultSetWithIsolation() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
         createTestTable("dept", DS, "dept_data");
         commit();
         PreparedStatement ps = prepareStatement("update dept set c0 = c0");
@@ -2136,6 +2147,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      * from a table select.
      */
     public void testSetMaxRowsTable()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3397
             throws SQLException {
         createTestTable("emp", ES+","+DNO+")", "emp_data");
         PreparedStatement ps = prepareStatement("select * from emp_data",
@@ -2278,6 +2290,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
 
 
     public void testDerby4330_JoinResultSet()  throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4330
         setTimeout(1);
         setSchema("APP");
         createDerby4330_join_tables();

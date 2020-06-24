@@ -128,6 +128,7 @@ public class Sttest extends Thread {
 		// get any properties user may have set in Sttest.properties file
 		// these will override any of those set above
 		userProperties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Class<?> clazz = Class.forName(driver);
         clazz.getConstructor().newInstance();
 		if (Setup.doit(dbURL) == false)
@@ -176,6 +177,7 @@ public class Sttest extends Thread {
 	InterruptedException, Exception, Throwable {
 		rand = new Random();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2312
 		Datatypes.Rn = rand;
 		// harder to actually delete rows when there are
 		// more connections, so repeat operation more often
@@ -346,6 +348,7 @@ public class Sttest extends Thread {
 					}
 					MemCheck.showmem();
 					// compress 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4213
 					try {
 						compress(conn);
 					} catch  (Exception e) {
@@ -375,6 +378,7 @@ public class Sttest extends Thread {
 					int addrows = 0;
 					for (int i = 0; i <= ind2; i++) {
 						Datatypes.add_one_row(conn, thread_id);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2312
 						addrows++;
 						conn.commit();
 						if (mode == INIT) {
@@ -390,6 +394,7 @@ public class Sttest extends Thread {
 					int updaterow = 0;
 					for (int i = 0; i <= ind2; i++) {
 						Datatypes.update_one_row(conn, thread_id);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2312
 						updaterow++;
 						conn.commit();
 						yield();
@@ -444,6 +449,7 @@ public class Sttest extends Thread {
 					e.printStackTrace();
 				}
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2312
 		}// end while
 		try {
 			conn.close();
@@ -487,6 +493,7 @@ public class Sttest extends Thread {
 		System.out.println("compressing table");
 		boolean autocom = conn.getAutoCommit();
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4213
 			conn.setAutoCommit(true);
 			CallableStatement cs = conn.prepareCall(
 				"CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?, ?, ?, ?, ?)");

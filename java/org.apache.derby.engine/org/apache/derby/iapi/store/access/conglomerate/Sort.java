@@ -59,6 +59,7 @@ public interface Sort
     @exception StandardException Standard exception policy.
 	**/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	ScanManager openSortScan(
     TransactionManager  tran,
     boolean             hold)

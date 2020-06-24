@@ -811,6 +811,7 @@ public  class   DBMDWrapper implements OptionalTool
     private Object  getDummyValue( Class type )
     {
         if ( String.class == type ) { return ""; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         else if ( Integer.TYPE == type ) { return 1; }
         else if ( Short.TYPE == type ) { return (short) 1; }
         else if ( Boolean.TYPE == type ) { return Boolean.TRUE; }

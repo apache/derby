@@ -75,6 +75,7 @@ public class SortBufferScan extends SortScan
                 "next() called on scan after scan was closed.");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6322
         current = sortBuffer.removeFirst();
         return current != null;
     }

@@ -26,10 +26,12 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.ClientAutoloadedDriver;
 import org.apache.derby.client.ClientPooledConnection;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetCallableStatement extends NetPreparedStatement
         implements MaterialPreparedStatement {
 
     ClientCallableStatement callableStatement_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     //-----------------------------state------------------------------------------
 
@@ -71,7 +73,9 @@ class NetCallableStatement extends NetPreparedStatement
                          int type,
                          int concurrency,
                          int holdability,
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                          ClientPooledConnection cpc) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         this(ClientAutoloadedDriver.getFactory().newCallableStatement(netAgent,
                 netConnection, sql, type, concurrency, holdability,cpc),
                 netAgent,

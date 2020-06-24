@@ -76,6 +76,7 @@ public class SimpleDiff
     {
 
         Vector<String> vec = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         String aLine = "";
         //int count = 0;
@@ -123,6 +124,7 @@ public class SimpleDiff
         int currentLine1 = 0;
         int currentLine2 = 0;
         Vector<String> returnVec = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         while ( file1.isValidOffset(currentLine1) &&
                 file2.isValidOffset(currentLine2))
@@ -256,6 +258,7 @@ public class SimpleDiff
         file1.close();
         file2.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (returnVec.isEmpty())
         {
             return null;
@@ -366,6 +369,7 @@ public class SimpleDiff
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     class DiffBuffer extends Vector<String>
     {
 

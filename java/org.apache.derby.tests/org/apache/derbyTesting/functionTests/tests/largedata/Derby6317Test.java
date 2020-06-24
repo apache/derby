@@ -277,6 +277,9 @@ Source result set:
 					Scan type=btree
 					Tree height=3
 					start position:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 						&gt;= on first 1 column(s).
 						Ordered null semantics on the following columns: 
 						0 
@@ -314,6 +317,7 @@ public class Derby6317Test extends BaseJDBCTestCase
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Derby6317Test");
         suite.addTest(baseSuite("Derby6317Test:embedded"));
         return suite;
@@ -434,6 +438,7 @@ public class Derby6317Test extends BaseJDBCTestCase
 
     protected static Test baseSuite(String name) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby6317Test.class);
         return new CleanDatabaseTestSetup(suite)

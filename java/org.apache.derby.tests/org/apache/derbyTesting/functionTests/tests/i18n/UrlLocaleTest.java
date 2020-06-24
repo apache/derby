@@ -56,6 +56,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         // Reregister driver for any subsequent tests
         String driverClass =
                 TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(driverClass);
         clazz.getConstructor().newInstance();
     }
@@ -70,6 +71,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         s.executeUpdate("call checkRDefaultLoc()");
         
             // create a swiss database
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         String url = getReadWriteJDBCURL("swissdb");
         url += ";create=true;territory=fr_CH";
         Connection locConn = DriverManager.getConnection(url);
@@ -81,6 +83,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         
         //-- create a Hindi in India database (hi_IN)
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         url = getReadWriteJDBCURL("hindi");
         url += ";create=true;territory=hi_IN";
         locConn = DriverManager.getConnection(url);
@@ -91,6 +94,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         locConn.close();
        //- now try one with a variant
        // -- create a English in Israel database for JavaOS en_IL_JavaOS
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         url = getReadWriteJDBCURL("Israel");
         url += ";create=true;territory=en_IL_JavaOS";
         locConn = DriverManager.getConnection(url);
@@ -102,6 +106,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         
         // now try with just a language - we support this
         // as some vms do.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         url = getReadWriteJDBCURL("bacon");
         url += ";create=true;territory=da";
         locConn = DriverManager.getConnection(url);
@@ -120,8 +125,10 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
      */
     public void testUrlLocaleNegative() throws SQLException {
         //Connection without territory specified in territory attribute        
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
         String url = getReadWriteJDBCURL("fail1");
         url += ";create=true;territory=";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
         checkInvalidTerritoryFormat(url);
         //- database will not have been created so this connection will fail
         url = getReadWriteJDBCURL("fail1");
@@ -132,6 +139,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
             assertSQLState("XJ004", se);
           }
         //Invalid territory specification
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
         checkInvalidTerritoryFormat("en_");
         checkInvalidTerritoryFormat("en_d");
         checkInvalidTerritoryFormat("en-US");
@@ -192,6 +200,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         //create a database with a locale that has a small
         // number of messages. Missing ones will default to
         // the locale of the default locale: German;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
         String url = getReadWriteJDBCURL("qqPPdb");
         url += ";create=true;territory=qq_PP_testOnly";
         Connection locConn = DriverManager.getConnection(url);
@@ -211,6 +220,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         // Expect WARNING to be in German (default) because there is no 
         //qq_PP message. Index is a duplicate
         s.executeUpdate("create index i2_b on t2(i)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
         SQLWarning sqlw = s.getWarnings();
         assertSQLState("01504", sqlw);
         assertTrue("Expected German warning with Duplikat", 
@@ -265,6 +275,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
   
     private void checkInvalidTerritoryFormat(String territory) {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
             String url = getReadWriteJDBCURL("fail3");
             url += ";create=true;territory=" + territory;
             DriverManager.getConnection(url);
@@ -282,6 +293,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
      */
     private static String getReadWriteJDBCURL(String dbname)
    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         return TestConfiguration.getCurrent().
         getJDBCUrl(SupportFilesSetup.getReadWriteFileName(dbname));
     }
@@ -300,6 +312,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
                     "style java language java external name " +
                     "'org.apache.derbyTesting.functionTests.tests.i18n." +
                     "DefaultLocale.checkRDefaultLocale'");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
         s.executeUpdate("create procedure checkDefaultLoc() parameter " +
                 "style java language java external name " +
                 "'org.apache.derbyTesting.functionTests.tests.i18n." +
@@ -307,8 +320,10 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite();
         suite.addTestSuite(UrlLocaleTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6255
         suite.addTest(new LocaleTestSetup(
                 new UrlLocaleTest("messageLocale_unknown"),
                 new Locale("rr", "TT")));

@@ -403,6 +403,7 @@ public final class AccessTest extends BaseJDBCTestCase {
 
 
             if (expPages != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4540
                 assertTrue(
                         "RuntimeStatisticsParser.findstring(Number of pages visited= "
                         + expPages + ") returned false" +
@@ -1041,6 +1042,7 @@ public final class AccessTest extends BaseJDBCTestCase {
         expRS = new String [][]{{"20"}};
         JDBC.assertFullResultSet(rs, expRS, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4523
         st.executeUpdate("drop table long1");
         st.executeUpdate("drop table long2");
     }
@@ -1572,6 +1574,7 @@ public final class AccessTest extends BaseJDBCTestCase {
 
         checkSpaceTable(st, "5");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4523
         st.executeUpdate("drop table a");
     }
     
@@ -1859,6 +1862,7 @@ public final class AccessTest extends BaseJDBCTestCase {
     public void testQualifiers() throws Exception
     {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4523
 
         ResultSet rs = null;
         Statement st = createStatement();

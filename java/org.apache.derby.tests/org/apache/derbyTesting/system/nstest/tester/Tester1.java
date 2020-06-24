@@ -58,6 +58,7 @@ public class Tester1 extends TesterObject {
 		// this connection will remain open forever.
 		connex = getConnection();
 		if (connex == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println("FAIL: " + getThread_id()
 					+ " could not get the database connection");
 			return; // quit
@@ -68,12 +69,14 @@ public class Tester1 extends TesterObject {
 		try {
 			connex.setAutoCommit(false);
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println("FAIL: " + getThread_id()
 					+ "'s setAutoCommit() failed:");
 			printException("setting AutoCommit", e);
 
             // if you can't change the autocommit state, the connection is unusable.
             // get out of here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
             return;
 		}
 
@@ -99,6 +102,7 @@ public class Tester1 extends TesterObject {
 			case 0: // do a select operation
 				try {
 					int numSelected = doSelectOperation(NsTest.MAX_LOW_STRESS_ROWS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 					NsTest.logger.println(getThread_id() + " selected "
 							+ numSelected + " rows");
 				} catch (Exception e) {
@@ -110,6 +114,7 @@ public class Tester1 extends TesterObject {
 					else { e.printStackTrace( NsTest.logger ); }
 
                     // if the connection is dead, there's no point in hanging around
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                     if ( NsTest.deadConnection( e ) ) { return; }
 				}
 				break;
@@ -119,6 +124,7 @@ public class Tester1 extends TesterObject {
 			case 3: // do Insert/Update/Delete operations
 				for (int j = 0; j < NsTest.MAX_LOW_STRESS_ROWS; j++) {
 					doIUDOperation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                     if ( deadConnection() ) { return; }
 				}
 				break;
@@ -131,12 +137,14 @@ public class Tester1 extends TesterObject {
 			try {
 				connex.commit();
 			} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger
 						.println("FAIL: " + getThread_id() + "'s commit() failed:");
 				printException("committing Xn in Tester1", e);
 
                 // if you can't commit, the connection is unusable.
                 // get out of here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                 return;
 			}
 		}// end of for (int i=0;...)
@@ -144,6 +152,7 @@ public class Tester1 extends TesterObject {
 		// close the connection before the thread terminates
 		closeConnection();
 		NsTest.logger.println("Thread " + getThread_id()+ " is now terminating");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 	}//end of startTesting()
 

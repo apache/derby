@@ -88,6 +88,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.defaultSuite(
             AnsiSignaturesTest.class);
 
@@ -104,6 +105,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         throws Exception
     {
         declareAndRunFunction
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
             ( "boolean_boolean_boolean", "boolean", new String[] { "boolean" }, "true", "true" );
     }
     public  void    test_boolean_Boolean_boolean()
@@ -391,6 +393,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
 
         declareAndRunFunction
             ( "clob_Clob_String", "clob", new String[] { "varchar( 10 )" }, "'3'", "3" );
@@ -463,6 +466,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
 
     public  void    test_boolean_badreturn_byte_int()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4657
         throws Exception
     {
         declareAndFailFunction
@@ -532,6 +536,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
 
     public  void    test_boolean_amb_boolean_boolean()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         throws Exception
     {
         declareAndFailFunction
@@ -647,6 +652,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
 
     public  void    test_boolean_unres_boolean()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         throws Exception
     {
         declareAndFailFunction
@@ -732,6 +738,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
 
     public  void    test_wrapperOutputArgs()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4958
         throws Exception
     {
         Connection  conn = getConnection();
@@ -900,6 +907,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
      * Prepare a statement and report its sql text.
      */
     protected PreparedStatement   chattyPrepare( Connection conn, String text )
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         throws SQLException
     {
         println( "Preparing statement:\n\t" + text );

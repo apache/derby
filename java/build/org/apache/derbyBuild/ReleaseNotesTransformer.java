@@ -67,6 +67,7 @@ public class ReleaseNotesTransformer extends Task
         "  (the \"License\"); you may not use this file except in compliance with\n" +
         "  the License.  You may obtain a copy of the License at\n" +
         "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-7010
         "      https://www.apache.org/licenses/LICENSE-2.0\n" +
         "\n" +
         "  Unless required by applicable law or agreed to in writing, software\n" +
@@ -80,17 +81,20 @@ public class ReleaseNotesTransformer extends Task
         "<body>\n" +
         "\n" +
         "    <h1>Distributions</h1>\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-7010
         "    <p>Use the links below to download a distribution of Apache Derby. You should <b>always</b> <a href=\"#Verifying+Releases\">verify the integrity</a>\n" +
         "       of distribution files downloaded from a mirror.</p>\n" +
         "\n" +
         "<p>You are currently using <strong>[preferred]</strong>. If you encounter a\n" +
         "problem with this mirror, then please select another.  If all\n" +
         "mirrors are failing, there are backup mirrors at the end of the list.\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-7010
         "See <a href=\"https://www.apache.org/mirrors/\">status</a> of mirrors.\n" +
         "</p>\n" +
         "\n" +
         "<form action=\"[location]\" method=\"get\" id=\"SelectMirror\">\n" +
         "Other mirrors: <select name=\"Preferred\">\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6875
         "[if-any http] [for http]\n" +
         "<option value=\"[http]\">[http]</option>\n" +
         "[end] [end]\n" +
@@ -112,6 +116,7 @@ public class ReleaseNotesTransformer extends Task
         "      <li>lib-debug distribution - contains jar files for Derby with source line numbers.</li>\n" +
         "      <li>src distribution - contains the Derby source tree at the point which the binaries were built.</li>\n" +
         "    </ul>\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-7010
         "    <p> <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-bin.zip\">db-derby-{0}-bin.zip</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.zip.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.zip.sha512\">SHA-512</a>]<br/>\n" +
         "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz\">db-derby-{0}-bin.tar.gz</a> [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz.asc\">PGP</a>] [<a href=\"https://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-bin.tar.gz.sha512\">SHA-512</a>]</p>\n" +
         "    \n" +
@@ -188,6 +193,7 @@ public class ReleaseNotesTransformer extends Task
      */
     public void setCliXconfFileName(String cliXconfFileName) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4855
         _cliXconfFileName = cliXconfFileName;
         _cliXconfFile = new File(_cliXconfFileName);
 
@@ -214,6 +220,7 @@ public class ReleaseNotesTransformer extends Task
             printOutput();
             postProcess();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4855
             wireIntoBuild();
         }
         catch (Throwable t) {
@@ -409,6 +416,7 @@ public class ReleaseNotesTransformer extends Task
         rawString = fullReplaceToken( rawString, "<hr>", "<hr/>" );
 
         // Forrest doesn't like square brackets and swallows the bracketed content
+//IC see: https://issues.apache.org/jira/browse/DERBY-5009
         rawString = rawString.replace( '[', '(' );
         rawString = rawString.replace( ']', ')' );
 
@@ -490,6 +498,7 @@ public class ReleaseNotesTransformer extends Task
      * </p>
      */
     private void wireIntoBuild()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4855
         throws Exception
     {
         String contents = readFileIntoString( _cliXconfFile );

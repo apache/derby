@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BooleanConstantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -41,6 +42,8 @@ public final class BooleanConstantNode extends ConstantNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BooleanConstantNode(ContextManager cm) throws StandardException {
 		/*
 		** RESOLVE: The length is fixed at 1, even for nulls.
@@ -188,6 +191,8 @@ public final class BooleanConstantNode extends ConstantNode
 
 		booleanValue = !booleanValue;
 		super.setValue(new SQLBoolean(booleanValue));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		return this;
 	}
@@ -209,6 +214,8 @@ public final class BooleanConstantNode extends ConstantNode
 	 * Set the value in this ConstantNode.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setValue(DataValueDescriptor value)
 	{
 		super.setValue( value);

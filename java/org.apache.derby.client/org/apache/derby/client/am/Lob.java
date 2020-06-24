@@ -78,6 +78,7 @@ public abstract class Lob implements UnitOfWorkListener {
     private int transactionID_;
 
     //-----------------------------messageId------------------------------------------
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final static private ClientMessageId LOB_OBJECT_LENGTH_UNKNOWN_YET =
         new ClientMessageId( SQLState.LOB_OBJECT_LENGTH_UNKNOWN_YET );
     
@@ -108,9 +109,11 @@ public abstract class Lob implements UnitOfWorkListener {
     {
         if (lengthObtained_) return sqlLength_;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         if (isLocator()) {
             sqlLength_ = getLocatorLength();
             lengthObtained_ = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         } else if (willBeLayerBStreamed()) {
             throw new SqlException(agent_.logWriter_,
                                    LOB_OBJECT_LENGTH_UNKNOWN_YET);
@@ -142,6 +145,7 @@ public abstract class Lob implements UnitOfWorkListener {
      * 
      * @return length of Lob
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
     long getLocatorLength() throws SqlException
     {
         return -1;
@@ -151,6 +155,9 @@ public abstract class Lob implements UnitOfWorkListener {
     //-----------------------event callback methods-------------------------------
 
     public void listenToUnitOfWork() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
+//IC see: https://issues.apache.org/jira/browse/DERBY-557
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         agent_.connection_.CommitAndRollbackListeners_.put(this,null);
     }
 
@@ -201,8 +208,10 @@ public abstract class Lob implements UnitOfWorkListener {
      *      while reading from the stream
      */
     protected InputStream materializeStream(InputStream is, String typeDesc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SqlException {
         final int GROWBY = 32 * 1024; // 32 KB
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> byteArrays = new ArrayList<byte[]>();
         byte[] curBytes = new byte[GROWBY];
         int totalLength = 0;
@@ -221,6 +230,7 @@ public abstract class Lob implements UnitOfWorkListener {
                         curBytes = new byte[GROWBY];
                     }
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
                 if (partLength > 0) {
                     totalLength += partLength;
                 }
@@ -235,6 +245,7 @@ public abstract class Lob implements UnitOfWorkListener {
                                 typeDesc
                         );
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             if (partLength > 0) {
                 byteArrays.add(curBytes);
             }
@@ -250,6 +261,8 @@ public abstract class Lob implements UnitOfWorkListener {
             throw new SqlException(null,
                         new ClientMessageId(
                             SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3913
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                             ioe,
                             typeDesc
                     );
@@ -282,6 +295,7 @@ public abstract class Lob implements UnitOfWorkListener {
      * @return true if Lob is based on locator, false otherwise
      */
     public boolean isLocator() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         return ((dataType_ & LOCATOR) == LOCATOR);
     }
 
@@ -311,6 +325,7 @@ public abstract class Lob implements UnitOfWorkListener {
         if (pos <= 0) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.BLOB_BAD_POSITION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 pos).getSQLException();
         }
         if (length < 0) {
@@ -318,6 +333,7 @@ public abstract class Lob implements UnitOfWorkListener {
                 new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
                 length).getSQLException();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
         if (length > (this.length() - (pos -1))) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.POS_AND_LENGTH_GREATER_THAN_LOB),
@@ -344,6 +360,7 @@ public abstract class Lob implements UnitOfWorkListener {
      * depend on updateCount for invalidation
      */
     protected synchronized void incrementUpdateCount() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
         updateCount++;
     }
     
@@ -387,7 +404,10 @@ public abstract class Lob implements UnitOfWorkListener {
             throw se.getSQLException();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4312
+//IC see: https://issues.apache.org/jira/browse/DERBY-4224
         if(!isValid_ || (isLocator()  && 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 (transactionID_ != agent_.connection_.getTransactionID())))
             throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
                                                   .getSQLException();

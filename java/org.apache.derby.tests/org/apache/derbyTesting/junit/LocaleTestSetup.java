@@ -44,6 +44,7 @@ public class LocaleTestSetup extends TestSetup {
 	 * Set up the new locale for the test
 	 */
 	protected void setUp() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         setDefaultLocale(newLocale);
 	}
 	

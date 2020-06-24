@@ -47,6 +47,7 @@ public final class MadhareTest extends BaseJDBCTestCase {
       public static Test suite()
       {
         //Add the test case into the test suite
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("MadhareTest Test");
         return TestConfiguration.defaultSuite(MadhareTest.class);
       }
@@ -57,6 +58,7 @@ public final class MadhareTest extends BaseJDBCTestCase {
 
         Statement st = createStatement();
         st.executeUpdate("create table t( i int )");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5127
 
         st.executeUpdate("insert into t(i) values (1956)");
 

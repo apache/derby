@@ -64,6 +64,7 @@ import java.io.IOException;
  * Method Builder implementation for generating bytecode.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 class BCMethod implements MethodBuilder {
     
     /**
@@ -89,6 +90,8 @@ class BCMethod implements MethodBuilder {
      * Fast access for the parametes, will be null
      * if the method has no parameters.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	BCLocalField[] parameters; 
     
     /**
@@ -99,7 +102,9 @@ class BCMethod implements MethodBuilder {
     
     
 	Vector<String> thrownExceptions; // expected to be names of Classes under Throwable
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 	CodeChunk myCode;
 	protected ClassMember myEntry;
 
@@ -127,6 +132,7 @@ class BCMethod implements MethodBuilder {
 
 		this.cb = (BCClass) cb;
 		modClass = this.cb.modify();
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		myReturnType = returnType;
 		myName = methodName;
 
@@ -140,6 +146,8 @@ class BCMethod implements MethodBuilder {
 
 		String[] vmParamterTypes;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (parms != null && parms.length != 0) {
 			int len = parms.length;
 			vmParamterTypes = new String[len];
@@ -165,6 +173,8 @@ class BCMethod implements MethodBuilder {
 		// get code chunk
 		myCode = new CodeChunk(this.cb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
         parameterTypes = parms;
 	}
 	//
@@ -177,6 +187,7 @@ class BCMethod implements MethodBuilder {
 	 * overflowing to. Those sub-methods are hidden from any caller.
 	 */
 	public String getName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		return myName;
 	}
 
@@ -202,6 +213,7 @@ class BCMethod implements MethodBuilder {
 		// Allowing this would cause the method overflow/split to
 		// break as the top-level method would not have the exception
 		// added in the sub method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		if (SanityManager.DEBUG)
 		{
 			if (myCode.getPC() != 0)
@@ -210,7 +222,9 @@ class BCMethod implements MethodBuilder {
 		}
 
 		if (thrownExceptions == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			thrownExceptions = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		thrownExceptions.add(exceptionClass);
 	}
 
@@ -230,7 +244,11 @@ class BCMethod implements MethodBuilder {
         // the last instruction. Note this value can
         // be changed by the splitMethod call.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-766
         if (myCode.getPC() > CODE_SPLIT_LENGTH)
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
             splitMethod();
                          
        // write exceptions attribute info
@@ -238,6 +256,7 @@ class BCMethod implements MethodBuilder {
         	
 		// get the code attribute to put itself into the class
 		// provide the final header information needed
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		myCode.complete(this, modClass, myEntry, maxStack, currentVarNum);
 	}
     
@@ -358,6 +377,7 @@ class BCMethod implements MethodBuilder {
 
 				for (int i = 0; i < numExc; i++) {
 					// put each exception into the constant pool
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 					String e = thrownExceptions.get(i).toString();
 					int ei2 = modClass.addClassReference(e);
 
@@ -443,6 +463,7 @@ class BCMethod implements MethodBuilder {
 	
 	private Type[] copyStack()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		Type[] stack = new Type[stackTypeOffset];
 		System.arraycopy(stackTypes, 0, stack, 0, stackTypeOffset);
 		return stack;
@@ -537,6 +558,8 @@ class BCMethod implements MethodBuilder {
 			int cpe = modClass.addConstant(value);
 			addInstrCPE(VMOpcode.LDC, cpe);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-766
 		growStack(type.width(), type);
 		
 	}
@@ -590,6 +613,8 @@ class BCMethod implements MethodBuilder {
 		else 
 		{
 			int cpe = modClass.addConstant(value);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			addInstrCPE(VMOpcode.LDC, cpe);
 		}
 		growStack(1, Type.FLOAT);
@@ -609,6 +634,10 @@ class BCMethod implements MethodBuilder {
 	}
 	public void push(String value) {
 		int cpe = modClass.addConstant(value);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		addInstrCPE(VMOpcode.LDC, cpe);
 		growStack(1, Type.STRING);
 	}
@@ -733,8 +762,12 @@ class BCMethod implements MethodBuilder {
 		int rw = rt.width();
 		if (rw != 0)
 			growStack(rw, rt);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
             overflowMethodCheck();
 		}
 		// Check the declared type of the method
@@ -796,6 +829,7 @@ class BCMethod implements MethodBuilder {
 		// classes to check relationships or any other
 		// information. Thus other optimizations where a cast
 		// is not required are not implemented.
+//IC see: https://issues.apache.org/jira/browse/DERBY-740
 		Type tbc = stackTypes[stackTypeOffset - 1];
 		
 		short sourceType = tbc.vmType();
@@ -935,12 +969,15 @@ class BCMethod implements MethodBuilder {
 		word
 		</PRE>
 		word2,word1 -&gt; word2, word1, word2
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		So that we are left with word after the put.
 
 	*/
 	public void putField(LocalField field) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		BCLocalField lf = (BCLocalField) field;
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		putField(lf.type, lf.cpi, true);
 	}
 
@@ -952,6 +989,7 @@ class BCMethod implements MethodBuilder {
 		Type ft = cb.factory.type(fieldType);
 		int cpi = modClass.addFieldReference(cb.classType.vmNameSimple, fieldName, ft.vmName());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		putField(ft, cpi, true);
 	}
 
@@ -1036,12 +1074,14 @@ class BCMethod implements MethodBuilder {
 		// 'if' so that we can set up the 'else' block with the
 		// correct stack on entry.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		condition = new Conditional(condition, myCode, opcode, copyStack());
 	}
 
 	public void startElseCode() {
 		
 		// start the else code
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		Type[] entryStack = condition.startElse(this, myCode, copyStack());
 		
 		for (int i = stackDepth = 0; i  < entryStack.length; i++)
@@ -1052,10 +1092,12 @@ class BCMethod implements MethodBuilder {
 
 	}
 	public void completeConditional() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		condition = condition.end(this, myCode, stackTypes, stackTypeOffset);
 	}
 	
 	public void pop() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		if (SanityManager.DEBUG) {
 			if (stackDepth == 0)
 				SanityManager.THROWASSERT("pop when stack is empty!");
@@ -1064,6 +1106,7 @@ class BCMethod implements MethodBuilder {
 
 		myCode.addInstr(toPop.width() == 2  ? VMOpcode.POP2 : VMOpcode.POP);
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
         overflowMethodCheck();
 	}	
 
@@ -1139,6 +1182,7 @@ class BCMethod implements MethodBuilder {
 	/**
 		Create an array instance
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		Stack ... =&gt;
 		      ...,arrayref
 	*/
@@ -1189,6 +1233,8 @@ class BCMethod implements MethodBuilder {
      */
     private void addInstrCPE(short opcode, int cpe)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
         if (cpe >= VMOpcode.MAX_CONSTANT_POOL_ENTRIES)
             cb.addLimitExceeded(this, "constant_pool_count",
                     VMOpcode.MAX_CONSTANT_POOL_ENTRIES, cpe);
@@ -1228,6 +1274,7 @@ class BCMethod implements MethodBuilder {
 	 * <CODE>
 	 public Object e23()
 	 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 	   ... existing code
 	   // split point
 	   return e23_0();
@@ -1262,6 +1309,7 @@ class BCMethod implements MethodBuilder {
 	 */
 	private void overflowMethodCheck()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
         if (stackDepth != 0) {
             // Can only overflow to new method if the stack is empty.
             return;
@@ -1294,6 +1342,8 @@ class BCMethod implements MethodBuilder {
 				return;
 		}
         		
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		BCMethod subMethod = getNewSubMethod(myReturnType, false);
 				
 		// stop any recursion
@@ -1340,6 +1390,8 @@ class BCMethod implements MethodBuilder {
      *            define it with no parameters.
      * @return A valid empty sub method.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
     final BCMethod getNewSubMethod(String returnType, boolean withParameters) {
         int modifiers = myEntry.getModifier();
 

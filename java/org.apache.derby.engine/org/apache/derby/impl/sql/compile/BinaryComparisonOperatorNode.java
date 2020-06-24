@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BinaryComparisonOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -64,6 +65,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
      * @param cm            The context manager
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BinaryComparisonOperatorNode(
                 ValueNode   leftOperand,
                 ValueNode   rightOperand,
@@ -87,6 +90,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 * normal comparability checks.
 	 * @param val  true if this was for a query rewrite
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setForQueryRewrite(boolean val)
 	{
 		forQueryRewrite=val;
@@ -136,6 +141,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -158,6 +164,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		{
 			DataTypeDescriptor rightTypeServices = rightOperand.getTypeServices();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             rightOperand = new CastNode(
 					rightOperand, 
 					new DataTypeDescriptor(
@@ -171,6 +179,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		{
 			DataTypeDescriptor leftTypeServices = leftOperand.getTypeServices();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             leftOperand = new CastNode(
 					leftOperand, 
 					new DataTypeDescriptor(
@@ -195,6 +205,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindComparisonOperator()
 			throws StandardException
 	{
@@ -207,6 +219,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		boolean forEquals = operator.equals("=") || operator.equals("<>");
 
         boolean cmp = leftOperand.getTypeServices().comparable(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2569
         		rightOperand.getTypeServices(),
 				forEquals,
 				getClassFactory());
@@ -214,6 +227,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		// optimizer.  We will assume Mr. Optimizer knows what he is doing.
           if (!cmp && !forQueryRewrite) {
 			throw StandardException.newException(SQLState.LANG_NOT_COMPARABLE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2668
 					leftOperand.getTypeServices().getSQLTypeNameWithCollation() ,
 					rightOperand.getTypeServices().getSQLTypeNameWithCollation());
 				
@@ -250,6 +264,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -333,6 +349,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4412
 	abstract BinaryOperatorNode getNegation(ValueNode leftOperand,
 										  ValueNode rightOperand)
 				throws StandardException;
@@ -385,6 +402,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
@@ -402,6 +421,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	
 	/** @see BinaryOperatorNode#genSQLJavaSQLTree */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode genSQLJavaSQLTree() throws StandardException
 	{
 		TypeId leftTypeId = leftOperand.getTypeId();
@@ -409,8 +430,10 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		/* If I have Java types, I need only add java->sql->java if the types
 		 * are not comparable 
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (leftTypeId.userType())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2569
 			if (leftOperand.getTypeServices().comparable(leftOperand.getTypeServices(),
 					false, getClassFactory()))
 				return this;
@@ -420,8 +443,10 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 
 		TypeId rightTypeId = rightOperand.getTypeId();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (rightTypeId.userType())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2569
 			if (rightOperand.getTypeServices().comparable(rightOperand.getTypeServices(),
 					false, getClassFactory()))
 				return this;

@@ -39,6 +39,7 @@ public class Derby5158Test extends BaseJDBCTestCase
     protected static Test makeSuite(String name)
     {
         BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Test cst = TestConfiguration.defaultSuite(Derby5158Test.class);
 

@@ -31,6 +31,7 @@ import org.apache.derby.iapi.store.raw.ContainerKey;
 */
 
 abstract class ContainerActionOnCommit implements DerbyObserver {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 	protected ContainerKey identity;
 

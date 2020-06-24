@@ -51,6 +51,7 @@ import java.util.Properties;
 * Used to save heapId, name pairs for non core tables.
 *
 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 class TabInfoImpl
 {
     /**
@@ -72,6 +73,7 @@ class TabInfoImpl
 	 *
 	 * @param crf				the associated CatalogRowFactory
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 	TabInfoImpl(CatalogRowFactory crf)
 	{
 		this.heapConglomerate = -1;
@@ -98,6 +100,7 @@ class TabInfoImpl
      *
      * @return long     The conglomerate for the heap.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	long getHeapConglomerate()
 	{
 		return heapConglomerate;
@@ -142,6 +145,7 @@ class TabInfoImpl
      * @param index             Index number for index for table
      * @param indexConglomerate The conglomerate for that index
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	void setIndexConglomerate(int index, long indexConglomerate)
 	{
 		/* Index names must be set before conglomerates.
@@ -169,6 +173,7 @@ class TabInfoImpl
      * @param cd    The ConglomerateDescriptor for one of the index
      *              for this table.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
     void setIndexConglomerate(ConglomerateDescriptor cd)
 	{
 		int		index;
@@ -218,8 +223,10 @@ class TabInfoImpl
      *
      * @return String   The table name.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	String getTableName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 		return crf.getCatalogName();
 	}
 
@@ -294,6 +301,7 @@ class TabInfoImpl
      *
      * @return IndexRowGenerator    The IRG for the specified index number.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	IndexRowGenerator getIndexRowGenerator(int indexNumber)
 	{
 		if (SanityManager.DEBUG)
@@ -316,6 +324,7 @@ class TabInfoImpl
      * @param indexNumber   The index number.
      * @param irg           The IndexRowGenerator for the specified index number.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	void setIndexRowGenerator(int indexNumber, IndexRowGenerator irg)
 	{
 		if (SanityManager.DEBUG)
@@ -417,6 +426,9 @@ class TabInfoImpl
 
 		RowLocation[] 			notUsed = new RowLocation[1]; 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
 		return insertRowListImpl(new ExecRow[] {row},tc,notUsed);
 	}
 
@@ -438,12 +450,16 @@ class TabInfoImpl
 	{
 		RowLocation[] 			notUsed = new RowLocation[1]; 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
 		return insertRowListImpl(rowList,tc,notUsed);
 	}
 
 	/**
 	  Insert logic to insert a list of rows into a table. This logic has two
 	  odd features.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 
 	  <OL>
 	  <LI>Returns an indication if any returned row was a duplicate.
@@ -457,6 +473,9 @@ class TabInfoImpl
 	  			ROWNOTDUPLICATE otherwise
 	 */
 	private int insertRowListImpl(ExecRow[] rowList, TransactionController tc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
                                   RowLocation[] rowLocationOut)
 		throws StandardException
 	{
@@ -522,6 +541,9 @@ class TabInfoImpl
 													   heapLocation,
 													   row );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                 insertRetCode = indexControllers[ ictr ].insert(
                         indexableRow.getRowArray());
 
@@ -667,6 +689,7 @@ class TabInfoImpl
 		** is a start key and no stop key or vice versa.
 		*/
 		int lockMode = ((startKey != null) && (stopKey != null)) ? 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6063
                 TransactionController.MODE_RECORD : 
                 TransactionController.MODE_TABLE;
 
@@ -758,6 +781,7 @@ class TabInfoImpl
       * @param  indexNumber Key is appropriate for this index.
       * @exception StandardException        Thrown on failure
       */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	ExecRow getRow( TransactionController tc,
 						ExecIndexRow key,
 						int indexNumber )
@@ -791,6 +815,7 @@ class TabInfoImpl
 	 *
 	 * @exception		  StandardException thrown on failure.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	RowLocation getRowLocation(TransactionController tc,
 									  ExecIndexRow key,
 									  int indexNumber)
@@ -826,6 +851,7 @@ class TabInfoImpl
       * @param  indexNumber Key is appropriate for this index.
       * @exception StandardException        Thrown on failure
       */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	ExecRow getRow( TransactionController tc,
 						   ConglomerateController heapCC,
 						   ExecIndexRow key,
@@ -919,6 +945,8 @@ class TabInfoImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	void updateRow( ExecIndexRow				key, 
 						   ExecRow					newRow, 
 						   int						indexNumber,
@@ -929,6 +957,9 @@ class TabInfoImpl
 	{
 		ExecRow[] newRows = new ExecRow[1];
 		newRows[0] = newRow;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
 		updateRow(key, newRows, indexNumber, indicesToUpdate, colsToUpdate, tc);
 	}
 
@@ -949,6 +980,7 @@ class TabInfoImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	void updateRow( ExecIndexRow				key,
 						   ExecRow[]				newRows,
 						   int						indexNumber,
@@ -973,11 +1005,20 @@ class TabInfoImpl
 
 		// Row level locking
 		rc.openForUpdate(indicesToUpdate, TransactionController.MODE_RECORD, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
 
 		/* Open the heap conglomerate */
 		heapCC = tc.openConglomerate(
                     getHeapConglomerate(),
                     false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
                     TransactionController.OPENMODE_FORUPDATE,
                     TransactionController.MODE_RECORD,
                     TransactionController.ISOLATION_REPEATABLE_READ);
@@ -1031,6 +1072,7 @@ class TabInfoImpl
 	 *
 	 * @return The Properties associated with creating the heap.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	Properties getCreateHeapProperties()
 	{
 		return crf.getCreateHeapProperties();
@@ -1043,6 +1085,7 @@ class TabInfoImpl
 	 *
 	 * @return The Properties associated with creating the specified index.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 	Properties getCreateIndexProperties(int indexNumber)
 	{
 		return crf.getCreateIndexProperties(indexNumber);
@@ -1088,6 +1131,7 @@ class TabInfoImpl
 			cids[ictr] = getIndexConglomerate(ictr);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 		rc = crf.getExecutionFactory().getRowChanger(getHeapConglomerate(),
 											(StaticCompiledOpenConglomInfo) null,
 											(DynamicCompiledOpenConglomInfo) null,
@@ -1164,6 +1208,7 @@ class TabInfoImpl
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
 			return "name: " + this.getTableName() + 
 				"\n\theapCongolomerate: "+heapConglomerate +
 				"\n\tnumIndexes: " + ((indexes != null) ? indexes.length : 0) +

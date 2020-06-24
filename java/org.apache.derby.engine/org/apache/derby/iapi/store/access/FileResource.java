@@ -57,6 +57,8 @@ import java.io.InputStream;
 public interface FileResource {
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-304
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
        The name of the jar directory
     */
     public static final String JAR_DIRECTORY_NAME = "jar";
@@ -111,6 +113,8 @@ public interface FileResource {
 		throws StandardException;
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
+//IC see: https://issues.apache.org/jira/browse/DERBY-2040
 	  Get the StorageFile for a file resource.
 	  
 	  @param name The name of the fileResource

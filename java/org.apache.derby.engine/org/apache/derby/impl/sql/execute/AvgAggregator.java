@@ -63,6 +63,8 @@ public final class AvgAggregator extends SumAggregator
 			if (   typeName.equals(TypeId.TINYINT_NAME)
 				|| typeName.equals(TypeId.SMALLINT_NAME)
 				|| typeName.equals(TypeId.INTEGER_NAME)
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 || typeName.equals(TypeId.BIGINT_NAME)) {
 				scale = 0;
 			} else if (   typeName.equals(TypeId.REAL_NAME)
@@ -70,6 +72,7 @@ public final class AvgAggregator extends SumAggregator
 				scale = TypeId.DECIMAL_SCALE;
 			} else {
 				// DECIMAL
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				scale = ((SQLDecimal) addend).getDecimalValueScale();
 				if (scale < NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE)
 					scale = NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE;
@@ -115,6 +118,7 @@ public final class AvgAggregator extends SumAggregator
 		} else if (typeName.equals(TypeId.REAL_NAME)) {
 			newValue = new org.apache.derby.iapi.types.SQLDouble();
 		} else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             newValue = new SQLDecimal();
 		}
 		

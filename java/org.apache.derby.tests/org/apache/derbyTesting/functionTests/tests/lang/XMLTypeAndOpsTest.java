@@ -77,9 +77,11 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("XML Type and Operators Suite\n");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
         if (!XML.classpathMeetsXMLReqs())
             return suite;
 
@@ -87,6 +89,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
          * database before the embedded and client suites.  This ensures
          * that we do not remove the objects created by XMLTestSetup.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
         suite.addTest(
             TestConfiguration.defaultSuite(XMLTypeAndOpsTest.class, false));
 
@@ -101,6 +104,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // If the column's definition doesn't make sense for XML,
         // then we should throw the correct error.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42894",
             "create table fail1 (i int, x xml default 'oops')");
 
@@ -155,6 +159,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLColsWithNonXMLVals() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42821", "insert into t1 values (3, 'hmm')");
         assertCompileError("42821", "insert into t1 values (1, 2)");
         assertCompileError("42821", "insert into t1 values (1, 123.456)");
@@ -185,6 +190,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             + "float, d double, vc varchar(20), da date, ti time, "
             + "ts timestamp, cl clob, bl blob)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42821",
             "insert into nonXTable (si) values (cast (null as xml))");
         
@@ -241,6 +247,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLCasting() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42846",
             "insert into t1 values (1, cast ('hmm' as xml))");
         
@@ -295,6 +302,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLInNonXMLOps() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42Y95", "select i + x from t1");
         assertCompileError("42Y95", "select i * x from t1");
         assertCompileError("42Y95", "select i / x from t1");
@@ -314,6 +322,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLComparisons() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42818", "select i from t1 where x = 'hmm'");
         assertCompileError("42818", "select i from t1 where x > 0");
         assertCompileError("42818", "select i from t1 where x < x");
@@ -328,6 +337,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     {
         // Indexing/ordering on XML cols is not allowed.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("X0X67", "create index oops_ix on t1(x)");
         assertCompileError("X0X67",
             "select i from t1 where x is null order by x");
@@ -338,6 +348,8 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             "CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ("
             + "  null, 'T1', 'extinout/xmlexport.del', null, null, null)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
         assertStatementError("42Z71", cSt);
         
         cSt = prepareCall(
@@ -361,6 +373,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         
         // XML cannot be used with procedures/functions.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42962",
             "create procedure hmmproc (in i int, in x xml)"
             + "  parameter style java language java external name "
@@ -374,6 +387,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // XML columns cannot be used for global temporary 
         // tables.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42962",
             "declare global temporary table SESSION.xglobal (myx XML)"
             + "  not logged on commit preserve rows");
@@ -386,6 +400,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     public void testTriggerSetXML() throws Exception
     {
         // This should fail.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42821",
             "create trigger tr2 after insert on t1 for each row "
             + "mode db2sql update t1 set x = 'hmm'");
@@ -411,6 +426,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // These should fail with various parse errors.
 
         Statement st = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42Z74",
             "insert into t1 values (1, xmlparse(document "
             + "'<hmm/>' strip whitespace))");
@@ -606,6 +622,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         Statement st = createStatement();
         st.executeUpdate("create table vcTab (vc varchar(100))");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42Z71", "select x from t1");
         assertCompileError("42Z71", "select * from t1");
         assertCompileError("42Z71",
@@ -636,6 +653,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         
         // These should fail with various parse errors.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42Z72", "select xmlserialize(x) from t1");
         assertCompileError("42X01", "select xmlserialize(x as) from t1");
         assertCompileError("42Z73",
@@ -808,6 +826,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             "select xmlserialize(xmlparse(document '<hmm>' "
             + "preserve whitespace) as clob) from t1");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42X25",
             " select xmlserialize(xmlparse(document x preserve "
             + "whitespace) as char(100)) from t1");
@@ -892,6 +911,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     {
         // These should fail with various parse errors.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42X01",
             "select i from t1 where xmlexists(x)");
         
@@ -1484,6 +1504,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // If the query returns an atomic value (not a sequence), the XMLEXISTS
         // operator should return TRUE.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
         expRS = new String[][] {
             { "true" },
             { "true" },
@@ -1517,6 +1538,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     {
         // These should fail w/ syntax errors.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("42X01", "select i, xmlquery('//*') from t1");
         assertCompileError("42X01",
             " select i, xmlquery('//*' passing) from t1");
@@ -1571,6 +1593,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // saying what the problem is; it should *NOT* be a NPE, 
         // which is what we were seeing before DERBY-688 was completed.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         assertCompileError("10000",
             "select i,"
             + "  xmlserialize("
@@ -1583,6 +1606,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // In addition, we have prefixed the function with an unrecognized
         // namespace. Verify that it fails with an SQLException and that there
         // isn't any NPE in the exception chain.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         try {
             prepareStatement(
                     "select i,"
@@ -2230,6 +2254,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // Should fail because result of inner XMLQUERY op
         // isn't a valid document.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         Statement st = createStatement();
         assertStatementError("2200V", st,
             "select i,"
@@ -2481,6 +2506,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             {"3"}
         };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2502
         JDBC.assertFullResultSet(rs, expRS, true, false);
         
         // The use of MAX in the previous query throws a warning because
@@ -2499,6 +2525,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             assertSQLState("01003", sqlWarn);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2502
         rs.close();
         
         // Then use XPath position syntax to retrieve the 
@@ -2674,6 +2701,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testNumericReturnValues() throws SQLException {
         // Array of XPath queries and their expected return values
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         String[][] queries = {
             // Long.MAX_VALUE. We lose some precision.
             { "9223372036854775807", "9223372036854776000" },
@@ -2692,10 +2720,12 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             { "-0.0", "0" },
             { "-0.00", "0" },
             // Division by zero yields Not A Number or +/- Infinity
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
             { "0 div 0", "NaN" },
             { "3.14 div 0", "Infinity" },
             { "-3.14 div 0", "-Infinity" },
             // Not strictly numeric, but let's test boolean too
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
             { "1=1", "true" },
             { "1=2", "false" },
         };

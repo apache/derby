@@ -55,6 +55,7 @@ public class jdk13 extends jvm {
     public Vector<String> getCommandLine()
     {
         StringBuffer sb = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> v = super.getCommandLine();
         appendOtherFlags(sb);
         String s = sb.toString();
@@ -83,6 +84,7 @@ public class jdk13 extends jvm {
           sb.append(" -mx");
           sb.append(mx);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (classpath!=null)
         {
           if (isModuleAware) { sb.append(" -p "); }

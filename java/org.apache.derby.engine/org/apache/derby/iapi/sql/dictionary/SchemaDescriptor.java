@@ -41,6 +41,7 @@ import org.apache.derby.catalog.Dependable;
  */
 
 public final class SchemaDescriptor extends UniqueTupleDescriptor 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	implements Provider
 {
 	
@@ -258,6 +259,7 @@ public final class SchemaDescriptor extends UniqueTupleDescriptor
 	 */
 	public int	getCollationType()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2530
 		return collationType;
 	}
 
@@ -363,6 +365,7 @@ public final class SchemaDescriptor extends UniqueTupleDescriptor
 	 */
 	public boolean isSchemaWithGrantableRoutines()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		if (!isSystem)
 			return true;
 
@@ -407,6 +410,8 @@ public final class SchemaDescriptor extends UniqueTupleDescriptor
      * @throws StandardException Schema could not be dropped.
      */
 	public void drop(LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 					 Activation activation) throws StandardException
 	{
         DataDictionary dd = getDataDictionary();
@@ -447,6 +452,8 @@ public final class SchemaDescriptor extends UniqueTupleDescriptor
 	     ** LCC is free to set the new default schema to 
 	     ** some system defined default.
 	     */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 		lcc.resetSchemaUsages(activation, getSchemaName());
 	}
 }

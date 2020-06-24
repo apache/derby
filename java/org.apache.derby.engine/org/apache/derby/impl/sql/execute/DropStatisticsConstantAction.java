@@ -73,6 +73,7 @@ class DropStatisticsConstantAction extends DDLConstantAction
 
 		if (forTable)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 			td = dd.getTableDescriptor(objectName, sd, tc);
 		}
 		

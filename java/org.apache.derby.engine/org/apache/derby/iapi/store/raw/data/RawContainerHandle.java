@@ -131,5 +131,6 @@ public interface RawContainerHandle extends ContainerHandle {
      */
     public void encryptOrDecryptContainer(String newFilePath, boolean doEncrypt)
             throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
 
 }

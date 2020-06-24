@@ -85,6 +85,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, fkColumns,
               constraintId, indexId, schemaDesc, enforced);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 		this.referencedConstraintDescriptor = referencedConstraintDescriptor;
 		this.raDeleteRule = raDeleteRule;
@@ -126,6 +127,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	{
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, fkColumns,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
               constraintId, indexId, schemaDesc, enforced);
 		this.referencedConstraintId = referencedConstraintId;
 		this.raDeleteRule = raDeleteRule;
@@ -242,6 +244,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 		/*
 		** If we are disabled, we never fire
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (!enforced())
 		{
 			return false;

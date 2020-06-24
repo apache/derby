@@ -71,6 +71,7 @@ public interface MasterFactory {
     /** The name of the Master Factory, used to boot the service.  */
     public static final String MODULE =
         "org.apache.derby.iapi.store.replication.master.MasterFactory";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3432
 
     /* Property names that are used as key values in the Properties objects*/
     
@@ -141,6 +142,7 @@ public interface MasterFactory {
      **/
     public void appendLog(long greatestInstant,
                           byte[] log, int logOffset, int logLength);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
 
     /**
      * Used by the LogFactory to notify the replication master

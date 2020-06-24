@@ -25,6 +25,7 @@ import org.apache.derby.shared.common.error.MessageUtils;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     AppRequester stores information about the application requester.
     It is used so that multiple sessions can share information when they are
     started from the same version of the application requester.
@@ -40,6 +41,7 @@ class AppRequester
 
     private static final int [] MIN_MGR_LEVELS = {
                                             3, // AGENT - JCC comes in at 3
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                                             4, // CCSIDMGR
                                             3, // CMNAPPC, 
                                             4, // CMNSYNCPT
@@ -51,6 +53,8 @@ class AppRequester
                                             6, // SQLAM
                                             1, // SUPERVISOR    
                                             5, // SYNCPTMGR
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
+//IC see: https://issues.apache.org/jira/browse/DERBY-2031
                                             1208, // UNICODEMGR
                                             0  // XAMGR
                                             };
@@ -75,6 +79,7 @@ class AppRequester
      * 
      * @exception throws IOException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     AppRequester () 
     {
         for (int i = 0; i < CodePoint.MGR_CODEPOINTS.length; i++)
@@ -107,6 +112,7 @@ class AppRequester
         versionLevel = Integer.parseInt(prdid.substring (3, 5));
         releaseLevel = Integer.parseInt(prdid.substring (5, 7));
         modifyLevel = Integer.parseInt(prdid.substring (7, 8));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5565
         if ((prdid.indexOf(DRDAConstants.DERBY_DRDA_CLIENT_ID) != -1)) {
             clientType = DNC_CLIENT;
         } else {
@@ -135,6 +141,7 @@ class AppRequester
      * LMTBLKPRC
      */
     protected final boolean supportsQryclsimpForLmtblkprc() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         return clientType == DNC_CLIENT;
     }
 
@@ -251,6 +258,8 @@ class AppRequester
      */
 
     protected int supportedMessageParamLength() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6802
+//IC see: https://issues.apache.org/jira/browse/DERBY-6823
         return MessageUtils.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH;
     }
 
@@ -283,6 +292,7 @@ class AppRequester
      * @return {@code true} if the status byte is sent, {@code false} if not
      */
     protected boolean supportsEXTDTAAbort() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 6, 0));
     }
     
@@ -291,10 +301,14 @@ class AppRequester
      * @return {@code true} if the AppRequester supports CCSID 1208, {@code false} if not
      */
     protected boolean supportsUtf8Ccsid() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
+//IC see: https://issues.apache.org/jira/browse/DERBY-2031
         return (getManagerLevel(CodePoint.UNICODEMGR) == CcsidManager.UTF8_CCSID);
     }
 
     protected boolean supportsSessionDataCaching() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 4, 0));
     }
 
@@ -332,6 +346,7 @@ class AppRequester
     protected int getTimestampLength()
     {
         return supportsTimestampNanoseconds() ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
             DRDAConstants.JDBC_TIMESTAMP_LENGTH : DRDAConstants.DRDA_OLD_TIMESTAMP_LENGTH;
     }
 

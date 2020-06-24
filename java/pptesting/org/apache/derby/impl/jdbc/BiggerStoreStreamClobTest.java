@@ -43,6 +43,7 @@ public class BiggerStoreStreamClobTest
     public void setUp()
             throws Exception {
         super.initialCharLength = CLOBLENGTH;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         super.headerLength = 2 +3;
         // The fake stream uses ascii. Add header and EOF marker.
         super.initialByteLength = CLOBLENGTH + headerLength;
@@ -66,6 +67,7 @@ public class BiggerStoreStreamClobTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(
             BiggerStoreStreamClobTest.class,
             "BiggerStoreStreamClobTest suite");

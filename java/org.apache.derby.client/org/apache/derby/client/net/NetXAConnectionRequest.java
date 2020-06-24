@@ -26,7 +26,10 @@ import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetXAConnectionRequest extends NetResultSetRequest {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
     NetXAConnectionRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
@@ -54,6 +57,7 @@ class NetXAConnectionRequest extends NetResultSetRequest {
         Xid xid = callInfo.xid_;
         int xaFlags = callInfo.xaFlags_;
         long xaTimeout = callInfo.xaTimeoutMillis_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
 
         // create DSS command with reply.
         createCommand();
@@ -79,6 +83,7 @@ class NetXAConnectionRequest extends NetResultSetRequest {
         // DERBY-4232: The DRDA spec says that SYNCCTL should only have a
         // timeout property if TMNOFLAGS is specified.
         if (xaTimeout >= 0 && xaFlags == XAResource.TMNOFLAGS) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
             writeXATimeout(CodePoint.TIMEOUT, xaTimeout);
         }
 
@@ -248,6 +253,7 @@ class NetXAConnectionRequest extends NetResultSetRequest {
         write4Bytes(gtrid.length);
         write4Bytes(bqual.length);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         writeBytes(gtrid);
         writeBytes(bqual);
 
@@ -261,6 +267,7 @@ class NetXAConnectionRequest extends NetResultSetRequest {
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
     void writeXATimeout(int codepoint, long xaTimeout) {
         writeScalar8Bytes(codepoint, xaTimeout);
     }

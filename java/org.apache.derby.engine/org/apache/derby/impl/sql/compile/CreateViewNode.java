@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CreateViewNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -46,6 +47,8 @@ import org.apache.derby.impl.sql.execute.ColumnInfo;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateViewNode extends DDLStatementNode
 {
     private ResultColumnList resultColumns;
@@ -76,6 +79,8 @@ class CreateViewNode extends DDLStatementNode
      * @param cm                Context manager
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateViewNode(TableName viewName,
                    ResultColumnList resultColumns,
                    ResultSetNode queryExpression,
@@ -121,6 +126,8 @@ class CreateViewNode extends DDLStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "CREATE VIEW";
@@ -133,6 +140,8 @@ class CreateViewNode extends DDLStatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -173,6 +182,8 @@ class CreateViewNode extends DDLStatementNode
 
 		providerInfos = bindViewDefinition
 			( dataDictionary, cc, getLanguageConnectionContext(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
               getOptimizerFactory(),
 			  queryExpression,
 			  getContextManager()
@@ -204,6 +215,7 @@ class CreateViewNode extends DDLStatementNode
 		}
 
 		/* Only 5000 columns allowed per view */
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		if (queryExpression.getResultColumns().size() > Limits.DB2_MAX_COLUMNS_IN_VIEW)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_COLUMNS_IN_TABLE_OR_VIEW,
@@ -230,6 +242,8 @@ class CreateViewNode extends DDLStatementNode
 	 */
 
     private ProviderInfo[] bindViewDefinition(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         DataDictionary      dataDictionary,
         CompilerContext     compilerContext,
         LanguageConnectionContext lcc,
@@ -276,6 +290,7 @@ class CreateViewNode extends DDLStatementNode
 		}
 
 		DependencyManager 		dm = dataDictionary.getDependencyManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         ProviderInfo[]          provInfo = dm.getPersistentProviderInfos(apl);
 		// need to clear the column info in case the same table descriptor
 		// is reused, eg., in multiple target only view definition
@@ -289,6 +304,7 @@ class CreateViewNode extends DDLStatementNode
 				" on return from RS.bindExpressions()");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return provInfo;
 	}
 
@@ -341,6 +357,7 @@ class CreateViewNode extends DDLStatementNode
 
 		for (int index = 0; index < colInfos.length; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = rcl.elementAt(index);
 			// The colInfo array has been initialized to be of length 
 			// visibleSize() (DERBY-4230).  This code assumes that all the visible
@@ -348,6 +365,7 @@ class CreateViewNode extends DDLStatementNode
 			// if we hit a generated column in what we think is the visible
 			// range.
 			if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				if (rc.isGenerated())
 					SanityManager.THROWASSERT("Encountered generated column in expected visible range at rcl[" + index +"]");
 			}
@@ -360,6 +378,11 @@ class CreateViewNode extends DDLStatementNode
 											 null,
 											 null,
 											 ColumnInfo.CREATE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 											 0, 0, false, 0);
 		}
 	}
@@ -391,11 +414,13 @@ class CreateViewNode extends DDLStatementNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (queryExpression != null)
 		{
 			queryExpression = (ResultSetNode)queryExpression.accept(v);
@@ -403,6 +428,9 @@ class CreateViewNode extends DDLStatementNode
 	}
 
     public OrderByList getOrderByList() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
         return orderByList;
     }
 

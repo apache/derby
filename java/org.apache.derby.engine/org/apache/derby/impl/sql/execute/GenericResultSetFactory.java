@@ -68,6 +68,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
     public ResultSet getInsertResultSet(NoPutResultSet source,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                         GeneratedMethod generationClauses,
                                         GeneratedMethod checkGM,
                                         int fullTemplate,
@@ -97,6 +98,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new InsertVTIResultSet(source, vtiRS, activation );
 	}
@@ -109,6 +111,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new DeleteVTIResultSet(source, activation);
 	}
@@ -121,6 +124,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		Activation activation = source.getActivation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new DeleteResultSet(source, activation );
 	}
@@ -148,6 +152,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new DeleteCascadeResultSet(source, activation, 
 										  constantActionItem,
@@ -189,6 +194,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		Activation activation = source.getActivation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new UpdateVTIResultSet(source, activation);
 	}
@@ -207,6 +213,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		Activation activation = source.getActivation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new UpdateResultSet(source, generationClauses, checkGM, activation,
 								   constantActionItem, rsdItem);
@@ -221,6 +230,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 				Activation activation)
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_CALL_OP);
 		return new CallStatementResultSet(methodCall, activation);
 	}
@@ -238,6 +248,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean reuseResult,
 		boolean doesProjection,
         boolean validatingCheckConstraint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         String validatingBaseTableUUIDString,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost)
@@ -253,6 +265,10 @@ public class GenericResultSetFactory implements ResultSetFactory
 
 		return new ProjectRestrictResultSet(source, source.getActivation(), 
 			restriction, projection, resultSetNumber, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
             constantRestriction, mapRefItem, cloneMapItem,
 			reuseResult,
 			doesProjection,
@@ -487,6 +503,7 @@ public class GenericResultSetFactory implements ResultSetFactory
                                      int returnTypeNumber,
                                      int vtiProjectionNumber,
                                      int vtiRestrictionNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
                                      String vtiSchema,
                                      String vtiName
                                           )
@@ -506,6 +523,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								isDerbyStyleTableFunction,
                                 returnTypeNumber,
                                 vtiProjectionNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
                                 vtiRestrictionNumber,
                                 vtiSchema,
                                 vtiName
@@ -612,6 +630,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 								resultRowTemplate,
 								resultSetNumber,
 								hashKeyColumn,
@@ -690,6 +709,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	}
 
     public NoPutResultSet getValidateCheckConstraintResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                     Activation activation,
                                     long conglomId,
                                     int scociItem,
@@ -923,6 +943,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								resultSetNumber,
 								indexName,
 								heapColRefItem,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2226
 								allColRefItem,
 								heapOnlyColRefItem,
 								indexColMapItem,
@@ -938,6 +959,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException	Thrown on error
 	 */
 	public NoPutResultSet getWindowResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 								Activation activation,
 								NoPutResultSet source,
 								int rowAllocator,
@@ -975,6 +999,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
@@ -1004,6 +1029,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
@@ -1035,6 +1061,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
@@ -1068,6 +1095,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
@@ -1081,6 +1109,10 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide,
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 										   userSuppliedOptimizerOverrides);
 	}
 
@@ -1092,6 +1124,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public ResultSet getSetTransactionResultSet(Activation activation) 
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_ARBITARY_OP);		
 		return new SetTransactionResultSet(activation);
 	}
@@ -1134,6 +1167,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									  resultSetNumber, 
 									  sourceRowWidth,
 									  optimizerEstimatedRowCount,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 									  optimizerEstimatedCost);
 		}
 		else
@@ -1157,6 +1191,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new NormalizeResultSet(source, source.getActivation(), 
 									  resultSetNumber, erdNumber, 
 									  optimizerEstimatedRowCount,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 									  optimizerEstimatedCost, forUpdate);
 	}
 
@@ -1176,6 +1211,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public ResultSet getDDLResultSet(Activation activation)
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_DDL_OP);
 		return getMiscResultSet( activation);
 	}
@@ -1187,6 +1223,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public ResultSet getMiscResultSet(Activation activation)
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_ARBITARY_OP);
 		return new MiscResultSet(activation);
 	}
@@ -1207,6 +1244,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 				                  leftResultSet.getActivation(),
 								  resultSetNumber, 
 								  optimizerEstimatedRowCount,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 								  optimizerEstimatedCost);
 	}
 
@@ -1272,6 +1310,7 @@ public class GenericResultSetFactory implements ResultSetFactory
         int                 resultRowTemplate,
 		long 				conglomId,
 		String 				tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String 				userSuppliedOptimizerOverrides,
 		String 				indexName,
 		int 				colRefItem,
@@ -1285,6 +1324,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new LastIndexKeyResultSet(
 					activation,
 					resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 					resultRowTemplate,
 					conglomId,
 					tableName,
@@ -1295,6 +1335,20 @@ public class GenericResultSetFactory implements ResultSetFactory
 					tableLocked,
 					isolationLevel,
 					optimizerEstimatedRowCount,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 					optimizerEstimatedCost);
 	}
 
@@ -1318,6 +1372,15 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean sameStartStopPosition,
 									Qualifier[][] qualifiers,
 									String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
@@ -1342,6 +1405,11 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 								resultRowTemplate,
 								resultSetNumber,
 								startKeyGetter,
@@ -1351,6 +1419,16 @@ public class GenericResultSetFactory implements ResultSetFactory
 								sameStartStopPosition,
 								qualifiers,
 								tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 								userSuppliedOptimizerOverrides,
 								indexName,
 								isConstraint,
@@ -1373,9 +1451,11 @@ public class GenericResultSetFactory implements ResultSetFactory
 	 * @see ResultSetFactory#getRowCountResultSet
 	 */
 	public NoPutResultSet getRowCountResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
 		NoPutResultSet source,
 		Activation activation,
 		int resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
 		GeneratedMethod offsetMethod,
 		GeneratedMethod fetchFirstMethod,
         boolean hasJDBClimitClause,
@@ -1386,10 +1466,13 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new RowCountResultSet(source,
 									 activation,
 									 resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
 									 offsetMethod,
 									 fetchFirstMethod,
 									 hasJDBClimitClause,
 									 optimizerEstimatedRowCount,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 									 optimizerEstimatedCost);
 	}
 

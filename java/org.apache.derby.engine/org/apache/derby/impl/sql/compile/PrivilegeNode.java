@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.PrivilegeNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -75,6 +76,8 @@ class PrivilegeNode extends QueryTreeNode
      * @param specificPrivileges null for routines and usage
      * @param cm                 the context manager
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     PrivilegeNode(int                 objectType,
                   Object              objectOfPrivilege,
                   TablePrivilegesNode specificPrivileges,
@@ -97,6 +100,8 @@ class PrivilegeNode extends QueryTreeNode
                                       "null specific privileges used with table privilege");
             }
             objectName = (TableName) objectOfPrivilege;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             this.specificPrivileges = specificPrivileges;
             break;
             
@@ -125,6 +130,8 @@ class PrivilegeNode extends QueryTreeNode
      * @param restrict   True if this is a REVOKE...RESTRICT action
      * @param cm         The context manager
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     PrivilegeNode(int            objectType,
                   TableName      objectName,
                   String         privilege,
@@ -152,6 +159,8 @@ class PrivilegeNode extends QueryTreeNode
      * @exception StandardException	Standard error policy.
      */
     public QueryTreeNode bind(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             HashMap<Provider,Provider> dependencies,
             List<String> grantees,
             boolean isGrant ) throws StandardException
@@ -209,6 +218,8 @@ class PrivilegeNode extends QueryTreeNode
             }
 				
             AliasDescriptor proc = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             List<AliasDescriptor> list = getDataDictionary().getRoutineList(
                 sd.getUUID().toString(),
                 objectName.getTableName(),
@@ -234,6 +245,8 @@ class PrivilegeNode extends QueryTreeNode
                                 objectName.getFullTableName());
                     }
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 proc = list.get(0);
             }
             else
@@ -243,6 +256,8 @@ class PrivilegeNode extends QueryTreeNode
                 for (int i = list.size() - 1; (!found) && i >= 0; i--)
                 {
                     proc = list.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
                     RoutineAliasInfo
                         routineInfo = (RoutineAliasInfo) proc.getAliasInfo();
@@ -263,6 +278,8 @@ class PrivilegeNode extends QueryTreeNode
                 if( ! found)
                 {
                     // reconstruct the signature for the error message
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     StringBuilder sb =
                             new StringBuilder(objectName.getFullTableName());
                     sb.append( "(");

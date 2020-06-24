@@ -53,6 +53,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(RoutineTest.class, "RoutineTest");
         
@@ -67,6 +68,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     public void testFunctionResultDataTypeValidation() throws SQLException
     {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3119
 
         // SMALLINT -> short
         s.executeUpdate(
@@ -320,6 +322,7 @@ public class RoutineTest extends BaseJDBCTestCase {
      */
     public void testFunctionNullHandling() throws SQLException, UnsupportedEncodingException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         Statement s = createStatement();
         
         // Create three simple functions that take an integer and
@@ -371,6 +374,7 @@ public class RoutineTest extends BaseJDBCTestCase {
         ps.close();
         
         // Test that any single argument being null causes NULL to be returned.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         s.executeUpdate(
                 "CREATE FUNCTION CONCAT_NOCALL(VARCHAR(10), VARCHAR(10)) " +
                    "RETURNS VARCHAR(20) " +
@@ -468,6 +472,7 @@ public class RoutineTest extends BaseJDBCTestCase {
         
         // Nested calls with SQL types that do not need casts
         // and map to primitive types. This had issues see DERBY-479
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         s.executeUpdate(
                 "CREATE FUNCTION SAME_NOCALL(INTEGER) " +
                    "RETURNS INTEGER " +
@@ -512,6 +517,7 @@ public class RoutineTest extends BaseJDBCTestCase {
         assertStatementError("39004", ps); // Can't pass NULL into primitive type
         ps.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         s.executeUpdate(
                 "CREATE FUNCTION NOON_NOCALL(TIME) " +
                    "RETURNS TIME " +
@@ -599,6 +605,7 @@ public class RoutineTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:30:00");
         ps.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         s.close();
     }
     
@@ -648,6 +655,7 @@ public class RoutineTest extends BaseJDBCTestCase {
      */
     public void test_5749() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
         Statement s = createStatement();
         s.executeUpdate("create table t5749(v varchar(5))");
         s.executeUpdate(
@@ -692,6 +700,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     public void test_6511() throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6511
 
         vet_6511( conn, "boolean", "booleanpToBoolean", "booleanToBooleanp", "true" );
         vet_6511( conn, "int", "intToInteger", "integerToInt", "1" );
@@ -822,16 +831,19 @@ public class RoutineTest extends BaseJDBCTestCase {
     // functions for converting between primitive and wrapper types
     public  static  Boolean booleanpToBoolean( boolean val )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return val;
     }
     public  static  boolean booleanToBooleanp( Boolean val ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6511
         if ( val == null )  { throw new Exception( "This method does not allow nulls!" ); }
         else { return val.booleanValue(); }
     }
     
     public  static  Integer intToInteger( int val )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return val;
     }
     public  static  int     integerToInt( Integer val ) throws Exception
@@ -842,6 +854,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Long    longpToLong( long val )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return val ;
     }
     public  static  long     longToLongp( Long val ) throws Exception
@@ -852,6 +865,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Integer    shortpToInteger( short val )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       return (int) val;
     }
     public  static  short     integerToShortp( Integer val ) throws Exception
@@ -862,6 +876,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Float floatpToFloat( float val )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return val;
     }
     public  static  float     floatToFloatp( Float val ) throws Exception
@@ -872,6 +887,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Double doublepToDouble( double val )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return val;
     }
     public  static  double     doubleToDoublep( Double val ) throws Exception

@@ -83,6 +83,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                                                         typeId);
 
                   case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                   case Types.BOOLEAN:
                         return booleanTypeCompiler =
                                         getAnInstance(PACKAGE_NAME + "BooleanTypeCompiler",
@@ -91,6 +92,8 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
 
                   case Types.CHAR:
                           sqlTypeName = typeId.getSQLTypeName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
                           return charTypeCompiler =
                               getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
                                                       charTypeCompiler,
@@ -121,6 +124,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                                                 longintTypeCompiler,
                                                                 typeId);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                   case Types.BLOB:
                         return blobTypeCompiler =
                                 getAnInstance(PACKAGE_NAME + "LOBTypeCompiler",
@@ -133,8 +137,11 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                                           longvarbitTypeCompiler,
                                                           typeId);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                   case Types.CLOB:
                       sqlTypeName = typeId.getSQLTypeName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
                       return clobTypeCompiler =
                           getAnInstance(PACKAGE_NAME + "CLOBTypeCompiler",
                                         clobTypeCompiler,
@@ -188,11 +195,14 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
 
                   case Types.VARCHAR:
                           sqlTypeName = typeId.getSQLTypeName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
                           return varcharTypeCompiler =
                               getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
                                                       varcharTypeCompiler,
                                                       typeId);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                   case Types.JAVA_OBJECT:
                   case Types.OTHER:
                         if (typeId.isRefTypeId())
@@ -211,6 +221,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                 return btc;
                         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                   case Types.SQLXML:
                         return xmlTypeCompiler =
                                 getAnInstance(PACKAGE_NAME + "XMLTypeCompiler",
@@ -243,10 +254,12 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                 {
                         Exception exc = null;
                         Class<?> typeCompilerClass = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
                         try
                         {
                                 typeCompilerClass = Class.forName(className);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                 anInstance  = (TypeCompiler)
                                     typeCompilerClass.getConstructor().newInstance();
                                 ((BaseTypeCompiler) anInstance).setTypeId(typeId);
@@ -263,6 +276,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                         {
                                 exc = ie;
                         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         catch (NoSuchMethodException nsme)
                         {
                                 exc = nsme;

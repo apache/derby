@@ -87,6 +87,7 @@ public class Changes10_7 extends UpgradeChange
      */
     public static Test suite(int phase) {
         BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.7");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTestSuite(Changes10_7.class);
         return new SupportFilesSetup((Test) suite);
@@ -141,6 +142,7 @@ public class Changes10_7 extends UpgradeChange
      * version of Derby
      */
     private Set<String> getSupportedTypes() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashSet<String> types = new HashSet<String>();
         ResultSet rs = getConnection().getMetaData().getTypeInfo();
         while (rs.next()) {
@@ -692,6 +694,7 @@ public class Changes10_7 extends UpgradeChange
      */
     public void testExternalSecuritySpecification() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         String functionWithDefinersRights =
             "create function f_4551( a varchar( 100 ) ) returns int\n" +
             "language java parameter style java reads sql data\n" +

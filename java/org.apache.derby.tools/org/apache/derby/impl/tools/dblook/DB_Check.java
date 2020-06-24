@@ -49,6 +49,7 @@ public class DB_Check {
 
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT CS.CONSTRAINTNAME, " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 			"CS.TABLEID, CS.SCHEMAID, CS.STATE, CK.CHECKDEFINITION FROM SYS.SYSCONSTRAINTS CS, " +
 			"SYS.SYSCHECKS CK WHERE CS.CONSTRAINTID = " +
 			"CK.CONSTRAINTID AND CS.STATE != 'D' ORDER BY CS.TABLEID");
@@ -70,6 +71,7 @@ public class DB_Check {
 
 			StringBuffer chkString = createCheckString(tableName, rs);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
             DB_Key.makeDeferredClauses( chkString, rs, 4 );
             
 			Logs.writeToNewDDL(chkString.toString());
@@ -108,6 +110,7 @@ public class DB_Check {
 		sb.append(constraintName);
 		sb.append(" CHECK ");
 		sb.append(dblook.removeNewlines(aCheck.getString(5)));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 
 		return sb;
 

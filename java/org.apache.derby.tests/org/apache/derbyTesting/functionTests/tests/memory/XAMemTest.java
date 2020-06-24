@@ -85,10 +85,13 @@ public class XAMemTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5291
+//IC see: https://issues.apache.org/jira/browse/DERBY-4137
         if (JDBC.vmSupportsJDBC3()) {
             return TestConfiguration.defaultSuite(XAMemTest.class);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
             "XAMemTest skipped - XADataSource not available");
     }

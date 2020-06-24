@@ -93,6 +93,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * in this hashtable
      */
     protected static Hashtable<String, Connection> conns =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             new Hashtable<String, Connection>();
     
     /** The expected format of a connection string. In English:
@@ -123,6 +124,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with a lower lock timeout.
      */
     private static Test getTimeoutSuite(String postfix) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Lower lock timeout" + postfix);
 
@@ -139,11 +141,13 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests to be run with client and/or embedded
      */
     private static Test baseSuite(String postfix) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ClientAndEmbedded" + postfix);
 
         suite.addTest(new J2EEDataSourceTest("testGlobalLocalInterleaf"));
         suite.addTest(new J2EEDataSourceTest("testSetIsolationWithStatement"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2498
         suite.addTest(new J2EEDataSourceTest("testJira95pds"));
         suite.addTest(new J2EEDataSourceTest("testJira95xads"));
         suite.addTest(new J2EEDataSourceTest("testBadConnectionAttributeSyntax"));
@@ -164,9 +168,12 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testClosedCPDSConnection"));
         suite.addTest(new J2EEDataSourceTest("testClosedXADSConnection"));
         suite.addTest(new J2EEDataSourceTest("testSetSchemaInXAConnection"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3379
         suite.addTest(new J2EEDataSourceTest("testPooledReuseOnClose"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3690
         suite.addTest(new J2EEDataSourceTest("testSchemaIsReset"));
         suite.addTest(new J2EEDataSourceTest("testSchemaIsResetWhenDeleted"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         suite.addTest(new J2EEDataSourceTest("testDerby3799"));
         return suite;
     }
@@ -177,13 +184,18 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with client only
      */
     private static Test getClientSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Client/Server");
         suite.addTest(new J2EEDataSourceTest("testClientDSConnectionAttributes"));
         suite.addTest(new J2EEDataSourceTest(
                 "testClientTraceFileDSConnectionAttribute"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4067
+//IC see: https://issues.apache.org/jira/browse/DERBY-2468
         suite.addTest(new J2EEDataSourceTest(
                 "testClientMessageTextConnectionAttribute"));
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommit"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4709
+//IC see: https://issues.apache.org/jira/browse/DERBY-4653
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommitAlt"));
         suite.addTest(new J2EEDataSourceTest("testDerby2026LoginTimeout"));
         // Disabled because rollback flow optimization hasn't been implemented.
@@ -199,6 +211,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with embedded only
      */
     private static Test getEmbeddedSuite(String postfix) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Embedded" + postfix);
         suite.addTest(new J2EEDataSourceTest("testDSRequestAuthentication"));
         // Following cannot run with client because of DERBY-2533; it hangs
@@ -214,6 +227,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             // test uses unsupported classes like DriverManager, XADataSource,
             // ConnectionPoolDataSource, ConnectionEvenListenere, as well as
             // unsupported methods, like Connection.setTypeMap()...
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite =
                 new BaseTestSuite("J2EEDatasourceTest cannot run with JSR169");
             return suite;
@@ -229,6 +243,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             suite.addTest(TestConfiguration.clientServerDecorator(
                     baseSuite(":client")));
             // Add the tests that only run with client
+//IC see: https://issues.apache.org/jira/browse/DERBY-4709
+//IC see: https://issues.apache.org/jira/browse/DERBY-4653
             suite.addTest(new SupportFilesSetup(
                     TestConfiguration.clientServerDecorator(getClientSuite())));
             // Add the tests that only run with embedded
@@ -263,6 +279,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                             "'org.apache.derbyTesting.functionTests.tests.jdbcapi.J2EEDataSourceTest." +
                             getNestedMethodName() +
                     "'");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
                     s.execute("create table derby3799 (dClob clob)");
                     s.executeUpdate("insert into derby3799 values (" +
                             "'myLittleTestClob')");
@@ -273,6 +290,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         // attempt to get rid of any left-over trace files
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (int i = 0; i < 6; i++) {
             String traceFileName = "trace" + (i + 1) + ".out";
             File traceFile = new File(traceFileName);
@@ -329,6 +347,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         //before shutdown and they all should generate connection error event.
         try {
             conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("SQLException should be thrown!");
         } catch (SQLException e) {
             //The first call on JDBC Connection object after Network Server
@@ -418,6 +437,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
                     ResultSet.CONCUR_READ_ONLY);
             fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
@@ -428,6 +448,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
@@ -447,6 +468,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
                     ResultSet.CLOSE_CURSORS_AT_COMMIT);
             fail("SQLException of 08003 should be thrown!");
@@ -476,6 +498,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
@@ -521,6 +544,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.setSavepoint();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
@@ -647,6 +671,16 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.setTypeMap(null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
@@ -656,6 +690,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         if (usingEmbedded())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             clazz.getConstructor().newInstance();
         }else
@@ -828,6 +863,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         c.setAutoCommit(false);
         testCloseActiveConnection(c, false, true);
         xar.end(xid, XAResource.TMSUCCESS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4151
+//IC see: https://issues.apache.org/jira/browse/DERBY-4151
         xa.close();
     }
 
@@ -994,6 +1031,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                     // Need to catch the exception here because
                     // we cannot throw a checked exception through
                     // the api method. Wrap it in a RuntimeException.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3425
+//IC see: https://issues.apache.org/jira/browse/DERBY-3425
                     throw new RuntimeException(e);
                 }
             }
@@ -1147,6 +1186,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         cs.setString(1,"Nested");
         try {
             cs.execute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("SQLException of 40XC0 should be thrown!");
         } catch (SQLException sqle) {
             assertSQLState("40XC0", sqle);
@@ -1158,6 +1198,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         String NullMapValue = "XJ081";
         String MapMapValue = "0A000";
         Object[] expectedValues = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             ResultSet.HOLD_CURSORS_OVER_COMMIT, "XJ010",
             2, true, false, 
             EmptyMapValue, NullMapValue, MapMapValue};
@@ -1225,6 +1266,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         cs.setString(1,"Nested");
         try {
             cs.execute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("SQLException of 40XC0 should be thrown!");
         } catch (SQLException sqle) {
             assertSQLState("40XC0", sqle);
@@ -1290,6 +1332,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         xar.start(xid, XAResource.TMNOFLAGS);
         Connection xacc = xac.getConnection();
         xacc.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         expectedValues[0] = ResultSet.CLOSE_CURSORS_AT_COMMIT;
         if (usingEmbedded())
             expectedValues[1] = "XJ058";
@@ -1309,6 +1352,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         xar.end(xid, XAResource.TMSUCCESS);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         expectedValues[0] = ResultSet.HOLD_CURSORS_OVER_COMMIT;
         expectedValues[3] = true;
         assertConnectionOK(expectedValues, 
@@ -1327,6 +1371,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         Connection backtoGlobal = xac.getConnection();
 
         xar.start(xid, XAResource.TMJOIN);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         expectedValues[0] = ResultSet.CLOSE_CURSORS_AT_COMMIT;
         expectedValues[3] = false;
         assertConnectionOK(expectedValues, 
@@ -1923,6 +1968,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         try {
             // (DERBY-2532)
             xac2.getXAResource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2532
             fail("expected SQLException on closed XAConnection.getXAResource");
         } catch (SQLException sqle) {
             assertSQLState("08003", sqle);
@@ -2037,6 +2083,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @throws SQLException if something goes wrong
      */
     public void testSchemaIsReset()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3690
             throws SQLException {
         final String userSchema = "USERSCHEMA";
         ConnectionPoolDataSource cpDs =
@@ -2052,6 +2099,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // This is currently only implemented in the client driver.
         if (usingDerbyNetClient()) {
             J2EEDataSource.setBeanProperty(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     cpDs, "maxStatements",7);
             doTestSchemaIsReset(cpDs.getPooledConnection(userSchema, "secret"),
                     userSchema);
@@ -2070,6 +2118,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             throws SQLException {
         Connection con1 = pc.getConnection();
         JDBC.assertCurrentSchema(con1, userSchema);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         JDBC.assertCurrentUser(con1, userSchema);
         Statement stmt1 = con1.createStatement();
         // Change the schema.
@@ -2263,6 +2312,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @throws SQLException if something goes wrong
      */
     public void testConnectionFlowRollbackAlt()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4709
+//IC see: https://issues.apache.org/jira/browse/DERBY-4653
             throws IOException, SQLException {
         Object[] dataSources = new Object[] {
             JDBCDataSource.getDataSource(),
@@ -2331,6 +2382,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         final int extraInvokations = invokeExtra ? 25 : 0;
         final int rowCount = 10;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         final boolean isXA = ds instanceof XADataSource;
         final boolean isCP = ds instanceof ConnectionPoolDataSource;
         // Generate trace file name and define trace behavior.
@@ -2344,6 +2396,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         J2EEDataSource.setBeanProperty(ds, "traceFileAppend", Boolean.FALSE);
         J2EEDataSource.setBeanProperty( ds, "traceLevel",
                 BasicClientDataSource40.TRACE_ALL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         // Obtain connection.
         PooledConnection physicalCon = null;
@@ -2352,6 +2405,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             physicalCon = ((XADataSource)ds).getXAConnection();
             con = physicalCon.getConnection();
         } else if (isCP) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             physicalCon = ((ClientConnectionPoolDataSourceInterface)ds).
                     getPooledConnection();
             con = physicalCon.getConnection();
@@ -2660,6 +2714,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             pds.getPooledConnection();
             fail ("expected an SQLException!");
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2498
             assertSQLState("XCY00", sqle);
         } catch (Exception e) {
             throw e;
@@ -2712,6 +2767,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     public void testClientDSConnectionAttributes()
             throws SQLException, ClassNotFoundException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    IllegalAccessException, InstantiationException,
                    NoSuchMethodException, InvocationTargetException
     {
@@ -2763,6 +2819,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         ClientXADataSourceInterface xads;
         
         if (JDBC.vmSupportsJNDI()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             clazz = Class.forName("org.apache.derby.jdbc.ClientXADataSource");
             xads = (ClientXADataSourceInterface) clazz.getConstructor().newInstance();
         } else {
@@ -2791,6 +2848,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // connectionAttributes=databaseName=kangaroo
         xads.setConnectionAttributes("databaseName=kangaroo");
         xads.setDatabaseName("wombat");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         dsXAConnectionRequests(new String[]
             {"OK","08001","OK","OK","08001","08001","OK","OK","OK"},
             xads);
@@ -2813,6 +2871,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         
         JDBCClient dsclient = getTestConfiguration().getJDBCClient();
         String dsName = dsclient.getDataSourceClassName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(dsName);
         DataSource ds = (DataSource) clazz.getConstructor().newInstance();
 
@@ -2843,6 +2902,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
         try {
             ds.getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3852
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("shutdown should raise exception");
         } catch (SQLException sqle) {
             assertSQLState("XJ015", sqle);
@@ -2877,10 +2938,12 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // now with ConnectionPoolDataSource
         String cpdsName = dsclient.getConnectionPoolDataSourceClassName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         clazz = Class.forName(cpdsName);
         ConnectionPoolDataSource cpds =(ConnectionPoolDataSource) clazz.getConstructor().newInstance();
 
         // ConnectionPoolDataSource - EMPTY
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         dsCPConnectionRequests(new String[] {
             "XJ004","XJ004","XJ004","XJ004",
             "XJ004","XJ004","XJ004","XJ004","XJ004"},
@@ -2910,6 +2973,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         JDBCDataSource.setBeanProperty(cpds, "attributesAsPassword", Boolean.TRUE);
         JDBCDataSource.setBeanProperty(cpds, "user", "fred");
         JDBCDataSource.setBeanProperty(cpds, "password", "databaseName=" + dbName + ";password=wilma");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         dsCPConnectionRequests(new String[] {
             "XJ004","XJ004","XJ004","XJ028",
             "XJ028","XJ004","XJ004","XJ004","XJ004"},
@@ -2922,11 +2986,13 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // now with XADataSource
 //        EmbeddedXADataSource xads = new EmbeddedXADataSource();
         String xadsName = dsclient.getXADataSourceClassName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         clazz = Class.forName(xadsName);
         XADataSource xads =
             (XADataSource) clazz.getConstructor().newInstance();
 
         // XADataSource - EMPTY
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         dsXAConnectionRequests(new String[] {
             "08006","08006","08006","08006",
             "08006","08006","08006","08006","08006"},
@@ -2994,6 +3060,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         JDBCDataSource.setBeanProperty(cpds, "connectionAttributes",
         		"traceFile="+traceFile);
         // DERBY-2468 - trace3.out does not get created
+//IC see: https://issues.apache.org/jira/browse/DERBY-4717
         ((PooledConnection)getPhysicalConnection(cpds)).close();
         JDBCDataSource.clearStringBeanProperty(cpds, "connectionAttributes");
 
@@ -3008,6 +3075,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         traceFile = "trace5.out";
         JDBCDataSource.setBeanProperty(xads, "connectionAttributes",
         		"traceFile="+traceFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4717
         ((XAConnection)getPhysicalConnection(xads)).close();
         // DERBY-2468 - trace5.out does not get created
         JDBCDataSource.clearStringBeanProperty(xads, "connectionAttributes");
@@ -3026,6 +3094,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     private static void assertTraceFilesExistAndCanBeDeleted()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (int i = 3; i <= 6; i++) {
             File traceFile = new File("trace" + i + ".out");
             assertTrue("Doesn't exist",
@@ -3048,6 +3117,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     public void testClientMessageTextConnectionAttribute()
             throws SQLException, ClassNotFoundException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         String retrieveMessageTextProperty = "retrieveMessageText";
@@ -3069,6 +3139,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         cpds.setDatabaseName(dbName);
         cpds.setConnectionAttributes(
                 retrieveMessageTextProperty + "=false");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4717
         PooledConnection cpConn = cpds.getPooledConnection();
         assertMessageText(cpConn.getConnection(), "false");
         cpConn.close();
@@ -3082,6 +3153,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // now with XADataSource
         ClientXADataSourceInterface xads;
         if (JDBC.vmSupportsJNDI()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             clazz = Class.forName("org.apache.derby.jdbc.ClientXADataSource");
             xads = (ClientXADataSourceInterface) clazz.getConstructor().newInstance();
         } else {
@@ -3093,6 +3165,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         xads.setDatabaseName(dbName);
         xads.setConnectionAttributes(
                 retrieveMessageTextProperty + "=false");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4717
         XAConnection xaConn = xads.getXAConnection();
         assertMessageText(xaConn.getConnection(), "false");
         xaConn.close();
@@ -3119,6 +3192,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     {
         try {
             conn.createStatement().executeQuery("SELECT * FROM APP.NOTTHERE");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             fail("SQLException of 42X05 should be thrown!");
         }
         catch (SQLException e)
@@ -3133,6 +3207,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 // retrieveMessageTextValue is false
                 assertTrue(e.getMessage().indexOf("does not exist") == -1);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4717
         } finally {
             try {
                 conn.close();
@@ -3177,6 +3252,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             "Everything you ever wanted to know about this datasource";
         
         JDBCDataSource.setBeanProperty(ds, "description", setDescription);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4717
         getPhysicalConnection(ds);
         assertEquals(setDescription, JDBCDataSource.getBeanProperty(ds, "description"));
         JDBCDataSource.clearStringBeanProperty(ds, "description");
@@ -3451,6 +3527,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // HOLDABLE Statement in global xact " 
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, 
             s.getResultSetHoldability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
         assertErrorCode(10000, conn.getWarnings());
         shxa.close();
 
@@ -3460,6 +3537,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // HOLDABLE PreparedStatement in global xact 
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT,
             s.getResultSetHoldability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
         assertErrorCode(10000, conn.getWarnings());
         shxa.close();
 
@@ -3469,6 +3547,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // HOLDABLE CallableStatement in global xact:
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT,
             s.getResultSetHoldability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
         assertErrorCode(10000, conn.getWarnings());
         shxa.close();
 
@@ -3546,6 +3625,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // The first meta data object should not return a reference to the
         // second logical connection.
         assertSame(con2, dmd2.getConnection());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3431
         try {
             dmd1.getConnection();
             fail("Should have thrown no current connection exception");
@@ -3570,6 +3650,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * See Jira issue DERBY-3799.
      */
     public void testDerby3799() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         ConnectionPoolDataSource cpDs =
                 J2EEDataSource.getConnectionPoolDataSource();
         PooledConnection pc = cpDs.getPooledConnection();
@@ -3968,6 +4049,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // DERBY-2531
         // network server gives mismatched connections. See also
         // comment in testAllDataSources()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3425
         if (usingEmbedded()) {
             assertEquals(conn, s.getConnection());
         }
@@ -4141,6 +4223,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             if (conn.getAutoCommit())
                 assertSQLState("XJ010", sqle);
             else if (((String)expectedValues[1]).equals("OK"))
+//IC see: https://issues.apache.org/jira/browse/DERBY-3425
                 throw sqle;
             else 
                 assertSQLState((String)expectedValues[1], sqle);
@@ -4177,12 +4260,14 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // Derby-33 - setTypeMap on connection
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Map<String, Class<?>> empty = Collections.emptyMap();
             conn.setTypeMap(empty);
             if (!((String)expectedValues[5]).equals("OK"))
                 fail (" expected an sqlexception on setTypeMap(EMPTY_MAP)");
         } catch (SQLException sqle) {
             if (((String)expectedValues[5]).equals("OK"))
+//IC see: https://issues.apache.org/jira/browse/DERBY-3425
                 throw sqle;
             else
                 assertSQLState((String)expectedValues[5], sqle);
@@ -4197,6 +4282,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         }
         try {
             // a populated map, not implemented
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Map<String, Class<?>> map = new HashMap<String, Class<?>>();
             map.put("name", Class.class);
             conn.setTypeMap(map);
@@ -4204,6 +4290,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 fail (" expected an sqlexception on setTypeMap(map)");
         } catch (SQLException sqle) {
             if (((String)expectedValues[7]).equals("OK"))
+//IC see: https://issues.apache.org/jira/browse/DERBY-3425
                 throw sqle;
             else
                 assertSQLState((String)expectedValues[7], sqle);
@@ -4214,6 +4301,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // method calls on a closed connection
         conn.close(); // expect no error
+//IC see: https://issues.apache.org/jira/browse/DERBY-3425
 
         try {
             conn.createStatement();
@@ -4414,6 +4502,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     private static void clearConnections() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Connection conn : conns.values()) {
             conn.close();
         }
@@ -4450,6 +4539,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         //  First get a bunch of pooled connections
         //  and make sure they're all unique
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<String, XAConnection> xaConns =
                 new HashMap<String, XAConnection>();
         for ( int i = 0 ; i < numConnections ; i++ )
@@ -4496,6 +4586,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         //  First get a bunch of pooled connections
         //  and make sure they're all unique
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<String, PooledConnection> pooledConns =
                 new HashMap<String, PooledConnection>();
         for ( int i = 0 ; i < numConnections ; i++ )
@@ -4525,6 +4616,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         while ( it.hasNext() )
         {
             PooledConnection pc = (PooledConnection)it.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4151
             pc.close();
         }
         pooledConns.clear();
@@ -4556,6 +4648,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             EmptyMapValue="0A000"; NullMapValue="0A000"; MapMapValue="0A000";
         }
         Object[] expectedValues = { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             ResultSet.HOLD_CURSORS_OVER_COMMIT, "OK",
             2, false, false, 
             EmptyMapValue, NullMapValue, MapMapValue};
@@ -4579,6 +4672,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @throws IllegalArgumentException if the object isn't a data source
      */
     public static Object getPhysicalConnection(Object ds)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4717
             throws SQLException {
         if (ds instanceof XADataSource) {
             return ((XADataSource)ds).getXAConnection();

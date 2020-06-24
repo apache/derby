@@ -88,6 +88,7 @@ public class ReferenceableDataSource extends BasicEmbeddedDataSource40
     public Object getObjectInstance(Object refObj,
                                     javax.naming.Name name,
                                     javax.naming.Context nameContext,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
                                     java.util.Hashtable<?,?> environment)
             throws java.lang.Exception {
 
@@ -101,6 +102,7 @@ public class ReferenceableDataSource extends BasicEmbeddedDataSource40
                     className.startsWith("org.apache.derby.jdbc.Embedded")) {
                 // Create the proper data source object shell.
                 ds = Class.forName(className).getConstructor().newInstance();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
                 // Fill in the data source object shell with values from the
                 // jndi reference.
@@ -129,6 +131,7 @@ public class ReferenceableDataSource extends BasicEmbeddedDataSource40
             throws Exception {
 
         for (Enumeration<RefAddr> e = ref.getAll(); e.hasMoreElements();) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
 
             RefAddr attribute = e.nextElement();
 

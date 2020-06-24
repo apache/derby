@@ -91,6 +91,7 @@ public class T_Diagnosticable extends T_MultiIterations
 
         // Create object with neither Diagnosticable:
         Object obj = (long) 5;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         // Test just getting a single string back, from each type of object.
         String          str          = null;

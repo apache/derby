@@ -2,6 +2,7 @@
 
    Derby - Class SimpleNetworkServerSample
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -78,6 +79,7 @@ public class SimpleNetworkServerSample
 			startNetworkServer();
 
 			/*
+//IC see: https://issues.apache.org/jira/browse/DERBY-6459
 			  Can now spawn threads to do many things with
 			  embedded connections but allow others to connect via
 			  Network Server. But for sample purposes, an embedded connection
@@ -183,6 +185,7 @@ public class SimpleNetworkServerSample
 		System.setProperty("derby.drda.startNetworkServer","true");
 
 		// Booting Derby
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
         clazz.getConstructor().newInstance();
 	}
@@ -313,6 +316,7 @@ public class SimpleNetworkServerSample
 
 		String ijUsage = "\nWhile my app is busy with embedded work, ";
 		ijUsage += "ij might connect like this:\n\n";
+//IC see: https://issues.apache.org/jira/browse/DERBY-247
 		ijUsage +=  "\t$ java -Dij.user=me -Dij.password=pw -Dij.protocol=jdbc:derby://localhost:1527/ org.apache.derby.tools.ij\n";
 		ijUsage += "\tij> connect '" + DBNAME + "';\n\n";
 

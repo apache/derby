@@ -119,6 +119,7 @@ public final class UTF8Reader extends Reader
         int buffersize = calculateBufferSize(csd);
         this.buffer = new char[buffersize];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         if (csd.isPositionAware()) {
             // Check and save the stream state.
             if (SanityManager.DEBUG) {
@@ -145,6 +146,7 @@ public final class UTF8Reader extends Reader
             this.in = csd.getStream();
         }
         // Add the header portion to the utfCount.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         utfCount = csd.getDataOffset();
     }
 
@@ -162,6 +164,7 @@ public final class UTF8Reader extends Reader
     public int read() throws IOException
     {
         synchronized (lock) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
 
             // check if closed..
             if (noMoreReads)
@@ -220,16 +223,22 @@ public final class UTF8Reader extends Reader
     public long skip(long len) throws IOException {
         if (len < 0) {
             throw new IllegalArgumentException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
                 "Number of characters to skip must be positive: " + len);
         }
         synchronized (lock) {
             // check if closed..
             if (noMoreReads)
                 throw new IOException(READER_CLOSED);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
 
             if (readPositionInBuffer >= charactersInBuffer) {
                 // do somthing
                 if (fillBuffer()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2868
+//IC see: https://issues.apache.org/jira/browse/DERBY-2686
                     return 0L;
                 }
             }
@@ -253,6 +262,7 @@ public final class UTF8Reader extends Reader
     {
         synchronized (lock) {
             closeIn();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
             parent = null;
             noMoreReads = true;
         }
@@ -389,6 +399,7 @@ public final class UTF8Reader extends Reader
 
         charactersInBuffer = 0;
         readPositionInBuffer = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
 
         try {
         try {
@@ -403,9 +414,11 @@ public final class UTF8Reader extends Reader
                 }
             }
             // Keep track of how much we are allowed to read.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             final long utfLen = csd.getByteLength();
             final long maxFieldSize = csd.getMaxCharLength();
 readChars:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
         while (
                 (charactersInBuffer < buffer.length) &&
                 ((utfCount < utfLen) || (utfLen == 0)) &&
@@ -416,16 +429,19 @@ readChars:
             if (c == -1) {
                 if (utfLen == 0) {
                     // Close the stream if it cannot be reset.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
                     if (!csd.isPositionAware()) {
                         closeIn();
                     }
                     break readChars;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
                 throw utfFormatException("Reached EOF prematurely, " +
                     "read " + utfCount + " out of " + utfLen + " bytes");
             }
 
             int finalChar;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
             switch (c >> 4) {
                 case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
                     // 0xxxxxxx
@@ -439,6 +455,7 @@ readChars:
                     utfCount += 2;
                     int char2 = in.read();
                     if (char2 == -1)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
                         throw utfFormatException("Reached EOF when reading " +
                             "second byte in a two byte character encoding; " +
                             "byte/char position " + utfCount + "/" +
@@ -460,6 +477,7 @@ readChars:
                     int char2 = in.read();
                     int char3 = in.read();
                     if (char2 == -1 || char3 == -1)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
                         throw utfFormatException("Reached EOF when reading " +
                             "second/third byte in a three byte character " +
                             "encoding; byte/char position " + utfCount + "/" +
@@ -472,11 +490,13 @@ readChars:
                             // that was terminated with
                             // (11100000, 00000000, 00000000)
                             // Close the stream if it cannot be reset.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
                             if (!csd.isPositionAware()) {
                                 closeIn();
                             }
                             break readChars;
                         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
                         throw utfFormatException("Internal error: Derby-" +
                             "specific EOF marker read");
                     }
@@ -495,6 +515,7 @@ readChars:
 
                 default:
                     // 10xx xxxx,  1111 xxxx
+//IC see: https://issues.apache.org/jira/browse/DERBY-2824
                     throw utfFormatException("Invalid UTF encoding at " +
                         "byte/char position " + utfCount + "/" +
                         readerCharCount + ": (int)" + c);
@@ -517,15 +538,18 @@ readChars:
         }
 
         // Close the stream if it cannot be reset.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         if (!csd.isPositionAware()) {
             closeIn();
         }
         return true;
         } finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
             ConnectionChild.restoreIntrFlagIfSeen(true, parent.getEmbedConnection());
             parent.restoreContextStack();
         }
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throw Util.newIOException(sqle);
         }
     }
@@ -542,7 +566,9 @@ readChars:
     private void resetUTF8Reader()
             throws IOException, StandardException {
         // Skip the length encoding bytes.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         this.positionedIn.reposition(csd.getDataOffset());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         this.utfCount = this.rawStreamPos = this.positionedIn.getPosition();
         // If bufferable, discard buffered stream and create a new one.
         if (csd.isBufferable()) {
@@ -574,6 +600,7 @@ readChars:
             SanityManager.ASSERT(this.positionedIn != null);
             SanityManager.ASSERT(requestedCharPos > 0);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
         if (requestedCharPos <= readerCharCount - charactersInBuffer) {
             // The stream must be reset, because the requested position is
             // before the current lower buffer boundary.
@@ -606,6 +633,7 @@ readChars:
         // Using the maximum buffer size will be optimal,
         // unless the data is smaller than the maximum buffer.
         int bufferSize = MAXIMUM_BUFFER_SIZE;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         long knownLength = csd.getCharLength();
         long maxCharLength = csd.getMaxCharLength();
         if (knownLength < 1) {
@@ -629,6 +657,7 @@ readChars:
      * @throws IOException if reading from the stream fails
      */
     private final void persistentSkip(long toSkip)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
             throws IOException {
         long remaining = toSkip;
         while (remaining > 0) {

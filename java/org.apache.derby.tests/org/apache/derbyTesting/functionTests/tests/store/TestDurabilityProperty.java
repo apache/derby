@@ -124,6 +124,7 @@ public class TestDurabilityProperty {
 
         try {
             conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
             TestUtil.getConnection("","shutdown=true");
         } catch (SQLException sqle) {
             if ("XJ015".equals(sqle.getSQLState())) {

@@ -66,6 +66,7 @@ public class FilteredIssueListerAntWrapper {
     }
 
     public void setReportDisqualifications(String bool) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5080
         System.setProperty("reportDisqualifications", bool);
     }
 

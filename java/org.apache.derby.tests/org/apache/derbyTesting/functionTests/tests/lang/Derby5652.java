@@ -63,6 +63,7 @@ public class Derby5652 extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite( "Derby5652" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Test    test = new Derby5652( "basicTest" );
 

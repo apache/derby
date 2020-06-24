@@ -42,6 +42,7 @@ import org.apache.derby.iapi.util.UTF8Util;
  * 1-based. Byte positions are always 0-based.
  */
 final class TemporaryClob implements InternalClob {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2827
 
     /**
      * Connection child assoicated with this Clob.
@@ -113,6 +114,7 @@ final class TemporaryClob implements InternalClob {
      * @throws SQLException if accessing underlying resources fail
      */
     static InternalClob cloneClobContent(String dbName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2800
                                          ConnectionChild conChild,
                                          InternalClob clob,
                                          long length)
@@ -131,6 +133,7 @@ final class TemporaryClob implements InternalClob {
      *      <code>null</code>
      */
     TemporaryClob (ConnectionChild conChild) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         if (conChild == null) {
             throw new NullPointerException("conChild cannot be <null>");
         }
@@ -179,12 +182,14 @@ final class TemporaryClob implements InternalClob {
      * @param conChild connection object used to obtain synchronization object
      */
     TemporaryClob (String data, ConnectionChild conChild)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5760
                           throws IOException, StandardException {
         if (conChild == null) {
             throw new NullPointerException("conChild cannot be <null>");
         }
         this.conChild = conChild;
         bytes = new LOBStreamControl(conChild.getEmbedConnection(), getByteFromString (data));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4023
         this.cachedCharLength = data.length();
     }
     /**
@@ -201,6 +206,7 @@ final class TemporaryClob implements InternalClob {
      */
     //@GuardedBy(this)
     private long getBytePosition (final long charPos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
             throws IOException {
         long bytePos;
         if (charPos == this.posCache.getCharPos()) {
@@ -230,6 +236,7 @@ final class TemporaryClob implements InternalClob {
      * @return Update count.
      */
     public long getUpdateCount() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         return bytes.getUpdateCount();
     }
 
@@ -243,6 +250,7 @@ final class TemporaryClob implements InternalClob {
      */
     public synchronized Writer getWriter (long pos)
             throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         checkIfValid();
         // If pos is too large, an error will first be thrown when the writer
         // is written to. Is this okay behavior, is does it break the spec?
@@ -271,6 +279,7 @@ final class TemporaryClob implements InternalClob {
         }
         // getCSD obtains a descriptor for the stream to allow the reader
         // to configure itself.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         Reader isr = new UTF8Reader(getCSD(), conChild,
                 conChild.getConnectionSynchronization());
 
@@ -293,6 +302,7 @@ final class TemporaryClob implements InternalClob {
      */
     public Reader getInternalReader(long characterPosition)
             throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         if (this.internalReader == null) {
             // getCSD obtains a descriptor for the stream to allow the reader
             // to configure itself.
@@ -322,6 +332,7 @@ final class TemporaryClob implements InternalClob {
      */
     public synchronized long getCharLength() throws IOException {
         checkIfValid();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         if (cachedCharLength == 0) {
             cachedCharLength = UTF8Util.skipUntilEOF(
                     new BufferedInputStream(getRawByteStream()));
@@ -335,6 +346,7 @@ final class TemporaryClob implements InternalClob {
      * @return The number of characters in the Clob, or {@code -1} if unknown.
      */
     public synchronized long getCharLengthIfKnown() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
         checkIfValid();
         // Treat a cached value of zero as a special case.
         return (cachedCharLength == 0 ? -1 : cachedCharLength);
@@ -368,6 +380,7 @@ final class TemporaryClob implements InternalClob {
             throw new IllegalArgumentException(
                 "Position must be positive: " + insertionPoint);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         long prevLength = cachedCharLength;
         updateInternalState(insertionPoint);
         long byteInsertionPoint = getBytePosition(insertionPoint);
@@ -401,6 +414,7 @@ final class TemporaryClob implements InternalClob {
                 throw Util.generateCsSQLException(se);
             }
             // Update the length if we know the previous length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
             if (prevLength != 0) {
                 long newLength = (insertionPoint -1) + str.length();
                 if (newLength > prevLength) {
@@ -420,6 +434,7 @@ final class TemporaryClob implements InternalClob {
      * @return {@code true} if released, {@code false} if not.
      */
     public synchronized boolean isReleased() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         return released;
     }
 
@@ -447,6 +462,7 @@ final class TemporaryClob implements InternalClob {
                     new BufferedInputStream(getRawByteStream()), newCharLength);
             this.bytes.truncate(byteLength);
             // Reset the internal state, and then update the length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
             updateInternalState(newCharLength);
             cachedCharLength = newCharLength;
         } catch (StandardException se) {
@@ -495,6 +511,7 @@ final class TemporaryClob implements InternalClob {
     private void copyClobContent(InternalClob clob)
             throws IOException, SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
             long knownLength = clob.getCharLengthIfKnown();
             if (knownLength == -1) {
                 // Decode UTF-8 data and copy until EOF, obtain char length.
@@ -523,8 +540,11 @@ final class TemporaryClob implements InternalClob {
      * @throws SQLException if accessing underlying resources fail
      */
     private void copyClobContent(InternalClob clob, long charLength)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2800
             throws IOException, SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
             long knownLength = clob.getCharLengthIfKnown();
             if (knownLength > charLength || knownLength == -1) {
                 // Decode and copy the requested number of chars.
@@ -534,6 +554,7 @@ final class TemporaryClob implements InternalClob {
                 this.cachedCharLength = knownLength;
                 // Copy raw bytes until EOF.
                 // Special case optimization, avoids UTF-8 decoding.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3793
                 this.bytes.copyData(clob.getRawByteStream(), Long.MAX_VALUE);
             } else {
                 // The known length must be smaller than the requested length.
@@ -570,6 +591,8 @@ final class TemporaryClob implements InternalClob {
      */
     private final void updateInternalState(long charChangePosition) {
         // Discard the internal reader, don't want to deliver stale data.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         if (internalReader != null) {
             internalReader.close();
             internalReader = null;

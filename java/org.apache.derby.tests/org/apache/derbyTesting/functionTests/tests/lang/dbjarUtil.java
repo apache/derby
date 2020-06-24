@@ -122,6 +122,7 @@ public class dbjarUtil
 
 		File jar = new File(root, jarName);
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		URLClassLoader cl = new URLClassLoader(new URL[] {jar.toURI().toURL()});
     	java.lang.Thread.currentThread().setContextClassLoader(cl);
    

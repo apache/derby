@@ -59,6 +59,7 @@ public class XATest extends BaseJDBCTestCase {
     
     public XATest(String name) {
         super(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2474
 
     }
 
@@ -88,6 +89,7 @@ public class XATest extends BaseJDBCTestCase {
      */
     public void testSingleConnectionOnePhaseCommit() throws SQLException,
             XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2474
 
         XADataSource xads = J2EEDataSource.getXADataSource();
         J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
@@ -177,6 +179,8 @@ public class XATest extends BaseJDBCTestCase {
      * transaction xa_commit xa_1Phase 3; disconnect; </code>
      */
     public void testInterleavingTransactions() throws SQLException, XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         Statement preStatement = getConnection().createStatement();
         preStatement.execute("create table fooInterleaving (a int)");
         preStatement.execute("insert into fooInterleaving values (0)");
@@ -195,6 +199,8 @@ public class XATest extends BaseJDBCTestCase {
         Connection conn = xac.getConnection();
 
         Statement s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         s.executeUpdate("insert into APP.fooInterleaving values (1)");
         xar.end(xid1, XAResource.TMSUSPEND);
 
@@ -270,6 +276,8 @@ public class XATest extends BaseJDBCTestCase {
         expectedRows = new String[][] { { "(3", "IDLE", "NULL", "SKU",
                 "UserTransaction" } };
         XATestUtil.checkXATransactionView(conn, expectedRows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         ResultSet rs = s.executeQuery("select * from APP.fooInterleaving");
         expectedRows = new String[][] { { "0" }, { "1" }, { "3" } };
         JDBC.assertFullResultSet(rs, expectedRows);
@@ -321,6 +329,7 @@ public class XATest extends BaseJDBCTestCase {
      </code>
      */
     public void testNoTransaction() throws SQLException, XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2474
         XADataSource xads = J2EEDataSource.getXADataSource();
         XAConnection xac = xads.getXAConnection();
         XAResource xar = xac.getXAResource();
@@ -397,6 +406,8 @@ public class XATest extends BaseJDBCTestCase {
      * Morph a connection between local anf global transactions.
      */
     public void testMorph() throws SQLException, XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         Statement preStatement = getConnection().createStatement();
         preStatement.execute("create table fooMorph (a int)");
         preStatement.executeUpdate("insert into APP.fooMorph values (0)");
@@ -420,6 +431,8 @@ public class XATest extends BaseJDBCTestCase {
          */
         conn.setAutoCommit(false);
         Statement s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         s.executeUpdate("insert into APP.fooMorph values (2001)");
         // no rows expected
         XATestUtil.checkXATransactionView(conn, null);
@@ -432,6 +445,8 @@ public class XATest extends BaseJDBCTestCase {
          */
 
         conn.setAutoCommit(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         s.executeUpdate("insert into APP.fooMorph values (2002)");
         XATestUtil.checkXATransactionView(conn, null);
 
@@ -447,6 +462,8 @@ public class XATest extends BaseJDBCTestCase {
                 "UserTransaction" } };
         XATestUtil.checkXATransactionView(conn, expectedRows);
         s.executeUpdate("insert into APP.fooMorph values (2003)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
 
         /*
          * -- disallowed commit; -- disallowed rollback; -- disallowed
@@ -485,6 +502,8 @@ public class XATest extends BaseJDBCTestCase {
         // set, will execute but ResultSet will have close on commit
 
         // DERBY-1158 query with holdable statement
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         s.executeQuery("select * from APP.fooMorph where A >= 2000").close();
         s.close();
 
@@ -496,6 +515,8 @@ public class XATest extends BaseJDBCTestCase {
         /*
          * select * from foo; xa_end xa_success 1; xa_prepare 1;
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         ResultSet rs = s.executeQuery("select * from APP.fooMorph where A >= 2000");
         expectedRows = new String[][] { { "2001" }, { "2002" }, { "2003" } };
 
@@ -556,6 +577,8 @@ public class XATest extends BaseJDBCTestCase {
          */
         conn = xac.getConnection();
         s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         s.executeUpdate("insert into APP.fooMorph values (2005)");
         conn.commit();
         conn.setAutoCommit(false);
@@ -583,6 +606,8 @@ public class XATest extends BaseJDBCTestCase {
                 { "2005" }, { "2007" } };
         JDBC.assertFullResultSet(rs, expectedRows);
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
+//IC see: https://issues.apache.org/jira/browse/DERBY-3319
         conn.rollback();
         conn.close();
 
@@ -594,6 +619,8 @@ public class XATest extends BaseJDBCTestCase {
         conn = xac.getConnection();
         conn.setAutoCommit(false);
         s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         s.executeUpdate("delete from app.fooMorph");
         rs = s.executeQuery("select * from APP.fooMorph");
         JDBC.assertEmpty(rs);
@@ -646,6 +673,8 @@ public class XATest extends BaseJDBCTestCase {
          * null order by gxid,username; select * from foo;
          */
         s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         s.executeUpdate("delete from APP.fooMorph");
         rs = s.executeQuery("select * from APP.fooMorph where A >= 2000");
         JDBC.assertEmpty(rs);
@@ -661,6 +690,12 @@ public class XATest extends BaseJDBCTestCase {
 
         conn = xac.getConnection();
         s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         rs = s.executeQuery("select * from APP.fooMorph where A >= 2000");
         expectedRows = new String[][] { { "2001" }, { "2002" }, { "2003" },
                 { "2005" }, { "2007" } };
@@ -677,6 +712,8 @@ public class XATest extends BaseJDBCTestCase {
      * upon calling close() on them.
      */
     public void testDerby4310PreparedStatement() throws SQLException, XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         XADataSource xads = J2EEDataSource.getXADataSource();
         J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
 
@@ -807,6 +844,8 @@ public class XATest extends BaseJDBCTestCase {
         assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT, sdh
                 .getResultSetHoldability());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         checkHeldRS(conn, sdh, sdh.executeQuery("select * from app.foo966"));
         PreparedStatement psdh = conn.prepareStatement("SELECT * FROM APP.foo966");
         PreparedStatement psdh_d = conn
@@ -819,6 +858,8 @@ public class XATest extends BaseJDBCTestCase {
                 ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
         assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT, shh
                 .getResultSetHoldability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         checkHeldRS(conn, shh, shh.executeQuery("select * from app.foo966"));
         PreparedStatement pshh = conn.prepareStatement("SELECT * FROM APP.foo966",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
@@ -836,6 +877,8 @@ public class XATest extends BaseJDBCTestCase {
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, sch
                 .getResultSetHoldability());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         checkHeldRS(conn, sch, sch.executeQuery("select * from app.foo966"));
         PreparedStatement psch = conn.prepareStatement("SELECT * FROM APP.foo966",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
@@ -854,6 +897,8 @@ public class XATest extends BaseJDBCTestCase {
         Statement sdc = conn.createStatement();
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, sdc
                 .getResultSetHoldability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         checkHeldRS(conn, sdc, sdc.executeQuery("select * from app.foo966"));
         PreparedStatement psdc = conn.prepareStatement("SELECT * FROM APP.foo966");
         PreparedStatement psdc_d = conn
@@ -866,6 +911,8 @@ public class XATest extends BaseJDBCTestCase {
                 ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, psdc
                 .getResultSetHoldability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         checkHeldRS(conn, shc, shc.executeQuery("select * from app.foo966"));
         PreparedStatement pshc = conn.prepareStatement("SELECT * FROM APP.foo966",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
@@ -883,6 +930,8 @@ public class XATest extends BaseJDBCTestCase {
                 ResultSet.CONCUR_READ_ONLY, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, scc
                 .getResultSetHoldability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         checkHeldRS(conn, scc, scc.executeQuery("select * from app.foo966"));
         PreparedStatement pscc = conn.prepareStatement("SELECT * FROM APP.foo966",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
@@ -899,6 +948,8 @@ public class XATest extends BaseJDBCTestCase {
         // Revert back to holdable
         conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         ResultSet rs = sdh.executeQuery("SELECT * FROM APP.foo966");
         rs.next();
         // before commit
@@ -911,6 +962,8 @@ public class XATest extends BaseJDBCTestCase {
 
         // ensure a transaction is active to test DERBY-1025
         rs = sdh.executeQuery("SELECT * FROM APP.foo966");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
 
         // This switch to global is ok because conn
         // is in auto-commit mode, thus the start performs
@@ -920,11 +973,14 @@ public class XATest extends BaseJDBCTestCase {
         xar.start(xid, XAResource.TMNOFLAGS);
 
         // Statements not returning ResultSet's should be ok
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         sdh.executeUpdate("DELETE FROM APP.foo966 where A < -99");
         shh.executeUpdate("DELETE FROM APP.foo966 where A < -99");
         sch.executeUpdate("DELETE FROM APP.foo966 where A < -99");
 
         ArrayList<ResultSet> openRS = new ArrayList<ResultSet>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Statements obtained while default was hold.
         // All should work, holability will be downgraded
@@ -940,11 +996,14 @@ public class XATest extends BaseJDBCTestCase {
         openRS.add(psch.executeQuery());
 
         // Statements not returning ResultSet's should be ok
+//IC see: https://issues.apache.org/jira/browse/DERBY-1159
         psdh_d.executeUpdate();
         pshh_d.executeUpdate();
         psch_d.executeUpdate();
 
         // Statements not returning ResultSet's should be ok
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
         sdc.executeUpdate("DELETE FROM APP.foo966 where A < -99");
         shc.executeUpdate("DELETE FROM APP.foo966 where A < -99");
         scc.executeUpdate("DELETE FROM APP.foo966 where A < -99");
@@ -961,6 +1020,7 @@ public class XATest extends BaseJDBCTestCase {
         openRS.add(pscc.executeQuery());
 
         // Statements not returning ResultSet's should be ok
+//IC see: https://issues.apache.org/jira/browse/DERBY-1159
         psdc_d.executeUpdate();
         pshc_d.executeUpdate();
         pscc_d.executeUpdate();
@@ -971,6 +1031,7 @@ public class XATest extends BaseJDBCTestCase {
         // JDBC 4.0 method getHoldabilty to ensure the
         // holdability is reported correctly.
         int orsCount = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (ResultSet ors : openRS) {
             ors.clearWarnings();
             orsCount++;
@@ -999,6 +1060,8 @@ public class XATest extends BaseJDBCTestCase {
         // DERBY2481 Client does not downgrade PreparedStatement holdability
         if (!usingDerbyNetClient()) {
             PreparedStatement psglobalhold = conn.prepareStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
                     "SELECT * FROM APP.foo966", ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_READ_ONLY,
                     ResultSet.HOLD_CURSORS_OVER_COMMIT);
@@ -1042,6 +1105,7 @@ public class XATest extends BaseJDBCTestCase {
         // test, clearWarnings throws an error if the ResultSet
         // is closed.
         int crsCount = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (ResultSet crs : openRS) {
             try {
                 crs.clearWarnings();
@@ -1432,6 +1496,7 @@ public class XATest extends BaseJDBCTestCase {
     public static void zeroArg() {  }
 
     public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(XATest.class);
 
@@ -1492,6 +1557,7 @@ public class XATest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("XATest");
         // no XA for JSR169
         if (JDBC.vmSupportsJSR169())

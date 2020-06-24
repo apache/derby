@@ -56,6 +56,7 @@ public class ij {
   	@exception IOException thrown if cannot access input or output files.
    */
   static public void main(String[] args) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
       Main.main(args);
   }
   
@@ -76,10 +77,13 @@ public class ij {
 		  Connection conn,
 		  InputStream sqlIn,
 		  String inputEncoding,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		  OutputStream sqlOut,
 		  String outputEncoding)
 		  throws UnsupportedEncodingException
   {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
 	  return ij.runScript(conn, sqlIn, inputEncoding, sqlOut, outputEncoding,false);
   }
 
@@ -115,12 +119,14 @@ public class ij {
                     getNewEncodedOutput(sqlOut, outputEncoding);
 
         Main ijE = new Main(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
 
         LocalizedInput li = LocalizedResource.getInstance().
                 getNewEncodedInput(sqlIn, inputEncoding);
 
         utilMain um = ijE.getutilMain(1, lo, loadSystemProperties);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
         return um.goScript(conn, li);
     }
 
@@ -138,6 +144,7 @@ public class ij {
   }
 
   public static java.sql.Connection startJBMS()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     throws java.sql.SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException,
            NoSuchMethodException, java.lang.reflect.InvocationTargetException
   {			

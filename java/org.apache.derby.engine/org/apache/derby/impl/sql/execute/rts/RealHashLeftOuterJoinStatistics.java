@@ -62,6 +62,7 @@ public class RealHashLeftOuterJoinStatistics
 								long restrictionTime,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics,
@@ -83,6 +84,7 @@ public class RealHashLeftOuterJoinStatistics
 			restrictionTime,
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 			userSuppliedOptimizerOverrides,
 			leftResultSetStatistics,
 			rightResultSetStatistics,
@@ -116,6 +118,7 @@ public class RealHashLeftOuterJoinStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                           // index updates
            null,                           // lock mode

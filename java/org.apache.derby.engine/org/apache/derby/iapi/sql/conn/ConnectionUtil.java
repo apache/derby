@@ -46,6 +46,7 @@ public class ConnectionUtil {
 
 			LanguageConnectionContext lcc = (LanguageConnectionContext)
 				getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			if (lcc == null)
 				throw new SQLException(
@@ -64,6 +65,7 @@ public class ConnectionUtil {
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

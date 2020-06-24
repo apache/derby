@@ -110,6 +110,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
 
         if (pos < 1 || pos > len)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             throw makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {pos} );
         }
         if (length < 0)
@@ -215,6 +216,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
             throws SQLException {
         if (pos < 1 || length < 0 || pos > (len - length + 1))
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             throw makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {pos} );
         }
         if (offset < 0 || length < 0 || offset > (theBytes.length - length))
@@ -228,6 +230,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
     public void truncate(long length) throws SQLException {
         if (length > this.len)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             throw makeSQLException( SQLState.BLOB_LENGTH_TOO_LONG, new Object[] {len} );
         }
         buf = getBytes(1, (int) length);
@@ -242,6 +245,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
             throws SQLException {
         if (len < 0)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             throw makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {len} );
         }
         if (length < 0)

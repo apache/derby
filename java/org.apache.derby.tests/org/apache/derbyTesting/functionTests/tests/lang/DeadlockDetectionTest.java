@@ -82,6 +82,7 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
         final Barrier readLockBarrier = new Barrier(threads.length);
 
         // Exceptions seen by the threads.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         final List<Exception> exceptions =
                 Collections.synchronizedList(new ArrayList<Exception>());
 
@@ -183,6 +184,7 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
         // The transactions that have exclusive locks should attempt to lock
         // another row than the one they already have locked, otherwise there
         // will be no deadlock.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         final List<Exception> exceptions =
                 Collections.synchronizedList(new ArrayList<Exception>());
         for (int i = 0; i < threads.length; i++) {
@@ -225,6 +227,8 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
             conns[i].close();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Exception e : exceptions) {
             if (e instanceof SQLException) {
                 assertSQLState(DEADLOCK, (SQLException) e);

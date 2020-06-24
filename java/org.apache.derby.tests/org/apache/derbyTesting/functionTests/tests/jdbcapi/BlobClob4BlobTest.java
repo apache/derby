@@ -87,6 +87,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         checkSmallPageSize(stmt, "TESTBLOB");
 
         stmt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2519
         commit();
     }
 
@@ -125,6 +126,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         PreparedStatement ps = prepareStatement( sql);
         ps.setBinaryStream( 1, is,data.length);
         //DERBY-4312 Make sure commit() doesn't interfere here
+//IC see: https://issues.apache.org/jira/browse/DERBY-4312
+//IC see: https://issues.apache.org/jira/browse/DERBY-4224
         commit();
         ps.executeUpdate();          
         // Make sure things still work ok when we have a parameter that does get consumed.
@@ -224,6 +227,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 clobLength, CharAlphabet.tamil());
         ps.setCharacterStream(1, streamReader, clobLength);
         //DERBY-4312 make sure commit() doesn't interfere
+//IC see: https://issues.apache.org/jira/browse/DERBY-4312
+//IC see: https://issues.apache.org/jira/browse/DERBY-4224
         commit();
         ps.executeUpdate();
         streamReader.close();
@@ -402,6 +407,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt.executeUpdate(
                 "create trigger T13A after update on testClob " +
                 "referencing new as n old as o " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3220
                 "for each row "+
                 "insert into testClobTriggerA(a, b) values (n.a, n.b)");
         stmt.executeUpdate(
@@ -421,6 +427,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         Statement trigASt = createStatement();
         Statement trigBSt = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
         ResultSet origRS  = null;
         ResultSet trigARS = null;
         ResultSet trigBRS = null;
@@ -435,6 +443,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             trigBRS = 
                 trigBSt.executeQuery(
                     "select a, length(a), b from testClobTriggerB order by b");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
+//IC see: https://issues.apache.org/jira/browse/DERBY-1895
 
         } else {
             origRS = 
@@ -456,6 +466,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             assertTrue("statement trigger produced less rows " +
                     count, trigBRS.next());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
             Clob origClob = origRS.getClob(1);
             if (origClob != null) {
                 assertEquals("FAIL - Invalid checksum for row trigger",
@@ -501,6 +512,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      **/
     public void testTriggersWithClobColumnOrderBy() 
         throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
 
         baseTestTriggersWithClobColumn(true);
     }
@@ -715,6 +730,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 for (int i=0; i<10; i++) {
                     // find a random string to search for
                     start = Math.max(random.nextInt(clobLength - 1), 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1917
                     length = random.nextInt(clobLength - start) + 1;
                     println("start:" + start + " length:" + length);
                     searchString = clob.getSubString(start, length);
@@ -818,6 +834,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             try {
                 Clob clob = rs.getClob(1);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
                 rs.close(); // Cleanup on fail
                 stmt.close();
 
@@ -853,6 +870,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     ps.setInt(2, clobLength);
                     ps.executeUpdate();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
                     rs.close(); // Cleanup on fail
                     stmt.close();
 
@@ -999,6 +1017,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * Test Clob.position()
      */
     public void testPositionAgressiveUseOrderBy() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
         throws Exception {
             baseTestPositionAgressive(true);
     }
@@ -1008,6 +1028,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     public void baseTestPositionAgressive(boolean useOrderBy) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
         throws Exception {
         Statement s = createStatement();
 
@@ -1069,6 +1093,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         psp.setString(1, pstr);
         psp.executeUpdate();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
         checkClob8(s, pstr, useOrderBy);
         commit();
 
@@ -1129,6 +1155,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         commit();
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
         checkClob8(s, pstr, useOrderBy);
         commit();
 
@@ -1216,6 +1246,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     private static void checkClob8(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
     Statement   s, 
     String      pstr,
     boolean     useOrderBy) 
@@ -1251,6 +1283,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     private static void checkClob8(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6154
+//IC see: https://issues.apache.org/jira/browse/DERBY-6092
     Statement   s, 
     Clob        pstr,
     boolean     useOrderBy) 
@@ -1362,6 +1396,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         try {
             stmt2.executeUpdate(
                     "update testClob set b = b + 1 where b = 10000");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
             stmt2.close(); // Cleanup on fail
             conn2.rollback();
             conn2.close();
@@ -1377,6 +1412,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         assertEquals("FAIL: clob length changed", 10000, clob.length());
         
         // Test that update goes through after the transaction is committed
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
         commit();
         stmt2.executeUpdate("update testClob set b = b + 1 where b = 10000");
         
@@ -1433,7 +1469,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         try {
             stmt2.executeUpdate(
                     "update testClob set el = 'smurfball' where b = 1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
             stmt2.close(); // Cleanup on fail
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
             conn2.rollback();
             conn2.close();
             fail("FAIL - statement should timeout");
@@ -1485,6 +1523,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         try {
             shortClob.length();
             //Should have thrown an SQLException in the
+//IC see: https://issues.apache.org/jira/browse/DERBY-2787
             fail("FAIL - should not be able to access Clob after commit");
         } catch (SQLException e) {
             //The same SQLState String INVALID_LOB
@@ -1587,6 +1626,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             //Clobs on the Embedded side and the NetworkClient
             //side are not accessible after closing the
             //connection. Should have thrown an SQLException here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
             fail("FAIL - should not be able to access Clob after " +
                     "Connection Close");
         }
@@ -1665,6 +1705,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      */
     public void testClobAfterCommitWithSecondClob() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3365
         getConnection().setAutoCommit(false);
         Statement s1 = createStatement();
         ResultSet rs1 = s1.executeQuery("values cast('first' as clob)");
@@ -1745,6 +1786,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         assertEquals("FAIL - wrong clob value", expectedValue, value);
         // update contents
         value = updatedClobData + rs.getInt(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2519
         c.setString(1, value);
         rs.updateClob(2, c);
         rs.updateRow();
@@ -1949,6 +1991,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     length = random.nextInt(blobLength - start) + 1;
                     println("start:" + start + " length:" + length);
                     searchBytes = blob.getBytes(start, length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
                     String searchString = new String(searchBytes, "US-ASCII");
                     // get random position to start the search from
                     distance = random.nextInt(maxStartPointDistance);
@@ -1980,6 +2023,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * actions and arguments.
      */
     public void testPositionBlobDeterministic()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3766
             throws IOException, SQLException {
         getConnection().setAutoCommit(false);
         final int size = 100000;
@@ -2078,6 +2122,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     start = Math.max(random.nextInt(blobLength - 1), 1);
                     length = random.nextInt(blobLength - start) + 1;
                     println("start:" + start + " length:" + length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
                     searchString = new String(blob.getBytes(start, length),"US-ASCII");
                     // get random position to start the search from
                     distance = random.nextInt(maxStartPointDistance);
@@ -2106,6 +2151,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     start = rs2.getInt(3);
 
                     searchString = new String(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
                             searchBlob.getBytes(1L, (int)searchBlob.length()),"US-ASCII");
                     println("startSearchPos: " + startSearchPos +
                             "searchString: " + searchString);
@@ -2138,6 +2184,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt.executeUpdate(
                 "create trigger T8A after update on testBlob " +
                 "referencing new as n old as o " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3220
                 "for each row "+
                 "insert into blobTest8TriggerA(a, b, crc32) " +
                 "values (n.a, n.b, n.crc32)");
@@ -2235,6 +2282,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             // get the first column as a clob
             try {
                 Blob blob = rs.getBlob(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
                 rs.close();
                 stmt.close();
                 fail("FAIL - getBlob on int column should throw an " +
@@ -2268,6 +2316,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 try {
                     ps.setBlob(1,blob);
                     ps.executeUpdate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
                     rs.close();
                     stmt.close();
                     ps.close();
@@ -2359,6 +2408,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 // 0 or negative position value
                 try {
                     blob.position(blob, -42);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4785
+//IC see: https://issues.apache.org/jira/browse/DERBY-4785
                     fail("FAIL - position with negative start " +
                             "position should have caused an exception");
                 } catch (SQLException e) {
@@ -2505,8 +2556,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             
             stmt2.executeUpdate(
                     "update testBlob set b = b + 1 where b = 10000");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
             stmt.close();
             stmt2.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
             conn2.rollback();
             conn2.close();
             fail("FAIL - should have gotten lock timeout");
@@ -2530,6 +2583,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         assertTrue(shortBlob != null);
         
         // Test that update goes through after the transaction is committed
+//IC see: https://issues.apache.org/jira/browse/DERBY-4312
+//IC see: https://issues.apache.org/jira/browse/DERBY-4224
         commit();
         stmt2.executeUpdate("update testBlob set b = b + 1 where b = 10000");
         
@@ -2592,8 +2647,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt2 = conn2.createStatement();
         try {
             stmt2.executeUpdate("update testBlob set el = null where b = 1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2768
             stmt2.close();
             stmt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
             conn2.rollback();
             conn2.close();
             fail("FAIL - statement should timeout");
@@ -2660,6 +2717,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             shortBlob.length();
             fail("FAIL - should not be able to access Blob after commit");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2770
             checkException(INVALID_LOB, e);
         }
 
@@ -2669,6 +2727,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             blob.length();
             fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2770
             checkException(INVALID_LOB, e);
         }
         try {
@@ -2693,6 +2752,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             blob.position(blob,2);
             fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2770
             checkException(INVALID_LOB, e);
         }
     }
@@ -2728,6 +2788,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         getConnection().close();
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2729
             long length = shortBlob.length();                        
             fail("FAIL - should get an exception, connection is closed");
         } catch (SQLException e) {
@@ -2740,6 +2801,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             fail("FAIL - should not be able to access large lob " +
                     "after the connection is closed");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2729
             checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
@@ -2768,6 +2830,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             fail("FAIL - should not be able to access large lob " +
                     "after the connection is closed");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
             checkException(NO_CURRENT_CONNECTION, e);
         }
 
@@ -2861,12 +2924,14 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         b = rs.getBlob(2);
         // check contents
         value = b.getBytes(1, blobData.length() + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
         expectedValue = (blobData + rs.getInt(1)).getBytes("US-ASCII");
         assertTrue("FAIL - wrong blob value",
                 Arrays.equals(value, expectedValue));
 
         // update contents
         value = (updatedBlobData + rs.getInt(1)).getBytes("US-ASCII");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2519
         b.setBytes(1, value);
         rs.updateBlob(2, b);
         rs.updateRow();
@@ -2897,6 +2962,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 "insert into testBlob (b, a) values (?, ?)");
         for (int i=0; i<10; i++) {
             ps.setInt(1, i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
             ps.setBytes(2, (blobData + i).getBytes("US-ASCII"));
             ps.execute();
         }
@@ -2926,6 +2993,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     private void updateBlobWithUpdateBinaryStream(ResultSet rs)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
     throws SQLException, UnsupportedEncodingException {
         Blob b;
         byte[] value, expectedValue;
@@ -2935,6 +3004,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         b = rs.getBlob(2);
         // check contents
         value = b.getBytes(1, blobData.length() + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
         expectedValue = (blobData + rs.getInt(1)).getBytes("US-ASCII");
         
         assertTrue("FAIL - wrong blob value",
@@ -2951,6 +3021,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         b = rs.getBlob(2);
         // check contents
         value = b.getBytes(1, updatedBlobData.length() + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
         expectedValue = (updatedBlobData + rs.getInt(1)).getBytes("US-ASCII");
         assertTrue("FAIL - wrong blob value",
                 Arrays.equals(value, expectedValue));
@@ -3008,6 +3080,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         assertEquals("FAIL - invalid column size", clobLength, columnSize);
         assertEquals("FAIL - invalid column size", columnSize, clob.length());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2140
         rs.close();
         stmt.close();
     }
@@ -3046,6 +3119,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     break;
                 columnSize += size;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
             fail("FAIL - should have got an IOException");
         } catch (java.io.IOException ioe) {
             if(usingEmbedded()) {
@@ -3168,7 +3242,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("BlobClob4BlobTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
         suite.addTest(baseSuite("embedded"));
         suite.addTest(
                 TestConfiguration.clientServerDecorator(baseSuite("client")));
@@ -3184,8 +3260,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(
                 BlobClob4BlobTest.class, "BlobClob4BlobTest:" + name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2003
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4));
     }
@@ -3463,6 +3541,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             if (numBytes >= 0) {
                 byte[] readBytes = new byte[numBytes];
                 System.arraycopy(value, 0, readBytes, 0, numBytes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3776
                 valueString = new String(readBytes, "US-ASCII");
                 assertEquals("FAIL - wrong substring value",
                         valueString, subStr);
@@ -3538,6 +3617,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testBlobInsert() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2523
         String[] typeNames = { "int", "char(10)", "varchar(80)", "long varchar",
                 "char(10) for bit data", "long varchar for bit data", "blob(80)" };
 
@@ -3589,6 +3669,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     private void checkException(String SQLState, SQLException se)
             throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4785
          assertSQLState(SQLState, se);
     }
 

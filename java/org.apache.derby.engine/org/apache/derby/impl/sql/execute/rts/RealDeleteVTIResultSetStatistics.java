@@ -150,6 +150,7 @@ public class RealDeleteVTIResultSetStatistics
            (UUID)parentID,
            null,                             // estimated row count
            null,                             // estimated cost
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.rowCount,
            null,                              // the deferred rows.
            null,                              // the input rows

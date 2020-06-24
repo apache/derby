@@ -89,6 +89,7 @@ public final class FileMonitor extends BaseMonitor
      * a SecurityException
      */
     private ThreadGroup createDaemonGroup() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1439
         try {
             ThreadGroup group = new ThreadGroup("derby.daemons");
             group.setDaemon(true);
@@ -98,6 +99,8 @@ public final class FileMonitor extends BaseMonitor
             // let the daemon threads be created in the default thread group.
             // This can only happen if the current Derby thread is a part of
             // the root thread group "system".
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
             reportThread(se);
             return null;
         }
@@ -107,6 +110,7 @@ public final class FileMonitor extends BaseMonitor
 		SECURITY WARNING.
 
 		This method is run in a privileged block in a Java 2 environment.
+//IC see: https://issues.apache.org/jira/browse/DERBY-623
 
 		Set the system home directory.  Returns false if it couldn't for
 		some reason.
@@ -119,6 +123,7 @@ public final class FileMonitor extends BaseMonitor
 		}
 
 		InputStream versionStream = getClass().getResourceAsStream("/" + ProductGenusNames.DBMS_INFO);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 		engineVersion = ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
 
@@ -129,6 +134,7 @@ public final class FileMonitor extends BaseMonitor
 			systemHome = System.getProperty(Property.SYSTEM_HOME_PROPERTY);
 		} catch (SecurityException se) {
 			// system home will be the current directory
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
             report(se, Property.SYSTEM_HOME_PROPERTY);
 			systemHome = null;
 		}
@@ -162,10 +168,12 @@ public final class FileMonitor extends BaseMonitor
                     // but avoids requiring read permission on the parent
                     // directory if it exists.
                     created = home.mkdir() || home.mkdirs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
                     if (created) {
                         FileUtil.limitAccessToOwner(home);
                     }
 				} catch (SecurityException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
                     report(se, home);
 					return false;
                 } catch (IOException ioe) {
@@ -181,6 +189,7 @@ public final class FileMonitor extends BaseMonitor
 		SECURITY WARNING.
 
 		This method is run in a privileged block in a Java 2 environment.
+//IC see: https://issues.apache.org/jira/browse/DERBY-623
 
 		Return a property from the JVM's system set.
 		In a Java2 environment this will be executed as a privileged block
@@ -193,6 +202,7 @@ public final class FileMonitor extends BaseMonitor
 			// SECURITY PERMISSION - OP1
 			return System.getProperty(key);
 		} catch (SecurityException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
             report(se, key);
 			return null;
 		}
@@ -228,6 +238,8 @@ public final class FileMonitor extends BaseMonitor
     }
 
     private void reportThread(SecurityException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
         report(MessageService.getTextMessage(
                 MessageId.CANNOT_SET_DAEMON, e.toString()));
     }
@@ -242,6 +254,7 @@ public final class FileMonitor extends BaseMonitor
 	final boolean initialize(final boolean lite)
 	{
         // SECURITY PERMISSION - OP2, OP2a, OP2b
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return (AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
             public Boolean run() {
                 return Boolean.valueOf(PBinitialize(lite));
@@ -251,6 +264,7 @@ public final class FileMonitor extends BaseMonitor
 
 	final Properties getDefaultModuleProperties() {
         // SECURITY PERMISSION - IP1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return AccessController.doPrivileged(
                 new PrivilegedAction<Properties>() {
             public Properties run() {
@@ -264,6 +278,7 @@ public final class FileMonitor extends BaseMonitor
 			return PBgetJVMProperty(key);
 
         // SECURITY PERMISSION - OP1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return AccessController.doPrivileged(new PrivilegedAction<String>() {
             public String run() {
                 return PBgetJVMProperty(key);
@@ -275,6 +290,7 @@ public final class FileMonitor extends BaseMonitor
             final Runnable task,
             final String name,
             final boolean setMinPriority) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return AccessController.doPrivileged(new PrivilegedAction<Thread>() {
             public Thread run() {
                 try {
@@ -286,6 +302,7 @@ public final class FileMonitor extends BaseMonitor
                     // daemon group has been automatically destroyed. If that's
                     // what happened, create a new daemon group and try again.
                     if (daemonGroup != null && daemonGroup.isDestroyed()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1439
                         daemonGroup = createDaemonGroup();
                         return FileMonitor.super.getDaemonThread(
                                 task, name, setMinPriority);
@@ -301,6 +318,7 @@ public final class FileMonitor extends BaseMonitor
 	  throws IOException {
 		try {
 			// SECURITY PERMISSION - OP3
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<InputStream>() {
                 public InputStream run() throws IOException {

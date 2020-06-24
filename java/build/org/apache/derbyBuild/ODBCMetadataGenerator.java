@@ -193,8 +193,10 @@ public class ODBCMetadataGenerator {
 	private void initChanges() {
 
 		changeMap = new HashMap<String, Byte>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
 
 		changeMap.put("getProcedures", COL_RENAME_CHANGE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		changeMap.put("getProcedureColumns",
 			(byte)(COL_RENAME_CHANGE
@@ -242,6 +244,7 @@ public class ODBCMetadataGenerator {
 
 		// Note: We use ISO-8859-1 because property files are
 		// defined to be that encoding.
+//IC see: https://issues.apache.org/jira/browse/DERBY-675
 		LineNumberReader reader =
 			new LineNumberReader(new InputStreamReader(is, "ISO-8859-1"));
 
@@ -367,6 +370,7 @@ public class ODBCMetadataGenerator {
 
 		// Get a list of the column definitions in the subquery, for
 		// use by subsequent operations.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
 		ArrayList<String> colDefs = new ArrayList<String>();
 		pos = getSelectColDefinitions(queryText, colDefs);
 
@@ -759,6 +763,7 @@ public class ODBCMetadataGenerator {
 	 *	clause, for later use by the calling method.
 	 */
 	private int getSelectColDefinitions(StringBuffer queryText,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
 		ArrayList<String> colDefList)
 	{
 
@@ -942,6 +947,7 @@ public class ODBCMetadataGenerator {
 	{
 
 		if (queryName.equals("getTypeInfo")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
 			if (colName.equals("DATA_TYPE") ||
 				colName.equals("CASE_SENSITIVE") ||
 				colName.equals("UNSIGNED_ATTRIBUTE") ||
@@ -956,6 +962,7 @@ public class ODBCMetadataGenerator {
 		else if (queryName.equals("getColumns")) {
 			if (colName.equals("DECIMAL_DIGITS") ||
 				colName.equals("NULLABLE") ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
 				colName.equals("DATA_TYPE") ||
 				colName.equals("NUM_PREC_RADIX") ||
 				colName.equals("SQL_DATA_TYPE") ||
@@ -964,6 +971,7 @@ public class ODBCMetadataGenerator {
 				return "SMALLINT";
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
 		else if (queryName.equals("getProcedureColumns")) {
 			if (colName.equals("DATA_TYPE")) {
 				return "SMALLINT";
@@ -1013,6 +1021,7 @@ public class ODBCMetadataGenerator {
 	 *	leaves the received column list unchanged.
 	 */
 	private void markNewColPosition(String queryName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
 		ArrayList<String> selectColDefs)
 	{
 
@@ -1256,6 +1265,7 @@ public class ODBCMetadataGenerator {
 	 */
 	private boolean stmtNeedsChange(String queryName, byte changeType) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
 		Byte changeByte = changeMap.get(queryName);
 		if (changeByte == null)
 		// No entry means change is not needed.

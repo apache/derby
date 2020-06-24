@@ -193,10 +193,14 @@ class CreateIndexConstantAction extends IndexConstantAction
 		super(tableId, indexName, tableName, schemaName);
 
         this.forCreateTable             = forCreateTable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         this.unique                     = unique && !hasDeferrableChecking;
 		this.uniqueWithDuplicateNulls   = uniqueWithDuplicateNulls;
         this.hasDeferrableChecking      = hasDeferrableChecking;
         this.initiallyDeferred          = initiallyDeferred;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         this.constraintType             = constraintType;
         this.uniqueDeferrable           = unique && hasDeferrableChecking;
 		this.indexType                  = indexType;
@@ -248,10 +252,15 @@ class CreateIndexConstantAction extends IndexConstantAction
 		 */
 		IndexRowGenerator irg = srcCD.getIndexDescriptor();
 		this.unique = irg.isUnique();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3502
 		this.uniqueWithDuplicateNulls = irg.isUniqueWithDuplicateNulls();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         this.hasDeferrableChecking = false; // N/A such indexes are not shared
         this.uniqueDeferrable = false;      // N/A
         this.initiallyDeferred = false;     // N/A
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         this.constraintType = -1;           // N/A
 		this.indexType = irg.indexType();
 		this.columnNames = srcCD.getColumnNames();
@@ -372,6 +381,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 				td = dd.getTableDescriptor(tableName, sd, tc);
 			}
 		}
@@ -506,12 +516,16 @@ class CreateIndexConstantAction extends IndexConstantAction
              * 4. hasDeferrableChecking is FALSE.
              */
             boolean possibleShare =
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                     (irg.isUnique() || !unique) &&
                     (bcps.length == baseColumnPositions.length) &&
                     !hasDeferrableChecking;
 
 			//check if existing index is non unique and uniqueWithDuplicateNulls
 			//is set to true (backing index for unique constraint)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3502
 			if (possibleShare && !irg.isUnique ())
 			{
 				/* If the existing index has uniqueWithDuplicateNulls set to
@@ -545,6 +559,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 					activation.addWarning(
 							StandardException.newWarning(
 								SQLState.LANG_INDEX_DUPLICATE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6269
 								indexName,
 								cd.getConglomerateName()));
 
@@ -570,6 +585,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 				 */
 				indexRowGenerator =
 					new IndexRowGenerator(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3502
 						indexType, unique, uniqueWithDuplicateNulls,
                         false, // uniqueDeferrable
                         false, // deferrable indexes are not shared
@@ -633,10 +649,15 @@ class CreateIndexConstantAction extends IndexConstantAction
 		indexProperties.put("baseConglomerateId",
 							Long.toString(td.getHeapConglomerateId()));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         if (uniqueWithDuplicateNulls && !hasDeferrableChecking)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             if (dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 				indexProperties.put(
                     "uniqueWithDuplicateNulls", Boolean.toString(true));
 			}
@@ -669,9 +690,12 @@ class CreateIndexConstantAction extends IndexConstantAction
 		// For now, assume that all index columns are ordered columns
 		if (! shareExisting)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             if (dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
                 indexRowGenerator = new IndexRowGenerator(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                         indexType, 
                         unique, 
                         uniqueWithDuplicateNulls,
@@ -772,6 +796,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 					continue;
 				}
 				numSet++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ColumnDescriptor cd = cdl.elementAt(index);
 				DataTypeDescriptor dts = cd.getType();
 
@@ -813,8 +838,13 @@ class CreateIndexConstantAction extends IndexConstantAction
 			 * sort.
 			 */
 			int             numColumnOrderings;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             SortObserver    sortObserver;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
             Properties      sortProperties = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             if (unique || uniqueWithDuplicateNulls || uniqueDeferrable)
 			{
 				// if the index is a constraint, use constraintname in 
@@ -838,8 +868,11 @@ class CreateIndexConstantAction extends IndexConstantAction
                     numColumnOrderings = unique ? baseColumnPositions.length :
                             baseColumnPositions.length + 1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     sortObserver = new UniqueIndexSortObserver(
                         lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                         constraintID,
                         true,
                         uniqueDeferrable,
@@ -857,6 +890,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 
                     // tell transaction controller to use the unique with 
                     // duplicate nulls sorter, when making createSort() call.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 					sortProperties = new Properties();
 					sortProperties.put(
                         AccessFactoryGlobals.IMPL_TYPE, 
@@ -865,8 +899,11 @@ class CreateIndexConstantAction extends IndexConstantAction
 					sortObserver = 
                         new UniqueWithDuplicateNullsIndexSortObserver(
                             lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                             constraintID,
                             true,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                             (hasDeferrableChecking && 
                             constraintType != DataDictionary.FOREIGNKEY_CONSTRAINT),
                             initiallyDeferred,
@@ -887,6 +924,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			ColumnOrdering[]	order = new ColumnOrdering[numColumnOrderings];
 			for (int i=0; i < numColumnOrderings; i++) 
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 				order[i] = 
                     new IndexColumnOrder(
                         i, 
@@ -895,6 +933,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 
 			// create the sorter
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             sortId = tc.createSort(sortProperties,
 					indexTemplateRow.getRowArrayClone(),
 					order,
@@ -917,6 +956,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 					indexType,
 					indexTemplateRow.getRowArray(),	// index row template
 					order, //colums sort order
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     indexRowGenerator.getColumnCollationIds(
                         td.getColumnDescriptorList()),
 					indexProperties,
@@ -988,6 +1028,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 		CardinalityCounter cCount = (CardinalityCounter)rowSource;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         long numRows = cCount.getRowCount();
         if (addStatistics(dd, indexRowGenerator, numRows))
 		{
@@ -1023,6 +1064,7 @@ class CreateIndexConstantAction extends IndexConstantAction
      * @throws StandardException if accessing the data dictionary fails
      */
     private boolean addStatistics(DataDictionary dd,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
                                   IndexRowGenerator irg,
                                   long numRows)
             throws StandardException {
@@ -1159,6 +1201,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 		}
 		finally
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 			sorter.completedInserts();
 		}
 

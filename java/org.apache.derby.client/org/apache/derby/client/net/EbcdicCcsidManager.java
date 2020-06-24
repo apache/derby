@@ -34,6 +34,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * should be fine since this class is intended for converting DDM Parameter data only.
  */
 class EbcdicCcsidManager extends CcsidManager {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     private static final int[] conversionArrayToEbcdic = {
         0x0000, 0x0001, 0x0002, 0x0003, 0x0037, 0x002d, 0x002e, 0x002f
@@ -130,7 +131,9 @@ class EbcdicCcsidManager extends CcsidManager {
     }
 
     public byte[] convertFromJavaString(String sourceString, Agent agent)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
         CharBuffer src = CharBuffer.wrap(sourceString);
         ByteBuffer dest = ByteBuffer.allocate(sourceString.length());
         startEncoding();
@@ -168,6 +171,7 @@ class EbcdicCcsidManager extends CcsidManager {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
     String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
         int i = 0, j = 0;
         char[] theChars = new char[numToConvert];

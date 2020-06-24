@@ -60,6 +60,7 @@ import org.apache.derby.iapi.util.IdUtil;
  */
 
 public final class AliasDescriptor 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	extends PrivilegedSQLObject
 	implements Provider, Dependent
 {
@@ -194,6 +195,7 @@ public final class AliasDescriptor
 	 */
 	public String getQualifiedName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4476
         return IdUtil.mkQualifiedName(getSchemaName(), aliasName);
 	}
 
@@ -364,6 +366,7 @@ public final class AliasDescriptor
 	/** @see TupleDescriptor#getDescriptorType */
 	public String getDescriptorType()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 		return getAliasType(aliasType);
 	}
 	
@@ -406,6 +409,7 @@ public final class AliasDescriptor
      */
     public boolean isPersistent()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1809
         return !getSchemaUUID().toString().equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID);
     }
    

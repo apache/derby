@@ -41,6 +41,7 @@ public class ClientCompatibilitySuite
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Client compatibility suite");
         suite.addTest(JDBCDriverTest.suite());
         // Adding the LOB suite adds around 5 minutes to each client-server

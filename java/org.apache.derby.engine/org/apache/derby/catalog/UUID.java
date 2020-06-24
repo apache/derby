@@ -23,6 +23,7 @@ package org.apache.derby.catalog;
 
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
  An interface for accessing Derby UUIDs, unique identifiers.
 		
 	<p>The values in the

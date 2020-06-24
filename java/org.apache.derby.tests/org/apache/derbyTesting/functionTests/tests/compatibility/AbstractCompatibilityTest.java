@@ -228,6 +228,7 @@ abstract class AbstractCompatibilityTest
                 break;
 
             case Types.BIGINT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 retval = rs.getLong( columnName );
                 break;
 
@@ -261,6 +262,7 @@ abstract class AbstractCompatibilityTest
                 break;
 
             case Types.DOUBLE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 retval = rs.getDouble( columnName );
                 break;
 

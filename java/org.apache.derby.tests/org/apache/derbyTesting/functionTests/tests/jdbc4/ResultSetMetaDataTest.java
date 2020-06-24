@@ -68,6 +68,8 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
             rs.close();
         if(ps != null && !ps.isClosed())
             ps.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         ps = null;
         rs = null;
         rsmd = null;
@@ -77,6 +79,7 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
     }
 
     public void testIsWrapperForResultSetMetaData() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1536
         assertTrue(rsmd.isWrapperFor(ResultSetMetaData.class));
     }
 
@@ -102,6 +105,8 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
      * Return suite with all tests of the class.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return TestConfiguration.defaultSuite(ResultSetMetaDataTest.class);
     }
 }

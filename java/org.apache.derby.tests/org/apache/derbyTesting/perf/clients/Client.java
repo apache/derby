@@ -54,5 +54,6 @@ public interface Client {
      *
      * @param out stream to print the report to
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
     void printReport(PrintStream out);
 }

@@ -42,6 +42,7 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetConnectionReply extends Reply
         implements ConnectionReplyInterface {
     private static MessageUtil msgutil_ = SqlException.getMessageUtil();
@@ -51,6 +52,7 @@ class NetConnectionReply extends Reply
     }
 
     // NET only entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readExchangeServerAttributes(ClientConnection connection)
             throws SqlException {
         startSameIdChainParse();
@@ -60,6 +62,7 @@ class NetConnectionReply extends Reply
     }
 
     // NET only entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readAccessSecurity(ClientConnection connection,
                             int securityMechanism) throws SqlException {
         startSameIdChainParse();
@@ -69,6 +72,7 @@ class NetConnectionReply extends Reply
     }
 
     // NET only entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readSecurityCheck(ClientConnection connection) throws SqlException {
         startSameIdChainParse();
         parseSECCHKreply((NetConnection) connection);
@@ -77,6 +81,7 @@ class NetConnectionReply extends Reply
     }
 
     // NET only entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readAccessDatabase(ClientConnection connection) throws SqlException {
         startSameIdChainParse();
         parseACCRDBreply((NetConnection) connection);
@@ -114,6 +119,7 @@ class NetConnectionReply extends Reply
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readXaStartUnitOfWork(NetConnection conn) throws DisconnectException {
     }
 
@@ -166,6 +172,8 @@ class NetConnectionReply extends Reply
     // for the rdbrllbck command.
     private void parseRDBRLLBCKreply(ConnectionCallbackInterface connection) throws DisconnectException {
         parseTypdefsOrMgrlvlovrs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         parseENDUOWRM(connection);
         int peekCP = parseTypdefsOrMgrlvlovrs();
@@ -216,6 +224,7 @@ class NetConnectionReply extends Reply
 
         peekCP = peekCodePoint();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (SanityManager.DEBUG) {
             if (peekCP != Reply.END_OF_SAME_ID_CHAIN) {
                 SanityManager.THROWASSERT("expected END_OF_SAME_ID_CHAIN");
@@ -243,6 +252,7 @@ class NetConnectionReply extends Reply
             // incorrect but consider it a conversation protocol error
             // 0x03 - OBJDSS sent when not allowed.
             //parseSECTKN (true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             parseSECTKN(false);
         }
     }
@@ -296,6 +306,7 @@ class NetConnectionReply extends Reply
     //-----------------------------parse DDM Reply Messages-----------------------
 
     private void parseCommitError(ConnectionCallbackInterface connection)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
@@ -439,6 +450,7 @@ class NetConnectionReply extends Reply
      *
      */
     private NetSqlca parseAbnormalEndUow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ConnectionCallbackInterface connection,
             UnitOfWorkListener uwl) throws DisconnectException {
 
@@ -485,6 +497,11 @@ class NetConnectionReply extends Reply
     }
 
     private void parseRdbAccessFailed(NetConnection netConnection)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         parseRDBAFLRM();
 
@@ -503,7 +520,9 @@ class NetConnectionReply extends Reply
         NetSqlca netSqlca = parseSQLCARD(null);
         
         //Check if the SQLCARD has null SQLException
+//IC see: https://issues.apache.org/jira/browse/DERBY-374
         if(netSqlca.getSqlErrmc() == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             netConnection.setConnectionNull(true);
         else
             netConnection.completeSqlca(netSqlca);
@@ -801,6 +820,7 @@ class NetConnectionReply extends Reply
     //   RECCNT - optional (MINVAL 0, MINLVL 3)
     //
     // Called by all the Reply classesCMDCHKRM
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void parseCMDCHKRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
@@ -852,6 +872,7 @@ class NetConnectionReply extends Reply
             new DisconnectException(
                 agent_,
                 new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 new SqlException(agent_.logWriter_, netSqlca),
                 msgutil_.getTextMessage(MessageId.CONN_DRDA_CMDCHKRM)));
     }
@@ -925,6 +946,7 @@ class NetConnectionReply extends Reply
         checkRequiredObjects(svrcodReceived, rdbnamReceived);
 
         netAgent_.setSvrcod(svrcod);
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
         agent_.accumulateChainBreakingReadExceptionAndThrow(
             new DisconnectException(agent_,
                 new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
@@ -986,6 +1008,7 @@ class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.NET_DATABASE_NOT_FOUND),
             netConnection.databaseName_));
     }
@@ -1046,6 +1069,7 @@ class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         netAgent_.accumulateReadException(new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
             msgutil_.getTextMessage(MessageId.CONN_USER_NOT_AUTHORIZED_TO_DB)));
     }
@@ -1211,6 +1235,7 @@ class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
             msgutil_.getTextMessage(MessageId.CONN_DRDA_RDBACCRM)));
     }
@@ -1657,6 +1682,7 @@ class NetConnectionReply extends Reply
     // CODPNT - required
     // RDBNAM - optional (MINLVL 3)
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void parseCMDNSPRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
@@ -1705,6 +1731,7 @@ class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.DRDA_DDM_COMMAND_NOT_SUPPORTED),
                 Integer.toHexString(codpnt)));
     }
@@ -1750,6 +1777,7 @@ class NetConnectionReply extends Reply
                 // not having to convert this to a string is a time saver also.
                 foundInPass = true;
                 rdbnamReceived = checkAndGetReceivedFlag(rdbnamReceived);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 String rdbnam = parseRDBNAM(true);
                 peekCP = peekCodePoint();
             }
@@ -1842,6 +1870,7 @@ class NetConnectionReply extends Reply
                 // for logging errors.
                 foundInPass = true;
                 srvnamReceived = checkAndGetReceivedFlag(srvnamReceived);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 parseSRVNAM(); // not used yet
                 peekCP = peekCodePoint();
             }
@@ -1865,6 +1894,7 @@ class NetConnectionReply extends Reply
         }
         popCollectionStack();
         // according the the DDM book, all these instance variables are optional
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         netConnection.setServerAttributeData(srvclsnm, srvrlslv);
     }
 
@@ -1898,6 +1928,8 @@ class NetConnectionReply extends Reply
                 // driver may use it for logging purposes later).
                 foundInPass = true;
                 extnamReceived = checkAndGetReceivedFlag(extnamReceived);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 String extnam = parseEXTNAM();
                 peekCP = peekCodePoint();
             }
@@ -2037,6 +2069,7 @@ class NetConnectionReply extends Reply
                 sectkn);
         
         /* Switch to UTF-8 or EBCDIC managers depending on what's supported */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         if (netConnection.serverSupportsUtf8Ccsid()) {
             netConnection.netAgent_.switchToUtf8CcsidMgr();
         } else {
@@ -2099,6 +2132,7 @@ class NetConnectionReply extends Reply
     }
 
     // Process XA return value
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     byte parseSYNCTYPE() throws DisconnectException {
         return 0;
     }
@@ -2106,6 +2140,7 @@ class NetConnectionReply extends Reply
     // This method handles the parsing of all command replies and reply data
     // for the SYNCCTL command.
     int parseSYNCCTLreply(ConnectionCallbackInterface connection)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         throws DisconnectException {
         if (peekCodePoint() == CodePoint.PBSD) {
             parsePBSD();
@@ -2255,6 +2290,7 @@ class NetConnectionReply extends Reply
                 }
                 netConnection.targetSyncptmgr_ = managerLevel;
                 break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
             case CodePoint.UNICODEMGR:
                 if ((managerLevel < NetConfiguration.MIN_UNICODE_MGRLVL) ||
                         (managerLevel > netConnection.targetUnicodemgr_)) {
@@ -2408,6 +2444,7 @@ class NetConnectionReply extends Reply
 
     // Relational Database Name specifies the name of a relational
     // database of the server.  A server can have more than one RDB.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     String parseRDBNAM(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.RDBNAM);
         if (skip) {
@@ -2424,6 +2461,7 @@ class NetConnectionReply extends Reply
         return readUnsignedShort();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     Xid parseXID() throws DisconnectException {
         return null;
     }
@@ -2510,6 +2548,7 @@ class NetConnectionReply extends Reply
     }
 
     int parseFastSVRCOD(int minSvrcod, int maxSvrcod)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         matchCodePoint(CodePoint.SVRCOD);
 
@@ -2531,6 +2570,7 @@ class NetConnectionReply extends Reply
         return svrcod;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     NetSqlca parseSQLCARD(Sqlca[] rowsetSqlca) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SQLCARD);
         int ddmLength = getDdmLength();
@@ -2609,6 +2649,7 @@ class NetConnectionReply extends Reply
                     sqlstate,
                     sqlerrproc);
             parseSQLCAXGRP(netSqlca);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
             if (netAgent_.targetSqlam_ >= NetConfiguration.MGRLVL_7) {
                 netSqlca.setRowsetRowCount(parseSQLDIAGGRP(rowsetSqlca));
@@ -2705,6 +2746,7 @@ class NetConnectionReply extends Reply
 
         netSqlca.setSqlerrd(sqlerrd);
         netSqlca.setSqlwarnBytes(sqlwarn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         netSqlca.setSqlerrmcBytes(sqlerrmc); // sqlerrmc may be null
     }
 
@@ -2729,6 +2771,7 @@ class NetConnectionReply extends Reply
     // this is duplicated in parseColumnMetaData, but different
     // DAGroup under NETColumnMetaData requires a lot more stuffs including
     // precsion, scale and other stuffs
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     String parseFastVCS() throws DisconnectException {
         // doublecheck what readString() does if the length is 0
         return readFastString(readFastUnsignedShort(),
@@ -2746,6 +2789,7 @@ class NetConnectionReply extends Reply
         return true;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void checkRequiredObjects(boolean receivedFlag) throws DisconnectException {
         if (!receivedFlag) {
             doSyntaxrmSemantics(CodePoint.SYNERRCD_REQ_OBJ_NOT_FOUND);
@@ -2782,11 +2826,13 @@ class NetConnectionReply extends Reply
 
     private void doObjnsprmSemantics(int codePoint) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.DRDA_DDM_OBJECT_NOT_SUPPORTED),
             Integer.toHexString(codePoint)));
     }
 
     // Also called by NetStatementReply and others
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void doPrmnsprmSemantics(int codePoint) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
             new ClientMessageId(SQLState.DRDA_DDM_PARAM_NOT_SUPPORTED),
@@ -2800,6 +2846,7 @@ class NetConnectionReply extends Reply
 
     private void doValnsprmSemantics(int codePoint, String value)
             throws DisconnectException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         // special case the FDODTA codepoint not to disconnect.
         if (codePoint == CodePoint.FDODTA) {
@@ -2835,6 +2882,7 @@ class NetConnectionReply extends Reply
             }
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                 new ClientMessageId(SQLState.DRDA_NO_AVAIL_CODEPAGE_CONVERSION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 cpValue, value));
             return;
         }
@@ -2843,6 +2891,8 @@ class NetConnectionReply extends Reply
         // Returning more information would
         // require rearranging this code a little.
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.DRDA_DDM_PARAMVAL_NOT_SUPPORTED),
             Integer.toHexString(codePoint)));
     }
@@ -2869,6 +2919,7 @@ class NetConnectionReply extends Reply
     //       is producted for SQL CONNECT statement.
     private void doMgrlvlrmSemantics(String manager, String level) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.DRDA_MGRLVLRM),
             manager, level));
     }
@@ -2879,6 +2930,7 @@ class NetConnectionReply extends Reply
     }
 
     private void doMgrlvlrmSemantics(int[] nameList, int[] levelList) throws DisconnectException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         StringBuilder managerNames = new StringBuilder(100);
         StringBuilder managerLevels = new StringBuilder(100);
 
@@ -2944,10 +2996,12 @@ class NetConnectionReply extends Reply
     //          transaction is rolled back and the application is disconnected
     //          from the remote database.
     private void doPrccnvrmSemantics(int conversationProtocolErrorCode)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         // we may need to map the conversation protocol error code, prccnvcd, to some kind
         // of reason code.  For now just return the prccnvcd as the reason code
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
                 msgutil_.getTextMessage(MessageId.CONN_DRDA_PRCCNVRM, 
                     Integer.toHexString(conversationProtocolErrorCode))));
@@ -3124,6 +3178,7 @@ class NetConnectionReply extends Reply
             if (rowsetSqlca[sqldcRown] != null) {
                 rowsetSqlca[sqldcRown].resetRowsetSqlca(netAgent_.netConnection_,
                         sqldcCode,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         sqldcState);
             } else {
                 rowsetSqlca[sqldcRown] = new NetSqlca(netAgent_.netConnection_,
@@ -3237,6 +3292,8 @@ class NetConnectionReply extends Reply
                 skipFastBytes(vcm_length);
             }
             if (readFastUnsignedByte() != CodePoint.NULLDATA) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
                 agent_.accumulateChainBreakingReadExceptionAndThrow(
                     new DisconnectException(agent_,
                         new ClientMessageId(
@@ -3304,7 +3361,9 @@ class NetConnectionReply extends Reply
      * current schema as an UTF-8 String.
      * @throws org.apache.derby.client.am.DisconnectException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void parsePBSD() throws DisconnectException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         parseLengthAndMatchCodePoint(CodePoint.PBSD);
         int peekCP = peekCodePoint();
         while (peekCP != END_OF_SAME_ID_CHAIN) {
@@ -3317,6 +3376,8 @@ class NetConnectionReply extends Reply
             case CodePoint.PBSD_SCHEMA:
                 netAgent_.netConnection_.
                     completePiggyBackSchema
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                     (readString(getDdmLength(), Typdef.UTF8ENCODING));
                 break;
             default:

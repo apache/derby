@@ -40,6 +40,7 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("OCRecoveryTest");
         //DERBY-4647 exec does not work on weme
         if (BaseTestCase.isJ9Platform())
@@ -54,6 +55,7 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
                         OCRecoveryTest.class);
         // using a singleUseDatabaseDecorator which should not create
         // the database until the first connection is made
+//IC see: https://issues.apache.org/jira/browse/DERBY-5382
         return TestConfiguration.singleUseDatabaseDecorator(test,
             "OCRecoveryDB");
     }
@@ -68,6 +70,7 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
                 "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_1",
                 "OCRecoveryDB");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5382
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
                 "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_2",
                 "OCRecoveryDB");
@@ -85,8 +88,10 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
         // is done in next method launchOCRecovery_2 which will run restart
         // recovery on the work done in this step.
         // open a connection to the database, this should create the db
+//IC see: https://issues.apache.org/jira/browse/DERBY-5382
         getConnection();
         setAutoCommit(false);        
+//IC see: https://issues.apache.org/jira/browse/DERBY-5382
         createAndLoadTable(tableName, true, 5000, 0);
         Statement st = createStatement();
         st.executeUpdate("DELETE FROM " + tableName);

@@ -56,6 +56,7 @@ class GenericAuthorizer implements Authorizer
 
 	private final LanguageConnectionContext lcc;
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
     GenericAuthorizer(LanguageConnectionContext lcc)
 		 throws StandardException
 	{
@@ -77,6 +78,7 @@ class GenericAuthorizer implements Authorizer
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 	  Used for operations that do not involve tables or routines.
      
 	  @see Authorizer#authorize
@@ -132,9 +134,11 @@ class GenericAuthorizer implements Authorizer
 		}
         if( activation != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             List<StatementPermission> requiredPermissionsList =
                 activation.getPreparedStatement().getRequiredPermissionsList();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
             authorize( requiredPermissionsList, activation );
         }
     }
@@ -152,6 +156,7 @@ class GenericAuthorizer implements Authorizer
         // requiredPermissionsList for Database Owner
         if( requiredPermissionsList != null    && 
             !requiredPermissionsList.isEmpty() && 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             !lcc.getCurrentUserId(activation).equals(
                                                      dd.getAuthorizationDatabaseOwner()))
         {
@@ -185,6 +190,7 @@ class GenericAuthorizer implements Authorizer
                 try 
                 {
                     // perform the permission checking
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     for (StatementPermission rp : requiredPermissionsList)
                     {
                         rp.check(lcc, false, activation);
@@ -253,6 +259,7 @@ class GenericAuthorizer implements Authorizer
 	{
 		PersistentSet tc = lcc.getTransactionExecute();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         String modeS = PropertyUtil.getServiceProperty(
 									tc,
 									Property.DEFAULT_CONNECTION_MODE_PROPERTY);
@@ -278,7 +285,9 @@ class GenericAuthorizer implements Authorizer
 	private boolean userOnAccessList(String listName) throws StandardException
 	{
 		PersistentSet tc = lcc.getTransactionExecute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         String listS = PropertyUtil.getServiceProperty(tc, listName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         return IdUtil.idOnList(lcc.getSessionUserId(),listS);
 	}
 

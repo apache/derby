@@ -116,6 +116,7 @@ public class XPLAINResultSetDescriptor extends XPLAINTableDescriptor
         ps.setString(1, rs_id.toString());
         ps.setString(2, op_identifier);
         ps.setString(3, op_details);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6318
         ps.setObject(4, no_opens, Types.INTEGER);
         ps.setObject(5, no_index_updates, Types.INTEGER);
         ps.setString(6, lock_mode);
@@ -155,6 +156,7 @@ public class XPLAINResultSetDescriptor extends XPLAINTableDescriptor
         
         return new SystemColumn[] {
             SystemColumnImpl.getUUIDColumn("RS_ID", false),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4772
             SystemColumnImpl.getColumn("OP_IDENTIFIER", Types.VARCHAR, false,
                     TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("OP_DETAILS", Types.VARCHAR, true,

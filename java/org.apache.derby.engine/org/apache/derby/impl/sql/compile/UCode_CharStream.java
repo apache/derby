@@ -224,6 +224,8 @@ public final class UCode_CharStream implements CharStream
      if (inBuf > 0)
      {
         --inBuf;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return buffer[(bufpos == bufsize - 1) ? (bufpos = 0) : ++bufpos];
      }
 

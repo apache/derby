@@ -84,9 +84,11 @@ class Database
      * 
      * @param dbName    database name
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     Database (String dbName)
     {
         setDatabaseName(dbName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.stmtTable = new Hashtable<Object, DRDAStatement>();
         initializeDefaultStatement();
     }
@@ -115,6 +117,7 @@ class Database
     }
     
     public String getDatabaseName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         return this.dbName;
     }
     
@@ -136,11 +139,13 @@ class Database
     final void setConnection(EngineConnection conn)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         if (this.conn != conn) {
             // Need to drop the pb session data when switching connections
             pbsd_ = null;
         }
         this.conn = conn;
+//IC see: https://issues.apache.org/jira/browse/DERBY-374
         if(conn != null)
             defaultStatement.setStatement(conn);
     }
@@ -205,6 +210,7 @@ class Database
     throws SQLException
     {
         DRDAStatement stmt = getDRDAStatement(pkgnamcsn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1002
         if (stmt != null) {
             stmt.close();
             stmt.reset();
@@ -225,6 +231,7 @@ class Database
      * @return DRDAStatement
      */
     protected DRDAStatement getDRDAStatement(Pkgnamcsn pkgnamcsn) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         DRDAStatement newStmt =
             (DRDAStatement) stmtTable.get(pkgnamcsn.getStatementKey());
         if (newStmt != null) {
@@ -284,6 +291,7 @@ class Database
     }
     
     // Create string to pass to DataSource.setConnectionAttributes
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     String appendAttrString(Properties p)
     {
         if (p == null)
@@ -305,6 +313,7 @@ class Database
      */
     protected void storeStatement(DRDAStatement stmt) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         stmtTable.put(stmt.getPkgnamcsn().getStatementKey(), stmt);
     }
 
@@ -360,6 +369,7 @@ class Database
                 }
             
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             if (defaultStatement != null)
                 defaultStatement.close();
             if ((conn != null) && !conn.isClosed())
@@ -369,6 +379,7 @@ class Database
                 {
                     conn.rollback();
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 conn.close();
             }
         }
@@ -447,6 +458,7 @@ class Database
      */
     boolean supportsLocator() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2695
         if (!locatorSupportChecked) {
             // Check if locator procedures exist
             ResultSet rs = getConnection().getMetaData()
@@ -503,6 +515,7 @@ class Database
      */
     public PiggyBackedSessionData getPiggyBackedSessionData(
             boolean createOnDemand) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         pbsd_ = PiggyBackedSessionData.getInstance(pbsd_, conn, createOnDemand);
         return pbsd_;
     }

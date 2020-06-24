@@ -72,6 +72,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      * allow recording information about the firing.
      */
     private static ThreadLocal<List<String>> TRIGGER_INFO =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             new ThreadLocal<List<String>>();
     StringBuffer listOfCreatedTriggers = new StringBuffer();
 
@@ -302,6 +303,7 @@ public class TriggerTest extends BaseJDBCTestCase {
     }
 
     public void testDerby6726()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6726
         throws SQLException
     {
         Statement s = createStatement();
@@ -447,6 +449,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      */
     public void testDerby5578InvalidateAllStatementsProc() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5578
         Statement s = createStatement();
         CallableStatement cSt;
 
@@ -544,6 +547,7 @@ public class TriggerTest extends BaseJDBCTestCase {
     			"SELECT COUNT(*) FROM SYS.SYSSTATEMENTS "+
         		"WHERE VALID = false");
     	rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5578
     	num = rs.getInt(1);
     	rs.close();
     	return(num);
@@ -639,6 +643,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         int triggerCount = createRandomTriggers()[0];
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<String> info = new ArrayList<String>();
         TRIGGER_INFO.set(info);
         
@@ -794,6 +799,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         int beforeCount = createRandomTriggers()[1];
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<String> info = new ArrayList<String>();
         TRIGGER_INFO.set(info);
         
@@ -917,6 +923,7 @@ public class TriggerTest extends BaseJDBCTestCase {
       */
     public static void logTriggerInfo(String info)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         TRIGGER_INFO.get().add(info);
     }
 
@@ -1106,6 +1113,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      */
     private void testClobInTriggerTable(int clobSize) throws SQLException, IOException {
         // Alphabet used when inserting a CLOB.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         CharAlphabet a1 = CharAlphabet.singleChar('a');
         // Alphabet used when updating a CLOB.
         CharAlphabet a2 = CharAlphabet.singleChar('b');
@@ -1187,6 +1195,9 @@ public class TriggerTest extends BaseJDBCTestCase {
         ps.setString(1, clobSize +"");
 
         // - set the value of the input parameter to the input stream
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         ps.setCharacterStream(2,
                 new LoopingAlphabetReader(clobSize, a1), clobSize);
         ps.execute();
@@ -1257,6 +1268,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      */
     private  void testBlobInTriggerTable(int blobSize) throws SQLException, IOException {
         // Alphabet used when inserting a BLOB.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         ByteAlphabet a1 = ByteAlphabet.singleByte((byte) 8);
         // Alphabet used when updating a BLOB.
         ByteAlphabet a2 = ByteAlphabet.singleByte((byte) 9);
@@ -1279,6 +1291,7 @@ public class TriggerTest extends BaseJDBCTestCase {
 
         // - set the value of the input parameter to the input stream
         // use a couple blobs so we are sure it works with multiple lobs
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         ps.setBinaryStream(2,
                 new LoopingAlphabetStream(blobSize, a1), blobSize);
         ps.setBinaryStream(3,
@@ -1341,6 +1354,8 @@ public class TriggerTest extends BaseJDBCTestCase {
 
 
         // - set the value of the input parameter to the input stream
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         ps.setBinaryStream(2,
                 new LoopingAlphabetStream(blobSize, a1), blobSize);
         ps.execute();
@@ -1385,6 +1400,7 @@ public class TriggerTest extends BaseJDBCTestCase {
     public void testUpdateTriggerOnClobColumn() throws SQLException, IOException
     {
         // Alphabet used when inserting a CLOB.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         CharAlphabet a1 = CharAlphabet.singleChar('a');
         // Alphabet used when updating a CLOB.
         CharAlphabet a2 = CharAlphabet.singleChar('b');
@@ -1404,6 +1420,7 @@ public class TriggerTest extends BaseJDBCTestCase {
 
 
         // - set the value of the input parameter to the input stream
+//IC see: https://issues.apache.org/jira/browse/DERBY-5751
         ps.setCharacterStream(2,
                 new LoopingAlphabetReader(clobSize, a1), clobSize);
         ps.execute();
@@ -1514,6 +1531,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         s.executeUpdate("CREATE TRIGGER AIS " +
                 "AFTER INSERT ON T_MAIN " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3220
                 "REFERENCING NEW TABLE AS N " +
                 "FOR EACH STATEMENT " +      
                 "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
@@ -1529,6 +1547,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         s.executeUpdate("CREATE TRIGGER AUS " +
                 "AFTER UPDATE OF V ON T_MAIN " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3220
                 "REFERENCING NEW TABLE AS N OLD TABLE AS O " +
                 "FOR EACH STATEMENT " +      
                 "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
@@ -1544,6 +1563,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         s.executeUpdate("CREATE TRIGGER ADS " +
                 "AFTER DELETE ON T_MAIN " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3220
                 "REFERENCING OLD TABLE AS O " +
                 "FOR EACH STATEMENT " +      
                 "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
@@ -1849,6 +1869,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         switch (jdbcType)
         {
         case Types.SMALLINT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
           return (short) r.nextInt();
         case Types.INTEGER:
             return r.nextInt();

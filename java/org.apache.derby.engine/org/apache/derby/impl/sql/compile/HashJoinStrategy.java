@@ -67,6 +67,7 @@ class HashJoinStrategy extends BaseJoinStrategy {
 		 */
 		if (! innerTable.isMaterializable())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if ( innerTable.optimizerTracingIsOn() ) { innerTable.getOptimizerTracer().traceSkipUnmaterializableHashJoin(); }
 			return false;
 		}
@@ -118,6 +119,8 @@ class HashJoinStrategy extends BaseJoinStrategy {
 			// join predicates that we'll be searching.
 			JBitSet pNums = new JBitSet(tNums.size());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             for (int i = 0; i < predList.size(); i++)
 			{
                 Predicate pred = (Predicate)predList.getOptPredicate(i);
@@ -143,12 +146,15 @@ class HashJoinStrategy extends BaseJoinStrategy {
 		
 		/* Look for equijoins in the predicate list */
         int[] hashKeyColumns = findHashKeyColumns(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 innerTable,
                 cd,
                 predList);
 
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if ( innerTable.optimizerTracingIsOn() )
             {
                 if (hashKeyColumns == null)
@@ -216,6 +222,7 @@ class HashJoinStrategy extends BaseJoinStrategy {
 	/** @see JoinStrategy#nonBasePredicateSelectivity */
 	public double nonBasePredicateSelectivity(
 										Optimizable innerTable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 										OptimizablePredicateList predList) 
 	throws StandardException {
 		double retval = 1.0;
@@ -268,6 +275,7 @@ class HashJoinStrategy extends BaseJoinStrategy {
 	public int maxCapacity( int userSpecifiedCapacity,
                             int maxMemoryPerTable,
                             double perRowUsage) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
         if( userSpecifiedCapacity >= 0)
             return userSpecifiedCapacity;
         perRowUsage += ClassSize.estimateHashEntrySize();
@@ -350,6 +358,8 @@ class HashJoinStrategy extends BaseJoinStrategy {
 		{
 			for (int i = storeRestrictionList.size() - 1; i >= 0; i--)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 Predicate pred =
                         (Predicate)storeRestrictionList.getOptPredicate(i);
 				if (pred.isInListProbePredicate())
@@ -370,10 +380,12 @@ class HashJoinStrategy extends BaseJoinStrategy {
 										storeRestrictionList,
 										acb,
 										resultRowTemplate);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
 		nonStoreRestrictionList.generateQualifiers(acb,	mb, innerTable, true);
 		mb.push(innerTable.initialCapacity());
 		mb.push(innerTable.loadFactor());
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
 		mb.push(innerTable.maxCapacity( (JoinStrategy) this, maxMemoryPerTable));
 		/* Get the hash key columns and wrap them in a formattable */
 		int[] hashKeyColumns = innerTable.hashKeyColumns();
@@ -392,6 +404,7 @@ class HashJoinStrategy extends BaseJoinStrategy {
 						tableLocked,
 						isolationLevel);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		return 28;
 	}
 
@@ -639,12 +652,15 @@ class HashJoinStrategy extends BaseJoinStrategy {
 		}
 
         // Build a list of all the hash key columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<Integer> hashKeys = new ArrayList<Integer>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         for (int colCtr = 0; colCtr < columns.length; colCtr++)
 		{
 			// Is there an equijoin condition on this column?
 			if (predList.hasOptimizableEquijoin(innerTable, columns[colCtr]))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                 hashKeys.add(colCtr);
 			}
 		}
@@ -658,6 +674,8 @@ class HashJoinStrategy extends BaseJoinStrategy {
         int[] keyCols = new int[hashKeys.size()];
         for (int index = 0; index < keyCols.length; index++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             keyCols[index] = hashKeys.get(index).intValue();
         }
         return keyCols;

@@ -45,6 +45,7 @@ public class ReplicationSuite extends BaseTestCase
 	public static Test suite() throws SQLException {
 
         BaseTestSuite suite = new BaseTestSuite("ReplicationSuite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // DERBY-5998: The replication code uses javax.net.ServerSocketFactory
         // to set up communication channels between the master and the slave.
@@ -63,13 +64,17 @@ public class ReplicationSuite extends BaseTestCase
         // on platforms that support JDBC3 and higher. The tests also require
         // a network server.
         if (JDBC.vmSupportsJDBC3() && Derby.hasServer()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5677
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4638
             suite.addTest(ReplicationRun_Local.suite());
             suite.addTest(ReplicationRun_Local.localAuthenticationSuite());
 
             suite.addTest(ReplicationRun_Local_1.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
 
             suite.addTest(ReplicationRun_Local_1Indexing.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
 
             suite.addTest(ReplicationRun_Local_StateTest_part1.suite());
             suite.addTest(ReplicationRun_Local_StateTest_part1_1.suite());
@@ -81,6 +86,7 @@ public class ReplicationSuite extends BaseTestCase
             // Run this separatly as it produces extra output:
             // suite.addTest(ReplicationRun_Local_showStateChange.suite());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
             suite.addTest(ReplicationRun_Local_3_p1.suite());
             suite.addTest(ReplicationRun_Local_3_p2.suite());
             suite.addTest(ReplicationRun_Local_3_p3.suite());
@@ -90,10 +96,13 @@ public class ReplicationSuite extends BaseTestCase
             suite.addTest(ReplicationRun_Local_3_p5.suite());
 
             suite.addTest(ReplicationRun_Local_Encrypted_1.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
 
             suite.addTest(ReplicationRun_Local_3_p6.suite());
 
             suite.addTest(ReplicationRun_Local_Derby4910.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4910
+//IC see: https://issues.apache.org/jira/browse/DERBY-4812
 
         }
 

@@ -45,11 +45,13 @@ public class _Suite extends BaseTestCase  {
 
     public static Test suite() throws Exception {
         BaseTestSuite suite = new BaseTestSuite("engine");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(ErrorStreamTest.suite());
         suite.addTest(LockInterruptTest.suite());
         // for now disable on IBM 1.7 DERBY-5434
         if (!(isIBMJVM() && isJava7()))
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             suite.addTest(RestrictiveFilePermissionsTest.suite());
         suite.addTest(ModuleLoadingTest.suite());
         suite.addTest(ReadMeFilesTest.suite());

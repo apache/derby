@@ -75,6 +75,7 @@ public class XPLAINStatementDescriptor extends XPLAINTableDescriptor
         this.jvm_id      = jvm_id;
         this.os_id       = os_id;
         this.xplain_mode = xplain_mode;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         this.xplain_time = DataTypeUtilities.clone( xplain_time );
         this.thread_id   = thread_id;
         this.xa_id       = xa_id;
@@ -122,6 +123,7 @@ public class XPLAINStatementDescriptor extends XPLAINTableDescriptor
             SystemColumnImpl.getIdentifierColumn("STMT_NAME", true),
             SystemColumnImpl.getColumn("STMT_TYPE", Types.CHAR, false, 3),
             SystemColumnImpl.getColumn("STMT_TEXT", Types.VARCHAR, false, TypeId.VARCHAR_MAXWIDTH),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4772
             SystemColumnImpl.getColumn("JVM_ID", Types.VARCHAR, false,
                     TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("OS_IDENTIFIER", Types.VARCHAR, false,

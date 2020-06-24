@@ -38,6 +38,7 @@ import org.apache.derby.catalog.UUID;
  */
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   <p>
   Generates and recreates unique identifiers.
   </p>

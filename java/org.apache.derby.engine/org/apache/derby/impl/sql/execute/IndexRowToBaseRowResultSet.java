@@ -47,6 +47,7 @@ import org.apache.derby.impl.sql.GenericPreparedStatement;
  * index conglomerate.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
 
@@ -90,6 +91,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     IndexRowToBaseRowResultSet(
 					long conglomId,
 					int scociItem,
@@ -128,6 +130,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 
 		// retrieve the valid column list from
 		// the saved objects, if it exists
+//IC see: https://issues.apache.org/jira/browse/DERBY-2226
 		if (heapColRefItem != -1) {
             this.accessedHeapCols =
                     (FormatableBitSet) gp.getSavedObject(heapColRefItem);
@@ -322,6 +325,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	 * @return the next row in the result
 	 */
 	public ExecRow	getNextRowCore() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -534,6 +538,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	 * location base row, but reuse the saved row location.
 	 */
 	public void positionScanAtRowLocation(RowLocation rl) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		throws StandardException 
 	{
 		baseRowLocation = rl;

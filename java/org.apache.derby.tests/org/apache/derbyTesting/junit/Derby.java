@@ -94,9 +94,11 @@ public class Derby {
             return true;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return hasCorrectJar("/derbytools.jar",
                 JDBC.vmSupportsJNDI() ?
                 "org.apache.derby.jdbc.ClientDataSource" :
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                 "org.apache.derby.jdbc.BasicClientDataSource40");
     }
     

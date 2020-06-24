@@ -69,6 +69,7 @@ public class ClientClob extends Lob implements Clob {
     // CTOR for output, when a btc isn't available; the encoding is
     public ClientClob(Agent agent,
                 byte[] unconvertedBytes,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                 Charset charset,
                 int dataOffset) throws SqlException {
 
@@ -89,6 +90,8 @@ public class ClientClob extends Lob implements Clob {
                 dataOffset,
                 unconvertedBytes.length - dataOffset,
                 charset);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         setSqlLength(string_.length());
         dataType_ |= STRING;
     }
@@ -96,6 +99,7 @@ public class ClientClob extends Lob implements Clob {
     // CTOR for ascii/unicode stream input
     //"ISO-8859-1", "UTF-8", or "UnicodeBigUnmarked"
     public ClientClob(Agent agent,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 InputStream inputStream,
                 Charset encoding,
                 int length) {
@@ -104,6 +108,7 @@ public class ClientClob extends Lob implements Clob {
              false);
 
         setSqlLength(length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
 
         if (encoding.equals(Cursor.ISO_8859_1)) {
             asciiStream_ = inputStream;
@@ -115,6 +120,7 @@ public class ClientClob extends Lob implements Clob {
             characterStream_ =
                     new InputStreamReader(inputStream, Cursor.UTF_16BE);
             dataType_ |= CHARACTER_STREAM;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
             setSqlLength(length / 2);
         }
     }
@@ -132,6 +138,7 @@ public class ClientClob extends Lob implements Clob {
      * @param encoding encoding to use for characters. Only "ISO-8859-1" is
      *      allowed.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     ClientClob(Agent agent, InputStream inputStream, Charset encoding)
             throws SqlException {
 
@@ -142,6 +149,10 @@ public class ClientClob extends Lob implements Clob {
             asciiStream_ = inputStream;
             dataType_ |= ASCII_STREAM;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                 encoding + " InputStream", "String/Clob");
@@ -151,10 +162,12 @@ public class ClientClob extends Lob implements Clob {
     // CTOR for character stream input
     // THE ENCODING IS ASSUMED TO BE "UTF-16BE"
     ClientClob(Agent agent, Reader reader, int length) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         this(agent,
              false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         setSqlLength(length);
         characterStream_ = reader;
         dataType_ |= CHARACTER_STREAM;
@@ -169,6 +182,7 @@ public class ClientClob extends Lob implements Clob {
      */
     public ClientClob(Agent agent, int locator)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         super(agent, false);
         locator_ = locator;
         dataType_ |= LOCATOR;
@@ -185,6 +199,7 @@ public class ClientClob extends Lob implements Clob {
      * @param reader the data to insert
      */
     ClientClob(Agent agent, Reader reader) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         this(agent,
              isLayerBStreamingPossible( agent ) );
@@ -217,6 +232,7 @@ public class ClientClob extends Lob implements Clob {
                 }
 
                 long length = super.sqlLength();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
 
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "length", length);
@@ -270,6 +286,7 @@ public class ClientClob extends Lob implements Clob {
 
                 if ( pos <= 0 ) {
                     throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         new ClientMessageId(SQLState.BLOB_BAD_POSITION), pos);
                 }
 
@@ -279,6 +296,7 @@ public class ClientClob extends Lob implements Clob {
                         length);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
                 if (pos > sqlLength() + 1) {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE),
@@ -300,11 +318,13 @@ public class ClientClob extends Lob implements Clob {
 
     private String getSubStringX(long pos, int length) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         checkForClosedConnection();
         // actual length is the lesser of the length requested
         // and the number of characters available from pos to the end
         long actualLength = Math.min(this.sqlLength() - pos + 1, (long) length);
         //Check to see if the Clob object is locator enabled.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         if (isLocator()) {
             //The Clob object is locator enabled. Hence call the stored
             //procedure CLOBGETLENGTH to determine the length of the Clob.
@@ -331,6 +351,7 @@ public class ClientClob extends Lob implements Clob {
                     agent_.logWriter_.traceEntry(this, "getCharacterStream");
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Reader retVal = getCharacterStreamX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
@@ -344,6 +365,7 @@ public class ClientClob extends Lob implements Clob {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     Reader getCharacterStreamX() throws SqlException {
         checkForClosedConnection();
 
@@ -353,6 +375,7 @@ public class ClientClob extends Lob implements Clob {
             //update sensitive Reader that wraps inside it a
             //Buffered Locator Reader. The wrapper class
             //watches out for updates.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             return new UpdateSensitiveClobLocatorReader
                     (agent_.connection_, this);
         }
@@ -361,6 +384,7 @@ public class ClientClob extends Lob implements Clob {
             return characterStream_;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return new StringReader(string_);
     }
 
@@ -370,6 +394,7 @@ public class ClientClob extends Lob implements Clob {
         //the Clob object has been freed by calling free() on it
         checkValidity();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -377,6 +402,7 @@ public class ClientClob extends Lob implements Clob {
                     agent_.logWriter_.traceEntry(this, "getAsciiStream");
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 InputStream retVal = getAsciiStreamX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getAsciiStream", retVal);
@@ -390,6 +416,7 @@ public class ClientClob extends Lob implements Clob {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     InputStream getAsciiStreamX() throws SqlException {
         checkForClosedConnection();
 
@@ -403,10 +430,12 @@ public class ClientClob extends Lob implements Clob {
             //it a Buffered Locator enabled InputStream. The
             //wrapper watches out for updates to the underlying
             //Clob.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             return new UpdateSensitiveClobLocatorInputStream
                     (agent_.connection_,this);
         }
         else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return new AsciiStream(string_, new StringReader(string_));
         }
     }
@@ -417,6 +446,7 @@ public class ClientClob extends Lob implements Clob {
         //the Clob object has been freed by calling free() on it
         checkValidity();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -427,10 +457,14 @@ public class ClientClob extends Lob implements Clob {
                             start);
                 }
                 if (searchstr == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1516
+//IC see: https://issues.apache.org/jira/browse/DERBY-1516
                 if (start < 1) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.BLOB_BAD_POSITION),
                             start);
@@ -452,10 +486,13 @@ public class ClientClob extends Lob implements Clob {
     private long positionX(String searchstr, long start) throws SqlException {
         checkForClosedConnection();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         long index = -1;
         if (start <= 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.INVALID_API_PARAMETER),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 start, "start", "Clob.position()");
         }
 
@@ -482,6 +519,7 @@ public class ClientClob extends Lob implements Clob {
         //the Clob object has been freed by calling free() on it
         checkValidity();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -489,10 +527,12 @@ public class ClientClob extends Lob implements Clob {
                     agent_.logWriter_.traceEntry(this,
                             "position(Clob, long)",
                             searchstr,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                             start);
                 }
                 if (start < 1) {
                     throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         new ClientMessageId(SQLState.BLOB_BAD_POSITION), start);
                 }
 
@@ -517,14 +557,18 @@ public class ClientClob extends Lob implements Clob {
         checkForClosedConnection();
 
         if (start <= 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.INVALID_API_PARAMETER),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 start, "start", "Clob.position()");
         }
 
         // if the searchstr is longer than the source, no match
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         long index;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
             if (searchstr.length() > sqlLength()) {
                 return -1;
             }
@@ -534,8 +578,10 @@ public class ClientClob extends Lob implements Clob {
                 //Locator support is available. Hence call
                 //CLOBGETPOSITIONFROMLOCATOR to determine the position
                 //of the given Clob inside the LOB.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                 index = agent_.connection_.locatorProcedureCall()
                     .clobGetPositionFromLocator(locator_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         ((ClientClob)searchstr).getLocator(),
                         start);
             } else {
@@ -545,10 +591,12 @@ public class ClientClob extends Lob implements Clob {
                                         (int) start - 1);
                 //increase the index by one since String positions are
                 //0-based and Clob positions are 1-based
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                 if (index != -1) {
                     index++;
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (SQLException e) {
             throw new SqlException(e);
         }
@@ -563,6 +611,7 @@ public class ClientClob extends Lob implements Clob {
         //the Clob object has been freed by calling free() on it
         checkValidity();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -608,16 +657,20 @@ public class ClientClob extends Lob implements Clob {
     }
 
     int setStringX(long pos, String str, int offset, int len)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         if ((int) pos <= 0 ) {
             throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 new ClientMessageId(SQLState.BLOB_BAD_POSITION), pos);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         if ( pos - 1 > sqlLength()) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), pos);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2769
         if (str == null) {
             throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(
@@ -630,6 +683,7 @@ public class ClientClob extends Lob implements Clob {
         
         if ((offset < 0) || offset >= str.length() ) {
             throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 new ClientMessageId(SQLState.BLOB_INVALID_OFFSET), offset);
         }
 
@@ -638,6 +692,7 @@ public class ClientClob extends Lob implements Clob {
                 new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH), len);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2769
         if (offset + len > str.length()) {
             throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(
@@ -652,6 +707,7 @@ public class ClientClob extends Lob implements Clob {
         int length = 0;
         length = Math.min((str.length() - offset), len);
         //check if the Clob object is locator enabled
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         if (isLocator()) {
             //The Clob is locator enabled. Call the CLOBSETSTRING
             //stored procedure to set the given string in the Clob.
@@ -664,10 +720,12 @@ public class ClientClob extends Lob implements Clob {
             //The Clob value has been
             //updated. Increment the
             //update count.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             incrementUpdateCount();
         }
         else {
             //The Clob is not locator enabled.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             reInitForNonLocator(
                 string_.substring(0, (int) pos - 1)
                     .concat(str.substring(offset, offset + length)));
@@ -688,15 +746,19 @@ public class ClientClob extends Lob implements Clob {
                     agent_.logWriter_.traceEntry(this, "setAsciiStream", (int) pos);
                 }
                 OutputStream outStream = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                 if(isLocator()) { // Check to see if the Lob is locator enabled
                     //The Lob is locator enabled. Return an instance of the
                     //Locator enabled Clob specific OutputStream implementation.
                     outStream = new ClobLocatorOutputStream
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             (this, pos);
                 }
                 else {
                     //The Lob is not locator enabled.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
                     outStream = new
                             ClobOutputStream(this, pos);
                 }
@@ -724,8 +786,10 @@ public class ClientClob extends Lob implements Clob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setCharacterStream", (int) pos);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Writer writer = null;
                 //Check to see if this Clob is locator enabled.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                 if (isLocator()) {
                     //return an instance of the locator enabled implementation
                     //of the writer interface
@@ -752,6 +816,17 @@ public class ClientClob extends Lob implements Clob {
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
 
         try
         {
@@ -762,10 +837,14 @@ public class ClientClob extends Lob implements Clob {
                 if (len < 0 ) {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         len);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
                 if ( len > sqlLength()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.BLOB_LENGTH_TOO_LONG),
                         len);
@@ -776,6 +855,7 @@ public class ClientClob extends Lob implements Clob {
                 }
 
                 //check whether the Lob is locator enabled.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                 if (isLocator()) {
                     //The Lob is locator enabled then call the stored
                     //procedure CLOBTRUNCATE to truncate this Lob.
@@ -784,10 +864,12 @@ public class ClientClob extends Lob implements Clob {
                     // The Clob value has been modified.
                     // Increment the update count and update the length.
                     incrementUpdateCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3978
                     setSqlLength(len);
                 }
                 else {
                     //The Lob is not locator enabled.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     reInitForNonLocator(string_.substring(0, (int) len));
                 }
             }
@@ -818,6 +900,7 @@ public class ClientClob extends Lob implements Clob {
         //valid
         isValid_ = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
         try {
             synchronized (agent_.connection_) {
                 if (agent_.loggingEnabled()) {
@@ -832,6 +915,7 @@ public class ClientClob extends Lob implements Clob {
             throw se.getSQLException();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         if(isString()) {
             string_ = null;
             utf8String_ = null;
@@ -883,6 +967,7 @@ public class ClientClob extends Lob implements Clob {
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2444
 
         synchronized (agent_.connection_) {
             if (agent_.loggingEnabled()) {
@@ -890,6 +975,7 @@ public class ClientClob extends Lob implements Clob {
                     (int) pos, length);
             }
             checkPosAndLength(pos, length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
             Reader retVal = null;
             //check if the Lob is locator enabled.
             if(isLocator()) {
@@ -904,6 +990,7 @@ public class ClientClob extends Lob implements Clob {
                 //   length fall within the boundaries of the
                 //   Clob object.
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
                     retVal = new UpdateSensitiveClobLocatorReader
                             (agent_.connection_, this,
                             pos, length);
@@ -921,6 +1008,7 @@ public class ClientClob extends Lob implements Clob {
                 catch(SqlException sqle) {
                     throw sqle.getSQLException();
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 retVal = new StringReader(retVal_str);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
@@ -967,6 +1055,7 @@ public class ClientClob extends Lob implements Clob {
             return utf8String_.length;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         utf8String_ = string_.getBytes(Cursor.UTF_8);
         return utf8String_.length;
     }
@@ -983,11 +1072,15 @@ public class ClientClob extends Lob implements Clob {
     // much since this code is only for talking to very old servers. Suppress
     // the deprecation warnings for now.
     @SuppressWarnings("deprecation")
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     void reInitForNonLocator(String newString) {
         string_ = newString;
         asciiStream_ = new java.io.StringBufferInputStream(string_);
         unicodeStream_ = new java.io.StringBufferInputStream(string_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         characterStream_ = new StringReader(string_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         setSqlLength(string_.length());
     }
 
@@ -998,7 +1091,9 @@ public class ClientClob extends Lob implements Clob {
      * @throws SqlException on error
      */
     protected void materializeStream()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3107
         unicodeStream_ = super.materializeStream(isAsciiStream() ?
                                                         asciiStream_ :
                                                         unicodeStream_,
@@ -1007,6 +1102,7 @@ public class ClientClob extends Lob implements Clob {
     }
 
     /*---------------------------------------------------------------------
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
       Methods used in the locator implementation.
      ----------------------------------------------------------------------*/
 

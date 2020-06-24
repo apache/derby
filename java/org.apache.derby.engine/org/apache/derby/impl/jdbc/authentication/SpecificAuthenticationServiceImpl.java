@@ -76,6 +76,7 @@ public class SpecificAuthenticationServiceImpl
 
 		specificAuthenticationScheme = PropertyUtil.getPropertyFromSet(
 					properties,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 					org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
 		if (
 			 ((specificAuthenticationScheme != null) &&
@@ -116,6 +117,7 @@ public class SpecificAuthenticationServiceImpl
 		Throwable t;
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Class<?> sasClass = Class.forName(specificAuthenticationScheme);
 			if (!UserAuthenticator.class.isAssignableFrom(sasClass)) {
 				throw StandardException.newException(SQLState.AUTHENTICATION_NOT_IMPLEMENTED,
@@ -137,12 +139,14 @@ public class SpecificAuthenticationServiceImpl
 			t = ie;
 		} catch (IllegalAccessException iae) {
 			t = iae;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		} catch (NoSuchMethodException nsme) {
 			t = nsme;
 		} catch (java.lang.reflect.InvocationTargetException ite) {
 			t = ite;
 		}
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5741
         String  detail = t.getClass().getName() + ": " + t.getMessage();
 		throw StandardException.newException
             ( SQLState.AUTHENTICATION_SCHEME_ERROR, specificAuthenticationScheme, detail );

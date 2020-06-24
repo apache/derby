@@ -50,6 +50,8 @@ public class SURTest extends SURBaseTest {
     public void testConcurrencyModeWarning1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -126,6 +128,10 @@ public class SURTest extends SURBaseTest {
     public void testForUpdateException2()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         try {
@@ -142,6 +148,10 @@ public class SURTest extends SURBaseTest {
                          FOR_UPDATE_NOT_PERMITTED_SQL_STATE,
                          e.getSQLState());
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         rollback();
         s.close();
     }
@@ -171,6 +181,8 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_READ_ONLY);
         s.setCursorName(getNextCursorName());
@@ -188,6 +200,8 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet2()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -243,6 +257,8 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet5()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.
                                           TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_READ_ONLY);
@@ -264,6 +280,7 @@ public class SURTest extends SURBaseTest {
      * when doing the update.
      */
     public void testCursorStateAfterCommit1() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1361
         throws SQLException
     {
         testCursorStateAfterCommit(false, ResultSet.TYPE_FORWARD_ONLY);
@@ -319,6 +336,8 @@ public class SURTest extends SURBaseTest {
                                             final int resultSetType) 
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         final Statement s = createStatement(resultSetType, 
                                                 ResultSet.CONCUR_UPDATABLE);
         final String cursorName = getNextCursorName();
@@ -335,6 +354,8 @@ public class SURTest extends SURBaseTest {
             rs.absolute(recordToUpdate);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         
         PreparedStatement ps = 
@@ -383,6 +404,7 @@ public class SURTest extends SURBaseTest {
      * combined with cancelRowUpdates().
      */
     public void testMultiUpdateRow1() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
         throws SQLException 
     {
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -516,6 +538,8 @@ public class SURTest extends SURBaseTest {
     public void testCursorOperationConflictWarning1() 
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -555,6 +579,8 @@ public class SURTest extends SURBaseTest {
     public void testCursorOperationConflictWarning2() 
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -579,6 +605,8 @@ public class SURTest extends SURBaseTest {
         assertEquals("Did not expect the resultset to be updated", oldValue, rs.getInt(2));
         assertEquals("Expected update count to be 0", 0, updateCount);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s4 = createStatement();
         updateCount = s4.executeUpdate("delete from t1 where current of " +
                                        rs.getCursorName());
@@ -592,6 +620,8 @@ public class SURTest extends SURBaseTest {
         assertEquals("Expected update count to be 0", 0, updateCount);
         
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
         s3.close();
         s4.close();
@@ -604,6 +634,8 @@ public class SURTest extends SURBaseTest {
     public void testIndexedUpdateCursor1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -623,6 +655,14 @@ public class SURTest extends SURBaseTest {
     public void testIndexedUpdateCursor2()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -644,6 +684,8 @@ public class SURTest extends SURBaseTest {
      * to insert a row without being on insert row.
      */
     public void testInsertRowWithScrollCursor() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         
@@ -858,6 +900,8 @@ public class SURTest extends SURBaseTest {
                 rs.updateRow();
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = prepareStatement
             ("select * from t1 where id=?");
         for (int i=0; i<recordCount; i++) {
@@ -903,6 +947,8 @@ public class SURTest extends SURBaseTest {
         rs.updateInt(3, -777);
         rs.updateRow();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps2 = prepareStatement
             ("select * from t1 where id=?");
         ps2.setInt(1, -primaryKey);
@@ -938,6 +984,10 @@ public class SURTest extends SURBaseTest {
         
         rs.last();
         int primaryKey = rs.getInt(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = prepareStatement
             ("update t1 set id = ? where id= ?");
         ps.setInt(1, -primaryKey);
@@ -950,6 +1000,8 @@ public class SURTest extends SURBaseTest {
         rs.updateRow();
         
         PreparedStatement ps2 =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
             prepareStatement("select * from t1 where id=?");
         ps2.setInt(1, primaryKey*10);
         ResultSet rs2 = ps2.executeQuery();
@@ -981,6 +1033,8 @@ public class SURTest extends SURBaseTest {
         
         rs.last();
         int primaryKey = rs.getInt(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = s.getConnection().prepareStatement
             ("update t1 set id = ? where id= ?");
         ps.setInt(1, -primaryKey);
@@ -1029,6 +1083,8 @@ public class SURTest extends SURBaseTest {
             rs.updateInt(2, newKey--);
             rs.updateRow();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = prepareStatement
             ("select * from t1 where a=?");
         for (int i=0; i<recordCount; i++) {
@@ -1065,6 +1121,8 @@ public class SURTest extends SURBaseTest {
         rs.last();
         int indexedKey = rs.getInt(2);
         PreparedStatement ps =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
             prepareStatement("update t1 set a = ? where a= ?");
         ps.setInt(1, -indexedKey);
         ps.setInt(2, indexedKey);
@@ -1076,6 +1134,8 @@ public class SURTest extends SURBaseTest {
         rs.updateRow();
         
         PreparedStatement ps2 =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
             prepareStatement("select * from t1 where a=?");
         ps2.setInt(1, -indexedKey);
         ResultSet rs2 = ps2.executeQuery();
@@ -1088,6 +1148,12 @@ public class SURTest extends SURBaseTest {
         assertTrue("Did not expect more than 1 row, however " +
                    "rs2.next() returned another row", !rs2.next());
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
         ps.close();
         ps2.close();
@@ -1150,6 +1216,12 @@ public class SURTest extends SURBaseTest {
     public void testPositionedUpdateWithoutForUpdate1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement
             (ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         s.setCursorName("MYCURSOR");
@@ -1167,6 +1239,8 @@ public class SURTest extends SURBaseTest {
     public void testPositionedUpdateWithForUpdate1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement();
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1 for update");
@@ -1182,6 +1256,26 @@ public class SURTest extends SURBaseTest {
     public void testScrollablePositionedUpdateWithForUpdate1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_READ_ONLY);
@@ -1201,6 +1295,8 @@ public class SURTest extends SURBaseTest {
         final int previousA = rs.getInt(2);
         final int previousB = rs.getInt(3);
         println(rs.getCursorName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = prepareStatement
             ("update T1 set a=?,b=? where current of " + rs.getCursorName());
         ps.setInt(1, 666);
@@ -1231,6 +1327,14 @@ public class SURTest extends SURBaseTest {
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
         ps.close();
     }
@@ -1258,6 +1362,10 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithForUpdate2()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         assertEquals("Invalid resultset concurrency on statement", 
@@ -1309,6 +1417,10 @@ public class SURTest extends SURBaseTest {
             assertEquals("Incorrect row updated for row " + count, 1000, a);
         }
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_READ_ONLY);
         s.setCursorName(getNextCursorName());
@@ -1331,6 +1443,8 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithForUpdate3()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -1347,6 +1461,8 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithoutForUpdate1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -1383,6 +1499,8 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithoutForUpdate3()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -1407,6 +1525,7 @@ public class SURTest extends SURBaseTest {
      *
      */
     public void testForUpdateWithColumnList() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
 
@@ -1560,6 +1679,7 @@ public class SURTest extends SURBaseTest {
      * @param state A string describing the illegal state.
      */
     private void checkDetectabilityCallsOutsideRow(ResultSet rs, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
                                                    String state)
     {
         boolean b;
@@ -1599,7 +1719,16 @@ public class SURTest extends SURBaseTest {
      * and deleteRow() methods.
      */
     public void testRowUpdatedAndRowDeleted() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1313
                                            ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select a,b from t1");
@@ -1630,6 +1759,8 @@ public class SURTest extends SURBaseTest {
      */
     public void testDetectabilityExceptions() throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -1663,6 +1794,8 @@ public class SURTest extends SURBaseTest {
         s.close();
 
         // Not strictly SUR, but fixed in same patch, so we test it here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                 ResultSet.CONCUR_UPDATABLE);
         rs = s.executeQuery("select * from t1");
@@ -1702,7 +1835,10 @@ public class SURTest extends SURBaseTest {
      *
      */
     public void testDowngradeToScrollReadOnly() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1481
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1 order by b");
 
@@ -1723,7 +1859,39 @@ public class SURTest extends SURBaseTest {
         rs.afterLast();
         
         // close result set and statement
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
     }
 
@@ -1732,6 +1900,7 @@ public class SURTest extends SURBaseTest {
      * Get a cursor name. We use the same cursor name for all cursors.
      */
     private final String getNextCursorName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-787
         return "MYCURSOR";
     }
     
@@ -1739,6 +1908,7 @@ public class SURTest extends SURBaseTest {
      * Run the base suite in embedded and client mode.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite = new BaseTestSuite("SURTest");
         mainSuite.addTest(baseSuite("SURTest:embedded"));
         mainSuite.addTest(
@@ -1752,6 +1922,7 @@ public class SURTest extends SURBaseTest {
      */
     private static Test baseSuite(String name) { 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite = new BaseTestSuite(name);
         
         // Iterate over all data models and decorate the tests:
@@ -1761,6 +1932,7 @@ public class SURTest extends SURBaseTest {
             SURDataModelSetup.SURDataModel model = 
                 (SURDataModelSetup.SURDataModel) i.next();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite = new BaseTestSuite(SURTest.class);
             TestSetup decorator = new SURDataModelSetup
                 (suite, model);

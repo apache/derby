@@ -69,6 +69,7 @@ public class BrokeredCallableStatement42 extends BrokeredCallableStatement
     }
     
     public  void setObject
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         ( int parameterIndex, java.lang.Object x, SQLType sqlType )
         throws SQLException
     {

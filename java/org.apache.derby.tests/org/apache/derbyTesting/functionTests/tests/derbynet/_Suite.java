@@ -43,26 +43,43 @@ public class _Suite extends BaseTestCase  {
 
     public static Test suite() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("derbynet");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2100
         suite.addTest(PrepareStatementTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
         suite.addTest(ClientSideSystemPropertiesTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2305
         suite.addTest(BadConnectionTest.suite());
         suite.addTest(NetHarnessJavaTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2196
         suite.addTest(SecureServerTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3829
         suite.addTest(SysinfoTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         suite.addTest(SSLTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3834
         suite.addTest(RuntimeInfoTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2505
         suite.addTest(NetIjTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3211
         suite.addTest(NSinSameJVMTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3273
         suite.addTest(NetworkServerControlClientCommandTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         suite.addTest(ServerPropertiesTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
         suite.addTest(LOBLocatorReleaseTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3796
         suite.addTest(OutBufferedStreamTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3717
         suite.addTest(GetCurrentPropertiesTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         suite.addTest(Utf8CcsidManagerTest.suite());
         suite.addTest(DerbyNetAutoStartTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3838
 
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
         // 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr'
@@ -75,17 +92,25 @@ public class _Suite extends BaseTestCase  {
         {
             // this test refers to ConnectionPooledDataSource class
             // thus causing class not found exceptions with JSR169
+//IC see: https://issues.apache.org/jira/browse/DERBY-1982
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
             suite.addTest(NSSecurityMechanismTest.suite());
             // Test does not run on J2ME    
+//IC see: https://issues.apache.org/jira/browse/DERBY-4765
             suite.addTest(DerbyNetNewServerTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2031
             suite.addTest(ProtocolTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
             suite.addTest(NetworkServerControlApiTest.suite());
         }
 
         // These tests references a client class directly
         // thus causing class not found exceptions if the
         // client code is not in the classpath.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         if (Derby.hasClient()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2054
             suite.addTest(ByteArrayCombinerStreamTest.suite());
             suite.addTest(SqlExceptionTest.suite());
             suite.addTest(Utf8CcsidManagerClientTest.suite());

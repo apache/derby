@@ -43,6 +43,7 @@ public final class XMLSuite extends BaseTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("XML Suite");
         
         // Add all JUnit tests for XML.
@@ -50,7 +51,10 @@ public final class XMLSuite extends BaseTestCase {
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLBindingTest.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLMissingClassesTest.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLConcurrencyTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLXXETest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6821
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLOptimizerTraceTest.suite());
         
         return suite;

@@ -141,15 +141,18 @@ public class ConsistencyChecker
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
             SecurityUtil.authorize( Securable.CHECK_TABLE );           
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
 
             dd = lcc.getDataDictionary();
 
             dvf = lcc.getDataValueFactory();
             
             ExecutionFactory ef = lcc.getLanguageConnectionFactory().getExecutionFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 
             sd = dd.getSchemaDescriptor(schemaName, tc, true);
             td = dd.getTableDescriptor(tableName, sd, tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 
             if (td == null)
             {
@@ -177,6 +180,7 @@ public class ConsistencyChecker
 
 			/* Get a row template for the base table */
 			baseRow = ef.getValueRow(td.getNumberOfColumns());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 
 			/* Fill the row with nulls of the correct type */
 			ColumnDescriptorList cdl = td.getColumnDescriptorList();
@@ -269,6 +273,7 @@ public class ConsistencyChecker
 
 				/* Get one row template for the index scan, and one for the fetch */
 				indexRow = ef.getValueRow(baseColumns + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 
 				/* Fill the row with nulls of the correct type */
 				for (int column = 0; column < baseColumns; column++)

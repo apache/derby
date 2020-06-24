@@ -78,6 +78,7 @@ public class ProcessStreamResult implements Runnable
         this.startTime = System.currentTimeMillis();
         if (timemin != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Integer i = Integer.valueOf(timemin);
             timeout = i.intValue();
         }
@@ -99,6 +100,7 @@ public class ProcessStreamResult implements Runnable
         
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
 			char[] ca = new char[1024];
 			int valid;
 			interrupted = false;
@@ -113,6 +115,7 @@ public class ProcessStreamResult implements Runnable
 			
             // keep reading from the stream as long as we have not 
             // timed out
+//IC see: https://issues.apache.org/jira/browse/DERBY-1694
 			while (((valid = inStream.read(ca, 0, ca.length)) != -1) &&
                     !interrupted)
 			{
@@ -137,6 +140,7 @@ public class ProcessStreamResult implements Runnable
 					}
 			    }
 */    			outStream.write(ca, 0, valid);
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
     			outStream.flush();
 			}
 		}
@@ -147,6 +151,7 @@ public class ProcessStreamResult implements Runnable
 		}
 
         // if we timed out, then just leave
+//IC see: https://issues.apache.org/jira/browse/DERBY-1694
         if ( interrupted )
             return;
         
@@ -207,6 +212,7 @@ public class ProcessStreamResult implements Runnable
 			try
 			{
                 // find timeout in milliseconds
+//IC see: https://issues.apache.org/jira/browse/DERBY-1694
                 long timeoutms = timeout * 60 *1000L;
                 
                 if ( timeout > 0 )

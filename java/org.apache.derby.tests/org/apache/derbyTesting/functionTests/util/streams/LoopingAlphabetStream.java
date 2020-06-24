@@ -30,6 +30,7 @@ import org.apache.derby.iapi.types.Resetable;
  * alphabet.
  */
 public class LoopingAlphabetStream
+//IC see: https://issues.apache.org/jira/browse/DERBY-3735
     extends InputStream
     implements Resetable {
 
@@ -66,6 +67,7 @@ public class LoopingAlphabetStream
      * @param trailingBlanks number of trailing blanks
      */
     public LoopingAlphabetStream(long length, int trailingBlanks) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3735
         if (trailingBlanks > length) {
             throw new IllegalArgumentException("Number of trailing blanks " +
                     "cannot be greater than the total length.");
@@ -201,6 +203,7 @@ public class LoopingAlphabetStream
     // Resetable interface
 
     public void resetStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3735
         reset();
     }
 

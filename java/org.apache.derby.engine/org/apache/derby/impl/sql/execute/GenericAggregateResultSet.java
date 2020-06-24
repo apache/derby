@@ -77,6 +77,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		source = s;
 		originalSource = s;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         ExecPreparedStatement ps = a.getPreparedStatement();
         ExecutionFactory ef = a.getExecutionFactory();
 
@@ -125,6 +126,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 	) throws StandardException
 	{
 		GenericAggregator 	aggregators[]; 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Vector<GenericAggregator>
                 tmpAggregators = new Vector<GenericAggregator>();
 		ClassFactory		cf = lcc.getLanguageConnectionFactory().getClassFactory();
@@ -178,6 +180,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		*/ 
 		if (row == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 			row = getRowTemplate();
 		}
 
@@ -192,6 +195,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		}
 
 		if (eliminatedNulls)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3461
 			addWarning(SQLWarningFactory.newSQLWarning(SQLState.LANG_NULL_ELIMINATED_IN_SET_FUNCTION));
 	
 		return row;
@@ -207,6 +211,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
     {
         // don't report the redundant originalSource node
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         Element result = super.toXML( parentNode, tag );
         NodeList    children = result.getChildNodes();
         for ( int i = 0; i < children.getLength(); i++ )

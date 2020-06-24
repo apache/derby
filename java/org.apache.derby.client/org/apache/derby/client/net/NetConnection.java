@@ -113,6 +113,7 @@ public class NetConnection extends ClientConnection {
     // for example, the product id (prdid) would give this driver an idea of
     // what type of sevrer it is connected to.
     String targetSrvclsnm_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // Server Product Release Level of the target server returned in excsatrd.
     // specifies the procuct release level of a ddm server.
@@ -142,6 +143,7 @@ public class NetConnection extends ClientConnection {
     // Correlation Token of the source sent to the server in the accrdb.
     // It is saved like the prddta in case it is needed for a connect reflow.
     byte[] crrtkn_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // The Secmec used by the target.
     // It contains the negotiated security mechanism for the connection.
@@ -189,14 +191,19 @@ public class NetConnection extends ClientConnection {
     //---------------------constructors/finalizer---------------------------------
 
     // For jdbc 1 connections
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
     NetConnection(LogWriter logWriter,
                          int driverManagerLoginTimeout,
                          String serverName,
                          int portNumber,
                          String databaseName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                          Properties properties) throws SqlException {
         super(logWriter, driverManagerLoginTimeout, serverName, portNumber,
               databaseName, properties);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
@@ -204,24 +211,32 @@ public class NetConnection extends ClientConnection {
             throw netAgent_.exceptionOpeningSocket_;
         }
         checkDatabaseName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         String password = BasicClientDataSource.getPassword(properties);
         securityMechanism_ =
                 BasicClientDataSource.getSecurityMechanism(properties);
         flowConnect(password, securityMechanism_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-374
         if(!isConnectionNull())
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             completeConnect();
         //DERBY-2026. reset timeout after connection is made
         netAgent_.setTimeout(0);
     }
 
     // For JDBC 2 Connections
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
     NetConnection(LogWriter logWriter,
                          String user,
                          String password,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                          BasicClientDataSource dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException {
         super(logWriter, user, password, isXAConn, dataSource);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
@@ -248,21 +263,28 @@ public class NetConnection extends ClientConnection {
      * @throws             SqlException
      */
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
     NetConnection(LogWriter logWriter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                          String user,
                          String password,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                          BasicClientDataSource dataSource,
                          int rmId,
                          boolean isXAConn,
                          ClientPooledConnection cpc) throws SqlException {
         super(logWriter, user, password, isXAConn, dataSource);
         netAgent_ = (NetAgent) super.agent_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         initialize(password, dataSource, isXAConn);
         this.pooledConnection_=cpc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
         this.closeStatementsOnClose = !cpc.isStatementPoolingEnabled();
     }
 
     private void initialize(String password,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                             BasicClientDataSource dataSource,
                             boolean isXAConn) throws SqlException {
         securityMechanism_ = dataSource.getSecurityMechanism(password);
@@ -278,6 +300,7 @@ public class NetConnection extends ClientConnection {
         // and it's not a subsubprotocol recognized by our drivers.
         // If so, bail out here.
         if(!isConnectionNull()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2498
             completeConnect();
         }
         else
@@ -442,6 +465,8 @@ public class NetConnection extends ClientConnection {
             // is returned in one of the connect flows.
             open_ = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
             handleLoginTimeout( e );
             
             // logWriter may be closed in agent_.close(),
@@ -455,6 +480,8 @@ public class NetConnection extends ClientConnection {
             {
                 exceptionToBeThrown = new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.JAVA_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, e.getClass().getName(), e.getMessage());
             }
 
@@ -471,10 +498,12 @@ public class NetConnection extends ClientConnection {
 
     /** Handle socket timeouts during connection attempts */
     private void    handleLoginTimeout( Throwable original )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         throws SqlException
     {
         for ( Throwable cause = original; cause != null; cause = cause.getCause() )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             if ( cause instanceof SocketTimeoutException )
             {
                 throw new SqlException
@@ -484,6 +513,7 @@ public class NetConnection extends ClientConnection {
     }
 
     private boolean flowReconnect(String password, int securityMechanism)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         constructExtnam();
         // these calls need to be after newing up the agent
@@ -530,6 +560,7 @@ public class NetConnection extends ClientConnection {
             default:
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     securityMechanism);
             }
         } catch (SqlException sqle) {            // this may not be needed because on method up the stack
@@ -673,6 +704,7 @@ public class NetConnection extends ClientConnection {
                 targetCmnappc_,
                 targetXamgr_,
                 targetSyncptmgr_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
                 targetRsyncmgr_,
                 targetUnicodemgr_);
         agent_.flowOutsideUOW();
@@ -753,6 +785,7 @@ public class NetConnection extends ClientConnection {
                 targetCmnappc_,
                 targetXamgr_,
                 targetSyncptmgr_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
                 targetRsyncmgr_,
                 targetUnicodemgr_);
         netAgent_.netConnectionRequest_.writeAccessSecurity(securityMechanism,
@@ -779,6 +812,7 @@ public class NetConnection extends ClientConnection {
         netAgent_.netConnectionRequest_.writeAccessDatabase(databaseName_,
                 false,
                 crrtkn_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
                 prddta_.array(),
                 netAgent_.typdef_);
     }
@@ -790,6 +824,7 @@ public class NetConnection extends ClientConnection {
 
     void writeDeferredReset() throws SqlException {
         // NetConfiguration.SECMEC_USRIDPWD
+//IC see: https://issues.apache.org/jira/browse/DERBY-3421
         if (securityMechanism_ == NetConfiguration.SECMEC_USRIDPWD) {
             writeAllConnectCommandsChained(NetConfiguration.SECMEC_USRIDPWD,
                     user_,
@@ -873,6 +908,7 @@ public class NetConnection extends ClientConnection {
 
     //-------------------parse callback methods--------------------------------
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void setServerAttributeData(String srvclsnm,
                                 String srvrlslv) {
         targetSrvclsnm_ = srvclsnm;      // since then can be optionally returned from the
@@ -912,6 +948,7 @@ public class NetConnection extends ClientConnection {
 
                     // a security token is required for USRENCPWD, or EUSRIDPWD.
                     if (!sectknReceived) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
                         agent_.accumulateChainBreakingReadExceptionAndThrow(
                             new DisconnectException(agent_, 
                                 new ClientMessageId(SQLState.NET_SECTKN_NOT_RETURNED)));
@@ -933,6 +970,7 @@ public class NetConnection extends ClientConnection {
                 // will be surfaced by endReadChain
                 // agent_.accumulateChainBreakingReadExceptionAndThrow (
                 //   new DisconnectException (agent_,"secmec not supported ","0000", -999));
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
                 agent_.accumulateReadException(new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.NET_SECKTKN_NOT_RETURNED)));
             }
@@ -963,13 +1001,16 @@ public class NetConnection extends ClientConnection {
     //-------------------Abstract object factories--------------------------------
 
     protected Agent newAgent_(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             LogWriter logWriter,
             int loginTimeout,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             String serverName,
             int portNumber,
             int clientSSLMode) throws SqlException {
 
         return new NetAgent(this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
                 logWriter,
                 loginTimeout,
                 serverName,
@@ -987,11 +1028,13 @@ public class NetConnection extends ClientConnection {
     }
 
     protected void resetStatement_(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientStatement statement,
             int type,
             int concurrency,
             int holdability) throws SqlException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ((NetStatement) statement.getMaterialStatement()).resetNetStatement(netAgent_, this, type, concurrency, holdability);
     }
 
@@ -1001,6 +1044,7 @@ public class NetConnection extends ClientConnection {
 
         //passing the pooledConnection_ object which will be used to raise 
         //StatementEvents to the PooledConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
         return new NetPreparedStatement(netAgent_, this, sql, section,pooledConnection_).preparedStatement_;
     }
 
@@ -1025,6 +1069,7 @@ public class NetConnection extends ClientConnection {
                                            int resultSetConcurrency,
                                            int resultSetHoldability,
                                            int autoGeneratedKeys,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
                                            String[] columnNames,
                                            int[] columnIndexes) throws SqlException {
         ((NetPreparedStatement) ps.materialPreparedStatement_).resetNetPreparedStatement(netAgent_, this, sql, resultSetType, resultSetConcurrency, 
@@ -1033,6 +1078,7 @@ public class NetConnection extends ClientConnection {
 
 
     protected ClientCallableStatement newCallableStatement_(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             String sql,
             int type,
             int concurrency,
@@ -1040,6 +1086,7 @@ public class NetConnection extends ClientConnection {
 
         //passing the pooledConnection_ object which will be used to raise 
         //StatementEvents to the PooledConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
         return new NetCallableStatement(netAgent_, this, sql, type, concurrency, holdability,pooledConnection_).callableStatement_;
     }
 
@@ -1053,6 +1100,7 @@ public class NetConnection extends ClientConnection {
 
 
     protected ClientDatabaseMetaData newDatabaseMetaData_() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             return ClientAutoloadedDriver.getFactory().newNetDatabaseMetaData(netAgent_, this);
     }
 
@@ -1072,6 +1120,7 @@ public class NetConnection extends ClientConnection {
         if ((usridLength == 0) || (usridLength > NetConfiguration.USRID_MAXSIZE)) {
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.CONNECT_USERID_LENGTH_OUT_OF_RANGE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 usridLength, NetConfiguration.USRID_MAXSIZE);
         }
     }
@@ -1081,6 +1130,7 @@ public class NetConnection extends ClientConnection {
         if ((passwordLength == 0) || (passwordLength > NetConfiguration.PASSWORD_MAXSIZE)) {
             throw new SqlException(netAgent_.logWriter_,
                 new ClientMessageId(SQLState.CONNECT_PASSWORD_LENGTH_OUT_OF_RANGE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 passwordLength, NetConfiguration.PASSWORD_MAXSIZE);
         }
     }
@@ -1096,6 +1146,7 @@ public class NetConnection extends ClientConnection {
     private void checkUserPassword(String user, String password) throws SqlException {
         checkUser(user);
         if (password == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.CONNECT_PASSWORD_ISNULL));
         }
@@ -1124,6 +1175,8 @@ public class NetConnection extends ClientConnection {
         if (!secmecSupported) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 securityMechanism);
         }
     }
@@ -1142,6 +1195,7 @@ public class NetConnection extends ClientConnection {
         switch (secchkcd) {
         case CodePoint.SECCHKCD_01:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
                 new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
                 msgutil.getTextMessage(MessageId.CONN_SECMECH_NOT_SUPPORTED));
         case CodePoint.SECCHKCD_10:  // ERROR SVRCOD
@@ -1206,10 +1260,12 @@ public class NetConnection extends ClientConnection {
         if (crrtkn_ == null) {
             crrtkn_ = new byte[19];
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Arrays.fill(crrtkn_, (byte) 0);
         }
 
         byte [] localAddressBytes = netAgent_.socket_.getLocalAddress().getAddress();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         // IP addresses are returned in a 4 byte array.
         // Obtain the character representation of each half byte.
@@ -1225,6 +1281,7 @@ public class NetConnection extends ClientConnection {
             // the characters 'G' thro 'P'(in order to use the crrtkn as the LUWID when using
             // SNA in a hop site). For example, 0 is mapped to G, 1 is mapped H,etc.
             if (i == 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
                 crrtkn_[j] = netAgent_.getCurrentCcsidManager().numToSnaRequiredCrrtknChar_[halfByte];
             } else {
                 crrtkn_[j] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
@@ -1244,6 +1301,7 @@ public class NetConnection extends ClientConnection {
         int num = netAgent_.socket_.getLocalPort();
 
         int halfByte = (num >> 12) & 0x0f;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         crrtkn_[9] = netAgent_.getCurrentCcsidManager().numToSnaRequiredCrrtknChar_[halfByte];
         halfByte = (num >> 8) & 0x0f;
         crrtkn_[10] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
@@ -1257,6 +1315,7 @@ public class NetConnection extends ClientConnection {
         // If the new time stamp is the
         // same as one of the already created ones, then recreate the time stamp.
         long time = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         for (int i = 0; i < 6; i++) {
             // store 6 bytes of 8 byte time into crrtkn
@@ -1268,6 +1327,7 @@ public class NetConnection extends ClientConnection {
     private void constructExtnam() throws SqlException {
         /* Construct the EXTNAM based on the thread name */
         char[] chars = Thread.currentThread().getName().toCharArray();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         /* DERBY-4584: Replace non-EBCDIC characters (> 0xff) with '?' */
         for (int i = 0; i < chars.length; i++) {
@@ -1278,9 +1338,11 @@ public class NetConnection extends ClientConnection {
 
     private void constructPrddta() throws SqlException {
         if (prddta_ == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
             prddta_ = ByteBuffer.allocate(NetConfiguration.PRDDTA_MAXSIZE);
         } else {
             prddta_.clear();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Arrays.fill(prddta_.array(), (byte) 0);
         }
 
@@ -1354,6 +1416,7 @@ public class NetConnection extends ClientConnection {
     }
 
     private byte[] encryptedPasswordForUSRENCPWD(String password) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         return encryptionManager_.encryptData(netAgent_.getCurrentCcsidManager().convertFromJavaString(password, netAgent_),
                 NetConfiguration.SECMEC_USRENCPWD,
                 netAgent_.getCurrentCcsidManager().convertFromJavaString(user_, netAgent_),
@@ -1392,6 +1455,7 @@ public class NetConnection extends ClientConnection {
             String dataSourceUserName = dataSource_.getUser();
             if (!dataSourceUserName.equals("") &&
                 userName.equalsIgnoreCase(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     ClientDataSourceInterface.propertyDefault_user) &&
                 !dataSourceUserName.equalsIgnoreCase(
                     ClientDataSourceInterface.propertyDefault_user))
@@ -1501,6 +1565,7 @@ public class NetConnection extends ClientConnection {
     }
 
     protected boolean doCloseStatementsOnClose_() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
         return closeStatementsOnClose;
     }
 
@@ -1532,6 +1597,9 @@ public class NetConnection extends ClientConnection {
     // Allow local COMMIT/ROLLBACK only if we are not in an XA transaction
     protected boolean allowLocalCommitRollback_() {
        
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (getXAState() == XA_T0_NOT_ASSOCIATED) {
             return true;
         }
@@ -1556,6 +1624,7 @@ public class NetConnection extends ClientConnection {
 
 
     public void writeTransactionStart(ClientStatement statement)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
     }
 
@@ -1565,7 +1634,9 @@ public class NetConnection extends ClientConnection {
 
     public void setIndoubtTransactions(
             List<Xid> indoubtTransactions) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
         if (isXAConnection_) {
             if (indoubtTransactions_ != null) {
                 indoubtTransactions_.clear();
@@ -1574,12 +1645,14 @@ public class NetConnection extends ClientConnection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     Xid[] getIndoubtTransactionIds() {
         Xid[] result = new Xid[0];
         return indoubtTransactions_.toArray(result);
     }
 
     public SectionManager newSectionManager
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             (Agent agent) {
         return new SectionManager(agent);
     }
@@ -1596,6 +1669,8 @@ public class NetConnection extends ClientConnection {
         int xaState = getXAState();
 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
         if (xaState == XA_T0_NOT_ASSOCIATED) {
             doCommit = true;
         }
@@ -1612,6 +1687,7 @@ public class NetConnection extends ClientConnection {
     }
 
     public byte[] getTargetPublicKey() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return targetPublicKey_ != null ?
                targetPublicKey_.clone() :
                null;
@@ -1625,6 +1701,8 @@ public class NetConnection extends ClientConnection {
      * @return Returns the connectionNull.
      */
     public final boolean isConnectionNull() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-374
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return connectionNull;
     }
     /**
@@ -1640,7 +1718,9 @@ public class NetConnection extends ClientConnection {
      *
      * @return true if QRYCLSIMP is fully supported
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final boolean serverSupportsQryclsimp() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         NetDatabaseMetaData metadata =
             (NetDatabaseMetaData) databaseMetaData_;
         return metadata.serverSupportsQryclsimp();
@@ -1672,6 +1752,7 @@ public class NetConnection extends ClientConnection {
      */
     protected final boolean supportsSessionDataCaching() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         NetDatabaseMetaData metadata =
             (NetDatabaseMetaData) databaseMetaData_;
 
@@ -1683,6 +1764,7 @@ public class NetConnection extends ClientConnection {
      * @return true if the server supports the UTF-8 Ccsid Manager
      */
     protected final boolean serverSupportsUtf8Ccsid() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         return targetUnicodemgr_ == CcsidManager.UTF8_CCSID;
     }
     
@@ -1699,6 +1781,7 @@ public class NetConnection extends ClientConnection {
     }
 
     protected final boolean serverSupportsEXTDTAAbort() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         NetDatabaseMetaData metadata =
             (NetDatabaseMetaData) databaseMetaData_;
 
@@ -1713,6 +1796,7 @@ public class NetConnection extends ClientConnection {
     protected final boolean serverSupportsLocators() {
         // Support for locators was added in the same version as layer B
         // streaming.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
         return serverSupportsLayerBStreaming();
     }
 
@@ -1763,6 +1847,7 @@ public class NetConnection extends ClientConnection {
     
     
     protected void writeXATransactionStart(ClientStatement statement)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         xares_.netXAConn_.writeTransactionStart(statement);
     }
@@ -1770,6 +1855,7 @@ public class NetConnection extends ClientConnection {
     // JDBC 4.0 methods
 
     public Array createArrayOf(String typeName, Object[] elements)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throws SQLException {
         throw SQLExceptionFactory.notImplemented ("createArrayOf(String,Object[])");
     }

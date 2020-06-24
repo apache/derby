@@ -152,6 +152,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         //
         // DECIMAL datatype used here and the JSR169 support for it is less complete.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4454
         if ( JDBC.vmSupportsJSR169() ) { return; }
         Connection conn = getConnection();
 
@@ -429,6 +430,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         dropTypeStatement = "drop type price_05_a restrict\n";
         createObjectStatement = 
              "create view udtView( a, b, c ) as\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
              "select tabletype, cast (null as price_05_a), cast( null as price_05_a)\n" +
             "from sys.systables\n";
         dropObjectStatement = "drop view udtView\n";
@@ -471,6 +473,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public void test_06_casts() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
 
         // cast a NULL as a UDT
         goodStatement
@@ -776,6 +779,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         // This test uses DriverManager.
         //
         if ( JDBC.vmSupportsJSR169() ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4545
 
         Connection conn = getConnection();
 
@@ -911,6 +915,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         // SQLData not defined in JSR 169.
         //
         if ( JDBC.vmSupportsJSR169() ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4545
 
         Connection conn = getConnection();
 
@@ -938,6 +943,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         // If a new system type is added, then we need to add it to the following block
         // of compilation errors.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         assertEquals( 21, vetDatatypeCount( conn ) );
         
         expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'byte[]' language java\n" );
@@ -1007,6 +1013,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectCompilationError( ILLEGAL_AGG, "select min( a ) from t_15\n" );
         expectCompilationError( ILLEGAL_AGG, "select avg( a ) from t_15\n" );
         expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "select * from t_15 union select * from t_15\n" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4545
         expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a = makeIntArray_15( 3 )\n" );
         expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a between makeIntArray_15( 2 ) and makeIntArray_15( 4 )\n" );
         expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a = r.a\n" );
@@ -1029,6 +1036,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public void test_16_casts() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
 
         goodStatement( conn, "create type javaSerializable external name 'java.io.Serializable' language java\n" );
         goodStatement( conn, "create type javaNumber external name 'java.lang.Number' language java\n" );
@@ -1063,6 +1071,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         // If this fails, it means that we need to add another system type to the
         // cast checks below.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         assertEquals( 21, vetDatatypeCount( conn ) );
         
         // casts to system types not allowed
@@ -1119,6 +1128,7 @@ public class UDTTest  extends GeneratedColumnsHelper
              "    a17 timestamp,\n" +
              "    a18 varchar(10),\n" +
              "    a19 varchar(10) for bit data,\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
              "    a20 xml,\n" +
              "    a21 boolean\n" +
              ")"
@@ -1146,11 +1156,13 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectCompilationError( BAD_CAST, "select cast( a20 as javaSerializable ) from t_16_all_types\n" );
         expectCompilationError( BAD_CAST, "select cast( a21 as javaSerializable ) from t_16_all_types\n" );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
 
         //
         // If this fails, it means that we need to add another system type to the
         // implicit casts which follow.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         assertEquals( 21, vetDatatypeCount( conn ) );
         
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a01 ) select b from t_16\n" );
@@ -1173,6 +1185,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a18 ) select b from t_16\n" );
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a19 ) select b from t_16\n" );
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a20 ) select b from t_16\n" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a21 ) select b from t_16\n" );
         
         // test cast from the half-supported boolean type
@@ -1200,6 +1213,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public void test_17_outputParameters() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4499
 
         goodStatement( conn, "create type intArray_17 external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray' language java\n" );
         goodStatement
@@ -1251,6 +1265,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public static void changeIntArray( int newSize, IntArray[] array )
     {
         IntArray newArray = new IntArray( new int[ newSize ] );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4499
 
         array[ 0 ] = newArray;
     }
@@ -1265,9 +1280,11 @@ public class UDTTest  extends GeneratedColumnsHelper
     }
 
     public static HashMap putValue(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             HashMap<String, String> map, String key, String value)
     {
         map.put( key, value );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
 
         return map;
     }
@@ -1285,6 +1302,7 @@ public class UDTTest  extends GeneratedColumnsHelper
 
     public  static  Integer getIntValue( HashMap<String,Integer> map, String key )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         return map.get( key );
     }
 

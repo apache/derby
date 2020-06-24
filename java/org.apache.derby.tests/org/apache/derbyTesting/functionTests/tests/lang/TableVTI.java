@@ -1478,6 +1478,7 @@ public abstract class TableVTI implements ResultSet {
     }
 
     public RowId getRowId(int columnIndex) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throw new SQLException("getRowId");
     }
 

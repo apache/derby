@@ -88,6 +88,7 @@ public class RemoveDerbyNature implements IObjectActionDelegate {
 			}
 			IClasspathEntry[] rawClasspath = currentJavaProject.getRawClasspath();
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-1931
 			List<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
 			for(IClasspathEntry e: rawClasspath) {
 				if(e.getEntryKind()!=IClasspathEntry.CPE_CONTAINER) {

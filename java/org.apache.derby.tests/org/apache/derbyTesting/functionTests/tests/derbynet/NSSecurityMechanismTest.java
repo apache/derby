@@ -126,6 +126,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     public static Test suite() 
     {
         BaseTestSuite suite = new BaseTestSuite("NSSecurityMechanismTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         BaseTestSuite clientSuite =
             new BaseTestSuite("NSSecurityMechanismTest - client");
@@ -271,6 +272,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // as it's the first in the array, it should use default setting
             if (derby_drda_securityMechanism != null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5940
                 if (derby_drda_securityMechanism.equals(
                         "STRONG_PASSWORD_SUBSTITUTE_SECURITY") &&
                         !hasSufficientEntropy()) {
@@ -311,6 +313,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             {
                 assertUSRSSBPWD_with_BUILTIN(testDERBY528ExpectedValues);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
             else
             {
                 // shutdown the database - this will prevent slow startup 
@@ -353,6 +356,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         try {
             // shut down the currently running
             // server, before setting the next security mechanism
+//IC see: https://issues.apache.org/jira/browse/DERBY-5677
             NetworkServerTestSetup.getNetworkServerControl().shutdown();
         } catch (Exception e) {
             if (!(e.getMessage().substring(0,17).equals("DRDA_InvalidValue")))
@@ -364,6 +368,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         // Before attempting to start a new server, wait for the previous
         // server to complete and release the server port.
         NetworkServerTestSetup.waitForAvailablePort();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5547
 
         setSystemProperty("derby.drda.securityMechanism",
                 derby_drda_securityMechanism);
@@ -374,6 +379,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
 
             // For debugging, to make output come to console call start() with
             // new PrintWriter(System.out, true) instead of null.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5677
             NetworkServerTestSetup.getNetworkServerControl().start(null);
             NetworkServerTestSetup.waitForServerStart(
                     NetworkServerTestSetup.getNetworkServerControl());
@@ -448,6 +454,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     {
         if (usingDerbyNetClient())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             assertSecurityMechanismOK("sarah",null, SECMEC_USRIDONL,"SECMEC_USRIDONL:", expectedValues[1]);
         }
         assertSecurityMechanismOK("john","sarah", SECMEC_USRIDPWD,"SECMEC_USRIDPWD:", expectedValues[2]);
@@ -464,6 +471,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // successful when client is running in a JVM where the JCE does
             // not support the DH (32 byte prime).
             // The test methods are implemented to work either way.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             assertSecurityMechanismOK("john","sarah",SECMEC_EUSRIDPWD,"SECMEC_EUSRIDPWD:", expectedValues[3]);
             assertSecurityMechanismOK("john","sarah",SECMEC_USRSSBPWD,"SECMEC_USRSSBPWD:", expectedValues[4]);
         }
@@ -473,6 +481,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         Short secmec, String msg, String expectedValue)
     {
         // Skip this USRSSBPWD on platforms that are short on entropy.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5940
         if (secmec.shortValue() == SECMEC_USRSSBPWD && !hasSufficientEntropy()){
             return;
         }
@@ -485,6 +494,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             conn = ds.getConnection(user, password);
             conn.close();
             // EUSRIDPWD is supported with some jvm( version)s, not with others
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             if (!(secmec.equals(SECMEC_EUSRIDPWD)))
             {
                 if (!expectedValue.equals("OK"))
@@ -509,6 +519,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // Exceptions expected in certain cases depending on JCE used for 
             // running the test. So, instead of '08004' (connection refused),
             // or "OK", we may see 'not supported' (XJ112).
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             else if (secmec.equals(SECMEC_EUSRIDPWD)) 
             {
                 if (!(sqle.getSQLState().equals("XJ112")))
@@ -528,6 +539,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private void assertConnectionUsingDriverManager(
         String dbUrl, String msg, String expectedValue)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5940
         if (!hasSufficientEntropy() &&
                 dbUrl.indexOf("securityMechanism=8") != -1) {
             return;
@@ -581,6 +593,8 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                 StringWriter sw = new StringWriter();
                 sqle.printStackTrace(new PrintWriter(sw));
                 if (!sw.toString().contains(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6789
+//IC see: https://issues.apache.org/jira/browse/DERBY-6702
                     "java.lang.InternalError: Unexpected CryptoAPI failure"))
                     assertSQLState(expectedValue, sqle);
                 else
@@ -823,6 +837,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                             getExpectedValueFromAll(expectedValues, k, j, i));
                     // case - specify security mechanism on datasource
                     assertSecurityMechanismOK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         USER_ATTRIBUTE[k],PWD_ATTRIBUTE[j], SECMEC_ATTRIBUTE[i], "TEST_DS (" + urlAttributes
                             + ",securityMechanism="+SECMEC_ATTRIBUTE[i]+")", 
                             getExpectedValueFromAll(expectedValues, k, j, i));
@@ -887,6 +902,8 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @param expectedValue expected sql state
      */
     private void getDataSourceConnection(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1982
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         String user, String password, String expectedValue)
     {
         Connection conn;
@@ -962,6 +979,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         conn.close();
         conn = pc.getConnection();
         assertConnectionOK(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         pc.close();
         conn.close();
     }
@@ -972,6 +990,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @throws Exception if there is any error
      */
     private void assertConnectionOK(Connection conn)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3465
     throws SQLException
     {
         Statement stmt = conn.createStatement();
@@ -1034,6 +1053,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * the security mechanism.
      */
     private void assertDerby1080Fixed(String expectedValue)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3465
             throws Exception {
         try
         {
@@ -1041,6 +1061,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // datasource set security mechanism to use encrypted userid and
             // password.
             assertSecMecWithConnPoolingOK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 "peter","neelima",SECMEC_EUSRIDPWD);
             if (!expectedValue.equals("OK"))
                 fail("expected SQLException if DERBY-1080 did not regress");
@@ -1073,17 +1094,22 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @throws Exception if there an unexpected error
      */
     private void assertUSRSSBPWD_with_BUILTIN(String[] expectedValues)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3465
             throws Exception {
         // Skip this security mechanism on platforms that are short on entropy,
         // otherwise this test will take a very long time to complete.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5940
         if (!hasSufficientEntropy()) {
             return;
         }
         // Turn on Derby BUILTIN authentication and attempt connecting with
         // USRSSBPWD security mechanism.
         println("Turning ON Derby BUILTIN authentication");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1982
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         Connection conn = getDataSourceConnectionWithSecMec(
             "neelima", "lee", SECMEC_USRSSBPWD);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         // Turn on BUILTIN authentication
         CallableStatement cs = conn.prepareCall(
@@ -1130,6 +1156,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             "user=neelima;password=lee;securityMechanism=" +
             SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T1):", expectedValues[2]);
         assertSecurityMechanismOK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             "neelima","lee",SECMEC_USRSSBPWD,
             "TEST_DS - USRSSBPWD + BUILTIN (T2):", expectedValues[2]);
         // Attempting to connect with some invalid user
@@ -1141,6 +1168,8 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             "TEST_DS - USRSSBPWD + BUILTIN (T4):", expectedValues[3]);
 
         // Prepare to turn OFF Derby BUILTIN authentication
+//IC see: https://issues.apache.org/jira/browse/DERBY-1982
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         conn = getDataSourceConnectionWithSecMec("neelima", "lee",
             SECMEC_USRSSBPWD);
 
@@ -1197,6 +1226,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         attrs = addRequiredAttributes(attrs);
 
         DataSource ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (String property : attrs.keySet()) {
             Object value = attrs.get(property);
             JDBCDataSource.setBeanProperty(ds, property, value);
@@ -1207,6 +1237,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private HashMap<String, Object> addRequiredAttributes(
             HashMap<String, Object> attrs)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
         String hostName = TestConfiguration.getCurrent().getHostName();
         int port = TestConfiguration.getCurrent().getPort();
         /** 
@@ -1216,6 +1247,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         if (!hostName.equals("localhost"))
         {
             attrs.put("serverName", hostName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             attrs.put("portNumber", port);
         }
         else
@@ -1228,6 +1260,8 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private javax.sql.ConnectionPoolDataSource getCPDS(
         String user, String password)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<String, Object> attrs = new HashMap<String, Object>();
         if (user != null)
             attrs.put("user", user);
@@ -1237,6 +1271,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         attrs = addRequiredAttributes(attrs);
         ConnectionPoolDataSource cpds = 
             J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (String property : attrs.keySet()) {
             Object value = attrs.get(property);
             JDBCDataSource.setBeanProperty(cpds, property, value);
@@ -1260,6 +1295,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private boolean hasSufficientEntropy() {
         // The ARM platform is known to suffer from too little entropy
         // (unless there is significant disk activity).
+//IC see: https://issues.apache.org/jira/browse/DERBY-5940
         return !getSystemProperty("os.arch").equalsIgnoreCase("arm");
     }
 }

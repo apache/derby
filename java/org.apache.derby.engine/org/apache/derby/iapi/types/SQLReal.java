@@ -185,6 +185,7 @@ public final class SQLReal
 		if (isNull())
 			return null;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			return value;
 	}
 
@@ -369,6 +370,7 @@ public final class SQLReal
             // what if String is rouned to zero?
             //System.out.println("SQLReal.setValue(String) - rounding issue?"+theValue);
 		    try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
 		        setValue(Double.parseDouble(theValue.trim()));
 			} catch (NumberFormatException nfe) {
 			    throw invalidFormat();
@@ -403,6 +405,9 @@ public final class SQLReal
 
         float v = bigDecimal.floatValue();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5546
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
+//IC see: https://issues.apache.org/jira/browse/DERBY-5534
         if (v == 0) {
             // We need to catch underflow here, since BigDecimal#floatValue it
             // just returns 0 (i.e. no exception).
@@ -469,6 +474,7 @@ public final class SQLReal
 	 * Set the value from a correctly typed Float object.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue) throws StandardException
 	{
 		setValue(((Float) theValue).floatValue());

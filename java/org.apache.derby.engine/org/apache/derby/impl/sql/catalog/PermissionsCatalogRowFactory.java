@@ -37,6 +37,7 @@ import org.apache.derby.iapi.types.StringDataValue;
 
 abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     PermissionsCatalogRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
     {
         super(uuidf,ef,dvf);
@@ -60,6 +61,7 @@ abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @return The internal authorization ID
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
     String getAuthorizationID( ExecRow row, int columnPos)
         throws StandardException
     {
@@ -74,6 +76,7 @@ abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @exception StandardException standard error policy
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
     abstract ExecIndexRow buildIndexKeyRow( int indexNumber,
                                                    PermissionsDescriptor perm)
         throws StandardException;
@@ -90,6 +93,7 @@ abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @exception StandardException standard error policy
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
     abstract int orPermissions( ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
         throws StandardException;
 
@@ -105,6 +109,7 @@ abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @exception StandardException standard error policy
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
     abstract int removePermissions( ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
         throws StandardException;
 
@@ -118,5 +123,6 @@ abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      * @param perm Permission descriptor
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
     abstract void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm) throws StandardException;
 }

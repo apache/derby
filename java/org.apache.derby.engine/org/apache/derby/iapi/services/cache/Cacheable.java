@@ -32,6 +32,7 @@ import org.apache.derby.shared.common.error.StandardException;
 	<P>
 	A Cacheable object has five states:
 	<OL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	<LI> No identity - The object is only accessable by the cache manager</LI>
 	<LI> Identity, clean, unkept - The object has an identity, is clean but is only accessable by the cache manager</LI>
 	<LI> Identity, clean, kept - The object has an identity, is clean, and is in use by one or more threads</LI> 
@@ -142,6 +143,7 @@ public interface Cacheable  {
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		Returns true if the object is dirty. 
 		May be called when the object is kept or unkept.
 

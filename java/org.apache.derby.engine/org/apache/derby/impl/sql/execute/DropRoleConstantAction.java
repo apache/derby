@@ -98,6 +98,7 @@ class DropRoleConstantAction extends DDLConstantAction
         dd.startWriting(lcc);
 
         RoleGrantDescriptor rdDef = dd.getRoleDefinitionDescriptor(roleName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
 
         if (rdDef == null) {
             throw StandardException.newException(

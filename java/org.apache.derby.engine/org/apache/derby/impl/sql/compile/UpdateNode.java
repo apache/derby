@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UpdateNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -123,6 +124,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "UPDATE";
@@ -135,6 +138,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -171,7 +176,10 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	{
 		// We just need select privilege on the expressions
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         FromList fromList = new FromList(
                 getOptimizerFactory().doJoinOrderOptimization(),
                 getContextManager());
@@ -184,9 +192,11 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		// check if targetTable is a synonym
 		if (targetTableName != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			TableName synonymTab = resolveTableToSynonym(this.targetTableName);
 			if (synonymTab != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 				this.synonymTableName = targetTableName;
 				this.targetTableName  = synonymTab;
 			}
@@ -199,6 +209,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
         if ( inMatchingClause() ) { tagOriginalResultSetColumns(); }
 
         // collect lists of objects which will require privilege checks
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         ArrayList<String>   explicitlySetColumns = getExplicitlySetColumns();
         List<CastNode> allCastNodes = collectAllCastNodes();
         tagPrivilegedNodes();
@@ -273,9 +284,12 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		// and we already bound the cursor or the select,
 		// the table descriptor should always be found.
 		verifyTargetTable();
+//IC see: https://issues.apache.org/jira/browse/DERBY-714
+//IC see: https://issues.apache.org/jira/browse/DERBY-571
 
         // add UPDATE_PRIV on all columns on the left side of SET operators
         addUpdatePriv( explicitlySetColumns );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
 
 		/* OVERVIEW - We generate a new ResultColumn, CurrentRowLocation(), and
 		 * prepend it to the beginning of the source ResultColumnList.  This
@@ -338,6 +352,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 
 		/* Prepend CurrentRowLocation() to the select's result column list. */
 		if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             SanityManager.ASSERT((resultSet.getResultColumns() != null),	
 							  "resultColumns is expected not to be null at bind time");
 
@@ -346,6 +361,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	 	** from list.
 		*/
         /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(resultSet.getFromList().size() == 1,
                     "More than one table in result from list in an update.");
@@ -353,6 +370,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
         */
 		/* Normalize the SET clause's result column list for synonym */
 		if (synonymTableName != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			normalizeSynonymColumns( resultSet.getResultColumns(), targetTable );
 		
 		/* Bind the original result columns by column name */
@@ -376,6 +394,9 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
         // we have started using sequence generator to create unique ids
         //If we fix this jira for prior releases, we will need to maintain
         // the code for old way of generating unique ids.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         if (dataDictionary.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null )) {
             //Replace any DEFAULTs with the associated tree for the default if
             // allowed, otherwise throw an exception
@@ -387,6 +408,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
         } else {
     		LanguageConnectionContext lcc = getLanguageConnectionContext();
     		if (lcc.getAutoincrementUpdate() == false)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3950
     			resultSet.getResultColumns().forbidOverrides(null);
         }
 
@@ -477,6 +499,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		*/
 		if (!allColumns && needBaseColumns)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 			getCompilerContext().pushCurrentPrivType( Authorizer.NULL_PRIV);
 			try
 			{
@@ -519,6 +542,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		}
 
         ValueNode rowLocationNode;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (needBaseColumns)
 		{
@@ -534,6 +559,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
         else
         {
            rowLocationNode = new NumericConstantNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                    TypeId.getBuiltInTypeId(Types.INTEGER), 0,
                    getContextManager());
         }
@@ -563,6 +589,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 
         // SQL 2011, section 6.10, SR 4b.
         SelectNode.checkNoWindowFunctions(resultSet, "<update source>");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6565
 
 		/* Bind the expressions */
 		super.bindExpressions();
@@ -574,6 +601,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 
         /* Bind the new ResultColumn */
         rowLocationColumn.bindResultColumnToExpression();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		resultColumnList.checkStorableExpressions();
 
@@ -582,6 +611,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		 */
 		if (! resultColumnList.columnTypesAndLengthsMatch())
  		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             resultSet = new NormalizeResultSetNode(
                 resultSet, resultColumnList, null, true, getContextManager());
 			
@@ -597,6 +628,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	 			 * order to bind the check constraints.
 	 			 */
 	 			int afterColumnsSize = afterColumns.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 afterColumns = new ResultColumnList(getContextManager());
 	 			ResultColumnList normalizedRCs = resultSet.getResultColumns();
 	 			for (int index = 0; index < afterColumnsSize; index++)
@@ -626,8 +659,11 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
                 ( dataDictionary, targetTableDescriptor, afterColumns, resultColumnList, true, resultSet );
 
             /* Get and bind all constraints on the columns being updated */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             checkConstraints = bindConstraints(
                 dataDictionary,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 getOptimizerFactory(),
                 targetTableDescriptor,
                 null,
@@ -649,6 +685,9 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
             {
                 deferred = true;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
             TransactionController tc = 
                     getLanguageConnectionContext().getTransactionCompile();
 
@@ -659,6 +698,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		identitySequenceUUIDString = getUUIDofSequenceGenerator();
 
 		getCompilerContext().popCurrentPrivType();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
         getCompilerContext().removePrivilegeFilter( tagFilter );
 
@@ -683,6 +723,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
      * of SET operators.
      */
     private ArrayList<String>   getExplicitlySetColumns()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         throws StandardException
     {
         ArrayList<String>   result = new ArrayList<String>();
@@ -929,11 +970,14 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		*/
 		if (targetTableDescriptor.getLockGranularity() == TableDescriptor.TABLE_LOCK_GRANULARITY)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             lckMode = TransactionController.MODE_TABLE;
 		}
 
 
 		return	getGenericConstantActionFactory().getUpdateConstantAction
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             ( targetTableDescriptor,
 			  tc.getStaticCompiledConglomInfo(heapConglomId),
 			  indicesToMaintain,
@@ -942,6 +986,8 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 			  indexNames,
 			  deferred,
 			  targetTableDescriptor.getUUID(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
               lckMode,
 			  false,
 			  changedColumnIds, null, null, 
@@ -955,6 +1001,9 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 				  readColsBitSet.getNumBitsSet(),			
 			  positionedUpdate,
 			  resultSet.isOneRowResultSet(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 			  autoincRowLocation,
 			  inMatchingClause(),
 			  identitySequenceUUIDString
@@ -1020,6 +1069,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		// DERBY-827 this must be done in execute() since
 		// createResultSet() will only be called once.
 		generateCodeForTemporaryTable(acb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
 
 		/* generate the parameters */
 		if(!isDependentTable)
@@ -1116,6 +1166,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     FormatableBitSet getReadMap
 	(
 		DataDictionary		dd,
@@ -1128,9 +1179,11 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
 		relevantCdl = new ConstraintDescriptorList();
         relevantTriggers =  new TriggerDescriptorList();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		FormatableBitSet	columnMap = getUpdateReadMap
             (
@@ -1229,8 +1282,10 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		DataDictionary		dd,
 		TableDescriptor				baseTable,
 		ResultColumnList			updateColumnList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<ConglomerateDescriptor>     conglomerates,
 		ConstraintDescriptorList	relevantConstraints,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         TriggerDescriptorList       relevantTriggers,
 		boolean[]					needsDeferredProcessing,
         ColumnDescriptorList    affectedGeneratedColumns
@@ -1265,6 +1320,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		** columns where 1 or more columns in the index
 		** are going to be modified.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         DMLModStatementNode.getXAffectedIndexes(
                 baseTable, updateColumnList, columnMap, conglomerates);
  
@@ -1335,6 +1391,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 			// after the soft-upgrade.
 			boolean in10_9_orHigherVersion = dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (TriggerDescriptor trd : relevantTriggers) {
 				if (in10_9_orHigherVersion) {
 					// See if we can avoid reading all the columns from the
@@ -1464,6 +1521,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         ResultColumnList     updateColumnList = updateSet.getResultColumns();
         ColumnDescriptorList generatedColumns = baseTable.getGeneratedColumns();
         HashSet<String>      updatedColumns = new HashSet<String>();
@@ -1487,6 +1545,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 
             // figure out if this generated column is affected by the
             // update
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (String mcn : mentionedColumnNames)
             {
                 if ( updatedColumns.contains( mcn ) )
@@ -1497,11 +1556,14 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
                     
                     // If the generated column isn't in the update list yet,
                     // add it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3922
                     if ( !updatedColumns.contains( gc.getColumnName() ) )
                     {
                         addedGeneratedColumns.add( tableID, gc );
                         
                         // we will fill in the real value later on in parseAndBindGenerationClauses();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         ValueNode dummy =
                             new UntypedNullConstantNode(getContextManager());
                         ResultColumn newResultColumn = new ResultColumn(
@@ -1538,12 +1600,14 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 		{ tableNameNode = ((CurrentOfNode) fromTable).getBaseCursorTargetTableName(); }
 		else { tableNameNode = makeTableName( null, fromTable.getBaseTableName() ); }
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn column : rcl)
 		{
 			ColumnReference	reference = column.getReference();
 
 			if ( (reference != null) && correlationName.equals( reference.getTableName() ) )
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				reference.setQualifiedTableName( tableNameNode );
 			}
 		}
@@ -1558,6 +1622,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	private void checkTableNameAndScrubResultColumns(ResultColumnList rcl) 
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn column : rcl)
 		{
 			boolean foundMatchingTable = false;			
@@ -1614,6 +1679,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 	private	void normalizeSynonymColumns(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
     ResultColumnList    rcl, 
     FromTable           fromTable)
 		throws StandardException
@@ -1661,6 +1727,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
         for ( int i = 0; i < count; i++ )
         {
             ResultColumn rc = targetRCL.elementAt( i );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             // defaults may already have been substituted for MERGE statements
             if ( rc.wasDefaultColumn() ) { continue; }

@@ -39,6 +39,7 @@ public class XATestUtil {
      * Return a new Xid for testing.
     */
     public static Xid getXid(int formatId, int b1, int b2) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         byte[] globalId = new byte[Xid.MAXGTRIDSIZE];
         byte[] branchId = new byte[Xid.MAXBQUALSIZE];
 
@@ -79,6 +80,7 @@ public class XATestUtil {
                 "create view XATESTUTIL.global_xactTable as " +
                 "select  cast(global_xid as char(2)) as gxid," +
                 " status, " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-434
                 " CAST (case when first_instant is NULL then 'NULL' else 'false' end AS VARCHAR(8)) as readOnly, " +
                 " cast (username as char(10)) as username, type " +
                 " from syscs_diag.transaction_table");
@@ -94,9 +96,11 @@ public class XATestUtil {
         Statement s = conn.createStatement();
         ResultSet rs = s.executeQuery(
                 "select * from XATESTUTIL.global_xactTable where gxid is not null order by gxid");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2474
         if (expectedRows == null)
             JDBC.assertEmpty(rs);
         else
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
             JDBC.assertUnorderedResultSet(rs, expectedRows);
         rs.close();
     }
@@ -151,6 +155,7 @@ class utilXid implements Xid, Serializable {
 
     private byte[] branch_id;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
     utilXid(int format_id, byte[] global_id, byte[] branch_id) {
         this.format_id = format_id;
         this.global_id = global_id;
@@ -191,6 +196,7 @@ class utilXid implements Xid, Serializable {
     public boolean equals(Object obj) {
         boolean ret = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         if (obj instanceof utilXid) {
             utilXid that = (utilXid) obj;
             ret = this.format_id == that.format_id &&

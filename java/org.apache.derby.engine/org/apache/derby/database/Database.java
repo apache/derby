@@ -22,6 +22,7 @@
 package org.apache.derby.database;
 
 /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
   The org.apache.derby.iapi.db.Database interface is all the externally 
   available methods on a database.  These are methods that might be called from 
   an SQL-J CALL statement. 
@@ -116,6 +117,8 @@ public interface Database
 	 */
 	public void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles) 
 		throws SQLException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
 
 	/**
 	  * Freeze the database temporarily so a backup can be taken.

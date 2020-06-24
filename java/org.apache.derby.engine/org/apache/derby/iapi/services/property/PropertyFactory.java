@@ -42,10 +42,12 @@ import java.util.Dictionary;
 
   <p>
   An PropertyFactory is typically obtained from the Monitor:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </p>
   <blockquote><pre>
 	// Get the current validation factory.
 	PropertyFactory af;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	af = (PropertyFactory) Monitor.findServiceModule(this, org.apache.derby.shared.common.reference.Module.PropertyFactory);
   </pre></blockquote>
 **/

@@ -174,6 +174,7 @@ public class AutoincrementCounter
 	{
 		if (initialized == false)
 			return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return counter;
 	}
 	

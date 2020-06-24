@@ -47,9 +47,12 @@ public class wisconsin {
         conn.setAutoCommit(false);
         conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1961
+//IC see: https://issues.apache.org/jira/browse/DERBY-2911
         createTables(conn, true);
         
         BufferedInputStream inStream;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1914
         String resource = "org/apache/derbyTesting/functionTests/tests/" +
                 "lang/wisc_setup.sql";  
         // set input stream
@@ -70,10 +73,13 @@ public class wisconsin {
 	
 	public static void createTables(Connection conn, boolean compress)
 			throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
                 createTables(conn, compress, 10000);
         }
 	public static void createTables(Connection conn, boolean compress, int numRows)
 			throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1961
+//IC see: https://issues.apache.org/jira/browse/DERBY-2911
 
 		Statement stmt = conn.createStatement();
 		
@@ -95,6 +101,7 @@ public class wisconsin {
 											 "string4 char(52) )");
 		//--insert numRows rows into TENKTUP1
 		WISCInsert wi = new WISCInsert();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
 		wi.doWISCInsert(numRows, "TENKTUP1", conn);
 		
 		stmt.execute("create unique index TK1UNIQUE1 on TENKTUP1(unique1)");
@@ -129,6 +136,7 @@ public class wisconsin {
 											"string4 char(52) )");
 		//-- insert numRows rows into TENKTUP2
 		wi = new WISCInsert();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
 		wi.doWISCInsert(numRows, "TENKTUP2", conn);
 		
 		stmt.execute("create unique index TK2UNIQUE1 on TENKTUP2(unique1)");
@@ -179,10 +187,13 @@ public class wisconsin {
 
 		conn.commit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1961
+//IC see: https://issues.apache.org/jira/browse/DERBY-2911
 		if (!compress) {
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-937
 		PreparedStatement ps2 = conn.prepareStatement
 			("call SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?)");
 		ps2.setString(1, "APP");
@@ -218,8 +229,10 @@ public class wisconsin {
      * @return An open stream
     */
     protected static InputStream openTestResource(final URL url)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1914
         throws PrivilegedActionException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged
         (new java.security.PrivilegedExceptionAction<InputStream>(){
 
@@ -241,6 +254,7 @@ public class wisconsin {
     protected static URL getTestResource(final String name)
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     return AccessController.doPrivileged
         (new java.security.PrivilegedAction<URL>(){
 

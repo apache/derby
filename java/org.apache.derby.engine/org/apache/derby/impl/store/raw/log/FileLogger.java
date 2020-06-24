@@ -986,6 +986,7 @@ public class FileLogger implements Logger {
 				{
 					int optionalDataLength = rawInput.readInt();
 					int savePosition = rawInput.getPosition();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2118
 					rawInput.setLimit(optionalDataLength);
 	
 					compensation = lop.generateUndo(t, rawInput);
@@ -1471,6 +1472,7 @@ public class FileLogger implements Logger {
                     }
 
 					int dataLength = logIn.readInt();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2118
 					logIn.setLimit(dataLength);
 										
 					// even though the log has already been written, we need to
@@ -1510,6 +1512,7 @@ public class FileLogger implements Logger {
 					recoveryTransaction.commit();
 				}
 			} // while redoScan.getNextRecord() != null
+//IC see: https://issues.apache.org/jira/browse/DERBY-298
 
             // If the scan ended in an empty file, update logEnd to reflect that
             // in order to avoid to continue logging to an older file
@@ -1567,6 +1570,7 @@ public class FileLogger implements Logger {
 			if (instant != LogCounter.INVALID_LOG_INSTANT)	
             {
 				SanityManager.ASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-298
                     LogCounter.getLogFileNumber(instant) <
                          LogCounter.getLogFileNumber(logEnd) ||
                     (LogCounter.getLogFileNumber(instant) ==

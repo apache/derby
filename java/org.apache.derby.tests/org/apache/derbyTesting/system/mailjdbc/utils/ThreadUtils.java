@@ -38,6 +38,7 @@ public class ThreadUtils {
 
 	//constructor which will start the threads
 	public static void startThreads() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 		threadutil.run();
 	}
 
@@ -61,6 +62,7 @@ public class ThreadUtils {
 										  // make sure insert attachment has been finished
 			Thread.sleep(sleep_time);
 			t.start();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 			MailJdbc.logAct.logMsg(LogFile.INFO + "Started: " + t.getName() + " with 150000 sleep time");
 			userThreads.add(t);
 			//Starting Backup Thread
@@ -90,6 +92,7 @@ public class ThreadUtils {
 	public static synchronized Thread getThread(String name) {
 		if (name.equalsIgnoreCase("Refresh Thread")) {
 			return (Refresh) userThreads.get(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 		} if (name.equalsIgnoreCase("Purging Thread")) {
 			return (Purge) userThreads.get(2);
 		} else {

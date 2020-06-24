@@ -64,6 +64,7 @@ public class Utf8CcsidManager extends CcsidManager {
     }
     
     public byte[] convertFromJavaString(String sourceString, Agent agent)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
             throws SqlException {
         try {
             ByteBuffer buf = encoder.encode(CharBuffer.wrap(sourceString));
@@ -91,10 +92,12 @@ public class Utf8CcsidManager extends CcsidManager {
      * Offset and numToConvert are given in terms of bytes! Not characters!
      */
     public String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         return new String(sourceBytes, offset, numToConvert, UTF8_CHARSET);
     }
 
     public void startEncoding() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5068
         encoder.reset();
     }
 

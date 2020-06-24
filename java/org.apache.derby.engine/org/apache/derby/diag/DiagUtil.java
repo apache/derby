@@ -45,6 +45,7 @@ abstract    class   DiagUtil
     static void    checkAccess()   throws StandardException
     {
         LanguageConnectionContext lcc = (LanguageConnectionContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
         DataDictionary  dd = lcc.getDataDictionary();
 
@@ -67,6 +68,7 @@ abstract    class   DiagUtil
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

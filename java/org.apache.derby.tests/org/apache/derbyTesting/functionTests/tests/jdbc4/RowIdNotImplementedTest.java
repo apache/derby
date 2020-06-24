@@ -145,6 +145,7 @@ public class RowIdNotImplementedTest
 
     public void testRowIdInDatabaseMetaDataRowIdLifeTime() 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         DatabaseMetaData meta = getConnection().getMetaData();
         RowIdLifetime rowIdLifetime = meta.getRowIdLifetime();
         assertEquals("RowIdLifetime should be ROWID_UNSUPPORTED",
@@ -183,6 +184,8 @@ public class RowIdNotImplementedTest
      * @return test suite.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return TestConfiguration.defaultSuite(RowIdNotImplementedTest.class);
     }
     

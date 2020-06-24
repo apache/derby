@@ -96,6 +96,7 @@ public class CastingTest extends BaseJDBCTestCase {
     public static int BLOB_OFFSET = 16;
 
     public static int[] jdbcTypes = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2523
         java.sql.Types.SMALLINT,
         java.sql.Types.INTEGER,
         java.sql.Types.BIGINT,
@@ -299,6 +300,7 @@ public static String[][]SQLData =
         new TypedColumn( "varcharCol", "varchar( 5 )", true ),
         new TypedColumn( "longVarcharCol", "long varchar", false ),
         new TypedColumn( "clobCol", "clob", false ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         new TypedColumn( "booleanCol", "boolean", true ),
     };
     
@@ -325,6 +327,7 @@ public static String[][]SQLData =
     protected void setUp() throws SQLException {
         Statement scb = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
         for (int type = 0; type < SQLUtilities.SQLTypes.length; type++) {
             String typeName = SQLUtilities.SQLTypes[type];
             String tableName = getTableName(type);
@@ -353,6 +356,7 @@ public static String[][]SQLData =
                 }
             }
         scb.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
         commit();
     }
 
@@ -392,6 +396,7 @@ public static String[][]SQLData =
             }
 
         scb.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
         commit();
     }
 
@@ -401,6 +406,7 @@ public static String[][]SQLData =
 
         // Try Casts from each type to the
         for (int sourceType = 0; sourceType < SQLUtilities.SQLTypes.length; sourceType++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
 
             String sourceTypeName = SQLUtilities.SQLTypes[sourceType];
             //System.out.print("/*" + sourceTypeName + "*/ {");
@@ -416,16 +422,20 @@ public static String[][]SQLData =
                         // For casts from Character types use strings that can
                         // be converted to the targetType.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
                         String convertString = getCompatibleString(sourceType,
                                 targetType, dataOffset);
 
                         String query =
                             "VALUES CAST (CAST (" + convertString + " AS "
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
                                 + SQLUtilities.SQLTypes[sourceType] + ") AS "
                                 + SQLUtilities.SQLTypes[targetType] + " )";
                         ResultSet rs = s.executeQuery(query);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
                         rs.next();
                         String val = rs.getString(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2523
                         ResultSetMetaData rsmd = rs.getMetaData();
                         assertEquals(rsmd.getColumnType(1), jdbcTypes[targetType]);
                         rs.close();
@@ -492,6 +502,7 @@ public static String[][]SQLData =
         }
 
         commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
 
     }
 
@@ -501,6 +512,8 @@ public static String[][]SQLData =
 
         // Comparison's using literals
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
         for (int type = 0; type < SQLUtilities.SQLTypes.length; type++) {
             try {
                 int dataOffset = 1; // don't use null values
@@ -509,9 +522,11 @@ public static String[][]SQLData =
                 String compareSQL = "SELECT distinct c FROM " + tableName
                         + " WHERE c = " + SQLData[type][dataOffset];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
                 ResultSet rs = scb.executeQuery(compareSQL);
                 //JDBC.assertDrainResults(rs);
                 // should return 1 row
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
                 assertTrue(rs.next());
                 rs.close();
             } catch (SQLException se) {
@@ -522,6 +537,8 @@ public static String[][]SQLData =
 
         // Try to compare each sourceType with the targetType
         for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
             for (int sourceType = 0; sourceType < SQLUtilities.SQLTypes.length; sourceType++) {
                 String sourceTypeName = SQLUtilities.SQLTypes[sourceType];
                 for (int targetType = 0; targetType < SQLUtilities.SQLTypes.length; targetType++) {
@@ -530,6 +547,7 @@ public static String[][]SQLData =
 
                         // For assignments Character types use strings that can
                         // be converted to the targetType.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
                         String convertString = getCompatibleString(sourceType,
                                 targetType, dataOffset);
 
@@ -546,6 +564,7 @@ public static String[][]SQLData =
                                 + sourceTypeName + ")";
 
                     
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
                         ResultSet rs = scb.executeQuery(compareSQL);
                         JDBC.assertDrainResults(rs);
                         
@@ -562,6 +581,7 @@ public static String[][]SQLData =
             }
         scb.close();
         commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
 
     }
 
@@ -1095,7 +1115,9 @@ public static String[][]SQLData =
 
     protected void tearDown() throws SQLException, Exception {
         Statement scb = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
         for (int type = 0; type < SQLUtilities.SQLTypes.length; type++) {
             String typeName = SQLUtilities.SQLTypes[type];
             String tableName = getTableName(type);
@@ -1106,6 +1128,7 @@ public static String[][]SQLData =
         }
 
         scb.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2382
         commit();
         super.tearDown();
     }
@@ -1132,6 +1155,7 @@ public static String[][]SQLData =
      */
 
     private static String getShortTypeName(int type) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
         String typeName = SQLUtilities.SQLTypes[type];
         String shortName = typeName;
         int parenIndex = typeName.indexOf('(');
@@ -1203,6 +1227,7 @@ public static String[][]SQLData =
     }
 
     private static void checkSupportedCast(int sourceType, int targetType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
         String description = " Cast from " + SQLUtilities.SQLTypes[sourceType] + " to "
                 + SQLUtilities.SQLTypes[targetType];
 
@@ -1220,6 +1245,7 @@ public static String[][]SQLData =
     }
 
     private static void checkSupportedComparison(int sourceType, int targetType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3034
         String description = " Comparison of " + SQLUtilities.SQLTypes[sourceType] + " to "
                 + SQLUtilities.SQLTypes[targetType];
 

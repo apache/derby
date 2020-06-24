@@ -49,6 +49,7 @@ public class ConcurrencyTest extends SURBaseTest {
         // For the concurrency tests, we recreate the model
         // for each testcase (since we do commits)
         SURDataModelSetup.createDataModel
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getConnection());
         commit();
     }
@@ -108,6 +109,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testAquireUpdateLock1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement();
         ResultSet rs = s.executeQuery("select * from t1");
         
@@ -127,6 +130,10 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.rollback();
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s2.close();
         con2.close();
         s.close();
@@ -139,6 +146,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testSharedLocks1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_READ_ONLY);
         final ResultSet rs = s.executeQuery("select * from t1");
@@ -165,9 +174,12 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testSharedLocks2()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement();
         ResultSet rs = s.executeQuery("select * from t1");
         scrollForward(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement();
         try {
@@ -203,6 +215,12 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.rollback();
             con2.close();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
     }
     
@@ -214,10 +232,19 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testSharedAndUpdateLocks2()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1 for update");
         scrollForward(rs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                             ResultSet.CONCUR_READ_ONLY);
@@ -303,6 +330,8 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: updateInt(2, 3);");
         rs.updateRow();
         println("T1: updateRow()");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         println("T1: commit");
         rs = s.executeQuery("select * from t1");
@@ -358,6 +387,8 @@ public class ConcurrencyTest extends SURBaseTest {
                 rs.getInt(2) + "," +
                 rs.getInt(3) + ")");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = prepareStatement
             ("update T1 set a=? where current of " + rs.getCursorName());
         ps.setInt(1, 3);
@@ -418,6 +449,7 @@ public class ConcurrencyTest extends SURBaseTest {
             ps2.executeUpdate();
             con2.commit();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
             ps2 = con2.prepareStatement("insert into t1 values(?,?,?,?,?)");
             ps2.setInt(1, firstKey);
             ps2.setInt(2, -1);
@@ -441,6 +473,8 @@ public class ConcurrencyTest extends SURBaseTest {
         rs.updateRow();
         println("T1: updated column 2, to value=3");
         println("T1: commit");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         rs = s.executeQuery("select * from t1");
         while (rs.next()) {
@@ -503,6 +537,7 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.commit();
             println("T3: commit");
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
             ps2 = con2.prepareStatement("insert into t1 values(?,?,?,?,?)");
             ps2.setInt(1, firstKey);
             ps2.setInt(2, valA);
@@ -602,6 +637,11 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateModifiedTuple2()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
@@ -658,6 +698,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testTableIntentLock1()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
@@ -670,6 +711,14 @@ public class ConcurrencyTest extends SURBaseTest {
         } // Now the cursor does not point to any tuples
         
         // Compressing the table in another transaction:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con2 = openDefaultConnection();
         
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
@@ -702,7 +751,10 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateLockInReadUncommitted()
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -758,6 +810,8 @@ public class ConcurrencyTest extends SURBaseTest {
                                         boolean testTruncate)
         throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         Statement delStatement = createStatement();
         // First delete all records except the last and first
@@ -768,6 +822,8 @@ public class ConcurrencyTest extends SURBaseTest {
         assertEquals("Invalid number of records deleted", expectedDeleted, 
                      deleted);
         delStatement.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         println("T1: commit");
         
@@ -787,6 +843,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         final Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         final PreparedStatement ps2 = con2.prepareStatement
@@ -827,6 +884,14 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: updateInt(2, 3);");
         rs.updateRow();
         println("T1: updateRow()");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         commit();
         println("T1: commit");
         rs = s.executeQuery("select * from t1");
@@ -836,7 +901,17 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(2) + "," +
                     rs.getInt(3) + ")");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         con2.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
     }
     
@@ -848,7 +923,9 @@ public class ConcurrencyTest extends SURBaseTest {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         final BaseTestSuite suite = new BaseTestSuite("ConcurrencyTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
         suite.addTest(baseSuite("ConcurrencyTest:embedded", true));
         
         suite.addTest(
@@ -861,6 +938,7 @@ public class ConcurrencyTest extends SURBaseTest {
     }
     
     private static Test baseSuite(String name, boolean embedded) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         final BaseTestSuite suite = new BaseTestSuite(name);
         
         // This testcase does not require JDBC3/JSR169, since it does not
@@ -876,6 +954,7 @@ public class ConcurrencyTest extends SURBaseTest {
             suite.addTest(new ConcurrencyTest("testSharedLocks1"));
             suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks1"));
             suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks2"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4785
             suite.addTest(new ConcurrencyTest ("testUpdatePurgedTuple2"));
             suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple3"));
             suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple4"));
@@ -889,12 +968,14 @@ public class ConcurrencyTest extends SURBaseTest {
             
             // This testcase fails in DerbyNetClient framework due to 
             // DERBY-1696
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
             if (embedded) {
                 suite.addTest
                     (new ConcurrencyTest("testUpdatePurgedTuple1"));
             }        
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
         return suite;
     }
     

@@ -22,6 +22,7 @@
 package org.apache.derby.client.net;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class CodePoint {
     // ---------------callable statement codepoints-------------------------------
 
@@ -115,6 +116,7 @@ class CodePoint {
 
     // Sync Point Control Request.
     final static int SYNCCTL = 0x1055;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // Sync Point Resync Command.
     final static int SYNCRSY = 0x1069;
@@ -172,6 +174,7 @@ class CodePoint {
 
     // SQL Data Reply Data.
     final static int SQLDTARD = 0x2413;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // SQL Statement.
     final static int SQLSTT = 0x2414;
@@ -497,6 +500,7 @@ class CodePoint {
 
     // Open Query Complete.
     final static int OPNQRYRM = 0x2205;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // End of Query.
     final static int ENDQRYRM = 0x220B;
@@ -509,6 +513,7 @@ class CodePoint {
 
     // RDB Result Set Reply Message.
     final static int RSLSETRM = 0x2219;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     //----------------------------fdoca code points-------------------------------
 

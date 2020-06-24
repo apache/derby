@@ -56,9 +56,11 @@ public class ijMultipleResultSetResult extends ijResultImpl {
      */
     public ijMultipleResultSetResult(List<ResultSet> resultSets, int[] display,
                                      int[] widths) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         this.resultSets = new ArrayList<ResultSet>();
         this.resultSets.addAll(resultSets);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6195
         displayColumns = ToolUtils.copy( display );
         columnWidths   = ToolUtils.copy( widths );
     }
@@ -73,6 +75,7 @@ public class ijMultipleResultSetResult extends ijResultImpl {
     }
 
     public List<ResultSet> getMultipleResultSets() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return new ArrayList<ResultSet>(resultSets);
     }
 
@@ -97,6 +100,7 @@ public class ijMultipleResultSetResult extends ijResultImpl {
         SQLWarning warning = null;
         ResultSet rs = null;
         for (int i=0; i<resultSets.size(); i++){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             rs = resultSets.get(i);
             if (rs.getWarnings() != null) {
                 if (warning == null) warning = rs.getWarnings();
@@ -111,6 +115,7 @@ public class ijMultipleResultSetResult extends ijResultImpl {
      */
     public void clearSQLWarnings() throws SQLException {
         for (int i=0; i<resultSets.size(); i++){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             (resultSets.get(i)).clearWarnings();
         }
     }

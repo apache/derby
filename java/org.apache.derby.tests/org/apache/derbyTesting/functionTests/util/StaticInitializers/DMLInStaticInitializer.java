@@ -64,6 +64,7 @@ public class DMLInStaticInitializer
 		}
 		catch (SQLException se)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2518
 			if (!se.getSQLState().equals("38001")){
 				throw new ExceptionInInitializerError(se);
 			}
@@ -77,6 +78,7 @@ public class DMLInStaticInitializer
 			}
 			catch (SQLException se)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2518
 				if (!se.getSQLState().equals("38001")) {
 					throw new ExceptionInInitializerError(se);
 				}

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DropViewNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -34,6 +35,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class DropViewNode extends DDLStatementNode
 {
 
@@ -67,6 +70,7 @@ class DropViewNode extends DDLStatementNode
 		CompilerContext cc = getCompilerContext();
 				
 		TableDescriptor td = dd.getTableDescriptor(getRelativeName(), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 					getSchemaDescriptor(),
                     getLanguageConnectionContext().getTransactionCompile());
 	

@@ -73,6 +73,7 @@ public final class InitPageOperation extends PhysicalPageOperation
 	protected boolean reuse;	// is this page being initialize for reuse, or for first time
 	protected boolean overflowPage; // is this page an overflow page
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     InitPageOperation(BasePage page, int flag, int formatid,
 							 long offset)
 		 throws StandardException

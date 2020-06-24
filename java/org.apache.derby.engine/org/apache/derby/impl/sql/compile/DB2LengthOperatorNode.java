@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DB2LengthOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -46,6 +47,8 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DB2LengthOperatorNode(ValueNode operand, ContextManager cm)
             throws StandardException {
         super(operand, "length", "getDB2Length", cm);
@@ -64,6 +67,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -87,6 +91,8 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 	 * in UnaryOperatorNode for code generation purposes.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getReceiverInterfaceName() {
 	    return ClassName.ConcatableDataValue;
 	}
@@ -137,6 +143,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
         {
         case Types.BIGINT:
             return 8;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		case Types.BOOLEAN:
         case Types.BIT:
             return 1;

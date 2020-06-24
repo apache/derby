@@ -44,6 +44,7 @@ public final class ChainAllocPageOperation extends PhysicalPageOperation
 	protected long newAllocPageNum;	// the next alloc page's page number
 	protected long newAllocPageOffset; // the next alloc page's page offset 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     ChainAllocPageOperation(AllocPage allocPage, long pageNumber, long pageOffset)
 		 throws StandardException
 	{

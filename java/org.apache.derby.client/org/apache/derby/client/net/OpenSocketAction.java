@@ -39,6 +39,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.derby.client.BasicClientDataSource;
 import org.apache.derby.shared.common.drda.NaiveTrustManager;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
     private String server_;
     private int port_;
@@ -52,6 +53,7 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
 
     @Override
     public Socket run()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         throws UnknownHostException,
                IOException,
                NoSuchAlgorithmException,
@@ -64,7 +66,9 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
         
         SocketFactory sf;
         switch (clientSSLMode_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         case BasicClientDataSource.SSL_BASIC:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             Properties sslProperties = getSSLProperties();
             sf = NaiveTrustManager.getSocketFactory(sslProperties);
             break;
@@ -80,6 +84,7 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
             sf = SocketFactory.getDefault();
             break;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (clientSSLMode_ == BasicClientDataSource.SSL_BASIC ||
             clientSSLMode_ == BasicClientDataSource.SSL_PEER_AUTHENTICATION){
         	//DERBY-6764(analyze impact of poodle security alert on Derby 
@@ -126,6 +131,7 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
      */
     private Properties getSSLProperties()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Properties retval = new Properties();
         
         String keyStoreProp = System.getProperty(NaiveTrustManager.SSL_KEYSTORE);

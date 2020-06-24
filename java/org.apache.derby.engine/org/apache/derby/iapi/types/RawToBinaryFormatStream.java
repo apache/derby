@@ -203,6 +203,7 @@ public final class RawToBinaryFormatStream extends LimitInputStream {
 
 		int remainingBytes = clearLimit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
         if (length > -1 && remainingBytes > 0) {
             throw new DerbyIOException(
                         MessageService.getTextMessage(
@@ -221,6 +222,7 @@ public final class RawToBinaryFormatStream extends LimitInputStream {
 			catch (IOException ioe) {
 				c = -1;
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1473
 			if (c != -1) {
                 if (length > -1) {
                     // Stream is not capped, and should have matched the

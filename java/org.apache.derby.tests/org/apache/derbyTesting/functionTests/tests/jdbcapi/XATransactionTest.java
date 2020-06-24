@@ -112,6 +112,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             bid[i] = (byte) (64 - i);
         }
         Xid xid = XATestUtil.getXid(0x1234, gid, bid);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
 
         // get the stuff required to execute the global transaction
         xaConn = xaDataSource.getXAConnection();
@@ -145,6 +146,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
 
             // there should be at least one globaltransaction in progress
             assertTrue(rs.next());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
 
             // check whether the xid obtained matches the original xid
             Xid rXid = parseXid(rs.getString(1));
@@ -214,6 +216,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
         int timeoutStatementsToExecute = 66;
 
         /* Specifies the number of total executed statements per one
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
            commited statement in timeout related test. */
         int timeoutCommitEveryStatement = 3;
 
@@ -227,6 +230,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
         stm.execute("create table XATT (i int, text char(10))");
 
         XADataSource xaDataSource = J2EEDataSource.getXADataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
         XAConnection[] xaConn = new XAConnection[timeoutStatementsToExecute];
         XAResource xaRes = null;
         Connection conn = null;
@@ -253,6 +257,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
                 // with failure.
                 try {
                     xaRes.end(xid, XAResource.TMFAIL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
                     fail();
                 } catch (XAException ex) {
                     if (ex.errorCode < XAException.XA_RBBASE
@@ -271,6 +276,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
         }
 
         ResultSet rs = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
 
         stm = getConnection().createStatement();
         rs = stm.executeQuery("select count(*) from XATT");
@@ -297,6 +303,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             // Run this kind of statement just to be sure
             // it will not finish before it will time out
             rs = stm.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
                  "select count(*) from sys.syscolumns a, sys.syscolumns b, "
                + "sys.syscolumns c, sys.syscolumns d, sys.syscolumns e "
                + "group by a.referenceid, b.referenceid, c.referenceid, "
@@ -483,6 +490,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
                           + XAeForget.errorCode  + "  calling forget on a committed transaction",
                         XAException.XAER_NOTA, XAeForget.errorCode);
         } finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5529
             s.executeUpdate("DROP TABLE Derby1016");
             conn.commit();
             s.close();
@@ -583,6 +591,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
     static Xid createXid(int gtrid, int bqual) throws XAException {
         byte[] gid = new byte[2]; gid[0]= (byte) (gtrid % 256); gid[1]= (byte) (gtrid / 256);
         byte[] bid = new byte[2]; bid[0]= (byte) (bqual % 256); bid[1]= (byte) (bqual / 256);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         return XATestUtil.getXid(0x1234, gid, bid);
     }
 
@@ -593,6 +602,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
       * @return The xid object corresponding to the xid specified in a string.
       */
     private static Xid parseXid(String str) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
         assertNotNull(str);
         assertTrue(str.matches("\\(\\p{Digit}+,\\p{XDigit}+,\\p{XDigit}+\\)"));
 
@@ -615,6 +625,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             bqual[i] = (byte) Integer.parseInt(bqualS.substring(2*i, 2*i + 2), 16);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         return XATestUtil.getXid(fmtid, gtid, bqual);
     }
 
@@ -625,6 +636,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
     public static Test suite() {
         // the test requires XADataSource to run
         if (JDBC.vmSupportsJDBC3()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
             Test test = TestConfiguration.defaultSuite(XATransactionTest.class);
             // Set the lock timeout back to the default, because when
             // running in a bigger suite the value may have been
@@ -633,6 +645,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             return test;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
             "XATransactionTest cannot run without XA support");
     }

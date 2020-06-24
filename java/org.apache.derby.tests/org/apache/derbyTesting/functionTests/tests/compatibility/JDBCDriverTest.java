@@ -136,6 +136,7 @@ public class JDBCDriverTest
     {
         // 10.0 columns
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         1L,
         new DummyBlob( SAMPLE_BYTES ),
         SAMPLE_STRING,
@@ -187,6 +188,7 @@ public class JDBCDriverTest
         //                                                  -|-|-|-|-|-|-|-|-|-|R|A|-|-|-|-|-|-|-
         //                                                  -|-|-|-|-|-|-|-|-|-|-|R|-|-|-|-|-|-|-
         //                                                  -|-|-|-|-|-|-|-|-|-|-|Y|-|-|-|-|-|-|-
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         new T_CN( Types.BIGINT, new boolean[]             { Y,n,Y,n,n,n,n,Y,Y,Y,Y,n,Y,Y,Y,n,n,Y,n } ),
         new T_CN( Types.BLOB, new boolean[]               { n,Y,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n } ),
         new T_CN( Types.CHAR, new boolean[]               { n,n,Y,n,n,n,n,n,n,n,Y,n,n,n,n,n,n,Y,n } ),
@@ -329,6 +331,7 @@ public class JDBCDriverTest
         }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             objectValue = expectedValue ? 1 : 0;
         }
         String stringValue = objectValue.toString();
@@ -670,6 +673,7 @@ public class JDBCDriverTest
 
         checkDBMetadata(tableName);
         stuffTable(tableName, types, rows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         readTable(tableName, types, rows);
     }
 
@@ -779,6 +783,7 @@ public class JDBCDriverTest
     // Verify that we can select all legal datatypes in a table.
     //
     private void readTable(String tableName, TypeDescriptor[] types,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                            Object[][] rows)
             throws SQLException {
         PreparedStatement    ps = readTableQuery(tableName, types);
@@ -788,6 +793,7 @@ public class JDBCDriverTest
         rs.close();
         // Execute the statement again for each cast / coercion we check.
         checkRows( ps, types, rows );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         ps.close();
     }
@@ -878,6 +884,7 @@ public class JDBCDriverTest
      * @throws Exception
      */
     private void checkRows(PreparedStatement ps, TypeDescriptor[] types,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                            Object[][] rows)
             throws SQLException {
         int typeCount = types.length;
@@ -894,6 +901,7 @@ public class JDBCDriverTest
                 // Make sure we're using the correct type descriptor.
                 assertEquals(types[colIndex], type);
                 checkPlainGet(ps, colIndex, type, rows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 checkCoercions(ps, type);
             }
         }
@@ -1069,6 +1077,7 @@ public class JDBCDriverTest
     }
     private    void    putCoercionIndex( int index )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         _coercionIndex.put( COERCIONS[ index ].getJdbcType(), index );
     }
 
@@ -1079,6 +1088,7 @@ public class JDBCDriverTest
     {
         if ( _coercionIndex.isEmpty() ) { buildCoercionMap(); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return ((Integer) _coercionIndex.get( jdbcType )).intValue();
     }
 
@@ -1346,6 +1356,7 @@ public class JDBCDriverTest
      * whose names start with the string "test" in the named classes.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite testSuite = new BaseTestSuite("JDBCDriverTest suite");
         testSuite.addTestSuite(JDBCDriverTest.class);
         return TestConfiguration.defaultExistingServerDecorator(

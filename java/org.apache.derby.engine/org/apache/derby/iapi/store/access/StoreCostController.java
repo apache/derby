@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 <p>
 The StoreCostController interface provides methods that an access client
 (most likely the system optimizer) can use to get store's estimated cost of
@@ -44,6 +45,7 @@ work, so the caller if possible should attempt to open the StoreCostController
 once per unit of work and rather than close and reopen the controller.  For
 instance if the optimizer needs to cost 2 different scans against a single
 conglomerate, it should use one instance of the StoreCostController.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 </p>
 <p>
 The locking behavior of the implementation of a StoreCostController is
@@ -53,6 +55,7 @@ An optimal implementation will not get any locks on the underlying
 conglomerate, thus allowing concurrent access to the table by a executing
 query while another query is optimizing.
 </p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 @see TransactionController#openStoreCost
 @see RowCountable

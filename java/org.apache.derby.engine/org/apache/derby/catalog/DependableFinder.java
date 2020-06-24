@@ -52,6 +52,7 @@ public interface DependableFinder
 	  */
     public	Dependable	getDependable(DataDictionary dd,
             UUID dependableObjectID) throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
 
 	/**
 	  * The name of the class of Dependables as a "SQL Object" which this

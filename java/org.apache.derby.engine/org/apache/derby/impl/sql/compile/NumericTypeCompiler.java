@@ -64,6 +64,8 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return "int";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             case StoredFormatIds.BIGINT_TYPE_ID:
 				return "long";
 
@@ -106,6 +108,8 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return "getInt";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             case StoredFormatIds.BIGINT_TYPE_ID:
 				return "getLong";
 
@@ -147,6 +151,8 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return TypeCompiler.INT_MAXWIDTH_AS_CHAR;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             case StoredFormatIds.BIGINT_TYPE_ID:
 				return TypeCompiler.LONGINT_MAXWIDTH_AS_CHAR;
 
@@ -176,6 +182,8 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	 */
     @Override
     public DataTypeDescriptor resolveArithmeticOperation(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             DataTypeDescriptor leftType,
             DataTypeDescriptor rightType,
             String operator) throws StandardException
@@ -347,6 +355,8 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return "getNullInteger";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             case StoredFormatIds.BIGINT_TYPE_ID:
 				return "getNullLong";
 
@@ -432,6 +442,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			val = this.getScale(operator, leftType, rightType) +
 					Math.max(lprec - lscale, rprec - rscale) + 1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			if (val > Limits.DB2_MAX_DECIMAL_PRECISION_SCALE)
 			// then, like DB2, just set it to the max possible.
 				val = Limits.DB2_MAX_DECIMAL_PRECISION_SCALE;
@@ -489,6 +500,8 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			** or 4, whichever is biggest 
 			*/
 			// Scale: 31 - left precision + left scale - right scale
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             val = Math.max(NumberDataValue.MAX_DECIMAL_PRECISION_SCALE
                                - lprec + lscale - rscale,
                            0);
@@ -519,6 +532,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	public void generateDataValue(MethodBuilder mb, int collationType,
 			LocalField field)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         if (getTypeId().isDecimalTypeId())
 		{
             // Cast the value to a Number for method resolution. It is most

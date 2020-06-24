@@ -192,6 +192,7 @@ public class NestedWhereSubqueryTest extends BaseJDBCTestCase {
 		JDBC.assertUnorderedResultSet(rs, expectedRows);
 
 		/* A variation of the above WHERE EXISTS but using ANY should return the same rows */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3349
 		sb = new StringBuffer();
 		sb.append("select unbound_e.empid, unbound_p.projid ");
 		sb.append("from departments this, ");
@@ -405,6 +406,7 @@ public class NestedWhereSubqueryTest extends BaseJDBCTestCase {
      * here (FIXME).
      */
     public void testDerby5501 () throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5501
         setAutoCommit(false);
         Statement s = createStatement();
 

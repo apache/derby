@@ -167,6 +167,7 @@ public class CoalesceTest extends BaseJDBCTestCase
         "create table tD (c1 int, c2 char(254))",
         "create table tB (c1 char(254), c2 char(40), vc1 varchar(253), vc2 varchar(2000), lvc1 long varchar, lvc2 long varchar, clob1 CLOB(200), clob2 CLOB(33K))",
         "create table tC (cbd1 char(254) for bit data, cbd2 char(40) for bit data, vcbd1 varchar(253) for bit data, vcbd2 varchar(2000) for bit data, lvcbd1 long varchar for bit data, lvcbd2 long varchar for bit data, blob1 BLOB(200), blob2 BLOB(33K))",	
+//IC see: https://issues.apache.org/jira/browse/DERBY-2016
         "create table tAggr (i int)"
     };
 
@@ -215,6 +216,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
     public void testCoalesceSyntax() throws Throwable
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         s.executeUpdate("insert into tA (c1) values(1)");
 
@@ -235,6 +237,7 @@ public class CoalesceTest extends BaseJDBCTestCase
         s.executeUpdate("insert into value values(null,1)");
         dumpRS(s.executeQuery("select coalesce(value,c12) from value"), "COL1(datatype : INTEGER, precision : 10, scale : 0) null 1 ");  
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         assertCompileError("42610", "select coalesce(?,?) from tA");
         assertCompileError("42610", "select value(?,?) from tA");
     }
@@ -310,12 +313,14 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 null ",
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 15:30:20 ",
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 15:30:20 ",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
                 "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
                 "", "",
                 "COL1(datatype : BLOB, precision : 1024, scale : 0) null null null null "
         };
 
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
 
         int index = 0;
         for (int firstColumnType = 0; firstColumnType < SQLTypes.length; firstColumnType++) {
@@ -500,6 +505,7 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 null ",
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 null ",
                 "","","","","","","","","","","","","","","","",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
                 "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
                 "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
                 "","","","","","","","","","","","","","","","",
@@ -510,6 +516,7 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : BLOB, precision : 1024, scale : 0) null null null null "
         };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         int index = 0;
 
@@ -548,6 +555,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
     public void testDateCoalesce() throws Throwable
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         s.executeUpdate("insert into tF values(null, null, null)");
         s.executeUpdate("insert into tF values(date('1992-01-02'), '1992-01-03', '1992-01-04')");
@@ -573,6 +581,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         s.executeUpdate("insert into tF values(date('1992-01-01'), 'I am char', 'I am varchar')");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         assertStatementError("22007", s, "select coalesce(charCol,dateCol) from tF");
         assertStatementError("22007", s, "select value(charCol,dateCol) from tF");
         assertStatementError("22007", s, "select coalesce(varcharCol,dateCol) from tF");
@@ -607,6 +616,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         s.executeUpdate("insert into tG values(time('12:30:33'), 'I am char', 'I am varchar')");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         assertStatementError("22007", s, "select coalesce(charCol,timeCol) from tG");
         assertStatementError("22007", s, "select value(charCol,timeCol) from tG");
         assertStatementError("22007", s, "select coalesce(charCol,timeCol) from tG");
@@ -621,10 +631,12 @@ public class CoalesceTest extends BaseJDBCTestCase
 
     public void testTimeStampCoalesce() throws Throwable
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         s.executeUpdate("insert into tH values(null, null, null)");
         s.executeUpdate("insert into tH values(timestamp('1992-01-01 12:30:30'), '1992-01-01 12:30:31', '1992-01-01 12:30:32')");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
         String expectedValue = "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 1992-01-01 12:30:30.0 ";
         String expectedValue1 = "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 1992-01-01 12:30:31.0 ";
         String expectedValue2 = "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 1992-01-01 12:30:32.0 ";
@@ -646,6 +658,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         s.executeUpdate("insert into tH values(timestamp('1992-01-01 12:30:33'), 'I am char', 'I am varchar')");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         assertStatementError("22007", s, "select coalesce(charCol,timestampCol) from tH");
         assertStatementError("22007", s, "select value(charCol,timestampCol) from tH");
         assertStatementError("22007", s, "select coalesce(charCol,timestampCol) from tH");
@@ -754,6 +767,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         PreparedStatement ps;
 
@@ -785,6 +799,7 @@ public class CoalesceTest extends BaseJDBCTestCase
         try {
             ps.setString(1,"abc");
             dumpRS(ps.executeQuery(), "");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
             fail("Expected statement to fail");
         }
         catch (SQLException sqle) {
@@ -835,6 +850,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         s.executeUpdate("insert into tB values('c1 not null', 'c2 not null', 'vc1 not null', 'vc2 not null', 'lvc1 not null', 'lvc2 not null', 'clob1 not null', 'clob2 not null')");
         s.executeUpdate("insert into tB values('c1 not null but c2 is', null, 'vc1 is not null but vc2 is', null, null, null,null,null)");
@@ -913,6 +929,7 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : BLOB, precision : 33792, scale : 0) 626c6f6231206e6f74206e756c6c null 626c6f6231206e6f74206e756c6c20616761696e null "
         };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         PreparedStatement ps =
                 prepareStatement("insert into tC values (?,?,?,?,?,?,?,?)");
         ps.setBytes(1, "cbd1 not null".getBytes("US-ASCII"));
@@ -954,6 +971,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         int index = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         dumpRS(s.executeQuery("select coalesce(cbd1,cbd2) from tC"), expectedValues[index++]);
         dumpRS(s.executeQuery("select value(cbd1,cbd2) from tC"), expectedValues[index++]);
@@ -978,6 +996,7 @@ public class CoalesceTest extends BaseJDBCTestCase
         dumpRS(s.executeQuery("select coalesce(lvcbd1,lvcbd2) from tC"), expectedValues[index++]);
         dumpRS(s.executeQuery("select value(lvcbd1,lvcbd2) from tC"), expectedValues[index++]);		
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         assertStatementError("42815", s, "select coalesce(blob1,cbd1) from tC");
         assertStatementError("42815", s, "select value(blob1,cbd1) from tC");
         assertStatementError("42815", s, "select coalesce(cbd1,blob2) from tC");
@@ -998,12 +1017,14 @@ public class CoalesceTest extends BaseJDBCTestCase
 
     public void testAggregateDerby2016() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2016
         String[] expectedValues = {
             "COL1(datatype : INTEGER, precision : 10, scale : 0) 2 ",
             "COL1(datatype : INTEGER, precision : 10, scale : 0) 55 ",
             "COL1(datatype : INTEGER, precision : 10, scale : 0) 1 ",
         };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         int index = 0;
 
@@ -1038,6 +1059,7 @@ public class CoalesceTest extends BaseJDBCTestCase
      * CoalesceFunctionNode didn't remap column references correctly.
      */
     public void testColumnRemappingDerby4342() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         JDBC.assertSingleValueResultSet(createStatement().executeQuery(
                 "select t1.smallintcol from " +
                 "AllDataTypesTable t1 join AllDataTypesTable t2 " +
@@ -1053,6 +1075,7 @@ public class CoalesceTest extends BaseJDBCTestCase
      * properly categorized in CoalesceFunctionNode.
      */
     public void testPredicateCategorizationDerby4594() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5704
         Statement s = createStatement();
         s.execute("create table d4594_t1 (a1 int)");
         s.execute("create table d4594_t2 (a2 int)");

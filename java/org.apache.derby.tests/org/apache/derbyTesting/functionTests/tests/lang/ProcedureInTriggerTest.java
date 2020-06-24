@@ -49,6 +49,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         s.execute("create trigger after_stmt_trig_no_sql AFTER insert on t2 for each STATEMENT call proc_no_sql()");
         //insert 2 rows. check that trigger is fired - procedure should be called once
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
         zeroArgCount = 0;
         s.execute("insert into t2 values (1,2), (2,4)");
         checkAndResetZeroArgCount(1);
@@ -101,6 +102,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      */
     public void testTriggerContainsSql() throws SQLException{
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5103
         s.execute("insert into t2 values (1,2), (2,4)");
         s.execute("create trigger after_row_trig_contains_sql AFTER update on t2 for each ROW call proc_contains_sql()");
         // --- update 2 rows. check that trigger is fired - procedure should be called twice
@@ -131,6 +133,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         s.execute("insert into t1 values (1, 'one')");
         s.execute("create trigger after_stmt_trig_reads_sql AFTER insert on t2 for each STATEMENT call proc_reads_sql(1)");
         //--- insert 2 rows. check that trigger is fired - procedure should be called once
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
         selectRowsCount = 0;
         s.execute("insert into t2 values (1,2), (2,4)");
         checkAndResetSelectRowsCount(1);
@@ -218,8 +221,11 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         try {
             s.execute("insert into t2 values (1,2), (2,4)");
         } catch (SQLException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
             assertSQLState("38000", se);
             se = se.getNextException();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
             assertSQLState("38001", se);
         }
         //--- check trigger is not fired.
@@ -240,6 +246,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
        s.execute("insert into t1 values (4,'four')");
        //--- Check that insert successful and trigger fired. 
        rs = s.executeQuery("select * from t1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
        String [][] expectedRows = {{"5","two            "},
                                    {"3","one            "},
                                    {"6","four           "}};
@@ -252,6 +259,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
        rs = s.executeQuery("select * from t1");
        expectedRows = new String [][]
                         {{"5","two            "},{"6","four           "},{"8","eight          "}};
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
        JDBC.assertFullResultSet(rs, expectedRows);
        s.execute("drop trigger delete_trig");
        //--- Procedures with schema name
@@ -297,9 +305,11 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
 
         // Insert some test data.
         s.execute("insert into t1 values (5,'two'), (6,'four'), (8,'eight')");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5103
 
         ResultSet rs;
         assertStatementError("42Y03",s,"create trigger call_non_existent_proc1 AFTER insert on t2 for each ROW call non_existent_proc()");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
           rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_NON_EXISTENT_PROC1'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
           assertStatementError("42Y03",s,"create trigger call_proc_with_non_existent_proc2 AFTER insert on t2 for each ROW call new_schema.non_existent_proc()");
@@ -403,9 +413,12 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          //--- check delete failed
          rs = s.executeQuery("select * from t1");
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
          JDBC.assertFullResultSet(rs, expectedRows);
          //--- check trigger is not created
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where  CAST(triggername AS VARCHAR(128))='TEST_TRIG'");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
          JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
          s.execute("drop trigger create_trigger_trig");
          //--- create a trigger to test we cannot drop it from a procedure called by a trigger
@@ -416,7 +429,9 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          rs = s.executeQuery("select * from t2");
          JDBC.assertFullResultSet(rs,new String[][] {{"1","2"}, {"2","4"}});
          //--- check trigger is not dropped
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='TEST_TRIG'");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
          s.execute("drop trigger drop_trigger_trig");
          //- use procedures which create/drop index on trigger table and some other table
@@ -428,6 +443,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          JDBC.assertFullResultSet(rs,new String[][] {{"1","2"}, {"2","4"}});
          // -- check index is not created
          rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
          JDBC.assertFullResultSet(rs, new String [][] {{"0"}});
          s.execute("drop trigger create_index_trig");
          //--- create an index to test we cannot drop it from a procedure called by a trigger
@@ -437,16 +453,19 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          // -- check delete failed
          rs = s.executeQuery("select * from t1");
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
          JDBC.assertFullResultSet(rs, expectedRows);
          // -- check index is not dropped
          rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
 
          // Clean up objects created by the test case.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5103
          s.execute("drop trigger alter_table_trig");
          s.execute("drop trigger test_trig");
          s.execute("drop trigger drop_index_trig");
          s.execute("drop index ix");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5103
 
          s.close();
     }
@@ -454,6 +473,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
     
     
     private static Test basesuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test basesuite = new BaseTestSuite(ProcedureInTriggerTest.class);
         Test clean = new CleanDatabaseTestSetup(basesuite) {
         protected void decorateSQL(Statement s) throws SQLException {
@@ -488,7 +508,9 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         }
                 
         public static Test suite() { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2560
             if (!JDBC.vmSupportsJSR169()) {
                 suite.addTest(basesuite());
                 suite.addTest(TestConfiguration.clientServerDecorator(basesuite()));
@@ -501,6 +523,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          */
         protected void tearDown() throws Exception {
             rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5103
 
             // Remove all rows in the test tables, so that each test case
             // sees the same initial state.

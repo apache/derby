@@ -54,6 +54,7 @@ public class SkipTest
         }
         
         // Create a BufferedReader to read the list of tests to skip
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
         BufferedReader listFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String str = "";
         // Read the list of tests to skip, compare to testName

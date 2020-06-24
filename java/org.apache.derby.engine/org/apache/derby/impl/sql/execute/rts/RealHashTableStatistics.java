@@ -99,6 +99,7 @@ public class RealHashTableStatistics
 			optimizerEstimatedCost
 			);
 		this.hashtableSize = hashtableSize;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6201
 		this.hashKeyColumns = ArrayUtil.copy( hashKeyColumns );
 		this.nextQualifiers = nextQualifiers;
 		this.scanProperties = new FormatableProperties();
@@ -110,6 +111,7 @@ public class RealHashTableStatistics
 				this.scanProperties.put(key, scanProperties.get(key));
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.subqueryTrackingArray = ArrayUtil.copy(subqueryTrackingArray);
 		this.childResultSetStatistics = childResultSetStatistics;
 	}
@@ -329,6 +331,7 @@ public class RealHashTableStatistics
               null,                          // the scan qualifiers
               this.nextQualifiers,     // the next qualifiers
               hashkey_columns,               // the hash key column numbers
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
               this.hashtableSize // the hash table size
             );
         

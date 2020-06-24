@@ -72,6 +72,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	@see Loggable
 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
 abstract class PageBasicOperation implements Loggable, RePreparable
 {
 
@@ -86,6 +87,7 @@ abstract class PageBasicOperation implements Loggable, RePreparable
 	transient protected RawContainerHandle	containerHdl;
 	transient protected boolean	            foundHere;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     PageBasicOperation(BasePage page)
     {
 		if (SanityManager.DEBUG) 
@@ -104,6 +106,7 @@ abstract class PageBasicOperation implements Loggable, RePreparable
 	}
 
 	// no-arg constructor, required by Formatable
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     PageBasicOperation()
     {
 	}
@@ -164,6 +167,7 @@ abstract class PageBasicOperation implements Loggable, RePreparable
 		else
 			throw StandardException.newException(
                     SQLState.DATA_MISSING_LOG, pageId, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     pversion, 
                     pageVersion);
 	}

@@ -32,6 +32,7 @@ import org.apache.derby.client.am.SqlException;
 interface ConnectionRequestInterface {
     public void writeCommitSubstitute(NetConnection connection)
             throws SqlException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     public void writeLocalCommit(NetConnection connection)
             throws SqlException;

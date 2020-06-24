@@ -45,6 +45,7 @@ public class UpgradeClassLoader
     private static final Version FIRST_MODULE_SUPPORT_VERSION = new Version(new int[] { 10, 15, 0, 0 });
     private static final String[] _preModuleSupport_jarFiles = {
             "derby.jar", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             "derbynet.jar",
             "derbyTesting.jar",
             };
@@ -58,6 +59,7 @@ public class UpgradeClassLoader
             };
 
     static final String oldVersionsPath =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             getSystemProperty(_Suite.OLD_VERSIONS_PATH_PROPERTY);
     static final String jarPath =
             getSystemProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
@@ -84,6 +86,7 @@ public class UpgradeClassLoader
      */
     public static ClassLoader makeClassLoader( final int[] version )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ClassLoader oldLoader = AccessController.doPrivileged(
                 new PrivilegedAction<ClassLoader>() {
             public ClassLoader run() {
@@ -141,6 +144,7 @@ public class UpgradeClassLoader
      */
     private static ClassLoader createClassLoader(int[] version)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Version oldVersion = new Version(version);
         String[] jarFiles = (oldVersion.compareTo(FIRST_MODULE_SUPPORT_VERSION) < 0) ?
             _preModuleSupport_jarFiles : _postModuleSupport_jarFiles;
@@ -164,6 +168,7 @@ public class UpgradeClassLoader
 
             for (int i=0; i < jarFiles.length; i++) {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     url[i] = new File(lib, jarFiles[i]).toURI().toURL();
                 } catch (MalformedURLException e) {
                     Assert.fail(e.toString());
@@ -186,6 +191,7 @@ public class UpgradeClassLoader
                 } catch (MalformedURLException e) {
                     Assert.fail(e.toString());
                 } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5775
                     BaseTestCase.alarm("IOException connecting to location: " + oldURLJarLocation + ", msg: '" + e.getMessage() + "'." 
                         + " Upgrade tests can NOT be run!");
                         e.printStackTrace();
@@ -198,10 +204,12 @@ public class UpgradeClassLoader
         // add junit.jar to the classpath
         int lastSlot = jarFiles.length;
         url[lastSlot] = Assert.class.getProtectionDomain().getCodeSource().getLocation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         // Create a class loader which loads Derby classes from the specified
         // URL, and JDBC classes and other system classes from the platform
         // class loader.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6854
         ClassLoader oldVersionLoader =
             new URLClassLoader(url, java.sql.Connection.class.getClassLoader());
 

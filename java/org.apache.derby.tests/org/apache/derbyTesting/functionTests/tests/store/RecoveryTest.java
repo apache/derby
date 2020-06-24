@@ -46,6 +46,7 @@ public final class RecoveryTest extends BaseJDBCTestCase
     public static Test suite()
     {
         // Add the test case into the test suite
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("RecoveryTest");
         suite.addTest(decorateTest());
         return suite;

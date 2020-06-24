@@ -94,7 +94,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     public static Test suite() {
         final String nameRoot = ConstraintCharacteristicsTest.class.getName();
         final BaseTestSuite suite = new BaseTestSuite(nameRoot);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6666
         suite.addTest(baseSuite1(nameRoot + ":embedded 1"));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite1(nameRoot + ":client 1")));
@@ -115,7 +117,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     private static Test baseSuite3(final String name) {
 
         final BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         suite.addTest(new ConstraintCharacteristicsTest(
                 "testDeferredRowsInvalidation"));
         suite.addTest(new ConstraintCharacteristicsTest(
@@ -131,6 +135,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     
     private static Test baseSuite2(final String name) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6666
         final BaseTestSuite suite = new BaseTestSuite(name);
         final Properties systemProperties = new Properties();
         systemProperties.setProperty("derby.language.logQueryPlan", "true");
@@ -144,8 +149,10 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     private static Test baseSuite1(final String name) {
         final BaseTestSuite suite = new BaseTestSuite(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(new ConstraintCharacteristicsTest(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                       "testSyntaxAndBinding"));
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testDropNotNullOnUniqueColumn"));
@@ -175,11 +182,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                       "testXA"));
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testAlmostRemovedAllDups"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testCheckConstraintsWithDeferredRows"));
         suite.addTest(new ConstraintCharacteristicsTest(
                      "testSeveralCheckConstraints"));
         suite.addTest(new ConstraintCharacteristicsTest(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                      "testDerby6670_a"));
         suite.addTest(new ConstraintCharacteristicsTest(
                      "testDerby6670_b"));
@@ -191,6 +201,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         final Properties systemProperties = new Properties();
         systemProperties.setProperty(
             "derby.locks.waitTimeout", Integer.toString(500));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6437
 
         return new SupportFilesSetup(
                 new SystemPropertyTestSetup(suite, systemProperties, true));
@@ -199,10 +210,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final Statement s = createStatement();
         s.executeUpdate("create table referenced(" +
                         "    i int primary key, j int default 0)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if ((usingEmbedded() && !exportFilesCreatedEmbedded) ||
             (usingDerbyNetClient() && !exportFilesCreatedClient)) {
 
@@ -216,6 +229,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             // Create a file for import that contains duplicate rows,
             // see testImport and testDerby6374.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             expImpDataFile =
                 SupportFilesSetup.getReadWrite("t.data").getPath();
             expImpDataWithNullsFile =
@@ -236,6 +252,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             s.executeUpdate("drop table t_with_nulls");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         s.close();
         setAutoCommit(false);
     }
@@ -250,6 +267,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     public void testSyntaxAndBinding() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6708
         final Connection c = getConnection();
         final Statement s = c.createStatement();
 
@@ -259,6 +277,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         assertTableLevelDefaultBehaviorAccepted(c, s);
         assertTableLevelNonDefaultAccepted(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         //
         //   A L T E R    C O N S T R A I N T    C H A R A C T E R I S T I C S
@@ -271,6 +290,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         // not default behavior, expect error until feature implemented
         assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             NOT_IMPLEMENTED, s,
             "alter table t alter constraint c not enforced");
 
@@ -282,6 +302,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         // Unknown constraint name
         assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             LANG_DROP_OR_ALTER_NON_EXISTING_C, s,
             "alter table t alter constraint cuckoo not enforced");
 
@@ -297,9 +318,11 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // Unknown constraint name
         assertStatementError(LANG_OBJECT_NOT_FOUND, s,
                              "set constraints cuckoo deferred");
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         assertStatementError(LANG_DB2_DUPLICATE_NAMES , s,
                 "set constraints c,c deferred");
         c.rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         //
         //   C O L U M N    L E V E L    C O N S T R A I N T S
@@ -307,6 +330,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         assertColumnLevelDefaultBehaviorAccepted(c, s);
         assertColumnLevelNonDefaultAccepted(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         // Characteristics are not currently allowed for NOT NULL,
         // since Derby does not represent NOT NULL as a constraint,
@@ -330,6 +354,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     public void testCreateConstraintDictionaryEncodings() throws SQLException {
         final Statement s = getConnection().createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         for (String[] ch : defaultCharacteristics) {
             assertDictState(s, ch[0], ch[1]);
@@ -358,6 +383,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     public void testAlterConstraintDictionaryEncodings() throws SQLException {
         final Statement s = getConnection().createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         for (String[] ch : defaultCharacteristics) {
             s.executeUpdate(
@@ -372,6 +398,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         for (String[] ch : nonDefaultCharacteristics) {
             if (ch[0].contains("not enforced")) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertStatementError(NOT_IMPLEMENTED,
                         s,
                         "create table t(i int, constraint c primary key(i) " +
@@ -398,6 +425,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     public void testAlterConstraintInvalidation() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (usingDerbyNetClient()) {
             // Skip, since we need to see inside an embedded connection here
             return;
@@ -412,7 +440,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         ps.execute();
 
         s.executeUpdate("alter table t alter constraint c enforced ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6741
         final LanguageConnectionContext lcc = getLCC( c );
         final GenericPreparedStatement derbyPs =
                 (GenericPreparedStatement)lcc.getLastActivation().
@@ -430,6 +460,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             "create table t(i int not null, j int, constraint c unique(i)"};
 
     static final String[] uniqueSpec = { // corresponding to above forms
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             "primary key(i)",
             "unique(i)",
             "unique(i)"};
@@ -438,6 +469,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             "create table t(i int, j int, constraint c check (i > 0)"};
 
     static final String[] fkForms = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             "create table t(i int, j int, " +
             "    constraint c foreign key(i) references referenced(i)"};
 
@@ -465,11 +497,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // Test that our constraint backing index is still reported as unique
         // even if we implement it as physically non-unique when deferrable:
         // logically it is still a unique index.
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final Statement s = createStatement();
         s.executeUpdate(
             "create table t(i int not null " +
             "    constraint c primary key deferrable initially immediate)");
         final DatabaseMetaData dbmd = s.getConnection().getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         ResultSet rs = dbmd.getIndexInfo(null, null, "T", false, false);
         rs.next();
         assertEquals("false", rs.getString("NON_UNIQUE"));
@@ -555,6 +589,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             c2.setAutoCommit(false);
 
             final Statement s2 = c2.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             assertStatementError(LOCK_TIMEOUT, s2, "insert into t1 values 4");
         } finally {
             if (c2 != null) {
@@ -602,11 +637,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             c2 = openDefaultConnection();
             c2.setAutoCommit(false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final Statement s2 = c2.createStatement();
             s2.executeUpdate("insert into t2 values 4");
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             assertCommitError(LOCK_TIMEOUT, c2);
         } finally {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (c2 != null) {
                     c2.rollback();
                     c2.close();
@@ -622,6 +661,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // Thread 2: insert same row (duplicate)
         c2 = openDefaultConnection();
         c2.setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final Statement s2 = c2.createStatement();
         s2.executeUpdate("insert into t2 values 5");
 
@@ -642,6 +683,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         s.executeUpdate("insert into t2 values 11,11");
 
         // next delete one of the duplicates,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final Statement us = createStatement(
                 ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE);
@@ -663,6 +705,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     public void testBasicDeferral() throws SQLException {
         final Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         for (String sCF : setConstraintsForms) {
             int idx = 0;
@@ -721,6 +764,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             {"3", "31"}});
 
                     // Try to set immediate mode, and detect violation
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertStatementError(LANG_DEFERRED_DUP_VIOLATION_S,
                                          s,
                                          sCF + " immediate");
@@ -740,6 +784,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                     // Setting immediate now should work again:
                     s.executeUpdate(sCF + " immediate");
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertStatementError(LANG_DUPLICATE_KEY_CONSTRAINT,
                                          s,
                                          "insert into t values (2,30)");
@@ -750,6 +796,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     // Duplicate insert should now work
                     s.executeUpdate(
                         "insert into t values (2,19),(2,21),(3,31)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertStatementError(LANG_DEFERRED_DUP_VIOLATION_S,
                                          s,
                                          sCF + " immediate");
@@ -785,6 +832,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             {"3", "31"}});
 
                     // Now try to commit, which should lead to rollback
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertCommitError(LANG_DEFERRED_DUP_VIOLATION_T,
                                       getConnection());
 
@@ -812,6 +860,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     // We can't add a constraint with immediate checking
                     // because of the existing duplicates.
                     assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         LANG_DUPLICATE_KEY_CONSTRAINT,
                         s,
                         "alter table t add constraint c " + uniqueSpec[idx]);
@@ -835,11 +884,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             {"3", "31"}});
 
                     // But since we still have duplicates, the commit will fail
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertCommitError(LANG_DEFERRED_DUP_VIOLATION_T,
                                       getConnection());
 
                     checkConsistencyOfBaseTableAndIndex(s);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
                 } finally {
                     idx++;
@@ -985,6 +1036,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             {"-4", "31"}});
 
                     // Now try to commit, which should lead to rollback
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertCommitError(LANG_DEFERRED_CHECK_VIOLATION_T,
                                       getConnection());
 
@@ -1054,6 +1107,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     public void testRoutines() throws SQLException {
         final Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         //
         //   P R I M A R Y   K E Y,   U N I Q U E   C O N S T R A I N T S
@@ -1071,6 +1125,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                 declareCalledNested(s);
                 assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         LANG_DEFERRED_DUP_VIOLATION_T,
                         s,
                         "call calledNested(false)");
@@ -1092,6 +1147,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                     s.executeUpdate(setConstraintForm + " immediate");
                     declareCalledNested(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertStatementError(LANG_DEFERRED_DUP_VIOLATION_T,
                             s,
                             "call calledNested(false)");
@@ -1114,6 +1170,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         "insert into t values " + rs2Values(initialContents));
 
                 declareCalledNested(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 s.executeUpdate("call calledNested(false)");
             } finally {
                 rollback();
@@ -1161,6 +1218,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             "call calledNested(true)");
                 } finally {
                     dropTable("t");
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     commit();
                 }
             }
@@ -1189,6 +1247,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 s.executeUpdate(
                    "insert into t values " + rs2Values(negatedInitialContents));
                 declareCalledNestedSetImmediate(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertStatementError(LANG_DEFERRED_CHECK_VIOLATION_S,
                                      s, "call calledNestedSetImmediate()");
             } finally {
@@ -1306,6 +1365,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         commit();
 
         //   D r o p   t h e   t a b l e
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         s.executeUpdate("create table t(i int, " +
                         "  constraint c primary key (i) initially deferred)");
         s.executeUpdate("insert into t values 1,2,2,3");
@@ -1539,6 +1599,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 s.executeUpdate("set constraints c deferred");
 
                 // import and implicit commit leads to checking
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertStatementError(
                     LANG_DEFERRED_DUP_VIOLATION_T, s,
                     "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
@@ -1559,6 +1620,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 s.executeUpdate("set constraints c deferred");
 
                 // import and implicit commit leads to checking
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertStatementError(
                     LANG_DEFERRED_DUP_VIOLATION_T, s,
                     "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
@@ -1576,6 +1638,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 commit();
 
                 // import and implicit commit leads to checking
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertStatementError(
                     LANG_DEFERRED_DUP_VIOLATION_T, s,
                     "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
@@ -1592,6 +1655,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 s.executeUpdate("alter table t drop constraint c");
                 s.executeUpdate("truncate table t");
                 commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
                 //
                 //   C H E C K   C O N S T R A I N T
@@ -1601,6 +1665,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     "add constraint c check (i > 0) initially deferred");
 
                 // import and implicit commit leads to checking
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertStatementError(
                     LANG_DEFERRED_CHECK_VIOLATION_T, s,
                     "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
@@ -1622,6 +1687,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     // be non-unique was incomplete in the deferrable case.
     public void testDropNotNullOnUniqueColumn() throws SQLException {
         final Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         s.executeUpdate("create table constraintest (" +
                 "val1 varchar (20) not null, " +
@@ -1634,10 +1700,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         s.executeUpdate("insert into constraintest(val1) values 'name1'");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         assertStatementError(
             LANG_DUPLICATE_KEY_CONSTRAINT, s,
             "insert into constraintest(val1) values 'name1'");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final PreparedStatement ps = prepareStatement(
                 "insert into constraintest(val1) values (?)");
         ps.setString(1, null);
@@ -1649,6 +1717,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     public void testDerby6374() throws SQLException {
         final Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         s.executeUpdate("create table t(i int)");
 
@@ -1662,6 +1731,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 s.executeUpdate("alter table t add constraint c unique(i)");
                 commit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertStatementError(
                     LANG_DUPLICATE_KEY_CONSTRAINT, s,
                     "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
@@ -1677,6 +1747,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     public void testXA() throws SQLException, XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final XADataSource xads = J2EEDataSource.getXADataSource();
         J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
 
@@ -1745,6 +1816,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     fail("Expected XA commit to fail due to " +
                          "constraint violation");
                 } catch (XAException xe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6666
                     if (xe.errorCode == -3) {
                         System.err.println("huff");
                     } else {
@@ -1773,6 +1845,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     // deferrable: compress recreates the index.
     public void testCompressTableOKUnique() throws SQLException {
         final Statement stmt = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         stmt.executeUpdate(
                 "create table table1(" +
                 "name1 int unique deferrable initially immediate, " +
@@ -1787,6 +1860,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             // The following should run into problem because of constraint
             // on name1
             assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 LANG_DUPLICATE_KEY_CONSTRAINT, stmt,
                 "insert into table1 values(1,22,222)");
 
@@ -1818,6 +1892,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6708
     final static long NO_OF_INSERTED_ROWS = (1024L * 4);
     public void testManySimilarDuplicates() throws SQLException {
         if (usingDerbyNetClient()) {
@@ -1828,6 +1903,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         final Connection c = getConnection();
         c.setAutoCommit(false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final Statement s = c.createStatement();
         try {
             s.executeUpdate(
@@ -1844,7 +1920,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             for (long l=0; l < NO_OF_INSERTED_ROWS; l++) {
                 ps.executeUpdate();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             c.commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             fail();
         } catch (SQLException e) {
             assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
@@ -1897,6 +1975,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     {"9","9"}});
             commit();
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
         } finally {
             dropTable("t");
@@ -1958,6 +2037,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     public void testLockingForUniquePKWithCommit () throws Exception {
         setupTab1(getConnection());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6708
 
         try {
             for (int i = 0; i < 4; i++) {
@@ -1983,6 +2063,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     public void testLockingForUniquePKWithRollback () throws Exception {
         setupTab1(getConnection());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6708
 
         try {
             for (int i = 0; i < 4; i++) {
@@ -2008,6 +2089,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     public void testCheckConstraintsWithDeferredRows () throws
             SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         final Statement s = createStatement();
 
@@ -2025,6 +2107,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             s.executeUpdate("insert into tab1 values (4)");
             s.executeUpdate("insert into tab1 values (3)");
             s.executeUpdate("insert into tab1 select c1-3 from tab1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             assertCommitError(LANG_DEFERRED_CHECK_VIOLATION_T,
                               getConnection());
 
@@ -2037,6 +2120,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             s.executeUpdate("update tab1 as grr set c1=-1 where c1 = 2 and " +
                     "((select max(c1) from tab1 where grr.c1 > 0) > 0)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             assertCommitError(LANG_DEFERRED_CHECK_VIOLATION_T,
                               getConnection());
 
@@ -2154,7 +2238,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws java.lang.Exception
      */
     private static void executeThreads (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6708
         final ConstraintCharacteristicsTest thisTest,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final int isolation1,
         final int isolation2,
         final boolean commit) throws Exception {
@@ -2184,6 +2270,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 dbo1.commit();
                 t.join();
                 assertNull("isolation levels: " + isolation1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6437
                             + " " + isolation2 + ": exception " + 
                         dbo2.getException(), dbo2.getException());
             }
@@ -2221,7 +2308,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     private Xid doXAWorkCheck(final Statement s, final XAResource xar)
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             throws SQLException, XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final Xid xid = XATestUtil.getXid(1,05,32);
         // Start work on a transaction branch
         xar.start(xid, XAResource.TMNOFLAGS);
@@ -2256,6 +2345,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     private static String rs2Values(final String[][] rs) {
         final StringBuilder sb = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         for (String[] row : rs) {
             sb.append('(');
@@ -2334,7 +2424,11 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     private final static String[] illegalAlterCharacteristics;
 
     static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final List<String> characteristics = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         characteristics.addAll(Arrays.asList(defaultCharacteristics[0]));
         characteristics.addAll(Arrays.asList(nonDefaultCharacteristics[0]));
         characteristics.addAll(Arrays.asList(illegalCharacteristics));
@@ -2368,12 +2462,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     private static void assertTableLevelNonDefaultAccepted(
             final Statement s) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         for (String ct : tableConstraintTypes) {
             for (String[] ch : nonDefaultCharacteristics) {
                 // Only primary key and unique implemented
                 if (ch[0].contains("not enforced")) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     assertStatementError(NOT_IMPLEMENTED,
                             s,
                             "create table t(i int, constraint c " +
@@ -2396,11 +2492,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     private static void assertColumnLevelNonDefaultAccepted(
             final Statement s) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         for (String ct : columnConstraintTypes) {
             for (String[] ch : nonDefaultCharacteristics) {
                 // Only primary key and unique implemented
                 if (ch[0].contains("not enforced")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
                     assertStatementError(NOT_IMPLEMENTED,
                             s,
@@ -2425,11 +2525,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private static void assertTableLevelDefaultBehaviorAccepted (
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final Connection c,
             final Statement s) throws SQLException {
 
         for (String ct : tableConstraintTypes) {
             for (String[] ch : defaultCharacteristics) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                 assertUpdateCount(s, 0,
                     "create table t(i int, constraint c " + ct + ch[0] + ")");
                 c.rollback();
@@ -2447,11 +2551,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private static void assertColumnLevelDefaultBehaviorAccepted (
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final Connection c,
             final Statement s) throws SQLException {
 
         for (String ct : columnConstraintTypes) {
             for (String ch[] : defaultCharacteristics) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                 assertUpdateCount(s, 0,
                     "create table t(i int " + ct + ch[0] + ")");
                 c.rollback();
@@ -2471,11 +2579,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private void assertDictState(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final Statement s,
             final String characteristics,
             final String code) throws SQLException {
 
         for (String ct: tableConstraintTypes) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             try {
                 s.executeUpdate(
                     "create table t(i int, constraint c " + ct + " " +
@@ -2492,6 +2602,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     rollback();
                 }
             } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (characteristics.contains("not enforced")) {
                     assertSQLState(NOT_IMPLEMENTED, e);
                 } else {
@@ -2511,12 +2622,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private void assertAlterDictState(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final Statement s,
             final String enforcement) throws SQLException {
 
         final String oldState = getOldState(s);
         final String newState = computeNewState(oldState, enforcement);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (!enforcement.contains("not enforced")) {
             s.executeUpdate("alter table t alter constraint c " +
                     enforcement);
@@ -2525,12 +2638,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             "    where constraintname = 'C'"),
                     new String[][]{{newState}});
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             assertStatementError(NOT_IMPLEMENTED, s,
                     "alter table t alter constraint c " + enforcement);
         }
     }
 
     private String getOldState(final Statement s) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final ResultSet rs = s.executeQuery(
                 "select state from sys.sysconstraints " +
                 "    where constraintname = 'C'");
@@ -2544,22 +2659,30 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
 
     private String computeNewState(String oldState, String enforcement) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return inverseState.get(oldState)[
             enforcement.equals("enforced") ? 0 : 1];
     }
 
     private void assertCreateInconsistentCharacteristics(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final Statement s,
             final String characteristics) throws SQLException {
 
         for (String ct: tableConstraintTypes) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                 s.executeUpdate(
                     "create table t(i int, constraint c " + ct + " " +
                     characteristics + ")");
                 fail("wrong characteristics unexpectedly passed muster");
                 rollback();
             } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 assertSQLState(LANG_INCONSISTENT_C_CHARACTERISTICS, e);
             }
         }
@@ -2575,12 +2698,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             fail("wrong characteristics unexpectedly passed muster");
             rollback();
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             assertSQLState(LANG_SYNTAX_ERROR, e);
         }
     }
 
     private void declareCalledNested(final Statement s) throws SQLException {
         s.executeUpdate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             "create procedure calledNested(isCheckConstraint boolean)" +
             "  language java parameter style java" +
             "  external name '" +
@@ -2589,6 +2714,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     private void declareCalledNestedFk(final Statement s) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         s.executeUpdate(
             "create procedure calledNestedFk()" +
             "  language java parameter style java" +
@@ -2623,6 +2749,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     public static void calledNestedFk() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         final Connection c =
             DriverManager.getConnection("jdbc:default:connection");
         final Statement cStmt = c.createStatement();
@@ -2646,6 +2773,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     private void dontThrow(Statement st, String stm) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         try {
             st.executeUpdate(stm);
         } catch (SQLException e) {
@@ -2667,6 +2795,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     public void testDerby6670_a() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         final Connection c = getConnection();
         Statement s = createStatement();
 
@@ -2853,6 +2983,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     public void testDerby6666() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6666
         final Statement s = createStatement();
         s.executeUpdate("create table t1(x int primary key)");
         s.executeUpdate(
@@ -2925,6 +3056,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      */
     public  static  LanguageConnectionContext    getLCC( final Connection conn )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6741
         return AccessController.doPrivileged
             (
              new PrivilegedAction<LanguageConnectionContext>()

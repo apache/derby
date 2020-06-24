@@ -48,6 +48,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("checkConstraint Test");
         suite.addTest(TestConfiguration.defaultSuite(CheckConstraintTest.class));
 
@@ -59,6 +60,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
     public void testNotAllowedInCheckConstraints() throws Exception
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         Statement st = createStatement();
         setAutoCommit(false);
         
@@ -111,6 +113,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         // alter table t1 drop constraint asdf
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
         
         // alter table t1 drop constraint asdf forward references 
@@ -123,6 +126,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
             " create table neg2(c1 int constraint asdf check(c2 "
             + "= 1), c2 int)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
     }
     public void testCheckConstraints() throws SQLException{
@@ -150,6 +154,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23513", st,
             " insert into pos1 values 10");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         ResultSet rs = st.executeQuery("select * from pos1");
         
         String[] expColNames = {"C1"};
@@ -198,6 +203,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
         
         // conflicting constraints, should fail
@@ -222,6 +228,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23513", st,
             "insert into negcks values (2, 3, 3)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
         
         // same source and target tables
@@ -233,6 +240,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into pos1 values (1, 2), (2, 3), (3, 4)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         commit();
         // these should work
         
@@ -274,6 +282,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
         
         // these should fail
@@ -316,6 +325,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " drop table pos1");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         commit();
         // union under insert
         
@@ -389,6 +399,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
     }
     
@@ -409,6 +420,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " create index i1 on t1(c1)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         Statement st1 = createStatement();
         st1.setCursorName("c1");
         ResultSet rs1 = st1.executeQuery(
@@ -426,6 +438,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st1.close();
         rs1.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         Statement st2 = createStatement();
         st2.setCursorName("c2");
         ResultSet rs2 = st2.executeQuery(
@@ -442,6 +455,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st2.close();
         rs2.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         Statement st3 = createStatement();
         st3.setCursorName("c3");
         ResultSet rs3 = st3.executeQuery(
@@ -463,6 +477,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st3.close();
         rs3.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         ResultSet rs = st.executeQuery("select * from t1");
         
         String[] expColNames = {"C1", "C2"};
@@ -477,6 +492,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
         
         // complex expressions
@@ -520,6 +536,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
     }
     
@@ -564,6 +581,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23513", st,
             "insert into maxIntTab values 2147483647");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
         
         // verify that inserts, updates and statements with forced 
@@ -575,6 +593,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into t1 values 1, 2, 3, 4, 5");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         commit();
         
         PreparedStatement pSt1 = prepareStatement(
@@ -593,6 +612,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23505", pSt2);
 
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         ResultSet rs = pSt3.executeQuery();
         
         String[] expColNames = {"C1"};
@@ -614,6 +634,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         // rollback and verify that constraints are enforced and 
         // select succeeds
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         rollback();
         
         assertStatementError("23505", pSt1);
@@ -646,6 +667,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             "create table t1(c1 int constraint asdf check(c1 = 1))");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         PreparedStatement pSt = prepareStatement(
             "insert into t1 values (?)");
         
@@ -730,6 +752,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
             {"C"}
         };
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4908
         JDBC.assertUnorderedResultSet(rs, expRS, true);
         
         assertStatementError("42Y55", st,
@@ -815,10 +838,12 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         // Cleanup:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4392
         st.executeUpdate("drop table t4");
         st.executeUpdate("drop table t3");
         st.executeUpdate("drop table t2");
         st.executeUpdate("drop table t1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         commit();
         
         // DERBY-2989
@@ -860,6 +885,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
             return;
 
         Statement st = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
 
         st.executeUpdate(
             "create table t4282(c1 int, c2 int, constraint ck1 "
@@ -884,6 +910,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st1.close();
         st.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5106
         dropTable("t4282");
     }
     // This test verifies that if the PRIMARY KEY constraint mentions a
@@ -893,6 +920,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
     public void testPrimaryKeyPageSizeDerby3947()
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5712
         Statement st = createStatement();
         st.executeUpdate("create table d3947 (x varchar(1000) primary key)");
         char[] chars = new char[994];

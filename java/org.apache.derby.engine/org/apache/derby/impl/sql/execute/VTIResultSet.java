@@ -68,6 +68,7 @@ import org.w3c.dom.Element;
 
 /**
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class VTIResultSet extends NoPutResultSetImpl
 	implements CursorResultSet, VTIEnvironment {
 
@@ -106,6 +107,7 @@ class VTIResultSet extends NoPutResultSetImpl
 
 	/**
 		Specified isolation level of SELECT (scan). If not set or
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		not application, it will be set to TransactionControl.UNSPECIFIED_ISOLATION_LEVEL
 	*/
 	private int scanIsolationLevel = TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
@@ -113,6 +115,7 @@ class VTIResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
     VTIResultSet(Activation activation, int row, int resultSetNumber,
 				 GeneratedMethod constructor,
 				 String javaClassName,
@@ -128,6 +131,7 @@ class VTIResultSet extends NoPutResultSetImpl
                  int returnTypeNumber,
                  int vtiProjectionNumber,
                  int vtiRestrictionNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
                  String vtiSchema,
                  String vtiName
                  ) 
@@ -143,14 +147,17 @@ class VTIResultSet extends NoPutResultSetImpl
 		this.pushedQualifiers = pushedQualifiers;
 		this.scanIsolationLevel = scanIsolationLevel;
 		this.isDerbyStyleTableFunction = isDerbyStyleTableFunction;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
         this.vtiSchema = vtiSchema;
         this.vtiName = vtiName;
 
         ExecPreparedStatement ps = activation.getPreparedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
         this.allocatedRow = ((ExecRowBuilder) ps.getSavedObject(row))
                 .build(activation.getExecutionFactory());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3616
         this.returnType = returnTypeNumber == -1 ? null :
             (TypeDescriptor)
             activation.getPreparedStatement().getSavedObject(returnTypeNumber);
@@ -257,6 +264,7 @@ class VTIResultSet extends NoPutResultSetImpl
                     restrictedVTI.initScan( vtiProjection, cloneRestriction( activation ) );
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
                 if ( userVTI instanceof AwareVTI )
                 {
                     AwareVTI awareVTI = (AwareVTI) userVTI;
@@ -424,6 +432,7 @@ class VTIResultSet extends NoPutResultSetImpl
      */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -461,6 +470,7 @@ class VTIResultSet extends NoPutResultSetImpl
                         populateFromResultSet(result);
                         if (fastPath != null)
                         { fastPath.currentRow(userVTI, result.getRowArray()); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6151
 
                         SQLWarning  warnings = userVTI.getWarnings();
                         if ( warnings != null ) { addWarning( warnings ); }
@@ -731,6 +741,7 @@ class VTIResultSet extends NoPutResultSetImpl
 	}
 
 	public final int getStatementIsolationLevel() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		return TransactionControl.jdbcIsolationLevel( getScanIsolationLevel() );
 	}
 
@@ -764,6 +775,7 @@ class VTIResultSet extends NoPutResultSetImpl
     {
         if ( returnColumnTypes == null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3616
             TypeDescriptor[] columnTypes = returnType.getRowTypes();
             int                         count = columnTypes.length;
 
@@ -792,6 +804,7 @@ class VTIResultSet extends NoPutResultSetImpl
         {
             if ( typeID.isLongVarcharTypeId() ) { castLongvarchar( dtd, dvd ); }
             else if ( typeID.isLongVarbinaryTypeId() ) { castLongvarbinary( dtd, dvd ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3536
             else if ( typeID.isDecimalTypeId() ) { castDecimal( dtd, dvd ); }
             else
             {
@@ -853,6 +866,7 @@ class VTIResultSet extends NoPutResultSetImpl
      * </p>
      */
     private void    castDecimal( DataTypeDescriptor dtd, DataValueDescriptor dvd )
+//IC see: https://issues.apache.org/jira/browse/DERBY-3536
         throws StandardException
     {
         VariableSizeDataValue   vsdv = (VariableSizeDataValue) dvd;
@@ -862,6 +876,7 @@ class VTIResultSet extends NoPutResultSetImpl
     
     public Element toXML( Element parentNode, String tag ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         Element myNode = super.toXML( parentNode, tag );
         myNode.setAttribute( "javaClassName", javaClassName );
         

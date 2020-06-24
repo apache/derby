@@ -49,6 +49,7 @@ public interface LockFactory extends PropertySetCallback {
 	public CompatibilitySpace createCompatibilitySpace(LockOwner owner);
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		Lock an object within a compatibility space
 		and associate the lock with a group object,
 		waits up to timeout milli-seconds for the object to become unlocked. A 
@@ -76,6 +77,7 @@ public interface LockFactory extends PropertySetCallback {
 		could not be granted.
 
         @exception StandardException if a deadlock has occurred (message id
+//IC see: https://issues.apache.org/jira/browse/DERBY-6323
             will be LockFactory.Deadlock), or if the wait for the lock timed
             out (message id will be LockFactory.TimeOut), or if another thread
             interrupted this thread while it was waiting for the lock (this will
@@ -84,6 +86,7 @@ public interface LockFactory extends PropertySetCallback {
             any other error occurs when locking the object
 	*/
 	public boolean lockObject(CompatibilitySpace compatibilitySpace,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 							  Object group, Lockable ref, Object qualifier,
 							  int timeout)
 		throws StandardException;
@@ -139,6 +142,7 @@ public interface LockFactory extends PropertySetCallback {
 	public boolean anyoneBlocked();
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		Return true if locks are held in this compatibility space and
 		 this group.
 
@@ -168,6 +172,7 @@ public interface LockFactory extends PropertySetCallback {
 		Zero duration means the lock is released as soon as it is obtained.
 		<P>
 		A compatibility space in an space where lock requests are assumed to be
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
         compatible and granted by the lock manager if the trio
         {compatibilitySpace, ref, qualifier} are equal (i.e. reference equality
         for qualifier and compatibilitySpace, equals() method for ref).
@@ -187,6 +192,7 @@ public interface LockFactory extends PropertySetCallback {
 		could not be granted.
 
         @exception StandardException if a deadlock has occurred (message id
+//IC see: https://issues.apache.org/jira/browse/DERBY-6323
             will be LockFactory.Deadlock), or if the wait for the lock timed
             out (message id will be LockFactory.TimeOut), or if another thread
             interrupted this thread while it was waiting for the lock (this will
@@ -196,6 +202,7 @@ public interface LockFactory extends PropertySetCallback {
 
 	*/
 	public boolean zeroDurationlockObject(CompatibilitySpace compatibilitySpace,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 										  Lockable ref, Object qualifier,
 										  int timeout)
 		throws StandardException;
@@ -214,6 +221,7 @@ public interface LockFactory extends PropertySetCallback {
 							  Object group, Lockable ref, Object qualifier);
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
 		Get the lock timeout in milliseconds. A negative number means that
         there is no timeout.
 

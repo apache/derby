@@ -62,12 +62,14 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		// Check that the current user has permission to grant the privileges.
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         String currentUser = lcc.getCurrentUserId(activation);
 		TransactionController tc = lcc.getTransactionExecute();
 
 		// Check that the current user has permission to grant the privileges.
 		checkOwnership( currentUser,
 						aliasDescriptor,
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 						dd.getSchemaDescriptor( aliasDescriptor.getSchemaUUID(), tc),
 						dd);
 		
@@ -83,12 +85,15 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 			// warning.
 			boolean privileges_revoked = false;
 			String grantee = (String) itr.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1643
+//IC see: https://issues.apache.org/jira/browse/DERBY-1582
 			if (dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc)) 
 			{
 				privileges_revoked = true;	
 				//Derby currently supports only restrict form of revoke execute
 				//privilege and that is why, we are sending invalidation action 
 				//as REVOKE_PRIVILEGE_RESTRICT rather than REVOKE_PRIVILEGE
+//IC see: https://issues.apache.org/jira/browse/DERBY-2594
 				dd.getDependencyManager().invalidateFor
 					(routinePermsDesc,
 					 DependencyManager.REVOKE_PRIVILEGE_RESTRICT, lcc);

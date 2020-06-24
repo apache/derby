@@ -83,6 +83,7 @@ public class shutdown
         PrintStream stdout = System.out;
     	PrintStream stderr = System.err;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(driver);
 		clazz.getConstructor().newInstance();
 

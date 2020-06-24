@@ -31,6 +31,7 @@ import org.apache.derby.shared.common.reference.ModuleUtil;
 
 /**
   Class to hold a Derby Product version.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 
   This class includes the following product version features.
 
@@ -61,6 +62,7 @@ import org.apache.derby.shared.common.reference.ModuleUtil;
 	is represented by a int (2G values) we have plenty of room for encoding. If we assign a given
 	majorVersion.minorVersion.fixPack a 10 year life, then we about the maximum number of individual releases
 	it can have is 10 years * 365 days/year = 3650. Thus with the pre 5.2 scheme we would not expect a 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	5.1.x to have an x &gt; 3650 (approximately). Usually the rate of point releases has been much less than
 	one per day, 5.1.31 is released about 225 days after GA which makes around a point release every 7 days.
 	But in the encoding we need to be conservative. With fix packs the maximum is about 2 per year and fix
@@ -84,6 +86,7 @@ import org.apache.derby.shared.common.reference.ModuleUtil;
     The encoding number must continue to increase so that the
 	
 		encodedMaintB &gt; encodedMaintA
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		if (fixPackB &gt; fixPackA) || ((fixPackB == fixPackA) &amp;&amp; (bugB &gt; bugA))
 
@@ -365,6 +368,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 
 	/**
        Return the fix pack version from the maintenance encoding.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
        @return the fix pack version number
 	*/
@@ -553,6 +557,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 		Returns a short-hand value for the product version string.
 		Used by Sysinfo.
 		Includes the optional beta designation
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         @param withBuild If true, include the build number
 
@@ -575,9 +580,11 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	}
 	// SECURITY PERMISSION - IP4
 	private Properties loadProperties(String productGenus) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		String resourceName = "/org/apache/derby/info/" + productGenus+"/info.properties";
 			
 		InputStream is = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         if (JVMInfo.isModuleAware())
         {

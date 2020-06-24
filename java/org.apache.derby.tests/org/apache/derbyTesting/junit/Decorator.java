@@ -55,6 +55,8 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2687
+//IC see: https://issues.apache.org/jira/browse/DERBY-5622
         return encryptedDatabaseBpw(test, getBootPhrase(16));
     }
 
@@ -77,7 +79,9 @@ public class Decorator {
     {
         if (JDBC.vmSupportsJSR169())
             return new BaseTestSuite("no encryption support");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
         Properties attributes = new Properties();
         attributes.setProperty("dataEncryption", "true");
         attributes.setProperty("bootPassword", bootPassword);
@@ -104,6 +108,8 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test, final String algorithm)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2687
+//IC see: https://issues.apache.org/jira/browse/DERBY-5622
         return encryptedDatabaseBpw(test, algorithm, getBootPhrase(16));
     }
 
@@ -160,6 +166,7 @@ public class Decorator {
      */
     public static Test territoryCollatedDatabase(Test test, final String locale)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
         Properties attributes = new Properties();
         attributes.setProperty("collation", "TERRITORY_BASED");
         
@@ -193,6 +200,7 @@ public class Decorator {
      */
     public static Test territoryCollatedCaseInsensitiveDatabase(Test test, final String locale)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
         Properties attributes = new Properties();
         attributes.setProperty("collation", "TERRITORY_BASED:SECONDARY");
 

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SetOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -53,6 +54,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	boolean			all;
 
     QueryExpressionClauses qec = new QueryExpressionClauses();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
 	// List of scoped predicates for pushing during optimization.
 	private PredicateList leftOptPredicates;
@@ -78,6 +80,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SetOperatorNode(ResultSetNode leftResult,
                     ResultSetNode rightResult,
                     boolean all,
@@ -201,6 +205,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 */
 
 		// Find all UnionNodes in the subtree.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<UnionNode> cnv =
                 new CollectNodesVisitor<UnionNode>(UnionNode.class);
 		this.accept(cnv);
@@ -223,6 +228,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 			// _unscoped_ form, which means they are intended for _this_
 			// node instead of this node's children.  That's exactly what
 			// we want.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ResultSetNode prnRSN = new ProjectRestrictNode(
 				topNode,					// Child ResultSet
 				topNode.getResultColumns(),	// Projection
@@ -232,6 +239,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 				null,						// Subquerys in Restriction
 				null,						// Table properties
 				getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			prnRSN.setCostEstimate( ce.cloneMe() );
 			prnRSN.setReferencedTableMap(topNode.getReferencedTableMap());
 			topNode = prnRSN;
@@ -377,6 +385,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		// and if so just use that.
 		Predicate scopedPred = null;
 		if (leftScopedPreds == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			leftScopedPreds = new HashMap<Predicate,Predicate>();
 		else
 			scopedPred = leftScopedPreds.get(pred);
@@ -392,6 +401,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 
 		scopedPred = null;
 		if (rightScopedPreds == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			rightScopedPreds = new HashMap<Predicate,Predicate>();
 		else
 			scopedPred = rightScopedPreds.get(pred);
@@ -413,6 +423,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		// modifyAccessPaths() in this class for more.
 		if (pushedPredicates == null)
             pushedPredicates = new PredicateList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		pushedPredicates.addOptPredicate(pred);
 		return true;
@@ -462,6 +474,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		RemapCRsVisitor rcrv = new RemapCRsVisitor(false);
 		for (int i = 0; i < pushedPredicates.size(); i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             Predicate pred = (Predicate)pushedPredicates.getOptPredicate(i);
 			if (pred.isScopedForPush())
 			{
@@ -532,12 +546,15 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             printQueryExpressionSuffixClauses(depth, qec);
 		}
 	}
@@ -552,6 +569,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumns(FromList fromListParam)
 					throws StandardException
 	{
@@ -625,6 +644,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 * may have been 1 or more *'s in the left's SELECT list.
 		 */
 		setResultColumns( leftResultSet.getResultColumns().copyListAndObjects() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         // The generated grouping columns of the left result set should not be
         // part of the result from the set operation (DERBY-3764).
@@ -648,6 +669,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList rcl)
 				throws StandardException
 	{
@@ -676,6 +699,7 @@ abstract class SetOperatorNode extends TableOperatorNode
      * {@inheritDoc}
      */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
     void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)
@@ -697,6 +721,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @return	The number of new types found in the RowResultSetNode
 	 */
 	int getParamColumnTypes(DataTypeDescriptor[] types, RowResultSetNode rrsn)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	 throws StandardException
 	{
 		int	numTypes = 0;
@@ -706,7 +731,9 @@ abstract class SetOperatorNode extends TableOperatorNode
 		{
 			if (types[i] == null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ResultColumn rc = rrsn.getResultColumns().elementAt(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 				if ( ! (rc.getExpression().requiresTypeFromContext()))
 				{
 					types[i] = rc.getExpression().getTypeServices();
@@ -742,7 +769,9 @@ abstract class SetOperatorNode extends TableOperatorNode
 		for (int index = 0; index < rrclSize; index++)
 		{
             ResultColumn rc = rrcl.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			if (rc.getExpression().requiresTypeFromContext())
 			{
 				/*
@@ -758,6 +787,7 @@ abstract class SetOperatorNode extends TableOperatorNode
     public void bindExpressions(FromList fromList) throws StandardException {
         // Actions for UnionNode qua top node of a multi-valued table value
         // constructor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
 
@@ -782,6 +812,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -791,6 +823,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 
     @Override
     public void pushQueryExpressionSuffix() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.push();
     }
 
@@ -805,6 +838,7 @@ abstract class SetOperatorNode extends TableOperatorNode
     @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.setOrderByList(orderByList);
 	}
 
@@ -818,6 +852,7 @@ abstract class SetOperatorNode extends TableOperatorNode
     @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.setOffset(offset);
         qec.setFetchFirst(fetchFirst);
         qec.setHasJDBCLimitClause(hasJDBClimitClause);
@@ -849,6 +884,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -861,6 +898,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		rightResultSet = rightResultSet.preprocess(numTables, gbl, fromList);
 
 		/* Build the referenced table map (left || right) */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setReferencedTableMap( (JBitSet) leftResultSet.getReferencedTableMap().clone() );
         getReferencedTableMap().or(rightResultSet.getReferencedTableMap());
 
@@ -879,6 +917,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 *		above the select so that the shape of the result set
 		 *		is as expected.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             OrderByList obl = qec.getOrderByList(i);
 
@@ -888,6 +927,7 @@ abstract class SetOperatorNode extends TableOperatorNode
                 /* Order by list currently restricted to columns in select
                  * list, so we will always eliminate the order by here.
                  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 if (obl.isInOrderPrefix(getResultColumns()))
                 {
                     obl = null;
@@ -910,6 +950,7 @@ abstract class SetOperatorNode extends TableOperatorNode
             // UnionNode qua top of table value constructor with ordering
             // If we have more than 1 ORDERBY columns, we may be able to
             // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             if (obl != null && obl.size() > 1) {
                 obl.removeDupColumns();
             }
@@ -927,6 +968,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
@@ -942,6 +985,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
@@ -1029,6 +1074,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
 		throws StandardException
 	{
@@ -1059,6 +1106,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		// Now create a ResultColumnList that simply holds the "*".
 
         ResultColumnList rcl = new ResultColumnList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
        ResultColumn allResultColumn =
                 new AllResultColumn(null, getContextManager());
@@ -1074,7 +1123,10 @@ abstract class SetOperatorNode extends TableOperatorNode
 				null,     // WHERE clause
 				null,     // GROUP BY list
 				null,     // having clause
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 				null, /* window list */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
 				null, /* optimizer override plan */
 				getContextManager());
 
@@ -1144,6 +1196,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		throws StandardException
 	{
 		if (leftOptPredicates == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             leftOptPredicates = new PredicateList(getContextManager());
 		}
 
@@ -1159,6 +1213,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		throws StandardException
 	{
 		if (rightOptPredicates == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             rightOptPredicates = new PredicateList(getContextManager());
 		}
 

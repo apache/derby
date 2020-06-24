@@ -64,6 +64,7 @@ public class XAXactId extends GlobalXact implements Xid
 							   byte[]  branch_id)
     {
 		this.format_id = format_id;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6184
         this.global_id = (byte[]) global_id.clone();
         this.branch_id = (byte[]) branch_id.clone();
     }
@@ -227,6 +228,7 @@ public class XAXactId extends GlobalXact implements Xid
      **/
     public byte[] getGlobalTransactionId()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6184
         return (byte[]) global_id.clone();
     }
 
@@ -238,6 +240,7 @@ public class XAXactId extends GlobalXact implements Xid
      **/
     public byte[] getBranchQualifier()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6184
         return (byte[]) branch_id.clone();
     }
 
@@ -274,6 +277,7 @@ public class XAXactId extends GlobalXact implements Xid
 			// this class only knows how to compare with other Xids
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT("comparing XAXactId with " + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 										  other.getClass().getName(), cce); 
 		
 			return false;

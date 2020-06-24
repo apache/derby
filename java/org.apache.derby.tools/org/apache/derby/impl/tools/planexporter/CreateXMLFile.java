@@ -45,6 +45,7 @@ public class CreateXMLFile {
      * @throws IOException
      */
     public void writeTheXMLFile(String stmt, String time,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
                                 Writer out, String xsl_sheet_name)
     throws IOException {
 

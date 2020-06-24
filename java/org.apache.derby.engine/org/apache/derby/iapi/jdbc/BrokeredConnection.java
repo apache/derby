@@ -374,6 +374,7 @@ public class BrokeredConnection implements EngineConnection
     public final Statement createStatement(int resultSetType,
             int resultSetConcurrency,
             int resultSetHoldability)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5877
             throws SQLException {
         try {
             resultSetHoldability =
@@ -509,7 +510,9 @@ public class BrokeredConnection implements EngineConnection
      * Generate an exception reporting that there is no current connection.
      * @return a no-current-connection exception
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
     final SQLException noCurrentConnection() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6253
         return ExceptionFactory.getInstance().getSQLException(
                 SQLState.NO_CURRENT_CONNECTION, null, null, null);
     }
@@ -522,11 +525,13 @@ public class BrokeredConnection implements EngineConnection
 	final EngineConnection getRealConnection() throws SQLException {
 		if (isClosed)
 			throw noCurrentConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 
 		return control.getRealConnection();
 	}
 
 	final void notifyException(SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-24
 		if (!isClosed)
 			control.notifyException(sqle);
 	}
@@ -573,6 +578,7 @@ public class BrokeredConnection implements EngineConnection
 	public void setState(boolean complete) throws SQLException {
 
 		if (complete) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
 		    Connection conn = getRealConnection();
 			conn.setTransactionIsolation(stateIsolationLevel);
 			conn.setReadOnly(stateReadOnly);
@@ -580,13 +586,16 @@ public class BrokeredConnection implements EngineConnection
 			// make the underlying connection pick my holdability state
 			// since holdability is a state of the connection handle
 			// not the underlying transaction.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5050
             conn.setHoldability(stateHoldability);
 		}
 	}
 
     public final BrokeredStatement newBrokeredStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             BrokeredStatementControl statementControl) throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3525
             return new BrokeredStatement(statementControl);
         } catch (SQLException sqle) {
             notifyException(sqle);
@@ -681,6 +690,7 @@ public class BrokeredConnection implements EngineConnection
      */
     public String toString() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-412
         if ( connString == null )
         {
             String wrappedString;
@@ -742,6 +752,7 @@ public class BrokeredConnection implements EngineConnection
     // JDBC 4.0 methods
 
     public final Array createArrayOf(String typeName, Object[] elements)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             throws SQLException {
         try {
             return getRealConnection().createArrayOf(typeName, elements);
@@ -1004,6 +1015,7 @@ public class BrokeredConnection implements EngineConnection
         int holdability = control.checkHoldCursors(resultSetHoldability, true);
         if (holdability != resultSetHoldability) {
             SQLWarning w =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3461
                  SQLWarningFactory.newSQLWarning(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
             
             addWarning(w);
@@ -1033,6 +1045,7 @@ public class BrokeredConnection implements EngineConnection
      * @throws java.sql.SQLException on error
      */
     public String getCurrentSchemaName() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         try {
             return getRealConnection().getCurrentSchemaName();
         }
@@ -1046,6 +1059,7 @@ public class BrokeredConnection implements EngineConnection
      * @see org.apache.derby.iapi.jdbc.EngineConnection
      */
     public void resetFromPool()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3596
             throws SQLException {
         getRealConnection().resetFromPool();
     }
@@ -1061,6 +1075,7 @@ public class BrokeredConnection implements EngineConnection
      */
     public String   getSchema() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
     	try {
             return getRealConnection().getSchema();
     	}
@@ -1087,6 +1102,7 @@ public class BrokeredConnection implements EngineConnection
     }
 
     public void abort(Executor executor) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         if (!isClosed) {
             ((EngineConnection) getRealConnection()).abort(executor);
         }

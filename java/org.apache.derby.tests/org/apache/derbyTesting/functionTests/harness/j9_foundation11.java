@@ -26,6 +26,7 @@ import java.util.Properties;
 
 /**
   <p>This class is for IBM's J9 jdk 1.3., foundation class library; v 2.4 (weme6.2)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4305
 
  */
 public class j9_foundation11 extends jvm {
@@ -53,6 +54,7 @@ public class j9_foundation11 extends jvm {
 	{
 		String wshome = guessWSHome();
 		// note, may have to use separator instead of hardcoding the slashes...
+//IC see: https://issues.apache.org/jira/browse/DERBY-4305
 		setJavaCmd(wshome+"/weme6.2/bin/j9");
 	}
 	else
@@ -64,6 +66,7 @@ public class j9_foundation11 extends jvm {
     public Vector<String> getCommandLine()
     {
         StringBuffer sb = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> v = super.getCommandLine();
         appendOtherFlags(sb);
         String s = sb.toString();
@@ -93,6 +96,7 @@ public class j9_foundation11 extends jvm {
             // note, assuming jclFoundation classes sit under weme6.2/lib/jclFoundation11
             //       and that jdbc.jar sits under weme6.2/lib
             // note, may have to switch to sep instead of hardcoding the slashes...
+//IC see: https://issues.apache.org/jira/browse/DERBY-4305
             sb.append(" -Xbootclasspath/a:" + wshome + "/weme6.2/lib/jclFoundation11/classes.zip"
                 + pathsep + wshome + "/weme6.2/lib/jclFoundation11/locale.zip"
                 + pathsep + wshome + "/weme6.2/lib/jdbc.jar");

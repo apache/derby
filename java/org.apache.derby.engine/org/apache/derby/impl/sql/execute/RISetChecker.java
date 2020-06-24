@@ -37,6 +37,7 @@ public class RISetChecker
 {
 	private GenericRIChecker[] 	checkers;
     LanguageConnectionContext lcc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 	/**
      * @param lcc       the language connection context
@@ -56,6 +57,7 @@ public class RISetChecker
 
 		checkers = new GenericRIChecker[fkInfo.length];
         this.lcc = lcc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 		for (int i = 0; i < fkInfo.length; i++)
 		{
@@ -106,6 +108,7 @@ public class RISetChecker
 		if (checkers == null)
 			return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
         for (GenericRIChecker checker : checkers) {
             if (checker instanceof ReferencedKeyRIChecker) {
                 checker.doCheck(a,
@@ -158,6 +161,7 @@ public class RISetChecker
 		{
 			if (checkers[i] instanceof ForeignKeyRIChecker)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                 checkers[i].doCheck(a, row, false, 0);
 			}
 		}
@@ -181,6 +185,7 @@ public class RISetChecker
 	 */
     public void doRICheck(Activation a,
                           int index,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                           ExecRow row,
                           boolean restrictCheckOnly,
                           int deferredRowReq) throws StandardException
@@ -200,6 +205,7 @@ public class RISetChecker
 		}
 
         checkers[index].doCheck(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             a, row, restrictCheckOnly, deferredRowReq);
 	}
 

@@ -78,6 +78,7 @@ public class Changes10_11 extends UpgradeChange
      * @return the test suite created.
      */
     public static Test suite(int phase) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(Changes10_11.class, "Upgrade test for 10.11");
     }
 
@@ -304,6 +305,7 @@ public class Changes10_11 extends UpgradeChange
             "create table t532(i int not null primary key deferrable)",
             "create table t532(i int unique deferrable)",
             "create table t532(i int not null unique deferrable)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             "create table t532(i int check (i > 0) deferrable)",
             "create table t532(i int references referenced(i) deferrable)"};
 
@@ -312,6 +314,7 @@ public class Changes10_11 extends UpgradeChange
             "create table t532(i int, constraint c unique(i) deferrable)",
             "create table t532(i int not null, constraint c unique(i) " + 
                 "deferrable)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             "create table t532(i int, constraint c check (i > 0) deferrable)",
             "create table t532(i int, constraint c foreign key(i) " + 
                 "references referenced(i) deferrable)"};
@@ -388,6 +391,7 @@ public class Changes10_11 extends UpgradeChange
     /** Test that identity columns handle self-deadlock in soft-upgrade mode */
     public void test_derby6692() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6692
         Connection  conn = getConnection();
         
         switch (getPhase())
@@ -418,9 +422,11 @@ public class Changes10_11 extends UpgradeChange
     /** Test the Lucene plugin */
     public void testLuceneSupport() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         Properties  properties = TestConfiguration.getSystemProperties();
         if ( getBooleanProperty( properties, TestConfiguration.KEY_OMIT_LUCENE ) )  { return; }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         Version initialVersion = new Version( getOldMajor(), getOldMinor(), 0, 0 );
         Version firstVersionHavingBooleanType = new Version( 10, 7, 0, 0 );
         Version firstVersionHavingOptionalTools = new Version( 10, 10, 0, 0 );
@@ -445,6 +451,7 @@ public class Changes10_11 extends UpgradeChange
         {
             case PH_CREATE:
             case PH_POST_SOFT_UPGRADE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 assertStatementError( originalSQLState, statement, loadTool );
                 break;
             case PH_SOFT_UPGRADE:

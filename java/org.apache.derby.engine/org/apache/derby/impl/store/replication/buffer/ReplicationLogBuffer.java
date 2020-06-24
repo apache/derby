@@ -107,12 +107,14 @@ public class ReplicationLogBuffer {
         defaultBufferSize = bufferSize;
         
         this.mf = mf;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3359
 
         outBufferData = new byte[bufferSize];
         outBufferStored = 0;
         outBufferLastInstant = 0;
         validOutBuffer = false; // no valid data in outBuffer yet
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         dirtyBuffers = new LinkedList<LogBufferElement>();
         freeBuffers = new LinkedList<LogBufferElement>();
 
@@ -137,6 +139,7 @@ public class ReplicationLogBuffer {
      * free space in the buffer to store the chunk of log.
      **/
     public void appendLog(long greatestInstant,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
                           byte[] log, int logOffset, int logLength)
         throws LogBufferFullException{
 
@@ -153,6 +156,7 @@ public class ReplicationLogBuffer {
 
             // switch buffer if current buffer does not have enough space
             // for the incoming data
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
             if (logLength > currentDirtyBuffer.freeSize()) {
                 switchDirtyBuffer();
                 switchedBuffer = true;
@@ -220,12 +224,14 @@ public class ReplicationLogBuffer {
                 if (dirtyBuffers.size() > 0 ) {
                     LogBufferElement current =
                         dirtyBuffers.removeFirst();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                     // The outBufferData byte[] should have the
                     // default size or the size of the current
                     // LogBufferElement if that is bigger than the
                     // default size.
                     int requiredOutBufferSize = Math.max(defaultBufferSize,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2926
                                                          current.size());
                     if (outBufferData.length != requiredOutBufferSize) {
                         // The current buffer has a different size
@@ -322,6 +328,7 @@ public class ReplicationLogBuffer {
         synchronized (outputLatch) {
             if (validOutBuffer) {
                 return outBufferLastInstant;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3359
             } else {
                 throw new NoSuchElementException();
             }
@@ -351,6 +358,7 @@ public class ReplicationLogBuffer {
         if (currentDirtyBuffer == null) {
             try {
                 currentDirtyBuffer =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     freeBuffers.removeFirst();
                 currentDirtyBuffer.init();
             } catch (NoSuchElementException nsee) {
@@ -369,6 +377,7 @@ public class ReplicationLogBuffer {
      *         information.
      */
     public int getFillInformation() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3359
         return ((dirtyBuffers.size()*100)/DEFAULT_NUMBER_LOG_BUFFERS);
     }
 

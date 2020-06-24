@@ -95,6 +95,8 @@ public class ReferencedColumnsDescriptorImpl
 	public ReferencedColumnsDescriptorImpl(	int[] referencedColumns,
 			int[] referencedColumnsInTriggerAction)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
 		this.referencedColumns = ArrayUtil.copy( referencedColumns );
 		this.referencedColumnsInTriggerAction = ArrayUtil.copy( referencedColumnsInTriggerAction );
 	}
@@ -108,6 +110,7 @@ public class ReferencedColumnsDescriptorImpl
 	*/
 	public int[] getReferencedColumnPositions()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
 		return ArrayUtil.copy( referencedColumns );
 	}
 	
@@ -116,6 +119,7 @@ public class ReferencedColumnsDescriptorImpl
 	*/
 	public int[] getTriggerActionReferencedColumnPositions()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
 		return ArrayUtil.copy( referencedColumnsInTriggerAction );
 	}
 

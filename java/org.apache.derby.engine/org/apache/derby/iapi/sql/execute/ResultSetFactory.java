@@ -121,6 +121,7 @@ public interface ResultSetFactory {
 		@exception StandardException thrown when unable to perform the insert
 	 */
 	ResultSet getInsertResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                  GeneratedMethod checkGM, int fullTemplate,
                                  String schemaNameName,
                                  String tableName)
@@ -296,6 +297,7 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to determine whether the restriction is satisfied or not.
 			The signature of this method is
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				"Boolean restriction() throws StandardException;"
 		@param projection a reference to a method in the activation
 			that is applied to the activation's "current row" field
@@ -331,6 +333,8 @@ public interface ResultSetFactory {
 		boolean reuseResult,
 		boolean doesProjection,
         boolean validatingCheckConstraint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         String validatingBaseTableUUIDString,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost) throws StandardException;
@@ -352,6 +356,7 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to project out the expected result row.
 			The signature of this method is
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				"ExecRow projection() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param mapRefItem	Item # for mapping of source to target columns
@@ -588,6 +593,7 @@ public interface ResultSetFactory {
 
 	/**
 		A once result set iterates over its source,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		raising an error if the source returns &gt; 1 row and
 		returning a row with all columns set to nulls
 		if the source returns no rows.
@@ -628,6 +634,7 @@ public interface ResultSetFactory {
 			create the result set.
 		@param row a reference to a method in the activation
 			that creates the expected row.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				"ExecRow row() throws StandardException;"
 		@param canCacheRow	True if execution can cache the input row
 			after it has gotten it.  If the input row is constructed soley
@@ -690,6 +697,7 @@ public interface ResultSetFactory {
                                      int returnTypeNumber,
                                      int vtiProjectionNumber,
                                      int vtiRestrictionNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
                                      String vtiSchema,
                                      String vtiName
                                           )
@@ -883,6 +891,7 @@ public interface ResultSetFactory {
 		@exception StandardException thrown when unable to create the
 			result set
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     NoPutResultSet getValidateCheckConstraintResultSet(
                                 Activation activation,
                                 long conglomId,
@@ -1072,6 +1081,7 @@ public interface ResultSetFactory {
 		and uses the RowLocation in its last column to get the row from the
 		base conglomerate.
 		<p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
 
 	    @param conglomId	Conglomerate # for the heap.
 		@param scoci The saved item for the static conglomerate info.
@@ -1079,6 +1089,7 @@ public interface ResultSetFactory {
 						rows from an index conglomerate
 		@param resultRowAllocator a reference to a method in the activation
 			that creates a holder for the rows from the scan.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				"ExecRow rowAllocator() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param indexName		The name of the index.
@@ -1086,6 +1097,7 @@ public interface ResultSetFactory {
 								are referenced in the underlying heap.  -1 if
 								no item.
 		@param allColRefItem A saved item for a bitImpl of columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-2226
 								that are referenced in the underlying
 								index and heap.  -1 if no item.
 		@param heapOnlyColRefItem A saved item for a bitImpl of
@@ -1126,6 +1138,8 @@ public interface ResultSetFactory {
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 	   A OLAP window on top of a regular result set. It is used to realize
 	   window functions.
 	   <p>
@@ -1303,6 +1317,10 @@ public interface ResultSetFactory {
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
 			The signature of this method is
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				"Boolean joinClause() throws StandardException;"
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param emptyRowFun a reference to a method in the activation
@@ -1332,6 +1350,10 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 								   String userSuppliedOptimizerOverrides)
 			throws StandardException;
 
@@ -1522,6 +1544,7 @@ public interface ResultSetFactory {
         int                 resultRowTemplate,
 		long 				conglomId,
 		String 				tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String 				userSuppliedOptimizerOverrides,
 		String 				indexName,
 		int 				colRefItem,
@@ -1535,6 +1558,7 @@ public interface ResultSetFactory {
 
 	/**
 		A Dependent table scan result set forms a result set on a scan
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 		of a dependent table for the rows that got materialized
 		on the scan of its parent table and if the row being deleted
 		on parent table has a reference in the dependent table.
@@ -1548,6 +1572,10 @@ public interface ResultSetFactory {
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
 			means there is no start key.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				"ExecIndexRow startKeyGetter() throws StandardException;"
 		@param startSearchOperator The start search operator for opening
 			the scan
@@ -1579,6 +1607,7 @@ public interface ResultSetFactory {
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param parentResultSetId  Id to access the materialized temporary result
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
                             	  set from the reference stored in the activation.
 		@param fkIndexConglomId foreign key index conglomerate id.
 		@param fkColArrayItem  saved column array object  that matches the foreign key index
@@ -1602,6 +1631,15 @@ public interface ResultSetFactory {
 									boolean sameStartStopPosition,
 									Qualifier[][] qualifiers,
 									String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
@@ -1642,9 +1680,11 @@ public interface ResultSetFactory {
 	 */
 
 	public NoPutResultSet getRowCountResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
 		NoPutResultSet source,
 		Activation activation,
 		int resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
 		GeneratedMethod offsetMethod,
 		GeneratedMethod fetchFirstMethod,
         boolean hasJDBClimitClause,

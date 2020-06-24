@@ -70,6 +70,7 @@ public class URLCheck {
     }
   }
   public void check(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     Enumeration<AttributeHolder> e = attributes.elements();
     while (e.hasMoreElements()) {
       AttributeHolder anAttribute = e.nextElement();
@@ -82,6 +83,7 @@ public class URLCheck {
     }
   }
   public void checkForDuplicate(AttributeHolder anAttribute){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     Enumeration<AttributeHolder> e = attributes.elements();
     while (e.hasMoreElements()) {
       AttributeHolder aHolder = e.nextElement();
@@ -113,6 +115,7 @@ public class URLCheck {
 		
 		//Parse the url into attributes and put them in a Properties object.
 		StringTokenizer st = new StringTokenizer(url.substring(protocol.length()), ";:\"");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		attributes = new Vector<AttributeHolder>();
 		while (st.hasMoreTokens()) {
       AttributeHolder anAttribute = new AttributeHolder();
@@ -157,6 +160,7 @@ public class URLCheck {
         {
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 Vector<String> props = new Vector<String>();
                 Class att = Attribute.class;
                 //Use reflection to get the list of valid keys from the Attribute class.
@@ -166,6 +170,7 @@ public class URLCheck {
                 for (int i = 0; i < fields.length; i++)
                 {
                     Field aField = (Field)fields[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     props.addElement( (String) aField.get(att));
                 }
                 validDerbyProps = props;

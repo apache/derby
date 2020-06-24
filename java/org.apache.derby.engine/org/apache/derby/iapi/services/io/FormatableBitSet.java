@@ -74,6 +74,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	private transient int	lengthAsBits;
 
 	private final void checkPosition(int p) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (p < 0 || lengthAsBits <= p) {
 			throw new
 				IllegalArgumentException("Bit position "+p+
@@ -99,6 +100,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 		value = ArrayUtil.EMPTY_BYTE_ARRAY;
 	}
 
@@ -109,6 +111,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet(int numBits)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (numBits < 0) {
 			throw new
 			IllegalArgumentException("Bit set size "+ numBits +
@@ -135,6 +138,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet(byte[] newValue)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
 		value = ArrayUtil.copy( newValue );
 		bitsInLastByte = 8;
 		lengthAsBits = calculateLength(newValue.length);
@@ -182,6 +186,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public boolean invariantHolds() {
 		// Check that all bits will fit in byte array
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		final int arrayLengthAsBits = value.length*8;
 		if (lengthAsBits > arrayLengthAsBits) { return false; }
 
@@ -275,6 +280,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 			value = data;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
 		return ArrayUtil.copy( value );
 	}
 
@@ -292,10 +298,12 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void grow(int n)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(invariantHolds(), "broken invariant");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
  		if (n < 0) {
  			throw new IllegalArgumentException("Bit set cannot grow from "+
  											   lengthAsBits+" to "+n+" bits");
@@ -307,6 +315,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 		int newNumBytes = FormatableBitSet.numBytesFromBits(n);
 
 		// is there enough room in the existing array
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (newNumBytes > value.length) {
 			/*
 			** We didn't have enough bytes in value, so we need
@@ -333,10 +342,12 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void shrink(int n)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(invariantHolds(), "broken invariant");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (n < 0 || n > lengthAsBits) {
 			throw new
 				IllegalArgumentException("Bit set cannot shrink from "+
@@ -377,6 +388,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public boolean equals(Object other)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5022
         if (other instanceof FormatableBitSet) 
         {
             FormatableBitSet that = (FormatableBitSet) other;
@@ -508,6 +520,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	public final boolean isSet(int position)
 	{
 		checkPosition(position);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		final int byteIndex = udiv8(position);
 		final byte bitIndex = umod8(position);
 		return ((value[byteIndex] & (0x80>>bitIndex)) != 0);
@@ -535,6 +548,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	public void set(int position)
 	{
 		checkPosition(position);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		final int byteIndex = udiv8(position);
 		final byte bitIndex = umod8(position);
 		value[byteIndex] |= (0x80>>bitIndex);
@@ -548,7 +562,9 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void clear(int position)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		checkPosition(position);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		final int byteIndex = udiv8(position);
 		final byte bitIndex = umod8(position);
 		value[byteIndex] &= ~(0x80>>bitIndex);
@@ -574,6 +590,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	* @return	the number of bytes
 	*/
 	private static int numBytesFromBits(int bits) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		return (bits + 7) >> 3;
 	}
 
@@ -588,6 +605,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	private static byte
 	numBitsInLastByte(int bits)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (bits == 0) return 0;
 		byte lastbits = umod8(bits);
 		return (lastbits != 0 ? lastbits : 8);
@@ -606,6 +624,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 			StringBuffer str = new StringBuffer(getLength()*8*3);
 			str.append("{");
 			boolean first = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 			for (int inPosition = 0; inPosition < getLength(); inPosition++)
 			{
 				if (isSet(inPosition))
@@ -645,6 +664,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * @return the zero-based index of the first set bit in the argument byte
 	 */
 	private static byte firstSet(byte v) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if ((v & 0x80) != 0) {
 			return 0;
 		}
@@ -704,6 +724,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * beyondBit is set
 	 */
 	public int anySetBit(int beyondBit) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(invariantHolds(), "broken invariant");
 		}
@@ -735,6 +756,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void or(FormatableBitSet otherBit)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (otherBit == null) {
 			return;
 		}
@@ -761,6 +783,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
      */
     public  void    copyFrom( FormatableBitSet that )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
         System.arraycopy( that.getByteArray(), 0, value, 0, that.getLengthInBytes());
     }
 
@@ -837,6 +860,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public int getNumBitsSet()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(invariantHolds(),"broken invariant");
 		}

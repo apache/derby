@@ -54,6 +54,7 @@ public class JitTest {
     } catch (Exception e) {
     	System.out.println("FAIL -- unexpected exception "+e);
     	JDBCDisplayUtil.ShowException(System.out, e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
       	e.printStackTrace(System.out);
     }
   }
@@ -128,6 +129,7 @@ public class JitTest {
   		Statement stmt = conn.createStatement();
   		ResultSet rs =stmt.executeQuery("select count(autoincrementstart) from"+
   				" sys.syscolumns c, sys.systables t, sys.sysschemas s WHERE"+
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
 				" t.schemaid =  s.schemaid and CAST(s.schemaname AS VARCHAR(128))= 'APP' and"+
 				" autoincrementstart > " +  maxautoincrementstart);
 
@@ -141,6 +143,7 @@ public class JitTest {
   		{
   			rs =stmt.executeQuery("select tablename, columnname,"+
   					" autoincrementstart from sys.syscolumns c, sys.systables t,"+
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
 					" CAST(sys.sysschemas AS VARCHAR(128)) s WHERE t.schemaid = s.schemaid and"+
 					" CAST(s.schemaname AS VARCHAR(128)) = 'APP' and autoincrementstart > 2 ORDER"+
 					" BY tablename");
@@ -170,6 +173,7 @@ public class JitTest {
   		ResultSet rs = stmt1.executeQuery("SELECT tablename from sys.systables"+
   				" t, sys.sysschemas s where t.schemaid = s.schemaid and"+
 				" CAST(s.schemaname AS VARCHAR(128)) = 'APP'");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
 
   		while (rs.next())
   		{

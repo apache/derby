@@ -148,6 +148,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      *  This is itself a test of statements creating tables in batch. 
      */
     public void setUp() throws  Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         getConnection().setAutoCommit(false);
         Statement s = createStatement();
         s.execute("delete from t1");
@@ -156,6 +157,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("BatchUpdateTest");
         suite.addTest(baseSuite("BatchUpdateTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -171,7 +173,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      */
     public static Test embeddedSuite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("BatchUpdateTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2656
         suite.addTest(baseSuite("BatchUpdateTest:embedded"));
         return suite;
     }
@@ -206,10 +210,12 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      * helper method to check each count in the return array of a BatchUpdateException
      */
     public  static   void assertBatchUpdateCounts
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         ( long[] expectedBatchResult, BatchUpdateException bue )
     {
         assertBatchUpdateCounts( squashLongs( expectedBatchResult ), bue.getUpdateCounts() );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6614
         if (JDBC.vmSupportsJDBC42())
         {
             BatchUpdateExceptionWrapper wrapper = new BatchUpdateExceptionWrapper( bue );
@@ -262,6 +268,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     public static void assertBatchExecuteError( 
         String expectedError,
         Statement stmt,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         long[] expectedUpdateCount) 
     throws SQLException 
     { 
@@ -285,6 +292,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         int expectedCount[] = {0,0,0};
         assertBatchUpdateCounts(expectedCount, stmt.executeBatch());
         ResultSet rs = stmt.executeQuery(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
             "select count(*) from SYS.SYSTABLES where CAST(tablename AS VARCHAR(128)) like 'DDL%'");
         JDBC.assertSingleValueResultSet(rs, "2");
         rs = stmt.executeQuery(
@@ -308,6 +316,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertBatchUpdateCounts(new int[0], stmt.executeBatch());
 
         stmt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
 
@@ -355,6 +364,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         
         stmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
 
@@ -410,6 +421,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         stmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
 
@@ -460,6 +472,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertTableRowCount("T1", 3);
 
         stmt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
 
@@ -474,6 +487,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     public void testAssociatedParams() throws SQLException 
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         Statement stmt = createStatement();
         int i;
         println("Positive Statement: testing associated parameters");
@@ -483,11 +497,13 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             "insert into assoc values (?, 'hello')");
         for ( i = 10; i < 60; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             ps.setString(1, Integer.toString(i));
             ps.executeUpdate();     
         }
         ps.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         ps = prepareStatement(
             "insert into assocout select x from assoc where x like ?");
         ps.setString(1, "33%");
@@ -506,6 +522,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 
         stmt.executeUpdate("delete from assocout");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         ps = prepareStatement(
                 "insert into assocout select x from assoc where x like ?");
         ps.setString(1, "3%");
@@ -529,6 +546,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expectedStrArray, true);
                 
         stmt.executeUpdate("delete from assocout");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         ps = prepareStatement(
             "insert into assocout select x from assoc where x like ?");
         ps.setString(1, "%");// values 10-59
@@ -576,6 +594,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("insert into t1 values(1)");
         if (usingEmbedded())
             /* Ensure the exception is the ResultSetReturnNotAllowed */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("X0Y79", stmt, new long[] {});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new long[] {-3, 1});
@@ -591,6 +610,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("insert into t1 values(1)");
         if (usingEmbedded())
             /* Ensure the exception is the ResultSetReturnNotAllowed */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("X0Y79", stmt, new long[] {1});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new long[] {1,-3,1});
@@ -606,6 +626,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("SELECT * FROM SYS.SYSCOLUMNS");
         if (usingEmbedded())
             /* Ensure the exception is the ResultSetReturnNotAllowed */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("X0Y79", stmt, new long[] {1,1});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new long[] {1,1,-3});
@@ -619,6 +640,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         stmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -639,8 +661,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
         {
             stmt.addBatch("insert into t1 values(1)"); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("XJ208",stmt, new long[] {-3,1});           
             // pull level with embedded situation
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
             rollback();
         }
         // do clearBatch so we can proceed
@@ -649,6 +673,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertTableRowCount("T1", 0);
 
         // trying executeQuery after addBatch
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         println("Negative Statement: " +
             "statement testing executeQuery in the middle of batch");
         stmt.addBatch("insert into t1 values(1)");
@@ -679,6 +704,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         println("Negative Statement: " +
             "statement testing executeUpdate in the middle of batch");
         // trying executeUpdate after addBatch
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         println("Negative Statement: " +
         "statement testing executeUpdate in the middle of batch");
         stmt.addBatch("insert into t1 values(1)");
@@ -689,6 +715,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             stmt.addBatch("SELECT * FROM SYS.SYSCOLUMNS");
             if (usingDerbyNetClient())
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 assertBatchExecuteError("XJ208", stmt, new long[] {1,1,-3});
             }
             else if (usingEmbedded())
@@ -733,6 +760,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         /* Check to be sure the exception is the one we expect */
         /* Overflow is first stmt in the batch, so expect no update count */
         if (usingEmbedded())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("22003", stmt, new long[] {});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new long[] {-3,1});
@@ -749,6 +777,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         /* Check to be sure the exception is the one we expect */
         /* Update is second statement in the batch, expect 1 update count */
         if (usingEmbedded())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("22003", stmt, new long[] {1});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new long[] {1,-3,1});
@@ -765,6 +794,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         /* Check to be sure the exception is the one we expect */
         /* Update is last statement in the batch, expect 2 update counts */
         if (usingEmbedded())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("22003", stmt, new long[] {1,1});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new long[] {1,1,-3});
@@ -773,6 +803,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 usingEmbedded() ? 4 : 6);
         stmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -848,6 +879,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         executeBatchCallableStatement(cs);
 
         cleanUpCallableStatement(cs, "t1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
 
         /* For 'beetle' bug 2813 - setDate/setTime/setTimestamp
          * calls on callableStatement throws ClassNotFoundException 
@@ -864,6 +896,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         executeBatchCallableStatement(cs);
 
         cleanUpCallableStatement(cs, "datetab");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
 
         cs = prepareCall("insert into timetab values(?)");
 
@@ -874,6 +907,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         executeBatchCallableStatement(cs);
 
         cleanUpCallableStatement(cs, "timestamptab");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
 
         cs = prepareCall("insert into timestamptab values(?)");
 
@@ -884,6 +918,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         executeBatchCallableStatement(cs);
 
         cleanUpCallableStatement(cs, "timestamptab");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
 
         // Try with a user type
         cs = prepareCall("insert into usertypetab values(?)");
@@ -894,6 +929,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         cs.addBatch();
         executeBatchCallableStatement(cs);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         cleanUpCallableStatement(cs, "usertypetab");
     }
     
@@ -906,6 +942,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         updateCount = cs.executeBatch();
         assertEquals("there were 2 statements in the batch", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
             2, updateCount.length);
         for (int i=0; i<updateCount.length; i++) 
         {
@@ -1017,6 +1054,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertTableRowCount("T1", 3);
         stmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -1047,6 +1085,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         stmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -1071,6 +1110,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         
         assertTableRowCount("T1", 3);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -1080,6 +1120,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     // preparedStatement gives nullPointerException
     public void testMultipleValueSetNullPreparedBatch() throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         Statement stmt = createStatement();
         ResultSet rs;
 
@@ -1298,6 +1339,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         pStmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -1317,6 +1359,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Ensure the exception is the ResultSetReturnNotAllowed */
             /* "Select is first statement in the batch, 
              * so there should not be any update counts */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("X0Y79", pStmt, new long[] {});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ117", pStmt, new long[] {-3});
@@ -1359,6 +1402,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertTableRowCount("T1", 0);
 
         // trying executeQuery in the middle of batch
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         println("Negative Prepared Statement: " +
             "testing executeQuery in the middle of batch");
         pStmt = 
@@ -1384,6 +1428,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertTableRowCount("T1", 0);
 
         //  trying executeUpdate in the middle of batch
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         println("Negative Prepared Stat: " +
             "testing executeUpdate in the middle of batch");
         pStmt = 
@@ -1408,6 +1453,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         assertTableRowCount("T1", 0);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -1429,6 +1475,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Check to be sure the exception is the one we expect */
             /* Overflow is first statement in the batch, 
              * so there should not be any update count */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("22003", pStmt, new long[] {});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", pStmt, new long[] {-3});
@@ -1449,6 +1496,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Check to be sure the exception is the one we expect */
             /* Overflow is second statement in the batch, 
              * so there should be only 1 update count */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("22003", pStmt, new long[] {1});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", pStmt, new long[] {1,-3,1});
@@ -1459,6 +1507,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         // trying select as the last statement
         println("Negative Prepared Stat: " +
             "testing overflow as last set of values");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         pStmt = prepareStatement("update t1 set c1=(? + 1)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
@@ -1470,6 +1521,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Check to be sure the exception is the one we expect */
             /* Overflow is last statement in the batch, 
              * so there should be 2 update counts */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             assertBatchExecuteError("22003", pStmt, new long[] {1,1});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", pStmt, new long[] {1,1,-3});
@@ -1479,6 +1531,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         pStmt.close();
         stmt.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         commit();
     }
     
@@ -1542,6 +1598,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.close();
         stmt2.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
+//IC see: https://issues.apache.org/jira/browse/DERBY-2293
         rollback();
         conn2.rollback();
         conn2.close();
@@ -1603,6 +1661,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         // Embedded stops processing the batch on the first failure, and only
         // the update count from the successful statement is returned. The
         // client driver continues after the failure, so it'll also drop C.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         long[] expectedCounts = usingEmbedded() ?
             new long[]{0} : new long[]{0, Statement.EXECUTE_FAILED, 0};
 
@@ -1640,6 +1699,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         public BatchUpdateExceptionWrapper( BatchUpdateException wrappedException )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             _wrappedException = wrappedException;
         }
 

@@ -209,6 +209,7 @@ public class ClobTest
         assertEquals(1, this.clob.setString(9, "c"));
         assertEquals(1, this.clob.setString(5, "a"));
         assertEquals(1, this.clob.setString(6, "b"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
 	    assertEquals("Clob content is incorrect",
             newContent, this.clob.getSubString(1, newContent.length()));
     }
@@ -217,6 +218,7 @@ public class ClobTest
      * Tests that the length is updated correctly when inserting data.
      */
     public void testLengthAfterInsertOnEmpty()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
             throws IOException, SQLException {
         insertDataWithToken("", 0, 0, SET_STRING);
         assertEquals(0L, clob.length());
@@ -257,6 +259,7 @@ public class ClobTest
     }
 
     public void testReplaceMultibyteWithSingleByteForwards()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
             throws IOException, SQLException {
         // Add some content to work on first.
         this.clob.setString(1, NORWEGIAN_LETTERS);
@@ -307,6 +310,7 @@ public class ClobTest
      * ID USAGE: reads id 2, writes id 10002
      */
     public void testInsertCharacter_ReadOnlyToTemporary()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3793
             throws IOException, SQLException {
         setAutoCommit(false);
         // Insert data, a medium sized Clob to store it as a stream.
@@ -386,6 +390,7 @@ public class ClobTest
         final long prefix = 11L;
         final long postfix = 90L;
         char[] tmpChar = new char[1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         LoopingAlphabetReader tokenSrc =
             new LoopingAlphabetReader(1L, CharAlphabet.cjkSubset());
         tokenSrc.read(tmpChar);
@@ -399,6 +404,7 @@ public class ClobTest
      * Test setString() refuses wrong offset. 
      */
     public void testSetStringOnWrongOffset() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2769
         clob.setString(1, "TEST");
         long upperLimit = clob.length() + 1;
         String str = "AGAIN";
@@ -501,6 +507,7 @@ public class ClobTest
      * Truncating a Clob to the empty string.
      */
     public void testTruncateZeroOnDisk()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3991
             throws IOException, SQLException {
         long size = 33*1024+7;
         insertDataWithToken("", size, 0, SET_CHARACTER_STREAM);
@@ -537,6 +544,7 @@ public class ClobTest
      * Truncating a Clob to the current length should work.
      */
     public void testTruncateExactOnDisk()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3978
             throws IOException, SQLException {
         long size = 33*1024+7;
         insertDataWithToken("", size, 0, SET_CHARACTER_STREAM);
@@ -587,6 +595,8 @@ public class ClobTest
             this.clob.truncate(size * 2);
             fail("Truncate should have failed, position too large");
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3977
+//IC see: https://issues.apache.org/jira/browse/DERBY-3977
             assertSQLState("XJ079", sqle);
         }
     }
@@ -622,6 +632,7 @@ public class ClobTest
      * @throws SQLException if something goes wrong
      */
     public void testCloningThroughAddBatchWithStream()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4278
             throws SQLException {
         testCloningThroughAddBatch(true, true);
         testCloningThroughAddBatch(true, false);
@@ -859,6 +870,7 @@ public class ClobTest
         // Obtain a Clob containing the empty string ("").
         Statement stmt = createStatement();
         // Keep reference to the result set to be able to close it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
         ResultSet rs = stmt.executeQuery(
                 "select dClob from ClobTestData where id = 1");
         assertTrue(rs.next());
@@ -1025,6 +1037,7 @@ public class ClobTest
             Connection con = getConnection();
             Statement stmt = con.createStatement();
             stmt.execute("create table ClobTestData (" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3793
                     "id int unique, dClob CLOB)");
             stmt.executeUpdate("insert into ClobTestData values (1, '')");
             stmt.close();

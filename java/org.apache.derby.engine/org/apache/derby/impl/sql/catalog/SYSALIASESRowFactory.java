@@ -112,9 +112,11 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSALIASESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 		initInfo(SYSALIASES_COLUMN_COUNT, "SYSALIASES", indexColumnPositions, uniqueness, uuids);
 	}
 
@@ -219,6 +221,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 		/* 7th column is SYSTEMALIAS (boolean) */
 		row.setColumn
 			(SYSALIASES_SYSTEMALIAS, new SQLBoolean(systemAlias));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 8th column is ALIASINFO (org.apache.derby.catalog.AliasInfo) */
 		row.setColumn(SYSALIASES_ALIASINFO, 
@@ -325,6 +328,9 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 			{
 				case AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR: 
 				case AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR: 
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 				case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR: 
 				case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR: 
 				case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR: 
@@ -369,6 +375,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
      * @return array of SystemColumn suitable for making this catalog.
      */
     public SystemColumn[]   buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
       return new SystemColumn[] {
@@ -381,6 +388,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
         SystemColumnImpl.getIndicatorColumn("ALIASTYPE"),
         SystemColumnImpl.getIndicatorColumn("NAMESPACE"),
         SystemColumnImpl.getColumn("SYSTEMALIAS",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                 Types.BOOLEAN, false),
         SystemColumnImpl.getJavaColumn("ALIASINFO",
                 "org.apache.derby.catalog.AliasInfo", true),

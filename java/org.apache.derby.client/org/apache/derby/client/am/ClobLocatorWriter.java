@@ -32,6 +32,7 @@ import java.io.Writer;
  * buffering of data is done.  Hence, for efficiency {@code #write(char[])}
  * should be used instead of {@code #write(int)}.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ClobLocatorWriter extends Writer {
     /**
      * Connection used to read Clob from server.
@@ -67,6 +68,7 @@ class ClobLocatorWriter extends Writer {
      * @param pos the position in the {@code CLOB} value at which
      *        to start writing; the first position is 1
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobLocatorWriter(
             ClientConnection connection,
             ClientClob clob,
@@ -148,6 +150,7 @@ class ClobLocatorWriter extends Writer {
         checkClosed();
         if (len == 0) return;
         if ((off < 0) || (off > c.length) || (len < 0) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                 (len > c.length - off)) {
             throw new IndexOutOfBoundsException();
         }
@@ -165,6 +168,7 @@ class ClobLocatorWriter extends Writer {
     private void writeCharacters(char[] c, int off, int len)
     throws IOException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             clob.setStringX(currentPos, new String(c, off, len), 0, len);
             currentPos += len;
         } catch (SqlException ex) {

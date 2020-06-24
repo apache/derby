@@ -76,9 +76,11 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 		output = Monitor.getStream();
 
 		contextService = getContextService();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		this.currentOutput = output;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		vectorOfTests = new Vector<UnitTest>();
 		namesOfTests = new Hashtable<String, String>();
 
@@ -88,6 +90,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 		} catch (SecurityException se) {
 		}
 		findTests(getMonitor().getApplicationProperties(), startParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		if ( !alreadyRun )
 		{
@@ -101,6 +104,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 			System.out.println("Shutting down due to unit test failure.");
 			output.printlnWithHeader("Shutting down due to unit test failure, see log for more information.");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			getMonitor().shutdown();
 		}
 	}
@@ -133,6 +137,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 
 				try {
 					Object unitTest =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 						bootServiceModule(false, this, unitTestClass,
 												  startParams);
 					if (unitTest instanceof UnitTest) {
@@ -213,6 +218,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 
 		if (performanceReportOn){
 			endTime = new Date();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			emitAMessage("Test '" + thisTestName + "' took " + (endTime.getTime() - startTime.getTime()) + " milliseconds.");
 		}
 
@@ -297,12 +303,14 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

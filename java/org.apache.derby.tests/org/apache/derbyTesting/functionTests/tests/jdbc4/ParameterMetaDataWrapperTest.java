@@ -68,6 +68,8 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
         throws Exception {
         if(ps != null && !ps.isClosed())
             ps.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         ps = null;
         pmd = null;
         
@@ -75,6 +77,7 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
     }
 
     public void testIsWrapperForParameterMetaData() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1536
         assertTrue(pmd.isWrapperFor(ParameterMetaData.class));
     }
 
@@ -100,6 +103,8 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
      * Return suite with all tests of the class.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return TestConfiguration.defaultSuite(
             ParameterMetaDataWrapperTest.class);
     }

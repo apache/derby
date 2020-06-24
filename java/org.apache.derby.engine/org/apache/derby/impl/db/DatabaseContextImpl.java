@@ -38,6 +38,7 @@ import java.security.AccessController;
 /**
 	A context that shutdowns down the database on a databsae exception.
 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
 {
 
@@ -54,11 +55,13 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
 
         // Ensure the context is popped if the session is
         // going away.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
         if (se.getSeverity() < ExceptionSeverity.SESSION_SEVERITY)
             return;
 
         popMe();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5108
         if (se.getSeverity() >= ExceptionSeverity.DATABASE_SEVERITY) {
             // DERBY-5108: Shut down the istat daemon thread before shutting
             // down the various modules belonging to the database. An active
@@ -74,9 +77,11 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
         }
 
         if (se.getSeverity() == ExceptionSeverity.DATABASE_SEVERITY) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		    getContextService().notifyAllActiveThreads(this);
             // This may be called multiple times, but is short-circuited
             // in the monitor.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		    getMonitor().shutdown(db);
         }
 	}
@@ -100,6 +105,7 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()

@@ -25,12 +25,14 @@ import org.apache.derby.client.am.SqlException;
 
 
 class NetSqldta extends NetCursor {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     NetSqldta(NetAgent netAgent) {
         super(netAgent);
     }
 
     public boolean next() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (allRowsReceivedFromServer()) {
             return false;
         } else {
@@ -128,6 +130,7 @@ class NetSqldta extends NetCursor {
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (!allRowsReceivedFromServer()) {
             calculateLobColumnPositionsForRow();
         }

@@ -36,6 +36,8 @@ import java.sql.*;
 public class URCoveringIndexTest extends BaseJDBCTestCase {
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1971
         return TestConfiguration.defaultSuite(URCoveringIndexTest.class);
     }
     
@@ -49,6 +51,7 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
      * Set up the connection to the database.
      */
     public void setUp() throws  Exception {       
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con = getConnection();
         con.setAutoCommit(false);
 
@@ -61,6 +64,7 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
         
         stmt.execute(insertData);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         stmt.close();
     }
     
@@ -72,6 +76,7 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
         int resultsetType = scroll ? ResultSet.TYPE_SCROLL_INSENSITIVE :
                 ResultSet.TYPE_FORWARD_ONLY;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con = getConnection();
         
         if (!(con.getMetaData().supportsResultSetConcurrency(resultsetType,

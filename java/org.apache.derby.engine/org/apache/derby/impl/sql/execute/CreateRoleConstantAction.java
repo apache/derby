@@ -79,6 +79,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
         TransactionController tc = lcc.getTransactionExecute();
         DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3333
         if (roleName.equals(Authorizer.PUBLIC_AUTHORIZATION_ID)) {
             throw StandardException.
                 newException(SQLState.AUTH_PUBLIC_ILLEGAL_AUTHORIZATION_ID);
@@ -89,13 +90,16 @@ class CreateRoleConstantAction extends DDLConstantAction {
         // in the future since this SQL is more liberal.
         //
         final String currentAuthId = lcc.getCurrentUserId(activation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
         dd.startWriting(lcc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3173
 
         //
         // Check if this role already exists. If it does, throw.
         //
         RoleGrantDescriptor rdDef = dd.getRoleDefinitionDescriptor(roleName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
 
         if (rdDef != null) {
             throw StandardException.
@@ -107,13 +111,16 @@ class CreateRoleConstantAction extends DDLConstantAction {
         // a privilege grant or as a built-in user ("best effort"; we
         // can't guarantee against collision if users are externally
         // defined or added later).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
         if (knownUser(roleName, currentAuthId, lcc, dd, tc)) {
             throw StandardException.
                 newException(SQLState.LANG_OBJECT_ALREADY_EXISTS,
                              "User", roleName);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
         rdDef = ddg.newRoleGrantDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             dd.getUUIDFactory().createUUID(),
             roleName,
             currentAuthId,// grantee
@@ -121,6 +128,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
             true,         // with admin option
             true);        // is definition
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
         dd.addDescriptor(rdDef,
                          null,  // parent
                          DataDictionary.SYSROLES_CATALOG_NUM,
@@ -150,6 +158,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
      * with that name.
      */
     private boolean knownUser(String roleName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
                               String currentUser,
                               LanguageConnectionContext lcc,
                               DataDictionary dd,

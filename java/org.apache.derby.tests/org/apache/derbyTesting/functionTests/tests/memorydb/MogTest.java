@@ -77,6 +77,7 @@ public class MogTest extends BaseJDBCTestCase {
           } catch (SQLException sqle) {
               // Ignore exceptions during close.
           }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
           dropInMemoryDb();
       }
       println("duration-in-memory: " + (System.currentTimeMillis() - start));
@@ -93,6 +94,7 @@ public class MogTest extends BaseJDBCTestCase {
     // NOTE: Due to instability in the test, the seed has been fixed.
     //       See DERBY-4209 (and DERBY-4085).
     //final long _seed = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4085
     final long _seed = 1241411544935L;
     java.util.Random rng = new java.util.Random(_seed);
     /** MOG generator being tested */
@@ -128,6 +130,7 @@ public class MogTest extends BaseJDBCTestCase {
       // Cluster the samples again, using SQL.
       clusMogSql.clusterSQL(genMog.n, center, ns, sample);
       // Compare the computed MOG configurations.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4085
       assertEquals("MOG configurations differ, seed=" + _seed,
               clusMog.n, clusMogSql.n);
       compare(clusMog.n, clusMog.weight, clusMogSql.weight, _seed);
@@ -141,6 +144,7 @@ public class MogTest extends BaseJDBCTestCase {
       // Cluster the samples again, using SQL.
       clusMogSql.clusterSQL(genMog.n, center, ns, sample);
       // Compare the computed MOG configurations.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4085
       assertEquals("MOG configurations differ, seed=" + _seed,
               clusMog.n, clusMogSql.n);
       compare(clusMog.n, clusMog.weight, clusMogSql.weight, _seed);
@@ -160,6 +164,7 @@ public class MogTest extends BaseJDBCTestCase {
       final double err = dif / (1.0 + Math.abs(one));
       // Use if to avoid unnecessary string concatenation.
       if (err >= thresh) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4085
         fail("Error too big;" + err + " >= " + thresh + ", seed=" + seed);
       }
     }
@@ -184,6 +189,8 @@ public class MogTest extends BaseJDBCTestCase {
         sqle.initCause(e);
         throw sqle;
     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4436
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
     StringBuffer sb = constructUrl().append(";create=true");
     return DriverManager.getConnection(sb.toString());
   }

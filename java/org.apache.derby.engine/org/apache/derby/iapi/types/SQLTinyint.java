@@ -106,6 +106,7 @@ public final class SQLTinyint
 	}
 
 	public SQLTinyint(Byte obj) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 		if (isnull = (obj == null))
 			;
 		else
@@ -200,6 +201,7 @@ public final class SQLTinyint
 	{
 		return (isNull()) ?
 					null:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 					value;
 	}
 

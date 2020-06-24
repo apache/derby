@@ -42,6 +42,7 @@ public final class ServerSetup extends ChangeConfigurationSetup {
     }
 
     public ServerSetup(Test test, String host, int port, String dbPath) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
         super(test);
         this.host = host;
         this.port = port;
@@ -71,6 +72,7 @@ public final class ServerSetup extends ChangeConfigurationSetup {
     /**
      * Specify a dbPath to use in place of the default.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
     void setDbPath(String dbPath)
     {
         this.dbPath = dbPath;

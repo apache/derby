@@ -66,6 +66,7 @@ public class Export extends ExportAbstract{
 				doAllTheWork();
 			} catch (IOException iex) {
 				//in case of ioexception, catch it and throw it as our own exception
+//IC see: https://issues.apache.org/jira/browse/DERBY-2858
 				throw LoadError.errorWritingData(iex);
 			}
 		} catch (Exception ex) {
@@ -74,6 +75,7 @@ public class Export extends ExportAbstract{
 	}
 	
 	private Export(Connection con, String schemaName , 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 				   String tableName, String selectStatement ,
 				   String outputFileName, String characterDelimeter, 
 				   String columnDelimeter, String codeset)
@@ -103,12 +105,14 @@ public class Export extends ExportAbstract{
      */
 	private void setLobsExtFileName(String lobsFileName) throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 		if (lobsFileName == null) {
             throw PublicAPI.wrapStandardException(
                       StandardException.newException(
                       SQLState.LOB_DATA_FILE_NULL));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 		this.lobsFileName = lobsFileName;
 		lobsInExtFile = true;
 	}
@@ -146,6 +150,7 @@ public class Export extends ExportAbstract{
             fileName = FileUtil.stripProtocolFromFileName( fileName );
             File file = new File(fileName);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2556
             return fileExists(file);
         }
 
@@ -157,9 +162,11 @@ public class Export extends ExportAbstract{
      * @throws SecurityException if the required privileges are missing
      */
     private final boolean fileExists(final File file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return (AccessController.doPrivileged(
                 new PrivilegedAction<Boolean>() {
                     public Boolean run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         return file.exists();
                     }
             })).booleanValue();
@@ -185,6 +192,7 @@ public class Export extends ExportAbstract{
 		throws SQLException {
 
         /** Make sure that the current user has permission to perform this operation */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             SecurityUtil.authorize( Securable.EXPORT_TABLE );
         }
@@ -280,6 +288,7 @@ public class Export extends ExportAbstract{
      * @exception SQLException on errors
      */
     public static void exportQuery(Connection con, String selectStatement,
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                                    String outputFileName, String columnDelimeter, 
                                    String characterDelimeter, String codeset, 
                                    String lobsFileName)

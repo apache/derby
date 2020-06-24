@@ -101,23 +101,27 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
      * included in the name of a test)
      */
     public static void main(String[] args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2799
         junit.textui.TestRunner.run(baseSuite("main()", args));
     }
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("jdbcapi: old harness java tests");
 
         suite.addTest(baseSuite("embedded", LANG_TESTS_BOTH));
         suite.addTest(baseSuite("embedded", LANG_TESTS_EMEBDDED));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1355
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("clientserver", LANG_TESTS_BOTH)));
         return suite;
     }
    
     private static Test baseSuite(String which, String[] set) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("lang: " + which);
         for (int i = 0; i < set.length; i++)
         {

@@ -54,6 +54,7 @@ public class TesterObject {
 	public TesterObject(String name) {
 		this.thread_id = name;
 		dbutil = new DbUtil(getThread_id());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		NsTest.logger.println("==========> " + getThread_id()
 				+ " THREAD starting <======");
 	}
@@ -70,6 +71,7 @@ public class TesterObject {
 		Connection conn = null;
 		String jdbcurl = "";
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println(getThread_id()
 					+ " is getting a connection to the database...");
 
@@ -80,6 +82,7 @@ public class TesterObject {
 					jdbcurl = NsTest.clientDbURL + ";" + NsTest.bootPwd;
 
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println("-->Thread " + getThread_id()
 					+ " starting with url " + jdbcurl + " <--");
 			conn = DriverManager.getConnection(jdbcurl, NsTest.prop);
@@ -100,6 +103,7 @@ public class TesterObject {
     public  Connection  getNewConnection()
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
         if ( conn == null )
         {
@@ -118,6 +122,7 @@ public class TesterObject {
 		try {
 			connex.setTransactionIsolation(level);
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println("FAIL: " + getThread_id()
 					+ " could not set isolation level");
 			printException("setting transaction isolation", e);
@@ -133,7 +138,9 @@ public class TesterObject {
 	// *******************************************************************************
 	public void closeConnection() {
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println(getThread_id()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 					+ " is closing its connection to the database...");
 			connex.close();
 		} catch (Exception e) {
@@ -156,6 +163,7 @@ public class TesterObject {
 		int decider = (int) (Math.random() * 100) % 3;
 
         if ( connex == null ) { connex = getNewConnection(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 		switch (decider) {
 
@@ -183,6 +191,7 @@ public class TesterObject {
 					NsTest.addStats(NsTest.FAILED_UPDATE, 1);
 			} catch (Exception e) {
 				printException("executing update_one_row", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                 if ( NsTest.deadConnection( e ) ) { markDeadConnection(); }
 			}
 			break;
@@ -197,6 +206,8 @@ public class TesterObject {
 					NsTest.addStats(NsTest.FAILED_DELETE, 1);
 			} catch (Exception e) {
 				printException("executing delete_one_row()", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                 if ( NsTest.deadConnection( e ) ) { markDeadConnection(); }
 			}
 			break;
@@ -223,6 +234,7 @@ public class TesterObject {
 		ResultSet rSet = null;
 		Statement s = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		NsTest.logger.println(getThread_id() + " is selecting " + numRowsToSelect
 				+ " rows");
 		try {
@@ -235,20 +247,24 @@ public class TesterObject {
 					+ " t_date, t_decimal, t_decimal_nn, t_double, "
 					+ " t_float, t_int, t_longint, t_numeric_large,"
 					+ " t_real, t_smallint, t_time, t_timestamp,"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 					+ " t_varchar, serialkey, sequenceColumn from nstesttab where serialkey <= "
 					+ numRowsToSelect);
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger
 			.println("FAIL: doSelectOperation() had problems creating/executing query");
 			printException(
 					"FAIL: doSelectOperation() had problems creating/executing query",
 					e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
             if ( rSet != null ) { rSet.close(); }
 			if ( s != null ) { s.close(); }
 
             return numRowsSelected;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5421
 		if (rSet != null) {
 		    // Now work over the returned ResultSet and keep track of number of
 		    // rows returned
@@ -306,10 +322,12 @@ public class TesterObject {
 
 		            // get value of sequence column
 		            long lg3 = rSet.getLong(17);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 		            numRowsSelected++;
 		        }
 		        NsTest.addStats(NsTest.SELECT, 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		        NsTest.logger.println(this.thread_id + " selected " + numRowsSelected
 		                + " rows");
 		    } catch (Exception e) {
@@ -317,6 +335,7 @@ public class TesterObject {
 		        .println("FAIL: doSelectOperation() had problems working over the ResultSet");
 		        NsTest.addStats(NsTest.FAILED_SELECT, 1);
 		        printException("processing ResultSet during row data retrieval", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		        if ( rSet != null ) { rSet.close(); }
 		        if ( s != null ) { s.close(); }
 		        NsTest.logger.println("Closed the select statement");
@@ -328,6 +347,7 @@ public class TesterObject {
 			if ((rSet != null) && (s != null)) {
 				rSet.close();
 				s.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println("Closed the select statement");
 			}
 		} catch (Exception e) {
@@ -360,6 +380,7 @@ public class TesterObject {
 	// ***Method is synchronized so that the output file will contain sensible
 	// stack traces that are not mixed but one exception printed at a time
 	public synchronized void printException(String where, Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( NsTest.justCountErrors() )
         {
             NsTest.addError( e );

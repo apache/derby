@@ -74,6 +74,7 @@ class DerbyVersion
         fixpack = Integer.parseInt(comp[2]);
         point = Integer.parseInt(comp[3]);
         this.releaseDate = relDate;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         if (relDate == NOT_RELEASED) {
             releaseDateStr = "n/a";
         } else {
@@ -101,6 +102,7 @@ class DerbyVersion
      * @return Quoted version string, for instance '"10.6.2.1"'.
      */
     public String getQuotedVersion() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5080
         return "\"" + getVersion() + "\"";
     }
 
@@ -123,6 +125,7 @@ class DerbyVersion
      * @return The release date, or "n/a" if not released.
      */
     public String getFormattedReleaseDate() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         return releaseDateStr;
     }
 
@@ -228,6 +231,7 @@ class DerbyVersion
     }
 
     public String toString() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         return version + " (" + releaseDateStr + ")";
     }
 

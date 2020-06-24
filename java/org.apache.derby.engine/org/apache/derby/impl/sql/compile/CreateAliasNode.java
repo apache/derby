@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CreateAliasNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -45,6 +46,8 @@ import org.apache.derby.iapi.types.TypeId;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateAliasNode extends DDLStatementNode
 {
     // indexes into routineElements
@@ -130,7 +133,10 @@ class CreateAliasNode extends DDLStatementNode
      * @param cm                    The context manager
      * @exception StandardException Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateAliasNode(    TableName aliasName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 						Object targetObject,
                         String methodName,
 						Object aliasSpecificInfo,
@@ -152,6 +158,7 @@ class CreateAliasNode extends DDLStatementNode
 
                 // XML not allowed because SQLXML support has not been implemented
                 if (
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                     (aggForType.getJDBCTypeId() == Types.SQLXML) ||
                     (aggReturnType.getJDBCTypeId() == Types.SQLXML)
                    )
@@ -175,6 +182,8 @@ class CreateAliasNode extends DDLStatementNode
 			{
 				this.javaClassName = (String) targetObject;
                 this.methodName = methodName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 				//routineElements contains the description of the procedure.
 				// 
@@ -212,6 +221,7 @@ class CreateAliasNode extends DDLStatementNode
 				
 				if (paramCount != 0) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     names = new String[paramCount];
                     types = new TypeDescriptor[paramCount];
 					modes = new int[paramCount];
@@ -229,6 +239,7 @@ class CreateAliasNode extends DDLStatementNode
                         //
                         if ( !types[ i ].isUserDefinedType() )
                         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
                             if (TypeId.getBuiltInTypeId(types[i].getJDBCTypeId()).isXMLTypeId())
                             { throw StandardException.newException(SQLState.LANG_LONG_DATA_TYPE_NOT_ALLOWED, names[i]); }
                         }
@@ -262,6 +273,7 @@ class CreateAliasNode extends DDLStatementNode
 				Boolean hasVarargsO = (Boolean) routineElements[ VARARGS ];
                 boolean hasVarargs = (hasVarargsO == null) ? false : hasVarargsO.booleanValue();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 Boolean definersRightsO =
                     (Boolean) routineElements[ROUTINE_SECURITY_DEFINER];
                 boolean definersRights  =
@@ -286,6 +298,7 @@ class CreateAliasNode extends DDLStatementNode
                     returnType = dtd.getCatalogType();
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 aliasInfo = new RoutineAliasInfo(
                     this.methodName,
                     paramCount,
@@ -306,6 +319,7 @@ class CreateAliasNode extends DDLStatementNode
 				}
 				break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				String targetSchema;
 				implicitCreateSchema = true;
@@ -325,6 +339,8 @@ class CreateAliasNode extends DDLStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		switch (this.aliasType)
@@ -335,6 +351,7 @@ class CreateAliasNode extends DDLStatementNode
 			return "CREATE TYPE";
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 			return "CREATE PROCEDURE";
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 			return "CREATE SYNONYM";
 		default:
@@ -449,6 +466,7 @@ class CreateAliasNode extends DDLStatementNode
 
 		// Don't allow creating synonyms in SESSION schema. Causes confusion if
 		// a temporary table is created later with same name.
+//IC see: https://issues.apache.org/jira/browse/DERBY-405
 		if (isSessionSchema(getSchemaDescriptor().getSchemaName()))
 			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
@@ -474,6 +492,8 @@ class CreateAliasNode extends DDLStatementNode
         // A user-defined aggregate cannot have the name of a builtin function which takes 1 argument.
         //
         SchemaDescriptor    sysfun = getSchemaDescriptor( "SYSFUN", true );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<AliasDescriptor> systemFunctions =
             getDataDictionary().getRoutineList(
                 sysfun.getUUID().toString(),
@@ -532,6 +552,7 @@ class CreateAliasNode extends DDLStatementNode
             parameterTypes[ i ] = bindUserCatalogType( parameterTypes[ i ] );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
         aliasInfo.setParameterTypes( parameterTypes );
     }
 

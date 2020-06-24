@@ -109,6 +109,7 @@ public final class ErrorMessages extends VTITemplate implements VTICosting, java
 		if (retCode) {
 		  SQLState =StandardException.getSQLStateFromIdentifier(k);
 		  message = MessageService.getTextMessage(k);
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		  message = StringUtil.truncate(message, Limits.DB2_VARCHAR_MAXWIDTH);
 		}
 		return retCode;
@@ -157,6 +158,7 @@ public final class ErrorMessages extends VTITemplate implements VTICosting, java
 		p = new Properties();
 		for (int i = 0; i < 50; i++) {
 			msgFile = i;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			InputStream is = java.security.AccessController.doPrivileged(this);
 			if (is == null)
 				continue;
@@ -224,11 +226,13 @@ public final class ErrorMessages extends VTITemplate implements VTICosting, java
 	private static final ResultColumnDescriptor[] columnInfo = {
 
 		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_STATE",  Types.VARCHAR, true, 5),
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		EmbedResultSetMetaData.getResultColumnDescriptor("MESSAGE",    Types.VARCHAR, true, Limits.DB2_VARCHAR_MAXWIDTH),
 		EmbedResultSetMetaData.getResultColumnDescriptor("SEVERITY",   Types.INTEGER, true),
 	};
 
     private static final ResultSetMetaData metadata =
         new EmbedResultSetMetaData(columnInfo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
 }

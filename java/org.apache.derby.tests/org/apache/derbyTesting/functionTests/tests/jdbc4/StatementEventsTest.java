@@ -91,6 +91,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * @param xa if <code>true</code>, use XA
      */
     private void setXA(boolean xa) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1503
         this.xa = xa;
     }
 
@@ -125,7 +126,11 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      */
     public void setUp() throws SQLException {
         if (xa) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             XADataSource ds = J2EEDataSource.getXADataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3306
+//IC see: https://issues.apache.org/jira/browse/DERBY-3412
             J2EEDataSource.setBeanProperty(ds, "createDatabase", "create");
             pooledConnection = ds.getXAConnection();
         } else {
@@ -156,6 +161,8 @@ public class StatementEventsTest extends BaseJDBCTestCase {
     protected void tearDown() throws Exception {
         connection.close();
         pooledConnection.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         connection = null;
         pooledConnection = null;
         closedStatement = null;
@@ -171,6 +178,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * @return a test suite
      */
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suites = new BaseTestSuite(name);
         boolean[] truefalse = new boolean[] { true, false };
         for (boolean xa : truefalse) {
@@ -183,8 +191,11 @@ public class StatementEventsTest extends BaseJDBCTestCase {
 
     /** Create a test suite with all tests in the class. */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("StatementEventsTest suite");
         suite.addTest(baseSuite("StatementEventsTest:embedded"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         suite.addTest(TestConfiguration.clientServerDecorator(
               baseSuite("StatementEventsTest:client")));
         return suite;
@@ -199,6 +210,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
             super(StatementEventsTest.class);
 
             // Iterate over the sorted fixtures and tinker with them
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             for (Enumeration<?> i = tests(); i.hasMoreElements(); ) {
                 StatementEventsTest test =
                         (StatementEventsTest) i.nextElement();
@@ -273,6 +285,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * Test how the listener behaves if it is added twice.
      */
     public void testDoubleAddListener() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2091
         SimpleListener listener = new SimpleListener();
         pooledConnection.addStatementEventListener(listener);
         pooledConnection.addStatementEventListener(listener);
@@ -565,6 +578,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      */
     public void testAddRemoveListenerOnClosedObject() throws SQLException {
         // Add a listener that we can try to remove later after closing.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2091
         SimpleListener listener = new SimpleListener();
         pooledConnection.addStatementEventListener(listener);
 

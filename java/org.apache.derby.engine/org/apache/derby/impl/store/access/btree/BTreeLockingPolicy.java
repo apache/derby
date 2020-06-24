@@ -43,6 +43,8 @@ pointer where a BTreeLockingPolicy is requested.
 <p>
 There are 2 types of lock interfaces, lockScan*() and lockNonScan*().
 <p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-4177
+//IC see: https://issues.apache.org/jira/browse/DERBY-2991
 The lockScan*() interfaces save the key for the current scan position before
 giving up the latch on the page if they have to wait for a row lock. The
 callers can reposition the scan using the saved key by calling

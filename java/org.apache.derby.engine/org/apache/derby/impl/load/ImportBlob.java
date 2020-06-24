@@ -66,6 +66,7 @@ class ImportBlob implements java.sql.Blob {
      */
     public ImportBlob(byte[] data) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         blobData = data;
         blobLength = data.length;
     }
@@ -180,6 +181,7 @@ class ImportBlob implements java.sql.Blob {
     /** Return an unimplemented feature error */
     private SQLException   methodNotImplemented()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return LoadError.unexpectedError( new Exception("Method not implemented")) ;
     }
 }

@@ -52,6 +52,7 @@ public final class RowNumberFunctionNode extends WindowFunctionNode
      */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
             throws StandardException
     {

@@ -59,6 +59,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         Statement s = createStatement();
         try {
             s.executeUpdate(
@@ -92,6 +93,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             // Create a procedure to be called before checking on contents
             // to ensure that the background worker thread has completed 
             // all the post-commit work.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
             s.execute(
                 "CREATE PROCEDURE WAIT_FOR_POST_COMMIT() " +
                 "LANGUAGE JAVA EXTERNAL NAME " +
@@ -112,6 +114,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         try {
             dropTable("a");
             // commit to prevent message 'table/view a already exists'
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
             commit();
         } catch (SQLException e) {
             assertSQLState("42Y55", e);
@@ -124,6 +127,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
     public static Test suite() {
 
         Test suite = TestConfiguration.defaultSuite(UpdateLocksTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
 
         Properties p = new Properties();
         p.put("derby.storage.pageSize", "4096");
@@ -154,6 +158,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
      * Should be the same as SERIALIZABLE results except no previous key locks.
      */
     public void testRepeatableRead () throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         doRunTests(Connection.TRANSACTION_REPEATABLE_READ, false);
     }
 
@@ -196,6 +201,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
     }
 
     private void doRunTests (int isolation, boolean withhold) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
             throws Exception {
         setAutoCommit(false);
         getConnection().setTransactionIsolation(
@@ -215,6 +221,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         insertValuesUnpaddedVarchar(s);
         commit();
         updatecursorlocks(getConnection(), isolation, 0, NO_IDX_1, withhold);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
 
         // non cursor, no index run
         // to create tables of page size 4k and still keep the following tbl
@@ -237,6 +244,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         updateBtreeCursorLocks1(getConnection(),
                                 isolation,
                                 UNIQUE_INDEX,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
                                 true, 0, 0, withhold);
         updateBtreeCursorLocks2(getConnection(),
                                 isolation,
@@ -253,6 +261,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         commit();
         updateBtreeCursorLocks1(getConnection(), isolation,
                                 NON_UNIQUE_INDEX,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
                                 true, 0, 0, withhold);
         updateBtreeCursorLocks2(getConnection(), isolation,
                                 NON_UNIQUE_INDEX,
@@ -303,6 +312,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("insert into a values (7, 70, " +
                         "    PADSTRING('seven',1900))");
         commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         updatecursorlocks(getConnection(), isolation, 1900, NO_IDX_2,
                 withhold);
 
@@ -352,6 +362,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("create unique index a_idx on a (a, index_pad)");
         commit();
         updateBtreeCursorLocks1(getConnection(), isolation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
                                 UNIQUE_INDEX, false, 1900, 600, withhold);
         updateBtreeCursorLocks2(getConnection(), isolation,
                                 UNIQUE_INDEX, false, 1900, 600, withhold);
@@ -383,6 +394,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("create index a_idx on a (a, index_pad)");
         commit();
         updateBtreeCursorLocks1(getConnection(), isolation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
                                 NON_UNIQUE_INDEX, false, 1900, 700, withhold);
         updateBtreeCursorLocks2(getConnection(), isolation,
                                 NON_UNIQUE_INDEX, false, 1900, 700, withhold);
@@ -450,6 +462,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
 
     private void updatecursorlocks(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         Connection c, int isolation, int pad, int mode, boolean withhold)
                 throws SQLException {
 
@@ -2409,6 +2422,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             ));
         commit();
         // wait for post-commit tasks before going on
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
         s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
@@ -3066,6 +3080,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         boolean withhold) throws SQLException {
 
         c.setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         Statement s;
         if (withhold)
             s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
@@ -4840,6 +4855,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         int idxPad, 
         boolean withhold) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         Statement s;
         if (withhold)
             s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
@@ -4988,6 +5004,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         // With network server/client, locks for the first chunk of 
         // pre-fetched rows are acquired on execute/executeQuery 
         // instead of on the first call to next().
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         String[][] expectedValues;
         if (!usingDerbyNetClient())
             expectedValues = new String[][]{
@@ -5954,6 +5971,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         // With network server/client, locks for the first chunk of 
         // pre-fetched rows are acquired on execute/executeQuery 
         // instead of on the first call to next().
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
         if (usingDerbyNetClient() && (isolation != Connection.TRANSACTION_SERIALIZABLE))
             expectedValues = new String[][]{
                 {_app, _ut, _t, "3", _IX, _A, _tl, _g, _a},
@@ -6000,6 +6018,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                  (
                      unPadded ?
                      (mode == UNIQUE_INDEX ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
+//IC see: https://issues.apache.org/jira/browse/DERBY-6247
                       expectedValues
                       :
                       new String[][]{
@@ -6861,6 +6881,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
         c.commit();
         // wait for post-commit tasks before going on
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
         s.execute("call wait_for_post_commit()");
         /* ------------------------------------------------------------
          * Test full cursor scan which deletes "even" rows.
@@ -7284,6 +7305,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             ));
         c.commit();
         // wait for post-commit tasks before going on
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
         s.execute("call wait_for_post_commit()");
         s.executeUpdate(
             "update a  set b = -b where a = 2");
@@ -7573,6 +7595,9 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             ));
         c.commit();
         // wait for post-commit tasks before going on
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
         s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
@@ -7657,6 +7682,35 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             ));
         c.commit();
         // wait for post-commit tasks before going on
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
         s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);

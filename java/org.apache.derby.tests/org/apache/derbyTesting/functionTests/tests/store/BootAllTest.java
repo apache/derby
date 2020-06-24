@@ -54,9 +54,11 @@ public class BootAllTest  extends BaseJDBCTestCase {
     
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("BootAllTest");
         
         // Test uses driver manager so JDBC 2 required.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         if (JDBC.vmSupportsJDBC3())
         {           
             // Suite to create the third (inner) database and
@@ -74,6 +76,7 @@ public class BootAllTest  extends BaseJDBCTestCase {
             
             // Suite to create the second database (middle) and
             // embed in it the third database suite.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite db2 = new BaseTestSuite("db2");
             db2.addTest(new BootAllTest("createShutdownDatabase"));
             db2.addTest(TestConfiguration.singleUseDatabaseDecorator(db3));
@@ -106,6 +109,8 @@ public class BootAllTest  extends BaseJDBCTestCase {
     
     public void createShutdownDatabase() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         getConnection().close();
         getTestConfiguration().shutdownDatabase();
     }
@@ -131,6 +136,8 @@ public class BootAllTest  extends BaseJDBCTestCase {
             throws Exception 
     {
         JDBCClient embedded = getTestConfiguration().getJDBCClient();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
 
         String driverName = embedded.getJDBCDriverName();
         String url = embedded.getUrlBase();
@@ -142,6 +149,7 @@ public class BootAllTest  extends BaseJDBCTestCase {
         } catch (SQLException e) {
        }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(driverName);
         clazz.getConstructor().newInstance();
 

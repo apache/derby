@@ -108,6 +108,7 @@ public class ClassHolder {
 	protected ClassHolder(int estimatedConstantPoolCount) {
 		// Constant Pool Information
 		// 100 is the estimate of the number of entries that will be generated
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		cptEntries = new Vector<ConstantPoolEntry>(estimatedConstantPoolCount);
 		cptHashTable = new Hashtable<Object,ConstantPoolEntry>(estimatedConstantPoolCount, (float)0.75);
 
@@ -145,6 +146,7 @@ public class ClassHolder {
 		// (as it is stored as a U2).
 		// Special case to allow somewhat easier debugging
 		// of the resulting failure.
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		out.putU2("constant_pool", cptEntries.size());
 		cptPut(out);
 
@@ -214,6 +216,7 @@ public class ClassHolder {
 
 	
 		ClassFormatOutput cfo = new ClassFormatOutput(classFileSize + 200);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		put(cfo);
 
@@ -422,6 +425,7 @@ public class ClassHolder {
 		if (key != null)
 			cptHashTable.put(key, item);
 		cptEntries.add(item);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
 		cptEstimatedSize += item.classFileSize();
 
@@ -536,6 +540,7 @@ public class ClassHolder {
 
  	protected void cptPut(ClassFormatOutput out) throws IOException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		for (Enumeration<ConstantPoolEntry> e = cptEntries.elements(); e.hasMoreElements(); ) {
 			ConstantPoolEntry item = e.nextElement();
 			if (item == null) {
@@ -551,6 +556,7 @@ public class ClassHolder {
 	*/
 
 	public ConstantPoolEntry getEntry(int index) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return cptEntries.get(index);
 	}
 
@@ -657,6 +663,7 @@ public class ClassHolder {
 	}
 
 	protected ConstantPoolEntry findMatchingEntry(Object key) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return cptHashTable.get(key);
 	}
 

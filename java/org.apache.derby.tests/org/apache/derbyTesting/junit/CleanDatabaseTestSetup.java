@@ -38,6 +38,7 @@ import junit.framework.Test;
  * automatically clean them up by implementing the decorateSQL method.. 
  * As an example:
  * <code>
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         return new CleanDatabaseTestSetup(suite) {
             protected void decorateSQL(Statement s) throws SQLException {
 
@@ -71,6 +72,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      */
     public CleanDatabaseTestSetup(Test test, 
             boolean useNetworkClient,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3163
             String hostName,
             int portNo) {
         super(test);
@@ -91,6 +93,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      * initialize their schema requirments.
      */
     protected void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3163
         if (jdbcClient != null )
         { // We have network client (useNetworkClient) on a given host and port.
             TestConfiguration current = TestConfiguration.getCurrent();
@@ -107,7 +110,9 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         // this decorator to start with a clean database.
         CleanDatabaseTestSetup.cleanDatabase(conn, true);  
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         Statement s = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5734
         try {
             decorateSQL(s);
             s.close();
@@ -183,10 +188,13 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      * @throws SQLException database error
      */
      public static void cleanDatabase(Connection conn, boolean compress) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2033
          clearProperties(conn);
          removeObjects(conn);
          if (compress)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2048
              compressObjects(conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3681
          removeRoles(conn);
          removeUsers( conn );
      }
@@ -225,12 +233,14 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
    
         DatabaseMetaData dmd = conn.getMetaData();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
         SQLException sqle = null;
         // Loop a number of arbitary times to catch cases
         // where objects are dependent on objects in
         // different schemas.
         for (int count = 0; count < 5; count++) {
             // Fetch all the user schemas into a list
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             List<String> schemas = new ArrayList<String>();
             ResultSet rs = dmd.getSchemas();
             while (rs.next()) {
@@ -249,6 +259,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
     
             // DROP all the user schemas.
             sqle = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             for (String schema : schemas) {
                 try {
                     JDBC.dropSchema(dmd, schema);
@@ -266,6 +277,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
 
     private static void removeRoles(Connection conn) throws SQLException {
         // No metadata for roles, so do a query against SYSROLES
+//IC see: https://issues.apache.org/jira/browse/DERBY-3681
         Statement stm = conn.createStatement();
         Statement dropStm = conn.createStatement();
 
@@ -275,6 +287,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
             "cast(isdef as char(1)) = 'Y'");
 
         while (rs.next()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             dropStm.executeUpdate("DROP ROLE " + JDBC.escape(rs.getString(1)));
         }
 
@@ -289,6 +302,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         // Get the users
         Statement stm = conn.createStatement();
         ResultSet rs = stm.executeQuery( "select username from sys.sysusers" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> users = new ArrayList<String>();
         
         while ( rs.next() ) { users.add( rs.getString( 1 ) ); }
@@ -322,6 +336,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
       */
      private static final String[] COMPRESS_DB_OBJECTS =
      {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2048
          "SYS.SYSDEPENDS",
      };
      

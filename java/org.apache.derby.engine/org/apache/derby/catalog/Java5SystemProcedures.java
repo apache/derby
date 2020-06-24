@@ -100,12 +100,14 @@ public  class   Java5SystemProcedures
         throws SQLException
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			ClassFactoryContext cfc = (ClassFactoryContext) getContext( ClassFactoryContext.CONTEXT_ID );
             ClassFactory    classFactory = cfc.getClassFactory();
 
             String              toolClassName = findToolClassName( toolName, optionalArgs );            
             OptionalTool    tool = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
             Class<?> toolClass;
             try {
                 toolClass = classFactory.loadApplicationClass( toolClassName );
@@ -117,6 +119,7 @@ public  class   Java5SystemProcedures
             }
 
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 tool = (OptionalTool) toolClass.getConstructor().newInstance();
             }
             catch (InstantiationException ie) { throw wrap( ie ); }
@@ -164,6 +167,7 @@ public  class   Java5SystemProcedures
     }
 
     private static StandardException badCustomTool(String className) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
         return StandardException.newException(
                 SQLState.LANG_UNKNOWN_CUSTOM_TOOL_NAME, className);
     }
@@ -199,6 +203,7 @@ public  class   Java5SystemProcedures
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

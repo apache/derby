@@ -23,9 +23,11 @@ package org.apache.derby.catalog;
 
 /**
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
  <p>
  This interface is used in the column SYS.SYSSTATISTICS.STATISTICS. It
  encapsulates information collected by the UPDATE STATISTICS command
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
  and is used internally by the Derby optimizer to estimate cost 
  and selectivity of different query plans.
  </p>
@@ -39,6 +41,7 @@ public interface Statistics
      * @return Number of rows.
      */
     long getRowEstimate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
 
 	/**
      * @param predicates The predicates to evaluate

@@ -47,7 +47,9 @@ public class DistinctTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test s = new BaseTestSuite(DistinctTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2491
 		Properties p = new Properties();
 		p.put("derby.optimizer.noTimeout", "true");
 		Test t = new SystemPropertyTestSetup(s, p);
@@ -453,6 +455,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 		assertEquals(2, s.executeUpdate("insert into destWithAI(c12) select distinct(c31) from source"));
 		
 		// we should not see gaps in the autoincrement column
+//IC see: https://issues.apache.org/jira/browse/DERBY-4457
 		String [][] expected = { {"1"}, {"2"} };
 		JDBC.assertFullResultSet(
 				s.executeQuery("select c11 from destWithAI order by c11"),
@@ -559,6 +562,7 @@ public class DistinctTest extends BaseJDBCTestCase {
                                      {"1", "1"},
         		                     {"2", "2"}, 
         		                     {"2", "1"} };
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
 		JDBC.assertUnorderedResultSet(s.executeQuery(
 			"select * from td, (select distinct x from td) as sub(x)"),
 			expected);

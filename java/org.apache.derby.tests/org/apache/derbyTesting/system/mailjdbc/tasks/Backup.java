@@ -40,6 +40,8 @@ public class Backup extends Thread{
 		//After fix of Derby-1062 only owner can perform backup
 		//Please refer Derby-4295
 		//conn = DbTasks.getConnection("BACKUP", "Backup");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
+//IC see: https://issues.apache.org/jira/browse/DERBY-4295
 		conn = DbTasks.getConnection("REFRESH", "Refresh");
 	}
 

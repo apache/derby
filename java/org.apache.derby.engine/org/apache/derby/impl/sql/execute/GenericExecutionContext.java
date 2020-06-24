@@ -36,6 +36,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
  * duration of the connection.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class GenericExecutionContext
 	extends ContextImpl 
 	implements ExecutionContext {
@@ -65,6 +66,7 @@ class GenericExecutionContext
 
 			StandardException se = (StandardException) error;
             int severity = se.getSeverity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
             if (severity >= ExceptionSeverity.SESSION_SEVERITY)
             {
                popMe();
@@ -82,6 +84,7 @@ class GenericExecutionContext
 	//
 	// class interface
 	//
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	GenericExecutionContext(
 			ContextManager cm,
 			ExecutionFactory ef)

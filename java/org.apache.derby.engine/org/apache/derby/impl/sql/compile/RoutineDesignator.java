@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.RoutineDesignator
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -39,6 +40,8 @@ class RoutineDesignator
 	 * if null then the signature is not specified and this designator is ambiguous if there is
 	 * more than one function (procedure) with this name.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     List<TypeDescriptor> paramTypeList;
 	AliasDescriptor aliasDescriptor;
 

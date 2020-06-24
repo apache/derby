@@ -949,6 +949,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
                 // Per jdbc spec (see Statement.close() javadoc)
                 checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
                 if (name == null || name.equals("")) {
                     throw new SqlException(agent_.logWriter_, 
@@ -1004,6 +1005,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     }
 
     public ResultSet getResultSet() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1013,6 +1015,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
                 // Per jdbc spec (see Statement.close() javadoc)
                 checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getResultSet", resultSet_);
@@ -1040,6 +1043,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getUpdateCount", updateCount_);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 return (int) updateCount_;
             }
         }
@@ -1051,6 +1055,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
     // Added by JDBC 4.2
     public long getLargeUpdateCount() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try
         {
             synchronized (connection_) {
@@ -1060,6 +1065,8 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
                 // Per jdbc spec (see Statement.close() javadoc)
                 checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getUpdateCount", updateCount_);
@@ -1105,6 +1112,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
                 // Per jdbc spec (see Statement.close() javadoc)
                 checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
                 switch (direction) {
                 case ResultSet.FETCH_FORWARD:
@@ -1115,6 +1123,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 default:
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.INVALID_FETCH_DIRECTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         direction);
                 }
             }
@@ -1150,10 +1159,12 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
                 // Per jdbc spec (see Statement.close() javadoc)
                 checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
                 if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_ST_FETCH_SIZE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         rows).getSQLException();
                 }
                 fetchSize_ = rows;
@@ -1236,6 +1247,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     agent_.logWriter_.traceEntry(this, "clearBatch");
                 }
                 checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
                 batch_.clear();
             }
         }
@@ -1252,6 +1264,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "executeBatch");
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 long[] updateCounts = executeBatchX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeBatch", updateCounts);
@@ -1267,6 +1280,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
     // Added by JDBC 4.2
     public long[] executeLargeBatch() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try
         {
             synchronized (connection_) {
@@ -1288,19 +1302,23 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
     private long[] executeBatchX() throws SqlException, BatchUpdateException {
         // Per jdbc spec (see Statement.close() javadoc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         checkForClosedStatement();
         clearWarningsX(); // Per jdbc spec 0.7, and getWarnings() javadoc
         resultSetList_ = null;
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
         // read any more replies
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         long[] updateCounts = new long[batch_.size()];
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
         Arrays.fill(updateCounts, -3);
         flowExecuteBatch(updateCounts);
         return updateCounts;
     }
 
     public Connection getConnection() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             checkForClosedStatement();
@@ -1339,8 +1357,10 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
     private boolean getMoreResultsX(int current) throws SqlException {
         // Per jdbc spec (see Statement.close() javadoc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         checkForClosedStatement();
         boolean resultIsResultSet;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         updateCount_ = -1L;
         if (resultSetList_ == null) {
             if (resultSet_ != null) {
@@ -1351,6 +1371,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             }
             resultIsResultSet = false;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             if (current == CLOSE_CURRENT_RESULT &&
                     resultSetList_[indexOfCurrentResultSet_] != null) {
                 resultSetList_[indexOfCurrentResultSet_].closeX();
@@ -1376,11 +1397,13 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     }
 
     public ResultSet getGeneratedKeys() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getGeneratedKeys");
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             checkForClosedStatement();
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getGeneratedKeys", generatedKeysResultSet_);
@@ -1402,6 +1425,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 }
                 autoGeneratedKeys_ = autoGeneratedKeys;
                 int updateValue = (int) executeUpdateX(sql);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -1420,6 +1444,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                     agent_.logWriter_.traceEntry(this, "executeLargeUpdate", sql, autoGeneratedKeys);
                 }
                 autoGeneratedKeys_ = autoGeneratedKeys;
@@ -1452,6 +1477,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 }
 
                 int updateValue = (int) executeUpdateX(sql);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -1470,9 +1496,12 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         {
             synchronized (connection_) {  
                 if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                     agent_.logWriter_.traceEntry(this, "executeLargeUpdate", sql, columnIndexes);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (columnIndexes != null && columnIndexes.length > 0) {
                     autoGeneratedKeys_ = ClientStatement.RETURN_GENERATED_KEYS;
                     generatedKeysColumnIndexes_ = columnIndexes.clone();
@@ -1501,7 +1530,10 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     agent_.logWriter_.traceEntry(this, "executeUpdate", sql, columnNames);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (columnNames != null && columnNames.length > 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     autoGeneratedKeys_ = ClientStatement.RETURN_GENERATED_KEYS;
                     generatedKeysColumnNames_ = columnNames.clone();
                 } else {
@@ -1509,6 +1541,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 }
 
                 int updateValue = (int) executeUpdateX(sql);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -1527,10 +1560,14 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                     agent_.logWriter_.traceEntry(this, "executeLargeUpdate", sql, columnNames);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (columnNames != null && columnNames.length > 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     autoGeneratedKeys_ = ClientStatement.RETURN_GENERATED_KEYS;
                     generatedKeysColumnNames_ = columnNames.clone();
                 } else {
@@ -1579,10 +1616,12 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     agent_.logWriter_.traceEntry(this, "execute", sql, columnIndexes);
                 }             
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (columnIndexes != null && columnIndexes.length > 0) {
                     autoGeneratedKeys_ = ClientStatement.RETURN_GENERATED_KEYS;
                     generatedKeysColumnIndexes_ = columnIndexes.clone();
                 } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
                     generatedKeysColumnIndexes_ = null;
                 }
 
@@ -1607,7 +1646,10 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     agent_.logWriter_.traceEntry(this, "execute", sql, columnNames);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (columnNames != null && columnNames.length > 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     autoGeneratedKeys_ = ClientStatement.RETURN_GENERATED_KEYS;
                     generatedKeysColumnNames_ = columnNames.clone();
                 } else {
@@ -1652,7 +1694,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      */
     private Section setSpecialRegisterSection_ = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writeSetSpecialRegister(ArrayList sqlsttList)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3198
         throws SqlException {
         if (setSpecialRegisterSection_ == null) {
             setSpecialRegisterSection_ = 
@@ -1663,6 +1707,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                                                     sqlsttList);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readSetSpecialRegister() throws SqlException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(setSpecialRegisterSection_ != null);
@@ -1693,11 +1738,13 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         materialStatement_.readExecuteImmediateForBatch_(sql);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writePrepareDescribeOutput(String sql,
                                            Section section) throws SqlException {
         materialStatement_.writePrepareDescribeOutput_(sql, section);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readPrepareDescribeOutput() throws SqlException {
         materialStatement_.readPrepareDescribeOutput_();
     }
@@ -1712,6 +1759,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     }
 
     // Used for re-prepares across commit only
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writePrepare(String sql, Section section) throws SqlException {
         materialStatement_.writePrepare_(sql, section);
     }
@@ -1728,6 +1776,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         markPrepared();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writeOpenQuery(Section section,
                                int fetchSize,
                                int resultSetType) throws SqlException {
@@ -1736,6 +1785,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 resultSetType);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readOpenQuery() throws SqlException {
         materialStatement_.readOpenQuery_();
     }
@@ -1753,6 +1803,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         resultSet.resultSetMetaData_.resultSetConcurrency_ = resultSet.resultSetConcurrency_;
         // Create tracker for LOB locator columns.
         resultSet.createLOBColumnTracker();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
 
         // only cache the Cursor object for a PreparedStatement and if a Cursor object is
         // not already cached.
@@ -1766,6 +1817,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             return;
         }
         resultSet.cursor_.rowsRead_ = fetchedRowBase;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         // Set fetchSize_ to the default(64) if not set by the user if the resultset is scrollable.
         // This fetchSize_ is used to check for a complete rowset when rowsets are parsed.
@@ -1773,8 +1825,10 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         // fetchSize of 64 is sent on behalf of the application, so we need to update the fetchSize_
         // here to 64.
         if (resultSet_.fetchSize_ == 0 &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
              (resultSet_.resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE ||
               resultSet_.resultSetType_ == ResultSet.TYPE_SCROLL_SENSITIVE)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             resultSet_.setFetchSize_(Configuration.defaultFetchSize);
         }
     }
@@ -1790,6 +1844,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         resultSet.resultSetMetaData_ = resultSetMetaData;
         // Create tracker for LOB locator columns.
         resultSet.createLOBColumnTracker();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
 
         // The following two assignments should have already happened via prepareEvent(),
         // but are included here for safety for the time being.
@@ -1797,6 +1852,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             return;
         }
         resultSet.cursor_.rowsRead_ = fetchedRowBase;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         resultSet.generatedSection_ = generatedSection;
 
@@ -1805,10 +1861,12 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         // fetchSize_ is not set, we do not send any default value.  Here since we always send
         // the fetchSize_, we need to set it to what we sent.
         if (resultSet.fetchSize_ == 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             resultSet.fetchSize_ = Configuration.defaultFetchSize;
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writeExecuteCall(boolean outputExpected,
                                  String procedureName,
                                  Section section,
@@ -1827,15 +1885,18 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 inputs);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readExecuteCall() throws SqlException {
         materialStatement_.readExecuteCall_();
     }
 
     public void completeExecuteCall(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Sqlca sqlca,
             Cursor singletonParams,
             ClientResultSet[] resultSets) {
         completeExecuteCall(sqlca, singletonParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         resultSetList_ = resultSets.clone();
         if (resultSets != null) {
             resultSet_ = resultSets[0];
@@ -1871,6 +1932,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             // sometime for call statement, protocol will return updateCount_, we will always set that to 0
             // sqlMode_ is not set for statements, only for prepared statements
             if (sqlMode_ == isCall__) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 updateCount_ = -1L;
             }
             // Sqlcode 466 indicates a call statement has issued and result sets returned.
@@ -1896,6 +1958,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      * @param owner the owning statement, if any
      */
     protected final void setOwner(Statement owner) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3446
         this.owner = owner;
     }
 
@@ -1904,6 +1967,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      *
      * @return The designated owner of this statement, or {@code null} if none.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Statement getOwner() {
         return this.owner;
     }
@@ -2026,6 +2090,8 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         if (connection_.autoCommit_ && requiresAutocommit && isAutoCommittableStatement_) {
             connection_.writeAutoCommit();
             if (connection_.isXAConnection_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 return connection_.getXAState() ==
                        ClientConnection.XA_T0_NOT_ASSOCIATED;
             } else {
@@ -2044,6 +2110,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     }
 
     private void readCloseResultSets(int number, boolean allowAutoCommits)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         boolean requiredAutocommit = false;
         if (resultSetList_ != null) {
@@ -2141,6 +2208,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      * added to the list of open statements.
      */
     void markClosed() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         markClosed(false);
     }
     
@@ -2157,7 +2225,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      */
     void markClosed(boolean removeListener) {
         openOnClient_ = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         markResultSetsClosed(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         closeEverythingExceptResultSets( removeListener );
     }
 
@@ -2175,6 +2245,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         removeClientCursorNameFromCache();
         markPreparedStatementForAutoGeneratedKeysClosed();
         setSection(null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
 
         // mark close ResultSetMetaData
         if (resultSetMetaData_ != null) {
@@ -2184,7 +2255,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         
         if(removeListener)
             connection_.openStatements_.remove(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3198
         if (setSpecialRegisterSection_ != null) {
             setSpecialRegisterSection_.free();
             setSpecialRegisterSection_ = null;
@@ -2205,6 +2278,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      * from the commit and rollback listeners list in
      * <code>org.apache.derby.client.am.Connection</code>.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
     final void markResultSetsClosed(boolean removeListener)
     {
         try {
@@ -2239,13 +2313,16 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     private void flowExecute(int executeType, String sql) throws SqlException {
         // Per jdbc spec (see Statement.close() javadoc)
         checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         clearWarningsX(); // Per jdbc spec 0.7, and getWarnings() javadoc
         sql = escape(sql);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5806
         sqlMode_ = executeType==executeQueryMethod__?isQuery__:isUpdate__;
         parseSqlAndSetSqlModes(sql);
         checkAutoGeneratedKeysParameters();
         if (sqlMode_ == isUpdate__) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             updateCount_ = 0L;
         } else {
             updateCount_ = -1L;
@@ -2258,6 +2335,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         // statements can have the same cursor name as long as their result
         // sets are not simultaneously open.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1036
+//IC see: https://issues.apache.org/jira/browse/DERBY-1183
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         if (sqlMode_ == isQuery__) {
             checkForDuplicateCursorName();
         }
@@ -2267,6 +2347,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             agent_.beginWriteChain(this);
             boolean piggybackedAutoCommit = writeCloseResultSets(true);  // true means permit auto-commits
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientResultSet scrollableRS = null;
             Section newSection = null;
             boolean repositionedCursor = false;
@@ -2304,6 +2385,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     newSection = agent_.sectionManager_.getPositionedUpdateSection(cursorName, true); // true means get an execute immediate section
                     if (newSection == null) {
                         throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4777
                             new ClientMessageId(SQLState.LANG_CURSOR_NOT_FOUND),
                             cursorName);
                     }
@@ -2328,13 +2410,17 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     writeExecuteImmediate(sql, newSection);
                 }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-3426
                else {
                     newSection = agent_.sectionManager_.getDynamicSection(resultSetHoldability_);
 
                     writeExecuteImmediate(sql, newSection);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
             		if ((sqlUpdateMode_ == isInsertSql__ || sqlUpdateMode_ == isUpdateSql__) 
             				&& autoGeneratedKeys_ == RETURN_GENERATED_KEYS) {
                         // chain a "select from identity_val_local()" to the insert statement
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                         if (preparedStatementForAutoGeneratedKeys_ == null) {
                             preparedStatementForAutoGeneratedKeys_ =
                                  prepareAutoGeneratedKeysStatement(connection_);
@@ -2361,6 +2447,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
             readCloseResultSets(true);  // true means permit auto-commits
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
             if (timeoutSent) {
                 readSetSpecialRegister(); // Read response to the EXCSQLSET
             }
@@ -2374,6 +2461,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
             markResultSetsClosed(true); // true means remove from list of commit and rollback listeners
             setSection(newSection);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
 
             switch (sqlMode_) {
             case isQuery__:
@@ -2394,6 +2482,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     // result sets happening during readCloseResultSets above
                     // because ResultSet#markClosed calls
                     // Statement#removeClientCursorNameFromCache.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1036
+//IC see: https://issues.apache.org/jira/browse/DERBY-1183
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
                     setupCursorNameCacheAndMappings();
                 }
 
@@ -2407,14 +2498,18 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 }
                 readExecuteImmediate();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
         		if ((sqlUpdateMode_ == isInsertSql__ || sqlUpdateMode_ == isUpdateSql__) 
         				&& autoGeneratedKeys_ == RETURN_GENERATED_KEYS) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                     if (prepareSentForAutoGeneratedKeys) {
                         preparedStatementForAutoGeneratedKeys_.materialPreparedStatement_.readPrepareDescribeOutput_();
                     }
                     preparedStatementForAutoGeneratedKeys_.readOpenQuery();
                     generatedKeysResultSet_ = preparedStatementForAutoGeneratedKeys_.resultSet_;
                     preparedStatementForAutoGeneratedKeys_.resultSet_ = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                     generatedKeysResultSet_.outerStatement_ = this;
                 }
 
@@ -2439,12 +2534,14 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             if (resultSet_ != null && resultSet_.resultSetHoldability_ != resultSetHoldability_ && sqlMode_ != isCall__) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.UNABLE_TO_OPEN_RS_WITH_REQUESTED_HOLDABILITY),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     resultSetHoldability_);
             }
 
         // In the case of executing a call to a stored procedure.
         if (sqlMode_ == isCall__) {
             parseStorProcReturnedScrollableRowset();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
             checkForStoredProcResultSetCount(executeType);
             // When there is no result sets back, we will commit immediately when autocommit is true.
             if (connection_.autoCommit_ && resultSet_ == null && resultSetList_ == null) {
@@ -2479,6 +2576,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             // net will need to be able to reset the send buffer
             if (flowSQL) {
                 if (sqlMode_ != isCall__) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                     setSection(agent_.sectionManager_.getDynamicSection(resultSetHoldability_));
                     writeExecuteImmediate(sql, getSection());
                 } else {
@@ -2505,6 +2603,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     invalidSQLCaughtByClient = e;
                 }
                 if (invalidSQLCaughtByClient == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                     updateCount_ = -1L;
                     if (sqlMode_ != isCall__) {
                         readExecuteImmediateForBatch(sql);
@@ -2516,6 +2615,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                     }
                 } else {
                     agent_.accumulateReadException(invalidSQLCaughtByClient);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     updateCount_ = Statement.EXECUTE_FAILED;
                     invalidSQLCaughtByClient = null;
                 }
@@ -2585,6 +2685,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         if (warnings_ == null) {
             warnings_ = e;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-860
             warnings_.setNextWarning(e);
         }
     }
@@ -2600,6 +2701,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      * @return name of java.sql interface
      */
     protected String getJdbcStatementInterfaceName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
         return "java.sql.Statement";
     }
 
@@ -2644,10 +2746,12 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      */
     private String isolateAnyInitialIdentifier (String sql) {
         int idx;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4748
         for (idx = 0; idx < sql.length(); idx++) {
             char ch = sql.charAt(idx);
             if (!Character.isLetter(ch)) {
                 // first non-token char found
+//IC see: https://issues.apache.org/jira/browse/DERBY-4338
                 break;
             }
         }
@@ -2709,6 +2813,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 case '-':
                     if (idx == sql.length() - 1) {
                         // no more characters, so this is the token
+//IC see: https://issues.apache.org/jira/browse/DERBY-5011
                         tokenFound = "-";
                     } else if (sql.charAt(idx + 1) == '-') {
                         state = INSIDE_SIMPLECOMMENT;
@@ -2823,6 +2928,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      *                         match the execute type
      */
     private void checkResultSetCount(int executeType) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
         switch (executeType) {
         case executeQueryMethod__:
             // We'll just rely on finalizers to close the dangling result sets.
@@ -2894,6 +3000,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         if (!openOnClient_) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1395
                 new ClientMessageId(SQLState.ALREADY_CLOSED), "Statement");
         } else {
             agent_.checkForDeferredExceptions();
@@ -2922,6 +3029,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
     // Two open result sets can not have the same cursor name. 
     protected void checkForDuplicateCursorName() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1036
+//IC see: https://issues.apache.org/jira/browse/DERBY-1183
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         if (cursorName_ != null && (connection_.clientCursorNameCache_.
                                     containsKey(cursorName_))) {
             throw new SqlException
@@ -2943,6 +3053,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             // whenever the result set produced by this statement
             // is referenced in a positioned update/delete statement.
             agent_.sectionManager_.mapCursorNameToQuerySection
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                 (cursorName_, getSection());
             getSection().setClientCursorName(cursorName_);
             
@@ -2951,7 +3062,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                                                    cursorName_);
         } else {
         // canned cursor name
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         agent_.sectionManager_.mapCursorNameToQuerySection
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                 (getSection().getServerCursorName(), getSection());
     }
 
@@ -2969,6 +3082,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             if (whereIndex != -1) {
                 String[] whereCurrentOf = {"where", "current", "of"};
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 StringTokenizer st =
                     new StringTokenizer(sql.substring(whereIndex));
 
@@ -3029,9 +3143,11 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         if (section_ != null) {
             agent_.sectionManager_.removeCursorNameToResultSetMapping(cursorName_,
                     getSection().getServerCursorNameForPositionedUpdate());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
 
             // remove resultset mapping for other cursors (other than positioned
             // update statements) - DERBY-210
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
             agent_.sectionManager_.removeCursorNameToResultSetMapping(cursorName_,
                     getSection().getServerCursorName());
 
@@ -3050,6 +3166,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         if (cursorName_ != null) {
             agent_.sectionManager_.mapCursorNameToResultSet(cursorName_, resultSet_);
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             agent_.sectionManager_.mapCursorNameToResultSet(getSection().getServerCursorName(), resultSet_);
         }
     }
@@ -3080,6 +3197,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     // buffer at prepare-time.
     String cacheCursorAttributesToSendOnPrepare() throws SqlException {
         StringBuffer cursorAttributes = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ == ResultSet.TYPE_SCROLL_SENSITIVE) {
             // append "SENSITIVE STATIC SCROLL"
             cursorAttributes.append(Configuration.cursorAttribute_SensitiveStatic);
@@ -3092,6 +3210,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         }
 
         // Default is read-only, forward-only.  No attribute needs to be sent.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetConcurrency_ == ResultSet.CONCUR_UPDATABLE) {
             cursorAttributes.append(Configuration.cursorAttribute_ForUpdate); // FOR UPDATE
         }
@@ -3107,15 +3226,18 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     }
 
     protected static ClientPreparedStatement 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             prepareAutoGeneratedKeysStatement(ClientConnection cc) 
             throws SqlException {
         String s = "select IDENTITY_VAL_LOCAL() from SYSIBM.SYSDUMMY1";
         ClientPreparedStatement cps =
                     cc.newPreparedStatement_(s,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             ResultSet.TYPE_FORWARD_ONLY,
                             ResultSet.CONCUR_READ_ONLY,
                             ResultSet.HOLD_CURSORS_OVER_COMMIT,
                             Statement.NO_GENERATED_KEYS,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
                             null, null);
             // need a special case for Derby, since the attribute has to go through the wire.
             // This same special casing for Derby is already in place in method PS.cacheCursorAttributesToSendOnPrepare() as called by prepareStatementX().
@@ -3123,26 +3245,31 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
             // Maybe just call prepareStatementX() or use some special purpose prepare method like the ones in Connection.
             // Something more abstract so that we don't have to special case the WITH HOLD thing twice.
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             cps.cursorAttributesToSendOnPrepare_ = Configuration.cursorAttribute_WithHold; 
             cps.materialPreparedStatement_.writePrepareDescribeOutput_(cps.sql_, cps.getSection());
             return cps;
     }
 
     void checkAutoGeneratedKeysParameters() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (autoGeneratedKeys_ != Statement.NO_GENERATED_KEYS &&
                 autoGeneratedKeys_ != Statement.RETURN_GENERATED_KEYS) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.INVALID_API_PARAMETER),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 autoGeneratedKeys_, "autoGeneratedKeys",
                 "Statement.execute()/executeQuery()");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         if (sqlUpdateMode_ == isInsertSql__)
         {
         if (generatedKeysColumnNames_ != null && 
                 generatedKeysColumnNames_.length > 1) {
             throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.INVALID_COLUMN_ARRAY_LENGTH),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     generatedKeysColumnNames_.length);
             }
         
@@ -3169,6 +3296,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     }
 
     protected void removeClientCursorNameFromCache() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1036
+//IC see: https://issues.apache.org/jira/browse/DERBY-1183
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         if (cursorName_ != null && 
                 connection_.clientCursorNameCache_.containsKey(cursorName_)) {
             connection_.clientCursorNameCache_.remove(cursorName_);
@@ -3182,8 +3312,10 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      * @param closingRS The ResultSet to be closed
      * @throws SqlException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void resultSetCommitting(ClientResultSet closingRS)
             throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-213
         resultSetCommitting(closingRS, false);
     }
     
@@ -3209,6 +3341,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         // If so, then no commit. The last result set to close will close the statement.
         if (resultSetList_ != null) {
             for (int i = 0; i < resultSetList_.length; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 ClientResultSet crs = resultSetList_[i];
                 if (crs == null)
                     continue;
@@ -3256,6 +3389,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
 
     public  void    closeOnCompletion() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         try { checkForClosedStatement(); }
         catch (SqlException se) { throw se.getSQLException(); }
         
@@ -3295,6 +3429,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
                 }
 
                 // if we got here, then the Statement has no open ResultSets left
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                 openOnClient_ = false;
                 closeEverythingExceptResultSets( true );
             }
@@ -3306,6 +3441,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         return ( (rs != null) && (!rs.isClosed()) );
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void resetResultSetList() {
         indexOfCurrentResultSet_ = -1; //reset ResultSetList
     }
@@ -3317,6 +3453,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      * @return section_
      */
     public Section getSection() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
         return section_;
     }
 

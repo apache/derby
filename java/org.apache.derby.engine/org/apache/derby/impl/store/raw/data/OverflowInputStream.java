@@ -47,6 +47,7 @@ InputStream.
 Any time store fetches a long column, the value is returned as a stream.
 A long column is any column that at some point was longer than a page, so
 a long column in one table may not be long in another depending on page size.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 <p>
 When the column is fetched a new OverflowInputStream is created and then
 the datatype's stream is set using:
@@ -56,6 +57,8 @@ the datatype's stream is set using:
 
 public class OverflowInputStream
 extends BufferedByteHolderInputStream
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
 implements Resetable, CloneableStream
 {
     /**************************************************************************
@@ -112,6 +115,8 @@ implements Resetable, CloneableStream
     BaseContainerHandle owner,
     long                overflowPage, 
     int                 overflowId, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
     RecordHandle        recordToLock) {
         super(bh);
         this.owner              = owner;
@@ -155,6 +160,7 @@ implements Resetable, CloneableStream
                     columnOverflowPage.restorePortionLongColumn(this);
                     columnOverflowPage.unlatch();
                     columnOverflowPage = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2992
                 } else {
                     // An overflow page was specified, but we failed to get it.
                     // Probably the value got deleted under our feet.
@@ -165,6 +171,7 @@ implements Resetable, CloneableStream
             }
             catch (StandardException se)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 throw new IOException(se);
             }
 
@@ -338,6 +345,8 @@ implements Resetable, CloneableStream
      * @return Copy of this stream which can be used independently.
      */
     public InputStream cloneStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
         OverflowInputStream ret_stream = 
             new OverflowInputStream(
                 bh.cloneEmpty(),

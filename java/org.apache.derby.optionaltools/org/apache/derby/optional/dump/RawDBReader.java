@@ -126,6 +126,7 @@ public	class   RawDBReader  implements OptionalTool
         String  recoveryScript = configurationParameters[ idx++ ];
         String  controlSchema = configurationParameters[ idx++ ];
         String  schemaPrefix = configurationParameters[ idx++ ];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         String  corruptDBLocation = configurationParameters[ idx++ ];
         String  encryptionAttributes = configurationParameters[ idx++ ];
         String  dbo = configurationParameters[ idx++ ];
@@ -182,6 +183,7 @@ public	class   RawDBReader  implements OptionalTool
         String  controlSchema = configurationParameters[ idx++ ];
         String  schemaPrefix = configurationParameters[ idx++ ];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         if ( nullOrEmpty( controlSchema) )
         { throw badArgs( "Null or empty control schema argument." ); }
         if ( nullOrEmpty( schemaPrefix ) )
@@ -245,6 +247,11 @@ public	class   RawDBReader  implements OptionalTool
              conn,
              controlSchema,
              "SYSCOLUMNS", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
              "( referenceid char(36), columnname varchar(128), columnnumber int, columndatatype serializable, columndefault serializable, columndefaultid char(36), autoincrementvalue bigint, autoincrementstart bigint, autoincrementinc bigint, autoincrementcycle boolean )",
              "c90.dat",
              corruptDBLocation,
@@ -324,6 +331,7 @@ public	class   RawDBReader  implements OptionalTool
              "(\n" +
              "    " + qualifiedName + "\n" +
              "    (\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
              "        '" + corruptDBLocation + "',\n" +
              "        '" + heapFileName + "',\n" +
              "        '" + tableSignature + "',\n" +
@@ -372,6 +380,7 @@ public	class   RawDBReader  implements OptionalTool
     /** Make the name of a local schema from a prefix and the name of a corrupt schema */
     private String  makeSchemaName( String schemaPrefix, String corruptName )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         return IdUtil.normalToDelimited( schemaPrefix + corruptName );
     }
     
@@ -421,6 +430,7 @@ public	class   RawDBReader  implements OptionalTool
 
         ArrayList<String>   columnNames = new ArrayList<String>();
         ArrayList<TypeDescriptor>   columnTypes = new ArrayList<TypeDescriptor>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         String  corruptSchemaName = null;
         String  corruptTableName = null;
         String  schemaName = null;
@@ -467,6 +477,7 @@ public	class   RawDBReader  implements OptionalTool
                 }
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
             corruptSchemaName = currentCorruptSchemaName;
             corruptTableName = currentCorruptTableName;
             schemaName = newSchemaName;
@@ -485,6 +496,8 @@ public	class   RawDBReader  implements OptionalTool
                  conn,
                  scriptWriter,
                  controlSchema,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
                  corruptSchemaName,
                  corruptTableName,
                  schemaName,
@@ -513,6 +526,7 @@ public	class   RawDBReader  implements OptionalTool
              (
               dblook.stripQuotes
               (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
                dblook.addQuotes( unnormalizedName )
                )
               )
@@ -536,6 +550,10 @@ public	class   RawDBReader  implements OptionalTool
          long   conglomerateNumber,
          ArrayList<String>  columnNames,
          ArrayList<TypeDescriptor>  columnTypes,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
          String corruptDBLocation,
          String encryptionAttributes,
          String dbo,
@@ -546,6 +564,7 @@ public	class   RawDBReader  implements OptionalTool
         String  conglomerateName = "c" + Long.toHexString( conglomerateNumber ) + ".dat";
         String  tableSignature = makeTableSignature( controlSchema, columnNames, columnTypes );
         String  localTableName =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
             IdUtil.normalToDelimited( corruptSchemaName ) + "." +
             IdUtil.normalToDelimited( corruptTableName );
         String  viewName = schemaName + "." + tableName;
@@ -565,6 +584,11 @@ public	class   RawDBReader  implements OptionalTool
              tableName, 
              tableSignature,
              conglomerateName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
              corruptDBLocation,
              encryptionAttributes,
              dbo,
@@ -751,6 +775,7 @@ public	class   RawDBReader  implements OptionalTool
     private SQLException    wrap( Throwable t )
     {
         String  errorMessage = t.getMessage();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         String  sqlState = org.apache.derby.shared.common.reference.SQLState.JAVA_EXCEPTION
             .substring( 0, 5 );
 

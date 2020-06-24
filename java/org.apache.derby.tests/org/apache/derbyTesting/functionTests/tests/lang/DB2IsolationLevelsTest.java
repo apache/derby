@@ -44,6 +44,7 @@ public final class DB2IsolationLevelsTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("DB2IsolationLevelsTest Test");
 

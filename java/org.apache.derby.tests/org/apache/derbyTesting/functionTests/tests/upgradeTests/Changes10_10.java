@@ -86,6 +86,7 @@ public class Changes10_10 extends UpgradeChange
      */
     public static Test suite(int phase) {
         BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.9");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTestSuite(Changes10_10.class);
         
@@ -308,6 +309,7 @@ public class Changes10_10 extends UpgradeChange
     // static final double DB2_LARGEST_NEGATIVE_DOUBLE  = -2.225E-307d;
 
     static final float[] beyondDB2Real = new float[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
         Float.MIN_VALUE,
         Float.MAX_VALUE,
         +1.174E-37f,
@@ -336,6 +338,7 @@ public class Changes10_10 extends UpgradeChange
         // engine in a remote server. The client driver, however,
         // corresponds to the trunk version, so these tests do
         // not stress the engine behavior.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (JVMInfo.isModuleAware()) { return; }
       
         Statement st = createStatement();

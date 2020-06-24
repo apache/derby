@@ -240,6 +240,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
 
         // create a function to count the number of connections
         // managed by ForeignTableVTI
+//IC see: https://issues.apache.org/jira/browse/DERBY-6440
         goodStatement
             (
              dboConnection,
@@ -292,6 +293,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              starResult,
              false
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6440
         assertResults
             (
              dboConnection,
@@ -314,6 +316,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              dboConnection,
              "call syscs_util.syscs_register_tool( 'foreignViews', false, '" + foreignURL + "' )"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6440
         assertResults
             (
              dboConnection,
@@ -386,6 +389,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              MISSING_SCHEMA,
              starSelect
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6440
         assertResults
             (
              dboConnection,
@@ -425,6 +429,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
         expectExecutionError
             (
              dboConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
              UNKNOWN_TOOL,
              "call syscs_util.syscs_register_tool( 'customTool', true, 'java.lang.String' )"
              );

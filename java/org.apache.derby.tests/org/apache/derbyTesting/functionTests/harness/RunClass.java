@@ -49,6 +49,7 @@ public class RunClass implements Runnable
 			    // we're invoking the test class's main method - which is always static
 			    // thus we can pass null, an underlying object argument would be 
 			    // ignored anyway. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 			    mainMethod.invoke(null, arguments);
 		    }
 		    catch (IllegalAccessException iae)

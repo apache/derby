@@ -74,6 +74,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  *
  */
 public class SPSDescriptor extends UniqueSQLObjectDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	implements Dependent, Provider
 {
 	/**
@@ -216,6 +217,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 		super( dataDictionary );
 
         // Added this check when setUUID was removed, see DERBY-4918.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4918
         if (uuid == null) {
             throw new IllegalArgumentException("UUID is null");
         }
@@ -225,6 +227,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 		this.text = text;
 		this.usingText = usingText;
 		this.valid = valid;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		this.compileTime = DataTypeUtilities.clone( compileTime );
 		this.sd = dataDictionary.getSchemaDescriptor(suuid, null);
 		this.preparedStatement = preparedStatement;
@@ -371,6 +374,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 
 		// stored statements always stored as unicode.
 		Statement 			stmt = lcf.getStatement(dd.getSchemaDescriptor(compSchemaId, null), text, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 
 		try
 		{
@@ -401,6 +405,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 		setParams(preparedStatement.getParameterTypes());
 
 		if (!dd.isReadOnlyUpgrade()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 
 			/*
 			** Indicate that we are going to write the data
@@ -409,6 +414,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 			*/
 			dd.startWriting(lcc);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4918
             DependencyManager dm = dd.getDependencyManager();
 			/*
 			** Clear out all the dependencies that exist
@@ -485,6 +491,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	 * @return type as a string
 	 */	
     public final String getTypeAsString() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4918
         return String.valueOf(type);
     }
 
@@ -517,6 +524,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public final synchronized Timestamp getCompileTime()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return DataTypeUtilities.clone( compileTime );
 	}
 
@@ -593,13 +601,16 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	public final synchronized DataTypeDescriptor[] getParams()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4918
         if (params == null && !lookedUpParams) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             List<DataValueDescriptor> tmpDefaults = new ArrayList<DataValueDescriptor>();
             params = getDataDictionary().getSPSParams(this, tmpDefaults);
             paramDefaults = tmpDefaults.toArray();
             lookedUpParams = true;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return ArrayUtil.copy(params);
 	}
 
@@ -610,6 +621,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public final synchronized void setParams(DataTypeDescriptor params[])
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.params = ArrayUtil.copy(params);
 	}
 
@@ -631,6 +643,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 			getParams();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return ArrayUtil.copy( paramDefaults );
 	}
 
@@ -641,6 +654,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public final synchronized void setParameterDefaults(Object[] values)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		this.paramDefaults = ArrayUtil.copy( values );
 	}
 	
@@ -688,6 +702,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 			 (preparedStatement == null)))
 		{
 			ContextManager cm = getContextService().getCurrentContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			/*
 			** Find the language connection context.  Get
@@ -699,6 +714,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 
 
 			if (!lcc.getDataDictionary().isReadOnlyUpgrade()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 
                 final String savepoint = lcc.getUniqueSavepointName();
 
@@ -754,6 +770,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
                         nestedTC.rollbackToSavePoint(savepoint, false, null);
                     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                     if (
                         (nestedTC != null) &&
                         ( se.isLockTimeout() || se.isSelfDeadlock() )
@@ -1018,6 +1035,12 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 			case DependencyManager.CREATE_TRIGGER:
 			case DependencyManager.DROP_TRIGGER:
 			case DependencyManager.DROP_COLUMN:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1489
+//IC see: https://issues.apache.org/jira/browse/DERBY-1909
+//IC see: https://issues.apache.org/jira/browse/DERBY-1926
+//IC see: https://issues.apache.org/jira/browse/DERBY-1489
+//IC see: https://issues.apache.org/jira/browse/DERBY-1909
+//IC see: https://issues.apache.org/jira/browse/DERBY-1926
 			case DependencyManager.DROP_COLUMN_RESTRICT:
 		    case DependencyManager.UPDATE_STATISTICS:
 		    case DependencyManager.DROP_STATISTICS:
@@ -1030,9 +1053,15 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 				if (valid == true)
 				{
 					valid = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
+//IC see: https://issues.apache.org/jira/browse/DERBY-4835
+//IC see: https://issues.apache.org/jira/browse/DERBY-5289
+//IC see: https://issues.apache.org/jira/browse/DERBY-5105
+//IC see: https://issues.apache.org/jira/browse/DERBY-5263
                     preparedStatement = null;
 					updateSYSSTATEMENTS(lcc, INVALIDATE, null);
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 dm.invalidateFor(
                         this, DependencyManager.USER_RECOMPILE_REQUEST, lcc);
 				break;
@@ -1121,6 +1150,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	{
 		DataDictionary dd = getDataDictionary();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 		if (dd.isReadOnlyUpgrade())
 			return;
 
@@ -1148,6 +1178,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	{
 		if (uuidFactory == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			uuidFactory = DataDescriptorGenerator.getMonitor().getUUIDFactory();
 		}
 		return uuidFactory.recreateUUID(idString);
@@ -1170,6 +1201,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();

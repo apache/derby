@@ -147,6 +147,7 @@ public class DataStoreEntry {
      */
     void release() {
         released = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         if (src != null) {
             src.release();
         }

@@ -71,9 +71,12 @@ abstract class ijResultImpl implements ijResult {
 		if (isVector()) return LocalizedResource.getMessage("IJ_Vec0",getVector().toString());
 		if (isMulti()) return LocalizedResource.getMessage("IJ_Mul0",getVector().toString());
 		if (isException()) return LocalizedResource.getMessage("IJ_Exc0",getException().toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
 		if (isMultipleResultSetResult())
 			return LocalizedResource.getMessage("IJ_MRS0",
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
 										getMultipleResultSets().toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		try {
 			if (isResultSet()) return LocalizedResource.getMessage("IJ_Rse0",getStatement().toString());
 		} catch(SQLException se) {

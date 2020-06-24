@@ -155,6 +155,7 @@ public class SanityManager {
 		// XXX (nat) Hmm, should we check ASSERT here?  The caller is
 		// not expecting this function to return, whether assertions
 		// are compiled in or not.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2580
 		THROWASSERT(msgIfFail, null);
 	}
 
@@ -170,6 +171,7 @@ public class SanityManager {
 	 * @see org.apache.derby.shared.common.sanity.AssertFailure
 	 */
 	public static final void THROWASSERT(String msg, Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2580
 		AssertFailure af = new AssertFailure("ASSERT FAILED " + msg, t);
 		if (DEBUG) {
 			if (DEBUG_ON("AssertFailureTrace")) {
@@ -191,6 +193,7 @@ public class SanityManager {
 	 * @see org.apache.derby.shared.common.sanity.AssertFailure
 	 */
 	public static final void THROWASSERT(Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2580
 		THROWASSERT(t.toString(), t);
 	}
 
@@ -249,6 +252,7 @@ public class SanityManager {
 			if (AllDebugOn) return true;
 			else if (AllDebugOff) return false;
 			else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					Boolean flagValue = DebugFlags.get(flag);
 					if (! DEBUGDEBUG.equals(flag)) {
 						if (DEBUG_ON(DEBUGDEBUG)) {

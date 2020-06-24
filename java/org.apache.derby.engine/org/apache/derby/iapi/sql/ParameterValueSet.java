@@ -43,6 +43,7 @@ public interface ParameterValueSet
 	 */
 	void initialize(DataTypeDescriptor[] types) throws StandardException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
 
 	/**
 		Set the mode of the parameter, called when setting up static method calls and stored procedures.
@@ -116,6 +117,7 @@ public interface ParameterValueSet
 
 	/**
 		Set the value of this user defined parameter to the passed in Object.
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
         @param parameterIndex The position of the parameter
         @param value It's value
@@ -133,6 +135,7 @@ public interface ParameterValueSet
 
 	/**
 	 * Tells whether all the parameters are set and ready for execution.
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	   OUT are not required to be set.
 	 *
 	 * @return	true if all parameters are set, false if at least one
@@ -176,6 +179,7 @@ public interface ParameterValueSet
 	/**
 		Check that there are not output parameters defined
 		by the parameter set. If there are unknown parameter
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		types they are forced to input types. i.e. Derby static method
 		calls with parameters that are array.
 
@@ -216,6 +220,7 @@ public interface ParameterValueSet
      * @exception StandardException if a database-access error occurs.
      */
 	DataValueDescriptor getReturnValueForSet() throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 	/**
 	 * Return the scale of the given parameter index in this pvs.

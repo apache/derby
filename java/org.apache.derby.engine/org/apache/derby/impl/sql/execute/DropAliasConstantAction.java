@@ -106,6 +106,7 @@ class DropAliasConstantAction extends DDLConstantAction
 		// RESOLVE - fix error message
 		if (ad == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
 			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, AliasDescriptor.getAliasType(nameSpace),  aliasName);
 		}
 

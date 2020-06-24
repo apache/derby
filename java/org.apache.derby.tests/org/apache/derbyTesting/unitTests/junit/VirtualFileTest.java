@@ -276,6 +276,7 @@ public class VirtualFileTest
      * Tests that {@code listChildren} doesn't include too many entries.
      */
     public void testListChilderen() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         DataStore store = getStore();
         VirtualFile dir1 = new VirtualFile(PathUtilTest.abs("mydir"), store);
         VirtualFile dir2 = new VirtualFile(
@@ -350,6 +351,7 @@ public class VirtualFileTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(VirtualFileTest.class);
     }
 
@@ -357,6 +359,7 @@ public class VirtualFileTest
     private static int dbStoreIndex = 0;
     /** Utility method returning a fresh data store. */
     private static synchronized DataStore getStore() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         DataStore store = new DataStore("testVFMemDB-" + dbStoreIndex++);
         // We need the root to exist.
         assertNotNull(store.createEntry(java.io.File.separator, true));

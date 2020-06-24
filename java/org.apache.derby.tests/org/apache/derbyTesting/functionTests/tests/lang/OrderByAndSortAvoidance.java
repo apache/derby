@@ -53,6 +53,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("OrderByAndSortAvoidance");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(makeSuite());
 
@@ -70,6 +71,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
     private static Test makeSuite()
     {
         return new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(OrderByAndSortAvoidance.class)) {
                 protected void decorateSQL(Statement st)
                         throws SQLException {
@@ -98,6 +100,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                         "CREATE INDEX key3 ON table2(value)");
 
                     populateTestTables(getConnection());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5695
 
                     //Start of tables creation for DERBY-4240 repro
                     st.executeUpdate(
@@ -124,6 +127,9 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                     //End of tables creation for DERBY-4240 repro
 
                     //Start of tables creation for DERBY-4331 repro
+//IC see: https://issues.apache.org/jira/browse/DERBY-4331
+//IC see: https://issues.apache.org/jira/browse/DERBY-3926
+//IC see: https://issues.apache.org/jira/browse/DERBY-4339
                     st.executeUpdate(
                         "CREATE TABLE REPOSITORIES ( ID INT CONSTRAINT "+
                         "REPOSITORIES_PRIMARY_ID PRIMARY KEY GENERATED ALWAYS "+
@@ -201,6 +207,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
      * @param id the value of the id column
      */
     private static void insertTable1(PreparedStatement ps, long id)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5695
             throws SQLException {
         ps.setLong(1, id);
         ps.executeUpdate();
@@ -440,6 +447,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483653L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483653L, "DocumentSortingValues", "______21857__1__1");
         insertTable2(it2, 2147483653L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483653L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483653L, "Plex", "S");
         insertTable2(it2, 2147483653L, "SC3", "=");
@@ -487,6 +495,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483654L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483654L, "DocumentSortingValues", "______21857__1__1");
         insertTable2(it2, 2147483654L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483654L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483654L, "Plex", "S");
         insertTable2(it2, 2147483654L, "SC3", "=");
@@ -534,6 +543,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483655L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483655L, "DocumentSortingValues", "______21858__1__1");
         insertTable2(it2, 2147483655L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483655L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483655L, "Plex", "S");
         insertTable2(it2, 2147483655L, "SC3", "=");
@@ -581,6 +591,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483656L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483656L, "DocumentSortingValues", "______21858__1__1");
         insertTable2(it2, 2147483656L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483656L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483656L, "Plex", "S");
         insertTable2(it2, 2147483656L, "SC3", "=");
@@ -1004,6 +1015,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483665L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483665L, "DocumentSortingValues", "______21863__1__1");
         insertTable2(it2, 2147483665L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483665L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483665L, "Plex", "S");
         insertTable2(it2, 2147483665L, "SC3", "=");
@@ -1051,6 +1063,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483666L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483666L, "DocumentSortingValues", "______21863__1__1");
         insertTable2(it2, 2147483666L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483666L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483666L, "Plex", "S");
         insertTable2(it2, 2147483666L, "SC3", "=");
@@ -1098,6 +1111,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483667L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483667L, "DocumentSortingValues", "______21864__1__1");
         insertTable2(it2, 2147483667L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483667L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483667L, "Plex", "S");
         insertTable2(it2, 2147483667L, "SC3", "=");
@@ -1145,6 +1159,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483668L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483668L, "DocumentSortingValues", "______21864__1__1");
         insertTable2(it2, 2147483668L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483668L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483668L, "Plex", "S");
         insertTable2(it2, 2147483668L, "SC3", "=");
@@ -1568,6 +1583,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483677L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483677L, "DocumentSortingValues", "______21869__1__1");
         insertTable2(it2, 2147483677L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483677L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483677L, "Plex", "S");
         insertTable2(it2, 2147483677L, "SC3", "=");
@@ -1615,6 +1631,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483678L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483678L, "DocumentSortingValues", "______21869__1__1");
         insertTable2(it2, 2147483678L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483678L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483678L, "Plex", "S");
         insertTable2(it2, 2147483678L, "SC3", "=");
@@ -1662,6 +1679,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483679L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483679L, "DocumentSortingValues", "______21870__1__1");
         insertTable2(it2, 2147483679L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483679L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483679L, "Plex", "S");
         insertTable2(it2, 2147483679L, "SC3", "=");
@@ -1709,6 +1727,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483680L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483680L, "DocumentSortingValues", "______21870__1__1");
         insertTable2(it2, 2147483680L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483680L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483680L, "Plex", "S");
         insertTable2(it2, 2147483680L, "SC3", "=");
@@ -2132,6 +2151,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483689L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483689L, "DocumentSortingValues", "______21875__1__1");
         insertTable2(it2, 2147483689L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483689L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483689L, "Plex", "S");
         insertTable2(it2, 2147483689L, "SC3", "=");
@@ -2179,6 +2199,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483690L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483690L, "DocumentSortingValues", "______21875__1__1");
         insertTable2(it2, 2147483690L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483690L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483690L, "Plex", "S");
         insertTable2(it2, 2147483690L, "SC3", "=");
@@ -2226,6 +2247,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483691L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483691L, "DocumentSortingValues", "______21876__1__1");
         insertTable2(it2, 2147483691L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483691L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483691L, "Plex", "S");
         insertTable2(it2, 2147483691L, "SC3", "=");
@@ -2273,6 +2295,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483692L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483692L, "DocumentSortingValues", "______21876__1__1");
         insertTable2(it2, 2147483692L, "ItemSeq", "1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 2147483692L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483692L, "Plex", "S");
         insertTable2(it2, 2147483692L, "SC3", "=");
@@ -2536,6 +2559,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 4294967297L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 4294967297L, "DocumentSortingValues", "");
         insertTable2(it2, 4294967297L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 4294967297L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 4294967297L, "Plex", "S");
         insertTable2(it2, 4294967297L, "SC3", "=");
@@ -2602,6 +2626,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 6442450945L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 6442450945L, "DocumentSortingValues", "");
         insertTable2(it2, 6442450945L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 6442450945L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 6442450945L, "Plex", "S");
         insertTable2(it2, 6442450945L, "SC3", "=");
@@ -2675,6 +2700,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 8589934593L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 8589934593L, "DocumentSortingValues", "");
         insertTable2(it2, 8589934593L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 8589934593L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 8589934593L, "Plex", "S");
         insertTable2(it2, 8589934593L, "SC3", "=");
@@ -2768,6 +2794,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 10737418241L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 10737418241L, "DocumentSortingValues", "");
         insertTable2(it2, 10737418241L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 10737418241L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 10737418241L, "Plex", "S");
         insertTable2(it2, 10737418241L, "SC3", "=");
@@ -2870,6 +2897,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 12884901889L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 12884901889L, "DocumentSortingValues", "");
         insertTable2(it2, 12884901889L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 12884901889L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 12884901889L, "Plex", "S");
         insertTable2(it2, 12884901889L, "SC3", "=");
@@ -2956,6 +2984,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 15032385537L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 15032385537L, "DocumentSortingValues", "");
         insertTable2(it2, 15032385537L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 15032385537L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 15032385537L, "Plex", "S");
         insertTable2(it2, 15032385537L, "SC3", "=");
@@ -3044,6 +3073,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 17179869185L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 17179869185L, "DocumentSortingValues", "");
         insertTable2(it2, 17179869185L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 17179869185L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 17179869185L, "Plex", "S");
         insertTable2(it2, 17179869185L, "SC3", "=");
@@ -3137,6 +3167,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 19327352833L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 19327352833L, "DocumentSortingValues", "");
         insertTable2(it2, 19327352833L, "ItemSeq", "0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5733
         insertTable2(it2, 19327352833L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 19327352833L, "Plex", "S");
         insertTable2(it2, 19327352833L, "SC3", "=");
@@ -3264,6 +3295,9 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
      * for both ascending and descending order by clause.  
      */
     public void testDerby4331() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4331
+//IC see: https://issues.apache.org/jira/browse/DERBY-3926
+//IC see: https://issues.apache.org/jira/browse/DERBY-4339
         Statement s;
         ResultSet rs;
         RuntimeStatisticsParser rtsp;
@@ -3610,6 +3644,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
      */
     public void testDerby6148() throws SQLException {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6148
 
         createTablesForDerby6148(s);
         insertDataForDerby6148();

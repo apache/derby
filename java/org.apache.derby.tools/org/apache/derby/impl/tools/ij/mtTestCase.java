@@ -144,6 +144,7 @@ public class mtTestCase
 			
 			if (framework != null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-236
                 String newURLPrefix = null;
                 framework = framework.toUpperCase(java.util.Locale.ENGLISH);
                 if (framework.equals("DB2JNET") || framework.equals("DERBYNET"))
@@ -163,6 +164,7 @@ public class mtTestCase
             if (("true").equalsIgnoreCase(p.getProperty("encryption"))) 
             {
                String encryptUrl = "dataEncryption=true;bootPassword=Thursday";
+//IC see: https://issues.apache.org/jira/browse/DERBY-956
                String dbUrl = p.getProperty("ij.database");
                String encryptionAlgorithm = p.getProperty("encryptionAlgorithm");
                if (encryptionAlgorithm != null)
@@ -182,6 +184,7 @@ public class mtTestCase
 			// then remove the ij.database and ij.protocol property.
             // This is because the ij.database and ij.protocol 
             // will override the ij.dataSource property.
+//IC see: https://issues.apache.org/jira/browse/DERBY-398
 			if (System.getProperty("ij.dataSource") != null)
 			{
 				p.remove("ij.database");
@@ -241,8 +244,10 @@ public class mtTestCase
 	
 		out.println("--------------"+file+"-----------------");
 		utilInstance = new utilMain(1, out, ignoreErrors);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		utilInstance.initFromEnvironment();
 		utilInstance.setMtUse(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3420
 		utilInstance.go(in, out);
 		log.flush();
 		out.flush();

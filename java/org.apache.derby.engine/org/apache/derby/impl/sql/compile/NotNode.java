@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.NotNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -43,6 +44,8 @@ public final class NotNode extends UnaryLogicalOperatorNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     NotNode(ValueNode operand, ContextManager cm)
             throws StandardException {
         super(operand, "not", cm);
@@ -106,6 +109,7 @@ public final class NotNode extends UnaryLogicalOperatorNode
 
 		// arg 2
 		mb.push(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateDataValue(mb, getTypeCompiler(), 
 				getTypeServices().getCollationType(), field);
 		mb.upCast(ClassName.DataValueDescriptor);

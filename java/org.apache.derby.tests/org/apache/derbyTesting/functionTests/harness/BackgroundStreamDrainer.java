@@ -42,6 +42,7 @@ public class BackgroundStreamDrainer implements Runnable
         this.startTime = System.currentTimeMillis();;
         if (timemin != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Integer i = Integer.valueOf(timemin);
             timeout = i.intValue();
         }

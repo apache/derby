@@ -41,6 +41,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class RuntimeInfoTest extends BaseJDBCTestCase {
 
 	private static String[] RuntimeinfoCmd = new String[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5514
             "-Demma.verbosity.level=silent",
 			"org.apache.derby.drda.NetworkServerControl", "runtimeinfo",
 			"-p", String.valueOf(TestConfiguration.getCurrent().getPort()) };
@@ -52,6 +53,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	
     private static final String POLICY_FILE_NAME =
         "org/apache/derbyTesting/functionTests/tests/derbynet/RuntimeInfoTest.policy";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
 
     private static final Locale englishLocale = new Locale("en", "US");
     private static final Locale germanLocale = new Locale("de", "DE");
@@ -74,6 +76,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	 */
 	public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("RuntimeInfoTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Run testRunTests in both English and German locale
         suite.addTest(decorateTest(englishLocale, "testRunTests"));
@@ -291,11 +294,13 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
         test = TestConfiguration.singleUseDatabaseDecorator(test);
         test = new LocaleTestSetup(test, serverLocale);
         // Install a security manager using the initial policy file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
 	
 	private static final HashMap<Locale, HashMap<String, String>> outputs;
 	static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		HashMap<String, String> englishOutputs = new HashMap<String, String>();
 		englishOutputs.put("RuntimeInfoWithActiveConn",
 				"--- Derby Network Server Runtime Information ---\n" + 
@@ -327,9 +332,11 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
         englishOutputs.put("sedSessionNumberReplace", "$1##");
 		englishOutputs.put("RuntimeInfoLocaleString", "\tStmt ID\t\tSQLText\n\t-------------\t-----------\n\n\n\nSession");
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		HashMap<String, String> germanOutputs = new HashMap<String, String>();
 		germanOutputs.put("RuntimeInfoWithActiveConn",
 				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
 				"---------- Sessioninformationen ---------------\n" + 
                 "Sessionnummer:##\n" +
 				"\n" + 
@@ -358,6 +365,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
         germanOutputs.put("sedSessionNumberReplace", "$1##");
 		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t-------------\t-----------\n\n\n\nSessionnummer");
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		outputs = new HashMap<Locale, HashMap<String, String>>();
 		outputs.put(englishLocale, englishOutputs);
 		outputs.put(germanLocale, germanOutputs);

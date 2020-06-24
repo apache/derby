@@ -46,6 +46,7 @@ context manager (ie. typically a single user) for a single RawStoreFactory.
 **/
 
 final class XactContext extends ContextImpl {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 	private		RawTransaction	xact;
 	private     RawStoreFactory factory;
@@ -144,6 +145,7 @@ final class XactContext extends ContextImpl {
 
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	RawTransaction getTransaction() {
 		return xact;
 	}

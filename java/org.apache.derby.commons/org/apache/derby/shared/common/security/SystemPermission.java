@@ -120,12 +120,14 @@ final public class SystemPermission extends BasicPermission {
         LEGAL_ACTIONS.add(CONTROL);
         LEGAL_ACTIONS.add(MONITOR);
         LEGAL_ACTIONS.add(SHUTDOWN);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         LEGAL_ACTIONS.add( USE_DERBY_INTERNALS );
     }
     
     /** Constant representing {@code SystemPermission("engine, "monitor")}. */
     public static final SystemPermission ENGINE_MONITOR =
             new SystemPermission(ENGINE, MONITOR);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
 
     /**
      * Actions for this permission.
@@ -147,6 +149,7 @@ final public class SystemPermission extends BasicPermission {
      * @see BasicPermission#BasicPermission(String)
      */
     public SystemPermission(String name, String actions) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         super( name );
         validateNameAndActions(name, actions);
     }
@@ -282,6 +285,8 @@ final public class SystemPermission extends BasicPermission {
     private static int getActionMask(String actions) {
         
         int mask = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
         StringTokenizer st = new StringTokenizer(actions, ",");
         while (st.hasMoreTokens()) {
             int validAction = LEGAL_ACTIONS.indexOf(st.nextElement());
@@ -411,6 +416,7 @@ final public class SystemPermission extends BasicPermission {
     @Override
     public String toString()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return getClass().getName() +
             "( " +
             doubleQuote( getName() ) +

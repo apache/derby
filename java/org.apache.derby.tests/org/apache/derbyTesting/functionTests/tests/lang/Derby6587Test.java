@@ -40,6 +40,7 @@ public class Derby6587Test extends BaseJDBCTestCase {
     }
 
     public static Test suite(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Derby6587Test");
         suite.addTest(baseSuite("Derby6587:embedded"));
         return suite;

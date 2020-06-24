@@ -302,6 +302,7 @@ public class XPLAINUtil {
          String vp_property = scanProps.getProperty(
             MessageService.getTextMessage(SQLState.STORE_RTS_NUM_PAGES_VISITED));
          if(vp_property!=null){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              descriptor.setNo_visited_pages(Integer.parseInt(vp_property));
          }
          
@@ -384,6 +385,7 @@ public class XPLAINUtil {
          String ir_property = sortProps.getProperty(
                  MessageService.getTextMessage(SQLState.STORE_RTS_NUM_ROWS_INPUT));
          if(ir_property!=null){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              descriptor.setNo_input_rows(Integer.parseInt(ir_property));
          }
 
@@ -398,6 +400,7 @@ public class XPLAINUtil {
               MessageService.getTextMessage(SQLState.STORE_RTS_NUM_MERGE_RUNS));
               
               if(nomr_property!=null){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                   descriptor.setNo_merge_runs(Integer.parseInt(nomr_property));
               }
              
@@ -421,6 +424,7 @@ public class XPLAINUtil {
       */
      public static Long getAVGNextTime(long dividend, long divisor){
          if(divisor==0) return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
          if(dividend==0) return (long) 0;
          return dividend/divisor;
      }

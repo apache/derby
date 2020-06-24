@@ -622,6 +622,7 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
 
     public void testDerby6783() throws SQLException {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
 
         s.execute("CREATE TABLE tabDerby6783(id INTEGER, result VARCHAR(10), status CHAR(1))");
 

@@ -77,6 +77,7 @@ import static org.apache.derbyTesting.junit.TestConfiguration.embeddedSuite;
 public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
 {
     private static final String  LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                                                                     = "23506";
     private static final String  LANG_DEFERRED_FK_CONSTRAINT_T = "23516";
     private static final String  LANG_DEFERRED_FK_CONSTRAINT_S = "23517";
@@ -96,6 +97,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
 
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite();
         suite.addTest(new SupportFilesSetup(
                 embeddedSuite(ForeignKeysDeferrableTest.class)));
@@ -865,6 +867,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
      */
     public void testFKPlusUnique() throws SQLException {
         Statement s = createStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             ResultSet.TYPE_FORWARD_ONLY,
             ResultSet.CONCUR_UPDATABLE);
 
@@ -876,6 +879,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
             // behavior is the same since we do not support SQL in before
             // triggers, so test both with the same fixtures.
             // CASCADE is tested separately later.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             final String[] refActions = {
                 "ON DELETE NO ACTION ON UPDATE NO ACTION",
                 "ON DELETE RESTRICT ON UPDATE RESTRICT" };
@@ -919,6 +923,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
                 // Try again, but this time delete both duplicate rows. The
                 // second delete should fail.
                 s.executeUpdate("insert into ref_t values (1,3)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                 rs = s.executeQuery("select * from ref_t");
                 rs.next();
                 rs.deleteRow();
@@ -932,6 +937,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
                 }
 
                 s.executeUpdate("insert into ref_t values (1,4), (1,5)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
 
                 // direct delete code path
                 assertStatementError(LANG_FK_VIOLATION, s, "delete from ref_t");
@@ -1186,6 +1192,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
     }
 
     public void testSelfReferential() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
         Statement s = createStatement();
         try {
 
@@ -1258,6 +1265,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
     public  void    test_6668() throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6668
 
         goodStatement
             (
@@ -1291,6 +1299,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
      * constraints erroneously shared a physical conglomerate.
      */
     public void testSharedConglomerates() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         setAutoCommit(false);
         Statement s = createStatement();
         s.execute("create table d6665_t1(x int primary key)");

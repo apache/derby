@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import javax.transaction.xa.XAException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ExceptionFormatter {
     // returnTokensOnly is true only when exception tracing is enabled so
     // that we don't try to go to the server for a message while we're in
@@ -35,6 +36,7 @@ class ExceptionFormatter {
     // when TRACE_DIAGNOSTICS is on  because tracing occurs within the exception constructor.
     static void printTrace(SqlException e,
                                   PrintWriter printWriter,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                   String messageHeader,
                                   boolean returnTokensOnly) {
         String header;
@@ -43,10 +45,12 @@ class ExceptionFormatter {
                 header = messageHeader + "[" + "SQLException@" + Integer.toHexString(e.hashCode()) + "]";
                 printWriter.println(header + " java.sql.SQLException");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Throwable throwable = e.getCause();
                 if (throwable != null) {
                     printTrace(throwable, printWriter, header);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5076
                 Sqlca sqlca = e.getSqlca();
                 if (sqlca != null) {
                     printTrace(sqlca, printWriter, header);
@@ -69,6 +73,7 @@ class ExceptionFormatter {
                         if (!sqlca.messageTextRetrievedContainsTokensOnly_) { // got the message text.
                             printWriter.println(header + " Message    = " + message);
                         } else { // got only message tokens.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1061
                             SqlException mysteryException = sqlca.exceptionThrownOnStoredProcInvocation_;
                             if (mysteryException != null &&
                                     (mysteryException.getErrorCode() == -440 || mysteryException.getErrorCode() == -444)) {
@@ -88,6 +93,7 @@ class ExceptionFormatter {
                 printWriter.println(header + " Stack trace follows");
                 e.printStackTrace(printWriter);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5076
                 sqlca = e.getSqlca();
                 if (sqlca != null) {
                     // JDK stack trace calls e.getMessage(), now that it is finished,
@@ -103,6 +109,8 @@ class ExceptionFormatter {
     }
 
     static void printTrace(SQLException e,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   PrintWriter printWriter,
                                   String messageHeader,
                                   boolean returnTokensOnly) {
@@ -126,7 +134,9 @@ class ExceptionFormatter {
                 printWriter.println(header + " SQL state  = " + e.getSQLState());
                 printWriter.println(header + " Error code = " + String.valueOf(e.getErrorCode()));
                 printWriter.println(header + " Message    = " + e.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (e instanceof DataTruncation) {
                     printWriter.println(header + " Index         = " +
                                         ((DataTruncation) e).getIndex());
@@ -158,12 +168,14 @@ class ExceptionFormatter {
     }
 
     private static void printTrace(Sqlca sqlca,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "Sqlca@" + Integer.toHexString(sqlca.hashCode()) + "]";
         synchronized (printWriter) {
             printWriter.println(header + " DERBY SQLCA from server");
             printWriter.println(header + " SqlCode        = " + sqlca.getSqlCode());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             printWriter.println(header + " SqlErrd        = " + sqlca.formatSqlErrd());
             printWriter.println(header + " SqlErrmc       = " + sqlca.getSqlErrmc());
             printWriter.println(header + " SqlErrp        = " + sqlca.getSqlErrp());

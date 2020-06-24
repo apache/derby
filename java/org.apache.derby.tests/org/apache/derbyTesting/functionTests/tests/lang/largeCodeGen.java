@@ -47,6 +47,7 @@ public class largeCodeGen extends BaseJDBCTestCase
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite();
         
         // Code generation test, just invoke on embedded
@@ -60,6 +61,7 @@ public class largeCodeGen extends BaseJDBCTestCase
        
     protected void setUp() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         getConnection().setAutoCommit(false);
     	Statement stmt = createStatement();
 		
@@ -290,6 +292,7 @@ public class largeCodeGen extends BaseJDBCTestCase
 	        commit();
         }
         pstmt.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
         return false;
      
 		} catch (SQLException sqle)

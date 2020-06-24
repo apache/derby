@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.GetCurrentConnectionNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -65,6 +66,8 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JavaValueNode bindExpression(FromList fromList,
                                  SubqueryList subqueryList,
                                  List<AggregateNode> aggregates)

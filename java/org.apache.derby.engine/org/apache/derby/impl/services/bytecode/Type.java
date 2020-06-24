@@ -49,6 +49,7 @@ final class Type {
 
     @Override
     public String toString() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6699
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         sb.append(javaName);

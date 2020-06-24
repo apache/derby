@@ -25,6 +25,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.store.access.StoreCostResult;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CostEstimateImpl implements CostEstimate {
     double  cost;
     double  rowCount;
@@ -311,6 +313,8 @@ class CostEstimateImpl implements CostEstimate {
 		singleScanRowCount = (double) count;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimateImpl setState(double theCost,
 										double theRowCount,
 										CostEstimateImpl retval) {
@@ -326,6 +330,7 @@ class CostEstimateImpl implements CostEstimate {
     
 	public String toString() 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
 		return "CostEstimateImpl: at " + hashCode() + ", cost == " + cost +
 				", rowCount == " + rowCount + 
 				", singleScanRowCount == " + singleScanRowCount;

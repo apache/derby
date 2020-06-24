@@ -125,6 +125,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		 throws StandardException
 	{
 		super.boot(create, startParams);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		contextService = getContextService();
 	}
 
@@ -161,6 +162,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 								getTestService(), startParams);
 
@@ -174,6 +176,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			}
 
 			uuidfactory = getMonitor().getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -208,6 +211,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 	protected T_MultiThreadedIterations newTestObject() {
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			Class<?> thisClass = this.getClass();
 			return (T_MultiThreadedIterations)(thisClass.getConstructor().newInstance());
 		}
@@ -219,6 +223,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		{
 			return new T_RawStoreFactory();
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		catch (NoSuchMethodException iae)
 		{
 			return new T_RawStoreFactory();
@@ -332,6 +337,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		P022();
 		P023(0);	// overflowThreshold test
 		P024(0);	// test page latching
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 
 		// long row tests
 		P030(0);
@@ -3689,6 +3695,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 	protected void P024(long segment) throws StandardException, T_Fail
 	{
 		Transaction t = t_util.t_startTransaction();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 
 		long cid = t_util.t_addContainer(t, segment, 4096, 0, 1, false);
 
@@ -6456,6 +6463,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		Update every other field with a long col
 		rollback.
 		The update each column back to a null and rollback
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		@exception T_Fail Unexpected behaviour from the API
 		@exception StandardException Unexpected exception from the implementation
@@ -7653,12 +7661,14 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

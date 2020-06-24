@@ -136,6 +136,7 @@ public final class SpawnedProcess {
         this.javaProcess = javaProcess;
         this.name = name;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
         errSaver = startStreamSaver(javaProcess.getErrorStream(), name
                 .concat(":System.err"));
         outSaver = startStreamSaver(javaProcess.getInputStream(), name
@@ -154,6 +155,7 @@ public final class SpawnedProcess {
         synchronized (KILL_THRESHOLD_PROPERTY) {
             if (KILL_TIMER == null) {
                 // Can't use 1.5 methods yet due to J2ME. Add name later.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
                 KILL_TIMER = new Timer(true);
             }        
         }
@@ -170,6 +172,7 @@ public final class SpawnedProcess {
      * @see #getFullServerError() to obtain suppressed output from stderr
      */
     public void suppressOutputOnComplete() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5608
         suppressOutput = true;
     }
 
@@ -195,6 +198,8 @@ public final class SpawnedProcess {
     public String getFullServerOutput() throws InterruptedException {
         // First wait until we've read all the output.
         outSaver.thread.join();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5288
+//IC see: https://issues.apache.org/jira/browse/DERBY-5288
 
         synchronized (this) {
             return outSaver.stream.toString();
@@ -212,6 +217,7 @@ public final class SpawnedProcess {
     public String getFullServerError() throws InterruptedException {
         // First wait until we've read all the output on stderr.
         errSaver.thread.join();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5608
 
         synchronized (this) {
             return errSaver.stream.toString();
@@ -231,6 +237,7 @@ public final class SpawnedProcess {
     public String getNextServerOutput() {
         byte[] fullData;
         synchronized (this) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5288
             fullData = outSaver.stream.toByteArray();
         }
         
@@ -245,6 +252,7 @@ public final class SpawnedProcess {
      * easier debugging if the reason the process failed is there!
      */
     public String getFailMessage(String reason) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
         sleep(500);
         StringBuffer sb = new StringBuffer();
         sb.append(reason);
@@ -257,6 +265,7 @@ public final class SpawnedProcess {
             sb.append("running");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5288
         ByteArrayOutputStream err = errSaver.stream;
         ByteArrayOutputStream out = outSaver.stream;
 
@@ -286,6 +295,7 @@ public final class SpawnedProcess {
      * @throws IOException if printing diagnostics fails
      */
     public int complete()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
             throws IOException {
         return complete(Long.MAX_VALUE);         
     }
@@ -311,6 +321,7 @@ public final class SpawnedProcess {
         Integer exitCode = null;
         while (exitCode == null) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 exitCode = javaProcess.exitValue();
             } catch (IllegalThreadStateException itse) {
                 // This exception means the process is running.
@@ -325,6 +336,7 @@ public final class SpawnedProcess {
         killTask.cancel();
         joinWith(errSaver.thread);
         joinWith(outSaver.thread);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
         cleanupProcess();
         printDiagnostics(exitCode.intValue());
         return exitCode.intValue();
@@ -352,6 +364,7 @@ public final class SpawnedProcess {
             throws IOException {
         // Always write the error, except when suppressed.
         ByteArrayOutputStream err = errSaver.stream;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5608
         if (!suppressOutput && err.size() != 0) {
             System.err.println("START-SPAWNED:" + name + " ERROR OUTPUT:");
             err.writeTo(System.err);
@@ -360,6 +373,7 @@ public final class SpawnedProcess {
 
         // Only write contents of stdout if it appears the server
         // failed in some way, or output is suppressed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5288
         ByteArrayOutputStream out = outSaver.stream;
         if (!suppressOutput && exitCode != 0 && out.size() != 0) {
             System.out.println("START-SPAWNED:" + name
@@ -412,6 +426,7 @@ public final class SpawnedProcess {
      * to the stream.
      */
     private static class StreamSaver {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5288
         final ByteArrayOutputStream stream;
         final Thread thread;
         StreamSaver(ByteArrayOutputStream stream, Thread thread) {
@@ -460,6 +475,7 @@ public final class SpawnedProcess {
         streamReader.setDaemon(true);
         streamReader.start();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5288
         return new StreamSaver(out, streamReader);
     }
 
@@ -470,6 +486,7 @@ public final class SpawnedProcess {
      */
     private static class ProcessKillerTask
         extends TimerTask {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
 
         private final String name;
         private Process process;
@@ -509,6 +526,7 @@ public final class SpawnedProcess {
             }
             if (retriesAllowed == 0) {
                 System.err.println(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
                         "DEBUG: Failed to destroy process '" + name + "'");
             } 
             process = null;
@@ -532,6 +550,7 @@ public final class SpawnedProcess {
      */
     @SuppressWarnings("SleepWhileInLoop")
     public boolean waitForExit(long patience, long sleepInterval)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
             throws InterruptedException {
         boolean completed = false;
         while (!completed && patience > 0) {

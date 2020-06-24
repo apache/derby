@@ -31,11 +31,13 @@ import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
  *
  */
 class DropDatabaseSetup extends BaseTestSetup {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2000
 
     private final String logicalDBName;
     private final boolean shutdownBeforeDrop;
 
     DropDatabaseSetup(Test test, String logicalDBName) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6546
         this(test, logicalDBName, true);
     }
 
@@ -64,6 +66,7 @@ class DropDatabaseSetup extends BaseTestSetup {
         // Ensure the database is booted
         // since that is what shutdownDatabase() requires.
         boolean shutdown;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         try {
             config.openConnection(logicalDBName).close();
             shutdown = true;
@@ -121,10 +124,12 @@ class DropDatabaseSetup extends BaseTestSetup {
     static void removeDirectory(final File dir) {
         // Check if anything to do!
         // Database may not have been created.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (!PrivilegedFileOpsForTests.exists(dir)) {
             return;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5836
         BaseTestCase.assertDirectoryDeleted(dir);
     }
 

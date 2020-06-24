@@ -79,6 +79,7 @@ public class J2EEDataSource {
      */
     public static void setBeanProperty(Object ds, String property, Object value) {
        // reuse code from JDBCDataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-2474
         JDBCDataSource.setBeanProperty(ds, property, value);
     }
     

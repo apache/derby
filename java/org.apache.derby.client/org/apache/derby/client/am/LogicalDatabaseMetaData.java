@@ -37,6 +37,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * of the underlying physical connection.
  */
 class LogicalDatabaseMetaData implements DatabaseMetaData {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /** The associated logical connection. */
     private final LogicalConnection logicalCon;
@@ -54,6 +55,7 @@ class LogicalDatabaseMetaData implements DatabaseMetaData {
      * @param logWriter destination for log/error messages
      * @throws SQLException if obtaining the JDBC driver versions fail
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     LogicalDatabaseMetaData(LogicalConnection logicalCon,
                             LogWriter logWriter)
             throws SQLException {
@@ -76,6 +78,7 @@ class LogicalDatabaseMetaData implements DatabaseMetaData {
      * @throws SQLException if the logical connection has been closed, or
      *      obtaining the metadata object fails
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final DatabaseMetaData getRealMetaDataObject()
             throws SQLException {
         return this.logicalCon.getRealMetaDataObject();
@@ -825,6 +828,7 @@ class LogicalDatabaseMetaData implements DatabaseMetaData {
     // JDBC 4.0 methods
 
     public boolean autoCommitFailureClosesAllResultSets()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             throws SQLException {
         return getRealMetaDataObject().autoCommitFailureClosesAllResultSets();
     }

@@ -32,6 +32,7 @@ import org.apache.derby.client.ClientXid;
 import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.DisconnectException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetXAConnectionReply extends NetResultSetReply {
     NetXAConnectionReply(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
@@ -60,6 +61,7 @@ class NetXAConnectionReply extends NetResultSetReply {
         connection.completeLocalRollback();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readXaStartUnitOfWork(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
@@ -85,6 +87,7 @@ class NetXAConnectionReply extends NetResultSetReply {
         parseSYNCCTLreply(conn);
         endOfSameIdChainData();
         if (xaFlags == XAResource.TMFAIL) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return XAException.XA_RBROLLBACK;
         }
         return XAResource.XA_OK;
@@ -98,6 +101,7 @@ class NetXAConnectionReply extends NetResultSetReply {
         return synctype;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readXaCommit(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
@@ -115,6 +119,7 @@ class NetXAConnectionReply extends NetResultSetReply {
         NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
         conn.completeLocalRollback();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return XAResource.XA_OK;
     }
 
@@ -176,6 +181,7 @@ class NetXAConnectionReply extends NetResultSetReply {
 
             if (peekCP == CodePoint.PRPHRCLST) {
                 foundInPass = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 conn.setIndoubtTransactions(parseIndoubtList());
                 peekCP = peekCodePoint();
             }
@@ -198,6 +204,7 @@ class NetXAConnectionReply extends NetResultSetReply {
     }
 
     // Process XA return value
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     byte parseSYNCTYPE() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SYNCTYPE);
         return readByte();
@@ -221,6 +228,7 @@ class NetXAConnectionReply extends NetResultSetReply {
             //JCFTMP, need to null out the client list?
             peekCP = peekCodePoint();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         if (peekCP == CodePoint.PBSD) {
             parsePBSD();
         }
@@ -272,6 +280,7 @@ class NetXAConnectionReply extends NetResultSetReply {
         return readUnsignedShort();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     Xid parseXID() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.XID);
         int formatId = readInt();
@@ -280,9 +289,11 @@ class NetXAConnectionReply extends NetResultSetReply {
         byte[] gtrid = readBytes(gtridLen);
         byte[] bqual = readBytes(bqualLen);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return new ClientXid(formatId, gtrid, bqual);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     List<Xid> parseIndoubtList()
             throws DisconnectException {
         peekCodePoint();

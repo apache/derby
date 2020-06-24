@@ -132,6 +132,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		super(uuidf,ef,dvf);
         this.dataDictionary = dd;
 		initInfo(SYSTRIGGERS_COLUMN_COUNT, TABLENAME_STRING, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 				 indexColumnPositions,  uniqueness, uuids);
 	}
 
@@ -265,6 +266,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		 *  (user type org.apache.derby.catalog.ReferencedColumns)
 		 */
 		row.setColumn(12, new UserType(rcd));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 13th column is TRIGGERDEFINITION */
 		row.setColumn(13, dvf.getLongvarcharDataValue(triggerDefinition));
@@ -475,6 +477,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
             whenClauseText = col.getString();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6186
         descriptor = ddg.newTriggerDescriptor(
 									dd.getSchemaDescriptor(suuid, null),
 									uuid, 
@@ -512,6 +515,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
         return new SystemColumn[] {

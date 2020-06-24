@@ -31,9 +31,11 @@ import java.nio.ByteBuffer;
  * be fine since this class is intended for converting
  * DDM Parameter data only.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class EbcdicCcsidManager extends CcsidManager
 {
     private static final int[] conversionArrayToEbcdic = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         0x0000,0x0001,0x0002,0x0003,0x0037,0x002d,0x002e,0x002f
         ,0x0016,0x0005,0x0025,0x000b,0x000c,0x000d,0x000e,0x000f
         ,0x0010,0x0011,0x0012,0x0013,0x003c,0x003d,0x0032,0x0026
@@ -115,6 +117,7 @@ class EbcdicCcsidManager extends CcsidManager
         //      'A',       'B',       'C',       'D',      'E',
           (byte)0xc1,(byte)0xc2,(byte)0xc3,(byte)0xc4,(byte)0xc5,
         //      'F',       'G',       'H',      'I',       'J',
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
           (byte)0xc6,(byte)0xc7,(byte)0xc8,(byte)0xc9,(byte)0xd1,
         //     'K',        'L',       'M',       'N',      'O',
           (byte)0xd2,(byte)0xd3,(byte)0xd4,(byte)0xd5,(byte)0xd6,
@@ -124,6 +127,7 @@ class EbcdicCcsidManager extends CcsidManager
       );
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
     byte[] convertFromJavaString (String sourceString)
     {
         ByteBuffer buf = ByteBuffer.allocate(sourceString.length());
@@ -142,6 +146,7 @@ class EbcdicCcsidManager extends CcsidManager
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
     String convertToJavaString (byte[] sourceBytes)
     {
         int i = 0;
@@ -156,6 +161,7 @@ class EbcdicCcsidManager extends CcsidManager
         return new String (theChars);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
     String convertToJavaString (byte[] sourceBytes, int offset, int numToConvert)
     {
         int i = 0,j = 0;
@@ -171,6 +177,7 @@ class EbcdicCcsidManager extends CcsidManager
     }
 
     int getByteLength(String str) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
         return str.length();
     }
 

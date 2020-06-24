@@ -53,6 +53,7 @@ import java.security.PrivilegedActionException;
 	for FileContainers which are implemented on java.io.RandomAccessFile.
 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Object>
 {
 
@@ -91,6 +92,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 	 * Constructors
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	RAFContainer(BaseDataFileFactory factory) {
 		super(factory);
 	}
@@ -116,6 +118,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 		 throws StandardException
 	{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		try {
 			synchronized(this)
 			{
@@ -149,6 +152,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 	}
 
 	void closeContainer() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-801
 
 		if (fileData != null) {
 			try {
@@ -183,6 +187,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 		long pageOffset = pageNumber * pageSize;
 
 		synchronized (this) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-801
+//IC see: https://issues.apache.org/jira/browse/DERBY-733
 
 			fileData.seek(pageOffset);
 
@@ -215,6 +221,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                 // committed and dropped, do nothing.
                 // This file container may only be a stub
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1392
 				return;
             }
 
@@ -281,6 +288,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 
 				if (SanityManager.DEBUG)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1392
 					SanityManager.ASSERT(
                         fileData.length() >= pageOffset,
                         "failed to blank filled missing pages");
@@ -333,6 +341,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      */
     protected byte[] updatePageArray(long pageNumber, 
                                    byte[] pageData, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
                                    byte[] encryptionBuf, 
                                    boolean encryptWithNewEngine) 
         throws StandardException, IOException
@@ -343,11 +352,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
             // bit because the alloc page have zero'ed out the borrowed
             // space
             writeHeader(getIdentity(), pageData);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1392
             if (SanityManager.DEBUG) 
             {
                 if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
                     SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
                             "expect " +
                             AllocPage.FORMAT_NUMBER +
                             "got " +
@@ -357,11 +369,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
             return pageData;
 
         } 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1392
         else 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             if (encryptionBuf != null &&
                     (dataFactory.databaseEncrypted() || encryptWithNewEngine))
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
                 return encryptPage(pageData, 
                                    pageSize, 
                                    encryptionBuf, 
@@ -439,6 +454,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
         boolean success = false;
         int maxTries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         while (!success) {
             success = true;
 
@@ -498,6 +514,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                         // Instead, just clobber the container info, which is
                         // checksum'ed seperately from the alloc page
                         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
                         writeRAFHeader(
                             getIdentity(),
                             fileData,
@@ -514,6 +531,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                             // we re-grab monitor on "this" (which recovery
                             // needs) and retry writeRAFHeader.
                             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5498
                                 Thread.sleep(
                                     InterruptStatus.INTERRUPT_RETRY_SLEEP);
                             } catch (InterruptedException ee) {
@@ -534,6 +552,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 
                         throw dataFactory.markCorrupt(
                             StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1958
                                 SQLState.FILE_CONTAINER_EXCEPTION, ioe,
                                 getIdentity() != null ?
                                 getIdentity().toString() : "unknown",
@@ -584,7 +603,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 					dataFactory.writeInProgress();
 					inwrite = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-218
                     if (!dataFactory.dataNotSyncedAtAllocation)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
                         fileData.sync();
   				}
 				catch (IOException ioe)
@@ -622,6 +644,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 	 * @exception  StandardException  Standard exception policy.
      **/
 	protected void truncatePages(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     long lastValidPagenum)
         throws StandardException
 	{  
@@ -665,6 +688,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 		@param syncFile if true, sync the file
 	*/
     private void writeRAFHeader(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
     Object                  identity,
     StorageRandomAccessFile file, 
     boolean                 create, 
@@ -686,16 +710,19 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
             // been written, ending up with the page at the incorrect
             // offset.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3726
             epage = new byte[pageSize];
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
 			epage = getEmbryonicPage(file, FIRST_ALLOC_PAGE_OFFSET);
 		}
 
 		// need to check for frozen state
 
         writeHeader(identity, file, create, epage);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
 
 		if (syncFile)
 		{
@@ -704,6 +731,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 			{
                 if (!dataFactory.dataNotSyncedAtCheckpoint)
                    file.sync();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
 
 			}
 			finally
@@ -727,6 +755,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 	}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	 synchronized StorageFile getFileName(ContainerKey identity, boolean stub,
 											 boolean errorOK, boolean tryAlternatePath)
 		 throws StandardException
@@ -784,7 +813,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                             }
                         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
                         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
                             directory.limitAccessToOwner();
                         } catch (IOException ioe) {
                             if (errorOK) {
@@ -804,6 +835,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
     } // end of privGetFileName
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	synchronized void createContainer(ContainerKey newIdentity)
         throws StandardException
     {
@@ -832,6 +864,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      */
     private void copyFile(final StorageFile from, final File to)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
         PrivilegedAction<Boolean> pa = () ->
                 FileUtil.copyFile(dataFactory.getStorageFactory(), from, to);
         boolean success = AccessController.doPrivileged(pa);
@@ -848,6 +881,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      * @throws StandardException if the file could not be removed
      */
     private void removeFile(final File file) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
         PrivilegedAction<Boolean> pa = () -> !file.exists() || file.delete();
         boolean success = AccessController.doPrivileged(pa);
         if (!success) {
@@ -856,6 +890,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	synchronized boolean removeFile(StorageFile file)
         throws SecurityException, StandardException
     {
@@ -889,12 +924,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
     } // end of privRemoveFile
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     synchronized boolean openContainer(ContainerKey newIdentity)
             throws StandardException {
         actionCode = OPEN_CONTAINER_ACTION;
         actionIdentity = newIdentity;
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5312
             return AccessController.doPrivileged( this) != null;
         }
         catch( PrivilegedActionException pae) {
@@ -907,6 +944,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
         }
         finally
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5312
             actionIdentity = null;
         }
     }
@@ -1044,6 +1082,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      *
      */
     protected void backupContainer(BaseContainerHandle handle,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5894
                                    String backupLocation)
         throws StandardException 
     {
@@ -1066,6 +1105,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                         }
                         catch (InterruptedException ie)
                         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                             InterruptStatus.setInterrupted();
                         }	
                     }
@@ -1078,6 +1119,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                 // create container at the backup location.
                 if (isStub) {
                     // get the stub ( it is a committted drop table container )
+//IC see: https://issues.apache.org/jira/browse/DERBY-5894
                     StorageFile file = getFileName((ContainerKey)getIdentity(),
                                                        true, false, true);
                     backupFile = new File(backupLocation, file.getName());
@@ -1087,6 +1129,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                 }else {
                     // regular container file 
                     long lastPageNumber= getLastPageNumber(handle);
+//IC see: https://issues.apache.org/jira/browse/DERBY-750
                     if (lastPageNumber == ContainerHandle.INVALID_PAGE_NUMBER) {
                         // last page number is invalid if there are no pages in
                         // the container yet. No need to backup this container, 
@@ -1099,6 +1142,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                     }
 
                     StorageFile file = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5894
                         getFileName(
                             (ContainerKey)getIdentity(), false, false, true);
 
@@ -1120,12 +1164,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                     // to the backup location by reading through the page cache.
                     for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
                          pageNumber <= lastPageNumber; pageNumber++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
                         page = getLatchedPage(handle, pageNumber);
                         
                         // update the page array before writing to the disk 
                         // with container header and encrypt it if the database 
                         // is encrypted. 
                         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
                         byte[] dataToWrite = 
                             updatePageArray(
                                 pageNumber, 
@@ -1198,6 +1244,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                         }
                     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5894
                     removeFile(backupFile);
                 } 
             }
@@ -1238,8 +1285,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
             long lastPageNumber= getLastPageNumber(handle);
  
             newRaf = getRandomAccessFile(newFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5894
 
             byte[] encryptionBuf = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             if (doEncrypt) {
                 encryptionBuf = new byte[pageSize];
             }
@@ -1267,6 +1316,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
             }
 
             // sync the new version of the container.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
             newRaf.sync();
             newRaf.close();
             newRaf = null;
@@ -1276,6 +1326,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                                     SQLState.FILE_CONTAINER_EXCEPTION, ioe,
                                     getIdentity() != null ?
                                         getIdentity().toString() : "unknown",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                                     doEncrypt ? "encrypt" : "decrypt",
                                     newFilePath);
         } finally {
@@ -1295,6 +1346,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                                     SQLState.FILE_CONTAINER_EXCEPTION, ioe,
                                     getIdentity() != null ?
                                         getIdentity().toString() : "unknown",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                                     doEncrypt ?
                                         "encrypt-close" : "decrypt-close",
                                     newFilePath);
@@ -1312,7 +1364,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      * @throws IOException if some other I/O error happens
      */
     private RandomAccessFile getRandomAccessFile(final File file)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5894
         try {
             return AccessController.doPrivileged(
                 new PrivilegedExceptionAction<RandomAccessFile>() {
@@ -1326,6 +1380,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                     }
                 });
         } catch (PrivilegedActionException pae) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
             throw (IOException) pae.getCause();
         }
     }
@@ -1370,6 +1425,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
              }
 
              try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5325
 
                  // OK not to force WAL here, in fact, this operation
                  // preceeds the creation of the log record to ensure
@@ -1379,6 +1435,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                  try
                      {
                          fileData = file.getRandomAccessFile( "rw");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
                          file.limitAccessToOwner();
                      }
                  finally
@@ -1483,11 +1540,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                  // just means we can't write to it.
              }
              fileName = file.toString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1958
 
              try {
 
                  fileData = file.getRandomAccessFile(canUpdate ? "rw" : "r");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
+//IC see: https://issues.apache.org/jira/browse/DERBY-5312
                  readHeader(getEmbryonicPage(fileData,
                                              FIRST_ALLOC_PAGE_OFFSET));
                  
@@ -1505,6 +1565,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                      throw dataFactory.
                          markCorrupt(StandardException.
                                      newException(SQLState.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1958
                                              FILE_CONTAINER_EXCEPTION, ioe,
                                              getIdentity() != null ?
                                                  getIdentity().toString() :
@@ -1533,15 +1594,18 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                          fileData = 
                              stub.getRandomAccessFile(canUpdate ? "rw" : "r");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3347
                          readHeader(getEmbryonicPage(fileData,
                                                      FIRST_ALLOC_PAGE_OFFSET));
                      }
                      catch (IOException ioe2)
                      {
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                          throw dataFactory.
                              markCorrupt(StandardException.
                                          newException(SQLState.
                                                       FILE_CONTAINER_EXCEPTION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1958
                                              ioe2,
                                              getIdentity() != null ?
                                                  getIdentity().toString() :
@@ -1556,6 +1620,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                      throw dataFactory.
                          markCorrupt(StandardException.
                                      newException(SQLState.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1958
                                                   FILE_CONTAINER_EXCEPTION, ioe,
                                              getIdentity() != null ?
                                                  getIdentity().toString() :
@@ -1565,6 +1630,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 
              return this;
          } // end of case OPEN_CONTAINER_ACTION
+//IC see: https://issues.apache.org/jira/browse/DERBY-5312
          case REOPEN_CONTAINER_ACTION:
          {
              StorageFile file =
@@ -1619,7 +1685,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                      // write the header to the stub
                      stubData = stub.getRandomAccessFile( "rw");
                      stub.limitAccessToOwner();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
                      writeRAFHeader(
                         actionIdentity,
                         stubData,
@@ -1648,6 +1716,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
              }
              catch (SecurityException se)
              {
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                  throw StandardException.
                      newException(SQLState.FILE_CANNOT_REMOVE_FILE, se, file, 
                                   se.toString());
@@ -1674,11 +1743,13 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                  catch (IOException ioe2)
                  {
                      throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                          SQLState.FILE_CANNOT_REMOVE_FILE, ioe2, file, ioe.toString());
                  }
                  catch (SecurityException se)
                  {
                      throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5886
                          SQLState.FILE_CANNOT_REMOVE_FILE, se, file, se.toString());
                  }
              }
@@ -1694,6 +1765,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
              {
                  boolean exists = actionFile.exists();
                  Object result = actionFile.getRandomAccessFile("rw");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
                  if (!exists) {
                      actionFile.limitAccessToOwner();
@@ -1701,6 +1773,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 
                  return result;
              }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
              catch (IOException ioe)
              {
                  throw StandardException.newException(

@@ -42,6 +42,7 @@ public class Management implements ManagementMBean {
     
     private ManagementMBean getManagementService() {
         return (ManagementMBean)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
              getSystemModule(Module.JMX);
     }
     
@@ -94,6 +95,7 @@ public class Management implements ManagementMBean {
      */
     private static  Object getSystemModule( final String factoryInterface )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Object>()

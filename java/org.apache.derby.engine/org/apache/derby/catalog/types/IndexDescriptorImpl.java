@@ -127,6 +127,9 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		this.indexType = indexType;
 		this.isUnique = isUnique;
 		this.isUniqueWithDuplicateNulls = isUniqueWithDuplicateNulls;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         this.isUniqueDeferrable = isUniqueDeferrable;
         this.hasDeferrableChecking = hasDeferrableChecking;
 		this.baseColumnPositions = ArrayUtil.copy( baseColumnPositions );
@@ -146,6 +149,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
      */
 	public boolean isUniqueWithDuplicateNulls()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		return isUniqueWithDuplicateNulls;
 	}
 
@@ -155,6 +159,9 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
      */
     public boolean hasDeferrableChecking()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return hasDeferrableChecking;
     }
 
@@ -181,6 +188,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	/** @see IndexDescriptor#baseColumnPositions */
 	public int[] baseColumnPositions()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
         return ArrayUtil.copy( baseColumnPositions );
 	}
 
@@ -236,12 +244,14 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	/** @see IndexDescriptor#isAscending */
 	public boolean[]		isAscending()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
         return ArrayUtil.copy( isAscending );
 	}
 
 	/** @see IndexDescriptor#setBaseColumnPositions */
 	public void		setBaseColumnPositions(int[] baseColumnPositions)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
 		this.baseColumnPositions = ArrayUtil.copy( baseColumnPositions );
 	}
 
@@ -260,7 +270,11 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	public String toString()
 	{
         StringBuilder   sb = new StringBuilder(60);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6623
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         if (isUnique || isUniqueDeferrable)
 			sb.append("UNIQUE ");
 		else if (isUniqueWithDuplicateNulls)
@@ -312,6 +326,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		indexType = (String)fh.get("indexType");
 		//isUniqueWithDuplicateNulls attribute won't be present if the index
 		//was created in older versions  
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		if (fh.containsKey("isUniqueWithDuplicateNulls"))
 			isUniqueWithDuplicateNulls = fh.getBoolean(
                                     "isUniqueWithDuplicateNulls");
@@ -320,6 +335,9 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 
         // hasDeferrableChecking won't be present if the index
         // was created in old versions (< 10_11).
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         if (fh.containsKey("hasDeferrableChecking")) {
             hasDeferrableChecking = fh.getBoolean("hasDeferrableChecking");
         } else {
@@ -353,8 +371,12 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		fh.putInt("orderedColumns", numberOfOrderedColumns);
 		fh.put("indexType", indexType);
 		//write the new attribut older versions will simply ignore it
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		fh.putBoolean("isUniqueWithDuplicateNulls", 
                                         isUniqueWithDuplicateNulls);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         fh.putBoolean("hasDeferrableChecking", hasDeferrableChecking);
         fh.putBoolean("isUniqueDeferrable", isUniqueDeferrable);
         out.writeObject(fh);
@@ -388,6 +410,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 			** Check all the fields for equality except for the array
 			** elements (this is hardest, so save for last)
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 			if ((id.isUnique == this.isUnique)       &&
                 (id.isUniqueWithDuplicateNulls == 
                     this.isUniqueWithDuplicateNulls) &&
@@ -407,6 +430,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 				{
 					/* If any array element is not equal, return false */
 					if ((id.baseColumnPositions[i] !=
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 						 this.baseColumnPositions[i]) || 
                         (id.isAscending[i] != this.isAscending[i]))
 					{

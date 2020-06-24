@@ -147,6 +147,7 @@ public class JDBCPerfTestCase extends BaseJDBCTestCase {
         for (int i = 0; i < repeats; i++)
         {
             println("Repeat ="+i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5726
             super.runBareOverridable();
             testRunNum++;
         }
@@ -165,6 +166,7 @@ public class JDBCPerfTestCase extends BaseJDBCTestCase {
             total = runs[0];
 
         System.out.println("Test-" + getName() +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2200
                 ": framework:"+ getTestConfiguration().getJDBCClient().getName()+
                 ":iterations: " + iterations
                 + " : Avg elapsedTime(ms): " + 
@@ -185,6 +187,7 @@ public class JDBCPerfTestCase extends BaseJDBCTestCase {
         endTime = System.currentTimeMillis();
         runs[testRunNum] = (endTime-startTime);
         System.out.println("Test-" + getName() + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2200
                 ": framework:"+ getTestConfiguration().getJDBCClient().getName()+
                 ": run#" + testRunNum
                 + " iterations: " + iterations + " : elapsedTime(ms): "

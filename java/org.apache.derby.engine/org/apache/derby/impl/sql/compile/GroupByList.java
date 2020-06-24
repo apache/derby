@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.GroupByList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -34,6 +35,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class GroupByList extends OrderedColumnList<GroupByColumn>
 {
 	int		numGroupingColsAdded = 0;
@@ -59,6 +61,8 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 
 		@param position	The column to get from the list
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     GroupByColumn getGroupByColumn(int position)
 	{
 		if (SanityManager.DEBUG)
@@ -67,10 +71,13 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 					"position (" + position +
 					") expected to be between 0 and " + size());
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return elementAt(position);
 	}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRollup()
 	{
 		rollup = true;
@@ -105,15 +112,19 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     void bindGroupByColumns(SelectNode select, List<AggregateNode> aggregates)
 					throws StandardException
 	{
 		FromList		 fromList = select.getFromList();
 		ResultColumnList selectRCL = select.getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         SubqueryList dummySubqueryList = new SubqueryList(getContextManager());
 		int				 numColsAddedHere = 0;
 
 		/* Only 32677 columns allowed in GROUP BY clause */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (size() > Limits.DB2_MAX_ELEMENTS_IN_GROUP_BY)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
@@ -123,6 +134,7 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
         for (GroupByColumn groupByCol : this)
 		{
 			groupByCol.bindExpression(fromList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                                       dummySubqueryList, aggregates);
 		}
 
@@ -170,6 +182,8 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 				ResultColumn newRC;
 
 				/* Get a new ResultColumn */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 newRC = new ResultColumn(
                         groupingCol.getColumnName(),
                         groupingCol.getColumnExpression().getClone(),
@@ -233,9 +247,12 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 	 * 
 	 * @throws StandardException
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     GroupByColumn findGroupingColumn(ValueNode node)
 	        throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (GroupByColumn gbc : this)
 		{
 			if (gbc.getColumnExpression().isEquivalent(node))
@@ -252,6 +269,8 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void remapColumnReferencesToExpressions() throws StandardException
 	{
         /* This method is called when flattening a FromTable. */
@@ -272,6 +291,7 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
     @Override
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG) {
 			return "numGroupingColsAdded: " + numGroupingColsAdded + "\n" +
 				super.toString();
@@ -281,6 +301,7 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 	}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     void preprocess(int numTables,
                     FromList fromList,
                     SubqueryList whereSubquerys,

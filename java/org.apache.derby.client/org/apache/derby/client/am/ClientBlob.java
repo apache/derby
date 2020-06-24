@@ -38,6 +38,7 @@ public class ClientBlob extends Lob implements Blob {
 
     // Only used for input purposes.  For output, each getBinaryStream call
     // must generate an independent stream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     InputStream binaryStream_ = null;
     int dataOffset_;
     
@@ -52,11 +53,13 @@ public class ClientBlob extends Lob implements Blob {
         
         binaryString_ = binaryString;
         dataType_ |= BINARY_STRING;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         setSqlLength(binaryString.length - dataOffset);
         dataOffset_ = dataOffset;
     }
 
     // CTOR for input:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClientBlob(Agent agent,
                 InputStream binaryStream,
                 int length) {
@@ -66,6 +69,7 @@ public class ClientBlob extends Lob implements Blob {
         
         binaryStream_ = binaryStream;
         dataType_ |= BINARY_STREAM;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         setSqlLength(length);
     }
 
@@ -89,11 +93,13 @@ public class ClientBlob extends Lob implements Blob {
      * @param agent
      * @param binaryStream the stream to get data from
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClientBlob(Agent agent, InputStream binaryStream) {
         
         super(agent,
               isLayerBStreamingPossible(agent));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         binaryStream_ = binaryStream;
         dataType_ |= BINARY_STREAM;
     }
@@ -106,6 +112,7 @@ public class ClientBlob extends Lob implements Blob {
      */
     public ClientBlob(Agent agent, int locator)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         super(agent, false);
         locator_ = locator;
         dataType_ |= LOCATOR;
@@ -117,6 +124,7 @@ public class ClientBlob extends Lob implements Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -124,6 +132,7 @@ public class ClientBlob extends Lob implements Blob {
                     agent_.logWriter_.traceEntry(this, "length");
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
                 checkForClosedConnection();
                 long retVal = super.sqlLength();
 
@@ -147,6 +156,7 @@ public class ClientBlob extends Lob implements Blob {
      * @throws org.apache.derby.client.am.SqlException
      * @return length of Blob in bytes
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
     long getLocatorLength() throws SqlException
     {
         return agent_.connection_.locatorProcedureCall()
@@ -188,8 +198,10 @@ public class ClientBlob extends Lob implements Blob {
                 }
                 if (pos <= 0) {
                     throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         new ClientMessageId(SQLState.BLOB_BAD_POSITION), pos);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
                 if (pos > sqlLength() + 1) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), 
@@ -219,7 +231,9 @@ public class ClientBlob extends Lob implements Blob {
         long actualLength;
         // actual length is the lesser of the number of bytes requested
         // and the number of bytes available from pos to the end
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         actualLength = Math.min(sqlLength() - pos + 1, (long) length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         byte[] retVal; 
         if (isLocator()) {
             retVal = agent_.connection_.locatorProcedureCall()
@@ -237,12 +251,14 @@ public class ClientBlob extends Lob implements Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "getBinaryStream");
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 InputStream retVal = getBinaryStreamX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getBinaryStream", retVal);
@@ -256,6 +272,7 @@ public class ClientBlob extends Lob implements Blob {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     InputStream getBinaryStreamX() throws SqlException {
         checkForClosedConnection();
 
@@ -267,9 +284,11 @@ public class ClientBlob extends Lob implements Blob {
             //UpdateSensitive stream which wraps inside it a 
             //Buffered Locator stream. The wrapper watches out 
             //for updates.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             return new UpdateSensitiveBlobLocatorInputStream
                     (agent_.connection_, this);
         } else {  // binary string
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return new ByteArrayInputStream(binaryString_, dataOffset_,
                                            binaryString_.length - dataOffset_);
         }
@@ -279,6 +298,7 @@ public class ClientBlob extends Lob implements Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -309,6 +329,7 @@ public class ClientBlob extends Lob implements Blob {
     private long positionX(byte[] pattern, long start) throws SqlException {
         checkForClosedConnection();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         if (isLocator()) {
             return agent_.connection_.locatorProcedureCall()
                 .blobGetPositionFromBytes(locator_, pattern, start);
@@ -321,6 +342,7 @@ public class ClientBlob extends Lob implements Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -333,6 +355,8 @@ public class ClientBlob extends Lob implements Blob {
                 }
                 if (start < 1) {
                     throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         new ClientMessageId(SQLState.BLOB_BAD_POSITION), start);
                 }
                 long pos = positionX(pattern, start);
@@ -352,7 +376,9 @@ public class ClientBlob extends Lob implements Blob {
         checkForClosedConnection();
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             if (isLocator()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if ((pattern instanceof ClientBlob)
                     && ((ClientBlob )pattern).isLocator()) {
                     // Send locator for pattern to server
@@ -373,7 +399,9 @@ public class ClientBlob extends Lob implements Blob {
                                   pattern.getBytes(1L, (int )pattern.length()),
                                   start);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
             throw new SqlException(e);
         }
     }
@@ -385,6 +413,7 @@ public class ClientBlob extends Lob implements Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (agent_.connection_) {
@@ -428,14 +457,17 @@ public class ClientBlob extends Lob implements Blob {
     }
 
     int setBytesX(long pos, byte[] bytes, int offset, int len)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-796
             Check if position is less than 0 and if true
             raise an exception
          */
         
         if (pos <= 0L) {
             throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     new ClientMessageId(SQLState.BLOB_BAD_POSITION), pos);
         }
         
@@ -447,6 +479,7 @@ public class ClientBlob extends Lob implements Blob {
         
         if (pos  >= Integer.MAX_VALUE) {
             throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), pos);
         }
         
@@ -473,7 +506,9 @@ public class ClientBlob extends Lob implements Blob {
         }   
         
         final int length = Math.min((bytes.length - offset), len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4738
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         if (isLocator()) {  
             byte[] ba = bytes;
             if ((offset > 0) || (length < bytes.length)) { 
@@ -491,6 +526,7 @@ public class ClientBlob extends Lob implements Blob {
             //modified. Increment the
             //updateCount to reflect the
             //change.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             incrementUpdateCount();
         } else {
             if ((binaryString_.length - dataOffset_ - (int)pos + 1) < length) {
@@ -503,7 +539,9 @@ public class ClientBlob extends Lob implements Blob {
             System.arraycopy(bytes, offset, 
                              binaryString_, (int) pos + dataOffset_ - 1, 
                              length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             binaryStream_ = new ByteArrayInputStream(binaryString_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
             setSqlLength(binaryString_.length - dataOffset_);
         }
         return length;
@@ -512,7 +550,9 @@ public class ClientBlob extends Lob implements Blob {
     public OutputStream setBinaryStream(long pos) throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             synchronized (agent_.connection_) {
                 if (agent_.loggingEnabled()) {
@@ -521,6 +561,7 @@ public class ClientBlob extends Lob implements Blob {
                 if (pos < 1) {
                     throw new SqlException(agent_.logWriter_,
                             new ClientMessageId(SQLState.BLOB_BAD_POSITION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                             pos);
                 }
                 
@@ -548,6 +589,14 @@ public class ClientBlob extends Lob implements Blob {
     public void truncate(long len) throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
         checkValidity();
         try
         {
@@ -555,14 +604,17 @@ public class ClientBlob extends Lob implements Blob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, " truncate", (int) len);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
                 if (len < 0 || len > sqlLength()) {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.INVALID_API_PARAMETER),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         len, "len", "Blob.truncate()");
                 }
                 if (len == this.sqlLength()) {
                     return;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
                 if (isLocator()) {
                     agent_.connection_.locatorProcedureCall()
                         .blobTruncate(locator_, len);
@@ -571,6 +623,7 @@ public class ClientBlob extends Lob implements Blob {
                     //updated Increment the
                     //update count to reflect
                     //the change.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
                     incrementUpdateCount();
                 } else {
                     long newLength = (int) len + dataOffset_;
@@ -579,7 +632,9 @@ public class ClientBlob extends Lob implements Blob {
                                      newbuf, 0, (int) newLength);
                     binaryString_ = newbuf;
                     binaryStream_ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         = new ByteArrayInputStream(binaryString_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
                     setSqlLength(binaryString_.length - dataOffset_);
                 }
             }
@@ -602,6 +657,7 @@ public class ClientBlob extends Lob implements Blob {
      * the Blob's resources
      */
     public void free()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1180
         throws SQLException {
         
         //calling free() on a already freed object is treated as a no-op
@@ -610,6 +666,7 @@ public class ClientBlob extends Lob implements Blob {
         //now that free has been called the Blob object is no longer
         //valid
         isValid_ = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {            
             synchronized (agent_.connection_) {
                 if (agent_.loggingEnabled()) {
@@ -653,6 +710,7 @@ public class ClientBlob extends Lob implements Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             synchronized (agent_.connection_) {
                 if (agent_.loggingEnabled()) {
@@ -668,12 +726,14 @@ public class ClientBlob extends Lob implements Blob {
                     //that wraps inside it a Buffered InputStream.
                     //The wrapper watches out for updates to the
                     //underlying Blob.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
                     retVal = new UpdateSensitiveBlobLocatorInputStream
                                                       (agent_.connection_,
                                                        this,
                                                        pos,
                                                        length);
                 } else {  // binary string
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     retVal = new ByteArrayInputStream
                         (binaryString_, 
                          (int)(dataOffset_ + pos - 1), 
@@ -736,6 +796,7 @@ public class ClientBlob extends Lob implements Blob {
      */
     protected void materializeStream() throws SqlException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         binaryStream_ = super.materializeStream(binaryStream_, "java.sql.Blob");
     }
 

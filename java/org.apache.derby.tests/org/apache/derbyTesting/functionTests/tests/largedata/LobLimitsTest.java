@@ -140,6 +140,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         sysprops.setProperty("derby.locks.monitor", "true");
         // Some of the test cases depend on certain other test cases to run
         // first, so force the test cases to run in lexicographical order.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test suite =
                 new CleanDatabaseTestSetup(
                         new BaseTestSuite(LobLimitsTest.class)) {
@@ -243,6 +244,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             insertBlob_SetBlob("BlobTest #7 (setBlob with 4Gb blob",
                     insertBlob, _4GbBlob,
                     _4GB, 0, 1, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
+//IC see: https://issues.apache.org/jira/browse/DERBY-5308
+//IC see: https://issues.apache.org/jira/browse/DERBY-5338
+//IC see: https://issues.apache.org/jira/browse/DERBY-5341
+//IC see: https://issues.apache.org/jira/browse/DERBY-5317
             fail("Inserting 4BG blob should have thrown exception");
         } catch (SQLException sqle) {
             // DERBY DOES NOT SUPPORT INSERT OF 4GB BLOB
@@ -357,6 +363,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 MORE_DATA_THAN_COL_WIDTH));
         // DERBY-5341 : Client allows clob larger than
         // column width to be inserted.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
+//IC see: https://issues.apache.org/jira/browse/DERBY-5308
+//IC see: https://issues.apache.org/jira/browse/DERBY-5338
+//IC see: https://issues.apache.org/jira/browse/DERBY-5341
+//IC see: https://issues.apache.org/jira/browse/DERBY-5317
         if (!usingDerbyNetClient()) {
             try {
                 insertClob2("ClobTest #9.1 ", insertClob2,
@@ -386,6 +397,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             insertClob2("ClobTest #11 ", insertClob2,
                     MORE_DATA_THAN_COL_WIDTH, 4, 1,
                        MORE_DATA_THAN_COL_WIDTH - 1, CHARDATAFILE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
+//IC see: https://issues.apache.org/jira/browse/DERBY-5308
+//IC see: https://issues.apache.org/jira/browse/DERBY-5338
+//IC see: https://issues.apache.org/jira/browse/DERBY-5341
+//IC see: https://issues.apache.org/jira/browse/DERBY-5317
             fail("ClobTest #11. Should have thrown XSDA4");
         } catch (SQLException sqle) {
             // NEGATIVE TEST - Expected Exception: truncation of non-blanks not
@@ -399,6 +415,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             // give -ve streamlength
             insertClob_SetCharacterStream("ClobTest #12.1", insertClob,
                     BIG_LOB_SZ, 4, 1, -1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
+//IC see: https://issues.apache.org/jira/browse/DERBY-5308
+//IC see: https://issues.apache.org/jira/browse/DERBY-5338
+//IC see: https://issues.apache.org/jira/browse/DERBY-5341
+//IC see: https://issues.apache.org/jira/browse/DERBY-5317
             fail("ClobTest #12. Should have thrown XJ025");
         } catch (SQLException sqle) {
             assertSQLState("XJ025", sqle);
@@ -420,6 +441,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             insertClob_SetClob("ClobTest #13 (setClob with 4Gb clob",
                     insertClob, _4GBClob,
                     _4GB, 0, 1, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
+//IC see: https://issues.apache.org/jira/browse/DERBY-5308
+//IC see: https://issues.apache.org/jira/browse/DERBY-5338
+//IC see: https://issues.apache.org/jira/browse/DERBY-5341
+//IC see: https://issues.apache.org/jira/browse/DERBY-5317
             fail("ClobTest #13. Should have thrown 22033");
         } catch (SQLException sqle) {
          // DERBY DOES NOT SUPPORT INSERT OF 4GB CLOB
@@ -462,6 +488,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         try {
             insertClob2(msg, insertClob2, BIG_LOB_SZ, 4, 1,
                     (NUM_TRAILING_SPACES + BIG_LOB_SZ - 1), CHARDATAFILE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
+//IC see: https://issues.apache.org/jira/browse/DERBY-5308
+//IC see: https://issues.apache.org/jira/browse/DERBY-5338
+//IC see: https://issues.apache.org/jira/browse/DERBY-5341
+//IC see: https://issues.apache.org/jira/browse/DERBY-5317
             fail(msg +". Should have thrown XSDA4");
         } catch (SQLException sqle) {
             // EXPECTED EXCEPTION - stream has trailing spaces,but stream
@@ -472,6 +503,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         try {
             insertClob2(msg, insertClob2, BIG_LOB_SZ, 5, 1,
                     (NUM_TRAILING_SPACES + BIG_LOB_SZ + 1), CHARDATAFILE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1903
+//IC see: https://issues.apache.org/jira/browse/DERBY-5308
+//IC see: https://issues.apache.org/jira/browse/DERBY-5338
+//IC see: https://issues.apache.org/jira/browse/DERBY-5341
+//IC see: https://issues.apache.org/jira/browse/DERBY-5317
             fail(msg + ". Should have thrown XSDA4");
         } catch (SQLException sqle) {
             // EXPECTED EXCEPTION - stream has trailing spaces,but stream
@@ -1618,6 +1654,7 @@ class BlobImplT implements java.sql.Blob {
     }
 
     public void free() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throw new SQLException("Not implemented");
     }
 

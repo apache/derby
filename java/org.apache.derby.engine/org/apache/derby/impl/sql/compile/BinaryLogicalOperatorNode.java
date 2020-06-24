@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BinaryLogicalOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -31,10 +32,13 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 {
 	boolean	shortCircuitValue;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BinaryLogicalOperatorNode(
             ValueNode leftOperand,
             ValueNode rightOperand,
@@ -59,12 +63,14 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		//following is to check if we have something like "? AND 1=1" or "2>1 OR ?" 
 		if (leftOperand.isParameterNode() || rightOperand.isParameterNode())
 			throw StandardException.newException( SQLState.LANG_UNTYPED_PARAMETER_IN_WHERE_CLAUSE );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5885
 
         super.bindExpression(fromList, subqueryList, aggregates);
 
@@ -134,6 +140,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 
 		// put an extra left of the stack for potential
 		// use in the else clause.
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		mb.dup();
 		// stack - left, left
 		mb.push(shortCircuitValue);
@@ -166,6 +173,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		mb.conditionalIf();
 		
 		// stack: left
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getImmutable",
 				ClassName.BooleanDataValue, 0);
 		

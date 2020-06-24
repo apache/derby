@@ -279,6 +279,7 @@ abstract class CorruptBaseStorageFactory implements WritableStorageFactory
      * @return StorageFile
      */
     public StorageFile createTemporaryFile(String prefix, String suffix)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
                                                             throws IOException {
         return new CorruptFile(realStorageFactory.createTemporaryFile(
                 prefix, suffix));

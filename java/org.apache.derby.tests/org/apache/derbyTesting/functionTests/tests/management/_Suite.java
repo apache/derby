@@ -51,15 +51,26 @@ public class _Suite extends BaseTestCase {
     public static Test suite() {
 
         BaseTestSuite suite = new BaseTestSuite("management");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6097
         if (JDBC.vmSupportsJMX()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
             suite.addTest(JMXTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
             suite.addTest(ManagementMBeanTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
             suite.addTest(InactiveManagementMBeanTest.suite());
             suite.addTest(VersionMBeanTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
             suite.addTest(JDBCMBeanTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
             suite.addTest(NetworkServerMBeanTest.suite());
             suite.addTest(CustomMBeanServerBuilderTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
             suite.addTest(CacheManagerMBeanTest.suite());
         }
 

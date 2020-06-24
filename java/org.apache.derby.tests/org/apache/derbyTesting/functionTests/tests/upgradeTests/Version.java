@@ -55,6 +55,7 @@ public class Version implements Comparable<Version>
     // we keep one class loader per version so that we don't have an explosion
     // of class loaders for redundant versions
     private static HashMap<String, ClassLoader> _classLoaders =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             new HashMap<String, ClassLoader>();
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -175,6 +176,7 @@ public class Version implements Comparable<Version>
     }
 
     public boolean equals( Object other ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return (other instanceof Version) && (compareTo((Version) other) == 0);
     }
     public int hashCode() { return toString().hashCode(); }
@@ -239,6 +241,7 @@ public class Version implements Comparable<Version>
          */
         public Trajectory( ArrayList<Version> versionList )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             if (versionList == null) {
                 versionList = new ArrayList<Version>();
             }

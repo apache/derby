@@ -346,6 +346,7 @@ public final class MergeNode extends DMLModStatementNode
             !(_sourceTable instanceof FromBaseTable)
             )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
             throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_OR_VTI );
         }
 
@@ -388,8 +389,10 @@ public final class MergeNode extends DMLModStatementNode
 
             // window function not allowed
             SelectNode.checkNoWindowFunctions(mcn, "matching clause");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6689
 
             // aggregates not allowed
+//IC see: https://issues.apache.org/jira/browse/DERBY-6693
             checkNoAggregates(mcn);
         }
         
@@ -450,6 +453,7 @@ public final class MergeNode extends DMLModStatementNode
      */
     private void    forbidDerivedColumnLists() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         if ( (_sourceTable.getResultColumns() != null) || (_targetTable.getResultColumns() != null) )
         {
             throw StandardException.newException( SQLState.LANG_NO_DCL_IN_MERGE );
@@ -562,6 +566,7 @@ public final class MergeNode extends DMLModStatementNode
             _leftJoinFromList = _hojn.makeFromList( true, true );
             _leftJoinFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
             if ( !sourceIsBase_or_VTI() )
             {
                 throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_OR_VTI );
@@ -691,6 +696,7 @@ public final class MergeNode extends DMLModStatementNode
                 (
                  source.methodCall,
                  source.correlationName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                  source.getResultColumns(),
                  null,
                  source.exposedName,
@@ -711,6 +717,7 @@ public final class MergeNode extends DMLModStatementNode
         }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
             throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_OR_VTI );
         }
     }

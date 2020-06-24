@@ -49,6 +49,8 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 	}
 	
 	public static void updateRow(int p1) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-551
+//IC see: https://issues.apache.org/jira/browse/DERBY-1261
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		PreparedStatement ps = conn.prepareStatement("update t1 set i=i+?");
 		ps.setInt(1, p1);
@@ -117,6 +119,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 	}
 	
 	public static int selectFromSpecificSchema(int p1) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		PreparedStatement ps = conn.prepareStatement("select * from mamta1.t12RoutineTest");
 		ps.executeQuery();
@@ -256,6 +259,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 
 		// return no results
 		if (p2 == 199) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1475
 			data1[0].close();
 			data1[0] = null;
 			data2[0].close();
@@ -274,6 +278,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 
 	// select all rows from a table
 	public static void selectRows(String table, ResultSet[] rs)
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
 		throws SQLException
 	{
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
@@ -430,6 +435,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 
 	public static void ambigious2(int p1, Integer p2) {
         System.out.println("ambigious2(int,Integer) called");
+//IC see: https://issues.apache.org/jira/browse/DERBY-89
     };
 	public static void ambigious2(Integer p1, int p2) {
         System.out.println("ambigious2(Integer,int) called");
@@ -597,6 +603,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 			inout[0] = null;
 		else
 			inout[0] = inout[0].booleanValue() && in.booleanValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 	}
 
@@ -618,6 +625,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 		if (in == null)
 			;//inout[0] = null;
 		else if (inout[0] == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			inout[0] = 3 * in.intValue();
 		else
 			inout[0] = inout[0].intValue() + in.intValue();
@@ -706,6 +714,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
      */
      public static void multiResult(int p1, int p2, ResultSet[] data1, ResultSet[] data2) 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-213
 
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement("select * from AutoCommitTable where num = ?");
@@ -762,6 +771,8 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 
 	public static void grantSelect() throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1729
+//IC see: https://issues.apache.org/jira/browse/DERBY-1736
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		PreparedStatement ps = conn.prepareStatement("grant select on t1 to user2");
 		ps.execute();

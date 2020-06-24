@@ -55,6 +55,7 @@ public class ExceptionUtil
      */
     public static String getSQLStateFromIdentifier(String messageID) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (messageID.length() == 5)
             return messageID;
         return messageID.substring(0, 5);

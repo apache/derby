@@ -84,6 +84,7 @@ class LOBStateTracker {
      * @param doRelease whether locators shall be released
      * @see #NO_OP_TRACKER
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
     LOBStateTracker(int[] lobIndexes, boolean[] isBlob, boolean doRelease) {
         this.columns = lobIndexes;
         this.isBlob = isBlob;
@@ -106,6 +107,7 @@ class LOBStateTracker {
             throws SqlException {
         // If we are on a delete hole, there are no locators to release, and 
         // trying to release them will cause an error. See DERBY-6228.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
         if (this.doRelease && !cursor.getIsUpdateDeleteHole()) {
             CallableLocatorProcedures procs = cursor.getLocatorProcedures();
             for (int i=0; i < this.columns.length; i++) {
@@ -117,6 +119,7 @@ class LOBStateTracker {
                     if (locator == this.lastLocatorSeen[i]) {
                         // We are being called on the same row twice...
                         return;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3658
                     } else if (locator == Lob.INVALID_LOCATOR) {
                         // The locator is invalid, probably because the
                         // database is running in soft upgrade mode and
@@ -133,6 +136,8 @@ class LOBStateTracker {
                 }
             }
             // Reset state for the next row.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
             Arrays.fill(this.published, false);
         }
     }
@@ -145,11 +150,13 @@ class LOBStateTracker {
      * to release them from the client side in this case.
      */
     void discardState() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
         if (this.doRelease) {
             // Force the state to published for all LOB columns.
             // This will cause checkCurrentRow to ignore all LOBs on the next
             // invocation. The method markAsPublished cannot be called before
             // after checkCurrentRow has been called again.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
             Arrays.fill(this.published, true);
         }
     }
@@ -164,6 +171,7 @@ class LOBStateTracker {
      * @param index 1-based column index
      */
     void markAsPublished(int index) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
         if (this.doRelease) {
             int internalIndex = Arrays.binarySearch(this.columns, index);
             this.published[internalIndex] = true;

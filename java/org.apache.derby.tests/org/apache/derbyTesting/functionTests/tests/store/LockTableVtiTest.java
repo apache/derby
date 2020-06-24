@@ -69,6 +69,7 @@ public class LockTableVtiTest extends BaseJDBCTestCase {
         // setting to 60, which is the default, for starters
         properties.setProperty("derby.locks.waitTimeout", "60");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1040
         Test suite = TestConfiguration.defaultSuite (LockTableVtiTest.class);
         suite = new DatabasePropertyTestSetup(suite, properties, true);
         return new CleanDatabaseTestSetup(suite) ;

@@ -93,6 +93,7 @@ public class JDBCMBeanTest extends MBeanTest {
         // get JDBC version from DatabaseMetaData for comparison
         DatabaseMetaData dmd = getConnection().getMetaData();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5521
         String JDBCVersion =
             dmd.getJDBCMajorVersion() + "." +
             dmd.getJDBCMinorVersion();
@@ -105,6 +106,7 @@ public class JDBCMBeanTest extends MBeanTest {
         println("MBean driverLevel  = " + driverLevelString);
 
         assertEquals(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5521
             "Unexpected driver level string: " + driverLevelString +
             " JDBCVersion: " + JDBCVersion,
             -1, driverLevelString.indexOf('?'));
@@ -134,6 +136,7 @@ public class JDBCMBeanTest extends MBeanTest {
          * this test configuration is client/server.
          * Assuming that the embedded driver is available in the classpath.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         Driver d = new org.apache.derby.jdbc.EmbeddedDriver();
         int expected = d.getMajorVersion();
         assertIntAttribute(expected, getJdbcMBeanObjectName(), "MajorVersion");

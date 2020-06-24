@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.VarbitConstantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -30,6 +31,7 @@ import org.apache.derby.iapi.types.TypeId;
 public final class VarbitConstantNode extends BitConstantNode
 {
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_VAR = 0;
     final static int K_LONGVAR = 1;
     final static int K_BLOB = 2;
@@ -54,6 +56,7 @@ public final class VarbitConstantNode extends BitConstantNode
 
         switch (t.getJDBCTypeId()) {
             case Types.VARBINARY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 kind = K_VAR;
                 break;
             case Types.LONGVARBINARY:
@@ -75,6 +78,7 @@ public final class VarbitConstantNode extends BitConstantNode
             int bitLength,
             ContextManager cm) throws StandardException {
         super(hexValue, bitLength, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         kind = K_VAR;
     }
 

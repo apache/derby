@@ -104,6 +104,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         // setting of the property derby.storage.useDefaultFilePermissions.
         // The extra setup file is for testJarFiles.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite totalSuite =
             new BaseTestSuite("RestrictiveFilePermissionsTest");
 
@@ -115,6 +116,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
             new SystemPropertyTestSetup(
                 TestConfiguration.singleUseDatabaseDecorator(
                     new SupportFilesSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                         new BaseTestSuite(
                             RestrictiveFilePermissionsTest.class,
                             "haveWeGotAllCreatedFilesSuite"),
@@ -127,6 +129,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
         // For server started from command line, we should still get secure
         // permissions.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5677
         if (Derby.hasServer()) {
             totalSuite.addTest(
                 new NetworkServerTestSetup(
@@ -173,6 +176,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
     public void testDerbyDotLog() throws Exception {
         File derbydotlog = new File(home, derbyDotLog);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         checkAccessToOwner(derbydotlog, POSITIVE);
     }
 
@@ -188,6 +192,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         File servProp = new File(home, dbName + "/" + "service.properties");
 
         checkAccessToOwner(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             servProp, POSITIVE);
     }
 
@@ -200,6 +205,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                          "on commit preserve rows not logged").executeUpdate();
 
         checkAccessToOwner(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             tmp, true, POSITIVE);
     }
 
@@ -209,6 +215,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         File dbexLck = new File(home, dbName + "/" + "dbex.lck");
 
         checkAccessToOwner(dbLck, POSITIVE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
         if (PrivilegedFileOpsForTests.exists(dbexLck)) {
             checkAccessToOwner(dbexLck, POSITIVE);
@@ -248,6 +255,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         File exp = new File(home, dbName + "/" + exportFileName);
 
         checkAccessToOwner(exp, POSITIVE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
         // Make a lob table and insert one row
         s.executeUpdate("create table lobtable(i int, c clob)");
@@ -274,6 +282,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
         // Check resuling exported files
         checkAccessToOwner(exp2, POSITIVE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
         checkAccessToOwner(expLob, POSITIVE);
     }
@@ -334,6 +343,10 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         File seg0 = new File(home, dbName + "/" + "seg0");
 
         checkAccessToOwner(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             seg0, true, POSITIVE);
     }
 
@@ -364,6 +377,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         File fbd = new File(fullBackupDir);
         checkAccessToOwner(
             fbd, true, POSITIVE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
         // DERBY-6258: When taking a backup, a file called BACKUP.HISTORY
         // is created in the original database directory. Verify that its
@@ -385,6 +399,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
         checkAccessToOwner(
             db, true, POSITIVE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
         con.close();
 
@@ -397,6 +412,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         final File newDb = new File(home, dbName2);
 
         checkAccessToOwner(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             newDb, true, POSITIVE);
         con2.close();
 
@@ -436,6 +452,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         File jarsDir = new File(home, dbName + "/" + "jar");
 
         checkAccessToOwner(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             jarsDir, true, POSITIVE);
     }
 
@@ -455,6 +472,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         File traceDirF = new File(traceDir);
 
         checkAccessToOwner(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             traceDirF, true, POSITIVE);
         nsctrl.shutdown();
         assertDirectoryDeleted(traceDirF);
@@ -474,6 +492,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
         checkAccessToOwner(
             traceDirF, true, NEGATIVE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
         nsctrl.shutdown();
         assertDirectoryDeleted(traceDirF);
@@ -482,6 +501,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
     public void dotestEmbeddedIsLax() throws Exception {
         File derbydotlogF = new File(home, derbyDotLog + ".lax");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         checkAccessToOwner(derbydotlogF, NEGATIVE);
     }
 
@@ -495,6 +515,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
     // Members used by limitAccessToOwner
     private static final Set<PosixFilePermission> UNWANTED_PERMISSIONS =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6865
             Collections.unmodifiableSet(EnumSet.of(
                     PosixFilePermission.GROUP_EXECUTE,
                     PosixFilePermission.GROUP_READ,
@@ -539,7 +560,9 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         // manager.
         if (doContents) {
             // visit immediately contained file in this directory also
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             checkAccessToOwner(file, false, expectedOutcome);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6865
             for (File f : PrivilegedFileOpsForTests.listFiles(file)) {
                 checkAccessToOwner(f, false, expectedOutcome);
             }

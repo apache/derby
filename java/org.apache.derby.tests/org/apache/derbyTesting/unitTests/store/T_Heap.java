@@ -86,6 +86,7 @@ public class T_Heap extends T_Generic
 		startParams = T_Util.setEncryptionParam(startParams);
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			store = (AccessFactory) createPersistentService(getModuleToTestProtocolName(),
 			testService, startParams);
 		} catch (StandardException mse) {
@@ -101,6 +102,7 @@ public class T_Heap extends T_Generic
 
             tc = store.getTransaction(
                     getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
             if (t_001(tc))
 			{
@@ -156,12 +158,14 @@ public class T_Heap extends T_Generic
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

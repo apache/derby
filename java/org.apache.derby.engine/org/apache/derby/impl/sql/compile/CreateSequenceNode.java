@@ -37,6 +37,8 @@ import org.apache.derby.iapi.types.TypeId;
  * represents a CREATE SEQUENCE statement.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateSequenceNode extends DDLStatementNode
 {
     private TableName _sequenceName;
@@ -62,6 +64,8 @@ class CreateSequenceNode extends DDLStatementNode
      * @param cm Context manager
      * @throws org.apache.derby.shared.common.error.StandardException on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateSequenceNode
         (
          TableName sequenceName,
@@ -111,6 +115,8 @@ class CreateSequenceNode extends DDLStatementNode
             }
         }
         _cycle = cycle;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
         // automatically create the schema if it doesn't exist
         implicitCreateSchema = true;
@@ -246,6 +252,8 @@ class CreateSequenceNode extends DDLStatementNode
                         _stepValue.longValue(),
                         _maxValue.longValue(),
                         _minValue.longValue(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         _cycle);
     }
 

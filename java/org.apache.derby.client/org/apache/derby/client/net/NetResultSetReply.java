@@ -30,6 +30,7 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetResultSetReply extends NetStatementReply
     implements ResultSetReplyInterface {
 
@@ -113,6 +114,7 @@ class NetResultSetReply extends NetStatementReply
 
                 int ddmLength = getDdmLength();
                 ensureBLayerDataInBuffer(ddmLength);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 ((ClientResultSet) resultSetI).expandRowsetSqlca();
                 NetSqlca sqlca = parseSQLCARDrow(
                     ((ClientResultSet) resultSetI).rowsetSqlca_);
@@ -126,6 +128,7 @@ class NetResultSetReply extends NetStatementReply
                 }
 
                 peekCP = peekCodePoint();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
                 if (peekCP == CodePoint.SQLCARD) {
                     NetSqlca netSqlca = parseSQLCARD(((ClientResultSet) resultSetI).rowsetSqlca_);
                     resultSetI.completeSqlca(netSqlca);
@@ -134,6 +137,7 @@ class NetResultSetReply extends NetStatementReply
                     parseRDBUPDRM();
                     peekCP = peekCodePoint();
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
                 if (peekCP == CodePoint.PBSD) {
                     parsePBSD();
                 }
@@ -148,6 +152,7 @@ class NetResultSetReply extends NetStatementReply
         if (peekCP == CodePoint.EXTDTA) {
             found = true;
             do {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 copyEXTDTA((NetCursor) ((ClientResultSet) resultSetI).cursor_);
                 if (longBufferForDecryption_ != null) {//encrypted EXTDTA
                     buffer_ = longBufferForDecryption_;
@@ -163,6 +168,7 @@ class NetResultSetReply extends NetStatementReply
 
         if (peekCP == CodePoint.SQLCARD) {
             found = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ((ClientResultSet) resultSetI).expandRowsetSqlca();
             NetSqlca netSqlca =
                 parseSQLCARD(((ClientResultSet)resultSetI).rowsetSqlca_);
@@ -190,6 +196,7 @@ class NetResultSetReply extends NetStatementReply
         if (peekCP == CodePoint.RDBUPDRM) {
             found = true;
             parseRDBUPDRM();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
             peekCP = peekCodePoint();
         }
 
@@ -238,6 +245,8 @@ class NetResultSetReply extends NetStatementReply
 
     private void parseFetchError(ResultSetCallbackInterface resultSetI)
             throws DisconnectException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         int peekCP = peekCodePoint();
         switch (peekCP) {
@@ -359,6 +368,7 @@ class NetResultSetReply extends NetStatementReply
         netAgent_.setSvrcod(svrcod);
         if (svrcod == CodePoint.SVRCOD_WARNING) {
             netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
                 new ClientMessageId(SQLState.DRDA_CURSOR_NOT_OPEN)));
         } else {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,

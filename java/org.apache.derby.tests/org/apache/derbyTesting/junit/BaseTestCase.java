@@ -97,11 +97,13 @@ public abstract class BaseTestCase
         TestConfiguration config = getTestConfiguration();
         boolean trace = config.doTrace();
         boolean stopAfterFirstFail = config.stopAfterFirstFail();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
         long startTime = 0;
         if ( trace )
         {
             startTime = System.currentTimeMillis();
             out.println();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5300
             String  junitClassName = this.getClass().getName();
             junitClassName=Utilities.formatTestClassNames(junitClassName);
             out.print(traceClientType());
@@ -110,6 +112,7 @@ public abstract class BaseTestCase
 
         // install a default security manager if one has not already been
         // installed
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
         if ( System.getSecurityManager() == null )
         {
             if (config.defaultSecurityManagerSetup())
@@ -118,18 +121,21 @@ public abstract class BaseTestCase
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
         try {
             super.runBare();   
         }
         // To log the exception to file, copy the derby.log file and copy
         // the database of the failed test.
         catch (Throwable running) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4199
             PrintWriter stackOut = null;
             try{
                 String failPath = PrivilegedFileOpsForTests.getAbsolutePath(getFailureFolder());
                 // Write the stack trace of the error/failure to file.
                 stackOut = new PrintWriter(
                         PrivilegedFileOpsForTests.getFileOutputStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4270
                             new File(failPath, ERRORSTACKTRACEFILE), true));
                 stackOut.println("[Error/failure logged at " +
                         new java.util.Date() + "]");
@@ -142,6 +148,7 @@ public abstract class BaseTestCase
                 // Copy some other likely files, the rolling log files
                 // These might occur if the tests are run with 
                 // derby.stream.error.style=rollingFile
+//IC see: https://issues.apache.org/jira/browse/DERBY-6380
                 for (int i=0; i < 10; i++) {
                     String logName = "derby-" + i + ".log";
                     File origRolLog = new File(DEFAULT_DB_DIR, logName);
@@ -159,6 +166,7 @@ public abstract class BaseTestCase
                 // is an exception saving the db or derby.log we will print it
                 // and additionally try to log it to file.
                 BaseTestCase.printStackTrace(ioe);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4199
                 if (stackOut != null) {
                     stackOut.println("Copying derby.log or database failed:");
                     ioe.printStackTrace(stackOut);
@@ -169,6 +177,7 @@ public abstract class BaseTestCase
                 if (stackOut != null) {
                     stackOut.close();
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6401
                 if (stopAfterFirstFail) {
                     // if run with -Dderby.tests.stopAfterFirstFail=true
                     // exit after reporting failure. Useful for debugging
@@ -184,6 +193,7 @@ public abstract class BaseTestCase
             if ( trace )
             {
                 long timeUsed = System.currentTimeMillis() - startTime;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3556
                 out.print("used " + timeUsed + " ms ");
             }
         }
@@ -194,6 +204,7 @@ public abstract class BaseTestCase
      */
     public final TestConfiguration getTestConfiguration()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
     	return TestConfiguration.getCurrent();
     }
     
@@ -212,6 +223,7 @@ public abstract class BaseTestCase
      * @param text String to print
      */
     public static void alarm(final String text) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-993
         out.println("ALARM: " + text);
     }
 
@@ -220,6 +232,7 @@ public abstract class BaseTestCase
      * @param text String to print
      */
     public static void println(final String text) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         if (TestConfiguration.getCurrent().isVerbose()) {
             out.println("DEBUG: " + text);
             out.flush();
@@ -231,6 +244,7 @@ public abstract class BaseTestCase
      * @param text String to print
      */
     public static void traceit(final String text) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3982
         if (TestConfiguration.getCurrent().doTrace()) {
             out.println(text);
         }
@@ -262,6 +276,7 @@ public abstract class BaseTestCase
      * @param out the new stream
      */
     protected static void setSystemOut(final PrintStream out) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 System.setOut(out);
@@ -291,8 +306,10 @@ public abstract class BaseTestCase
      * @param value value of the property
      */
     protected static void setSystemProperty(final String name, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1303
 					    final String value)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 System.setProperty(name, value);
@@ -308,6 +325,7 @@ public abstract class BaseTestCase
      */
     public static void removeSystemProperty(final String name)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 System.getProperties().remove(name);
@@ -323,6 +341,7 @@ public abstract class BaseTestCase
      */
     protected static String getSystemProperty(final String name)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(new PrivilegedAction<String>() {
             public String run() {
                 return System.getProperty(name);
@@ -340,6 +359,7 @@ public abstract class BaseTestCase
      * @return The list indicates files with certain prefix.
      */
     protected static String[] getFilesWith(final File dir, String prefix) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(new PrivilegedAction<String[]>() {
                     public String[] run() {
                         //create a FilenameFilter and override its accept-method to file
@@ -363,6 +383,7 @@ public abstract class BaseTestCase
      */
     protected static URL getTestResource(final String name)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(new PrivilegedAction<URL>() {
             public URL run() {
                 return BaseTestCase.class.getClassLoader().getResource(name);
@@ -379,6 +400,7 @@ public abstract class BaseTestCase
     protected static InputStream openTestResource(final URL url)
         throws PrivilegedActionException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                 new PrivilegedExceptionAction<InputStream>() {
             public InputStream run() throws IOException {
@@ -407,6 +429,7 @@ public abstract class BaseTestCase
      * @throws AssertionFailedError if the stream contents are not equal
      */
     public static void assertEquals(InputStream is1, InputStream is2)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1524
             throws IOException {
         if (is1 == null || is2 == null) {
             assertNull("InputStream is2 is null, is1 is not", is1);
@@ -495,6 +518,7 @@ public abstract class BaseTestCase
      */
     public  static  void    assertEquals( byte[] expected, byte[] actual )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
         if ( assertSameNullness( expected, actual ) ) { return; }
         
         assertEquals( expected.length, actual.length );
@@ -531,6 +555,7 @@ public abstract class BaseTestCase
     {
         if ( assertSameNullness( expected, actual ) ) { return; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         assertEquals( expected.length, actual.length );
         for ( int i = 0; i < expected.length; i++ )
         {
@@ -545,6 +570,7 @@ public abstract class BaseTestCase
      */
     public  static  void    assertEquals( long[] expected, long[] actual )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
         if ( assertSameNullness( expected, actual ) ) { return; }
         
         assertEquals( expected.length, actual.length );
@@ -561,7 +587,9 @@ public abstract class BaseTestCase
      * @param file2 the second file to compare
      */
 	public static void assertEquals(final File file1, final File file2) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2342
 		AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         (new PrivilegedAction<Void>() {
         	public Void run() {
         		try {
@@ -601,6 +629,7 @@ public abstract class BaseTestCase
 	    String expectedStrings = "";
 	    for (int i = 0; i < expectedString.length; i++) 
 	        expectedStrings += "\t[" +i + "]" + expectedString[i] +  "\n";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4762
 	    Assert.assertEquals("expectedExitValue:" + expectedExitValue +
 	            " does not match exitValue:" + exitValue +"\n" +
 	            "expected output strings:\n" + expectedStrings + 
@@ -609,6 +638,7 @@ public abstract class BaseTestCase
 	    if (expectedString != null) {
 	        for (int i = 0; i < expectedString.length; i++) {
 	            assertTrue("Could not find expectedString:" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4762
 	                    expectedString[i] + " in output:" + output,
 	                    output.indexOf(expectedString[i]) >= 0);
 	        }
@@ -620,6 +650,7 @@ public abstract class BaseTestCase
      * but with {@code addClassPath == true}.
      */
     public static Process execJavaCmd(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
         String jvm, String cp, String[] cmd, final File dir)
             throws IOException {
         return execJavaCmd(jvm, cp, cmd, dir, true);
@@ -646,11 +677,13 @@ public abstract class BaseTestCase
 	 * @throws IOException
 	 */
     public static Process execJavaCmd(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
         String jvm, String cp, String[] cmd, final File dir, boolean addClassPath)
             throws IOException
     {
         boolean useModules = JVMInfo.isModuleAware();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return execJavaCmd(jvm, cp, cmd, dir, addClassPath, useModules);
     }
   
@@ -689,7 +722,9 @@ public abstract class BaseTestCase
         // Is this an invocation of a jar file with java -jar ...?
         final boolean isJarInvocation = cmd.length > 0 && cmd[0].equals("-jar");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 	    ArrayList<String> cmdlist = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5808
         cmdlist.add(jvm == null ? getJavaExecutableName() : jvm);
 	    if (isJ9Platform())
 	    {
@@ -697,6 +732,7 @@ public abstract class BaseTestCase
             // also add the setting for emma.active so any tests
             // that fork will work correctly. See DERBY-5558.
             String emmaactive=getSystemProperty("emma.active");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6079
             if (emmaactive != null) {
                 cmdlist.add("-Demma.active=" + emmaactive);            
             }
@@ -736,23 +772,28 @@ public abstract class BaseTestCase
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5817
         if (runsWithJaCoCo()) {
             // Property (http://www.eclemma.org/jacoco/trunk/doc/agent.html):
             // -javaagent:[yourpath/]jacocoagent.jar=[opt1]=[val1],[opt2]=[val2]
             String agent = getSystemProperty(JACOCO_AGENT_PROP);
             cmdlist.add(agent + (agent.endsWith("=") ? "": ",") +
                     "destfile=" + getJaCoCoOutFile());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
             cmdlist.add("-Djacoco.active=");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5819
         if (isSunJVM() && Boolean.valueOf(
                     getSystemProperty("derby.test.debugSubprocesses")).
                 booleanValue()) {
             setupForDebuggerAttach(cmdlist);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (useModulePath)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             cmdlist.add("--add-modules");
             cmdlist.add(ModuleUtil.TESTING_MODULE_NAME + "," + DerbyConstants.JUNIT_MODULE_NAME);
         }
@@ -763,13 +804,16 @@ public abstract class BaseTestCase
             // been set in addition to -jar, as that's probably a mistake in
             // the calling code.
             assertNull("Both -jar and classpath specified", cp);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
         } else if (addClassPath) {
             String myClasspath;
             if (cp != null) { myClasspath = cp; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             else if (useModulePath) { myClasspath = JVMInfo.getSystemModulePath(); }
             else { myClasspath = getSystemProperty("java.class.path"); }
 
             // on Windows, the garbled "file:" prefix results in an unreadable classpath
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             if (isWindowsPlatform())
             {
                 myClasspath = myClasspath.replace("file:/", "/");
@@ -784,11 +828,13 @@ public abstract class BaseTestCase
 	        cmdlist.add(cmd[i]);
 	    }
 	    final String[] command = (String[]) cmdlist.toArray(cmd);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4762
 	    println("execute java command:");
 	    for (int i = 0; i < command.length; i++) {
 	        println("command[" + i + "]" + command[i]);
 	    }
 	    try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<Process>() {
                 public Process run() throws IOException {
@@ -797,13 +843,16 @@ public abstract class BaseTestCase
 	            }
 	        });
 	    } catch (PrivilegedActionException pe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             println("Failed to run command: " + pe.getMessage());
             if (TestConfiguration.getCurrent().isVerbose())
             {
                 pe.printStackTrace(out);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
                 out.flush();
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-3829
             throw (IOException) pe.getException();
 	    }
 	}
@@ -814,6 +863,7 @@ public abstract class BaseTestCase
      * shorthand for {@code execJavaCmd(null, null, cmd, null)}.
      */
     public static Process execJavaCmd(String[] cmd) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5808
         return execJavaCmd(null, null, cmd, null);
     }
 
@@ -824,6 +874,9 @@ public abstract class BaseTestCase
      */
     public static final String getJavaExecutableName() {
         String vmname = getSystemProperty("com.ibm.oti.vm.exe");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4179
+//IC see: https://issues.apache.org/jira/browse/DERBY-4646
+//IC see: https://issues.apache.org/jira/browse/DERBY-4647
 
         if (vmname == null) {
             vmname = getSystemProperty("java.vm.name");
@@ -861,6 +914,7 @@ public abstract class BaseTestCase
     }
 
     public static final boolean isSunJVM() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4867
         String vendor = getSystemProperty("java.vendor");
         return "Sun Microsystems Inc.".equals(vendor) ||
                 "Oracle Corporation".equals(vendor);
@@ -881,6 +935,7 @@ public abstract class BaseTestCase
      */
     public static boolean isPhoneME() {
         return isCVM() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-5412
                 getSystemProperty("java.vm.version").startsWith("phoneme");
     }
 
@@ -896,6 +951,7 @@ public abstract class BaseTestCase
     
     public static final boolean isPlatform(String osName)  {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4319
         return getSystemProperty("os.name").equals(osName);
     }
 
@@ -941,6 +997,7 @@ public abstract class BaseTestCase
         boolean isModuleAware = JVMInfo.isModuleAware();
         boolean isJenkinsRun = getSystemProperty("user.dir").startsWith("/home/jenkins");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-7011
         return isModuleAware && isJenkinsRun;
     }
 
@@ -957,14 +1014,18 @@ public abstract class BaseTestCase
     }
 
     public static final boolean isJava8() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return getSystemProperty("java.version").startsWith("1.8");
     }
 
     public static final boolean runsWithEmma() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5514
         return getSystemProperty("java.class.path").indexOf("emma.jar") != -1;
     }
 
     public static boolean runsWithJaCoCo() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6067
         return SecurityManagerSetup.jacocoEnabled;
     }
 
@@ -984,6 +1045,7 @@ public abstract class BaseTestCase
      * @return a file to which a sub-process can write code coverage data
      */
     private static synchronized File getJaCoCoOutFile() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5817
         return new File(currentDirectory(),
                 "jacoco.exec." + (++spawnedCount));
     }
@@ -997,6 +1059,7 @@ public abstract class BaseTestCase
      */
     private static synchronized File getEmmaOutFile() {
         return new File(currentDirectory(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5817
                 "coverage-" + (++spawnedCount) + ".ec");
     }
 
@@ -1023,6 +1086,7 @@ public abstract class BaseTestCase
      *      or -1 if the version can't be obtained for some reason.
      */
     public static int getClassVersionMajor() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5262
         String tmp = getSystemProperty("java.class.version");
         if (tmp == null) {
             println("VM doesn't have property java.class.version");
@@ -1053,6 +1117,7 @@ public abstract class BaseTestCase
 
         try {
             AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 new PrivilegedExceptionAction<Void>() {
                     public Void run() throws
                         IOException, InterruptedIOException {
@@ -1062,6 +1127,7 @@ public abstract class BaseTestCase
                         String sysHome = getSystemProperty("derby.system.home");
 
                         StringBuffer arbitraryRAFFileNameB = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4974
 
                         arbitraryRAFFileNameB.append(sysHome);
                         arbitraryRAFFileNameB.append(File.separatorChar);
@@ -1093,6 +1159,7 @@ public abstract class BaseTestCase
                 // Better to assume nothing when the test fails. Then, tests
                 // will not be skipped and we would not miss that something is
                 // amiss.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4974
                 println("Could not test for interruptible IO," +
                         " so assuming we don't have it: " + e);
                 e.getCause().printStackTrace();
@@ -1105,7 +1172,9 @@ public abstract class BaseTestCase
 
 
     public static final boolean isIBMJVM() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4836
         return ("IBM Corporation".equals(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4667
                 getSystemProperty("java.vendor")));
     }
 
@@ -1120,14 +1189,17 @@ public abstract class BaseTestCase
      *      subprocess or one of the output collector threads to terminate
      */
     public static String readProcessOutput(Process pr)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5608
             throws InterruptedException {
         SpawnedProcess wrapper = new SpawnedProcess(pr, "readProcessOutput");
         wrapper.suppressOutputOnComplete();
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
             wrapper.complete();
         } catch (IOException ioe) {
             fail("process completion method failed", ioe);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5608
         String output = "<STDOUT>" + wrapper.getFullServerOutput() +
                 "<END STDOUT>\n";
         output += "<STDERR>" + wrapper.getFullServerError() +
@@ -1155,6 +1227,7 @@ public abstract class BaseTestCase
      * @param dir the root to start deleting from (root will also be deleted)
      */
     public static void assertDirectoryDeleted(File dir) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5836
         File[] fl = null;
         int attempts = 0;
         while (attempts < 4) {
@@ -1242,6 +1315,7 @@ public abstract class BaseTestCase
      */
     public static void fail(String msg, Throwable t)
             throws AssertionFailedError {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6660
         throw newAssertionFailedError(msg, t);
     }
 
@@ -1284,6 +1358,7 @@ public abstract class BaseTestCase
      * @throws Exception
      */
     public static void assertLaunchedJUnitTestMethod(String testLaunchMethod,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5382
             String databaseName)
             throws Exception 
     {
@@ -1295,6 +1370,7 @@ public abstract class BaseTestCase
 
     /** Returns once the system timer has advanced at least one tick. */
     public static void sleepAtLeastOneTick() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5797
         long currentTime = System.currentTimeMillis(); 
         while (System.currentTimeMillis() == currentTime) {
             sleep(1);
@@ -1304,6 +1380,7 @@ public abstract class BaseTestCase
     /** Return true if the JVM is at least at the indicated rev level */
     public static boolean vmAtLeast( int major, int minor )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6755
         String version = AccessController.doPrivileged
             (new PrivilegedAction<String>(){
                 public String run(){
@@ -1328,6 +1405,7 @@ public abstract class BaseTestCase
     }
 
     private static String traceClientType() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5300
        if (TestConfiguration.getCurrent().getJDBCClient().isEmbedded()) {
             return "(emb)";
         } else {
@@ -1336,6 +1414,7 @@ public abstract class BaseTestCase
     }
     
     private static void setupForDebuggerAttach(ArrayList<String> cmdlist) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5819
         if (debugPort == 0) {
             // lazy initialization
             String dbp = getSystemProperty("derby.test.debugPortBase");

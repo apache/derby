@@ -40,6 +40,8 @@ import org.apache.derby.iapi.types.TypeId;
  * varying.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class ConcatenationOperatorNode extends BinaryOperatorNode {
 	/**
      * Constructor for a ConcatenationOperatorNode
@@ -83,6 +85,8 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
                     (StringDataValue) getTypeServices().getNull();
             resultValue.concatenate(leftValue, rightValue, resultValue);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             return new CharConstantNode(
                 resultValue.getString(), getContextManager());
         }
@@ -98,6 +102,7 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 	 *                thrown on failure
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException {
 		// deal with binding operands
@@ -223,6 +228,8 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 					.getCastToCharWidth(leftOperand							.getTypeServices()));	
 
             leftOperand = new CastNode(leftOperand, dtd, getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			// DERBY-2910 - Match current schema collation for implicit cast as we do for
 			// explicit casts per SQL Spec 6.12 (10)			
@@ -238,6 +245,8 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 							.getCastToCharWidth(rightOperand
 									.getTypeServices()));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             rightOperand = new CastNode(rightOperand, dtd, getContextManager());
 			
 			// DERBY-2910 - Match current schema collation for implicit cast as we do for
@@ -301,6 +310,7 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 	 *                not supported on the operand types.
 	 */
 	private DataTypeDescriptor resolveConcatOperation(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
 			DataTypeDescriptor leftType, DataTypeDescriptor rightType)
 			throws StandardException {
 		TypeId leftTypeId;
@@ -389,6 +399,7 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 			switch (rightTypeId.getJDBCTypeId()) {
 			case Types.CHAR:
 			case Types.BINARY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 				if (resultLength > Limits.DB2_CHAR_MAXWIDTH) {
 					if (rightTypeId.getJDBCTypeId() == Types.CHAR)
 						//operands CHAR(A) CHAR(B) and A+B>254 then result is
@@ -403,6 +414,7 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 
 			case Types.VARCHAR:
 			case Types.VARBINARY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 				if (resultLength > Limits.DB2_CONCAT_VARCHAR_LENGTH) {
 					if (rightTypeId.getJDBCTypeId() == Types.VARCHAR)
 						//operands CHAR(A) VARCHAR(B) and A+B>4000 then result
@@ -429,6 +441,7 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 							 // result is LONG VARCHAR
 			case Types.VARCHAR: //operands VARCHAR(A) VARCHAR(B) and A+B>4000
 								// then result is LONG VARCHAR
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 				if (resultLength > Limits.DB2_CONCAT_VARCHAR_LENGTH)
 					higherType = TypeId.LONGVARCHAR_NAME;
 				break;
@@ -446,6 +459,7 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
 			case Types.VARBINARY://operands VARCHAR FOR BIT DATA(A) VARCHAR FOR
 								 // BIT DATA(B) and A+B>4000 then result is LONG
 								 // VARCHAR FOR BIT DATA
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 				if (resultLength > Limits.DB2_CONCAT_VARCHAR_LENGTH)
 					higherType = TypeId.LONGVARBIT_NAME;
 				break;

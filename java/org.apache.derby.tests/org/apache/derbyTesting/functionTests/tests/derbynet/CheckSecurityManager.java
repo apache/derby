@@ -68,6 +68,7 @@ public class CheckSecurityManager extends BaseJDBCTestCase
 			//    We seem to be able to create the database.
 			// Ideally this test should attempt to create the database
 			// ../wombat;create=true and get the security exception.
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 			String hostName = TestUtil.getHostName();
 			String databaseURL;
 			if (hostName.equals("localhost"))

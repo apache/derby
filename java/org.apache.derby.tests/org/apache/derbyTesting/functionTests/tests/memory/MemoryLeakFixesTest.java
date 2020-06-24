@@ -175,6 +175,7 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
      * @throws SQLException if something goes wrong
      */
     public void testRepeatedDatabaseCreationWithAutoStats()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5336
             throws SQLException {
         final String DB_NAME = "derby-memory-test";
         final File DB_DIR = new File("system", DB_NAME);
@@ -184,6 +185,7 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
         // within 20 iterations;  this program was run on Windows 7 64-bit using
         // jdk1.6.0_26
         int iter = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5472
         while (iter < 20) {
             
             println("-- " + iter++);
@@ -202,6 +204,7 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
             JDBCDataSource.clearStringBeanProperty(ds, "createDatabase");
 
             // Disable auto-commit to speed up insert statements.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5472
             conn.setAutoCommit(false);
             
             // we'll use this one statement the whole time this db is open
@@ -216,6 +219,7 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
             // table trigger the daemon that updates index cardinality
             // statistics. derby.storage.indexStats.debug.createThreshold is
             // currently 100.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5472
             PreparedStatement ins =
                     conn.prepareStatement("INSERT INTO TEST VALUES ?");
             for (int i = 0; i < 200; i++) {

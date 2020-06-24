@@ -170,6 +170,8 @@ class ParseException extends Exception {
    * string literal.
    */
   protected String add_escapes(String str) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
       StringBuilder retval = new StringBuilder();
       char ch;
       for (int i = 0; i < str.length(); i++) {
@@ -204,6 +206,8 @@ class ParseException extends Exception {
            default:
               if ((ch = str.charAt(i)) < 0x20 || ch > 0x7e) {
                  String s = "0000" + Integer.toString(ch, 16);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                  retval.append("\\u");
                  retval.append(s.substring(s.length() - 4, s.length()));
               } else {

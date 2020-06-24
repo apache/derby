@@ -47,6 +47,7 @@ extends ByteHolderInputStream
 
 	public long skip(long count) throws IOException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2686
 		long bytesSkipped = 0L;
 		while (bytesSkipped < count) {
 			fillByteHolder();

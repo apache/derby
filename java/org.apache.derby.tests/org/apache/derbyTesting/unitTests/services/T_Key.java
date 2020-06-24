@@ -40,6 +40,7 @@ public class T_Key  {
 	private boolean   raiseException;
 
 	public static T_Key		simpleInt(int value) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return new T_Key(value, 0, true, false);
 	}
 	public static T_Key		dontFindInt(int value) {
@@ -59,6 +60,7 @@ public class T_Key  {
 		T_Key tkey = new T_Key();
 
 		if (rand < 0.48)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			tkey.value = (int) (100.0 * rand);
 		else if (rand < 0.96)
 			tkey.value = (int) (100.0 * rand);

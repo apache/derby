@@ -34,6 +34,7 @@ class MemberTable {
 	private MemberTableHash	mutableMTH = null;
 
 	public MemberTable(int count) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		entries = new Vector<ClassMember>(count);
 		hashtable = new Hashtable<MemberTableHash,MemberTableHash>((count > 50) ? count : 50);
 		mutableMTH = new MemberTableHash(null, null);
@@ -46,6 +47,7 @@ class MemberTable {
 									entries.size());
 		/* Add to the Vector */
 		entries.add(item);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
 		/* Add to the Hashtable */
 		hashtable.put(mth, mth);
@@ -59,6 +61,7 @@ class MemberTable {
 		mutableMTH.setHashCode();
 
 		/* search the hash table */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		MemberTableHash mth = hashtable.get(mutableMTH);
 		if (mth == null)
 		{
@@ -84,6 +87,7 @@ class MemberTable {
 	int classFileSize() {
 		int size = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<ClassMember> lentries = entries;
 		int count = lentries.size();
 		for (int i = 0; i < count; i++) {

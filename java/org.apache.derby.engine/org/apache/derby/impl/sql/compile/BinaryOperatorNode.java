@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BinaryOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -45,6 +46,8 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class BinaryOperatorNode extends OperatorNode
 {
 	String	operator;
@@ -54,6 +57,8 @@ class BinaryOperatorNode extends OperatorNode
 	/*
 	** These identifiers are used in the grammar.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final static int PLUS   = 1;
     final static int MINUS  = 2;
     final static int TIMES  = 3;
@@ -85,6 +90,7 @@ class BinaryOperatorNode extends OperatorNode
 	// possible.
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_XMLEXISTS = 0;
     final static int K_XMLQUERY = 1;
     final static int K_BASE = 2; // when BinaryOperatorNode is used
@@ -122,8 +128,11 @@ class BinaryOperatorNode extends OperatorNode
     /** The query expression if the operator is XMLEXISTS or XMLQUERY. */
     private String xmlQuery;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BinaryOperatorNode(ContextManager cm) {
         super(cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         kind = K_BASE;
     }
 
@@ -157,6 +166,8 @@ class BinaryOperatorNode extends OperatorNode
         this.rightOperand = rightOperand;
         this.leftInterfaceType = leftInterfaceType;
         this.rightInterfaceType = rightInterfaceType;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         this.kind = K_BASE;
 	}
 
@@ -230,6 +241,8 @@ class BinaryOperatorNode extends OperatorNode
 	 * Used when we don't know the interface type until
 	 * later in binding.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLeftRightInterfaceType(String iType)
 	{
 		leftInterfaceType = iType;
@@ -243,6 +256,8 @@ class BinaryOperatorNode extends OperatorNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -277,7 +292,9 @@ class BinaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -286,12 +303,14 @@ class BinaryOperatorNode extends OperatorNode
 		rightOperand = rightOperand.bindExpression(fromList, subqueryList, 
             aggregates);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if ((kind == K_XMLEXISTS) ||
             (kind == K_XMLQUERY)) {
 			return bindXMLQuery();
         }
 
 		/* Is there a ? parameter on the left? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if (leftOperand.requiresTypeFromContext())
 		{
 			/*
@@ -365,6 +384,7 @@ class BinaryOperatorNode extends OperatorNode
         }
 
         // Set the result type of this operator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_XMLEXISTS) {
             // For XMLEXISTS, the result type is always SQLBoolean.
             // The "true" in the next line says that the result
@@ -378,6 +398,7 @@ class BinaryOperatorNode extends OperatorNode
             // XML data value, per SQL/XML spec 6.17: "...yielding a value
             // X1 of an XML type."
             setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                     Types.SQLXML));
         }
 
@@ -389,10 +410,13 @@ class BinaryOperatorNode extends OperatorNode
 	 * the default behavior.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode genSQLJavaSQLTree() throws StandardException
 	{
 		TypeId leftTypeId = leftOperand.getTypeId();
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (leftTypeId.userType())
 			leftOperand = leftOperand.genSQLJavaSQLTree();
 
@@ -419,6 +443,8 @@ class BinaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -490,6 +516,7 @@ class BinaryOperatorNode extends OperatorNode
 		// additional work to be done.
 		boolean xmlGen =
            (kind == K_XMLQUERY) || (kind == K_XMLEXISTS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		/*
 		** The receiver is the operand with the higher type precedence.
@@ -507,6 +534,7 @@ class BinaryOperatorNode extends OperatorNode
 			** a class, they can note that in the implementation
 			** of the node that uses the method.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             receiverType = (kind == K_BASE)
 				? getReceiverInterfaceName()
 				: leftInterfaceType;
@@ -521,6 +549,7 @@ class BinaryOperatorNode extends OperatorNode
 			mb.cast(receiverType); // cast the method instance
 			// stack: left
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 			mb.dup();
 			mb.cast(leftInterfaceType);
 			// stack: left, left
@@ -542,6 +571,7 @@ class BinaryOperatorNode extends OperatorNode
 			** a class, they can note that in the implementation
 			** of the node that uses the method.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             receiverType = (kind == K_BASE)
 				? getReceiverInterfaceName()
 				: rightInterfaceType;
@@ -557,6 +587,7 @@ class BinaryOperatorNode extends OperatorNode
 			**  <right expression>.method(sqlXmlUtil)
 			*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 			rightOperand.generateExpression(acb, mb);			
 			mb.cast(receiverType); // cast the method instance
 			// stack: right
@@ -584,6 +615,7 @@ class BinaryOperatorNode extends OperatorNode
 		}
 
 		/* Figure out the result type name */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         resultTypeName = (kind == K_BASE)
 			? getTypeCompiler().interfaceName()
 			: resultInterfaceType;
@@ -629,6 +661,7 @@ class BinaryOperatorNode extends OperatorNode
 				{
 					// to leave the DataValueDescriptor value on the stack, since setWidth is void
 					mb.dup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 					mb.push(getTypeServices().getPrecision());
 					mb.push(getTypeServices().getScale());
@@ -652,6 +685,8 @@ class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLeftOperand(ValueNode newLeftOperand)
 	{
 		leftOperand = newLeftOperand;
@@ -662,6 +697,8 @@ class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current leftOperand.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getLeftOperand()
 	{
 		return leftOperand;
@@ -672,6 +709,8 @@ class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @param newRightOperand	The new rightOperand
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRightOperand(ValueNode newRightOperand)
 	{
 		rightOperand = newRightOperand;
@@ -682,6 +721,8 @@ class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current rightOperand.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getRightOperand()
 	{
 		return rightOperand;
@@ -731,6 +772,8 @@ class BinaryOperatorNode extends OperatorNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -768,6 +811,8 @@ class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getReceiverInterfaceName() throws StandardException {
 		if (SanityManager.DEBUG)
 		{
@@ -807,11 +852,14 @@ class BinaryOperatorNode extends OperatorNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (leftOperand != null)
 		{
 			leftOperand = (ValueNode)leftOperand.accept(v);
@@ -825,6 +873,7 @@ class BinaryOperatorNode extends OperatorNode
 
     @Override
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) &&
                 ((BinaryOperatorNode)o).kind == this.kind;
     }

@@ -49,6 +49,7 @@ public class CursorTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testCursor() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2299
         PreparedStatement select;
         ResultSet cursor;
 
@@ -196,6 +197,7 @@ public class CursorTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("CursorTest");
         
         suite.addTest(TestConfiguration.defaultSuite(CursorTest.class));

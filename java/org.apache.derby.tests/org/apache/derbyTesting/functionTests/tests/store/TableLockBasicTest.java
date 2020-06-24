@@ -536,6 +536,7 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
+//IC see: https://issues.apache.org/jira/browse/DERBY-5420
                     + "	optimizer estimated row count: 6.00\n"
                     + "	optimizer estimated cost: 100.40"
                 },
@@ -843,6 +844,12 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
+//IC see: https://issues.apache.org/jira/browse/DERBY-5420
+//IC see: https://issues.apache.org/jira/browse/DERBY-5420
+//IC see: https://issues.apache.org/jira/browse/DERBY-5420
+//IC see: https://issues.apache.org/jira/browse/DERBY-5420
+//IC see: https://issues.apache.org/jira/browse/DERBY-5420
+//IC see: https://issues.apache.org/jira/browse/DERBY-5420
                     + "	optimizer estimated row count: 6.00\n"
                     + "	optimizer estimated cost: 100.40"
                 }

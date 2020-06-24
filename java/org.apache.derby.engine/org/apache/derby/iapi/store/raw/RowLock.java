@@ -97,6 +97,7 @@ public final class RowLock {
 
 	private RowLock(int type) {
 		this.type = type;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2122
 		typeBit = (1 << type);
 		int bitmask = 0;
 		for (int i = 0; i < R_NUMBER; i++) {
@@ -110,6 +111,7 @@ public final class RowLock {
 
 	/**
 		Get an integer representation of the type of the lock. This method is 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         guaranteed to return an integer &gt;= 0 and &lt; R_NUMBER. No correlation 
         between the value and one of the static variables (CIS etc.) is 
         guaranteed, except that the values returned do not change.
@@ -119,6 +121,7 @@ public final class RowLock {
 	}
 
 	public boolean isCompatible(RowLock granted) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2122
 		return (granted.typeBit & compat) != 0;
 	}
 

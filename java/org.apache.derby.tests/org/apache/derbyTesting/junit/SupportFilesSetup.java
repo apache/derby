@@ -88,6 +88,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public SupportFilesSetup(Test test, String[] readOnly)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2435
         this(test, readOnly, (String[]) null, (String[]) null, (String[]) null);
     }
     
@@ -98,6 +99,7 @@ public class SupportFilesSetup extends TestSetup {
    */
     public SupportFilesSetup(Test test, String[] readOnly, String[] readWrite)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2435
         this(test, readOnly, readWrite, (String[]) null, (String[]) null);
     }
     
@@ -119,6 +121,7 @@ public class SupportFilesSetup extends TestSetup {
     
     protected void setUp() throws PrivilegedActionException, IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
         privCopyFiles(EXTIN, readOnly, readOnlyTargetFileNames);
         privCopyFiles(EXTINOUT, readWrite, readWriteTargetFileNames);
         privCopyFiles(EXTOUT, (String[]) null, (String[]) null);
@@ -134,6 +137,7 @@ public class SupportFilesSetup extends TestSetup {
     public  static   void privCopyFiles(final String dirName, final String[] resources, final String[] targetNames)
     throws PrivilegedActionException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
             public Void run() throws IOException, PrivilegedActionException {
               copyFiles(dirName, resources, targetNames);
@@ -158,6 +162,7 @@ public class SupportFilesSetup extends TestSetup {
                 "org/apache/derbyTesting/".concat(resources[i]);
             
             String baseName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2435
 
             if ( targetNames == null )
             {
@@ -226,6 +231,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static File getReadOnly(String name)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
         return getFile(EXTIN, name);
     }
     
@@ -235,6 +241,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static String getReadOnlyFileName(final String name)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                 new PrivilegedAction<String>() {
             public String run() {
@@ -250,6 +257,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static String getReadWriteFileName(final String name)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         return AccessController.doPrivileged(
                 new PrivilegedAction<String>() {
             public String run() {
@@ -264,6 +272,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static File getReadWrite(String name)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
         return getFile(EXTINOUT, name);
     }
     /**
@@ -272,6 +281,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static File getWriteOnly(String name)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
         return getFile(EXTOUT, name);
     }
     
@@ -284,9 +294,11 @@ public class SupportFilesSetup extends TestSetup {
     private static URL getURL(final File file) throws MalformedURLException
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<URL>() {
                 public URL run() throws MalformedURLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     return file.toURI().toURL();
                 }
             });
@@ -298,6 +310,7 @@ public class SupportFilesSetup extends TestSetup {
 
     public static void deleteFile(final String fileName) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6635
         deleteFile( new File(fileName) );
     }
 

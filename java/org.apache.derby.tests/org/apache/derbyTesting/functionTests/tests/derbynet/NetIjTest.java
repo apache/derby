@@ -48,6 +48,7 @@ public final class NetIjTest extends ScriptTestCase {
      * scripts (.sql files) - only run in client.
      */
     private static final String[] CLIENT_TESTS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         "testclientij",
     };
 
@@ -70,6 +71,7 @@ public final class NetIjTest extends ScriptTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("NetScripts");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Set up the scripts run with the network client
         BaseTestSuite clientTests = new BaseTestSuite("NetScripts:client");
@@ -77,6 +79,8 @@ public final class NetIjTest extends ScriptTestCase {
 
         int port = TestConfiguration.getCurrent().getPort();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
         Properties prop = new Properties();
         prop.setProperty("ij.protocol",
                 "jdbc:derby://localhost:"+port+"/");
@@ -95,6 +99,8 @@ public final class NetIjTest extends ScriptTestCase {
      * A single JUnit test that runs a single derbynet script.
      */
     private NetIjTest(String netTest){
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
         super(netTest,true);
     }
 
@@ -104,6 +110,7 @@ public final class NetIjTest extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite(String[] list) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Net scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(

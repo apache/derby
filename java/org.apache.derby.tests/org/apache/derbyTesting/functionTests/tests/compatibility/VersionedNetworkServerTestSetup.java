@@ -88,6 +88,7 @@ public class VersionedNetworkServerTestSetup
                 (appendToClasspath == null
                             ? ""
                             : File.pathSeparator + appendToClasspath);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("org.apache.derby.drda.NetworkServerControl");
         cmd.add("start");
@@ -100,6 +101,7 @@ public class VersionedNetworkServerTestSetup
         Process proc = null;
         try {
             proc = BaseTestCase.execJavaCmd(null, classpath,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 cmd.toArray(new String[cmd.size()]), null);
         } catch (IOException ioe) {
             fail("failed to start server: " + ioe.getMessage());
@@ -170,6 +172,7 @@ public class VersionedNetworkServerTestSetup
     private String shutDownInSeparateProcess() {
         int port = TestConfiguration.getCurrent().getPort();
         // java -classpath ... org.apache.derby.drda...
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("org.apache.derby.drda.NetworkServerControl");
         cmd.add("shutdown");
@@ -181,6 +184,7 @@ public class VersionedNetworkServerTestSetup
         Process proc;
         try {
             proc = BaseTestCase.execJavaCmd(null, dist.getProductionClasspath(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     cmd.toArray(new String[cmd.size()]), null);
         } catch (IOException ioe) {
             return "shutdown process failed to start: " + ioe.getMessage();

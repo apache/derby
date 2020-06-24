@@ -30,7 +30,9 @@ import javax.naming.Referenceable;
 import javax.naming.StringRefAddr;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    <P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
     This data source is suitable for an application using embedded Derby,
     running on full Java SE 6 and higher, corresponding to 4.0 and higher.
     </P>
@@ -106,6 +108,8 @@ import javax.naming.StringRefAddr;
   E.g. <code>setConnectionAttributes("bootPassword=erd3234dggd3kazkj3000");</code>.
   <BR>The database name must be set by the DataSource property <code>databaseName</code> and not by setting the <code>databaseName</code>
   connection attribute in the <code>connectionAttributes</code> property.
+//IC see: https://issues.apache.org/jira/browse/DERBY-441
+//IC see: https://issues.apache.org/jira/browse/DERBY-441
 	<BR>
    Any attributes that can be set using a property of this DataSource implementation
    (e.g user, password) should not be set in connectionAttributes. Conflicting
@@ -188,6 +192,7 @@ import javax.naming.StringRefAddr;
 
 */
 public class EmbeddedDataSource extends ReferenceableDataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                                 implements Referenceable
 {
 
@@ -239,6 +244,8 @@ public class EmbeddedDataSource extends ReferenceableDataSource
 	{
         // These fields will be set by the JNDI server when it decides to
         // materialize a data source.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4955
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         Reference ref = new Reference(
             this.getClass().getName(),
             "org.apache.derby.jdbc.ReferenceableDataSource",
@@ -281,6 +288,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource
                 continue;
 
             Class<?> returnType = m.getReturnType();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
 
             if (Integer.TYPE.equals(returnType)
                     || Short.TYPE.equals(returnType)
@@ -293,6 +301,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource
                 String propertyName = methodName.substring(3, 4).toLowerCase(
                         java.util.Locale.ENGLISH).concat(
                                 methodName.substring(4));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
 
                 try {
                     Object ov = m.invoke(ths, (Object[])null);

@@ -142,6 +142,8 @@ public class SecureServerTest extends BaseJDBCTestCase
     }
 
     public SecureServerTest(String fixture) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
         super(fixture);
     }
 
@@ -159,11 +161,13 @@ public class SecureServerTest extends BaseJDBCTestCase
         //NetworkServerTestSetup.setWaitTime( 10000L );
         
         BaseTestSuite      suite = new BaseTestSuite("SecureServerTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Server booting requires that we run from the jar files
         if ( !TestConfiguration.loadingFromJars() ) { return suite; }
         
         // Need derbynet.jar in the classpath!
+//IC see: https://issues.apache.org/jira/browse/DERBY-2366
         if (!Derby.hasServer())
             return suite;
 
@@ -184,6 +188,8 @@ public class SecureServerTest extends BaseJDBCTestCase
         // this wildcard port is rejected by the server right now
         //suite.addTest( decorateTest( false,  true, null, IPV6W, RUNNING_SECURITY_BOOTED ) );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
         suite.addTest( makeDerby6619Test() );
         return suite;
     }
@@ -224,14 +230,17 @@ public class SecureServerTest extends BaseJDBCTestCase
         String[]        startupProperties = getStartupProperties( authenticationRequired, customDerbyProperties );
         String[]        startupArgs = getStartupArgs( unsecureSet, wildCardHost );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2714
         NetworkServerTestSetup networkServerTestSetup =
                 new NetworkServerTestSetup
             (
              secureServerTest,
              startupProperties,
              startupArgs,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3504
              secureServerTest._outcome.serverShouldComeUp()
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2714
 
         secureServerTest.nsTestSetup = networkServerTestSetup;
 
@@ -241,6 +250,7 @@ public class SecureServerTest extends BaseJDBCTestCase
         // if using the custom derby.properties, copy the custom properties to a visible place
         if ( customDerbyProperties != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2435
             testSetup = new SupportFilesSetup
                 (
                  testSetup,
@@ -268,9 +278,11 @@ public class SecureServerTest extends BaseJDBCTestCase
     private static  String[]    getStartupArgs( boolean setUnsecureOption, String wildCardHost )
     {
         ArrayList<String> list = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         if ( setUnsecureOption )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2378
             list.add( "-noSecurityManager" );
         }
         
@@ -291,6 +303,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     private static  String[]  getStartupProperties( boolean authenticationRequired, String customDerbyProperties )
     {
         ArrayList<String> list = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         if ( authenticationRequired )
         {
@@ -301,13 +314,18 @@ public class SecureServerTest extends BaseJDBCTestCase
 
         if ( customDerbyProperties != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2435
             list.add( "derby.system.home=extinout" );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return list.toArray(new String[list.size()]);
     }
     
     // Policy which lacks the permission to set the context class loader.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
     final static String POLICY6619 =
             "org/apache/derbyTesting/functionTests/" +
             "tests/derbynet/SecureServerTest.policy";
@@ -342,16 +360,21 @@ public class SecureServerTest extends BaseJDBCTestCase
     {	
         String      myName = toString();
         boolean     serverCameUp = serverCameUp();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6225
         String      serverOutput = getServerOutput();
         boolean     outputOK = ( serverOutput.indexOf( _outcome.expectedServerOutput() ) >= 0 );
 
         assertEquals( myName + ": serverCameUp = " + serverCameUp, _outcome.serverShouldComeUp(), serverCameUp );
 
         assertWarningDerby6619("user.dir", false); // standard class loader
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6067
         if (!(runsWithEmma() || runsWithJaCoCo())) {
             // With Emma we run without the security manager, so we can't
             // assert on seeing it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5514
             assertTrue( myName + "\nExpected: " +
                         _outcome.expectedServerOutput() +
                         "\nBut saw: " + serverOutput , outputOK );
@@ -368,6 +391,7 @@ public class SecureServerTest extends BaseJDBCTestCase
         //
         runsysinfo();
         enableTracing();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3708
         setTraceDirectory();
         disableTracing();
         
@@ -376,6 +400,7 @@ public class SecureServerTest extends BaseJDBCTestCase
 
     private void disableTracing() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
         String traceOffOutput = runServerCommand(
                 new String[] { "trace", "off" });
 
@@ -387,6 +412,7 @@ public class SecureServerTest extends BaseJDBCTestCase
 
     private void setTraceDirectory() throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
         String  traceDirectoryOutput = runServerCommand(
                 new String[] { "tracedirectory", "trace" });
         println( "Output for tracedirectory trace command:\n\n" + traceDirectoryOutput );
@@ -427,6 +453,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     private void    runsysinfo()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
         String          sysinfoOutput = runServerCommand(
                 new String[] { "sysinfo" } );
 
@@ -437,6 +464,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     private void    enableTracing()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
         String          traceOnOutput = runServerCommand(
                 new String[] { "trace",  "on" } );
 
@@ -455,6 +483,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     public String toString()
     {
         StringBuilder    buffer = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         buffer.append( "SecureServerTest( " );
         buffer.append( "Opened = " ); buffer.append( _unsecureSet);
@@ -482,7 +511,9 @@ public class SecureServerTest extends BaseJDBCTestCase
     {
         String          portNumber = Integer.toString( getTestConfiguration().getPort() );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> cmdList = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5504
         cmdList.add("-Demma.verbosity.level=silent");
         cmdList.add("org.apache.derby.drda.NetworkServerControl");
         cmdList.add("-p");
@@ -497,6 +528,7 @@ public class SecureServerTest extends BaseJDBCTestCase
                 cmdList.toString());
         
         // Ensure it completes without failures.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
         assertEquals(0, spawned.complete());
         
         return spawned.getFullServerOutput();
@@ -518,6 +550,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     {
         return NetworkServerTestSetup.pingForServerUp(
             NetworkServerTestSetup.getNetworkServerControl(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3504
             nsTestSetup.getServerProcess().getProcess(), true);
     }
 
@@ -530,6 +563,8 @@ public class SecureServerTest extends BaseJDBCTestCase
 
     private void assertWarningDerby6619(String logLocation, boolean expected)
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
 
         final String logFileName =
                 getSystemProperty(logLocation) + File.separator + "derby.log";

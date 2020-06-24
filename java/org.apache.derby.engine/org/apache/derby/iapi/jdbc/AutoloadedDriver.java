@@ -111,6 +111,7 @@ public class AutoloadedDriver implements Driver
 		// the application is looking for a connection from some other
 		// driver.
 		//
+//IC see: https://issues.apache.org/jira/browse/DERBY-2788
 		return !_engineForcedDown && InternalDriver.embeddedDriverAcceptsURL(url);
 	}
 
@@ -193,6 +194,7 @@ public class AutoloadedDriver implements Driver
 
     public  Logger getParentLogger() throws SQLFeatureNotSupportedException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
     }
     
@@ -215,6 +217,7 @@ public class AutoloadedDriver implements Driver
 		}
 
 		if ( !isBooted() ) { JDBCBoot.boot(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 		return _driverModule;
 	}
@@ -231,6 +234,8 @@ public class AutoloadedDriver implements Driver
         try {
             if (_autoloadedDriver == null) {
                 //Support JDBC 4 or higher (DERBY-2905)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5029
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
                 _autoloadedDriver = makeAutoloadedDriver();
                 DriverManager.registerDriver(_autoloadedDriver);
             }
@@ -250,6 +255,7 @@ public class AutoloadedDriver implements Driver
 		_engineForcedDown = true;
         try {
             // deregister is false if user set deregister=false attribute (DERBY-2905)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
             if (InternalDriver.getDeregister() && _autoloadedDriver != null) {
                 deregisterDriver(_autoloadedDriver);
                 _autoloadedDriver = null;

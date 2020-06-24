@@ -48,6 +48,7 @@ public class Derby5730Test extends BaseTestCase {
     public static Test suite() {
         // The test case uses DriverManager, so require JDBC 3.0 or higher.
         if (JDBC.vmSupportsJDBC3()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(Derby5730Test.class);
         }
         return new BaseTestSuite("Derby5730Test - skipped");
@@ -108,6 +109,7 @@ public class Derby5730Test extends BaseTestCase {
      * Must run with capped memory size (-Xmx16M) to expose the memory leak.
      */
     public static void main(String[] args) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5753
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
         for (int i = 0; i < FUNCTIONS.length; i++) {
             Connection c = DriverManager.getConnection(

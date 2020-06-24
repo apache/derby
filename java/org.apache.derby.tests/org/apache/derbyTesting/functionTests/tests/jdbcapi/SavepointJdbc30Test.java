@@ -58,6 +58,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
      * @return A suite containing embedded, client and embedded with XA suites
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("SavepointJdbc30_JSR169Test suite");
 
@@ -70,6 +71,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
         suite.addTest(embedded);
 
         // Get the tests for client.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite client =
             new BaseTestSuite("SavepointJdbc30_JSR169Test:client");
 
@@ -80,7 +82,9 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
         // an XA data source if it is supported. This is not supported
         // under JSR169.
         if (JDBC.vmSupportsJDBC3()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             embedded = new BaseTestSuite(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3568
             "SavepointJdbc30_JSR169Test:embedded XADataSource");
             embedded.addTestSuite(SavepointJdbc30Test.class);
             embedded.addTest(getEmbeddedSuite("SavepointJdbc30_JSR169Test:"
@@ -89,6 +93,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
             //        	 Repeat the client tests obtaining a connection from
             // an XA data source if it is supported. This is not supported
             // under JSR169.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             client = new BaseTestSuite(
                 "SavepointJdbc30_JSR169Test:client XADatasource");
 
@@ -96,6 +101,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
             suite.addTest(TestConfiguration.clientServerDecorator(TestConfiguration.connectionXADecorator(client)));        	
         }	
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4885
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 1, 2)) {
             /**
@@ -119,6 +125,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
      * mode. These tests have names starting with x and are added automatically.
      */
     private static Test getEmbeddedSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite embedded = new BaseTestSuite(name);
         Method[] methods = SavepointJdbc30Test.class.getMethods();
         for (int i = 0; i < methods.length; i++) {
@@ -143,6 +150,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
         // Keep Autocommit off
         getConnection().setAutoCommit(false);
         // Clear the tables created by the decorator
+//IC see: https://issues.apache.org/jira/browse/DERBY-5114
         Statement s = createStatement();
         s.execute("truncate table t1");
         s.execute("truncate table t2");
@@ -959,6 +967,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
         Statement s = createStatement();
 
         // Make sure T1 is empty (testcase running order might have left content!):
+//IC see: https://issues.apache.org/jira/browse/DERBY-3824
         s.execute("DELETE FROM T1");
         
         Savepoint savepoint1 = con.setSavepoint();

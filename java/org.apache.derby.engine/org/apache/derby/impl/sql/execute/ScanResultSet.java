@@ -78,6 +78,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
 
     /** Object used to create and reset the candidate row. */
     final ExecRowBuilder resultRowBuilder;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
     /** The candidate row, matches the shape of the rows in
      * the underlying object to be scanned.
@@ -124,6 +125,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
         this.tableLocked = tableLocked;
         suppliedLockMode = lockMode;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (isolationLevel == TransactionControl.UNSPECIFIED_ISOLATION_LEVEL) {
             unspecifiedIsolationLevel = true;
             isolationLevel = getLanguageConnectionContext().getCurrentIsolationLevel();
@@ -136,6 +138,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
             translateLanguageIsolationLevel(isolationLevel);
 
         ExecPreparedStatement ps = activation.getPreparedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
         // Create a candidate row.
         resultRowBuilder =
@@ -186,6 +189,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
          */
         if (tableLocked ||
                 (languageLevel ==
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
                      TransactionControl.SERIALIZABLE_ISOLATION_LEVEL)) {
             return suppliedLockMode;
         } else {
@@ -214,6 +218,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     private int translateLanguageIsolationLevel(int languageLevel) {
 
         switch (languageLevel) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         case TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL:
             return TransactionController.ISOLATION_READ_UNCOMMITTED;
         case TransactionControl.READ_COMMITTED_ISOLATION_LEVEL:
@@ -227,6 +232,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
                 return TransactionController.ISOLATION_READ_COMMITTED;
             }
             return TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         case TransactionControl.REPEATABLE_READ_ISOLATION_LEVEL:
             return TransactionController.ISOLATION_REPEATABLE_READ;
         case TransactionControl.SERIALIZABLE_ISOLATION_LEVEL:
@@ -269,6 +275,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     
     public Element toXML( Element parentNode, String tag ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6266
         Element myNode = super.toXML( parentNode, tag );
         if ( tableName != null ) { myNode.setAttribute( "tableName", tableName ); }
         if ( indexName != null ) { myNode.setAttribute( "indexName", indexName ); }

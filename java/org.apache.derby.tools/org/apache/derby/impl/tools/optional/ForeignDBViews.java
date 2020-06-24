@@ -174,6 +174,7 @@ public	class   ForeignDBViews  implements OptionalTool
         for ( String schemaName : schemas ) { dropDerbySchema( derbyConn, schemaName ); }
 
         // now drop the connection to the foreign database
+//IC see: https://issues.apache.org/jira/browse/DERBY-6440
         ForeignTableVTI.dropConnection( foreignConnectionURL );
     }
 

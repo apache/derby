@@ -36,6 +36,7 @@ class SubstituteExpressionVisitor implements Visitor
     private Class<?>  skipOverClass;
 	
 	SubstituteExpressionVisitor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode s, ValueNode t, Class<?> skipThisClass)
 	{
 		source = s;
@@ -46,6 +47,8 @@ class SubstituteExpressionVisitor implements Visitor
 	/**
 	 * used by GroupByNode to process expressions by complexity level.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getSource()
 	{
 		return source;
@@ -83,6 +86,7 @@ class SubstituteExpressionVisitor implements Visitor
 
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 }

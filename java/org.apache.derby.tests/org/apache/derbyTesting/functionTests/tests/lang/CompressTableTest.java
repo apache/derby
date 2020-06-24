@@ -121,6 +121,7 @@ public class CompressTableTest extends BaseJDBCTestCase {
         // Object used by the main thread to tell the helper thread to stop.
         // The helper thread stops once the value is set to true.
         final AtomicBoolean stop = new AtomicBoolean();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Holder for anything thrown by the run() method in the helper thread.
         final Throwable[] error = new Throwable[1];
@@ -133,6 +134,7 @@ public class CompressTableTest extends BaseJDBCTestCase {
         Thread t = new Thread() {
             public void run() {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     while (!stop.get()) {
                         JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
                     }
@@ -155,6 +157,7 @@ public class CompressTableTest extends BaseJDBCTestCase {
             }
         } finally {
             // We're done, so tell the helper thread to stop.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             stop.set(true);
         }
 

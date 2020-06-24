@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.FromSubquery
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -41,6 +42,8 @@ import org.apache.derby.iapi.util.JBitSet;
  * of the insert target table.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class FromSubquery extends FromTable
 {
 	ResultSetNode	subquery;
@@ -69,6 +72,8 @@ class FromSubquery extends FromTable
 	 * @param tableProperties	Properties list associated with the table
      * @param cm            The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromSubquery(ResultSetNode subquery,
                  OrderByList orderByList,
                  ValueNode offset,
@@ -85,6 +90,7 @@ class FromSubquery extends FromTable
         this.offset = offset;
         this.fetchFirst = fetchFirst;
         this.hasJDBClimitClause = hasJDBClimitClause;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( derivedRCL );
 	}
 
@@ -95,6 +101,8 @@ class FromSubquery extends FromTable
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG) {
@@ -106,6 +114,9 @@ class FromSubquery extends FromTable
 				subquery.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
             if (orderByList != null)
             {
                 printLabel(depth, "orderByList: ");
@@ -131,6 +142,8 @@ class FromSubquery extends FromTable
 	 *
 	 * @return ResultSetNode	The "subquery" from this node.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode getSubquery()
 	{
 		return subquery;
@@ -153,6 +166,7 @@ class FromSubquery extends FromTable
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5005
         if (schemaName != null && origTableName != null) {
             // View can have schema
             if (!schemaName.equals(origTableName.schemaName)) {
@@ -179,6 +193,8 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						  FromList fromListParam) 
 							throws StandardException
@@ -202,6 +218,8 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindVTITables(FromList fromListParam)
 							throws StandardException
 	{
@@ -219,6 +237,8 @@ class FromSubquery extends FromTable
 	 *									directly under a ResultColumn
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void rejectParameters() throws StandardException
 	{
 		subquery.rejectParameters();
@@ -232,12 +252,15 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
         FromList            emptyFromList = new FromList(
                 getOptimizerFactory().doJoinOrderOptimization(),
                 getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		ResultColumnList	derivedRCL = getResultColumns();
 		ResultColumnList	subqueryRCL;
 		FromList			nestedFromList;
@@ -245,13 +268,17 @@ class FromSubquery extends FromTable
 		/* From subqueries cannot be correlated, so we pass an empty FromList
 		 * to subquery.bindExpressions() and .bindResultColumns()
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (orderByList != null) {
 			orderByList.pullUpOrderByColumns(subquery);
 		}
 
 		nestedFromList = emptyFromList;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2442
 
 		CompilerContext compilerContext = getCompilerContext();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
 
 		if (origCompilationSchema != null) {
 			// View expansion needs the definition time schema
@@ -261,6 +288,7 @@ class FromSubquery extends FromTable
         // Nested VTI/tableFunctions will want to know whether their arguments
         // reference tables in the FROM list which contains this subquery. Those
         // references are illegal. See DERBY-5554 and DERBY-5779.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<FromVTI> nestedVTIs =
                 new CollectNodesVisitor<FromVTI>(FromVTI.class);
 		subquery.accept( nestedVTIs );
@@ -278,11 +306,14 @@ class FromSubquery extends FromTable
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (orderByList != null) {
 			orderByList.bindOrderByColumns(subquery);
 		}
 
         bindOffsetFetch(offset, fetchFirst);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
 
         /* NOTE: If the size of the derived column list is less than
 		 * the size of the subquery's RCL and the derived column list is marked
@@ -292,6 +323,7 @@ class FromSubquery extends FromTable
 		 * the table since the view was created.
 		 */
 		subqueryRCL = subquery.getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getResultColumns() != null && getResultColumns().getCountMismatchAllowed() &&
 			getResultColumns().size() < subqueryRCL.size())
 		{
@@ -306,9 +338,11 @@ class FromSubquery extends FromTable
         /*
          * Create RCL based on subquery, adding a level of VCNs.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
          ResultColumnList newRcl = subqueryRCL.copyListAndObjects();
          newRcl.genVirtualColumnNodes(subquery, subquery.getResultColumns());
          setResultColumns( newRcl );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Propagate the name info from the derived column list */
 		if (derivedRCL != null)
@@ -331,6 +365,8 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getMatchingColumn(ColumnReference columnReference)
             throws StandardException
 	{
@@ -349,6 +385,7 @@ class FromSubquery extends FromTable
 		// now but what happens if the condition is false? Investigate.
 		if (columnReference.getGeneratedToReplaceAggregate()) // 1
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			resultColumn = getResultColumns().getResultColumn(columnReference.getColumnName());
 		}
 		else if (columnsTableName == null || columnsTableName.equals(correlationName)) // 5?
@@ -360,6 +397,7 @@ class FromSubquery extends FromTable
 		if (resultColumn != null)
 		{
 			columnReference.setTableNumber(tableNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4695
             columnReference.setColumnNumber(resultColumn.getColumnPosition());
 		}
 
@@ -385,13 +423,18 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         subquery.pushQueryExpressionSuffix();
 		// Push the order by list down to the ResultSet
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (orderByList != null)
 		{
 			// If we have more than 1 ORDERBY columns, we may be able to
@@ -465,6 +508,8 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode extractSubquery(int numTables)
 		throws StandardException
 	{
@@ -473,6 +518,7 @@ class FromSubquery extends FromTable
 
         newPRN = new ProjectRestrictNode(
 								subquery,		/* Child ResultSet */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 								getResultColumns(),	/* Projection */
 								null,			/* Restriction */
 								null,			/* Restriction as PredicateList */
@@ -518,9 +564,13 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromList flatten(ResultColumnList rcl,
 							PredicateList outerPList,
 							SubqueryList sql,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
                             GroupByList gbl,
                             ValueNode havingClause)
 
@@ -530,6 +580,7 @@ class FromSubquery extends FromTable
 		SelectNode	selectNode;
 
 		getResultColumns().setRedundant();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		subquery.getResultColumns().setRedundant();
 
@@ -572,6 +623,8 @@ class FromSubquery extends FromTable
 			gbl.remapColumnReferencesToExpressions();
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
         if (havingClause != null) {
             havingClause.remapColumnReferencesToExpressions();
         }
@@ -586,6 +639,8 @@ class FromSubquery extends FromTable
 	 * @return	The exposed name for this table.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getExposedName()
 	{
 		return correlationName;
@@ -597,12 +652,15 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
 		TableName		 exposedName;
         TableName        toCompare;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
 
 		if(allTableName != null)
              toCompare = makeTableName(allTableName.getSchemaName(),correlationName);
@@ -622,6 +680,8 @@ class FromSubquery extends FromTable
 		exposedName = makeTableName(null, correlationName);
 
         ResultColumnList rcList = new ResultColumnList((getContextManager()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/* Build a new result column list based off of resultColumns.
 		 * NOTE: This method will capture any column renaming due to 
@@ -634,6 +694,7 @@ class FromSubquery extends FromTable
 
 		for (int index = 0; index < rclSize; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			ResultColumn resultColumn = getResultColumns().elementAt(index);
 			ValueNode		 valueNode;
 			String			 columnName;
@@ -653,10 +714,14 @@ class FromSubquery extends FromTable
 			TableName tableName;
 
 			tableName = exposedName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2442
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             valueNode = new ColumnReference(columnName,
 											tableName,
 											getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             resultColumn = new ResultColumn(columnName,
 											valueNode,
 											getContextManager());
@@ -707,6 +772,8 @@ class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
@@ -732,7 +799,10 @@ class FromSubquery extends FromTable
 	 * @param sd schema descriptor of the original compilation schema of the
 	 * view.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setOrigCompilationSchema(SchemaDescriptor sd) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
 		origCompilationSchema = sd;
 	}
 

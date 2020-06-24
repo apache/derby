@@ -73,6 +73,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
         if (lengthless) {
             Method m = null;
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 Class<?> c = ps.getClass();
                 m = c.getMethod("setBinaryStream",new Class[] {Integer.TYPE,
                             InputStream.class});                
@@ -82,6 +83,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
                 println("Skipping lengthless insert because method is not available");
                 return;                
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             m.invoke(ps, new Object[] {2,stream});
         }
         else
@@ -200,6 +202,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
         testBlobLength(false, 10000);  
     }
        public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =  new BaseTestSuite();
         // Just add Derby-6096 embedded as it takes time to run
         suite.addTest(new BlobMemTest("xtestderby6096BlobhashJoin"));
@@ -221,6 +224,9 @@ public class BlobMemTest extends BaseJDBCTestCase {
      */
     public void testDerby4477_3645_3646_Repro_lowmem()
             throws SQLException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
         setAutoCommit(false);
 

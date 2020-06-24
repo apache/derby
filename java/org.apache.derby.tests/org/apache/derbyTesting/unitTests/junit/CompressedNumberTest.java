@@ -71,6 +71,7 @@ public class CompressedNumberTest extends TestCase {
                 Long.MAX_VALUE,
                 };
         int[] length = {2, 2, 2,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3742
                 2, 2,
                 2,
                 4, 4,
@@ -116,6 +117,7 @@ public class CompressedNumberTest extends TestCase {
                 Integer.MAX_VALUE,
                 };
         int[] length = { 1, 1, 1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3742
                 1, 1, 1, 1,
                 1,
                 2, 2, 2, 2,
@@ -205,6 +207,8 @@ public class CompressedNumberTest extends TestCase {
         aos.setPosition(0);
         int length = CompressedNumber.writeLong(out, l);
         assertEquals("Invalid length after compressed", expectedLength, length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3742
+//IC see: https://issues.apache.org/jira/browse/DERBY-3742
 
         assertEquals("MISMATCH written bytes", length, aos.getPosition());
 

@@ -34,6 +34,7 @@ public class _Suite extends BaseTestCase  {
 
     public static Test suite() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("oe");
         
         suite.addTest(OETest.suite());

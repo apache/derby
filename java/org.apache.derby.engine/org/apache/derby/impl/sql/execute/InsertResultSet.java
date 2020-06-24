@@ -85,6 +85,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * and triggers to be executed based on the c's and t's
  * compiled into the insert plan.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements TargetResultSet
 {
 	// RESOLVE. Embarrassingly large public state. If we could move the 
@@ -177,6 +180,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		if (constants.irgs.length > 0)
 		{
            RowLocation rlClone = (RowLocation) rowLocation.cloneValue(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
 			// Objectify any the streaming columns that are indexed.
 			for (int i = 0; i < execRow.getRowArray().length; i++)
@@ -244,6 +248,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
         if (checkGM != null) {
             boolean allOk = evaluateCheckConstraints();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (!allOk) {
                 if (SanityManager.DEBUG) {
                     SanityManager.ASSERT(
@@ -269,6 +274,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
 
     public void offendingRowLocation(RowLocation rl, long constainerId)
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             throws StandardException {
         if (violatingCheckConstraints != null) {
             deferredChecks =
@@ -279,6 +285,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                             tableName,
                             deferredChecks,
                             violatingCheckConstraints,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             rl,
                             new CheckInfo[1] /* dummy */);
             violatingCheckConstraints.clear();
@@ -316,10 +323,12 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 	 *
 	 * @exception StandardException		Thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     InsertResultSet(NoPutResultSet source, 
 						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
                            int fullTemplate,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                            String schemaName,
                            String tableName,
 						   Activation activation)
@@ -330,13 +339,16 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		constants = (InsertConstantAction) constantAction;
         this.generationClauses = generationClauses;
 		this.checkGM = checkGM;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         this.fullTemplateId = fullTemplate;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.schemaName = schemaName;
         this.tableName = tableName;
 		heapConglom = constants.conglomId;
         identitySequenceUUIDString = constants.identitySequenceUUIDString;
 
         tc = activation.getTransactionController();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		fkInfoArray = constants.getFKInfo();
 		triggerInfo = constants.getTriggerInfo();
 		
@@ -344,12 +356,17 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 				triggerInfo.hasTrigger(true, true) :
 				false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
         resultDescription = sourceResultSet.getResultDescription();
         
 		// Is this a bulkInsert or regular insert?
 		String insertMode = constants.getProperty("insertMode");
 
 		initializeAIcache(constants.getAutoincRowLocation());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 
 		if (insertMode != null)
 		{
@@ -369,6 +386,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 				*/
 				if (triggerInfo != null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     TriggerDescriptor trD = triggerInfo.getTriggerArray()[0];
                     throw StandardException.newException(
                         SQLState.LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER_DURING_EXECUTION,
@@ -384,6 +402,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 	*/
 	public void open() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 		setup();
 		// Remember if this is the 1st execution
 		firstExecute = (rowChanger == null);
@@ -393,8 +412,11 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		dd = lcc.getDataDictionary();
 
 		verifyAutoGeneratedRScolumnsList(constants.targetUUID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
 
 		rowCount = 0L;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
 		if (numOpens++ == 0)
 		{
@@ -428,6 +450,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			// Notify the source that we are the target
 			sourceResultSet.setTargetResultSet(this);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
             ExecRow fullTemplate =
                 ((ExecRowBuilder) activation.getPreparedStatement().
                     getSavedObject(fullTemplateId)).build(
@@ -442,6 +465,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                 }
 			}
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
             bulkValidateForeignKeys(tc, lcc.getContextManager(), fullTemplate);
 	
 			bulkInsertPerformed = true;
@@ -461,6 +485,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
 		cleanUp();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 		saveAIcacheInformation(constants.getSchemaName(), 
 			constants.getTableName(), constants.getColumnNames());
 
@@ -485,6 +512,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 	private int[] generatedColumnPositionsArray()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         TableDescriptor tabDesb = dd.getTableDescriptor(constants.targetUUID);
 		ColumnDescriptor cd;
         int size = tabDesb.getMaxColumnID();
@@ -601,6 +629,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
          //			System.out.println("in bulk insert");
          if (aiCache[index].isNull())
          {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
              long startValue;
  
              if (bulkInsertReplace)
@@ -617,6 +646,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
              lcc.autoincrementCreateCounter(td.getSchemaName(),
                                             td.getName(),
                                             cd.getColumnName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                             Long.valueOf(startValue),
                                             increment,
                                             columnPosition);
@@ -636,7 +666,10 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
      private NumberDataValue getOldStyleIdentityValue( int index )
          throws StandardException
      {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5687
+//IC see: https://issues.apache.org/jira/browse/DERBY-4437
          NumberDataValue newValue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
          TransactionController nestedTC = null;
          TransactionController tcToUse;
  
@@ -680,6 +713,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                  throw se;
              }
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-6692
              if ( se.getMessageId().equals(SQLState.LOCK_TIMEOUT) || se.isSelfDeadlock() )
              {
                  // if we couldn't do this with a nested xaction, retry with
@@ -741,6 +775,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
     {
         boolean isRow = false;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1554
         if (sourceResultSet instanceof RowResultSet)
         	isRow = true;
         else if (sourceResultSet instanceof NormalizeResultSet)
@@ -754,7 +789,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		throws StandardException
 	{
 		boolean setUserIdentity = constants.hasAutoincrement() && isSingleRowResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         ExecRow deferredRowBuffer;
+//IC see: https://issues.apache.org/jira/browse/DERBY-353
         long user_autoinc=0;
                         
 		/* Get or re-use the row changer.
@@ -799,6 +836,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		{
 			if (fkChecker == null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 fkChecker = new RISetChecker(lcc, tc, fkInfoArray);
 			}
 			else
@@ -817,12 +855,15 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			/*
 			** If deferred we save a copy of the entire row.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 			rowHolder = new TemporaryRowHolderImpl(activation, properties,
 												   resultDescription);
 			rowChanger.setRowHolder(rowHolder);
 		}
 
 		firstExecuteSpecialHandlingAutoGen(firstExecute, rowChanger, constants.targetUUID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
 
 		while ( row != null )
 		{
@@ -856,6 +897,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
 				if (fkChecker != null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     fkChecker.doFKCheck(activation, row);
 				}
 
@@ -877,6 +919,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 					}
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (allOk) {
                     rowChanger.insertRow(row, false);
                 } else {
@@ -889,6 +932,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                             tableName,
                             deferredChecks,
                             violatingCheckConstraints,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             offendingRow,
                             new CheckInfo[1] /* dummy */);
                 }
@@ -896,8 +940,10 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
             rowCount++;
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-1554
             if(setUserIdentity )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-353
                         dd = lcc.getDataDictionary();
                         td = dd.getTableDescriptor(constants.targetUUID);
                        
@@ -939,6 +985,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		{
 			if (triggerInfo != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				Vector<AutoincrementCounter> v = null;
 				if (aiCache != null)
 				{
@@ -998,6 +1045,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 					sourceResultSet.setCurrentRow(deferredRowBuffer);
                     boolean allOk = evaluateCheckConstraints();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     if (allOk) {
                         rowChanger.insertRow(deferredRowBuffer, false);
                     } else {
@@ -1006,11 +1054,18 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                         deferredChecks =
                             DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                                 constants.targetUUID,
                                 schemaName,
                                 tableName,
                                 deferredChecks,
                                 violatingCheckConstraints,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 offendingRow,
                                 new CheckInfo[1]);
                     }
@@ -1035,6 +1090,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 					rs.open();
 					while ((deferredRowBuffer = rs.getNextRow()) != null)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         fkChecker.doFKCheck(activation, deferredRowBuffer);
 					}
 				} finally
@@ -1069,8 +1125,10 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                  * find the value of the identity column from the user inserted value
                  * and do a lcc.setIdentityValue(<user_value>);
                  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1554
                 else if(setUserIdentity )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-353
                         lcc.setIdentityValue(user_autoinc);
                 } 
  }
@@ -1080,6 +1138,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		throws StandardException
 	{
         ExecRow nextRow = super.getNextRowCore( source );
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         if ( (nextRow != null) && constants.underMerge() ) {
             nextRow = processMergeRow( source, nextRow );
@@ -1133,6 +1192,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
 	// Do the work for a bulk insert
     private void bulkInsertCore(LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
                                 ExecRow fullTemplate,
 								long oldHeapConglom)
 		throws StandardException
@@ -1166,7 +1226,10 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		*/
 		if (hasBeforeRowTrigger && rowHolder != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 			rowHolder =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 				new TemporaryRowHolderImpl(activation, properties,
 										   resultDescription);
 		}
@@ -1187,6 +1250,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			sourceResultSet.setNeedsRowLocation(true);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (constants.hasDeferrableChecks) {
             sourceResultSet.setHasDeferrableChecks();
         }
@@ -1201,6 +1265,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		long[] loadedRowCount = new long[1];
 		if (bulkInsertReplace)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			newHeapConglom = 
                 tc.createAndLoadConglomerate(
                     "heap",
@@ -1238,6 +1303,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
 		// Find out how many rows were inserted
 		rowCount = loadedRowCount[0];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
 		// Set the "estimated" row count
 		setEstimatedRowCount(newHeapConglom);
@@ -1309,6 +1375,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 	** Bulk Referential Integrity Checker
 	*/
     private void bulkValidateForeignKeys(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
             TransactionController tc, ContextManager cm, ExecRow fullTemplate)
 		throws StandardException
 	{
@@ -1325,6 +1392,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         for (FKInfo fkInfo : fkInfoArray)
 		{
 
@@ -1366,7 +1434,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 						/* Self-referencing foreign key.  Both conglomerate
 						 * #s have changed.
 						 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 						pkConglom = (indexConversionTable.get(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             Long.valueOf(fkInfo.refConglomNumber))).longValue();
 						fkConglom = (indexConversionTable.get(
                             Long.valueOf(fkInfo.fkConglomNumbers[index]))).
@@ -1382,7 +1452,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 						 * we use the compile time conglomerate #.  This
 						 * is very simple, though not very elegant.
 						 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 						Long pkConglomLong = indexConversionTable.get(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             Long.valueOf(fkInfo.refConglomNumber));
 						Long fkConglomLong = indexConversionTable.get(
                             Long.valueOf(fkInfo.fkConglomNumbers[index]));
@@ -1405,7 +1477,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 						}
 					}
 					bulkValidateForeignKeysCore(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             tc, cm, fkInfo, fkConglom, pkConglom,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 							fkInfo.fkConstraintNames[index], fullTemplate);
 				}
 			}
@@ -1422,9 +1496,12 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 					SanityManager.ASSERT(fkInfo.type == FKInfo.FOREIGN_KEY, 
 						"error, expected to only check foreign keys on insert");
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				Long fkConglom = indexConversionTable.get(fkInfo.fkConglomNumbers[0]);
 				bulkValidateForeignKeysCore(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         tc, cm, fkInfo, fkConglom.longValue(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 						fkInfo.refConglomNumber, fkInfo.fkConstraintNames[0],
                         fullTemplate);
 			}
@@ -1434,6 +1511,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 	private void bulkValidateForeignKeysCore(
 						TransactionController tc, ContextManager cm, 
 						FKInfo fkInfo, long fkConglom, long pkConglom,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
                         String fkConstraintName, ExecRow fullTemplate)
 		throws StandardException
 	{
@@ -1456,6 +1534,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                         false,                       // hold 
                         0, 							 // read only
                         // doesn't matter, already locked
+//IC see: https://issues.apache.org/jira/browse/DERBY-6063
                         TransactionController.MODE_TABLE,
                         // doesn't matter, already locked
                         TransactionController.ISOLATION_READ_COMMITTED,
@@ -1508,6 +1587,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 						false,                       	// hold 
 						0, 								// read only
                         (fkConglom == pkConglom) ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-6063
                                 TransactionController.MODE_TABLE :
                                 TransactionController.MODE_RECORD,
                         // read committed is good enough
@@ -1525,6 +1605,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 				** magic.  It will do a merge on the two indexes. 
 				*/	
 				ExecRow firstFailedRow = template.getClone();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 RIBulkChecker riChecker = new RIBulkChecker(activation,
                                             refScan,
 											fkScan, 
@@ -1569,6 +1650,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		throws StandardException
 	{
 		ExecRow newRow = RowUtil.getEmptyIndexRow(fkInfo.colArray.length+1, lcc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 
 		DataValueDescriptor[] templateColArray = fullTemplate.getRowArray();
 		DataValueDescriptor[] newRowColArray   = newRow.getRowArray();
@@ -1577,6 +1659,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		for (i = 0; i < fkInfo.colArray.length; i++)
 		{
 			newRowColArray[i] = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                 templateColArray[fkInfo.colArray[i] - 1].cloneValue(false);
 		}
 
@@ -1598,6 +1681,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		int					numIndexes = constants.irgs.length;
 		int					numColumns = td.getNumberOfColumns();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		ordering        = new ColumnOrdering[numIndexes][];
         collation       = new int[numIndexes][];
 		needToDropSort  = new boolean[numIndexes];
@@ -1638,6 +1722,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			 */
 
 			// Get the ConglomerateDescriptor for the index
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			ConglomerateDescriptor cd = 
                 td.getConglomerateDescriptor(constants.indexCIDS[index]);
 
@@ -1647,6 +1732,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
            
 			int numColumnOrderings;
             SortObserver sortObserver;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 			/* We can only reuse the wrappers when doing an
 			 * external sort if there is only 1 index.  Otherwise,
@@ -1654,6 +1740,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			 * wrapper that is still in use in another sort.
 			 */
 			boolean reuseWrappers = (numIndexes == 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             final IndexRowGenerator indDes = cd.getIndexDescriptor();
             Properties sortProperties = null;
             String indexOrConstraintName = cd.getConglomerateName();
@@ -1661,6 +1750,8 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
             boolean deferrable = false;
 
             UUID uniqueDeferrableConstraintId = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             if (cd.isConstraint())
             {
                 // so, the index is backing up a constraint
@@ -1671,6 +1762,8 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                 indexOrConstraintName = conDesc.getConstraintName();
                 deferred = lcc.isEffectivelyDeferred(
                         lcc.getCurrentSQLSessionContext(activation),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                         conDesc.getUUID());
                 deferrable = conDesc.deferrable();
                 uniqueDeferrableConstraintId = conDesc.getUUID();
@@ -1685,6 +1778,8 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 				sortObserver = 
                     new UniqueIndexSortObserver(
                             lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                             uniqueDeferrableConstraintId,
                             false, // don't clone rows
                             deferrable,
@@ -1707,6 +1802,8 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                 sortObserver =
                         new UniqueWithDuplicateNullsIndexSortObserver(
                         lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                         uniqueDeferrableConstraintId,
                         true,
                         deferrable,
@@ -1731,6 +1828,8 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			}
 			if (numColumnOrderings > isAscending.length)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 				ordering[index][isAscending.length] = 
                     new IndexColumnOrder(isAscending.length);
             }
@@ -1744,6 +1843,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			// create the sorters
 			sortIds[index] = 
                 tc.createSort(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                     sortProperties,
                     indexRows[index].getRowArrayClone(),
                     ordering[index],
@@ -1761,6 +1863,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		// Open the sorts
 		for (int index = 0; index < numIndexes; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			sorters[index]        = tc.openSort(sortIds[index]);
 			needToDropSort[index] = true;
 		}
@@ -1798,6 +1901,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		dd.dropStatisticsDescriptors(td.getUUID(), null, tc);
 		long[] newIndexCongloms = new long[numIndexes];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		indexConversionTable = new Hashtable<Long,Long>(numIndexes);
 		// Populate each index
 		for (int index = 0; index < numIndexes; index++)
@@ -1837,6 +1941,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 							   Integer.toString(indexRowLength));
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if ( cd.getIndexDescriptor().isUniqueWithDuplicateNulls() &&
                 !cd.getIndexDescriptor().hasDeferrableChecking() )
 			{
@@ -1855,9 +1960,12 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			// Populate the index.
 			sorters[index].completedInserts();
 			sorters[index] = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			rowSources[index] = 
                 new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			newIndexCongloms[index] = 
                 tc.createAndLoadConglomerate(
                     "BTREE",
@@ -1906,6 +2014,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			// Drop the old conglomerate
 			tc.dropConglomerate(constants.indexCIDS[index]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			indexConversionTable.put(constants.indexCIDS[index], newIndexCongloms[index]);
 		}
 	}
@@ -1973,6 +2082,9 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			{
 				if (sorters[index] != null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 					sorters[index].completedInserts();
 				}
 				sorters[index] = null;
@@ -2137,6 +2249,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		throws StandardException
 	{
 		int					numIndexes = constants.irgs.length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         ExecIndexRow[]      idxRows = new ExecIndexRow[numIndexes];
         ExecRow             baseRows;
         ColumnOrdering[][]  order = new ColumnOrdering[numIndexes][];
@@ -2161,6 +2274,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		}
 
 		// We can finally create the partial base row
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		baseRows = 
             activation.getExecutionFactory().getValueRow(numReferencedColumns);
 
@@ -2174,6 +2288,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 				// NOTE: 1-based column numbers
 				baseRows.setColumn(
 						colNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 						fullTemplate.getColumn(index + 1).cloneValue(false));
 			}
 		}
@@ -2188,6 +2303,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		{
 			// create a single index row template for each index
             idxRows[index] = constants.irgs[index].getIndexRowTemplate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 			// Get an index row based on the base row
 			// (This call is only necessary here because we need to pass a 
@@ -2208,6 +2324,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			int[] baseColumnPositions = constants.irgs[index].baseColumnPositions();
 			boolean[] isAscending = constants.irgs[index].isAscending();
 			int numColumnOrderings;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             SortObserver sortObserver;
             final IndexRowGenerator indDes = cd.getIndexDescriptor();
 
@@ -2221,6 +2338,10 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                 boolean deferred = false;
                 boolean uniqueDeferrable = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 UUID uniqueDeferrableConstraintId = null;
 				if (cd.isConstraint()) 
 				{
@@ -2228,8 +2349,11 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 					ConstraintDescriptor conDesc = 
                         dd.getConstraintDescriptor(td, cd.getUUID());
 					indexOrConstraintName = conDesc.getConstraintName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     deferred = lcc.isEffectivelyDeferred(
                             lcc.getCurrentSQLSessionContext(activation),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                             conDesc.getUUID());
                     uniqueDeferrable = conDesc.deferrable();
                     uniqueDeferrableConstraintId = conDesc.getUUID();
@@ -2242,6 +2366,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                             uniqueDeferrable,
                             deferred,
                             indexOrConstraintName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             idxRows[index],
                             true,
                             td.getName());
@@ -2250,6 +2375,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			{
 				numColumnOrderings = baseColumnPositions.length + 1;
 				sortObserver       = new BasicSortObserver(false, false, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                                      idxRows[index],
 													 true);
 			}
@@ -2268,6 +2394,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			sortIds[index] = 
                 tc.createSort(
                     (Properties)null, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     idxRows[index].getRowArrayClone(),
                     order[index],
                     sortObserver,
@@ -2284,6 +2411,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 		// are in the correct order. 
 		rowSources = new RowLocationRetRowSource[numIndexes];
 		// Fill in the RowSources
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         SortController[]    sorter = new SortController[numIndexes];
 		for (int index = 0; index < numIndexes; index++)
 		{
@@ -2331,6 +2459,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 				properties.put("nUniqueColumns", 
 							   Integer.toString(indexRowLength));
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if( cd.getIndexDescriptor().isUniqueWithDuplicateNulls() &&
                !cd.getIndexDescriptor().hasDeferrableChecking() )
 			{
@@ -2353,8 +2482,10 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			newIndexCongloms[index] = 
                 tc.createAndLoadConglomerate(
                     "BTREE",
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     idxRows[index].getRowArray(),
                     null, //default column sort order 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     collation[index],
                     properties,
                     TransactionController.IS_DEFAULT,
@@ -2368,6 +2499,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			 * for those indexes need to be updated with the new number.
 			 */
 			dd.updateConglomerateDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 td.getConglomerateDescriptors(constants.indexCIDS[index]),
                 newIndexCongloms[index], tc);
 
@@ -2387,11 +2519,13 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 	{
 		if (tableScan == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			tableScan = 
                 new BulkTableScanResultSet(
                     conglomId,
                     tc.getStaticCompiledConglomInfo(conglomId),
                     activation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
                     fullTemplateId,
                     0,						// result set number
                     (GeneratedMethod)null, 	// start key getter
@@ -2401,12 +2535,14 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                     false,
                     (Qualifier[][])null,	// qualifiers
                     "tableName",
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
                     (String)null,
                     (String)null,			// index name
                     false,					// is constraint
                     false,					// for update
                     -1,						// saved object for referenced bitImpl
                     -1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6063
                     TransactionController.MODE_TABLE,
                     true,					// table locked
                     TransactionController.ISOLATION_READ_COMMITTED,
@@ -2414,6 +2550,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
                     false,                  // never disable bulk fetch
                     false,					// not a 1 row per scan
                     0d,						// estimated rows
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
                     0d 					// estimated cost
                     );
 			tableScan.openCore();
@@ -2444,6 +2581,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 
     @Override
     public void rememberConstraint(UUID cid) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (violatingCheckConstraints == null) {
             violatingCheckConstraints = new ArrayList<UUID>();
         }

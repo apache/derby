@@ -49,11 +49,13 @@ import org.apache.derbyTesting.junit.JDBCDataSource;
 public class Changes10_2 extends UpgradeChange {
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Upgrade changes for 10.2");
         
         suite.addTestSuite(Changes10_2.class);
         
         // Encryption only support on J2SE or higher.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         if (JDBC.vmSupportsJDBC3())
         {
             suite.addTest(new Changes10_2("changeEncryptionFromNone"));
@@ -228,6 +230,7 @@ public class Changes10_2 extends UpgradeChange {
      */
     public void testGrantRevokeStatements() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         Statement s = createStatement();
         switch(getPhase()) {
         // 
@@ -356,8 +359,10 @@ public class Changes10_2 extends UpgradeChange {
 
     public void changeEncryptionFromNone() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         DataSource ds = JDBCDataSource.getDataSourceLogical("NO_ENCRYPT_10_2");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         switch (getPhase())
         {
         case PH_CREATE:
@@ -387,6 +392,7 @@ public class Changes10_2 extends UpgradeChange {
             ds.getConnection().close();
             break;
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         case PH_HARD_UPGRADE:
             // On hard upgrade should be able to connect to it
             // changing the encryption.
@@ -428,6 +434,7 @@ public class Changes10_2 extends UpgradeChange {
 
     public void changeEncryptionFromEncryptedDatabase() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         DataSource ds = JDBCDataSource.getDataSourceLogical("ENCRYPT_10_2");
         
         switch (getPhase())

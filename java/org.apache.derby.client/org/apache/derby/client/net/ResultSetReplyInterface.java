@@ -27,6 +27,7 @@ import org.apache.derby.client.am.ResultSetCallbackInterface;
 interface ResultSetReplyInterface {
     public void readFetch(ResultSetCallbackInterface resultSet)
             throws DisconnectException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     public void readScrollableFetch(ResultSetCallbackInterface resultSet)
             throws DisconnectException;

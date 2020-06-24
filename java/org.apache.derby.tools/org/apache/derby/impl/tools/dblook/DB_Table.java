@@ -70,6 +70,7 @@ public class DB_Table {
 
 		getAutoIncStmt = 
 			conn.prepareStatement("SELECT AUTOINCREMENTSTART, " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-308
 			"AUTOINCREMENTINC, COLUMNNAME, REFERENCEID, COLUMNDEFAULT FROM SYS.SYSCOLUMNS " +
 			"WHERE COLUMNNAME = ? AND REFERENCEID = ?");
 
@@ -77,6 +78,7 @@ public class DB_Table {
 		// each one.
 
 		boolean firstTime = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5021
 		Set entries = tableIdToNameMap.entrySet();
 		for (Iterator itr = entries.iterator(); itr.hasNext(); ) {
 
@@ -187,6 +189,7 @@ public class DB_Table {
 
 			long start = autoIncCols.getLong(1);
 			if (!autoIncCols.wasNull()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-308
 				colDef.append(" GENERATED ");
 				colDef.append(autoIncCols.getObject(5) == null ? 
 					      "ALWAYS ":"BY DEFAULT ");

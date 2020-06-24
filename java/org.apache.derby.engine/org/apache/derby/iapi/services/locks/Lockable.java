@@ -42,6 +42,7 @@ import java.util.Hashtable;
 	<LI>Otherwise the request is granted if the following expression evaluates
 	to true for every other lock <TT>{ CSn, Qn}</TT> held on <TT> L </TT>
 	<UL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	<LI> <PRE>    ( ( CSn == CS1 ) &amp;&amp; L.lockerAlwaysCompatible() ) </PRE>
 	<LI> <PRE> || (L.reqestCompatible(Q1, Qn)) </PRE>
 	</UL>

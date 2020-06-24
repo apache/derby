@@ -43,6 +43,7 @@ public class IjSecurityManagerTest extends BaseTestCase {
 	    
 	    /* Mute the test */
         setSystemOut(new PrintStream(new TestNullOutputStream()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 	    try {
 	        /* Run ij */
@@ -51,6 +52,7 @@ public class IjSecurityManagerTest extends BaseTestCase {
 	        fail("Failed to run ij under security manager.",e);
 	    } finally {
 	        /* Restore the original out stream */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             setSystemOut(out);
 	    }
 	}
@@ -68,6 +70,7 @@ public class IjSecurityManagerTest extends BaseTestCase {
         return test;
 	}
 	public static Test suite() {		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("IjSecurityManagerTest");
 		suite.addTest(decorateTest());
 		return suite;

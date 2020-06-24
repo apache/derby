@@ -63,6 +63,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
     public static Test suite() {
         
         BaseTestSuite suite = new BaseTestSuite("LocalizedDisplay");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // This test will fail with JSR169, because lack of support for 
         // rs.getBigDecimal() will prevent the localization of numeric and
@@ -80,6 +81,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
             return suite;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite localizedEmbeddedTests =
             new BaseTestSuite("LocalizedDisplay:embedded");
 
@@ -94,6 +96,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         // resulting in localized display by default, and thus a diff with the
         // master.
         // Set up the script's run with the network client
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite localizedTests =
             new BaseTestSuite("LocalizedDisplay:client");
 
@@ -121,10 +124,12 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("localized Display");
         Properties uiProps = new Properties();
         uiProps.put("derby.ui.locale","es_AR");
         uiProps.put("derby.ui.codeset", ENCODING);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6356
         suite.addTest(new TimeZoneTestSetup(new SystemPropertyTestSetup(
                 new LocalizedDisplayScriptTest("LocalizedDisplay"), uiProps), 
                 "America/Los_Angeles"));

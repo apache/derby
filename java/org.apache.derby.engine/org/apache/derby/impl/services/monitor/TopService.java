@@ -43,6 +43,7 @@ import java.util.Locale;
 
 
 final class TopService {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 	/*
 	** Fields.
@@ -62,6 +63,7 @@ final class TopService {
 		List of protocols.
 	*/
 	Hashtable<ProtocolKey,ModuleInstance>		protocolTable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	/**
 	*/
@@ -88,6 +90,7 @@ final class TopService {
 	TopService(BaseMonitor monitor) {
 		super();
 		this.monitor = monitor;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		protocolTable = new Hashtable<ProtocolKey,ModuleInstance>();
 		moduleInstances = new Vector<ModuleInstance>(0, 5);
 	}
@@ -101,6 +104,7 @@ final class TopService {
 		this.serviceLocale = serviceLocale;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	void setTopModule(Object instance) {
 		synchronized (this) {
             ModuleInstance module = findModuleInstance(instance);
@@ -124,6 +128,7 @@ final class TopService {
 	}
 
 	Object getService() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 		return topModule.getInstance();
 	}
@@ -136,6 +141,7 @@ final class TopService {
 		if (serviceType == null)
 			otherCanonicalName = otherKey.getIdentifier();
 		else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-19
 			try
 			{
 				otherCanonicalName = serviceType.getCanonicalServiceName(otherKey.getIdentifier());
@@ -188,6 +194,8 @@ final class TopService {
 				try {
 					wait();
 				} catch (InterruptedException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
 				}
 			}
@@ -207,8 +215,10 @@ final class TopService {
 		the protocol table.
 	*/
 	synchronized Object findModule(ProtocolKey key, boolean findOnly, Properties properties) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 		ModuleInstance module = protocolTable.get(key);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		if (module == null)
 			return null;
@@ -235,6 +245,7 @@ final class TopService {
         // ArrayIndexOutOfBoundsException.
         synchronized (moduleInstances) {
             for (int i = 0; i < moduleInstances.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 ModuleInstance module = moduleInstances.get(i);
                 if (module.getInstance() == instance) {
                     return module;
@@ -281,6 +292,7 @@ final class TopService {
                 // and result in an ArrayIndexOutOfBoundsException.
                 synchronized (moduleInstances) {
                     if (i < moduleInstances.size()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                         module = moduleInstances.get(i);
                     } else {
                         // No more instances to look at, break out of the loop.
@@ -329,6 +341,7 @@ final class TopService {
 				topModule == null ? (Object) null : topModule.getInstance());
 
 		moduleInstances.add(module);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
 		try {
 			BaseMonitor.boot(instance, create, properties);
@@ -359,6 +372,7 @@ final class TopService {
 	
 		TopService.stop(instance);
 		moduleInstances.remove(module);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
 		// if we reached here it's because someone else beat us adding the module, so use theirs.
 		return findModule(key, true, properties);
@@ -387,6 +401,7 @@ final class TopService {
 					return true;
 
 				module = moduleInstances.get(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			}
 			
@@ -394,6 +409,7 @@ final class TopService {
 			TopService.stop(instance);
 			
 			synchronized (this) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				moduleInstances.remove(0);
 			}
 		}
