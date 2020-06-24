@@ -104,6 +104,7 @@ public class PropertyUtil {
 		boolean dbOnly = isDBOnly(set);
 
 		if (!dbOnly) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			if (getMonitor().getJVMProperty(key) != null) {
 				return SET_IN_JVM;
 			}
@@ -129,6 +130,7 @@ public class PropertyUtil {
 
 		boolean dbOnly = Boolean.valueOf(
                     (value != null ? value.trim() : null)).booleanValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		return dbOnly;
 	}
@@ -153,11 +155,13 @@ public class PropertyUtil {
      */
     public  static  String[]    getServicePropertyList()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6166
         return ArrayUtil.copy( servicePropertyList );
     }
 	
 	/**
 		Find a system wide property.
+//IC see: https://issues.apache.org/jira/browse/DERBY-623
 
         @param key The key to lookup
 		@return the value of the property or null if it does not exist.
@@ -176,6 +180,7 @@ public class PropertyUtil {
 		</OL>
 
 		<P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		This method can be used by a system that is not running Derby,
 		just to maintain the same lookup logic and security manager concerns
 		for finding derby.properties and reading system properties.
@@ -187,6 +192,7 @@ public class PropertyUtil {
 	public static String getSystemProperty(String key, String defaultValue) {
 
 		ModuleFactory monitor = getMonitorLite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		String value = monitor.getJVMProperty(key);
 
@@ -337,6 +343,9 @@ public class PropertyUtil {
                 (value != null ? value.trim() : value)).booleanValue();
 
 		if (!dbOnly) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			value = getMonitor().getJVMProperty(key);
 			if (value != null)
 				return value;
@@ -378,6 +387,7 @@ public class PropertyUtil {
 		@return true of the property is set to 'true, TRUE', false otherwise
 	*/
 	public static boolean getSystemBoolean(String key) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
 		return getSystemBoolean(key, false);
 	}
 
@@ -545,6 +555,7 @@ public class PropertyUtil {
 
 		String vS = ((String) v).trim();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 		if ("TRUE".equals(StringUtil.SQLToUpperCase(vS)))
 			return true;
         if ("FALSE".equals(StringUtil.SQLToUpperCase(vS)))
@@ -616,6 +627,7 @@ public class PropertyUtil {
 	 * @exception StandardException on error
 	 */
 	public static boolean existsBuiltinUser (
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 		PersistentSet set,
 		String username)
 			throws StandardException
@@ -704,6 +716,7 @@ public class PropertyUtil {
 	private static boolean systemPropertiesExistsBuiltinUser(String username)
 	{
 		ModuleFactory monitor = getMonitorLite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		try {
 			Properties JVMProperties = System.getProperties();
@@ -758,6 +771,7 @@ public class PropertyUtil {
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

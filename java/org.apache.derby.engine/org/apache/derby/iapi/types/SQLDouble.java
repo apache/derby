@@ -125,6 +125,7 @@ public final class SQLDouble extends NumberDataType
 	 */
 	public float	getFloat() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1136
 		if (Float.isInfinite((float)value))
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
 		return (float) value;
@@ -164,6 +165,7 @@ public final class SQLDouble extends NumberDataType
 		if (isNull())
 			return null;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			return value;
 	}
 
@@ -172,6 +174,7 @@ public final class SQLDouble extends NumberDataType
 	 * Set the value from a correctly typed Double object.
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue) throws StandardException
 	{
 		setValue(((Double) theValue).doubleValue());
@@ -274,6 +277,7 @@ public final class SQLDouble extends NumberDataType
 		{
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 					"error on clone, " +
 					" value = " + value +
 					" isnull = " + isnull, se);
@@ -446,6 +450,9 @@ public final class SQLDouble extends NumberDataType
 
         double v = bigDecimal.doubleValue();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5546
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
+//IC see: https://issues.apache.org/jira/browse/DERBY-5534
         if (v == 0) {
             // We need to catch underflow here, since BigDecimal#doubleValue it
             // just returns 0 (i.e. no exception).

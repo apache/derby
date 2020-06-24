@@ -121,6 +121,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
      * @return constraint id
      */
     public UUID getConstraintId() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return constraintId;
     }
 
@@ -150,6 +151,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	 */
 	static void validateFKConstraint
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         Activation                          activation,
 		TransactionController				tc,
 		DataDictionary						dd,
@@ -167,6 +169,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                 fk.getIndexConglomerateDescriptor(dd).getConglomerateNumber(),
                 false,                       			// hold 
                 0, 										// read only
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 TransactionController.MODE_TABLE,       // already locked
                 TransactionController.ISOLATION_READ_COMMITTED,
                 (FormatableBitSet)null,                 // retrieve all fields
@@ -217,6 +220,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 					refcd.getIndexConglomerateDescriptor(dd).getConglomerateNumber(),
                         false,                       	// hold 
                         0, 								// read only
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                         TransactionController.MODE_RECORD,
                         TransactionController.ISOLATION_READ_COMMITTED,
                                               // read committed is good enough
@@ -228,6 +232,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                         ScanController.GT             	// stopSearchOp 
                         );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             RIBulkChecker riChecker = new RIBulkChecker(
                     activation,
                     refScan,
@@ -293,6 +298,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	(
 		String							constraintName,
 		String							constraintText,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         UUID                            constraintId,
 		TableDescriptor					td,
 		LanguageConnectionContext		lcc,
@@ -301,6 +307,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         StringBuilder checkStmt = new StringBuilder();
 		/* should not use select sum(not(<check-predicate>) ? 1: 0) because
 		 * that would generate much more complicated code and may exceed Java
@@ -316,10 +323,12 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 		try
 		{
 			PreparedStatement ps = lcc.prepareInternalStatement(checkStmt.toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 
             // This is a substatement; for now, we do not set any timeout
             // for it. We might change this behaviour later, by linking
             // timeout to its parent statement's timeout settings.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 			rs = ps.executeSubStatement(lcc, false, 0L);
 			ExecRow row = rs.getNextRow();
 			if (SanityManager.DEBUG)
@@ -349,14 +358,18 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                         // violating rows, so for now, just pretend we know one,
                         // then invalidate the row location information forcing
                         // full table check at validation time
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         CheckInfo newCi[] = new CheckInfo[1];
                         DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                                 td.getObjectID(),
                                 td.getSchemaName(),
                                 td.getName(),
                                 null,
                                 violatingConstraints,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 new HeapRowLocation() /* dummy */,
                                 newCi);
                         newCi[0].setInvalidatedRowLocations();

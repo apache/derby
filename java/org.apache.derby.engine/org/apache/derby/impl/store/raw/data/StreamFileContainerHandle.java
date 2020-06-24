@@ -47,6 +47,7 @@ import java.util.Properties;
 */
 
 final class StreamFileContainerHandle 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     implements  StreamContainerHandle, DerbyObserver 
 {
 
@@ -308,6 +309,7 @@ final class StreamFileContainerHandle
 	*/
 	public String toString() {
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
             String str = "StreamContainerHandle:(" + identity.toString() + ")";
             return(str);
         } else {

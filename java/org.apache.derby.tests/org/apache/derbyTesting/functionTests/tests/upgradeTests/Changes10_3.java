@@ -52,6 +52,7 @@ public class Changes10_3 extends UpgradeChange {
      * @return the test suite created.
      */   
     public static Test suite(int phase) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Upgrade changes for 10.3");
         
         suite.addTestSuite(Changes10_3.class);
@@ -59,7 +60,9 @@ public class Changes10_3 extends UpgradeChange {
         //Add the tests for the Stored procedures related to the locator
         //implementation of the LOB related JDBC methods. This needs to be done
         //only during the hard(full) upgrade phase.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2385
         if(phase == PH_HARD_UPGRADE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2632
             if (JDBC.vmSupportsJDBC3())
             {
                 //Tests for the Blob related locator StoredProcedures
@@ -69,6 +72,7 @@ public class Changes10_3 extends UpgradeChange {
             }
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         return new SupportFilesSetup((Test) suite);
     }
 
@@ -114,10 +118,12 @@ public class Changes10_3 extends UpgradeChange {
      * 10.2 Databases will work with the old LogRecord format.
      */
     public void testNegValueSupportedLogRecord()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         throws SQLException
     {
         switch(getPhase()) {
             case PH_CREATE: {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2611
 
                 // This case is derived from OnlineCompressTest.test6.
                 Statement s = createStatement();
@@ -170,6 +176,7 @@ public class Changes10_3 extends UpgradeChange {
     
     private void checkDataToCase606(int start_value, int end_value)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         getConnection().setAutoCommit(false);
         Statement s = createStatement();
         PreparedStatement insert_stmt = prepareStatement("insert into case606 values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -226,6 +233,7 @@ public class Changes10_3 extends UpgradeChange {
      * are working on hard upgrade to 10.3 from previous derby versions.
      */
     public void testImportExportLobsProcedures()
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         throws SQLException
     {
     
@@ -244,6 +252,7 @@ public class Changes10_3 extends UpgradeChange {
             // on soft-upgrade.
             Statement s = createStatement();
             assertStatementError("42Y03", s, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                 "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE" +  
                 "(null , 'IET1' , 'iet1.del' , null, " + 
                 "null, null, 'iet1_lobs.dat')");
@@ -267,6 +276,7 @@ public class Changes10_3 extends UpgradeChange {
             SupportFilesSetup.deleteFile(lobsFileName);
 
             s.execute(
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                 "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE" +  
                 "(null , 'IET1' , '"  +  fileName  + 
                 "' , null, null, null, '" + lobsFileName + "')");
@@ -302,6 +312,7 @@ public class Changes10_3 extends UpgradeChange {
      * hard upgrade to 10.3 from previous derby versions.
      */
     public void testPolicyReloadingProcedure()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
         throws SQLException
     {
         int         currentPhase = getPhase();
@@ -446,6 +457,7 @@ public class Changes10_3 extends UpgradeChange {
         }
 
         // Now verify you can access the tables 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2611
         switch (getPhase())
         {
             case PH_CREATE: 

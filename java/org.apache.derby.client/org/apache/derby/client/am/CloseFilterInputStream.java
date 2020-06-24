@@ -30,12 +30,14 @@ class CloseFilterInputStream extends FilterInputStream {
     
     private static final String ALREADY_CLOSED_ERR_MESSAGE = 
             SqlException.getMessageUtil().getTextMessage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                 MessageId.OBJECT_CLOSED);
     
     private boolean closed;
     
     public CloseFilterInputStream(InputStream is){
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         super(is);
         closed = false;
         
@@ -46,6 +48,7 @@ class CloseFilterInputStream extends FilterInputStream {
         throws IOException {
 
         if(closed){
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
             throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
         }
         
@@ -58,6 +61,7 @@ class CloseFilterInputStream extends FilterInputStream {
         throws IOException {
         
         if(closed){
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
             throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
         }
 
@@ -72,6 +76,7 @@ class CloseFilterInputStream extends FilterInputStream {
         throws IOException{
         
         if(closed){
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
             throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
         }
 
@@ -84,6 +89,7 @@ class CloseFilterInputStream extends FilterInputStream {
         throws IOException{
 
         if(closed){
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
             throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
         }
         
@@ -96,6 +102,7 @@ class CloseFilterInputStream extends FilterInputStream {
         throws IOException{
         
         if(closed){
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
             throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
         }
 

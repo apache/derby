@@ -41,6 +41,7 @@ public class DriverManagerConnector implements Connector {
     }
 
     public Connection openConnection() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         return openConnection(config.getDefaultDatabaseName(), config.getUserName(), config.getUserPassword());
     }
 
@@ -83,6 +84,7 @@ public class DriverManagerConnector implements Connector {
          throws SQLException
     {
         String url = config.getJDBCUrl(databaseName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
 
         try {
             DriverManager.getDriver(url);
@@ -116,6 +118,7 @@ public class DriverManagerConnector implements Connector {
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
             Properties attributes = new Properties(connectionAttributes);
             attributes.setProperty("create", "true");
 
@@ -126,6 +129,7 @@ public class DriverManagerConnector implements Connector {
     private static void printFullException( Throwable t, int indentLevel )
     {
         if ( t == null ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
 
         String              tab = "    ";
         StringBuilder   buffer = new StringBuilder();
@@ -155,6 +159,7 @@ public class DriverManagerConnector implements Connector {
      * with the user and password defined by the configuration.
      */
     public void shutDatabase() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         Properties p = new Properties();
         p.setProperty("shutdown", "true");
         getConnectionByAttributes(config.getJDBCUrl(), p);
@@ -171,6 +176,7 @@ public class DriverManagerConnector implements Connector {
      * @throws java.sql.SQLException
      */
     public void shutEngine(boolean deregisterDriver) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         Properties p = new Properties();
         p.setProperty("shutdown", "true");
         
@@ -183,6 +189,7 @@ public class DriverManagerConnector implements Connector {
     
     public void setLoginTimeout( int seconds ) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         DriverManager.setLoginTimeout( seconds );
     }
     
@@ -197,6 +204,7 @@ public class DriverManagerConnector implements Connector {
      * and then the passed in attribute is set.
      */
     private Connection getConnectionByAttributes(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             String url,
             Properties p)
         throws SQLException
@@ -211,6 +219,7 @@ public class DriverManagerConnector implements Connector {
             attributes.setProperty(key, p.getProperty(key));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         try {
             DriverManager.getDriver(url);
         } catch (SQLException e) {
@@ -237,6 +246,7 @@ public class DriverManagerConnector implements Connector {
     private void loadJDBCDriver() throws SQLException {
         String driverClass = config.getJDBCClient().getJDBCDriverName();
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(driverClass);
             clazz.getConstructor().newInstance();
         } catch (ClassNotFoundException cnfe) {
@@ -248,6 +258,7 @@ public class DriverManagerConnector implements Connector {
         } catch (InstantiationException ie) {
             throw new SQLException("Failed to load JDBC driver '" + driverClass
                     + "': " + ie.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         } catch (NoSuchMethodException ie) {
             throw new SQLException("Failed to load JDBC driver '" + driverClass
                     + "': " + ie.getMessage());

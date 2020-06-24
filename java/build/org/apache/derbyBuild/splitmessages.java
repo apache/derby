@@ -57,10 +57,14 @@ public class splitmessages
     static
     {
         // Add message ids that don't start with XJ here
+//IC see: https://issues.apache.org/jira/browse/DERBY-841
         clientMessageIds.add(SQLState.NO_CURRENT_CONNECTION);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1115
         clientMessageIds.add(SQLState.NOT_IMPLEMENTED);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1149
         clientMessageIds.add(SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION);
         clientMessageIds.add(SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
         clientMessageIds.add(SQLState.UNSUPPORTED_ENCODING);
         clientMessageIds.add(SQLState.LANG_FORMAT_EXCEPTION);
         clientMessageIds.add(SQLState.LANG_DATA_TYPE_GET_MISMATCH);
@@ -68,12 +72,17 @@ public class splitmessages
         clientMessageIds.add(SQLState.LANG_DATE_SYNTAX_EXCEPTION);
         clientMessageIds.add(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE);
         clientMessageIds.add(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
         clientMessageIds.add(SQLState.LANG_STATEMENT_CLOSED_NO_REASON);
         clientMessageIds.add(SQLState.LANG_INVALID_COLUMN_POSITION);
         clientMessageIds.add(SQLState.INVALID_COLUMN_NAME);
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
         clientMessageIds.add(SQLState.LANG_NULL_INTO_NON_NULL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1185
         clientMessageIds.add(SQLState.JDBC_METHOD_NOT_IMPLEMENTED);
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
+//IC see: https://issues.apache.org/jira/browse/DERBY-970
         clientMessageIds.add(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER);
         clientMessageIds.add(SQLState.DRDA_NO_AUTOCOMMIT_UNDER_XA);
         clientMessageIds.add(SQLState.DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK);
@@ -84,12 +93,17 @@ public class splitmessages
         clientMessageIds.add(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT);
         clientMessageIds.add(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION);
         clientMessageIds.add(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1266
         clientMessageIds.add(SQLState.QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
         clientMessageIds.add(SQLState.MULTIPLE_RESULTS_ON_EXECUTE_QUERY);
         clientMessageIds.add(SQLState.USE_EXECUTE_UPDATE_WITH_NO_RESULTS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-843
+//IC see: https://issues.apache.org/jira/browse/DERBY-1198
         clientMessageIds.add(SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE);
         clientMessageIds.add(SQLState.LANG_CANT_INVALIDATE_OPEN_RESULT_SET);
         clientMessageIds.add(SQLState.YEAR_EXCEEDS_MAXIMUM);
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
         clientMessageIds.add(SQLState.LANG_INVALID_PARAM_POSITION);
         clientMessageIds.add(SQLState.LANG_MISSING_PARMS);
         clientMessageIds.add(SQLState.LANG_NO_CURRENT_ROW);
@@ -102,14 +116,21 @@ public class splitmessages
         clientMessageIds.add(SQLState.LANG_INVALID_CALL_STATEMENT);
         clientMessageIds.add(SQLState.LANG_INVALID_SQL_IN_BATCH);
         clientMessageIds.add(SQLState.LANG_RESULT_SET_NOT_OPEN);
+//IC see: https://issues.apache.org/jira/browse/DERBY-845
         clientMessageIds.add(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC);
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
         clientMessageIds.add(SQLState.SECMECH_NOT_SUPPORTED);
         clientMessageIds.add(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1393
         clientMessageIds.add(SQLState.DATA_TYPE_NOT_SUPPORTED);
+//IC see: https://issues.apache.org/jira/browse/DERBY-850
         clientMessageIds.add(SQLState.JDBC_DRIVER_REGISTER);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1266
         clientMessageIds.add(SQLState.NO_CURRENT_ROW);
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
         clientMessageIds.add(SQLState.LANG_IDENTIFIER_TOO_LONG);
         clientMessageIds.add(SQLState.DRDA_CURSOR_NOT_OPEN);
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
         clientMessageIds.add(SQLState.PROPERTY_UNSUPPORTED_CHANGE);
         clientMessageIds.add(SQLState.NET_INVALID_JDBC_TYPE_FOR_PARAM);
         clientMessageIds.add(SQLState.UNRECOGNIZED_JAVA_SQL_TYPE);
@@ -118,18 +139,25 @@ public class splitmessages
         clientMessageIds.add(SQLState.NET_SQLCDTA_INVALID_FOR_PKGID);
         clientMessageIds.add(SQLState.NET_PGNAMCSN_INVALID_AT_SQLAM);
         clientMessageIds.add(SQLState.NET_VCM_VCS_LENGTHS_INVALID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
         clientMessageIds.add(SQLState.LANG_STRING_TOO_LONG);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         clientMessageIds.add(SQLState.INVALID_COLUMN_ARRAY_LENGTH);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2498
         clientMessageIds.add(SQLState.PROPERTY_INVALID_VALUE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2769
         clientMessageIds.add(SQLState.LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4777
         clientMessageIds.add(SQLState.LANG_CURSOR_NOT_FOUND);
     };
+//IC see: https://issues.apache.org/jira/browse/DERBY-5474
 
 	public static void main(String[] args) throws Exception {
 
 		Properties p = new Properties();
         int idx = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		File engineClassesDir = new File(args[idx++]);
 		File clientClassesDir = new File(args[idx++]);
 		File localesDir = new File(args[idx++]);
@@ -143,6 +171,7 @@ public class splitmessages
 
 		boolean addBase = "_en".equals(locale);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         File localizedEngineMessagesDir = new File(localesDir, LOCALE_STUB + locale);
         localizedEngineMessagesDir.mkdir();
 
@@ -160,6 +189,7 @@ public class splitmessages
         Properties clientProps = new Properties();
 
         String clientPropsFileName = "clientmessages" + locale + ".properties";
+//IC see: https://issues.apache.org/jira/browse/DERBY-838
 
 		for (Enumeration e = p.keys(); e.hasMoreElements(); ) {
 			String key = (String) e.nextElement();
@@ -176,6 +206,7 @@ public class splitmessages
 		for (int i = 0; i < 50; i++) {
 			if (c[i].size() == 0)
 				continue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			OutputStream fos = new BufferedOutputStream
               (
 				new FileOutputStream
@@ -190,7 +221,10 @@ public class splitmessages
 			if (addBase) {
 				// add duplicate english file as the base
 				fos = new BufferedOutputStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 					new FileOutputStream(new File(engineClassesDir, "m"+i+"_en.properties")), 16 * 1024);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3132
+//IC see: https://issues.apache.org/jira/browse/DERBY-3132
 				c[i].store(fos, (String) null);
 				fos.flush();
 				fos.close();
@@ -204,7 +238,9 @@ public class splitmessages
         // Save the client messages (the combination of what was already
         // there and what we added from the engine properties file) into
         // the Derby locales directory
+//IC see: https://issues.apache.org/jira/browse/DERBY-838
         OutputStream clientOutStream = new BufferedOutputStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             new FileOutputStream(new File(clientClassesDir, clientPropsFileName)), 
             16 * 1024);
 
@@ -216,9 +252,12 @@ public class splitmessages
         {
             // Save the English messages as the base
             clientOutStream = new BufferedOutputStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 new FileOutputStream(new File(clientClassesDir, "clientmessages.properties")), 
                 16 * 1024);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3132
+//IC see: https://issues.apache.org/jira/browse/DERBY-3132
             clientProps.store(clientOutStream, (String)null);
             clientOutStream.flush();
             clientOutStream.close();            
@@ -240,8 +279,10 @@ public class splitmessages
         // Look for message ids that we assume are likely to be used
         // on the client.  These ones don't need to be explicitly added
         // to clientMessageIds
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
         if ( messageId.startsWith("XJ") || messageId.startsWith("J")  ||
              messageId.startsWith("XN") || messageId.startsWith("58") ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
              messageId.startsWith("57") || messageId.startsWith("08") ||
              messageId.startsWith( "XBD" ) )
         {

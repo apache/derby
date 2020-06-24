@@ -45,6 +45,7 @@ public class LobLimitsLiteTest extends LobLimitsTest {
     
     public static Test suite() {
         Test test = LobLimitsTest.baseSuite(_1MB, _100K);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("LobLimitsLiteTest");
         suite.addTest(test);
         suite.addTest(TestConfiguration.clientServerDecorator(test));

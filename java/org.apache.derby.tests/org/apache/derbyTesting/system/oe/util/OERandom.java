@@ -105,6 +105,7 @@ public class OERandom {
      */
     public BigDecimal payment()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         return randomDecimal(1, 500000, 2);
     }
 
@@ -137,6 +138,8 @@ public class OERandom {
      */
     public short carrier()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         return (short) randomInt(1, 10);
     }
 
@@ -336,6 +339,7 @@ public class OERandom {
         // First thousand customers (C_ID is one based)
         // have a fixed last name based upon the contiguous
         // values from 0-999, section 4.3.3.1
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         if (cid <= 1000)
             return randomCLast(cid-1); // range 0 - 999
 

@@ -92,9 +92,11 @@ class DerbyLuceneDir extends Directory
      * </p>
      */
     static  synchronized    DerbyLuceneDir  getDirectory
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         ( StorageFactory storageFactory, String schema, String table, String textcol )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         DerbyLuceneDir  candidate = new DerbyLuceneDir( storageFactory, schema, table, textcol );
         String              key = getKey( candidate );
         DerbyLuceneDir  result = _openDirectories.get( key );
@@ -122,6 +124,7 @@ class DerbyLuceneDir extends Directory
     /** Get the key associated with a directory */
     private static  String  getKey( DerbyLuceneDir dir )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         return dir._directory.getPath();
     }
     
@@ -133,9 +136,11 @@ class DerbyLuceneDir extends Directory
      * </p>
      */
     private DerbyLuceneDir( StorageFactory storageFactory, String schema, String table, String textcol )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         _storageFactory = storageFactory;
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         _schema = schema;
         _table = table;
         _textcol = textcol;
@@ -182,6 +187,7 @@ class DerbyLuceneDir extends Directory
 
     /** Clear the lock */
     public void clearLock( String name )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws IOException
     {
         _lockFactory.clearLock( name );
@@ -345,6 +351,7 @@ class DerbyLuceneDir extends Directory
     /** Make an IOException with the given SQLState and args */
     private IOException newIOException( String sqlState, Object... args )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         return new IOException( ToolUtilities.newSQLException( sqlState, args ).getMessage() );
     }
 
@@ -361,7 +368,9 @@ class DerbyLuceneDir extends Directory
 	 * Create the path if necessary.
 	 */
     private static StorageFile createPath
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         ( final StorageFactory storageFactory, final String schema, final String table, final String textcol )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         StorageFile    luceneDir = createPathLeg( storageFactory, null, Database.LUCENE_DIR );
@@ -377,6 +386,7 @@ class DerbyLuceneDir extends Directory
 	 */
     private static StorageFile createPathLeg
         ( final StorageFactory storageFactory, final StorageFile parentDir, final String fileName )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         try {
@@ -385,6 +395,7 @@ class DerbyLuceneDir extends Directory
              {
                  public StorageFile run() throws SQLException
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
                      String         normalizedName = ToolUtilities.derbyIdentifier( fileName );
                      StorageFile    file = parentDir == null ?
                          storageFactory.newStorageFile( normalizedName  ) :
@@ -393,6 +404,7 @@ class DerbyLuceneDir extends Directory
                      if ( !file.exists() ) { file.mkdir(); }
                      if ( !file.exists() )
                      {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
                          throw ToolUtilities.newSQLException
                              ( SQLState.SERVICE_DIRECTORY_CREATE_ERROR, normalizedName );
                      }
@@ -400,6 +412,7 @@ class DerbyLuceneDir extends Directory
                  }
              }
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         } catch (PrivilegedActionException pae) {
             throw (SQLException) pae.getCause();
         }

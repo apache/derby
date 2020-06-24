@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UnaryArithmeticOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -41,6 +42,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	private final static String[] UNARY_METHODS = {"plus","minus","sqrt", "absolute"};
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_PLUS = 0;
     final static int K_MINUS = 1;
     final static int K_SQRT = 2;
@@ -79,6 +81,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
     @Override
     public boolean requiresTypeFromContext()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_PLUS ||
             kind == K_MINUS) {
             return operand.requiresTypeFromContext(); 
@@ -92,6 +95,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
     @Override
     public boolean isParameterNode()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_PLUS ||
             kind == K_MINUS) {
             return operand.isParameterNode(); 
@@ -113,6 +117,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
     @Override
 	void bindParameter() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
        if (kind == K_SQRT ||
             kind == K_ABS)
 		{
@@ -122,6 +127,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		}
         
 		//Derby-582 add support for dynamic parameter for unary plus and minus
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
        if (kind == K_MINUS ||
             kind == K_PLUS)
 			return;
@@ -145,17 +151,20 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
        if (operand.requiresTypeFromContext() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ((kind == K_PLUS ||
                   kind == K_MINUS))
 				&& operand.getTypeServices() == null)
 				return this;
 
         bindOperand(fromList, subqueryList, aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
        if (kind == K_SQRT ||
             kind == K_ABS)
@@ -170,6 +179,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		/*
 		** The result type of a +, -, SQRT, ABS is the same as its operand.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		super.setType(operand.getTypeServices());
 		return this;
 	}
@@ -184,6 +194,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	    {
 	        throw StandardException.newException(
                     SQLState.LANG_UNARY_ARITHMETIC_BAD_TYPE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                    (kind == K_PLUS) ? "+" : "-",
 	                        operandType.getSQLTypeName());
 	    }
@@ -203,6 +214,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 									throws StandardException
 	{
 		/* Unary + doesn't do anything.  Just return the operand */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
        if (kind == K_PLUS)
 			operand.generateExpression(acb, mb);
 		else
@@ -228,6 +240,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 	 * If the operand is not a build-in type, generate a bound conversion
 		 * tree to build-in types.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (operandType.userType() )
 		{
 			operand = operand.genSQLJavaSQLTree();
@@ -243,6 +256,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 						getOperatorString(), operandType.getSQLTypeName());
 
 		/* For SQRT, if operand is not a DOUBLE, convert it to DOUBLE */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
        if (kind == K_SQRT &&
             jdbcType != Types.DOUBLE)
 		{
@@ -259,6 +273,8 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	binding. The setType method will call the binding code after setting
 	the type of the parameter*/
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
         if (operand.requiresTypeFromContext() && operand.getTypeServices() == null)
@@ -271,6 +287,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 
     @Override
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) &&
                 ((UnaryArithmeticOperatorNode)o).kind == kind;
     }

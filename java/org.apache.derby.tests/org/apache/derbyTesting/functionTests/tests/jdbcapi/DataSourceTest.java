@@ -66,6 +66,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * in this hashtable
      */
     protected static Hashtable<String, Connection> conns =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             new Hashtable<String, Connection>();
     
     /** The expected format of a connection string. In English:
@@ -73,6 +74,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      *  (DATABASE=<dbname>), (DRDAID = <drdaid>)"
      */
     private static final String CONNSTRING_FORMAT = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3082
         "\\S+@\\-?[0-9]+.* \\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
         "\\(DATABASE = [A-Za-z]+\\), \\(DRDAID = .*\\) "; 
     
@@ -96,12 +98,14 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests to be run with client and/or embedded
      */
     private static Test baseSuite(String postfix) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite
             suite = new BaseTestSuite("ClientAndEmbedded" + postfix);
 
         suite.addTest(new DataSourceTest("testBadConnectionAttributeSyntax"));
         suite.addTest(new DataSourceTest("testDescriptionProperty"));
         suite.addTest(new DataSourceTest("testAllDataSources"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2498
         suite.addTest(new DataSourceTest("testJira95ds"));
         return suite;
     }
@@ -112,6 +116,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with client only
      */
     private static Test getClientSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Client/Server");
         suite.addTest(new DataSourceTest("testClientDSConnectionAttributes"));
         suite.addTest(new DataSourceTest(
@@ -128,6 +133,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with embedded only
      */
     private static Test getEmbeddedSuite(String postfix) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Embedded" + postfix);
         suite.addTest(new DataSourceTest("testDSRequestAuthentication"));
         return suite;
@@ -136,6 +142,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("DataSourceTest suite");
         // Add the tests that only run with embedded
+//IC see: https://issues.apache.org/jira/browse/DERBY-3410
         suite.addTest(getEmbeddedSuite("embedded"));
         // Add tests that will run with embedded
         suite.addTest(baseSuite(":embedded"));
@@ -164,6 +171,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         // attempt to get rid of any left-over trace files
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (int i = 0; i < 6; i++) {
             String traceFileName = "trace" + (i + 1) + ".out";
             File traceFile = new File(traceFileName);
@@ -172,6 +180,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
                 PrivilegedFileOpsForTests.delete(traceFile);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2492
         super.tearDown();
     }
 
@@ -183,6 +192,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         //Connection dmc = getConnection();
         
         Object[] expectedValues = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             ResultSet.HOLD_CURSORS_OVER_COMMIT, "XJ010",
             2, true, false};
 
@@ -197,6 +207,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         assertConnectionOK(expectedValues, "DataSource", ds.getConnection());
         
         if (JDBC.vmSupportsJDBC4()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             BasicEmbeddedDataSource40 nds = new BasicEmbeddedDataSource40();
             nds.setDatabaseName(dbName);
             assertConnectionOK(
@@ -216,6 +227,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
             ds.getConnection();
             fail ("expected an SQLException!");
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2498
             assertSQLState("XCY00", sqle);
         } catch (Exception e) {
             fail ("unexpected exception: " + e.toString());
@@ -233,6 +245,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
             ds.getConnection();
             fail ("should have seen an error");
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4070
             assertSQLState("XJ028", e);
         } 
     } // End testBadConnectionAttributeSyntax
@@ -252,6 +265,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         ClientDataSourceInterface ds = null;
 
         Class<?> clazz;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         if (JDBC.vmSupportsJNDI()) {
             // Use reflection to avoid class not found in non-JNDI context
@@ -301,9 +315,11 @@ public class DataSourceTest extends BaseJDBCTestCase {
     public void testDSRequestAuthentication() throws SQLException {
 
         // Create an empty datasource of the type befitting the jvm/client/server
+//IC see: https://issues.apache.org/jira/browse/DERBY-3410
         JDBCClient dsclient = getTestConfiguration().getJDBCClient();
         String dsName = dsclient.getDataSourceClassName();
         DataSource ds = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         try {
             clazz = Class.forName(dsName);
@@ -318,6 +334,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
              "XJ004","XJ004","XJ004","XJ004","XJ004"}, ds);
  
         // DataSource - connectionAttributes=databaseName=wombat");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3410
         JDBCDataSource.setBeanProperty(ds, "connectionAttributes", "databaseName=" + dbName);
         dsConnectionRequests(new String[] {  
             "XJ004","XJ004","XJ004","XJ004",
@@ -395,6 +412,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     private static void assertTraceFilesExist() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (int i = 0; i < 2; i++) {
             String traceFileName = "trace" + (i + 1) + ".out";
             File traceFile = new File(traceFileName);
@@ -426,6 +444,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // DataSource - retrieveMessageTextProperty
         ClientDataSourceInterface ds = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             // Use reflection to avoid class not found in non-JNDI context
@@ -611,6 +630,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // if this fixture runs without the default db being created,
         // there will not be a warning. Otherwise,  the warning will be,
         // cannot create db, connecting to existing db
+//IC see: https://issues.apache.org/jira/browse/DERBY-3410
         if (conn.getWarnings() != null)
             assertSQLState("01J01", conn.getWarnings());
 
@@ -725,7 +745,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
         assertStringPrefix(conn);
         String str = conn.toString(); 
         // matches is not a supported method with JSR169
+//IC see: https://issues.apache.org/jira/browse/DERBY-3410
         if (!JDBC.vmSupportsJSR169())
+//IC see: https://issues.apache.org/jira/browse/DERBY-3082
             assertTrue("\nexpected format:\n " + CONNSTRING_FORMAT + "\nactual value:\n " + str,
                     str.matches(CONNSTRING_FORMAT));
     }
@@ -772,6 +794,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     private static void clearConnections() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Connection conn : conns.values()) {
             conn.close();
         }

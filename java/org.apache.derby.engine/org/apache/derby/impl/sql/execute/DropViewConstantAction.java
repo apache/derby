@@ -115,6 +115,7 @@ class DropViewConstantAction extends DDLConstantAction
 		/* Get the table descriptor.  We're responsible for raising
 		 * the error if it isn't found 
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 		td = dd.getTableDescriptor(tableName, sd,
                 lcc.getTransactionExecute());
 

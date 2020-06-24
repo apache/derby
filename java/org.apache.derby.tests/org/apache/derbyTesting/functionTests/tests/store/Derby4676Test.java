@@ -47,6 +47,7 @@ public class Derby4676Test extends BaseJDBCTestCase {
 
     /** Set up the test environment. */
     protected void setUp() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         threads = new ArrayList<HelperThread>();
     }
 
@@ -70,6 +71,7 @@ public class Derby4676Test extends BaseJDBCTestCase {
 
         // Then check if any of the helper threads failed.
         for (int i = 0; i < localThreads.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             HelperThread t = localThreads.get(i);
             if (t.exception != null) {
                 fail("Helper thread failed", t.exception);

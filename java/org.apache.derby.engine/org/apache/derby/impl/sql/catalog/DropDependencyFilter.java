@@ -140,6 +140,7 @@ public class DropDependencyFilter implements TupleFilter
 	{
 		if ( uuidFactory == null )
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			uuidFactory = DataDictionaryImpl.getMonitor().getUUIDFactory();
 		}
 		return	uuidFactory;
@@ -156,6 +157,7 @@ public class DropDependencyFilter implements TupleFilter
 	{
 		if ( trueValue == null )
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 			trueValue = new SQLBoolean( true );
 		}
 

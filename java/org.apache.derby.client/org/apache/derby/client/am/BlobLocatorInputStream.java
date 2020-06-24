@@ -41,6 +41,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * this.  A more efficient skip implementation should also be
  * straight-forward.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class BlobLocatorInputStream extends InputStream
 {
 
@@ -55,7 +56,9 @@ class BlobLocatorInputStream extends InputStream
      * @throws SqlException if an error occurs when obtaining the
      *         length of the <code>Blob</code>.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     BlobLocatorInputStream(ClientConnection connection, ClientBlob blob)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         throws SqlException
     {        
         if (SanityManager.DEBUG) {
@@ -88,20 +91,25 @@ class BlobLocatorInputStream extends InputStream
      * @throws SqlException if an error occurs when obtaining the
      *         length of the <code>Blob</code>.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     BlobLocatorInputStream(ClientConnection connection, ClientBlob blob,
                                   long position, long length) 
         throws SqlException
     {    
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             SanityManager.ASSERT(blob.isLocator());
         }
         this.connection = connection;
         this.blob = blob;
         this.currentPos = position;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
         if (length != -1) {//verify if length is -1
             this.maxPos = Math.min(blob.sqlLength(), position + length - 1);
         }
         else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             this.maxPos = -1;
         }
     }
@@ -119,6 +127,7 @@ class BlobLocatorInputStream extends InputStream
             return -1;
         } else {
             // convert byte in range [-128,127] to int in range [0,255]
+//IC see: https://issues.apache.org/jira/browse/DERBY-3226
             return bytes[0] & 0xff;
         }
     }
@@ -161,6 +170,7 @@ class BlobLocatorInputStream extends InputStream
             int actualLength = -1;
             //check if maxPos has been set and calculate actualLength
             //based on that.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             if(maxPos != -1) {
                 //maxPos has been set. use maxPos to calculate the
                 //actual length based on the value set for maxPos.

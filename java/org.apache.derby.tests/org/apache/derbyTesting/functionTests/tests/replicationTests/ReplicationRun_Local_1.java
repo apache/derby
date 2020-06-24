@@ -46,6 +46,7 @@ public class ReplicationRun_Local_1 extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_1 Suite");
         
@@ -65,6 +66,7 @@ public class ReplicationRun_Local_1 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost, ALL_INTERFACES, masterServerPort,
                 masterDbSubPath);
@@ -103,6 +105,7 @@ public class ReplicationRun_Local_1 extends ReplicationRun
         
         int tuplesToInsert = 10000;
         _testInsertUpdateDeleteOnMaster(masterServerHost, masterServerPort, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
                 dbPath, tuplesToInsert);
         
         failOver(jvmVersion,
@@ -117,6 +120,7 @@ public class ReplicationRun_Local_1 extends ReplicationRun
         // verifySlave();
         dbPath = slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb;
         _verifyDatabase(slaveServerHost, slaveServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
             dbPath, tuplesToInsert);
         // We should verify the master as well, 
         // at least to see that we still can connect.

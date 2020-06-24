@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.FromBaseTable
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -102,6 +103,8 @@ import org.apache.derby.impl.sql.catalog.SYSUSERSRowFactory;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class FromBaseTable extends FromTable
 {
 	static final int UNSET = -1;
@@ -212,6 +215,8 @@ class FromBaseTable extends FromTable
      * @param tableProperties   The Properties list associated with the table.
      * @param cm                The context manager
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromBaseTable(TableName tableName,
                   String correlationName,
                   ResultColumnList derivedRCL,
@@ -243,7 +248,10 @@ class FromBaseTable extends FromTable
         super(correlationName, null, cm);
         this.tableName = tableName;
         this.updateOrDelete = updateOrDelete;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( derivedRCL );
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 		setOrigTableName(this.tableName);
 		templateColumns = getResultColumns();
 	}
@@ -293,6 +301,7 @@ class FromBaseTable extends FromTable
 		ConglomerateDescriptor currentConglomerateDescriptor =
 												ap.getConglomerateDescriptor();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         if ( optimizerTracingIsOn() )
         { getOptimizerTracer().traceNextAccessPath( getExposedName(), ((predList == null) ? 0 : predList.size()) ); }
 
@@ -324,6 +333,7 @@ class FromBaseTable extends FromTable
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if ( optimizerTracingIsOn() )
                 { getOptimizerTracer().traceLookingForSpecifiedIndex( userSpecifiedIndexName, tableNumber ); }
 
@@ -432,6 +442,7 @@ class FromBaseTable extends FromTable
 
 		if (currentConglomerateDescriptor == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceNoMoreConglomerates( tableNumber ); }
 		}
 		else
@@ -456,6 +467,7 @@ class FromBaseTable extends FromTable
 				 */
 				if (! isOneRowResultSet(predList))
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                     if ( optimizerTracingIsOn() )
                     { getOptimizerTracer().traceAddingUnorderedOptimizable( ((predList == null) ? 0 : predList.size()) ); }
 
@@ -544,6 +556,10 @@ class FromBaseTable extends FromTable
 		// The cost that we found from the above call is now stored in the
 		// cost field of this FBT's current access path.  So that's the
 		// cost we want to return here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
 		return getCurrentAccessPath().getCostEstimate();
 	}
 
@@ -627,6 +643,7 @@ class FromBaseTable extends FromTable
 		baseCols = irg.baseColumnPositions();
 
 		/* First we check to see if this is a covering index */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns())
 		{
 			/* Ignore unreferenced columns */
@@ -692,7 +709,10 @@ class FromBaseTable extends FromTable
 		boolean constraintSpecified = false;
 		ConstraintDescriptor consDesc = null;
         Enumeration<?> e = tableProperties.keys();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         StringUtil.SQLEqualsIgnoreCase(tableDescriptor.getSchemaName(), "SYS");
 		while (e.hasMoreElements())
 		{
@@ -789,6 +809,7 @@ class FromBaseTable extends FromTable
 			{
 				try
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
 					loadFactor = Float.parseFloat(value);
 				}
 				catch (NumberFormatException nfe)
@@ -832,6 +853,7 @@ class FromBaseTable extends FromTable
 					throw StandardException.newException(SQLState.LANG_INVALID_BULK_FETCH_UPDATEABLE);
 				}
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             else if (key.equals("validateCheckConstraint")) {
                 // the property "validateCheckConstraint" is read earlier
                 // cf. isValidatingCheckConstraint
@@ -867,6 +889,7 @@ class FromBaseTable extends FromTable
 	}
 
     private boolean isValidatingCheckConstraint() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (tableProperties == null) {
             return false;
         }
@@ -875,6 +898,8 @@ class FromBaseTable extends FromTable
             String key = (String)e.nextElement();
             String value = (String) tableProperties.get(key);
             if (key.equals("validateCheckConstraint")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 targetTableUUIDString = value;
                 validatingCheckConstraint = true;
                 return true;
@@ -913,6 +938,8 @@ class FromBaseTable extends FromTable
 		** costEstimate will be copied to the best access paths as
 		** necessary.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         CostEstimate costEst = getCostEstimate(optimizer);
         ap.setCostEstimate(costEst);
 
@@ -975,6 +1002,8 @@ class FromBaseTable extends FromTable
 			*/
 			statisticsForConglomerate = tableDescriptor.statisticsExist(cd);
 			statisticsForTable = tableDescriptor.statisticsExist(null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             unknownPredicateList = new PredicateList(getContextManager());
 			predList.copyPredicatesToOtherList(unknownPredicateList);
             // If not already done, check if this table has indexes and if
@@ -986,17 +1015,21 @@ class FromBaseTable extends FromTable
                 // The case where we have a table with a single-column unique
                 // index is pretty common, so avoid engaging the istat
                 // daemon if that's the only index on the table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
                 if (qualifiesForStatisticsUpdateCheck(tableDescriptor)) {
                     tableDescriptor.markForIndexStatsUpdate(baseRowCount());
                 }
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         AccessPath currAccessPath = getCurrentAccessPath();
 		JoinStrategy currentJoinStrategy = 
             currAccessPath.getJoinStrategy();
 
         if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceEstimatingCostOfConglomerate( cd, tableNumber ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
 		/* Get the uniqueness factory for later use (see below) */
 		double tableUniquenessFactor =
@@ -1015,6 +1048,8 @@ class FromBaseTable extends FromTable
 		StoreCostController scc = getStoreCostController(cd);
 
         CostEstimate costEst = getScratchCostEstimate(optimizer);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/* First, get the cost for one scan */
 
@@ -1038,8 +1073,11 @@ class FromBaseTable extends FromTable
 										0);
 
             if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceSingleMatchedRowCost( cost, tableNumber ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
             costEst.setCost(cost, 1.0d, 1.0d);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/*
 			** Let the join strategy decide whether the cost of the base
@@ -1054,6 +1092,8 @@ class FromBaseTable extends FromTable
 				newCost *= outerCost.rowCount();
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             costEst.setCost(
 				newCost,
                 costEst.rowCount() * outerCost.rowCount(),
@@ -1093,6 +1133,7 @@ class FromBaseTable extends FromTable
                 currAccessPath.setLockMode(
 											TransactionController.MODE_RECORD);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceConstantStartStopPositions(); }
 			}
 			else
@@ -1133,10 +1174,13 @@ class FromBaseTable extends FromTable
                 // See reference to DERBY-6011 further down in this method.
 
                 cost = singleFetchCost * costEst.rowCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
                 costEst.setEstimatedCost(
                                 costEst.getEstimatedCost() + cost);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceNonCoveringIndexCost( cost, tableNumber ); }
 			}
 		}
@@ -1326,6 +1370,7 @@ class FromBaseTable extends FromTable
 						if (firstColumn != null && leftOpnd instanceof LikeEscapeOperatorNode)
 						{
 							LikeEscapeOperatorNode likeNode = (LikeEscapeOperatorNode) leftOpnd;
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 							if (likeNode.getLeftOperand().requiresTypeFromContext())
 							{
 								ValueNode receiver = ((TernaryOperatorNode) likeNode).getReceiver();
@@ -1386,6 +1431,7 @@ class FromBaseTable extends FromTable
                     // when the index is being considered by the optimizer.
                     IndexRowGenerator irg = cd.getIndexDescriptor();
                     if (irg.isUnique() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                             && irg.numberOfOrderedColumns() == 1
                             && startStopPredCount == 1) {
                         statStartStopSelectivity = (1/(double)baseRowCount());
@@ -1543,6 +1589,8 @@ class FromBaseTable extends FromTable
 					false,
 					0,
                     costEst);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/* initialPositionCost is the first part of the index scan cost we get above.
 			 * It's the cost of initial positioning/fetch of key.  So it's unrelated to
@@ -1562,6 +1610,8 @@ class FromBaseTable extends FromTable
 				 * on cost (affecting decision for covering index) and rc (decision for
 				 * non-covering). The purpose is favoring unique index. beetle 5006.
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 if (oneRowResultSetForSomeConglom && costEst.rowCount() <= 1)
 				{
                     costEst.setCost(costEst.getEstimatedCost() * 2,
@@ -1570,12 +1620,15 @@ class FromBaseTable extends FromTable
 				}
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if ( optimizerTracingIsOn() )
             {
                 getOptimizerTracer().traceCostOfConglomerateScan
                     (
                      tableNumber,
                      cd,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                      costEst,
                      numExtraFirstColumnPreds,
                      extraFirstColumnSelectivity,
@@ -1606,6 +1659,8 @@ class FromBaseTable extends FromTable
 				** we only applied the FirstColumnSelectivity to the 
 				** cost.
 				*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 costEst.setCost(
                     scanCostAfterSelectivity(costEst.getEstimatedCost(),
                                              initialPositionCost,
@@ -1615,6 +1670,7 @@ class FromBaseTable extends FromTable
                     costEst.singleScanRowCount() *
                     statStartStopSelectivity);
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if (optimizerTracingIsOn()) {
                     getOptimizerTracer().
                         traceCostIncludingStatsForIndex(costEst, tableNumber);
@@ -1630,6 +1686,8 @@ class FromBaseTable extends FromTable
 				*/
 				if (extraFirstColumnSelectivity != 1.0d)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     costEst.setCost(
                          scanCostAfterSelectivity(costEst.getEstimatedCost(),
 												  initialPositionCost,
@@ -1639,6 +1697,7 @@ class FromBaseTable extends FromTable
                          costEst.singleScanRowCount() *
                              extraFirstColumnSelectivity);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                     if (optimizerTracingIsOn()) {
                         getOptimizerTracer().
                             traceCostIncludingExtra1stColumnSelectivity(
@@ -1658,6 +1717,7 @@ class FromBaseTable extends FromTable
                         costEst.singleScanRowCount() *
                             extraStartStopSelectivity);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                     if (optimizerTracingIsOn()) {
                         getOptimizerTracer().traceCostIncludingExtraStartStop(
                             costEst, tableNumber);
@@ -1690,6 +1750,8 @@ class FromBaseTable extends FromTable
 				/* If multiplication by listSize returns more rows than are
 				 * in the scan then just use the number of rows in the scan.
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 costEst.setCost(
                     costEst.getEstimatedCost() * listSize,
 					rc > initialRowCount ? initialRowCount : rc,
@@ -1704,9 +1766,12 @@ class FromBaseTable extends FromTable
 			*/
 			if (! startStopFound)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 currAccessPath.setLockMode(
 											TransactionController.MODE_TABLE);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceNoStartStopPosition(); }
 			}
 			else
@@ -1816,6 +1881,7 @@ class FromBaseTable extends FromTable
                 costEst.setEstimatedCost(
                                 costEst.getEstimatedCost() + cost);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if (optimizerTracingIsOn()) {
                     getOptimizerTracer().traceCostOfNoncoveringIndex(
                         costEst, tableNumber);
@@ -1828,12 +1894,15 @@ class FromBaseTable extends FromTable
 			 */
 			if (extraQualifierSelectivity != 1.0d)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 costEst.setCost(
                         costEst.getEstimatedCost(),
                         costEst.rowCount() * extraQualifierSelectivity,
                         costEst.singleScanRowCount() *
                             extraQualifierSelectivity);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if (optimizerTracingIsOn()) {
                     getOptimizerTracer().
                         traceCostIncludingExtraQualifierSelectivity(
@@ -1876,6 +1945,8 @@ class FromBaseTable extends FromTable
 				newCost *= outerCost.rowCount();
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             rowCnt *= outerCost.rowCount();
 			initialRowCount *= outerCost.rowCount();
 
@@ -1889,6 +1960,8 @@ class FromBaseTable extends FromTable
 			*/
 			if (oneRowResultSetForSomeConglom)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 if (outerCost.rowCount() < rowCnt)
 				{
                     rowCnt = outerCost.rowCount();
@@ -1924,6 +1997,8 @@ class FromBaseTable extends FromTable
 					*/
 					double maxRows =
 							((double) baseRowCount()) / scanUniquenessFactor;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     if (rowCnt > maxRows)
 					{
 						/*
@@ -1963,6 +2038,7 @@ class FromBaseTable extends FromTable
                 costEst.singleScanRowCount());
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             if (optimizerTracingIsOn()) {
                 getOptimizerTracer().traceCostOfNScans(
                     tableNumber, outerCost.rowCount(), costEst);
@@ -1980,6 +2056,8 @@ class FromBaseTable extends FromTable
 			// beetle 4787
 			else if (extraNonQualifierSelectivity != 1.0d)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 rc = oneRowResultSetForSomeConglom ?
                     costEst.rowCount() :
                     costEst.rowCount() * extraNonQualifierSelectivity;
@@ -1991,6 +2069,7 @@ class FromBaseTable extends FromTable
 			{
                 costEst.setCost(costEst.getEstimatedCost(), rc, src);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if (optimizerTracingIsOn()) {
                     getOptimizerTracer().
                         traceCostIncludingExtraNonQualifierSelectivity(
@@ -2009,6 +2088,7 @@ class FromBaseTable extends FromTable
 				*/
 
 				double compositeStatRC = initialRowCount * statCompositeSelectivity;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if ( optimizerTracingIsOn() )
                 { getOptimizerTracer().traceCompositeSelectivityFromStatistics( statCompositeSelectivity ); }
 
@@ -2040,6 +2120,7 @@ class FromBaseTable extends FromTable
 									 1 : 
 									 compositeStatRC / outerCost.rowCount());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if (optimizerTracingIsOn()) {
                     getOptimizerTracer().
                         traceCostIncludingCompositeSelectivityFromStats(
@@ -2120,6 +2201,7 @@ class FromBaseTable extends FromTable
 		 * or it is (or was) the target table of an
 		 * updatable cursor.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return (updateOrDelete != 0) || isCursorTargetTable() || getUpdateLocks;
 	}
 
@@ -2177,6 +2259,8 @@ class FromBaseTable extends FromTable
 		JBitSet[] tableColMap = new JBitSet[1];
 		tableColMap[0] = new JBitSet(numColumns + 1);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         pl.checkTopPredicatesForEqualsConditions(tableNo,
 												null,
 												tableNumbers,
@@ -2299,6 +2383,8 @@ class FromBaseTable extends FromTable
 	 *
 	 * @param locations	list of bit numbers to be cleared
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void clearDependency(List<Integer> locations)
 	{
 		if (this.dependencyMap != null)
@@ -2313,6 +2399,8 @@ class FromBaseTable extends FromTable
 	 *
 	 * @param tableProperties	The new table properties.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setTableProperties(Properties tableProperties)
 	{
 		this.tableProperties = tableProperties;
@@ -2331,6 +2419,8 @@ class FromBaseTable extends FromTable
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						   FromList fromListParam) 
 					throws StandardException
@@ -2340,9 +2430,11 @@ class FromBaseTable extends FromTable
         TableDescriptor tabDescr = bindTableDescriptor();
 
         if (tabDescr.getTableType() == TableDescriptor.VTI_TYPE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 			ResultSetNode vtiNode = mapTableAsVTI(
                     tabDescr,
 					getCorrelationName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 					getResultColumns(),
 					getProperties(),
 					getContextManager());
@@ -2352,6 +2444,8 @@ class FromBaseTable extends FromTable
 		ResultColumnList	derivedRCL = getResultColumns();
   
 		// make sure there's a restriction list
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         restrictionList = new PredicateList(getContextManager());
         baseTableRestrictionList = new PredicateList(getContextManager());
 
@@ -2359,12 +2453,16 @@ class FromBaseTable extends FromTable
 		CompilerContext compilerContext = getCompilerContext();
 
 		/* Generate the ResultColumnList */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setResultColumns( genResultColList() );
 		templateColumns = getResultColumns();
 
 		/* Resolve the view, if this is a view */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if (tabDescr.getTableType() == TableDescriptor.VIEW_TYPE)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
 			FromSubquery                fsq;
 			ResultSetNode				rsn;
 			ViewDescriptor				vd;
@@ -2375,6 +2473,8 @@ class FromBaseTable extends FromTable
 			 * the view definition text.
 			 */
             vd = dataDictionary.getViewDescriptor(tabDescr);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/*
 			** Set the default compilation schema to be whatever
@@ -2384,6 +2484,7 @@ class FromBaseTable extends FromTable
 			*/
 			compSchema = dataDictionary.getSchemaDescriptor(vd.getCompSchemaId(), null);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
 			compilerContext.pushCompilationSchema(compSchema);
 	
 			try
@@ -2392,6 +2493,7 @@ class FromBaseTable extends FromTable
 				/* This represents a view - query is dependent on the ViewDescriptor */
 				compilerContext.createDependency(vd);
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 				cvn = (CreateViewNode)
 				          parseStatement(vd.getViewText(), false);
 
@@ -2405,6 +2507,7 @@ class FromBaseTable extends FromTable
 				 */
 				if (rsn.getResultColumns().containsAllResultColumn())
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 					getResultColumns().setCountMismatchAllowed(true);
 				}
 				//Views execute with definer's privileges and if any one of 
@@ -2417,20 +2520,28 @@ class FromBaseTable extends FromTable
 				//sql accessing a view, we only need to look for select privilege
 				//on the actual view and that is what the following code is
 				//checking.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 for (ResultColumn rc : getResultColumns()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
                     if (isPrivilegeCollectionRequired()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 						compilerContext.addRequiredColumnPriv( rc.getTableColumnDescriptor());
                     }
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 fsq = new FromSubquery(
 					rsn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
                     cvn.getOrderByList(),
                     cvn.getOffset(),
                     cvn.getFetchFirst(),
                     cvn.hasJDBClimitClause(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 					(correlationName != null) ? 
                         correlationName : getOrigTableName().getTableName(), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 					getResultColumns(),
 					tableProperties,
 					getContextManager());
@@ -2442,6 +2553,7 @@ class FromBaseTable extends FromTable
 				//Following call is marking the query to run with definer 
 				//privileges. This marking will make sure that we do not collect
 				//any privilege requirement for it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 CollectNodesVisitor<QueryTreeNode> cnv =
                     new CollectNodesVisitor<QueryTreeNode>(QueryTreeNode.class);
 
@@ -2452,9 +2564,11 @@ class FromBaseTable extends FromTable
                 }
 
 				fsq.setOrigTableName(this.getOrigTableName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 
 				// since we reset the compilation schema when we return, we
 				// need to save it for use when we bind expressions:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3270
 				fsq.setOrigCompilationSchema(compSchema);
 				ResultSetNode fsqBound =
 					fsq.bindNonVTITables(dataDictionary, fromListParam);
@@ -2479,6 +2593,8 @@ class FromBaseTable extends FromTable
 		{
 			/* This represents a table - query is dependent on the TableDescriptor */
             compilerContext.createDependency(tabDescr);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/* Get the base conglomerate descriptor */
 			baseConglomerateDescriptor =
@@ -2491,11 +2607,14 @@ class FromBaseTable extends FromTable
             if (baseConglomerateDescriptor == null) {
                 throw StandardException.newException(
                         SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         Long.valueOf(tabDescr.getHeapConglomerateId()));
             }
 
 			/* Build the 0-based array of base column names. */
 			columnNames = getResultColumns().getColumnNames();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			/* Do error checking on derived column list and update "exposed"
 			 * column names if valid.
@@ -2503,6 +2622,7 @@ class FromBaseTable extends FromTable
 			if (derivedRCL != null)
 			{
                 getResultColumns().propagateDCLInfo(derivedRCL, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1894
 											    origTableName.getFullTableName());
 			}
 
@@ -2516,6 +2636,8 @@ class FromBaseTable extends FromTable
         //
         authorizeSYSUSERS =
             dataDictionary.usesSqlAuthorization() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             tabDescr.getUUID().toString().equals(
                 SYSUSERSRowFactory.SYSUSERS_UUID );
 
@@ -2546,6 +2668,7 @@ class FromBaseTable extends FromTable
      * resultColumns) are passed into the FROM_VTI node.
      */
     private ResultSetNode mapTableAsVTI(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
             TableDescriptor td,
             String correlationName,
             ResultColumnList resultColumns,
@@ -2558,6 +2681,8 @@ class FromBaseTable extends FromTable
         // call is an indication that we are mapping to a no-argument VTI. Since
         // we have the table descriptor we do not need to pass in a TableName.
         // See NewInvocationNode for more.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         final List<ValueNode> emptyList = Collections.emptyList();
         MethodCallNode newNode = new NewInvocationNode(
                 null, // TableName
@@ -2579,6 +2704,8 @@ class FromBaseTable extends FromTable
             TableName exposedName = newNode.makeTableName(td.getSchemaName(),
                     td.getDescriptorName());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             vtiNode = new FromVTI(
                     newNode,
                     null, /* correlationName */
@@ -2609,6 +2736,7 @@ class FromBaseTable extends FromTable
 		throws StandardException
 	{
 		// ourSchemaName can be null if correlation name is specified.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1894
 		String ourSchemaName = getOrigTableName().getSchemaName();
 		String fullName = (schemaName != null) ? (schemaName + '.' + name) : name;
 
@@ -2662,6 +2790,7 @@ class FromBaseTable extends FromTable
 			// Compare column's schema name with table descriptor's if it is
 			// not a synonym since a synonym can be declared in a different
 			// schema.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1894
 			if (tableName.equals(origTableName) && 
 					! schemaName.equals(tableDescriptor.getSchemaDescriptor().getSchemaName()))
 			{
@@ -2675,6 +2804,7 @@ class FromBaseTable extends FromTable
 			}
 
 			// Make sure exposed name is not a correlation name
+//IC see: https://issues.apache.org/jira/browse/DERBY-1894
 			if (! getExposedName().equals(getOrigTableName().getTableName()))
 			{
 				return null;
@@ -2686,6 +2816,7 @@ class FromBaseTable extends FromTable
 		/* Schema name only specified on table. Compare full exposed name
 		 * against table's schema name || "." || column's table name.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1894
 		if (! getExposedName().equals(getOrigTableName().getSchemaName() + "." + name))
 		{
 			return null;
@@ -2710,9 +2841,11 @@ class FromBaseTable extends FromTable
 		SchemaDescriptor sd = getSchemaDescriptor(schemaName);
 
 		tableDescriptor = getTableDescriptor(tableName.getTableName(), sd);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1894
 		if (tableDescriptor == null)
 		{
 			// Check if the reference is for a synonym.
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			TableName synonymTab = resolveTableToSynonym(tableName);
 			if (synonymTab == null)
 				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);
@@ -2739,6 +2872,8 @@ class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -2760,6 +2895,8 @@ class FromBaseTable extends FromTable
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
@@ -2781,6 +2918,8 @@ class FromBaseTable extends FromTable
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getMatchingColumn(ColumnReference columnReference)
             throws StandardException
 	{
@@ -2789,6 +2928,7 @@ class FromBaseTable extends FromTable
 		TableName		exposedTableName;
 
 		columnsTableName = columnReference.getQualifiedTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         if(columnsTableName != null) {
             if(columnsTableName.getSchemaName() == null && correlationName == null)
@@ -2801,6 +2941,7 @@ class FromBaseTable extends FromTable
 		** table name.
 		*/
         exposedTableName = getExposedTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 
         if (exposedTableName.getSchemaName() == null
                 && correlationName == null) {
@@ -2826,6 +2967,7 @@ class FromBaseTable extends FromTable
             //         sys.systables systabs
             //     where systabs.tabletype = 'T' and systabs.tableid = tt.tableid;
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             if ( getResultColumns() == null )
             {
                 throw StandardException.newException
@@ -2837,6 +2979,7 @@ class FromBaseTable extends FromTable
 			if (resultColumn != null)
 			{
 				columnReference.setTableNumber(tableNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4695
                 columnReference.setColumnNumber(
                     resultColumn.getColumnPosition());
 
@@ -2850,6 +2993,7 @@ class FromBaseTable extends FromTable
                     // Add a privilege for this column if the bind() phase of an UPDATE
                     // statement marked it as a selected column. see DERBY-6429.
                     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
                     if ( columnReference.isPrivilegeCollectionRequired() )
                     {
                         if ( columnReference.taggedWith( TagFilter.NEED_PRIVS_FOR_UPDATE_STMT ) )
@@ -2892,6 +3036,8 @@ class FromBaseTable extends FromTable
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -2908,11 +3054,13 @@ class FromBaseTable extends FromTable
         // At preprocess() time, the result column list should be the columns in the base
         // table.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6221
         if ( authorizeSYSUSERS )
         {
             int passwordColNum = SYSUSERSRowFactory.PASSWORD_COL_NUM;
 
             FormatableBitSet    refCols = getResultColumns().getReferencedFormatableBitSet( false, true, false );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
             if (
                 (refCols.getLength() >= passwordColNum ) && refCols.isSet( passwordColNum - 1 )
@@ -2924,6 +3072,7 @@ class FromBaseTable extends FromTable
         }
         
         /* Generate the referenced table map */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setReferencedTableMap( new JBitSet(numTables) );
 		getReferencedTableMap().set(tableNumber);
 
@@ -2960,6 +3109,7 @@ class FromBaseTable extends FromTable
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		ResultColumnList prRCList = getResultColumns();
 		setResultColumns( getResultColumns().copyListAndObjects() );
 		getResultColumns().setIndexRow( baseConglomerateDescriptor.getConglomerateNumber(), forUpdate() );
@@ -2971,6 +3121,7 @@ class FromBaseTable extends FromTable
 		 * we won't be able to project out any of them.
 		 */
 		prRCList.genVirtualColumnNodes(this, getResultColumns(), false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Project out any unreferenced columns.  If there are no referenced 
 		 * columns, generate and bind a single ResultColumn whose expression is 1.
@@ -2978,6 +3129,7 @@ class FromBaseTable extends FromTable
 		prRCList.doProjection();
 
 		/* Finally, we create the new ProjectRestrictNode */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         ProjectRestrictNode result =
                 new ProjectRestrictNode(
 								this,
@@ -2989,6 +3141,7 @@ class FromBaseTable extends FromTable
 								null,
                                 getContextManager());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (isValidatingCheckConstraint()) {
             CompilerContext cc = getCompilerContext();
 
@@ -3000,6 +3153,8 @@ class FromBaseTable extends FromTable
                         SQLState.LANG_SYNTAX_ERROR, "validateCheckConstraint");
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             result.setValidatingCheckConstraints(targetTableUUIDString);
         }
         return result;
@@ -3020,6 +3175,7 @@ class FromBaseTable extends FromTable
 		JoinStrategy trulyTheBestJoinStrategy = ap.getJoinStrategy();
         Optimizer opt = ap.getOptimizer();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         if (optimizerTracingIsOn()) {
             getOptimizerTracer().traceChangingAccessPathForTable(tableNumber);
         }
@@ -3070,6 +3226,8 @@ class FromBaseTable extends FromTable
 		** Divide up the predicates for different processing phases of the
 		** best join strategy.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         storeRestrictionList = new PredicateList(getContextManager());
         nonStoreRestrictionList = new PredicateList(getContextManager());
         requalificationRestrictionList = new PredicateList(getContextManager());
@@ -3092,6 +3250,7 @@ class FromBaseTable extends FromTable
 		 * really need to completely disable bulk fetching here,
 		 * or can we do something else?
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate pred : restrictionList)
 		{
 			if (pred.isInListProbePredicate() && pred.isStartKey())
@@ -3123,6 +3282,7 @@ class FromBaseTable extends FromTable
 			(bulkFetch == UNSET) && 
 			!forUpdate() && 
 			!isOneRowResultSet() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             getLevel() == 0 &&
             !validatingCheckConstraint)
 		{
@@ -3149,6 +3309,7 @@ class FromBaseTable extends FromTable
 			/* Template must reflect full row.
 			 * Compact RCL down to partial row.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			templateColumns = getResultColumns();
 			referencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), isSysstatements, false);
 			setResultColumns( getResultColumns().compactColumns(isCursorTargetTable(), isSysstatements) );
@@ -3184,6 +3345,7 @@ class FromBaseTable extends FromTable
 			// If this is for update then we need to get the RID in the result row
 			if (forUpdate())
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				getResultColumns().addRCForRID();
 			}
 			
@@ -3192,6 +3354,7 @@ class FromBaseTable extends FromTable
 			 * because we don't want the RID in the partial row returned
 			 * by the store.)
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			referencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(),true, false);
 			setResultColumns( getResultColumns().compactColumns(isCursorTargetTable(),true) );
 
@@ -3226,6 +3389,7 @@ class FromBaseTable extends FromTable
 		** a cursor can fetch the current row).
 		*/
 		ResultColumnList newResultColumns =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			newResultColumns(getResultColumns(),
 							trulyTheBestConglomerateDescriptor,
 							baseConglomerateDescriptor,
@@ -3243,6 +3407,8 @@ class FromBaseTable extends FromTable
 		// Get the BitSet for all of the referenced columns
 		FormatableBitSet indexReferencedCols = null;
         FormatableBitSet heapReferencedCols;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if ((bulkFetch == UNSET) && 
 			(requalificationRestrictionList == null || 
@@ -3251,6 +3417,7 @@ class FromBaseTable extends FromTable
 			/* No BULK FETCH or requalification, XOR off the columns coming from the heap 
 			 * to get the columns coming from the index.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			indexReferencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), true, false);
 			heapReferencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), true, true);
 			if (heapReferencedCols != null)
@@ -3261,6 +3428,7 @@ class FromBaseTable extends FromTable
 		else
 		{
 			// BULK FETCH or requalification - re-get all referenced columns from the heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			heapReferencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), true, false) ;
 		}
 		ResultColumnList heapRCL = getResultColumns().compactColumns(isCursorTargetTable(), false);
@@ -3285,6 +3453,7 @@ class FromBaseTable extends FromTable
 		** result set is the compacted column list.
 		*/
 		setResultColumns( newResultColumns );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		templateColumns = newResultColumns(getResultColumns(),
 			 							   trulyTheBestConglomerateDescriptor,
@@ -3301,6 +3470,7 @@ class FromBaseTable extends FromTable
 		 */
 		if (bulkFetch != UNSET)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().markAllUnreferenced();
 			storeRestrictionList.markReferencedColumns();
 			if (nonStoreRestrictionList != null)
@@ -3355,6 +3525,8 @@ class FromBaseTable extends FromTable
 		IndexRowGenerator	irg = idxCD.getIndexDescriptor();
 		int[]				baseCols = irg.baseColumnPositions();
         ResultColumnList newCols = new ResultColumnList((getContextManager()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		for (int i = 0; i < baseCols.length; i++)
 		{
@@ -3378,6 +3550,8 @@ class FromBaseTable extends FromTable
 			if (cloneRCs)
 			{
 				newCol = oldCol.cloneMe();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 oldCol.setExpression(new VirtualColumnNode(
 						this,
 						newCol,
@@ -3419,6 +3593,7 @@ class FromBaseTable extends FromTable
 	{
         if ( rowLocationColumnName != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             getResultColumns().conglomerateId = tableDescriptor.getHeapConglomerateId();
         }
 
@@ -3428,6 +3603,7 @@ class FromBaseTable extends FromTable
 		** Remember if this base table is the cursor target table, so we can
 		** know which table to use when doing positioned update and delete
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (isCursorTargetTable())
 		{
 			acb.rememberCursorTarget(mb);
@@ -3499,6 +3675,7 @@ class FromBaseTable extends FromTable
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 			trulyTheBestJoinStrategy.resultSetMethodName(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 (bulkFetch != UNSET), multiProbing, validatingCheckConstraint),
 			ClassName.NoPutResultSet, nargs);
 
@@ -3528,6 +3705,8 @@ class FromBaseTable extends FromTable
 	 * @return	The final CostEstimate for this ResultSetNode.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 	{
 		return getTrulyTheBestAccessPath().getCostEstimate();
@@ -3541,8 +3720,12 @@ class FromBaseTable extends FromTable
          * @throws StandardException
          */
     private void pushIndexName(ConglomerateDescriptor cd, MethodBuilder mb)
+//IC see: https://issues.apache.org/jira/browse/DERBY-578
+//IC see: https://issues.apache.org/jira/browse/DERBY-1464
           throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if (cd.isConstraint()) {
             DataDictionary dd = getDataDictionary();
             ConstraintDescriptor constraintDesc =
@@ -3594,6 +3777,7 @@ class FromBaseTable extends FromTable
 		acb.pushThisAsActivation(mb);
 		mb.push(getResultSetNumber());
         mb.push(acb.addItem(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                             getResultColumns().buildRowTemplate(referencedCols, false)));
 		mb.push(cd.getConglomerateNumber());
 		mb.push(tableDescriptor.getName());
@@ -3609,12 +3793,15 @@ class FromBaseTable extends FromTable
 		mb.push(getTrulyTheBestAccessPath().getLockMode());
 		mb.push(tableLockGranularity);
 		mb.push(getCompilerContext().getScanIsolationLevel());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         mb.push(costEst.singleScanRowCount());
         mb.push(costEst.getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getLastIndexKeyResultSet",
 					ClassName.NoPutResultSet, 13);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 
 	}
 
@@ -3625,6 +3812,8 @@ class FromBaseTable extends FromTable
 	) throws StandardException
 	{
 		ConglomerateDescriptor cd = getTrulyTheBestAccessPath().getConglomerateDescriptor();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         CostEstimate costEst = getFinalCostEstimate();
 		int colRefItem = (referencedCols == null) ?
 						-1 :
@@ -3654,6 +3843,7 @@ class FromBaseTable extends FromTable
 		/* Get the hash key columns and wrap them in a formattable */
         int[] hashKeyCols;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         hashKeyCols = new int[getResultColumns().size()];
 		if (referencedCols == null)
 		{
@@ -3669,6 +3859,8 @@ class FromBaseTable extends FromTable
 					colNum != -1;
 					colNum = referencedCols.anySetBit(colNum))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 hashKeyCols[index++] = colNum;
 			}
 		}
@@ -3688,6 +3880,7 @@ class FromBaseTable extends FromTable
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
         mb.push(acb.addItem(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                             getResultColumns().buildRowTemplate(referencedCols, false)));
 		mb.push(getResultSetNumber());
 		mb.push(hashKeyItem);
@@ -3695,20 +3888,29 @@ class FromBaseTable extends FromTable
 		//User may have supplied optimizer overrides in the sql
 		//Pass them onto execute phase so it can be shown in 
 		//run time statistics.
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		if (tableProperties != null)
 			mb.push(org.apache.derby.iapi.util.PropertyUtil.sortProperties(tableProperties));
 		else
 			mb.pushNull("java.lang.String");
+//IC see: https://issues.apache.org/jira/browse/DERBY-578
+//IC see: https://issues.apache.org/jira/browse/DERBY-1464
+//IC see: https://issues.apache.org/jira/browse/DERBY-578
+//IC see: https://issues.apache.org/jira/browse/DERBY-1464
 		pushIndexName(cd, mb);
 		mb.push(cd.isConstraint());
 		mb.push(colRefItem);
 		mb.push(getTrulyTheBestAccessPath().getLockMode());
 		mb.push(tableLockGranularity);
 		mb.push(getCompilerContext().getScanIsolationLevel());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         mb.push(costEst.singleScanRowCount());
         mb.push(costEst.getEstimatedCost());
 		
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getDistinctScanResultSet",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 							ClassName.NoPutResultSet, 16);
 	}
 
@@ -3763,6 +3965,7 @@ class FromBaseTable extends FromTable
         // Put the result row template in the saved objects.
         int resultRowTemplate =
             acb.addItem(getResultColumns().buildRowTemplate(referencedCols, false));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// pass in the referenced columns on the saved objects
 		// chain
@@ -3774,6 +3977,7 @@ class FromBaseTable extends FromTable
 
 		// beetle entry 3865: updateable cursor using index
 		int indexColItem = -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (isCursorTargetTable() || getUpdateLocks)
 		{
 			ConglomerateDescriptor cd = getTrulyTheBestAccessPath().getConglomerateDescriptor();
@@ -3788,6 +3992,7 @@ class FromBaseTable extends FromTable
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
         AccessPath ap = getTrulyTheBestAccessPath();
 		JoinStrategy trulyTheBestJoinStrategy =	ap.getJoinStrategy();
 
@@ -3813,6 +4018,7 @@ class FromBaseTable extends FromTable
 											nonStoreRestrictionList,
 											acb,
 											bulkFetch,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 											resultRowTemplate,
 											colRefItem,
 											indexColItem,
@@ -3868,11 +4074,14 @@ class FromBaseTable extends FromTable
 	 *
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getExposedName()
 	{
 		if (correlationName != null)
 			return correlationName;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 			return getOrigTableName().getFullTableName();
 	}
 	
@@ -3898,6 +4107,8 @@ class FromBaseTable extends FromTable
 	 * @return	The table name for this table.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TableName getTableNameField()
 	{
 		return tableName;
@@ -3916,9 +4127,12 @@ class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return getResultColumnsForList(allTableName, getResultColumns(), 
 				getOrigTableName());
 	}
@@ -3932,6 +4146,8 @@ class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList genResultColList()
 			throws StandardException
 	{
@@ -3959,7 +4175,10 @@ class FromBaseTable extends FromTable
 			//setTableDescriptor method. ColumnDescriptor's table descriptor is used
 			//to get ResultSetMetaData.getTableName & ResultSetMetaData.getSchemaName
 			colDesc.setTableDescriptor(tableDescriptor);
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             valueNode = new BaseColumnNode(colDesc.getColumnName(),
 									  		exposedName,
 											colDesc.getType(),
@@ -3999,6 +4218,8 @@ class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList addColsToList
 	(
 		ResultColumnList	inputRcl,
@@ -4014,8 +4235,12 @@ class FromBaseTable extends FromTable
 		 * in the expanded list.
 		 */
 		exposedName = getExposedTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 
 		/* Add all of the columns in the table */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ResultColumnList newRcl = new ResultColumnList((getContextManager()));
 		ColumnDescriptorList cdl = tableDescriptor.getColumnDescriptorList();
 		int					 cdlSize = cdl.size();
@@ -4035,6 +4260,8 @@ class FromBaseTable extends FromTable
 			{	
                 ColumnReference cr = new ColumnReference(cd.getColumnName(),
 												exposedName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 												getContextManager());
                 if ( (getMergeTableID() != ColumnReference.MERGE_UNKNOWN ) )
                 {
@@ -4058,6 +4285,8 @@ class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TableName getTableName()
 			throws StandardException
 	{
@@ -4078,6 +4307,7 @@ class FromBaseTable extends FromTable
     @Override
     boolean markAsCursorTargetTable()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setCursorTargetTable( true );
 		return true;
 	}
@@ -4091,6 +4321,7 @@ class FromBaseTable extends FromTable
     @Override
 	protected boolean cursorTargetTable()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return isCursorTargetTable();
 	}
 
@@ -4103,6 +4334,7 @@ class FromBaseTable extends FromTable
 	 */
 	void markUpdated(ResultColumnList updateColumns)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().markUpdated(updateColumns);
 	}
 
@@ -4173,6 +4405,8 @@ class FromBaseTable extends FromTable
 		if (trulyTheBestJoinStrategy.isHashJoin())
 		{
             pl = new PredicateList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			if (storeRestrictionList != null)
 			{
@@ -4283,6 +4517,8 @@ class FromBaseTable extends FromTable
 	 * 	one table are a superset
 	 */
 	protected boolean supersetOfUniqueIndex(JBitSet[] tableColMap)
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 		throws StandardException
 	{
 		ConglomerateDescriptor[] cds = tableDescriptor.getConglomerateDescriptors();
@@ -4381,6 +4617,7 @@ class FromBaseTable extends FromTable
             getLanguageConnectionContext().getCurrentIsolationLevel();
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		if ((isolationLevel != TransactionControl.SERIALIZABLE_ISOLATION_LEVEL) &&
 			(tableDescriptor.getLockGranularity() != 
 					TableDescriptor.TABLE_LOCK_GRANULARITY))
@@ -4452,6 +4689,7 @@ class FromBaseTable extends FromTable
 			isOrdered = isStrictlyOrdered(crs, cd);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         if (fbtHolder != null)
 		{
             fbtHolder.add(this);
@@ -4501,7 +4739,9 @@ class FromBaseTable extends FromTable
 		}
 
 		HashSet<ValueNode> columns = new HashSet<ValueNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns()) {
 			columns.add(rc.getExpression());
 		}
@@ -4754,6 +4994,8 @@ class FromBaseTable extends FromTable
 		}
 
         PredicateList restrictList = (PredicateList) predList;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (! cd.isIndex())
 		{
@@ -4780,6 +5022,8 @@ class FromBaseTable extends FromTable
 			/* Is there a pushable equality predicate on this key column?
 			 * (IS NULL is also acceptable)
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if (! restrictList.hasOptimizableEqualityPredicate(
                         this, curCol, true))
 			{
@@ -4949,12 +5193,14 @@ class FromBaseTable extends FromTable
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 	
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (nonStoreRestrictionList != null) {
 			nonStoreRestrictionList.accept(v);
 		}
@@ -4984,6 +5230,7 @@ class FromBaseTable extends FromTable
      * @return {@code true} if qualified, {@code false} if not
      */
     private boolean qualifiesForStatisticsUpdateCheck(TableDescriptor td)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             throws StandardException {
         int qualifiedIndexes = 0;
         // Only base tables qualifies.

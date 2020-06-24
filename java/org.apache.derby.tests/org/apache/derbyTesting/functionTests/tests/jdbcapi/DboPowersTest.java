@@ -63,6 +63,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         "authentication",
         "authentication + sqlAuthorization"};
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
     final private static boolean ENCRYPT = true;
     final private static boolean DECRYPT = false;
 
@@ -112,6 +113,7 @@ public class DboPowersTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("DboPowersTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         /* Database shutdown powers */
 
@@ -126,6 +128,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         // the specification for JSR169 support in DERBY-97.
         if (!JDBC.vmSupportsJSR169()) {
             suite.addTest(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 dboCryptoSuite("suite: cryptographic powers, embedded"));
             suite.addTest(
                 TestConfiguration.clientServerDecorator(
@@ -178,6 +181,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         /* Tests without any authorization active (level ==
          * NOAUTHENTICATION).
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite noauthSuite =
             new BaseTestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
@@ -306,6 +310,10 @@ public class DboPowersTest extends BaseJDBCTestCase
             } else {
                 assertSQLState("database shutdown restriction, " +
                                "SQL authorization, not db owner",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
                                "08004", e);
             }
             break;
@@ -336,10 +344,12 @@ public class DboPowersTest extends BaseJDBCTestCase
          * variants: Necessary since framework doesn't know
          * bootPassword.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite noauthSuite =
             new BaseTestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         for (int tNo = 0; tNo < cryptoTests.length; tNo++) {
             noauthSuite.addTest(
                 TestConfiguration.singleUseDatabaseDecoratorNoShutdown(
@@ -354,10 +364,13 @@ public class DboPowersTest extends BaseJDBCTestCase
         for (int autLev = AUTHENTICATION;
              autLev <= SQLAUTHORIZATION ; autLev++) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             tests[autLev] = wrapCryptoUserTests(autLev);
         }
 
         BaseTestSuite suite = new BaseTestSuite("dboPowers:"+framework);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         /* run tests with no authentication enabled */
         suite.addTest(tests[NOAUTHENTICATION]);
@@ -383,6 +396,7 @@ public class DboPowersTest extends BaseJDBCTestCase
     private static Test wrapCryptoUserTests(int autLev)
     {
         // add decorator for different users authenticated
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite usersSuite =
             new BaseTestSuite("usersSuite: security level=" +
                           secLevelNames[autLev]);
@@ -391,6 +405,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         // use of no teardown / no shutdown decorator variants:
         // Necessary since framework doesnt know bootPassword
         for (int userNo = 0; userNo < users.length; userNo++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             for (int tNo = 0; tNo < cryptoTests.length; tNo++) {
                 Test test = TestConfiguration.changeUserDecorator
                     (new DboPowersTest(cryptoTests[tNo],
@@ -417,6 +432,7 @@ public class DboPowersTest extends BaseJDBCTestCase
     /**
      * Enumerates the cryptographic tests.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
     final static String[] cryptoTests = {
         "testEncrypt", "testReEncrypt", "testDecrypt"};
 
@@ -450,6 +466,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         JDBCDataSource.setBeanProperty(ds, "user", user);
         JDBCDataSource.setBeanProperty(ds, "password", password);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         Connection con;
         try {
             con = ds.getConnection();
@@ -509,6 +526,7 @@ public class DboPowersTest extends BaseJDBCTestCase
 
         try {
             ds.getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             vetCryptoAttempt(ENCRYPT, user, null);
         } catch (SQLException e) {
             vetCryptoAttempt(ENCRYPT, user, e);
@@ -526,6 +544,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      * Tests that only the DBO can decrypt a database.
      */
     public void testDecrypt()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             throws SQLException {
         println("testDecrypt: auth=" + this._authLevel +
                 " user=" + getTestConfiguration().getUserName());
@@ -612,6 +631,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         String user = getTestConfiguration().getUserName();
         String password = getTestConfiguration().getUserPassword();
         DataSource ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if (bootPassword != null) {
             JDBCDataSource.setBeanProperty(
                 ds, "connectionAttributes", "bootPassword=" + bootPassword);
@@ -658,6 +678,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         /* Tests without any authorization active (level ==
          * NOAUTHENTICATION).
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite noauthSuite =
             new BaseTestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
@@ -678,6 +699,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         }
 
         BaseTestSuite suite = new BaseTestSuite("dboPowers:"+framework);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // A priori, doing a hard upgrade is a no-op here; we are only
         // interested in checking if we have the powers to do it. However,
@@ -689,6 +711,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         // care of itself since it uses another database anyway.
 
         /* run tests with no authentication enabled */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4154
         suite.addTest(TestConfiguration.singleUseDatabaseDecorator(
                           tests[NOAUTHENTICATION]));
 
@@ -716,6 +739,8 @@ public class DboPowersTest extends BaseJDBCTestCase
     private static Test wrapHardUpgradeUserTests(int autLev)
     {
         // add decorator for different users authenticated
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite usersSuite =
             new BaseTestSuite("usersSuite: security level=" +
                           secLevelNames[autLev]);
@@ -779,6 +804,8 @@ public class DboPowersTest extends BaseJDBCTestCase
      */
     private void vetHardUpgradeAttempt (String user, SQLException e)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         vetAttempt(user, e, "08004", "hard upgrade");
     }
 
@@ -811,6 +838,7 @@ public class DboPowersTest extends BaseJDBCTestCase
                 assertEquals(operation + ", SQL authorization, db owner",
                              null, e);
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 String msg = operation + ", SQL authorization, not db owner";
                 assertNotNull(
                         msg + ": succeeded unexpectedly without exeption", e);

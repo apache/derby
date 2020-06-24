@@ -65,6 +65,7 @@ scan_position - this variable holds the current scan position, it may be
                 extended
                 to provide more information if necessary.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
 scan_state    - a scan has 5 possible states:
                 SCAN_INIT, SCAN_INPROGRESS, SCAN_DONE, SCAN_HOLD_INIT, and
                 SCAN_HOLD_INPROGRESS
@@ -247,6 +248,7 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     scan_position.current_rh.getPageNumber(),
                     scan_position.current_rh.getId());
         }
@@ -257,6 +259,7 @@ public abstract class GenericScanController
             // scan positioned on the row, need to request an
             // X lock before we can actually perform the delete
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4685
             open_conglom.lockPositionForWrite(scan_position, true);
         }
     }
@@ -292,7 +295,9 @@ public abstract class GenericScanController
         throws StandardException
     {
         // startKeyValue init.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         this.init_startKeyValue         = startKeyValue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-404
         if (RowUtil.isRowEmpty(this.init_startKeyValue))
             this.init_startKeyValue = null;
 
@@ -309,13 +314,16 @@ public abstract class GenericScanController
         // so allocating it here is probably not that bad.
         init_fetchDesc = 
             new FetchDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
               (open_conglom.getRuntimeMem().get_scratch_row(
                     open_conglom.getRawTran())).length,
               init_scanColumnList,
               init_qualifier);
 
         // stopKeyValue init.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         this.init_stopKeyValue          = stopKeyValue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-404
         if (RowUtil.isRowEmpty(this.init_stopKeyValue))
             this.init_stopKeyValue = null;
 
@@ -346,6 +354,7 @@ public abstract class GenericScanController
                 // add in start columns
                 if (this.init_startKeyValue != null)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
                     required_cols.grow(this.init_startKeyValue.length);
                     for (int i = 0; i < this.init_startKeyValue.length; i++)
                         required_cols.set(i);
@@ -366,6 +375,7 @@ public abstract class GenericScanController
                 // FormatableBitSet equals requires the two FormatableBitSets to be of same
                 // length.
                 required_cols.grow(init_scanColumnList.size());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
 
                 if (!required_cols_and_scan_list.equals(required_cols))
                 {
@@ -620,6 +630,8 @@ public abstract class GenericScanController
         else if (this.scan_state == SCAN_HOLD_INIT)
         {
             reopenAfterEndTransaction();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
 
             positionAtStartForForwardScan(scan_position);
 
@@ -642,6 +654,7 @@ public abstract class GenericScanController
         // (scan_position.current_page will be null).  
         // Along the way apply qualifiers to skip rows which don't qualify.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         while (scan_position.current_page != null)
         {
             while ((scan_position.current_slot + 1) < 
@@ -662,6 +675,7 @@ public abstract class GenericScanController
                         if (row_array[ret_row_count] == null)
                         {
                             row_array[ret_row_count] = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                               open_conglom.getRuntimeMem().get_row_for_export(
                                   open_conglom.getRawTran());
                         }
@@ -671,6 +685,7 @@ public abstract class GenericScanController
                     else
                     {
                         fetch_row = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                             open_conglom.getRuntimeMem().get_row_for_export(
                                 open_conglom.getRawTran());
                     }
@@ -841,6 +856,7 @@ public abstract class GenericScanController
         // we need to decrement when we stop scan at the end of the table.
         this.stat_numpages_visited--;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         return(ret_row_count);
     }
 
@@ -868,6 +884,7 @@ public abstract class GenericScanController
     first next operation is attempted.
 
     @param qualifier An array of qualifiers which, applied
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     to each key, restrict the rows returned by the scan.  Rows
     for which any one of the qualifiers returns false are not
     returned by the scan. If null, all rows are returned.
@@ -910,6 +927,7 @@ public abstract class GenericScanController
      */
     public void init(
     OpenConglomerate                open_conglom,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     FormatableBitSet                scanColumnList,
     DataValueDescriptor[]           startKeyValue,
     int                             startSearchOperator,
@@ -921,6 +939,7 @@ public abstract class GenericScanController
         super.init(open_conglom);
 
         scan_position = open_conglom.getRuntimeMem().get_scratch_row_position();
+//IC see: https://issues.apache.org/jira/browse/DERBY-806
 
         // remember inputs
         init_scanColumnList         = scanColumnList;
@@ -933,7 +952,9 @@ public abstract class GenericScanController
             stopSearchOperator,
             scan_position);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
         reusableRecordIdSequenceNumber = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-806
             open_conglom.getContainer().getReusableRecordIdSequenceNumber();
     }
 
@@ -1004,6 +1025,7 @@ public abstract class GenericScanController
 
         // If we are closed due to catching an error in the middle of init,
         // xact_manager may not be set yet. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         if (open_conglom.getXactMgr() != null)
             open_conglom.getXactMgr().closeMe(this);
 
@@ -1034,6 +1056,7 @@ public abstract class GenericScanController
      * @exception StandardException Derby standard exception
      */
     protected final boolean reopenAfterEndTransaction() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
         throws StandardException
     {
         // Only reopen if holdable
@@ -1101,6 +1124,7 @@ public abstract class GenericScanController
     @see org.apache.derby.iapi.store.access.ScanController#delete
     **/
     public boolean delete()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         repositionScanForUpateOper();
@@ -1293,6 +1317,7 @@ public abstract class GenericScanController
     the original openScan.  The previous template row continues to be used.
 
     @param startKeyValue  An indexable row which holds a 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     (partial) key value which, in combination with the
     startSearchOperator, defines the starting position of
     the scan.  If null, the starting position of the scan
@@ -1360,6 +1385,7 @@ public abstract class GenericScanController
     public boolean replace(
     DataValueDescriptor[]   row, 
     FormatableBitSet                 validColumns)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         repositionScanForUpateOper();
@@ -1434,6 +1460,7 @@ public abstract class GenericScanController
         }
 
         DataValueDescriptor row[] = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             open_conglom.getRuntimeMem().get_scratch_row(
                 open_conglom.getRawTran());
 
@@ -1454,12 +1481,14 @@ public abstract class GenericScanController
     }
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
     Fetch the row at the current position of the Scan without applying the 
     qualifiers.
     
     @see org.apache.derby.iapi.store.access.ScanController#fetchWithoutQualify
     **/
     public void fetchWithoutQualify(DataValueDescriptor[] row)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         fetch(row, false);
@@ -1470,6 +1499,7 @@ public abstract class GenericScanController
      */
     public boolean isHeldAfterCommit() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
         return (scan_state == SCAN_HOLD_INIT ||
                 scan_state == SCAN_HOLD_INPROGRESS);
     }
@@ -1482,6 +1512,7 @@ public abstract class GenericScanController
     @see org.apache.derby.iapi.store.access.ScanController#fetch
     **/
     public void fetch(DataValueDescriptor[] row)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         fetch(row, true);
@@ -1498,6 +1529,7 @@ public abstract class GenericScanController
     @exception StandardException Standard exception policy.
     **/
     private void fetch(DataValueDescriptor[] row, boolean qualify)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         if (scan_state != SCAN_INPROGRESS)
@@ -1509,6 +1541,7 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     scan_position.current_rh.getPageNumber(),
                     scan_position.current_rh.getId());
         }
@@ -1519,6 +1552,7 @@ public abstract class GenericScanController
                 scan_position.current_rh, 
                 scan_position.current_slot, 
                 row, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
                 qualify ? init_fetchDesc : null, 
                 false);
 
@@ -1543,6 +1577,7 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     scan_position.current_rh.getPageNumber(),
                     scan_position.current_rh.getId());
         }
@@ -1551,6 +1586,7 @@ public abstract class GenericScanController
     }
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
     Fetch the location of the current position in the scan.
     @see org.apache.derby.iapi.store.access.ScanController#fetchLocation
 
@@ -1577,6 +1613,7 @@ public abstract class GenericScanController
      * @exception  StandardException  Standard exception policy.
      **/
     public ScanInfo getScanInfo()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         throw StandardException.newException(
@@ -1598,6 +1635,10 @@ public abstract class GenericScanController
     @exception StandardException Standard exception policy.
     **/
     public boolean isCurrentPositionDeleted()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
+//IC see: https://issues.apache.org/jira/browse/DERBY-4690
         throws StandardException
     {
         if (scan_state != SCAN_INPROGRESS)

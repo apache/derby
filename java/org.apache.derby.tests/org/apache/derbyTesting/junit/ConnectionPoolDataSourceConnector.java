@@ -56,6 +56,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
 
         // Enable statement pooling by default.
         enableStatementPooling(ds);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6073
 
         // NOTE: Any other setup of the data source that gets added here,
         // probably also needs to be added to singleUseDS(). Otherwise, that
@@ -71,6 +72,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
         // Note that this does not automatically test the pooling itself, but it
         // should test basic JDBC operations on the logical wrapper classes.
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             J2EEDataSource.setBeanProperty(ds, "maxStatements", 2);
         } catch (AssertionFailedError afe) {
             // Ignore this, it will fail later if it is an actual error.
@@ -159,6 +161,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             HashMap<String, Object> hm =
                     DataSourceConnector.makeCreateDBAttributes( config );
             DataSourceConnector.copyProperties(connectionProperties, hm);
@@ -175,6 +178,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
     }
 
     public void shutEngine(boolean deregisterDriver) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (SanityManager.DEBUG) {
              // "false" only used with driver manager
             SanityManager.ASSERT(deregisterDriver);
@@ -188,6 +192,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
     
     public void setLoginTimeout( int seconds ) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         ds.setLoginTimeout( seconds );
     }
     
@@ -221,6 +226,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
         // too, just like it's enabled for the default data source in
         // setConfiguration().
         enableStatementPooling(sds);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6073
 
         return sds;
     }

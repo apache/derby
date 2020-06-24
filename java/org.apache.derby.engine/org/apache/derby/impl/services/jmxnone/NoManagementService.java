@@ -31,6 +31,7 @@ public final class NoManagementService implements ManagementService {
     public NoManagementService() {
     }
     public <T> Object registerMBean(T bean,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<T> beanInterface,
             String keyProperties)
     {
@@ -39,6 +40,8 @@ public final class NoManagementService implements ManagementService {
     public void unregisterMBean(Object mbeanIdentifier) {
     }
     public boolean isManagementActive() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
         return false;
     }
     public void startManagement() {
@@ -49,6 +52,7 @@ public final class NoManagementService implements ManagementService {
         return null;
     }
     public String quotePropertyValue(String value) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         return null;
     }
 }

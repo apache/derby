@@ -29,6 +29,7 @@ import org.apache.derby.client.am.SqlException;
 // Performs character conversions as required to send and receive PROTOCOL control data.
 // User data uses the JVM's built in converters, i18n.jar,
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 abstract class CcsidManager {
     byte space_; // ' ' character
     byte dot_;   // '.' character
@@ -61,6 +62,7 @@ abstract class CcsidManager {
     // @param sourceString A Java String to convert.
     // @return A new byte array representing the String in a particular ccsid.
     public abstract byte[] convertFromJavaString(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         String sourceString,
         Agent agent) throws SqlException;
 

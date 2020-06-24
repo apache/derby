@@ -60,6 +60,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
  */
 
 public final class ConglomerateDescriptor extends UniqueTupleDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	implements Provider
 {
 	// Implementation
@@ -109,6 +110,7 @@ public final class ConglomerateDescriptor extends UniqueTupleDescriptor
 		this.forConstraint = forConstraint;
 		if (uuid == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			UUIDFactory uuidFactory = DataDescriptorGenerator.getMonitor().getUUIDFactory();
 			uuid = uuidFactory.createUUID();
 		}
@@ -230,6 +232,7 @@ public final class ConglomerateDescriptor extends UniqueTupleDescriptor
 	 */
 	public void setColumnNames(String[] columnNames)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		this.columnNames = ArrayUtil.copy( columnNames );
 	}
 
@@ -241,6 +244,7 @@ public final class ConglomerateDescriptor extends UniqueTupleDescriptor
 	 */
 	public String[] getColumnNames()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return ArrayUtil.copy( columnNames );
 	}
 
@@ -309,6 +313,7 @@ public final class ConglomerateDescriptor extends UniqueTupleDescriptor
 		if (SanityManager.DEBUG)
 		{
 			StringBuffer keyString = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 
 			if (indexable && columnNames != null )
 			{
@@ -457,6 +462,7 @@ public final class ConglomerateDescriptor extends UniqueTupleDescriptor
 			 * has a uniqueness requirement.
 			 */
 			needNewConglomerate =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3502
 				(indexRowGenerator.isUnique() && !othersIRG.isUnique()) ||
 					(indexRowGenerator.isUniqueWithDuplicateNulls() && 
 						!othersIRG.isUniqueWithDuplicateNulls());
@@ -612,6 +618,7 @@ public final class ConglomerateDescriptor extends UniqueTupleDescriptor
 				continue;
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3502
 			if (descriptors[i].getIndexDescriptor().isUnique())
 			{
 				/* Given criteria #1 and #4 described above, if we

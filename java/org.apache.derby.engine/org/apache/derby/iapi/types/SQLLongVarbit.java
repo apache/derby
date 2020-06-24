@@ -123,6 +123,7 @@ public class SQLLongVarbit extends SQLVarbit
 			this.dataValue = other.dataValue;
 		}
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			setValue(source.getBytes());
 	}
 

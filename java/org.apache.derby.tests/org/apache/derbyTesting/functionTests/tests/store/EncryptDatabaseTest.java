@@ -63,6 +63,7 @@ public class EncryptDatabaseTest  extends BaseJDBCTestCase
      * @return A suite containing embedded suites
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("EncryptDatabase");
         suite.addTest(wrapTest());
         suite.addTest(wrapTest("DESede/CBC/NoPadding")); // from encryption

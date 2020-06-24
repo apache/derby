@@ -95,6 +95,7 @@ public class T_Util
 	 * check that transaction does not hold any lock
 	 */
 	public void t_checkNullLockCount(Transaction t) throws T_Fail {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		if (lFactory.areLocksHeld(t.getCompatibilitySpace()))
 			throw T_Fail.testFailMsg("Previous action did not clean up all locks.");
 	}
@@ -1147,6 +1148,7 @@ public class T_Util
 			Page p = c.getPage(pageNumber);
 			throw T_Fail.testFailMsg("got latched page");
 		} catch (StandardException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4982
             if (!"XSDAO".equals(se.getSQLState())) {
 				throw se;
 			}

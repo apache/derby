@@ -531,6 +531,7 @@ public class SecurityPolicyGenerator extends Task
             writer.print("grant");
             if (actualName.length() > 0)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3547
                 writer.print(" ");
                 if (isPrincipal)
                 {

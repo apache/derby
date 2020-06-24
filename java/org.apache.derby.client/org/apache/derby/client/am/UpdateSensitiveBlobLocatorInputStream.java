@@ -30,6 +30,7 @@ import java.io.InputStream;
  * which re-creates the underlying Blob locator stream whenever a
  * update happens on the Blob object associated with this stream.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class UpdateSensitiveBlobLocatorInputStream
         extends UpdateSensitiveLOBLocatorInputStream {
     //Stores the Blob instance associated with
@@ -49,6 +50,7 @@ class UpdateSensitiveBlobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     UpdateSensitiveBlobLocatorInputStream(
             ClientConnection con,
             ClientBlob blob) throws SqlException {
@@ -72,6 +74,7 @@ class UpdateSensitiveBlobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     UpdateSensitiveBlobLocatorInputStream(
             ClientConnection con,
             ClientBlob blob,
@@ -93,6 +96,7 @@ class UpdateSensitiveBlobLocatorInputStream
      *                      re-creating the underlying streams.
      */
     protected InputStream reCreateStream() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         InputStream is_;
         
         //Verify if a subset of the underlying

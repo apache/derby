@@ -187,6 +187,7 @@ class DateTimeParser
      *
      * @exception StandardException if there are more non-blank characters.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3173
     void checkEnd() throws StandardException
     {
         for( ; fieldStart < len; fieldStart++)

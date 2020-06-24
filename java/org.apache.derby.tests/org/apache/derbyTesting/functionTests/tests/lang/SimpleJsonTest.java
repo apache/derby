@@ -57,6 +57,7 @@ public class SimpleJsonTest extends BaseJDBCTestCase
     private static  final   String  OUT_OF_RANGE = "22003";
 
     private static  final   String  THERMOSTAT_READINGS =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         "[\n" +
         " {\n" +
         "   \"id\": 1,\n" +
@@ -93,12 +94,14 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 
         suite.addTest( TestConfiguration.defaultSuite( SimpleJsonTest.class ) );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         return new SupportFilesSetup
             (
              suite,
              new String[]
              { 
                 "functionTests/tests/lang/thermostatReadings.dat",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
                 "functionTests/tests/lang/json.dat",
              }
             );
@@ -539,6 +542,7 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 	public void testVTI_004() throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
         goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', true )" );
 
@@ -625,6 +629,7 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 	public void testVTIdatatypes005() throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
         goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', true )" );
 
@@ -759,6 +764,7 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 	public void testArrayToClob_006() throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
         goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', true )" );
         goodStatement( conn, "create table employee( fullName varchar( 100 ) )" );

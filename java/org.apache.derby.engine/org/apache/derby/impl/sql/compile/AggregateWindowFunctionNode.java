@@ -30,6 +30,8 @@ import org.apache.derby.iapi.services.context.ContextManager;
 /**
  * Represents aggregate function calls on a window
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 final class AggregateWindowFunctionNode extends WindowFunctionNode
 {
 
@@ -54,6 +56,7 @@ final class AggregateWindowFunctionNode extends WindowFunctionNode
      */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
             throws StandardException
     {

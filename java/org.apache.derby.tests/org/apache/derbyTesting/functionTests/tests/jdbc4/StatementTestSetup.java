@@ -70,6 +70,7 @@ public class StatementTestSetup
                     sqle.getSQLState());
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         try {
             stmt.execute("drop function delay_st");
         }
@@ -87,6 +88,7 @@ public class StatementTestSetup
         assertEquals("Number of rows are not as expected", 
                 2, rs.getInt(1));
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         stmt.execute
             (
              "create function delay_st(seconds integer, value integer) returns integer\n" +

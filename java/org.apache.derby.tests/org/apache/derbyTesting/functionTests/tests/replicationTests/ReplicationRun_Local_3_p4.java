@@ -50,6 +50,7 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_3_p4 Suite");
         
@@ -86,6 +87,7 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
@@ -127,6 +129,7 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
                 slaveServerHost, // for slaveReplInterface
                 slaveReplPort);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         replicationTest = null; // Used as a flag to verifyMaster and verifySlave!
         runTest(replicationTest, // Returns immediatly if replicationTest is null.
                 jvmVersion,
@@ -191,6 +194,7 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(slaveServerHost);
         ds.setPortNumber(slaveServerPort);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         ds.setConnectionAttributes(useEncryption(false));
         try {
             Connection conn = ds.getConnection(); // 
@@ -208,6 +212,8 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
         util.DEBUG("_internal_stopSlave");
         ClientDataSourceInterface ds;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
@@ -220,6 +226,7 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(slaveServerHost);
         ds.setPortNumber(slaveServerPort);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         ds.setConnectionAttributes("internal_stopslave=true"
                 +useEncryption(false));
         try {

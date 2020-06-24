@@ -80,6 +80,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         
     private static int[] jdbcTypes = { Types.TINYINT, Types.SMALLINT,
             Types.INTEGER, Types.BIGINT, Types.REAL, Types.FLOAT, Types.DOUBLE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
             Types.DECIMAL, Types.NUMERIC, Types.BIT, Types.BOOLEAN,
             Types.CHAR, Types.VARCHAR, Types.LONGVARCHAR, Types.NULL, // Types.BINARY,
             Types.VARBINARY, Types.NULL, // Types.LONGVARBINARY,
@@ -94,7 +95,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     };
 
     private static String[] validString = {null,"98","98","98",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
            "98","98", "98","98",null,null,"TRUE",
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
            "98","98","98","0x4",
            "0x4","0x4", "2004-02-14",
            "00:00:00","2004-02-14 00:00:00","98","0x4"};
@@ -367,6 +370,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         pscb.setInt(1, 1);
         {
             byte[] data = new byte[6];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
             data[0] = (byte) 0x4;
             data[1] = (byte) 0x3;
             data[2] = (byte) 0x72;
@@ -476,7 +480,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     public void testDerby2073() throws Exception
     {
         // Cannot use setBigDecimal with J2ME
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         if (!JDBC.vmSupportsJDBC3())
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
             return;
         
         
@@ -497,6 +503,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.executeUpdate();
 
         // Can't use negative scale on jdk1.4.2
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
         if (JDBC.vmSupportsJDBC4())
         {
             // Test with negative scale.
@@ -545,6 +552,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.executeUpdate();
         
         // Can't use negative scale on jdk1.4.2
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
         if (JDBC.vmSupportsJDBC4())
         {
             // Test with setObject and negative scale.
@@ -589,6 +597,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             String sqlType = SQLTypes[type];
 
             if (sqlType == null || jdbcTypes[type] == Types.NULL) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 continue;
             }
 
@@ -608,6 +617,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     .prepareStatement("SELECT VAL FROM PM.TYPE_AS");
             ResultSet rs = psq.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
             assertEquivalentDataType(jdbcTypes[type], rsmd.getColumnType(1));
             rs.close();
             // For this data type
@@ -618,6 +628,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             getXXX(psq, type, true);
 
             s.execute("DELETE FROM PM.TYPE_AS");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
             // For this data type
             // Test inserting a valid value and then performing all the getXXX()
@@ -652,7 +663,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 s.execute(procSQL);
             } catch (SQLException sqle) {
                 // may get error that column is not allowed
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
                 if (BAD_TYPE.equals(sqle.getSQLState()))
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     continue;
                 else
                     fail(sqle.getSQLState() + ":" + sqle.getMessage());
@@ -707,8 +720,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
                         } catch (SQLException sqle) {
                             boolean expectedConversionError = ("22018".equals(sqle.getSQLState())|| 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2381
                                                                "22007".equals(sqle.getSQLState()) ||
                                                                "22005".equals(sqle.getSQLState()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
                             if ( !expectedConversionError)
                             {
                                 printStackTrace( sqle );
@@ -734,10 +749,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      */
     public void testClobMapping() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         Connection conn = getConnection();
         PreparedStatement ps;
         CallableStatement cs;
         Clob outVal;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
 
         //
         // Clob input parameter
@@ -771,6 +788,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         //
         // Clob output parameter
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         ps = chattyPrepare
             (
              conn,
@@ -781,6 +799,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".clobOut'\n"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         ps.execute();
         ps.close();
         
@@ -804,16 +823,20 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".clobInOut'\n"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         ps.execute();
         ps.close();
         
         cs = chattyPrepareCall( conn, "call clobInOut( ? )" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         cs.setClob( 1, new HarmonySerialClob( "ghi" ) );
         cs.registerOutParameter( 1, Types.CLOB );
         cs.execute();
         outVal = cs.getClob( 1 );
         assertEquals( "ihg", outVal.getSubString( 1L, (int) outVal.length() ) );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         Clob inValue = makeBigClob();
         cs.setClob( 1, inValue );
         cs.execute();
@@ -838,6 +861,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         return new HarmonySerialClob( new String( value ) );
     }
     private void compareClobs( Clob left, Clob right ) throws Exception
@@ -848,6 +872,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         println( "Left clob has " + leftLength + " characters and right clob has " + rightLength + " characters." );
 
         assertEquals( leftLength, rightLength );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
 
         if ( leftLength == rightLength );
         {
@@ -882,6 +907,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         PreparedStatement ps;
         CallableStatement cs;
         Blob outVal;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
 
         //
         // Blob input parameter
@@ -900,6 +926,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.close();
 
         cs = chattyPrepareCall( conn, "call blobIn( ?, ? )" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         cs.setBlob( 1, new HarmonySerialBlob( "ghi".getBytes( UTF8 ) ) );
         cs.registerOutParameter( 2, Types.VARCHAR );
         cs.execute();
@@ -909,6 +936,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         //
         // Blob output parameter
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         ps = chattyPrepare
             (
              conn,
@@ -919,6 +947,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".blobOut'\n"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         ps.execute();
         ps.close();
 
@@ -942,16 +971,19 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".blobInOut'\n"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         ps.execute();
         ps.close();
 
         cs = chattyPrepareCall( conn, "call blobInOut( ? )" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         cs.setBlob( 1, new HarmonySerialBlob( "ghi".getBytes( UTF8 ) ) );
         cs.registerOutParameter( 1, Types.BLOB );
         cs.execute();
         outVal = cs.getBlob( 1 );
         assertEquals( "ihg", getBlobValue( outVal ) );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         Blob inValue = makeBigBlob();
         cs.setBlob( 1, inValue );
         cs.execute();
@@ -976,6 +1008,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         return new HarmonySerialBlob( value );
     }
     private void compareBlobs( Blob left, Blob right ) throws Exception
@@ -986,6 +1019,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         println( "Left blob has " + leftLength + " bytes and right blob has " + rightLength + " bytes." );
 
         assertEquals( leftLength, rightLength );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
 
         if ( leftLength == rightLength );
         {
@@ -1005,6 +1039,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     return;
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
                 assertEquals( leftC, rightC );
             }
         }
@@ -1092,6 +1128,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 "char_col", "varchar_col"
             };
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashSet<String> smallIntColumns = new HashSet<String>();
         for ( int i = 0; i < allColumns.length; i++ )
         {
@@ -1187,7 +1224,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      */
     protected void tearDown() throws Exception {
         rollback();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5721
         dropTable("PM.LOB_GET");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
         commit();
         super.tearDown();
     }
@@ -1198,6 +1237,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         // Expect the different getters to return some variant of the integer
         // 32. The exception is BOOLEAN columns, which don't have high enough
         // precision to do that. So expect 1 for BOOLEAN columns.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
         final int expectedInt =
                 (ps.getMetaData().getColumnType(1) == Types.BOOLEAN) ?
                     1 : 32;
@@ -1216,6 +1256,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                     assertEquals(expectedInt, b);
                 }
                 worked = true;
@@ -1241,6 +1282,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                     assertEquals(expectedInt, s);
                 }
                 worked = true;
@@ -1263,9 +1305,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 int i = rs.getInt(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     assertTrue(wn);
                 } else {
                     assertFalse(isNull);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                     assertEquals(expectedInt, i);
                 }
                 worked = true;
@@ -1289,6 +1333,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertTrue(wn);
                 } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                     assertEquals(expectedInt, l);
                     assertFalse(wn);
                 }
@@ -1316,6 +1361,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                     assertEquals((float) expectedInt, f, .000001);
                 }
                 worked = true;
@@ -1341,6 +1387,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                     assertEquals((double) expectedInt, d, .00001);
                 }
                 worked = true;
@@ -1368,6 +1415,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 } else {
                     assertFalse(wn);
                     assertEquals("BigDecimal comparison failed", 0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                             BigDecimal.valueOf(
                                     (long)expectedInt).compareTo(bd));
                 }
@@ -1418,6 +1466,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertNull(s);
                     assertTrue(wn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 } else {                    
                     s = s.trim();
                     int jdbcType = jdbcTypes[type];
@@ -1428,6 +1477,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     case java.sql.Types.CHAR:
                     case java.sql.Types.VARCHAR:
                     case java.sql.Types.LONGVARCHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
                         assertEquals(Integer.toString(expectedInt),s);
                         break;
                     case java.sql.Types.REAL:
@@ -1484,6 +1534,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertNull(data);
                     assertTrue(wn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 } else {
                     int jdbcType = jdbcTypes[type];
                     switch (jdbcType) {
@@ -1517,6 +1568,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 rs = ps.executeQuery();
                 rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 Date d = rs.getDate(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
@@ -1557,6 +1609,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     assertEquals("17:14:24", t.toString());
                 }
                 worked = true;
@@ -1588,6 +1641,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertNull(ts);
                     assertTrue(wn);
                 } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     if (type == java.sql.Types.DATE
                             || type == java.sql.Types.TIMESTAMP)
                         assertEquals("2004-02-14 00:00:00.0", ts.toString());
@@ -1599,6 +1653,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 // 22007 invalid date time conversion
                 worked = "22007".equals(sqle.getSQLState());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
             } catch (Throwable t) {
                 // System.out.println(t);
                 worked = false;
@@ -1618,6 +1673,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 InputStream is = rs.getAsciiStream(1);
                 boolean wn = rs.wasNull();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 if (isNull) {
                     assertTrue(wn);
                     assertNull(is);
@@ -1655,10 +1711,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             try {
                 InputStream is = rs.getBinaryStream(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 if (isNull) {
                     assertTrue(rs.wasNull());
                     assertNull(is);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 } else if (B6[14][type]) {
                     assertNotNull(showFirstTwo(is));
                 }
@@ -1685,6 +1743,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
                 Reader r = rs.getCharacterStream(1);
                 boolean wn = rs.wasNull();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 if (isNull) {
                     assertNull(r);
                     assertTrue(wn);
@@ -1714,6 +1773,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 Clob clob = rs.getClob(1);
                 boolean wn = rs.wasNull();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 if (isNull) {
                     assertNull(clob);
                     assertTrue(wn);
@@ -1744,10 +1804,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 Blob blob = rs.getBlob(1);
                 boolean wn = rs.wasNull();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 if (isNull) {
                     assertTrue(wn);
                     assertNull(blob);
                 } else if (B6[17][type]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     assertNotNull(showFirstTwo(blob.getBinaryStream()));
                 }
                 worked = true;
@@ -1775,7 +1837,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 @SuppressWarnings("deprecation")
                 InputStream is = rs.getUnicodeStream(1);
                 boolean wn = rs.wasNull();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 if (isNull) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     assertTrue(wn);
                     assertNull(is);
 
@@ -1792,6 +1856,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 worked = false;
             }
             rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
             if (JDBC.vmSupportsJDBC3())
                 judge_getXXX(worked, sqleResult, 18, type);
         }
@@ -1814,6 +1879,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         cname = "byte[]";
                     else
                         cname = cgo.getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     if (isNull) {
                         assertTrue(wn);
                         assertNull(o);
@@ -1879,6 +1945,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         "Wrong result column type for requested conversion") != -1)
                     validSQLState = true;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
             assertTrue("FAIL: Expected conversion error but got " + sqleResult,
                     validSQLState);
 
@@ -1895,6 +1962,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             msg = " JDBC MATCH(OK)";
         else if (worked)
             msg = " CLOUD EXT (OK)";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
         else if (sqleResult != null && "0A000".equals(sqleResult.getSQLState()))
             msg = " Not Implemented (OK)";
         else if (shouldWork) {
@@ -1906,6 +1974,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (msg == null)
                 return;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
         if (msg.startsWith("JDBC FAIL"))
             fail(" JDBC FAIL " + SQLTypes[type]);
     }
@@ -1919,6 +1988,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             msg = " JDBC MATCH(OK)";
         else if (worked)
             msg = " CLOUD EXT (OK)";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
         else if ("0A000".equals(sqleResult.getSQLState()))
             msg = " Not Implemented (OK)";
         else if (shouldWork) {
@@ -1930,6 +2000,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (msg == null)
                 return;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
         if (msg.startsWith("JDBC FAIL"))
             fail(" JDBC FAIL " + SQLTypes[type]);
     }
@@ -1956,6 +2027,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     || "XCL12".equals(e.getSQLState())
                     || e.getMessage().indexOf("Illegal Conv") != -1) {
                 unknownException = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 if ("0A000".equals(e.getSQLState())
                         && e.getMessage().indexOf("setUnicodeStream") != -1)
                     unknownException = false;
@@ -2007,6 +2079,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setByte");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2049,6 +2123,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setShort");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2091,6 +2167,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setInt");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2133,6 +2211,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setLong");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2177,6 +2257,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setFloat");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2221,6 +2303,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setDouble");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2309,6 +2393,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     psi.executeBatch();
 
                     getValidValue(psq, jdbcTypes[type], "setBigDecimal");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                     worked = true;
 
@@ -2352,6 +2440,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setBoolean");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2396,6 +2486,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 // setString() as batch
                
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 psi.setString(1,validString[type]);
                 psi.addBatch();
                 psi.executeBatch();
@@ -2457,6 +2549,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setString");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2557,6 +2651,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setBytes");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2642,6 +2740,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setDate");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2679,6 +2780,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean worked;
             try {
                 // setTime() as batch
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 psi.setTime(1, java.sql.Time.valueOf("00:00:00"));
                 psi.addBatch();
                 psi.executeBatch();
@@ -2726,6 +2829,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setTime");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2765,6 +2870,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 // setTimestamp() as batch
                 psi.setTimestamp(1, java.sql.Timestamp
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                         .valueOf("2004-02-14 00:00:00.0"));
                 psi.addBatch();
                 psi.executeBatch();
@@ -2813,6 +2920,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.executeBatch();
 
                 getValidValue(psq, jdbcTypes[type], "setTimestamp");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2913,6 +3022,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "setAsciiStream");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -2970,6 +3083,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "getBinaryStream");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -3010,6 +3124,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "setBinaryStream");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -3090,6 +3207,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "setCharacterStream");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -3186,6 +3307,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "setClob");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -3276,6 +3401,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "setBlob");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
                 worked = true;
 
@@ -3293,6 +3422,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 // setUnicodeStream()
                 byte[] data = new byte[6];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 data[0] = (byte) 0x4;
                 data[1] = (byte) 0x3;
                 data[2] = (byte) 0xca;
@@ -3300,9 +3432,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 data[4] = (byte) 0x00;
                 data[5] = (byte) 0x32;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 setUnicodeStream(psi, 1, new java.io.ByteArrayInputStream(
                             data), 6);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
                 if (JDBC.vmSupportsJDBC3()) {
                     psi.executeUpdate();
                     getValidValue(psq, jdbcTypes[type], "setUnicodeStream");
@@ -3313,12 +3447,14 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 worked = false;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
             if (JDBC.vmSupportsJDBC3())
                 judge_setXXX(worked, sqleResult, 14, type);
         }
 
         // DERBY-1938: Test setObject with null and no type specification.
         setXXX_setObjectNullNoTypeSpec(s, psi, psq, type);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1938
 
         setXXX_setObject(s, psi, psq, type, validString[type], "java.lang.String", 0);
         
@@ -3329,6 +3465,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 2);
 
         // DERBY-1500: setObject() should work for Byte and Short too.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         setXXX_setObject(s, psi, psq, type, (byte) 98,
                 "java.lang.Byte", 1);
         setXXX_setObject(s, psi, psq, type, (short) 98,
@@ -3357,6 +3494,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         // Test setObject with Blob
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1944
             ResultSet rsc = s
                     .executeQuery("SELECT B FROM PM.LOB_GET WHERE ID = 1");
             rsc.next();
@@ -3388,6 +3526,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     @SuppressWarnings("deprecation")
     private static void setUnicodeStream(PreparedStatement ps,
                   int parameterIndex, InputStream stream, int length)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             throws SQLException {
         ps.setUnicodeStream(parameterIndex, stream, length);
     }
@@ -3481,6 +3620,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      * @param type the type of the column
      */
     private static void setXXX_setObjectNullNoTypeSpec(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1938
             Statement s, PreparedStatement psi, PreparedStatement psq,
             int type) throws SQLException, IOException {
         // setObject(null) - see DERBY-1938
@@ -3497,6 +3637,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         psi.setObject(1, null);
         psi.addBatch();
         psi.executeBatch();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
         getValidValue(psq, jdbcTypes[type], "setObject");
     }
 
@@ -3525,6 +3667,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         switch (jdbcType) {
         case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
         case Types.BOOLEAN:
             ps.setBoolean(param, true);
             return true;
@@ -3602,6 +3745,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
     private static boolean getValidValue(PreparedStatement ps, int jdbcType,
             String method) throws SQLException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
 
         ResultSet rs = ps.executeQuery();
         rs.next();
@@ -3725,6 +3869,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     s = sb.toString();
 
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 checkValidStringValue(method, s);
             }
             return true;
@@ -3861,6 +4006,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
         default:
             fail("FAIL JDBC TYPE IN getValidValue "
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                     + JDBC.sqlNameFromJdbc(jdbcType));
             return false;
         }
@@ -3911,6 +4058,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         
         int paramJdbcType= jdbcTypes[paramType];
         switch (regJdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
         case Types.BIT:
         case Types.BOOLEAN:
         {
@@ -4200,6 +4348,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         boolean isBlob =  ( jdbcTypes[ paramType ] == Types.BLOB );
         if (param == 2)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
             if ( isBlob )
             {
                 assertEquals("0x82,0x43",showFirstTwo(val));
@@ -4326,6 +4475,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 ;
             // System.out.println(" IC (Expected)");
             else
+//IC see: https://issues.apache.org/jira/browse/DERBY-2333
                 fail("FAIL:" + sqle.getMessage());
         } catch (Exception e) {
             fail("FAIL: Unexpected Exception " + e.getMessage());
@@ -4365,6 +4515,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2381
         return TestConfiguration.defaultSuite(ParameterMappingTest.class);
     }
         /*
@@ -4382,6 +4533,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         }
         public static void pmap(boolean in, boolean[] inout, boolean[] out) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4891
             inout[0] = true;
             out[0] = true;
         }
@@ -4443,11 +4595,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     public static void pmap(Blob in, Blob[] inout, Blob[] out) throws SQLException {
         int    leftLength = (int) in.length();
         int    rightLength = (int) inout[0].length();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         byte[] left = in.getBytes( 1L, leftLength );
         byte[] right = inout[0].getBytes( 1L, rightLength );
         byte[] retval = new byte[ leftLength + rightLength ];
         System.arraycopy( left, 0, retval, 0, leftLength );
         System.arraycopy( right, 0, retval, leftLength, rightLength );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         inout[0] = new HarmonySerialBlob( retval );
         
         out[0] = new HarmonySerialBlob( new byte[] { (byte) 1, (byte) 2, (byte) 3 } );
@@ -4468,6 +4622,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     }
     public static void clobOut( Clob[] c ) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         c[ 0 ] = new HarmonySerialClob( "abc" );
     }
     public static void clobInOut( Clob[] c ) throws SQLException
@@ -4477,6 +4632,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         char[] inValue = value.toCharArray();
         char[] outValue = reverse( inValue );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         c[ 0 ] = new HarmonySerialClob( new String( outValue ) );
     }
 
@@ -4504,6 +4660,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     }
     public static void blobOut( Blob[] c ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         c[ 0 ] = new HarmonySerialBlob( "abc".getBytes( UTF8 ) );
     }
     public static void blobInOut( Blob[] c ) throws Exception
@@ -4513,6 +4670,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         char[] inValue = value.toCharArray();
         char[] outValue = reverse( inValue );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         c[ 0 ] = new HarmonySerialBlob( (new String( outValue )).getBytes( UTF8 ) );
     }
 
@@ -4566,6 +4724,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      */
     public void testDerby5533GetXXX() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
         String createTableString = "CREATE TABLE MultiTypeTable (" +
             "F01 SMALLINT," +
             "F02 INTEGER," +
@@ -4600,6 +4759,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.setBoolean(11, true);
         ps.executeUpdate();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
         PreparedStatement plainSelect = 
                 prepareStatement("select * from MultiTypeTable");
         ResultSet rs = plainSelect.executeQuery();
@@ -4673,6 +4833,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.executeUpdate();
 
         rs = plainSelect.executeQuery();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
 
         rs.next();
         // JDBC type -> byte
@@ -4707,6 +4868,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         // JDBC type -> float
         rs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
         rs = uSelect.executeQuery();
         rs.next();
         rs.updateDouble("F06", -Float.MAX_VALUE * 10.0);
@@ -4827,6 +4989,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           bdMinLongValue.subtract(BigDecimal.ONE), "22003");
 
         // REAL overflow checking
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Float maxF = Float.MAX_VALUE;
         assertUpdateState(rs, "F04",
                           _X, maxF.doubleValue() * 10,
@@ -4837,9 +5000,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           bdMaxFloatValue.multiply(BigDecimal.TEN), "22003");
 
         assertUpdateState(rs, "F04",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                           _X, -(maxF).doubleValue() * 10,
                           XXX_DOUBLE, "22003");
         assertUpdateState(rs, "F04",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
                           _X, Float.POSITIVE_INFINITY, XXX_FLOAT, "22003");
         assertUpdateState(rs, "F04",
                           _X, Float.NEGATIVE_INFINITY, XXX_FLOAT, "22003");
@@ -4862,6 +5027,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         // REAL Underflow checking
         // Make unconditional DERBY-5534 is fixed
+//IC see: https://issues.apache.org/jira/browse/DERBY-5546
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
+//IC see: https://issues.apache.org/jira/browse/DERBY-5534
         if (usingEmbedded()) {
             assertUpdateState(rs, "F04", bdSmallestPosDoubleValue, "22003");
             assertUpdateState(rs, "F04", bdSmallestNegDoubleValue, "22003");
@@ -4895,6 +5063,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
             // DOUBLE, FLOAT underflow checking
             // Make unconditional when DERBY-5534 is fixed
+//IC see: https://issues.apache.org/jira/browse/DERBY-5546
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
+//IC see: https://issues.apache.org/jira/browse/DERBY-5534
             if (usingEmbedded()) {
                 assertUpdateState(rs, dfCols[i],
                     bdSmallestPosDoubleValue.divide(BigDecimal.TEN), "22003");
@@ -4903,6 +5074,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             }
 
             // These two would fail prior to DERBY-3398
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             assertUpdateOK(rs, dfCols[i], _X, Double.MIN_VALUE, XXX_DOUBLE);
             assertUpdateOK(rs, dfCols[i], _X, -Double.MIN_VALUE, XXX_DOUBLE);
         }
@@ -4931,6 +5103,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      */
     public void testDerby5536() throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
         BigDecimal vBelow[] =
             new BigDecimal[]{new BigDecimal(123456789012345678L),  // 18 digits
                              new BigDecimal(-12345678901234567L)};
@@ -4988,6 +5161,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     }
 
     public void testDerby6902()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6902
         throws SQLException
     {
         createStatement().executeUpdate(
@@ -5032,6 +5206,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps6902.setLong(1, 1470362049757L);
         ps6902.executeUpdate();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6902
         try {
             ps6902.setString( 1,  "abcde" );
             ps6902.executeUpdate();
@@ -5185,6 +5360,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      * updateType.
      */
     private void assertUpdateOK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             ResultSet rs,
             String colName,
             long value,
@@ -5228,6 +5404,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 fail("wrong argument");
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             if (expected != null) {
                 fail("exception expected");
             }

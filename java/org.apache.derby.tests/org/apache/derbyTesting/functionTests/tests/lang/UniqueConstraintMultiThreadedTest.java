@@ -47,6 +47,7 @@ public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
      */
     private void executeThreads (int isolation1, int isolation2, 
             boolean commit) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5719
         Connection con1 = openDefaultConnection();
         con1.setTransactionIsolation(isolation1);
         Connection con2 = openDefaultConnection();
@@ -110,12 +111,14 @@ public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("UniqueConstraintTest");
         suite.addTest(TestConfiguration.embeddedSuite(UniqueConstraintMultiThreadedTest.class));
         return suite;
     }
     
     protected void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5719
         Statement stmt = createStatement();
         stmt.execute("create table tab1 (i integer)");
         stmt.executeUpdate("alter table tab1 add constraint con1 unique (i)");

@@ -283,6 +283,7 @@ public abstract class LuceneUtils
          */
         public Analyzer getAnalyzer()   throws SQLException
         { return LuceneUtils.defaultAnalyzer(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         /**
          * Return LuceneUtils.defaultQueryParser(  LuceneUtils.currentVersion(), getFieldNames(), getAnalyzer() ).

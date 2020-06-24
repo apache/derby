@@ -77,6 +77,7 @@ class LogBufferElement {
      **/
     protected void appendLog(long greatestInstant,
                              byte[] log, int logOffset, int logLength) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
 
         if (SanityManager.DEBUG){
             SanityManager.ASSERT(freeSize() >= logLength,
@@ -147,6 +148,7 @@ class LogBufferElement {
      */
     private int appendBytes(byte b[], int offset, int pos, int length) {
         if (SanityManager.DEBUG){
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
             SanityManager.ASSERT(freeSize() >= length,
                                  "byte[] is to big to fit"+
                                  " into this buffer");

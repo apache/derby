@@ -66,6 +66,8 @@ class NextSequenceNode extends ValueNode {
      * @throws StandardException Thrown on error
      */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates,

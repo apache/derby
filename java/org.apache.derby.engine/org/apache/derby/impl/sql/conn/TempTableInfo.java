@@ -142,6 +142,7 @@ At the time of rollback
 	  	declare temp table t2("declared in savepoint level" = 0, "dropped in savepoint level"=-1)
 		  rollback tran
         (temp table t2 will be removed from list of tables and conglomerate associated with it will be dropped)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     And if table was dropped in this unit of work ie "dropped in savepoint level" &gt;= "current savepoint level"
       Then we should remove the table from the list of temp tables
 		  eg

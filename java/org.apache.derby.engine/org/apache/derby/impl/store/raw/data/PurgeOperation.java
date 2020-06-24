@@ -80,6 +80,7 @@ public final class PurgeOperation extends PhysicalPageOperation {
 
 	transient protected ByteArray preparedLog;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     PurgeOperation(RawTransaction t, BasePage page, int slot, int
 						  num_rows, int[] recordIds, boolean needDataLogged)
 		throws StandardException

@@ -70,11 +70,13 @@ import org.apache.derby.iapi.services.io.FileUtil;
  * This class implements the PersistentService interface using a StorageFactory class.
  * It handles all subSubProtocols except for cache.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 final class StorageFactoryService implements PersistentService
 {
     /** Marker printed as the last line of the service properties file. */
     private static final String SERVICE_PROPERTIES_EOF_TOKEN =
             "#--- last line, don't put anything after this line ---";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
 
     private String home; // the path of the database home directory. Can be null
     private String canonicalHome; // will be null if home is null
@@ -83,12 +85,14 @@ final class StorageFactoryService implements PersistentService
     private StorageFactory rootStorageFactory;
     private char separatorChar;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
     StorageFactoryService( String subSubProtocol, Class storageFactoryClass)
         throws StandardException
     {
         this.subSubProtocol = subSubProtocol;
         this.storageFactoryClass = storageFactoryClass;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         Object monitorEnv = getMonitor().getEnvironment();
 		if (monitorEnv instanceof File)
         {
@@ -96,6 +100,7 @@ final class StorageFactoryService implements PersistentService
             try
             {
                 AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     new java.security.PrivilegedExceptionAction<Object>()
                     {
                         public Object run() throws IOException, StandardException
@@ -108,6 +113,7 @@ final class StorageFactoryService implements PersistentService
                             {
                                 StorageFile rootDir = rootStorageFactory.newStorageFile( null);
                                 boolean created = rootDir.mkdirs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
                                 if (created) {
                                     rootDir.limitAccessToOwner();
                                 }
@@ -132,6 +138,7 @@ final class StorageFactoryService implements PersistentService
             catch( IOException ioe){ throw Monitor.exceptionStartingModule(/*serviceName, */ ioe); }
         }
         AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             new java.security.PrivilegedAction<Object>()
             {
                 public Object run()
@@ -187,6 +194,7 @@ final class StorageFactoryService implements PersistentService
                 new PrivilegedExceptionAction<StorageFactory>()
                 {
                   public StorageFactory run() throws InstantiationException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                       IllegalAccessException, IOException, NoSuchMethodException, InvocationTargetException
                     {
                         return privGetStorageFactoryInstance( useHome, databaseName, tempDirName, uniqueName);
@@ -205,6 +213,7 @@ final class StorageFactoryService implements PersistentService
                                                           String databaseName,
                                                           String tempDirName,
                                                           String uniqueName)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       throws InstantiationException,
              IllegalAccessException,
              IOException,
@@ -276,6 +285,7 @@ final class StorageFactoryService implements PersistentService
                 {
                     public Object run()
                         throws IOException, StandardException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         InstantiationException, IllegalAccessException,
                         NoSuchMethodException, InvocationTargetException
                     {
@@ -293,6 +303,7 @@ final class StorageFactoryService implements PersistentService
                         {
                             StorageFactory storageFactory = privGetStorageFactoryInstance( true, serviceName, null, null);
                             StorageFile file = storageFactory.newStorageFile( PersistentService.PROPERTIES_NAME);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
                             resolveServicePropertiesFiles(storageFactory, file);
                             try {
                                 InputStream is = file.getInputStream();
@@ -349,6 +360,7 @@ final class StorageFactoryService implements PersistentService
                 {
                     public Object run() throws StandardException
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
                         StorageFile backupFile = replace
                             ? storageFactory.newStorageFile(
                                 PersistentService.PROPERTIES_NAME.concat("old"))
@@ -372,6 +384,7 @@ final class StorageFactoryService implements PersistentService
                             // The eof token should match the ISO-8859-1 encoding 
                             // of the rest of the properties file written with store.
                             BufferedWriter bOut = new BufferedWriter(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
                                     new OutputStreamWriter(os,"ISO-8859-1"));
                             bOut.write(SERVICE_PROPERTIES_EOF_TOKEN);
                             bOut.newLine();
@@ -490,12 +503,16 @@ final class StorageFactoryService implements PersistentService
      */
 
 	public void saveServiceProperties(final String serviceName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5260
                                       final Properties properties)
 		throws StandardException {
 
         try
         {
             AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 new PrivilegedExceptionAction<Object>()
                 {
                     public Object run() throws StandardException
@@ -511,6 +528,7 @@ final class StorageFactoryService implements PersistentService
 
                             fos = new FileOutputStream(servicePropertiesFile);
                             FileUtil.limitAccessToOwner(servicePropertiesFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
                             properties.store(fos, 
                                              serviceName + 
@@ -552,6 +570,7 @@ final class StorageFactoryService implements PersistentService
      *      file fails
      */
     private void resolveServicePropertiesFiles(StorageFactory sf,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
                                                StorageFile spf)
             throws StandardException {
         StorageFile spfOld = sf.newStorageFile(PROPERTIES_NAME.concat("old"));
@@ -579,6 +598,7 @@ final class StorageFactoryService implements PersistentService
             String lastLine = null;
             try {
                 //service.properties always in ISO-8859-1 because written with Properties.store()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5424
                 bin = new BufferedReader(new InputStreamReader(
                         new FileInputStream(spf.getPath()),"ISO-8859-1"));
                 String line;
@@ -690,6 +710,7 @@ final class StorageFactoryService implements PersistentService
                                 new PrivilegedExceptionAction<Object>()
                                 {
                                     public Object run()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                         throws IOException, StandardException,
                                       InstantiationException, IllegalAccessException,
                                       NoSuchMethodException, InvocationTargetException
@@ -725,6 +746,7 @@ final class StorageFactoryService implements PersistentService
 		{
 			//First make sure backup service directory exists in the specified path
 			File backupRoot = new File(restoreFrom);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2556
 			if (fileExists(backupRoot))
 			{
 				//First make sure backup have service.properties
@@ -737,9 +759,11 @@ final class StorageFactoryService implements PersistentService
                     try
                     {
                         AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                             new PrivilegedExceptionAction<Object>()
                             {
                                 public Object run()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                     throws IOException, StandardException,
                                     InstantiationException, IllegalAccessException,
                                     NoSuchMethodException, InvocationTargetException
@@ -795,10 +819,12 @@ final class StorageFactoryService implements PersistentService
 		Throwable t = null;
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
             return getProtocolLeadIn() + (String) AccessController.doPrivileged(
                 new PrivilegedExceptionAction<Object>()
                 {
                     public Object run()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         throws StandardException, IOException,
                         InstantiationException, IllegalAccessException,
                         NoSuchMethodException, InvocationTargetException
@@ -826,6 +852,7 @@ final class StorageFactoryService implements PersistentService
 
                             if (serviceDirectory.mkdirs())
                             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
                                 serviceDirectory.limitAccessToOwner();
                                 // DERBY-5096. The storageFactory canonicalName may need to be adjusted
                                 // for casing after the directory is created. Just reset it after making the 
@@ -842,6 +869,7 @@ final class StorageFactoryService implements PersistentService
                                     throw ioe;
                                 }
                             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                             throw StandardException.newException(SQLState.SERVICE_DIRECTORY_CREATE_ERROR, serviceDirectory);
                         }
                         finally { storageFactory.shutdown(); }
@@ -857,6 +885,7 @@ final class StorageFactoryService implements PersistentService
                 throw (StandardException) t;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
         throw StandardException.newException(SQLState.SERVICE_DIRECTORY_CREATE_ERROR, t, name);
     } // end of createServiceRoot
 
@@ -876,6 +905,7 @@ final class StorageFactoryService implements PersistentService
             StorageFile seg0 = storageFactory.newStorageFile("seg0");
             if (seg0.exists()) {
             throw StandardException.newException
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
                 ( SQLState.SERVICE_PROPERTIES_MISSING, serviceName, PersistentService.PROPERTIES_NAME );
             }
         }
@@ -903,9 +933,14 @@ final class StorageFactoryService implements PersistentService
         try
         {
             return AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 new PrivilegedExceptionAction<Object>()
                 {
                     public Object run()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         throws StandardException, IOException,
                         InstantiationException, IllegalAccessException,
                         NoSuchMethodException, InvocationTargetException
@@ -919,6 +954,7 @@ final class StorageFactoryService implements PersistentService
                                 // an extra sanity check. Prepending the
                                 // protocol lead in to the canonical name from
                                 // the storage factory should be enough.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
                                 String tmpCanonical = getCanonicalServiceName(
                                         getProtocolLeadIn() +
                                         storageFactory.getCanonicalName());
@@ -945,6 +981,7 @@ final class StorageFactoryService implements PersistentService
 	} // end of removeServiceRoot
 
 	public String getCanonicalServiceName(String name)
+//IC see: https://issues.apache.org/jira/browse/DERBY-19
 		throws StandardException
     {
         int colon = name.indexOf( ':');
@@ -953,6 +990,7 @@ final class StorageFactoryService implements PersistentService
         // specifications here, which contain a colon (i.e. 'C:').
         // The logic in this method may break in some cases if a colon is used
         // in the directory or database name.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4171
         if (colon < 2 && !getType().equals(PersistentService.DIRECTORY)) {
             return null;
         }
@@ -966,10 +1004,12 @@ final class StorageFactoryService implements PersistentService
 
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             return getProtocolLeadIn() + AccessController.doPrivileged(
                 new PrivilegedExceptionAction<String>()
                 {
                     public String run()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         throws StandardException, IOException,
                         InstantiationException, IllegalAccessException,
                         NoSuchMethodException, InvocationTargetException
@@ -986,6 +1026,7 @@ final class StorageFactoryService implements PersistentService
         }
 		catch (PrivilegedActionException pae)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-19
 			throw Monitor.exceptionStartingModule(pae.getException());
 		}
 	} // end of getCanonicalServiceName
@@ -1010,6 +1051,7 @@ final class StorageFactoryService implements PersistentService
     {
 		if (SanityManager.DEBUG)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-19
 			try {
             SanityManager.ASSERT(serviceName1.equals(getCanonicalServiceName(serviceName1)), serviceName1);
 			SanityManager.ASSERT(serviceName2.equals(getCanonicalServiceName(serviceName2)), serviceName2);
@@ -1029,9 +1071,11 @@ final class StorageFactoryService implements PersistentService
      * @throws SecurityException if the required privileges are missing
      */
     private final boolean fileExists(final File file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return (AccessController.doPrivileged(
                 new PrivilegedAction<Boolean>() {
                     public Boolean run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         return file.exists();
                     }
             })).booleanValue();
@@ -1058,6 +1102,7 @@ final class StorageFactoryService implements PersistentService
         // We prepend the subsub protocol name to the storage factory canonical
         // name to form the service name, except in case of the default
         // subsub prototcol (which is PersistentService.DIRECTORY).
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
         if (getType().equals(PersistentService.DIRECTORY)) {
             return "";
         } else {
@@ -1071,6 +1116,7 @@ final class StorageFactoryService implements PersistentService
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()
@@ -1083,6 +1129,7 @@ final class StorageFactoryService implements PersistentService
              );
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     final class DirectoryList implements Enumeration, PrivilegedAction<DirectoryList>
     {
         private String[] contents;
@@ -1103,6 +1150,7 @@ final class StorageFactoryService implements PersistentService
 
         public boolean hasMoreElements()
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
             if (contents == null)
                 return false;
             
@@ -1173,6 +1221,7 @@ final class StorageFactoryService implements PersistentService
      *      {@code File.getPath}.
      */
     private static String getMostAccuratePath(StorageFile file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
         String path = file.getPath();
         try {
             path = file.getCanonicalPath();

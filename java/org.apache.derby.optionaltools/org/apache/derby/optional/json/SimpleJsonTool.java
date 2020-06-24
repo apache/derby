@@ -67,6 +67,7 @@ public	class   SimpleJsonTool  implements OptionalTool
 
     private FunctionDescriptor[]    _functionDescriptors =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         new FunctionDescriptor
         (
             "toJSON",
@@ -108,6 +109,7 @@ public	class   SimpleJsonTool  implements OptionalTool
             "external name 'org.apache.derby.optional.api.SimpleJsonUtils.readArrayFromURL'\n"
         ),
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         new FunctionDescriptor
         (
             "arrayToClob",
@@ -167,9 +169,11 @@ public	class   SimpleJsonTool  implements OptionalTool
         Connection          derbyConn = getDerbyConnection();
 
         createUDT( derbyConn );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         createFunctions( derbyConn );
         
         boolean sqlAuthorizationEnabled = ToolUtilities.sqlAuthorizationEnabled( derbyConn );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         if ( sqlAuthorizationEnabled ) { grantPermissions( derbyConn ); }
     }
 
@@ -202,6 +206,7 @@ public	class   SimpleJsonTool  implements OptionalTool
 
         Connection          derbyConn = getDerbyConnection();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         dropFunctions( derbyConn );
         dropUDT( derbyConn );
     }
@@ -290,6 +295,7 @@ public	class   SimpleJsonTool  implements OptionalTool
         )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         for ( FunctionDescriptor desc : _functionDescriptors )
         {
             executeDDL( derbyConn, desc.creationDDL );

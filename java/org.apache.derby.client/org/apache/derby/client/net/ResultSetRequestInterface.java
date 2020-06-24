@@ -35,6 +35,8 @@ interface ResultSetRequestInterface {
                            int fetchSize) throws SqlException;
 
     public void writeScrollableFetch(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         NetResultSet resultSet,
         Section section,
         int fetchSize,

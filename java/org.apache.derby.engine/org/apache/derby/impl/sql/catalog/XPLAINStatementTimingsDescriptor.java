@@ -68,6 +68,7 @@ public class XPLAINStatementTimingsDescriptor extends XPLAINTableDescriptor
         this.generate_time   = generate_time;
         this.compile_time    = compile_time;
         this.execute_time    = execute_time;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         this.begin_comp_time = DataTypeUtilities.clone( begin_comp_time );
         this.end_comp_time   = DataTypeUtilities.clone( end_comp_time );
         this.begin_exe_time  = DataTypeUtilities.clone( begin_exe_time );
@@ -78,6 +79,7 @@ public class XPLAINStatementTimingsDescriptor extends XPLAINTableDescriptor
         throws SQLException
     {
         ps.setString(1, timing_id.toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6318
         ps.setObject(2, parse_time, Types.BIGINT);
         ps.setObject(3, bind_time, Types.BIGINT);
         ps.setObject(4, optimize_time, Types.BIGINT);

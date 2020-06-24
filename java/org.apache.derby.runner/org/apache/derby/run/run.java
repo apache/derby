@@ -32,6 +32,7 @@ import org.apache.derby.tools.ij;
 import org.apache.derby.tools.sysinfo;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-1063
   <p>
   The run class facilitates running the various Derby utilities with the
   java -jar command. For example:
@@ -57,10 +58,12 @@ public class run {
           sysinfo.main(trimArgs(args));
       } else if (args[0].equals("dblook")) {
           dblook.main(trimArgs(args));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1063
       } else if (args[0].equals("server")) {
           NetworkServerControl.main(trimArgs(args));
       } else if (args[0].equals("SignatureChecker")) {
           SignatureChecker.main(trimArgs(args));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5950
       } else if (args[0].equals("PlanExporter")) {
     	  PlanExporter.main(trimArgs(args));  
       } else printUsage();

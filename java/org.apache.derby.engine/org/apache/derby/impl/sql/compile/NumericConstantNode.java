@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.NumericConstantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -42,6 +43,7 @@ public final class NumericConstantNode extends ConstantNode
 {
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_TINYINT = 0;
     final static int K_SMALLINT = 1;
     final static int K_INT = 2;
@@ -63,6 +65,8 @@ public final class NumericConstantNode extends ConstantNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     NumericConstantNode(TypeId t, ContextManager cm)
             throws StandardException {
         super(cm);
@@ -79,9 +83,12 @@ public final class NumericConstantNode extends ConstantNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     NumericConstantNode(TypeId t, Number value, ContextManager cm)
             throws StandardException {
         super(cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         kind = getKind(t);
         setType(t,
                 getPrecision(t, value),
@@ -94,6 +101,7 @@ public final class NumericConstantNode extends ConstantNode
     private int getPrecision(TypeId t, Number val) throws StandardException {
 
         switch (t.getJDBCTypeId()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         case Types.TINYINT:
             return TypeId.SMALLINT_PRECISION; // FIXME
@@ -105,6 +113,7 @@ public final class NumericConstantNode extends ConstantNode
             return TypeId.LONGINT_PRECISION;
         case Types.DECIMAL:
             if (val != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 SQLDecimal constantDecimal = new SQLDecimal((BigDecimal) val);
                 return constantDecimal.getDecimalValuePrecision();
             } else {
@@ -134,6 +143,7 @@ public final class NumericConstantNode extends ConstantNode
             return TypeId.LONGINT_SCALE;
         case Types.DECIMAL:
             if (val != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 SQLDecimal constantDecimal = new SQLDecimal((BigDecimal) val);
                 return constantDecimal.getDecimalValueScale();
             } else {
@@ -163,6 +173,7 @@ public final class NumericConstantNode extends ConstantNode
            return val != null ? TypeId.LONGINT_MAXWIDTH: 0;
        case Types.DECIMAL:
             if (val != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                SQLDecimal constantDecimal = new SQLDecimal((BigDecimal) val);
                int precision = constantDecimal.getDecimalValuePrecision();
                int scal = constantDecimal.getDecimalValueScale();
@@ -188,6 +199,7 @@ public final class NumericConstantNode extends ConstantNode
     private int getKind(TypeId t) {
        switch (t.getJDBCTypeId()) {
        case Types.TINYINT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
            return K_TINYINT;
        case Types.INTEGER:
            return K_INT;
@@ -224,6 +236,7 @@ public final class NumericConstantNode extends ConstantNode
            setValue(new SQLLongint((Long)value));
             break;
        case Types.DECIMAL:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
            setValue(new SQLDecimal((BigDecimal)value));
             break;
        case Types.DOUBLE:
@@ -270,6 +283,7 @@ public final class NumericConstantNode extends ConstantNode
 	void generateConstant(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (kind)
 		{
         case K_INT:
@@ -282,7 +296,9 @@ public final class NumericConstantNode extends ConstantNode
 			mb.push(value.getShort());
 			break;
         case K_DECIMAL:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             mb.pushNewStart("java.math.BigDecimal");
+//IC see: https://issues.apache.org/jira/browse/DERBY-225
 			mb.push(value.getString());
             mb.pushNewComplete(1);
 			break;
@@ -301,6 +317,7 @@ public final class NumericConstantNode extends ConstantNode
 				// we should never really come here-- when the class is created
 				// it should have the correct nodeType set.
 				SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                           "Unexpected numeric type = " + kind);
 			}
 		}	

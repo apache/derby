@@ -79,7 +79,9 @@ public class RecoveryAfterBackup
             // Shut down database
             System.out.println("Shutting down database ...");
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-907
             	TestUtil.getConnection("", "shutdown=true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-810
             } catch(SQLException sqle) {
                 if (sqle.getSQLState() != null 
                     && sqle.getSQLState().equals("XJ015")) {
@@ -91,6 +93,7 @@ public class RecoveryAfterBackup
 
             // Start up with rollforward-recovery
             System.out.println("Starting restore with roll-forward recovery..");
+//IC see: https://issues.apache.org/jira/browse/DERBY-907
             String dbName = "hairynosedwombat";
             String connAttrs = 
             	"rollForwardRecoveryFrom=extinout/mybackup/hairynosedwombat";

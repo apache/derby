@@ -7084,6 +7084,8 @@ public class StoredPage extends CachedPage
     public void logAction(LogInstant instant) throws StandardException
     {
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
             SanityManager.ASSERT(isLatched(), 
                 "logAction() executed on an unlatched page.");
         }
@@ -7683,6 +7685,7 @@ public class StoredPage extends CachedPage
         This method ensures there is enough room to replace the
         old data of length oldLength at the given offset, with the new data of length
         newLength. This method does put any new data on the page, it moves old data around
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         and zeros out any old data when newLength &lt; oldLength. This method does
         update the information in the slot table.
 
@@ -7869,6 +7872,7 @@ public class StoredPage extends CachedPage
         int fieldDataLength = StoredFieldHeader.readFieldDataLength(in, fieldStatus, slotFieldSize);
 
         if (fieldDataLength != 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3941
             DataInputUtil.skipFully(in, fieldDataLength);
         }
     }
@@ -8131,6 +8135,7 @@ public class StoredPage extends CachedPage
 
     public String toUncheckedString()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5002
         if (SanityManager.DEBUG)
         {
             String str = "---------------------------------------------------\n";
@@ -8211,6 +8216,8 @@ public class StoredPage extends CachedPage
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6320
+//IC see: https://issues.apache.org/jira/browse/DERBY-4923
     String getPageDumpString()
     {
         return(
@@ -8236,6 +8243,7 @@ public class StoredPage extends CachedPage
     {
         if (SanityManager.DEBUG)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
             String str = "";
             try 
             {
@@ -8820,6 +8828,8 @@ slotScan:
                         hitLongColumn = true;
 
                     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6320
+//IC see: https://issues.apache.org/jira/browse/DERBY-4923
                     catch (NoSpaceOnPage nsop)
                     {
                         // DERBY-4923
@@ -8998,6 +9008,8 @@ slotScan:
                     // information into the post commit work.
 
                     RecordHandle portionHandle;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6320
+//IC see: https://issues.apache.org/jira/browse/DERBY-4923
 
                     try 
                     {

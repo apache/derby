@@ -175,10 +175,12 @@ final class JarLoader extends SecureClassLoader {
         // not make assumptions about this check reducing the
         // number of classes it has to check for.
         if (className.startsWith("org.apache.derby.")
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 && !isDerbyDriver(className)
                 && !className.startsWith("org.apache.derby.jdbc.")
                 && !className.startsWith("org.apache.derby.vti.")
                 && !className.startsWith("org.apache.derby.agg.")
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
                 && !className.startsWith("org.apache.derby.optional.")
                 && !className.startsWith("org.apache.derby.impl.tools.optional.")
             )
@@ -211,9 +213,11 @@ final class JarLoader extends SecureClassLoader {
      */
     private boolean isDerbyDriver(String className)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return
           (
            className.startsWith("org.apache.derby.iapi.jdbc.AutoloadedDriver")
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
            || className.startsWith("org.apache.derby.iapi.client.ClientAutoloadedDriver")
            );
     }
@@ -231,6 +235,7 @@ final class JarLoader extends SecureClassLoader {
      * Return the SQL name for the installed jar.
      * Used for error and informational messages.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
     final String getJarName() {
         return IdUtil.mkQualifiedName(name);
     }
@@ -243,6 +248,7 @@ final class JarLoader extends SecureClassLoader {
 		try {
 			if (jar != null)
 				return loadClassDataFromJar(className, jvmClassName, resolve);
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 
 			if (isStream) {
 				// have to use a new stream each time
@@ -271,6 +277,7 @@ final class JarLoader extends SecureClassLoader {
      
 		if (jar != null)
 			return getRawStream(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 
 		if (isStream) {
 			try {
@@ -293,6 +300,7 @@ final class JarLoader extends SecureClassLoader {
      * as a java.util.jarFile.
      */
 	private Class loadClassDataFromJar(
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
             String className, String jvmClassName, boolean resolve) 
 		throws IOException {
 
@@ -346,8 +354,10 @@ final class JarLoader extends SecureClassLoader {
 		String className, boolean resolve) throws IOException {
 
 		byte[] data = readData(e, in, className);
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 
 		Certificate[] signers = getSigners(className, e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 
 		synchronized (updateLoader) {
 			// see if someone else loaded it while we
@@ -381,8 +391,10 @@ final class JarLoader extends SecureClassLoader {
      * resolve any classes or resources.
      *
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 	void setInvalid() {
 		updateLoader = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
         if (jar != null) {
             try {
                 jar.close();
@@ -399,6 +411,7 @@ final class JarLoader extends SecureClassLoader {
 	*/
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
 		Get a stream for a resource directly from a JarFile.
 		In this case we can safely return the stream directly.
 		It's a new stream set up by the zip code to read just
@@ -419,6 +432,7 @@ final class JarLoader extends SecureClassLoader {
 
 	/**
 		Get a stream from a zip file that is itself a stream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-552
         We copy to the contents to a byte array and return a
         stream around that to the caller. Though a copy is
         involved it has the benefit of:
@@ -443,6 +457,7 @@ final class JarLoader extends SecureClassLoader {
 
 				if (e.getName().equals(name)) {
                     int size = (int) e.getSize();
+//IC see: https://issues.apache.org/jira/browse/DERBY-552
                     if (size == -1)
                     {
                         // unknown size so just pick a good buffer size.
@@ -472,6 +487,7 @@ final class JarLoader extends SecureClassLoader {
      * If this is a signed class and it has been compromised then
      * a SecurityException will be thrown.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-538
     byte[] readData(JarEntry ze, InputStream in, String className)
             throws IOException {
 
@@ -555,6 +571,7 @@ final class JarLoader extends SecureClassLoader {
      */
     public String toString()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2331
         return getJarName() + ":" + super.toString();
     }
 }

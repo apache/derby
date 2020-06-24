@@ -58,6 +58,7 @@ public interface Transaction {
 	 * @return The compatibility space of the transaction.
      **/
     CompatibilitySpace getCompatibilitySpace();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 
     /**
      * Tell this transaction whether it should time out immediately if a lock
@@ -185,6 +186,8 @@ public interface Transaction {
         occur of lower severity than Transaction severity are caught, the 
         transaction is then aborted and then an exception of Transaction
 		severity is thrown nesting the original exception.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6323
+//IC see: https://issues.apache.org/jira/browse/DERBY-6323
         Any exception more severe than a
         Transaction exception is not caught and the transaction is not aborted.
         The transaction will be aborted by the standard context mechanism.
@@ -629,5 +632,6 @@ public interface Transaction {
 	 * @exception  StandardException  Standard exception policy.
      **/
     public DataValueFactory getDataValueFactory()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		throws StandardException;
 }

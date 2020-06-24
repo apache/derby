@@ -2399,6 +2399,7 @@ public class T_b2i extends T_MultiIterations
             testbtree.create(
                 tm, -1, ContainerHandle.DEFAULT_ASSIGN_ID, index_row1.getRow(),
                 null, null, null, TransactionController.IS_TEMPORARY); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
             throw T_Fail.testFailMsg("bad create succeeded.");
         }
@@ -2887,11 +2888,13 @@ public class T_b2i extends T_MultiIterations
         DataValueDescriptor[] base_row        = TemplateRow.newU8Row(2);
         T_SecondaryIndexRow   index_row1      = new T_SecondaryIndexRow();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         long base_conglomid = 
             tc.createConglomerate(
                 "heap",   // create a heap conglomerate
                 base_row, // base table template row
                 null, //column sort order - not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, //default collation
                 null,     // default properties
                 TransactionController.IS_DEFAULT);
@@ -2932,6 +2935,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",       // create a heap conglomerate
                 index_row1.getRow(), // 1 column template.
 				null, //column sort order - default
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, //default collation
                 properties,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
@@ -3267,6 +3271,7 @@ public class T_b2i extends T_MultiIterations
 
                 ContextService contextFactory = 
                     getContextService();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
                 // Get the context manager.
                 ContextManager cm = contextFactory.getCurrentContextManager();
@@ -4228,6 +4233,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",    				// create a btree secondary
                 index_row.getRow(),         // row template
 				order, //column sort order - default
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, //default collation
                 properties,                 // properties
                 TransactionController.IS_DEFAULT);   // not temporary
@@ -4775,6 +4781,10 @@ public class T_b2i extends T_MultiIterations
                 "heap",                            // create a heap conglomerate
                 base_row,                          // base table template row
 				null, //column sort order - not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, //default collation
                 null,                              // default properties
                 TransactionController.IS_DEFAULT); // not temporary
@@ -4814,6 +4824,10 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",    				// create a btree secondary
                 index_row.getRow(),         // row template
 				order, //column sort order - default
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, //default collation
                 properties,                 // properties
                 TransactionController.IS_DEFAULT);   // not temporary
@@ -5101,6 +5115,7 @@ public class T_b2i extends T_MultiIterations
      * @return {@code true} if the database is active, {@code false} otherwise
      */
     public boolean isdbActive() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         LanguageConnectionContext lcc = (LanguageConnectionContext)
                 getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
         Database db = (Database) (lcc != null ? lcc.getDatabase() : null);
@@ -5139,6 +5154,7 @@ public class T_b2i extends T_MultiIterations
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Context>()

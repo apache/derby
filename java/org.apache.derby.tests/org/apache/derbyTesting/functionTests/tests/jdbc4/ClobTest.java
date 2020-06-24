@@ -46,6 +46,7 @@ import java.util.*;
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
 class ExemptClobMD {
     /** The Name of the method. */
     private String methodName_;
@@ -158,11 +159,14 @@ public class ClobTest
         throws SQLException {
         // Life span of Clob objects are limited by the transaction.  Need
         // autocommit off so Clob objects survive closing of result set.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
         getConnection().setAutoCommit(false);
     }
 
     protected void tearDown() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
         if (clob != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2707
             clob.free();
             clob = null;
         }
@@ -175,6 +179,7 @@ public class ClobTest
      * can be exempted or not
      */
     void buildHashSet() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
         Class<Clob> iface = Clob.class;
         for(int i=0;i<emd.length;i++) {
             try {
@@ -215,15 +220,18 @@ public class ClobTest
      *
      */
     public void testFreeandMethodsAfterCallingFree()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
           throws IllegalAccessException, InvocationTargetException, SQLException
     {
         clob = BlobClobTestSetup.getSampleClob(getConnection());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
 
         //call the buildHashSetMethod to initialize the
         //HashSet with the method signatures that are exempted
         //from throwing a SQLException after free has been called
         //on the Clob object.
         buildHashSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
 
         InputStream asciiStream = clob.getAsciiStream();
         Reader charStream = clob.getCharacterStream();
@@ -246,6 +254,7 @@ public class ClobTest
      * get the list of methods present in the interface
      * @param LOB an instance of the Clob interface implementation
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
     void buildMethodList(Object LOB)
             throws IllegalAccessException, InvocationTargetException {
         //If the given method throws the correct exception
@@ -303,6 +312,7 @@ public class ClobTest
     boolean checkIfExempted(Method m) {
         ExemptClobMD md = excludedMethodSet.get(m);
         boolean isExempted = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
         if (md != null) {
             if (usingDerbyNetClient()) {
                 isExempted = md.getIfClientFramework();
@@ -326,6 +336,7 @@ public class ClobTest
      *               LOB object
      */
     boolean checkIfMethodThrowsSQLException(Object LOB,Method method)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
             throws IllegalAccessException, InvocationTargetException {
         try {
             method.invoke(LOB,getNullValues(method.getParameterTypes()));
@@ -371,6 +382,7 @@ public class ClobTest
             return Boolean.FALSE;
         }
         if (type == Character.TYPE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return (char) 0;
         }
         if (type == Byte.TYPE) {
@@ -401,6 +413,7 @@ public class ClobTest
      * @throws Exception
      */
     public void testGetCharacterStreamLong()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2444
     throws Exception {
         String str1 = "This is a test String. This is a test String";
 
@@ -426,6 +439,7 @@ public class ClobTest
         Reader r_2 = new java.io.StringReader(str2);
 
         assertEquals(r_2,r_1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
 
         rs.close();
         st.close();
@@ -438,6 +452,7 @@ public class ClobTest
      * This case fills the Clob with latin lowercase characters.
      */
     public void testGetCharacterStreamLongLastCharLatin()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
             throws IOException, SQLException {
         CharAlphabet alphabet = CharAlphabet.modernLatinLowercase();
         // Insert a Clob
@@ -629,6 +644,7 @@ public class ClobTest
         catch(SQLException sqle) {
             // The SQLState for the exception thrown when pos > length of Clob
             // is XJ076
+//IC see: https://issues.apache.org/jira/browse/DERBY-2444
             assertSQLState("XJ087", sqle);
         }
 
@@ -673,6 +689,7 @@ public class ClobTest
          //to do the inserts into the
          //Clob.
          String str = "Hi I am the insert String";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
 
          //Create the InputStream that will
          //be used for comparing the Stream
@@ -680,6 +697,7 @@ public class ClobTest
          //the update.
          ByteArrayInputStream str_is = new ByteArrayInputStream
                  (str.getBytes("US-ASCII"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3774
 
          //create the empty Clob.
          Clob clob = getConnection().createClob();
@@ -815,6 +833,7 @@ public class ClobTest
          //should reflect the same extension
          //in the InputStream also.
          clob.setString((str1.length())+1, str2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
 
          //Now get the reader from the Clob after
          //the update has been done.
@@ -835,6 +854,7 @@ public class ClobTest
     {
         int id = initializeLongClob();  // Opens clob object
         executeParallelUpdate(id, true); // Test that timeout occurs
+//IC see: https://issues.apache.org/jira/browse/DERBY-3098
 
         // Test that update goes through after the clob is closed
         clob.free();
@@ -888,6 +908,7 @@ public class ClobTest
 
     /** Inserts, fetches and checks the length of a Clob using a stream. */
     public void testInsertAndFetchZeroLength()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             throws IOException, SQLException {
         insertAndFetchTest(0);
     }
@@ -1056,6 +1077,7 @@ public class ClobTest
      * @throws IOException if reading from the stream fails
      */
     public static char getLastCharInStream(Reader reader, int expectedCount)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
             throws IOException {
         int read = 0;
         final char[] buf = new char[256];

@@ -346,6 +346,7 @@ public class MessageUtils
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             msg[0] = formatMessage
               (MessageService.getBundleForLocale(locale, messageId), messageId, arguments, true);
             rc[0] = 0;
@@ -355,6 +356,7 @@ public class MessageUtils
             // most likely it does exist in our fake base class _en, so try that.
         } catch (ShutdownException se) {
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         msg[0] = formatMessage
           (MessageService.getBundleForLocale(EN, messageId), messageId, arguments, false);
         rc[0] = 0;
@@ -373,6 +375,7 @@ public class MessageUtils
         String locMsg = null;
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             locMsg = formatMessage
               (MessageService.getBundleForLocale(locale, messageId), messageId, args, true);
             return locMsg;

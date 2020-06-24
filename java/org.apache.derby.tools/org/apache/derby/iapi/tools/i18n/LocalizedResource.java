@@ -69,6 +69,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		init();
 	}
     public LocalizedResource(String msgF){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6680
         init(null, null, msgF, true);
 	}
 
@@ -96,6 +97,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
     // in trouble when testing the localization for ij.
     public static void resetLocalizedResourceCache()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1726
         local=null;
     }
 	public void init(){
@@ -104,10 +106,12 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 
 
     public void init (String encStr, String locStr, String msgF) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6680
         init(encStr, locStr, msgF, true);
     }
 
     private void init (String encStr, String locStr, String msgF, boolean readEnv){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (encStr != null){
 			encode = encStr;
 		}
@@ -126,6 +130,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		locale = getNewLocale(locStr);
 
 		//if null, get locale again from the environment variable
+//IC see: https://issues.apache.org/jira/browse/DERBY-6680
         if (locale==null && readEnv) {
 			String s = getEnvProperty(ENV_LOCALE);
 			locale = getNewLocale(s);
@@ -141,6 +146,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 			messageFileName = MESSAGE_FILE;
 		}
 		//create default in/out
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
 		out = getNewOutput(System.out);
 		in = getNewInput(System.in);
 
@@ -170,6 +176,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		if (res != null){
 			return;
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         res = MessageService.getBundleWithEnDefault(messageFileName, locale);
 	}
 	private void initMaxSizes2(){
@@ -220,6 +227,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 
 	public LocalizedInput getNewInput(InputStream i) {
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
 			if (encode != null)
 			    return new LocalizedInput(i,encode);
 		}
@@ -230,6 +238,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	}
 
 	public LocalizedInput getNewEncodedInput(InputStream i, String encoding) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
 		try {
 	          return new LocalizedInput(i,encoding);
 		}
@@ -253,7 +262,9 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	 * @throws UnsupportedEncodingException
 	 */
 	public LocalizedOutput getNewEncodedOutput(OutputStream o,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 			String encoding) throws UnsupportedEncodingException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5303
 	    out = new LocalizedOutput(o, encoding);
 	    return out;
 	}
@@ -283,6 +294,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 				return MessageFormat.format(res.getString(key), objectArr);
 			} catch (Exception e) {
 					String tmpFormat = key;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6828
 					for (int i=0; objectArr != null && i<objectArr.length; i++)
 						tmpFormat = tmpFormat + ", <{" + (i) + "}>";
 					return MessageFormat.format(tmpFormat, objectArr);
@@ -306,7 +318,9 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 					type == Types.DOUBLE ) {
 				return getNumberAsString(rs.getDouble(columnNumber));
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             else if (type == Types.NUMERIC || type == Types.DECIMAL) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3132
                 return getNumberAsString(rs.getBigDecimal(columnNumber));
 			}
 			else if (type == Types.TIME ) {
@@ -366,6 +380,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		if (!enableLocalized){
 			return t.toString();
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3194
 		return formatTimestamp.format
 			(t, new StringBuffer(),
 			 new java.text.FieldPosition(0)).toString();
@@ -424,6 +439,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		 try
 		  {
 				resourceKey =  key;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				s = java.security.AccessController.doPrivileged(this);
 		}
 		catch (SecurityException se) {
@@ -446,6 +462,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		return getInstance().enableLocalized;
 	}
     public static String getMessage(String key, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         return getInstance().getTextMessage(key, args);
     }
 	public static LocalizedOutput OutputWriter(){

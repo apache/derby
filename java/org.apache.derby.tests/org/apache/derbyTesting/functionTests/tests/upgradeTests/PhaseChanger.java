@@ -43,6 +43,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * for a suite of upgrade tests.
  */
 final class PhaseChanger extends BaseTestSetup {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2000
 
     private final int phase;
     private final int[] version;
@@ -70,9 +71,11 @@ final class PhaseChanger extends BaseTestSetup {
      */
     protected void setUp() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         UpgradeChange.phase.set(phase);
         UpgradeChange.oldVersion.set(version);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3982
         TestConfiguration config = TestConfiguration.getCurrent();
         trace = config.doTrace();
         if ( trace )
@@ -90,6 +93,8 @@ final class PhaseChanger extends BaseTestSetup {
         
         if (loader != null) {
             previousLoader = Thread.currentThread().getContextClassLoader();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
             ClassLoaderTestSetup.setThreadLoader(loader);
         }
          
@@ -128,6 +133,7 @@ final class PhaseChanger extends BaseTestSetup {
     protected void tearDown() throws Exception
     {
         if ( trace ) BaseTestCase.traceit(" Test upgrade done.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3982
 
         // Get a handle to the old engine's ContextService if this version is
         // affected by DERBY-23. The actual workaround for DERBY-23 must be
@@ -135,6 +141,7 @@ final class PhaseChanger extends BaseTestSetup {
         // to the service before shutdown, while it's still easily available.
         Object contextService = getDerby23ContextService();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5267
         DataSource ds = JDBCDataSource.getDataSource();
         JDBCDataSource.shutEngine(ds);
 
@@ -157,6 +164,8 @@ final class PhaseChanger extends BaseTestSetup {
         clearDerby23ThreadLocals(contextService);
 
         if (loader != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
             ClassLoaderTestSetup.setThreadLoader(previousLoader);
         loader = null;
         previousLoader = null;
@@ -179,6 +188,7 @@ final class PhaseChanger extends BaseTestSetup {
 
         boolean isAtLeast10_15 = 
             UpgradeRun.lessThan(new int[] {10,15,0,0}, version);
+//IC see: https://issues.apache.org/jira/browse/DERBY-7031
 
         boolean isAffectedVersion = isBetween10_2and10_8 || isAtLeast10_15;
 
@@ -187,6 +197,7 @@ final class PhaseChanger extends BaseTestSetup {
             // that live in a class loader that is able to load the driver. So
             // create an instance of DriverUnloader in the old driver's class
             // loader.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<?> unloader = Class.forName(
                     DriverUnloader.class.getName(), true, loader);
             Method m = unloader.getMethod("unload", (Class[]) null);
@@ -195,6 +206,7 @@ final class PhaseChanger extends BaseTestSetup {
             // Don't check this on a JVM which is
             // module aware because, in that case, the relevant driver is remote
             // in the server.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             if (!JVMInfo.isModuleAware())
             {
                 // Check that there weren't any drivers to unload except in the
@@ -228,6 +240,7 @@ final class PhaseChanger extends BaseTestSetup {
         // a derby server. the field below no longer exists
         // in the TableDescriptor class on the trunk.
         if (JVMInfo.isModuleAware()) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         Class td = Class.forName(
                 "org.apache.derby.iapi.sql.dictionary.TableDescriptor",
@@ -303,6 +316,7 @@ final class PhaseChanger extends BaseTestSetup {
             // setting the field to null.
             Field tclField = cls.getDeclaredField("threadContextList");
             tclField.setAccessible(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             ThreadLocal<?> tcl = (ThreadLocal) tclField.get(contextService);
             tcl.set(null);
 

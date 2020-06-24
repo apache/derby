@@ -32,6 +32,7 @@ import junit.framework.TestCase;
 public class StressMulti50x59 extends TestCase {
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1764
         return StressMultiTest.embeddedSuite(50,59);
     }
 }

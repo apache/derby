@@ -64,11 +64,13 @@ class SYSDUMMY1RowFactory extends CatalogRowFactory
 	 */
     SYSDUMMY1RowFactory(UUIDFactory uuidf, 
 									ExecutionFactory ef, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 									DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
 		
 		initInfo(SYSDUMMY1_COLUMN_COUNT, "SYSDUMMY1", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 				 null, null, uuids);
 	}
 

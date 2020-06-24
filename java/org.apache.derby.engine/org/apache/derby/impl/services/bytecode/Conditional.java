@@ -53,6 +53,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 Note all branches here are using relative offsets, not absolute program counters.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 If the then code leads to the conditional branch offset being too big (&gt;32k)
 because the then code is larger than 32767 bytes then this is built:
 <code>
@@ -97,9 +98,12 @@ for this is the same as when both the then code and the else code require
      if condition branch to tb: (relative offset +8)
      goto_w eb: // indirect for else block (5 bytes)
      tb:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	    then code (&gt; 32767 bytes)
 	    goto_w end:
 	 eb:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	  else code (&gt; 32767 bytes)
 	 end:
 </code>
@@ -147,6 +151,7 @@ class Conditional {
 	 * @param ifOpcode Opcode for the if check.
 	 * @param entryStack Type stack on entering the conditional then block.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 	Conditional(Conditional parent, CodeChunk chunk, short ifOpcode, Type[] entryStack) {
 		this.parent = parent;
 		if_pc = chunk.getPC();
@@ -163,6 +168,7 @@ class Conditional {
 	 * @param thenStack Type stack on completing the conditional then block.
 	 * @return the type stack on entering the then block
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 	Type[] startElse(BCMethod mb, CodeChunk chunk, Type[] thenStack) {
 		
 		// reserve space for the goto end we will be adding
@@ -178,6 +184,7 @@ class Conditional {
 		// instructions in a goto to get its pc.
 		thenGoto_pc = chunk.getPC() - 3;
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		Type[] entryStack = stack;
 		stack = thenStack;
 		
@@ -204,8 +211,10 @@ class Conditional {
 		
 		fillIn(mb, chunk, branch_pc, chunk.getPC());
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6699
 			if (stackNumber != stack.length) {
                 StringBuilder sb = new StringBuilder();
                 
@@ -229,6 +238,7 @@ class Conditional {
             
 			for (int i = 0; i < stackNumber; i++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2230
 				if (stack[i].vmType() != elseStack[i].vmType()) {
 				    if(  !stack[i].vmName().equals(elseStack[i].vmName()))
 					SanityManager.THROWASSERT("ByteCode Conditional then/else stack mismatch: then: "

@@ -72,6 +72,7 @@ public class XADataSourceConnector implements Connector {
     }
 
     public Connection openConnection(String databaseName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
         try {
             return ds.getXAConnection().getConnection();
@@ -104,6 +105,7 @@ public class XADataSourceConnector implements Connector {
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
             return singleUseDS( DataSourceConnector.makeCreateDBAttributes( config ) ).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
                    getXAConnection(user, password).getConnection(); 
        }
     }
@@ -127,6 +129,7 @@ public class XADataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             HashMap<String, Object> hm =
                     DataSourceConnector.makeCreateDBAttributes( config );
             DataSourceConnector.copyProperties(connectionProperties, hm);
@@ -148,6 +151,7 @@ public class XADataSourceConnector implements Connector {
     
     public void setLoginTimeout( int seconds ) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         ds.setLoginTimeout( seconds );
     }
     

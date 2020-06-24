@@ -57,9 +57,13 @@ public  class   Wrapper41
 
     public Wrapper41( Object wrapped ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         if ( wrapped instanceof EmbedResultSet ) { _embedded = (EmbedResultSet) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         else if ( wrapped instanceof EmbedCallableStatement ) { _embedCallableStatement = (EmbedCallableStatement) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         else if ( wrapped instanceof BrokeredCallableStatement ) { _brokeredCallableStatement = (BrokeredCallableStatement) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         else if ( wrapped instanceof ClientResultSet ) { _netclient = (ClientResultSet) wrapped; }
         else if ( wrapped instanceof ClientCallableStatement ) { _callableStatement = (ClientCallableStatement) wrapped; }
         else if ( wrapped instanceof LogicalCallableStatement ) { _logicalCallableStatement = (LogicalCallableStatement) wrapped; }

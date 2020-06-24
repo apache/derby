@@ -40,6 +40,8 @@ import java.sql.ClientInfoStatus;
 public class FailedProperties40 {
     private final HashMap<String,ClientInfoStatus> failedProps_ = 
     new HashMap<String,ClientInfoStatus>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1380
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
     private final String firstKey_;
     private final String firstValue_;
@@ -52,6 +54,7 @@ public class FailedProperties40 {
      * @return the created <code>Properties</code> object
      */
     public static Properties makeProperties(String name, String value) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     Properties p = new Properties();
         if (name != null || value != null)
             p.setProperty(name, value);
@@ -76,6 +79,7 @@ public class FailedProperties40 {
         Enumeration e = props.keys();
         firstKey_ = (String)e.nextElement();
         firstValue_ = props.getProperty(firstKey_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1380
         failedProps_.put(firstKey_, ClientInfoStatus.REASON_UNKNOWN_PROPERTY);
         while (e.hasMoreElements()) {
             failedProps_.put((String)e.nextElement(), 

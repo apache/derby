@@ -49,6 +49,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class ClientConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     implements Connection, ConnectionCallbackInterface
 {
     //---------------------navigational members-----------------------------------
@@ -65,6 +66,7 @@ public abstract class ClientConnection
         
     // In Connection.markStatementsClosed() method, this list is traversed to get a
     // list of open statements, which are marked closed and removed from the list.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final WeakHashMap<ClientStatement, Void> openStatements_ =
             new WeakHashMap<ClientStatement, Void>();
 
@@ -74,6 +76,7 @@ public abstract class ClientConnection
     //     after both commit and rollback
     // (2) result set will be unpositioned on server after both commit and rollback.
     // If they depend on both commit and rollback, they need to get on CommitAndRollbackListeners_.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     final WeakHashMap<UnitOfWorkListener, Void> CommitAndRollbackListeners_ =
             new WeakHashMap<UnitOfWorkListener, Void>();
 
@@ -108,6 +111,7 @@ public abstract class ClientConnection
 
     //prepared statements associated with isolation level change are stored 
     // in isolationLevelPreparedStmts
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final private HashMap<String, ClientPreparedStatement>
         isolationLevelPreparedStmts = 
             new HashMap<String, ClientPreparedStatement>();
@@ -192,6 +196,7 @@ public abstract class ClientConnection
     public int portNumber_;
     private int clientSSLMode_ = BasicClientDataSource.SSL_OFF;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     Hashtable<String, String> clientCursorNameCache_ =
             new Hashtable<String, String>();
 
@@ -219,9 +224,13 @@ public abstract class ClientConnection
             String user,
             String password,
             boolean isXAConn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             BasicClientDataSource dataSource)
             throws SqlException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3723
+//IC see: https://issues.apache.org/jira/browse/DERBY-3723
         this.user_ = user;
         isXAConnection_ = isXAConn;
         initConnection(logWriter, dataSource);
@@ -244,6 +253,7 @@ public abstract class ClientConnection
         // "setConnectionAttributes" method.  
         databaseName_ = dataSource.getDatabaseName();
         String connAtrrs = dataSource.getConnectionAttributes();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         if (dataSource.getCreateDatabase() != null) // can be "create" or null
         {
             if (connAtrrs == null)
@@ -283,6 +293,8 @@ public abstract class ClientConnection
     protected ClientConnection(
             LogWriter logWriter,
             boolean isXAConn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             BasicClientDataSource dataSource)
             throws SqlException {
 
@@ -293,6 +305,7 @@ public abstract class ClientConnection
         isXAConnection_ = isXAConn;
 
         user_ = ClientDataSourceInterface.propertyDefault_user;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
 
         // Extract common properties.
         databaseName_ = dataSource.getDatabaseName();
@@ -306,6 +319,8 @@ public abstract class ClientConnection
 
         clientSSLMode_ = 
             BasicClientDataSource.getSSLModeFromString(dataSource.getSsl());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
@@ -316,6 +331,7 @@ public abstract class ClientConnection
 
     // This is a callback method, called by subsystem - NetConnection
     protected void resetConnection(LogWriter logWriter)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3581
             throws SqlException {
         // Transaction isolation level is handled in completeReset.
         // clearWarningsX() will re-initialize the following properties
@@ -326,10 +342,12 @@ public abstract class ClientConnection
         encryptionManager_ = null;
 
         // DERBY-3723: Reset schema to user name.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3723
         currentSchemaName_ = this.user_;
         autoCommit_ = true;
         inUnitOfWork_ = false;
         holdability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 
         this.agent_.resetAgent(
                 this, logWriter, loginTimeout_, serverNameIP_, portNumber_);
@@ -341,6 +359,7 @@ public abstract class ClientConnection
                          String serverName,
                          int portNumber,
                          String databaseName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                          Properties properties) throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectEntry(serverName, portNumber, databaseName, properties);
@@ -349,6 +368,7 @@ public abstract class ClientConnection
         databaseName_ = databaseName;
 
         // Extract common properties.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         user_ = BasicClientDataSource.getUser(properties);
         retrieveMessageText_ =
             BasicClientDataSource.getRetrieveMessageText(properties);
@@ -403,6 +423,7 @@ public abstract class ClientConnection
 
     // ---------------------------jdbc 1------------------------------------------
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Statement createStatement() throws SQLException {
         try
         {
@@ -425,6 +446,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(String sql)
             throws SQLException {
         try
@@ -450,6 +472,7 @@ public abstract class ClientConnection
     }
 
     // For internal use only.  Use by updatable result set code.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized ClientPreparedStatement preparePositionedUpdateStatement (
             String sql,
             Section querySection) throws SqlException {
@@ -472,8 +495,10 @@ public abstract class ClientConnection
         return preparedStatement;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public CallableStatement prepareCall(String sql)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
@@ -497,23 +522,28 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized ClientPreparedStatement prepareDynamicCatalogQuery(String sql)
             throws SqlException {
         ClientPreparedStatement ps = newPreparedStatement_(
             sql,
             ResultSet.TYPE_FORWARD_ONLY,
             ResultSet.CONCUR_READ_ONLY,
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
             holdability(),
             Statement.NO_GENERATED_KEYS,
             null,
             null);
         ps.isCatalogQuery_ = true;
         ps.prepare();
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         openStatements_.put(ps, null);
         return ps;
     }
 
     public String nativeSQL(String sql) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
@@ -532,6 +562,7 @@ public abstract class ClientConnection
 
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized String nativeSQLX(String sql) throws SqlException {
         checkForClosedConnection();
         if (sql == null) {
@@ -555,6 +586,7 @@ public abstract class ClientConnection
     // primary usage is distinction between local and global trans. envs.;
     protected abstract boolean allowLocalCommitRollback_() throws SqlException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
     synchronized public void setAutoCommit(boolean autoCommit) throws SQLException {
         try
         {
@@ -609,6 +641,7 @@ public abstract class ClientConnection
                 agent_.logWriter_.traceEntry(this, "commit");
             }
             checkForClosedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 
             // the following XA State check must be in commit instead of commitX since
             // external application call commit, the SqlException should be thrown
@@ -675,6 +708,7 @@ public abstract class ClientConnection
         if (! allowLocalCommitRollback_()) {
             return false;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-213
         return true;
     }
 
@@ -685,8 +719,10 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writeCommit() throws SqlException {
         if (isXAConnection_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
             writeXACommit_ ();
         } else {
             writeLocalCommit_();
@@ -700,14 +736,17 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readCommit() throws SqlException {
         if (isXAConnection_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
             readXACommit_ ();
         } else {
             readLocalCommit_();
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
     synchronized public void rollback() throws SQLException {
         try
         {
@@ -715,6 +754,7 @@ public abstract class ClientConnection
                 agent_.logWriter_.traceEntry(this, "rollback");
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             if ( !isAborting() ) { checkForClosedConnection(); }
             checkForInvalidXAStateOnCommitOrRollback();
 
@@ -760,6 +800,7 @@ public abstract class ClientConnection
 
     private void writeRollback() throws SqlException {
         if (isXAConnection_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
             writeXARollback_ ();
         } else {
             writeLocalRollback_();
@@ -774,6 +815,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
     synchronized public void close() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "close");
@@ -809,6 +851,7 @@ public abstract class ClientConnection
 
     // This is a no-op if the connection is already closed.
     private void closeX() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if (!open_ && !isAborting()) {
             return;
         }
@@ -817,6 +860,7 @@ public abstract class ClientConnection
 
     // Close physical socket or attachment even if connection is marked close.
     // Used by ClientPooledConnection.close().
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
     synchronized public void closeResources() throws SQLException {
         if (open_ || (!open_ && availableForReuse_)) {
             availableForReuse_ = false;
@@ -839,8 +883,10 @@ public abstract class ClientConnection
         SQLException accumulatedExceptions = null;
 
         //Close prepared statements associated with isolation level change
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         for (ClientPreparedStatement ps :
                  isolationLevelPreparedStmts.values()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6053
             try {
                 ps.close();
             } catch (SQLException se) {
@@ -862,11 +908,14 @@ public abstract class ClientConnection
             flowClose();
         } catch (SqlException e) {
             accumulatedExceptions =
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                     Utils.accumulateSQLException(
                         e.getSQLException(), accumulatedExceptions);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
         markClosed(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         aborting_ = false;
         try {
             agent_.close();
@@ -880,6 +929,7 @@ public abstract class ClientConnection
 
     // Just like closeX except the socket is not pulled.
     // Physical resources are not closed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized void closeForReuse(boolean statementPooling)
             throws SqlException {
         if (!open_) {
@@ -893,6 +943,7 @@ public abstract class ClientConnection
             accumulatedExceptions = e;
         }
         if (open_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
             markClosedForReuse(statementPooling);
         }
         if (accumulatedExceptions != null) {
@@ -924,6 +975,7 @@ public abstract class ClientConnection
     {
         open_ = false;
         inUnitOfWork_ = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
         if (!statementPooling) {
             markStatementsClosed();
         }
@@ -938,6 +990,7 @@ public abstract class ClientConnection
     }
 
     private void markStatementsClosed() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Set<ClientStatement> keySet = openStatements_.keySet();
         for (Iterator<ClientStatement> i = keySet.iterator(); i.hasNext();) {
             ClientStatement stmt = i.next();
@@ -1039,6 +1092,7 @@ public abstract class ClientConnection
             throws SqlException {
         String levelString = null;
         switch (level) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientConnection.TRANSACTION_REPEATABLE_READ:
             levelString = DERBY_TRANSACTION_REPEATABLE_READ;
             break;
@@ -1058,10 +1112,12 @@ public abstract class ClientConnection
         default:
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.UNIMPLEMENTED_ISOLATION_LEVEL),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 level);
         }
         //If we do not already have a prepared statement for the requested
         // isolation level change, then create one
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement ps =
             (ClientPreparedStatement)isolationLevelPreparedStmts.
             get(levelString);
@@ -1086,7 +1142,9 @@ public abstract class ClientConnection
         // The server has now implicitly committed the
         // transaction so we have to clean up locally.
         completeLocalCommit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-638
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         if (SanityManager.DEBUG && supportsSessionDataCaching()) {
             SanityManager.ASSERT(isolation_ == level);
         }
@@ -1135,11 +1193,13 @@ public abstract class ClientConnection
         // Store the current auto-commit value and use it to restore 
         // at the end of this method.
         boolean currentAutoCommit = autoCommit_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ResultSet rs = null;
         try
         {
             checkForClosedConnection();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
             if (isolation_ != TRANSACTION_UNKNOWN) {
                 if (SanityManager.DEBUG) {
                     SanityManager.ASSERT(supportsSessionDataCaching(),
@@ -1197,10 +1257,12 @@ public abstract class ClientConnection
             // cached isolation level to TRANSACTION_UNKNOWN which will trigger
             // a refresh from the server.
             if (getTransactionIsolationPrepStmt == null  || 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                     !getTransactionIsolationPrepStmt.openOnClient_) {
             	getTransactionIsolationPrepStmt =
                         prepareStatementX(
                                 "VALUES CURRENT ISOLATION",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                 ResultSet.TYPE_FORWARD_ONLY,
                                 ResultSet.CONCUR_READ_ONLY,
                                 holdability(),
@@ -1214,6 +1276,7 @@ public abstract class ClientConnection
             String isolationStr = rs.getString(1);
 
             int isolation = translateIsolation(isolationStr);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
             if (isolation_ == TRANSACTION_UNKNOWN &&
                     supportsSessionDataCaching()) {
                 // isolation_ will be TRANSACTION_UNKNOWN if the connection has
@@ -1233,6 +1296,8 @@ public abstract class ClientConnection
                         (isolation_ == TRANSACTION_UNKNOWN),
                         "isolation_ modified when caching is not supported");
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             rs.close();
             // So... of we did not have an active transaction before
             // the query, we pretend to still not have an open
@@ -1248,6 +1313,7 @@ public abstract class ClientConnection
         }
         finally {
             // Restore auto-commit value
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             autoCommit_ = currentAutoCommit;
             if(rs != null)
                 rs.close();
@@ -1270,6 +1336,7 @@ public abstract class ClientConnection
      * @throws java.sql.SQLException on error
      */
     public String getCurrentSchemaName() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         try {
             checkForClosedConnection();
         } catch (SqlException se) {
@@ -1280,6 +1347,7 @@ public abstract class ClientConnection
                agent_.logWriter_.traceEntry(this,
                   "getCurrentSchemaName() executes query");
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Statement s = createStatement();
             ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
             rs.next();
@@ -1305,6 +1373,7 @@ public abstract class ClientConnection
      */
     private int translateIsolation(String isolationStr) {
         if(isolationStr.compareTo(DERBY_TRANSACTION_REPEATABLE_READ) == 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return ClientConnection.TRANSACTION_REPEATABLE_READ;
         else if (isolationStr.compareTo(DERBY_TRANSACTION_SERIALIZABLE) == 0)
             return ClientConnection.TRANSACTION_SERIALIZABLE;
@@ -1320,20 +1389,24 @@ public abstract class ClientConnection
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         try {
             checkForClosedConnection();
         } catch (SqlException se) {
             throw se.getSQLException();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-860
         return warnings_ == null ? null : warnings_.getSQLWarning();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
     synchronized public void clearWarnings() throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "clearWarnings");
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
             checkForClosedConnection();
             clearWarningsX();
         }
@@ -1354,6 +1427,7 @@ public abstract class ClientConnection
     // Advanced features:
 
     public DatabaseMetaData getMetaData() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             checkForClosedConnection();
@@ -1431,6 +1505,7 @@ public abstract class ClientConnection
 
     //--------------------------JDBC 2.0-----------------------------
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Statement createStatement(int resultSetType,
                                                            int resultSetConcurrency) throws SQLException {
         try
@@ -1455,6 +1530,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
                                                                     int resultSetConcurrency) throws SQLException {
@@ -1463,6 +1539,7 @@ public abstract class ClientConnection
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientPreparedStatement ps = prepareStatementX(sql,
                     resultSetType,
                     resultSetConcurrency,
@@ -1480,6 +1557,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public CallableStatement prepareCall(String sql,
                                                                int resultSetType,
                                                                int resultSetConcurrency) throws SQLException {
@@ -1489,6 +1567,7 @@ public abstract class ClientConnection
                 agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientCallableStatement cs = prepareCallX(
                 sql,
                 resultSetType,
@@ -1506,7 +1585,9 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized ClientCallableStatement prepareMessageProc(String sql)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         checkForClosedConnection();
 
@@ -1530,12 +1611,14 @@ public abstract class ClientConnection
     }
 
     public Map<String, Class<?>> getTypeMap() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTypeMap");
             }
             checkForClosedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Map<String, Class<?>> map = Collections.emptyMap();
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getTypeMap", map);
@@ -1548,6 +1631,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     synchronized public void setTypeMap(Map map) throws SQLException {
         try
         {
@@ -1555,6 +1639,7 @@ public abstract class ClientConnection
                 agent_.logWriter_.traceEntry(this, "setTypeMap", map);
             }
             checkForClosedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3853
             if (map == null) {
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId (SQLState.INVALID_API_PARAMETER),
@@ -1586,10 +1671,13 @@ public abstract class ClientConnection
             // commits, as the engine does not support it.
             if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                 if (holdability == ResultSet.HOLD_CURSORS_OVER_COMMIT)
                     throw new SqlException(agent_.logWriter_, 
                             new ClientMessageId(SQLState.CANNOT_HOLD_CURSOR_XA));
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
             this.holdability = holdability;
             
        }
@@ -1604,6 +1692,8 @@ public abstract class ClientConnection
         {
             checkForClosedConnection();
             if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
                 agent_.logWriter_.traceExit(this, "getHoldability", holdability());
             }
             return holdability();
@@ -1618,7 +1708,9 @@ public abstract class ClientConnection
     // generated name used internally for unnamed savepoints
     private static final String
             dncGeneratedSavepointNamePrefix__ = "DNC_GENENERATED_NAME_";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Savepoint setSavepoint() throws SQLException {
         try
         {
@@ -1635,6 +1727,7 @@ public abstract class ClientConnection
             if ((++dncGeneratedSavepointId_) < 0) {
                 dncGeneratedSavepointId_ = 1; // restart from 1 when overflow.
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Object s = setSavepointX(
                 new ClientSavepoint(agent_, dncGeneratedSavepointId_));
 
@@ -1646,6 +1739,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Savepoint setSavepoint(String name)
             throws SQLException {
         try
@@ -1664,6 +1758,7 @@ public abstract class ClientConnection
                         new ClientMessageId (SQLState.NO_SAVEPOINT_WHEN_AUTO));
             }
             // create a named savepoint.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Object s = setSavepointX(new ClientSavepoint(agent_, name));
             return (ClientSavepoint) s;
         }
@@ -1674,6 +1769,7 @@ public abstract class ClientConnection
     }
 
     private ClientSavepoint setSavepointX(ClientSavepoint savepoint)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException {
         // Construct and flow a savepoint statement to server.
         ClientStatement stmt = null;
@@ -1682,10 +1778,13 @@ public abstract class ClientConnection
                 ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_READ_ONLY,
                 holdability());
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
 
             String savepointName;
             try {
                 savepointName = savepoint.getSavepointName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             } catch (SQLException e) {
                 // generate the name for an un-named savepoint.
                 savepointName = dncGeneratedSavepointNamePrefix__ +
@@ -1709,6 +1808,7 @@ public abstract class ClientConnection
         return savepoint;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public void rollback(Savepoint savepoint) throws SQLException {
         try
         {
@@ -1720,6 +1820,7 @@ public abstract class ClientConnection
             if (savepoint == null) // Throw exception if savepoint is null
             {
                 throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         new ClientMessageId (SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL));
             } else if (autoCommit_) // Throw exception if auto-commit is on
             {
@@ -1728,6 +1829,7 @@ public abstract class ClientConnection
             } 
             // Only allow to rollback to a savepoint from the connection that create the savepoint.
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (this != ((ClientSavepoint) savepoint).agent_.connection_) {
                     throw new SqlException(agent_.logWriter_,
                             new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
@@ -1772,6 +1874,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public void releaseSavepoint(Savepoint savepoint)
             throws SQLException {
         try
@@ -1792,6 +1895,7 @@ public abstract class ClientConnection
             } 
             // Only allow to release a savepoint from the connection that create the savepoint.
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (this != ((ClientSavepoint) savepoint).agent_.connection_) {
                     throw new SqlException(agent_.logWriter_, new ClientMessageId 
                             (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
@@ -1800,6 +1904,7 @@ public abstract class ClientConnection
                 // savepoint is not an instance of am.Savepoint
                 throw new SqlException(
                     agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     new ClientMessageId(
                         SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
             }
@@ -1810,6 +1915,12 @@ public abstract class ClientConnection
                 stmt = (ClientStatement) createStatementX(
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
                         holdability());
                 String savepointName;
                 try {
@@ -1839,6 +1950,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Statement createStatement(int resultSetType,
                                                            int resultSetConcurrency,
                                                            int resultSetHoldability) throws SQLException {
@@ -1848,6 +1960,7 @@ public abstract class ClientConnection
                 agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency, resultSetHoldability);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientStatement s = createStatementX(
                 resultSetType,
                 resultSetConcurrency,
@@ -1880,6 +1993,7 @@ public abstract class ClientConnection
         // engine and handled there.
         if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
             if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
                 resultSetHoldability = ResultSet.CLOSE_CURSORS_AT_COMMIT;
                 accumulateWarning(new SqlWarning(agent_.logWriter_, 
@@ -1887,12 +2001,14 @@ public abstract class ClientConnection
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientStatement s = newStatement_(
             resultSetType,
             resultSetConcurrency,
             resultSetHoldability);
 
         s.cursorAttributesToSendOnPrepare_ = s.cacheCursorAttributesToSendOnPrepare();
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         openStatements_.put(s, null);
         return s;
     }
@@ -1906,15 +2022,18 @@ public abstract class ClientConnection
         s.cursorAttributesToSendOnPrepare_ = cursorAttributesToSendOnPrepare;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
                                                                     int resultSetConcurrency,
                                                                     int resultSetHoldability) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientPreparedStatement ps = prepareStatementX(sql,
                     resultSetType,
                     resultSetConcurrency,
@@ -1933,6 +2052,7 @@ public abstract class ClientConnection
     }
 
     // used by DBMD
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClientPreparedStatement prepareStatementX(String sql,
                                         int resultSetType,
                                         int resultSetConcurrency,
@@ -1943,6 +2063,7 @@ public abstract class ClientConnection
         checkForClosedConnection();
         resultSetType = downgradeResultSetType(resultSetType);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement ps = newPreparedStatement_(
             sql,
             resultSetType,
@@ -1954,6 +2075,11 @@ public abstract class ClientConnection
 
         ps.cursorAttributesToSendOnPrepare_ = ps.cacheCursorAttributesToSendOnPrepare();
         ps.prepare();
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
+//IC see: https://issues.apache.org/jira/browse/DERBY-557
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
+//IC see: https://issues.apache.org/jira/browse/DERBY-557
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         openStatements_.put(ps,null);
         return ps;
     }
@@ -1962,24 +2088,29 @@ public abstract class ClientConnection
     // right thing to do here... because if property on the dataSource changes, we may have
     // to send different attributes, i.e. SENSITIVE DYNAMIC, instead of SENSITIVE STATIC.
     protected void resetPrepareStatement(ClientPreparedStatement ps)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         String cursorAttributesToSendOnPrepare = ps.cursorAttributesToSendOnPrepare_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         resetPreparedStatement_(ps, ps.sql_, ps.resultSetType_, ps.resultSetConcurrency_, ps.resultSetHoldability_, ps.autoGeneratedKeys_, ps.generatedKeysColumnNames_,
                 ps.generatedKeysColumnIndexes_);
         ps.cursorAttributesToSendOnPrepare_ = cursorAttributesToSendOnPrepare;
         ps.prepare();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public CallableStatement prepareCall(String sql,
                                                                int resultSetType,
                                                                int resultSetConcurrency,
                                                                int resultSetHoldability) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientCallableStatement cs = prepareCallX(
                 sql,
                 resultSetType,
@@ -1997,6 +2128,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClientCallableStatement prepareCallX(String sql,
                                            int resultSetType,
                                            int resultSetConcurrency,
@@ -2010,6 +2142,9 @@ public abstract class ClientConnection
             resultSetHoldability);
         cs.cursorAttributesToSendOnPrepare_ = cs.cacheCursorAttributesToSendOnPrepare();
         cs.prepare();
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
+//IC see: https://issues.apache.org/jira/browse/DERBY-557
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         openStatements_.put(cs,null);
         return cs;
     }
@@ -2032,8 +2167,14 @@ public abstract class ClientConnection
             ClientPreparedStatement ps = prepareStatementX(sql,
                     ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_READ_ONLY,
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
                     holdability(),
                     autoGeneratedKeys,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
                     null, null);
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareStatement", ps);
@@ -2055,6 +2196,7 @@ public abstract class ClientConnection
             }
             int genKeys = (columnIndexes == null ||
                     columnIndexes.length == 0
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     ? ClientStatement.NO_GENERATED_KEYS:
                 ClientStatement.RETURN_GENERATED_KEYS);
             ClientPreparedStatement ps = prepareStatementX(sql,
@@ -2075,6 +2217,8 @@ public abstract class ClientConnection
     }
 
     public PreparedStatement prepareStatement(String sql, String columnNames[])
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException {
         try
         {
@@ -2083,13 +2227,19 @@ public abstract class ClientConnection
             }
             int genKeys = (columnNames == null ||
                     columnNames.length == 0
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     ? ClientStatement.NO_GENERATED_KEYS:
                 ClientStatement.RETURN_GENERATED_KEYS);
             ClientPreparedStatement ps = prepareStatementX(sql,
                     ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_READ_ONLY,
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
                     holdability(),
                     genKeys,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
                     columnNames, null);
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareStatement", ps);
@@ -2128,6 +2278,7 @@ public abstract class ClientConnection
 
 
     protected abstract ClientPreparedStatement
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         newPositionedUpdatePreparedStatement_
             (String sql,
              Section section) throws SqlException;
@@ -2138,6 +2289,7 @@ public abstract class ClientConnection
                                                                int holdability,
                                                                int autoGeneratedKeys,
                                                                String[] columnNames, int[] columnIndexes) throws SqlException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
 
     protected abstract void resetPreparedStatement_(ClientPreparedStatement ps,
                                                     String sql,
@@ -2145,6 +2297,7 @@ public abstract class ClientConnection
                                                     int resultSetConcurrency,
                                                     int resultSetHoldability,
                                                     int autoGeneratedKeys,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
                                                     String[] columnNames,
                                                     int[] columnIndexes) throws SqlException;
 
@@ -2168,6 +2321,7 @@ public abstract class ClientConnection
         databaseMetaData_ = newDatabaseMetaData_();
 
         agent_.sectionManager_ =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 newSectionManager(
                         agent_);
         if (agent_.loggingEnabled()) {
@@ -2197,8 +2351,10 @@ public abstract class ClientConnection
     
     protected abstract void writeXATransactionStart(ClientStatement statement)
                                                 throws SqlException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
 
     public void completeLocalCommit() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Set<UnitOfWorkListener> keySet = CommitAndRollbackListeners_.keySet();
         for (Iterator<UnitOfWorkListener> i = keySet.iterator(); i.hasNext();) {
             i.next().completeLocalCommit(i);
@@ -2215,6 +2371,7 @@ public abstract class ClientConnection
     // This is a client-side only operation.
     // This method will only throw an exception on bug check.
     public void completeLocalRollback() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Set<UnitOfWorkListener> keySet = CommitAndRollbackListeners_.keySet();
         for (Iterator<UnitOfWorkListener> i = keySet.iterator(); i.hasNext();) {
             i.next().completeLocalRollback(i);
@@ -2230,6 +2387,7 @@ public abstract class ClientConnection
      *
      */
     private void completeSpecificRollback(UnitOfWorkListener uwl) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Set<UnitOfWorkListener> keySet = CommitAndRollbackListeners_.keySet();
         for (Iterator<UnitOfWorkListener> i = keySet.iterator(); i.hasNext();) {
             UnitOfWorkListener listener = i.next();
@@ -2251,7 +2409,9 @@ public abstract class ClientConnection
     protected abstract void readXARollback_() throws SqlException;
 
     public void writeTransactionStart(ClientStatement statement)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
         if (isXAConnection_) {
             writeXATransactionStart (statement);
         }
@@ -2301,6 +2461,7 @@ public abstract class ClientConnection
     }
 
     public void completePiggyBackIsolation(int pbIsolation) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3192
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(supportsSessionDataCaching());
         }
@@ -2322,6 +2483,7 @@ public abstract class ClientConnection
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(
                     pbIsolation == 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         Connection.TRANSACTION_READ_UNCOMMITTED ||
                     pbIsolation ==
                         Connection.TRANSACTION_READ_COMMITTED ||
@@ -2355,6 +2517,7 @@ public abstract class ClientConnection
     // can this be called in a unit of work
     // can this be called from within a stored procedure
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-3581
     synchronized public void reset(LogWriter logWriter)
             throws SqlException {
         if (logWriter != null) {
@@ -2373,6 +2536,7 @@ public abstract class ClientConnection
 
     synchronized public void lightReset() throws SqlException {
         if (!open_ && !availableForReuse_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             return;
         }
         open_ = true;
@@ -2380,6 +2544,7 @@ public abstract class ClientConnection
     }
 
     abstract protected void reset_(LogWriter logWriter) throws SqlException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3581
 
     /**
      * <p>
@@ -2416,6 +2581,7 @@ public abstract class ClientConnection
         // Iterate through the physical statements and re-enable them for reuse.
 
         if (closeStatementsOnClose) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             for (ClientStatement stmt : openStatements_.keySet()) {
                 stmt.reset(closeStatementsOnClose);
             }
@@ -2458,6 +2624,7 @@ public abstract class ClientConnection
      *
      * @return object with prepared statements for calling locator procedures
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2495
     CallableLocatorProcedures locatorProcedureCall() 
     {
         if (lobProcs == null) {
@@ -2473,6 +2640,7 @@ public abstract class ClientConnection
         if (!open_) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     new ClientMessageId (SQLState.NO_CURRENT_CONNECTION));
         } else {
             agent_.checkForDeferredExceptions();
@@ -2499,6 +2667,7 @@ public abstract class ClientConnection
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void accumulate440WarningForMessageProcFailure(SqlWarning e) {
         if (!accumulated440ForMessageProcFailure_) {
             accumulateWarning(e);
@@ -2524,9 +2693,12 @@ public abstract class ClientConnection
      * global (XA) transaction the holdability is CLOSE_CURSORS_AT_COMMIT.
      * Otherwise return the holdability set by the user.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
     final int holdability()
     {
         if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
             return ResultSet.CLOSE_CURSORS_AT_COMMIT;
         return holdability;
     }
@@ -2542,6 +2714,7 @@ public abstract class ClientConnection
      */
     
     public Clob createClob() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2587
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "createClob");
         }
@@ -2558,9 +2731,11 @@ public abstract class ClientConnection
 
         //Stores the Clob instance that is returned.
         ClientClob clob = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         //Call the CLOBCREATELOCATOR stored procedure
         //that will return a locator value.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2587
         try {
             locator = locatorProcedureCall().clobCreateLocator();
         }
@@ -2576,6 +2751,7 @@ public abstract class ClientConnection
         //the Lob implementations are completed then this code can be enabled.
         if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             clob = new ClientClob(this.agent_, locator);
         }
         else {
@@ -2618,6 +2794,7 @@ public abstract class ClientConnection
         
         //Stores the Blob instance that is returned.
         ClientBlob blob = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         //Call the BLOBCREATELOCATOR stored procedure
         //that will return a locator value.
@@ -2631,8 +2808,11 @@ public abstract class ClientConnection
         //If the locator value is -1 it means that we do not
         //have locator support on the server.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
         if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             blob = new ClientBlob(this.agent_, locator);
         } 
         else {
@@ -2673,6 +2853,7 @@ public abstract class ClientConnection
      */
     public String   getSchema() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         return getCurrentSchemaName();
     }
     
@@ -2689,10 +2870,12 @@ public abstract class ClientConnection
 
         // nothing to do if the current schema name is cached and is the same
         // as the new schema name
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if ( ( currentSchemaName_ != null) && (currentSchemaName_.equals( schemaName )) )
         { return; }
 
         PreparedStatement   ps = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         try {
             ps = prepareStatement( "set schema ?" );
@@ -2708,6 +2891,7 @@ public abstract class ClientConnection
     public  void    abort( Executor executor )  throws SQLException
     {
         // NOP if called on a closed connection.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         if ( !open_ ) { return; }
         // Null executor not allowed.
         if ( executor == null )

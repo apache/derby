@@ -51,7 +51,9 @@ public class GroupByTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3050
 		return new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                 new BaseTestSuite(GroupByTest.class, "GroupByTest")) {
 			protected void decorateSQL(Statement s)
 				throws SQLException
@@ -121,6 +123,7 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into d2457_a values (1, 12), (2, 23), " +
                 "(3, 34), (4, 45), (5, 56)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4071
         st.executeUpdate("create table d4071(i int, v char(10))");
         st.executeUpdate("insert into d4071 " +
                          "       values (1, '0123456789')," +
@@ -1751,6 +1754,7 @@ public class GroupByTest extends BaseJDBCTestCase {
 	public void testGroupByWithAliasToSameName() throws SQLException {
 
 		Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
 
 		String[][] expected1 = {{"1", "3"}, {"2", "2"}};
 		JDBC.assertUnorderedResultSet(
@@ -1827,6 +1831,7 @@ public class GroupByTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(
 				rs,
 				new Object[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 						{3.0, 4},
 						{4.0, 2},
 						{7.0, 1}},
@@ -1839,6 +1844,7 @@ public class GroupByTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(
 				rs,
 				new Object[][]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 						{7.0, 1},
 						{4.0, 2},
 						{3.0, 4}},
@@ -2246,6 +2252,7 @@ public class GroupByTest extends BaseJDBCTestCase {
 
         for (int i = 0; i < queries.length; i++) {
             final String query1 = queries[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             final List<List<String>> rows1 =
                     resultArrayToList(expectedResults[i]);
 
@@ -2324,6 +2331,7 @@ public class GroupByTest extends BaseJDBCTestCase {
      * String[][]}
      */
     private static String[][] union(Collection<List<String>> rows1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                     Collection<List<String>> rows2,
                                     boolean all) {
         Collection<List<String>> bagOrSet = newBagOrSet(all);
@@ -2344,6 +2352,7 @@ public class GroupByTest extends BaseJDBCTestCase {
      * {@code String[][]}
      */
     private static String[][] except(Collection<List<String>> rows1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                      Collection<List<String>> rows2,
                                      boolean all) {
         Collection<List<String>> bagOrSet = newBagOrSet(all);
@@ -2367,6 +2376,7 @@ public class GroupByTest extends BaseJDBCTestCase {
      * {@code String[][]}
      */
     private static String[][] intersect(Collection<List<String>> rows1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                         Collection<List<String>> rows2,
                                         boolean all) {
         Collection<List<String>> bagOrSet = newBagOrSet(all);
@@ -2389,6 +2399,7 @@ public class GroupByTest extends BaseJDBCTestCase {
      */
     private static Collection<List<String>> newBagOrSet(boolean bag) {
         if (bag) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return new ArrayList<List<String>>();
         } else {
             return new HashSet<List<String>>();
@@ -2405,6 +2416,7 @@ public class GroupByTest extends BaseJDBCTestCase {
      */
     private static String[][] toResultArray(Collection<List<String>> rows) {
         String[][] results = new String[rows.size()][];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Iterator<List<String>> it = rows.iterator();
         for (int i = 0; i < results.length; i++) {
             List<String> row = it.next();
@@ -2423,6 +2435,7 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @return the values of {@code results} in a list of lists
      */
     private static List<List<String>> resultArrayToList(String[][] results) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<List<String>> rows =
                 new ArrayList<List<String>>(results.length);
         for (int i = 0; i < results.length; i++) {
@@ -2501,6 +2514,7 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testDerby4071AggregateOnGroupByColumnInHaving() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4071
          Statement s = createStatement();
          ResultSet rs = s.executeQuery("SELECT MAX(i), COUNT(T.V) FROM d4071 T " +
                                        "    GROUP BY T.V HAVING COUNT(T.V) > 1");
@@ -2515,6 +2529,8 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testDerby4450() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4450
+//IC see: https://issues.apache.org/jira/browse/DERBY-681
         setAutoCommit(false);
         Statement s = createStatement();
         ResultSet rs;
@@ -2542,6 +2558,8 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testDerby4698() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
         setAutoCommit(false);
         Statement s = createStatement();
         ResultSet rs;

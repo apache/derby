@@ -1,7 +1,9 @@
 /*
 
    Derby - Class org.apache.derby.impl.sql.compile.TablePrivilegesNode
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -41,6 +43,8 @@ import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
 /**
  * This class represents a set of privileges on one table.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class TablePrivilegesNode extends QueryTreeNode
 {
 	private boolean[] actionAllowed = new boolean[ TablePrivilegeInfo.ACTION_COUNT];
@@ -73,6 +77,8 @@ class TablePrivilegesNode extends QueryTreeNode
 	 *
 	 * @exception StandardException standard error policy.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addAction( int action, ResultColumnList privilegeColumnList)
 	{
 		actionAllowed[ action] = true;
@@ -90,6 +96,8 @@ class TablePrivilegesNode extends QueryTreeNode
 	 * @param td The table descriptor
 	 * @param isGrant grant if true; revoke if false
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bind( TableDescriptor td, boolean isGrant) throws StandardException
 	{
 		this.td = td;
@@ -100,6 +108,7 @@ class TablePrivilegesNode extends QueryTreeNode
 				columnBitSets[action] = columnLists[ action].bindResultColumnsByName( td, (DMLStatementNode) null);
 
 			// Prevent granting non-SELECT privileges to views
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 			if (td.getTableType() == TableDescriptor.VIEW_TYPE && action != TablePrivilegeInfo.SELECT_ACTION)
 				if (actionAllowed[action])
 					throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED,
@@ -143,11 +152,13 @@ class TablePrivilegesNode extends QueryTreeNode
 		ViewDescriptor vd = dd.getViewDescriptor(td);
 		DependencyManager dm = dd.getDependencyManager();
 		ProviderInfo[] pis = dm.getPersistentProviderInfos(vd);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		this.descriptorList = new ArrayList<Provider>();
 					
 		int siz = pis.length;
 		for (int i=0; i < siz; i++) 
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
 				Provider provider = (Provider) pis[i].getDependableFinder().getDependable(dd, pis[i].getObjectId());
 							
 				if (provider instanceof TableDescriptor || 

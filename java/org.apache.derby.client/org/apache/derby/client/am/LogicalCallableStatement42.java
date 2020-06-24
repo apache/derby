@@ -56,6 +56,7 @@ public class LogicalCallableStatement42 extends LogicalCallableStatement
     public  void registerOutParameter( int parameterIndex, SQLType sqlType )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ((ClientCallableStatement42)getPhysCs()).
             registerOutParameter( parameterIndex, sqlType );
     }

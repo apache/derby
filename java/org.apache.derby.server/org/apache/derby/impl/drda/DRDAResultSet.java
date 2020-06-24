@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     DRDAResultSet holds result set information
 */
 class DRDAResultSet
@@ -92,6 +93,7 @@ class DRDAResultSet
     // emitted in the next QRYDTA response to a CNTQRY request.
     private byte []splitQRYDTA;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     DRDAResultSet()
     {
         state = NOT_OPENED;
@@ -124,6 +126,7 @@ class DRDAResultSet
      */
     protected void setPkgcnstkn(ConsistencyToken pkgcnstkn)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         this.pkgcnstkn = pkgcnstkn;
     }
 
@@ -230,6 +233,7 @@ class DRDAResultSet
      */
     protected int getRsDRDAType(int index)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2347
         if ((outovr_drdaType != null) && (outovr_drdaType[index-1] != 0)) {
             // Override with requested type.  0 means use default
             return outovr_drdaType[index-1];
@@ -256,6 +260,7 @@ class DRDAResultSet
     protected void  addExtDtaObject (Object o, int jdbcIndex )
     {
         if (extDtaObjects == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             extDtaObjects = new java.util.ArrayList<Object>();
         extDtaObjects.add (o);
 
@@ -264,6 +269,7 @@ class DRDAResultSet
         
         // need to record the 0 based position so subtract 1
         rsExtPositions.add(jdbcIndex - 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
     }
 
@@ -297,6 +303,7 @@ class DRDAResultSet
 
         // if there is no type information, then we represent a CallableStatement
         // and all parameters are nullable
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
         if ( rsDRDATypes == null ) { return true; }
         else if (FdocaConstants.isNullable(getRsDRDAType(colnum)))
             return true;
@@ -342,6 +349,7 @@ class DRDAResultSet
      * 
      */
     protected void reset() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1002
         explicitlyClosed = false;
         state = NOT_OPENED;
         hasdata = true;
@@ -352,6 +360,7 @@ class DRDAResultSet
         
         outovr_drdaType = null;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         withHoldCursor = 0;
         scrollType = ResultSet.TYPE_FORWARD_ONLY;
         concurType = 0;
@@ -361,6 +370,7 @@ class DRDAResultSet
         blksize = 0;
         maxblkext = 0;
         outovropt = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         qryclsimp = CodePoint.QRYCLSIMP_NO;
         qryrelscr = false;
         qryrownbr = 0;
@@ -480,6 +490,7 @@ class DRDAResultSet
     {
         String s = indent + "***** DRDASResultSet toDebugString ******\n";
         s += indent + "State:" + getStateString(state)+ "\n";
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         s += indent + "pkgcnstkn: {" + pkgcnstkn + "}\n"; 
         s += indent + "cursor Name: ";
         String cursorName = null;
@@ -525,6 +536,7 @@ class DRDAResultSet
     protected void setOPNQRYOptions(int blksize, int qryblkctl,
             int maxblkext, int outovropt,int qryrowset,int qryclsimpl)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-343
         this.blksize = blksize;
         setQryprctyp(qryblkctl);
         this.maxblkext = maxblkext;

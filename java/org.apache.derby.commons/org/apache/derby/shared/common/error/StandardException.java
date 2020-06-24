@@ -83,12 +83,14 @@ public class StandardException extends Exception
 		this.severity = getSeverityFromIdentifier(messageID);
 		this.sqlState = getSQLStateFromIdentifier(messageID);
 		this.arguments = args;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 		if (t != null) {
 			initCause(t);
 		}
 
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                     SanityManager.ASSERT(messageID != null,
                                          "StandardException with no messageID");
 		}
@@ -153,6 +155,7 @@ public class StandardException extends Exception
 		If you need teh identifier that was used to create the
 		message, then use getMessageId(). getMessageId() will return the
 		string that corresponds to the field in org.apache.derby.shared.common.reference.SQLState.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         @return the 5 character SQL state
 	*/
@@ -167,6 +170,7 @@ public class StandardException extends Exception
      * @return the next exception
      */
     public final SQLException getNextException() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         return next;
     }
 
@@ -183,6 +187,7 @@ public class StandardException extends Exception
     }
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		Convert a message identifer from org.apache.derby.shared.common.reference.SQLState to
 		a SQLState five character string.
 	 *	@param messageID - the sql state id of the message from Derby
@@ -197,6 +202,7 @@ public class StandardException extends Exception
 
 	/**
 		Get the severity given a message identifier from org.apache.derby.shared.common.reference.SQLState.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         @param messageID The handle on the message
         @return the severity associated with the message
@@ -291,6 +297,7 @@ public class StandardException extends Exception
 	}
 
     public static StandardException
+//IC see: https://issues.apache.org/jira/browse/DERBY-6254
             newException(String messageId, Object... args) {
         return newException(messageId, (Throwable) null, args);
     }
@@ -343,6 +350,7 @@ public class StandardException extends Exception
      * @throws BadMessageArgumentException - always (dummy)
      */
     public static StandardException newException(String messageID, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                                                  Object a1, 
                                                  Object a2,
                                                  Throwable t) 
@@ -369,6 +377,7 @@ public class StandardException extends Exception
     {
         StandardException se = new StandardException( MessageID, localizedMessage);
         if( t != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
             se.initCause(t);
         return se;
     }
@@ -387,6 +396,7 @@ public class StandardException extends Exception
 	 */
     public static StandardException getArgumentFerry(SQLException se)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         Throwable cause = se.getCause();
         return (cause instanceof StandardException)
                 ? (StandardException) cause : null;
@@ -406,6 +416,7 @@ public class StandardException extends Exception
         // The only interesting information in an InvocationTargetException
         // or a PrivilegedActionException is the cause, so consider them
         // vacuous if they have a cause.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6493
         if (t instanceof InvocationTargetException
                 || t instanceof PrivilegedActionException) {
             return (t.getCause() != null);
@@ -450,6 +461,8 @@ public class StandardException extends Exception
 		** (38001-38XXX).  If so, then we convert it into a 
 		** StandardException without further ado.
 		*/ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 		if ((t instanceof SQLException) && (ferry == null))
 		{
 			SQLException sqlex  = (SQLException)t;
@@ -462,6 +475,7 @@ public class StandardException extends Exception
 				StandardException se = new StandardException(state, sqlex.getMessage());
 				if (sqlex.getNextException() != null)		
 				{	
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 					se.initCause(sqlex.getNextException());
 				}
 				return se;
@@ -506,6 +520,7 @@ public class StandardException extends Exception
 			** should be seen as a bug.
 			*/
             String detailMessage = t.getMessage();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
 
 			if (detailMessage == null)
 			{
@@ -518,6 +533,7 @@ public class StandardException extends Exception
 			if (detailMessage.length() == 0) {
 				detailMessage = t.getClass().getName();
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
             else
             {
                 detailMessage = t.getClass().getName() + ": " + detailMessage;
@@ -542,6 +558,7 @@ public class StandardException extends Exception
 
         // If there is no useful information in the top-level throwable,
         // peel it off and only report the cause.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6493
         if (isVacuousWrapper(t)) {
             return plainWrapException(t.getCause());
         }
@@ -559,6 +576,7 @@ public class StandardException extends Exception
 				StandardException se = new StandardException(sqlState, "(" + sqle.getErrorCode()  + ") " + sqle.getMessage());
 				sqle = sqle.getNextException();
 				if (sqle != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 					se.initCause(plainWrapException(sqle));
 				return se;
 			}
@@ -593,6 +611,7 @@ public class StandardException extends Exception
 	*/
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         <P>
 		The message stored in the super class Throwable must be set
 		up object creation. At this time we cannot get any information
@@ -612,6 +631,7 @@ public class StandardException extends Exception
 	*/
 
 	public String getMessage() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         if (textMessage == null) {
             textMessage = MessageService.getTextMessage(
                                 getMessageId(), getArguments());
@@ -671,6 +691,7 @@ public class StandardException extends Exception
 
     public static SQLWarning newWarning(String messageId, Object... oa)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         String      message = MessageService.getTextMessage(messageId, oa);
 		String		state = StandardException.getSQLStateFromIdentifier(messageId);
 		SQLWarning	sqlw = new SQLWarning(message, state, ExceptionSeverity.WARNING_SEVERITY);
@@ -700,6 +721,7 @@ public class StandardException extends Exception
      **/
     public final boolean isSelfDeadlock() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
         return(SQLState.SELF_DEADLOCK.equals(getSQLState()));
     }
 

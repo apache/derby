@@ -83,6 +83,7 @@ public abstract class ClassFactoryContext extends ContextImpl {
      */
 	public final void cleanupOnError(Throwable error) {
         if (error instanceof StandardException) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 
             StandardException se = (StandardException) error;
             

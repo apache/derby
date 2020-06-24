@@ -27,6 +27,7 @@ import javax.sql.ConnectionPoolDataSource;
  * Specifies Derby extensions to the {@code java.sqlx.ConnectionPoolDataSource}.
  */
 public interface ClientConnectionPoolDataSourceInterface
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     extends ClientDataSourceInterface, ConnectionPoolDataSource {
     /**
      * Returns the maximum number of JDBC prepared statements a connection is

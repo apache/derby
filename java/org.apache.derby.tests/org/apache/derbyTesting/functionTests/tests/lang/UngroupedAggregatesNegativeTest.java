@@ -58,6 +58,7 @@ public class UngroupedAggregatesNegativeTest extends BaseJDBCTestCase {
     public void tearDown() throws Exception {
         dropTable("t1");
         dropTable("t2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5720
         super.tearDown();
     }
 

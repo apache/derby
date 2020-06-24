@@ -46,9 +46,11 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
      * Only run the fixtures in network server mode as that's what they are testing.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ShutDownDBWhenNSShutsDownTest");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2063
         suite.addTest(TestConfiguration.clientServerDecorator(
            new ShutDownDBWhenNSShutsDownTest(
                    "testEngineShutdownDoesNotTakeDownNSManualReload")));
@@ -81,6 +83,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
      */
     public void testEngineShutdownDoesNotTakeDownNSManualReload() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2063
         scenarioEngineShutdownDoesNotTakeDownNS(true);
     }
  
@@ -126,7 +129,10 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
 
         // shut down the engine
         TestConfiguration.getCurrent().shutdownEngine();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (loadEmbeddedDriver)
         {
@@ -147,6 +153,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
      * This fixture must be run with a clientServerDecorator().
      */
     public void testDatabasesShutDownWhenNSShutdownAPI()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2063
             throws Exception
     {
         // Check that the databases will not be shutdown when the server is
@@ -188,6 +195,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
         createDatabase();
         
         NetworkServerControl server = NetworkServerTestSetup.getNetworkServerControl();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2063
 
         // shut down the server
         server.shutdown();
@@ -195,13 +203,16 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
         // check if db.lck exists
         String fileName = getSystemProperty("derby.system.home") +
                 java.io.File.separator +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
                 TestConfiguration.getCurrent().getDefaultDatabaseName() +
                 java.io.File.separator + "db.lck";
 
         File lockFile = new File(fileName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         boolean fileNotFound = false;
         int i = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1563
         do {
             Thread.sleep(500);
             fileNotFound = !PrivilegedFileOpsForTests.exists(lockFile);
@@ -212,6 +223,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
     }
 
     private void createDatabase() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();

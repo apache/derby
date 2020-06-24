@@ -68,6 +68,7 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         // Only run this test if we have a JDBC 4 JVM on full SE
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         if (JDBC.vmSupportsJDBC4() && JDBC.vmSupportsJNDI())
         {
             return TestConfiguration.forceJDBC3Suite(
@@ -75,6 +76,7 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
         }
 
         // Else return empty suite.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite("JDBC 4 from JDBC 3 Data Sources");
     }
 

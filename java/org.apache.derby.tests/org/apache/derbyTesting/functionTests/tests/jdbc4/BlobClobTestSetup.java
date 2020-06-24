@@ -112,6 +112,7 @@ public class BlobClobTestSetup
      */
     public static Blob getSampleBlob(Connection con) 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 		InputStream blobInput = new ByteArrayInputStream(blobData, 0, blobData.length);
         PreparedStatement pStmt = 
             con.prepareStatement("update BLOBCLOB set BLOBDATA = ? where ID = ?");
@@ -142,6 +143,7 @@ public class BlobClobTestSetup
      */
     public static Clob getSampleClob(Connection con) 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 		Reader clobInput = new StringReader(clobData);
         PreparedStatement pStmt = 
             con.prepareStatement("update BLOBCLOB set CLOBDATA = ? where ID = ?");
@@ -168,6 +170,7 @@ public class BlobClobTestSetup
      * @return an integer that represents an unique ID value.
      */
     public static int getID() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2444
         return ID++;
     }
 

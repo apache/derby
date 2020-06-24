@@ -155,6 +155,7 @@ public class AnyResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

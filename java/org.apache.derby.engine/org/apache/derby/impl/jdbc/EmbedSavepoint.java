@@ -45,6 +45,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
  * @see java.sql.Savepoint
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 final class EmbedSavepoint extends ConnectionChild
     implements Savepoint {
 
@@ -63,12 +64,14 @@ final class EmbedSavepoint extends ConnectionChild
 		and restore it.
 	    @exception SQLException on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     EmbedSavepoint(EmbedConnection conn, String name)
     throws StandardException {
    		super(conn);
    		if (name == null) //this is an unnamed savepoint
    		{
             //Generating a unique internal name for unnamed savepoints
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
             savepointName = "i." + getLanguageConnectionContext( conn ).getUniqueSavepointName();
             savepointID = getLanguageConnectionContext( conn ).getUniqueSavepointID();
    		} else
@@ -88,6 +91,7 @@ final class EmbedSavepoint extends ConnectionChild
     * @exception SQLException if this is a named savepoint
     */
     public int getSavepointId() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
    		if (savepointID == -1) {
 			throw newSQLException(SQLState.NO_ID_FOR_NAMED_SAVEPOINT);
         }
@@ -103,6 +107,7 @@ final class EmbedSavepoint extends ConnectionChild
     * @exception SQLException if this is an un-named savepoint
     */
     public String getSavepointName() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
    		if (savepointID != -1) {
 			throw newSQLException(SQLState.NO_NAME_FOR_UNNAMED_SAVEPOINT);
         }
@@ -120,6 +125,7 @@ final class EmbedSavepoint extends ConnectionChild
     boolean sameConnection(EmbedConnection con) {
    		return
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
              getLCC( getEmbedConnection() ) ==
              getLCC( con )
              );

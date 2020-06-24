@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SelectNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -57,6 +58,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class SelectNode extends ResultSetNode
 {
 	/**
@@ -90,14 +93,18 @@ class SelectNode extends ResultSetNode
 	 * List of windows.
 	 */
 	WindowList windows;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 
     /** Full plan for this SELECT as specified in an optimizer override */
     OptimizerPlan   overridingPlan;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
 
 	/**
 	 * List of window function calls (e.g. ROW_NUMBER, AVG(i), DENSE_RANK).
 	 */
 	List<WindowFunctionNode> windowFuncCalls;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	/** User specified a group by without aggregates and we turned 
 	 * it into a select distinct 
@@ -107,6 +114,7 @@ class SelectNode extends ResultSetNode
 	boolean		orderByQuery ;
 
     QueryExpressionClauses qec = new QueryExpressionClauses();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
 	/* PredicateLists for where clause */
 	PredicateList wherePredicates;
@@ -132,12 +140,15 @@ class SelectNode extends ResultSetNode
 	
 	private int nestingLevel;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SelectNode(ResultColumnList selectList,
               FromList fromList,
               ValueNode whereClause,
               GroupByList groupByList,
               ValueNode havingClause,
               WindowList windowDefinitionList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
               OptimizerPlan overridingPlan,
               ContextManager cm) throws StandardException {
         super(cm);
@@ -145,6 +156,7 @@ class SelectNode extends ResultSetNode
 		 * Consider adding selectAggregates and whereAggregates 
 		 */
         setResultColumns( selectList );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         if (getResultColumns() != null) {
 			getResultColumns().markInitialSize();
@@ -163,13 +175,18 @@ class SelectNode extends ResultSetNode
 		// column list and in genProjectRestrict for such window specifications
 		// used in window functions in ORDER BY.
         this.windows = windowDefinitionList;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         this.overridingPlan = overridingPlan;
         
 		bindTargetListOnly = false;
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-3301
 		this.originalWhereClauseHadSubqueries = false;
 		if (this.whereClause != null){
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             CollectNodesVisitor<SubqueryNode> cnv =
                 new CollectNodesVisitor<SubqueryNode>(
                     SubqueryNode.class, SubqueryNode.class);
@@ -180,16 +197,22 @@ class SelectNode extends ResultSetNode
 		}
 
 		if (getResultColumns() != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
             // Collect simply contained window functions (note: *not*
             // any inside nested SELECTs) used in result columns, and
             // check them for any <in-line window specification>s.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			CollectNodesVisitor<WindowFunctionNode> cnvw =
                 new CollectNodesVisitor<WindowFunctionNode>(WindowFunctionNode.class,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5954
                                         SelectNode.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().accept(cnvw);
 			windowFuncCalls = cnvw.getList();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 
 			for (int i=0; i < windowFuncCalls.size(); i++) {
 				WindowFunctionNode wfn =
@@ -221,6 +244,8 @@ class SelectNode extends ResultSetNode
 
 		if (wl == null) {
 			// This is the first window we see, so initialize list.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             wl = new WindowList(getContextManager());
 		}
 
@@ -260,6 +285,8 @@ class SelectNode extends ResultSetNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "SELECT";
@@ -288,6 +315,8 @@ class SelectNode extends ResultSetNode
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -330,12 +359,15 @@ class SelectNode extends ResultSetNode
 				groupByList.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 			if (havingClause != null) {
 				printLabel(depth, "havingClause:");
 				havingClause.treePrint(depth + 1);
 			}
 
             printQueryExpressionSuffixClauses(depth, qec);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
 			if (preJoinFL != null)
 			{
@@ -343,6 +375,8 @@ class SelectNode extends ResultSetNode
 				preJoinFL.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 			if (windows != null)
 			{
 				printLabel(depth, "windows: ");
@@ -357,6 +391,8 @@ class SelectNode extends ResultSetNode
 	 * @return FromList	The fromList for this SelectNode.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromList getFromList()
 	{
 		return fromList;
@@ -373,6 +409,8 @@ class SelectNode extends ResultSetNode
 	 *
 	 * @return	ColumnReference	ColumnReference to the column, if found
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ColumnReference findColumnReferenceInResult(String colName)
 					throws StandardException
 	{
@@ -387,6 +425,7 @@ class SelectNode extends ResultSetNode
 			return null;
 
 		// Loop through the result columns looking for a match
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns())
 		{
 			if (! (rc.getExpression() instanceof ColumnReference))
@@ -394,6 +433,7 @@ class SelectNode extends ResultSetNode
 
 			ColumnReference crNode = (ColumnReference) rc.getExpression();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			if (crNode.getColumnName().equals(colName))
 				return (ColumnReference) crNode.getClone();
 		}
@@ -406,6 +446,8 @@ class SelectNode extends ResultSetNode
 	 *
 	 * @return ValueNode	The whereClause for this SelectNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getWhereClause()
 	{
 		return whereClause;
@@ -416,6 +458,8 @@ class SelectNode extends ResultSetNode
 	 *
 	 * @return PredicateList	The wherePredicates for this SelectNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     PredicateList getWherePredicates()
 	{
 		return wherePredicates;
@@ -426,6 +470,8 @@ class SelectNode extends ResultSetNode
 	 *
 	 * @return SubqueryList	The selectSubquerys for this SelectNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SubqueryList getSelectSubquerys()
 	{
 		return selectSubquerys;
@@ -436,6 +482,8 @@ class SelectNode extends ResultSetNode
 	 *
 	 * @return SubqueryList	The whereSubquerys for this SelectNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SubqueryList getWhereSubquerys()
 	{
 		return whereSubquerys;
@@ -455,6 +503,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						   FromList fromListParam) 
 					throws StandardException
@@ -496,8 +546,10 @@ class SelectNode extends ResultSetNode
 		}
 
         // if an explicit join plan is requested, bind it
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         if ( overridingPlan != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
             overridingPlan.bind( dataDictionary, getLanguageConnectionContext(), getCompilerContext() );
         }
         
@@ -514,6 +566,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -526,7 +580,9 @@ class SelectNode extends ResultSetNode
 		int fromListSize = fromList.size();
 		int numDistinctAggs;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             SanityManager.ASSERT(fromList != null && getResultColumns() != null,
                 "Both fromList and resultColumns are expected to be non-null");
         }
@@ -549,8 +605,11 @@ class SelectNode extends ResultSetNode
 			fromList.bindExpressions( fromListParam );
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         selectSubquerys = new SubqueryList(getContextManager());
 		selectAggregates = new ArrayList<AggregateNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		/* Splice our FromList on to the beginning of fromListParam, before binding
 		 * the expressions, for correlated column resolution.
@@ -571,7 +630,10 @@ class SelectNode extends ResultSetNode
 		// WindowFunctionNode.bindExpression.
 
 		fromListParam.setWindows(windows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().bindExpressions(fromListParam, 
 									  selectSubquerys,
 									  selectAggregates);
@@ -588,13 +650,17 @@ class SelectNode extends ResultSetNode
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		whereAggregates = new ArrayList<AggregateNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         whereSubquerys = new SubqueryList(getContextManager());
         
         CompilerContext cc = getCompilerContext();
         
 		if (whereClause != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
             cc.beginScope( CompilerContext.WHERE_SCOPE );
 			cc.pushCurrentPrivType( Authorizer.SELECT_PRIV);
 
@@ -613,6 +679,7 @@ class SelectNode extends ResultSetNode
 			** in the WHERE clause at all.
 			** Note: a similar check is made in JoinNode.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2442
 			if (whereAggregates.size() > 0)
 			{
 				throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_WHERE_CLAUSE);
@@ -621,12 +688,17 @@ class SelectNode extends ResultSetNode
 			/* If whereClause is a parameter, (where ?/where -?/where +?), then we should catch it and throw exception
 			 */
 			if (whereClause.isParameterNode())
+//IC see: https://issues.apache.org/jira/browse/DERBY-5885
 				throw StandardException.newException(SQLState.LANG_UNTYPED_PARAMETER_IN_WHERE_CLAUSE );
 			
 			whereClause = whereClause.checkIsBoolean();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 			getCompilerContext().popCurrentPrivType();
             cc.endScope( CompilerContext.WHERE_SCOPE );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 			checkNoWindowFunctions(whereClause, "WHERE");
 		}
 
@@ -634,11 +706,16 @@ class SelectNode extends ResultSetNode
         {
             int previousReliability = orReliability( CompilerContext.HAVING_CLAUSE_RESTRICTION );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			havingAggregates = new ArrayList<AggregateNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             havingSubquerys = new SubqueryList(getContextManager());
 			havingClause.bindExpression(
 					fromListParam, havingSubquerys, havingAggregates);
 			havingClause = havingClause.checkIsBoolean();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 			checkNoWindowFunctions(havingClause, "HAVING");
             
             cc.setReliability( previousReliability );
@@ -665,6 +742,7 @@ class SelectNode extends ResultSetNode
             // We expect zero aggregates, so initialize the holder array
             // with zero capacity.
             ArrayList<AggregateNode> groupByAggregates = new ArrayList<AggregateNode>(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             groupByList.bindGroupByColumns(this, groupByAggregates);
 
@@ -675,10 +753,13 @@ class SelectNode extends ResultSetNode
 			*/
 			if (SanityManager.DEBUG)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 SanityManager.ASSERT(groupByAggregates.isEmpty(),
                     "Unexpected aggregate list generated by GROUP BY clause");
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 			checkNoWindowFunctions(groupByList, "GROUP BY");
 		}
 		/* If ungrouped query with aggregates in SELECT list, verify
@@ -695,6 +776,7 @@ class SelectNode extends ResultSetNode
 
   			VerifyAggregateExpressionsVisitor visitor = 
   				new VerifyAggregateExpressionsVisitor(groupByList);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().accept(visitor);
 		}       
 
@@ -708,6 +790,7 @@ class SelectNode extends ResultSetNode
 			throw StandardException.newException(SQLState.LANG_USER_AGGREGATE_MULTIPLE_DISTINCTS);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
 
@@ -718,6 +801,7 @@ class SelectNode extends ResultSetNode
             bindOffsetFetch(qec.getOffset(i), qec.getFetchFirst(i));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
     }
 
@@ -731,6 +815,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
@@ -748,6 +834,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -755,6 +843,7 @@ class SelectNode extends ResultSetNode
 		 * With a FromSubquery in the FromList we cannot bind target expressions 
 		 * at this level (DERBY-3321)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<FromSubquery> cnv =
             new CollectNodesVisitor<FromSubquery>(
                 FromSubquery.class, FromSubquery.class);
@@ -779,6 +868,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
@@ -791,6 +882,7 @@ class SelectNode extends ResultSetNode
 		fromList.bindResultColumns(fromListParam);
 		super.bindResultColumns(fromListParam);
 		/* Only 1012 elements allowed in select list */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getResultColumns().size() > Limits.DB2_MAX_ELEMENTS_IN_SELECT_LIST)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
@@ -862,6 +954,7 @@ class SelectNode extends ResultSetNode
 	void pushExpressionsIntoSelect(Predicate predicate)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		wherePredicates.pullExpressions(getReferencedTableMap().size(), predicate.getAndNode());
 		fromList.pushPredicates(wherePredicates);
 	}
@@ -876,11 +969,15 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns()) {
             if (!(rc instanceof AllResultColumn)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5501
                 continue;
             }
 
@@ -897,6 +994,7 @@ class SelectNode extends ResultSetNode
              * name can come from an outer query block.
              */
             String fullTableName = ((AllResultColumn)rc).getFullTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             if (fullTableName != null) {
                 if (fromList.getFromTableByName
@@ -945,6 +1043,8 @@ class SelectNode extends ResultSetNode
 	 *									directly under a ResultColumn
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void rejectParameters() throws StandardException
 	{
 		super.rejectParameters();
@@ -953,6 +1053,7 @@ class SelectNode extends ResultSetNode
 
     @Override
     public void pushQueryExpressionSuffix() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.push();
     }
 
@@ -967,6 +1068,7 @@ class SelectNode extends ResultSetNode
     @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.setOrderByList(orderByList);
 		// remember that there was an order by list
 		orderByQuery = true;
@@ -982,6 +1084,7 @@ class SelectNode extends ResultSetNode
     @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         qec.setOffset(offset);
         qec.setFetchFirst(fetchFirst);
         qec.setHasJDBCLimitClause(Boolean.valueOf(hasJDBClimitClause));
@@ -1013,6 +1116,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fl)
@@ -1039,10 +1144,13 @@ class SelectNode extends ResultSetNode
 		boolean anyChange = fromList.LOJ_reorderable(numTables);
 		if (anyChange)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             FromList afromList = new FromList(
                     getOptimizerFactory().doJoinOrderOptimization(),
                     getContextManager());
 			bindExpressions(afromList);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4736
             fromList.bindResultColumns(afromList);
 		}
 
@@ -1064,6 +1172,7 @@ class SelectNode extends ResultSetNode
 		 * we can flatten/optimize any subqueries in the
 		 * select list.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		getResultColumns().preprocess(numTables, 
 								 fromList, whereSubquerys,
 								 wherePredicates);
@@ -1082,6 +1191,7 @@ class SelectNode extends ResultSetNode
 			// Mark subqueries that are part of the where clause as such so
 			// that we can avoid flattening later, particularly for nested 
 			// WHERE EXISTS subqueries.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3301
 			if (whereSubquerys != null){
 				whereSubquerys.markWhereSubqueries();
 			}
@@ -1128,9 +1238,12 @@ class SelectNode extends ResultSetNode
 		 */
 
 		// Flatten any flattenable FromSubquerys or JoinNodes
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		fromList.flattenFromTables(getResultColumns(), 
 								   wherePredicates, 
 								   whereSubquerys,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4698
+//IC see: https://issues.apache.org/jira/browse/DERBY-3880
                                    groupByList,
                                    havingClause);
 
@@ -1143,6 +1256,7 @@ class SelectNode extends ResultSetNode
 			}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             for (int i = 0; i < qec.size(); i++) {
                 final OrderByList obl = qec.getOrderByList(i);
                 if (obl != null)
@@ -1159,6 +1273,7 @@ class SelectNode extends ResultSetNode
                     if (obl.size() == 0)
                     {
                         qec.setOrderByList(i, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                         getResultColumns().removeOrderByColumns();
                     }
                 }
@@ -1171,6 +1286,7 @@ class SelectNode extends ResultSetNode
 		 */
 		if (groupByList != null &&
 			havingClause == null &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 			selectAggregates.isEmpty() &&
 			whereAggregates.isEmpty())
 		{
@@ -1206,6 +1322,7 @@ class SelectNode extends ResultSetNode
 			
 			if (distinctTable != -1)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				if (fromList.returnsAtMostSingleRow(getResultColumns(), 
 											   whereClause, wherePredicates,
 											   getDataDictionary()))
@@ -1214,6 +1331,7 @@ class SelectNode extends ResultSetNode
 				}
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             for (int i = 0; i < qec.size(); i++) {
                 /* If we were unable to eliminate the distinct and we have
                  * an order by then we can consider eliminating the sort for
@@ -1231,12 +1349,14 @@ class SelectNode extends ResultSetNode
                  *      is as expected.
                  */
                 final OrderByList obl = qec.getOrderByList(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
                 if (isDistinct && obl != null && obl.allAscending())
                 {
                     /* Order by list currently restricted to columns in select
                      * list, so we will always eliminate the order by here.
                      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                     if (obl.isInOrderPrefix(getResultColumns()))
                     {
                         qec.setOrderByList(i, null);
@@ -1251,6 +1371,7 @@ class SelectNode extends ResultSetNode
                          */
                         newTop = genProjectRestrictForReordering();
                         obl.resetToSourceRCs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                         setResultColumns( obl.reorderRCL(getResultColumns()) );
                         newTop.getResultColumns().removeOrderByColumns();
                         qec.setOrderByList(i, null);
@@ -1273,6 +1394,7 @@ class SelectNode extends ResultSetNode
 		fromList.pushPredicates(wherePredicates);
 
 		/* Set up the referenced table map */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setReferencedTableMap( new JBitSet(numTables) );
 		int flSize = fromList.size();
 		for (int index = 0; index < flSize; index++)
@@ -1289,14 +1411,17 @@ class SelectNode extends ResultSetNode
 
 
         if (qec.getOrderByList(0) != null) { // only relevant for first one
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
 			// Collect window function calls and in-lined window definitions
 			// contained in them from the orderByList.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             CollectNodesVisitor<WindowFunctionNode> cnvw =
                 new CollectNodesVisitor<WindowFunctionNode>(
                     WindowFunctionNode.class);
             qec.getOrderByList(0).accept(cnvw);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
             for (WindowFunctionNode wfn : cnvw.getList()) {
 				windowFuncCalls.add(wfn);
@@ -1408,6 +1533,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
@@ -1450,6 +1577,7 @@ class SelectNode extends ResultSetNode
 		}
 
 		/* Don't flatten if selectNode contains a group by or having clause */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2442
 		if ((groupByList != null) || (havingClause != null))
 		{
 			return false;
@@ -1457,6 +1585,7 @@ class SelectNode extends ResultSetNode
 
 		/* Don't flatten if select list contains something that isn't cloneable.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (! getResultColumns().isCloneable())
 		{
 			return false;
@@ -1469,6 +1598,7 @@ class SelectNode extends ResultSetNode
 			return false;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             // Don't flatten if selectNode now has an order by or offset/fetch
             // clause
@@ -1497,6 +1627,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode genProjectRestrict(int origFromListSize)
 				throws StandardException
 	{
@@ -1505,7 +1637,9 @@ class SelectNode extends ResultSetNode
 		ResultSetNode		prnRSN;
 
         prnRSN = new ProjectRestrictNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 fromList.elementAt(0),   /* Child ResultSet */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 getResultColumns(),      /* Projection */
                 whereClause,            /* Restriction */
                 wherePredicates,/* Restriction as PredicateList */
@@ -1525,11 +1659,14 @@ class SelectNode extends ResultSetNode
 		if (((selectAggregates != null) && (selectAggregates.size() > 0)) 
 			|| (groupByList != null))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			List<AggregateNode> aggs = selectAggregates;
 			if (havingAggregates != null && !havingAggregates.isEmpty()) {
 				havingAggregates.addAll(selectAggregates);
 				aggs = havingAggregates;
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             GroupByNode gbn = new GroupByNode(prnRSN,
                     groupByList,
                     aggs,
@@ -1539,11 +1676,13 @@ class SelectNode extends ResultSetNode
                     getContextManager());
 			gbn.considerPostOptimizeOptimizations(originalWhereClause != null);
 			gbn.assignCostEstimate(getOptimizer().getOptimizedCost());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			groupByList = null;
 			prnRSN  = gbn.getParent();
 
 			// Remember whether or not we can eliminate the sort.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6008
             for (int i=0; i < eliminateSort.length; i++ ) {
                 eliminateSort[i] = eliminateSort[i] || gbn.getIsInSortedOrder();
             }
@@ -1561,6 +1700,7 @@ class SelectNode extends ResultSetNode
 			}
 
             WindowDefinitionNode wn = windows.elementAt(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             WindowResultSetNode wrsn = new WindowResultSetNode(
 					prnRSN,
@@ -1570,16 +1710,19 @@ class SelectNode extends ResultSetNode
 					getContextManager());
 
 			prnRSN = wrsn.getParent();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			wrsn.assignCostEstimate(getOptimizer().getOptimizedCost());
 		}
 
 
 		// if it is distinct, that must also be taken care of.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
 		if (isDistinct)
 		{
 			// We first verify that a distinct is valid on the
 			// RCL.
 			getResultColumns().verifyAllOrderable();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			/* See if we can push duplicate elimination into the store
 			 * via a hash scan.  This is possible iff:
@@ -1607,9 +1750,11 @@ class SelectNode extends ResultSetNode
 			if (origFromListSize == 1 && !orderByAndDistinctMerged)
 			{
 				boolean simpleColumns = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				HashSet<BaseColumnNode> distinctColumns = new HashSet<BaseColumnNode>();
 				int size = getResultColumns().size();
 				for (int i = 1; i <= size; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 					BaseColumnNode bc = getResultColumns().getResultColumn(i).getBaseColumnNode();
 					if (bc == null) {
 						simpleColumns = false;
@@ -1629,11 +1774,15 @@ class SelectNode extends ResultSetNode
 				 * duplicates without a sorter. 
 				 */
 				boolean inSortedOrder = isOrderedResult(getResultColumns(), prnRSN, !(orderByAndDistinctMerged));
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 prnRSN = new DistinctNode(
                         prnRSN, inSortedOrder, null, getContextManager());
 				prnRSN.setCostEstimate( getCostEstimate().cloneMe() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
                 // Remember whether or not we can eliminate the sort.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6008
                 for (int i=0; i < eliminateSort.length; i++) {
                     eliminateSort[i] = eliminateSort[i] || inSortedOrder;
                 }
@@ -1644,6 +1793,7 @@ class SelectNode extends ResultSetNode
 		 * the order by.
 		 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i=0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
             if (obl != null) {
@@ -1653,6 +1803,7 @@ class SelectNode extends ResultSetNode
                                              obl,
                                              null,
                                              getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                     prnRSN.setCostEstimate( getCostEstimate().cloneMe() );
                 }
 
@@ -1690,9 +1841,11 @@ class SelectNode extends ResultSetNode
 
             // Do this only after the main ORDER BY; any extra added by
             // IntersectOrExceptNode should sit on top of us.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             ValueNode offset = qec.getOffset(i);
             ValueNode fetchFirst = qec.getFetchFirst(i);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
             if (offset != null || fetchFirst != null) {
                 // Keep the same RCL on top, since there may be references to
                 // its result columns above us.
@@ -1705,13 +1858,17 @@ class SelectNode extends ResultSetNode
                         topList,
                         offset,
                         fetchFirst,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
                         qec.getHasJDBCLimitClause()[i].booleanValue(),
                         getContextManager());
             }
         }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		if (wasGroupBy &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().numGeneratedColumnsForGroupBy() > 0 &&
 			windows == null) // windows handling already added a PRN which
 							 // obviates this.
@@ -1732,12 +1889,18 @@ class SelectNode extends ResultSetNode
 			// select sum(j),i from t group by i having i
 			//             in (select i from t group by i,j )
 			//
+//IC see: https://issues.apache.org/jira/browse/DERBY-4450
+//IC see: https://issues.apache.org/jira/browse/DERBY-681
 			ResultColumnList topList = prnRSN.getResultColumns();
 			ResultColumnList newSelectList = topList.copyListAndObjects();
 			prnRSN.setResultColumns(newSelectList);
 
 			topList.removeGeneratedGroupingColumns();
 			topList.genVirtualColumnNodes(prnRSN, newSelectList);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             prnRSN = new ProjectRestrictNode(
 						prnRSN,
 						topList,
@@ -1749,6 +1912,7 @@ class SelectNode extends ResultSetNode
 						getContextManager());
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i=0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
 
@@ -1765,10 +1929,12 @@ class SelectNode extends ResultSetNode
              */
             if (eliminateSort[i])
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
                 prnRSN.adjustForSortElimination(obl);
             }
 
             /* Set the cost of this node in the generated node */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             prnRSN.setCostEstimate( getCostEstimate().cloneMe() );
         }
 
@@ -1800,6 +1966,7 @@ class SelectNode extends ResultSetNode
 		 * or a ConstantNode.
 		 */
 		int numCRs = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : resultColumns)
 		{
 			if (rc.getExpression() instanceof ColumnReference)
@@ -1822,6 +1989,7 @@ class SelectNode extends ResultSetNode
 
 		// Now populate the CR array and see if ordered
 		int crsIndex = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : resultColumns)
 		{
 			if (rc.getExpression() instanceof ColumnReference)
@@ -1830,6 +1998,7 @@ class SelectNode extends ResultSetNode
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return newTopRSN.isOrderedOn(crs, permuteOrdering, (List<FromBaseTable> ) null);
 	}
 
@@ -1842,6 +2011,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
@@ -1861,6 +2032,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList	predicateList,
 								  double outerRows) 
@@ -1871,6 +2044,7 @@ class SelectNode extends ResultSetNode
 		/* Optimize any subquerys before optimizing the underlying result set */
 
 		/* selectSubquerys is always allocated at bind() time */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(selectSubquerys != null,
                     "selectSubquerys is expected to be non-null");
@@ -1903,6 +2077,7 @@ class SelectNode extends ResultSetNode
 			// Iterate backwards because we might be deleting entries.
 			for (int i = wherePredicates.size() - 1; i >= 0; i--)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 if (wherePredicates.elementAt(i).isScopedForPush())
                 {
 					wherePredicates.removeOptPredicate(i);
@@ -1940,6 +2115,8 @@ class SelectNode extends ResultSetNode
 		if (predicateList != null)
 		{
 			if (wherePredicates == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 wherePredicates = new PredicateList(getContextManager());
 			}
 
@@ -1963,7 +2140,10 @@ class SelectNode extends ResultSetNode
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         opt = getOptimizer(fromList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
                 wherePredicates,
                 dataDictionary,
                 qec.getOrderByList(0), // use first one
@@ -1989,6 +2169,8 @@ class SelectNode extends ResultSetNode
 		{
 			for (int i = wherePredicates.size() - 1; i >= 0; i--)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 Predicate pred = (Predicate)wherePredicates.getOptPredicate(i);
 				if (pred.isScopedForPush())
 				{
@@ -2000,6 +2182,7 @@ class SelectNode extends ResultSetNode
 
 		/* Get the cost */
         setCostEstimate( opt.getOptimizedCost() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Update row counts if this is a scalar aggregate */
 		if ((selectAggregates != null) && (selectAggregates.size() > 0)) 
@@ -2021,6 +2204,7 @@ class SelectNode extends ResultSetNode
 
         // dispose of the optimizer we created above
         if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceEndQueryBlock(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
         return this;
 	}
@@ -2039,6 +2223,7 @@ class SelectNode extends ResultSetNode
 							OptimizerPlan overridingPlan)
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getOptimizer() == null)
 		{
 			/* Get an optimizer. */
@@ -2074,6 +2259,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException        Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths(PredicateList predList)
 		throws StandardException
 	{
@@ -2085,6 +2272,7 @@ class SelectNode extends ResultSetNode
 
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			SanityManager.ASSERT(getOptimizer() != null,
 				"SelectNode's optimizer not expected to be null when " +
 				"modifying access paths.");
@@ -2103,6 +2291,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		int				 origFromListSize = fromList.size();
@@ -2117,6 +2307,7 @@ class SelectNode extends ResultSetNode
 		** This should be the same optimizer we got above.
 		*/
 		getOptimizer().modifyAccessPaths();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// Load the costEstimate for the final "best" join order.
 		setCostEstimate( getOptimizer().getFinalCost() );
@@ -2136,6 +2327,8 @@ class SelectNode extends ResultSetNode
 			{
 				for (int i = wherePredicates.size() - 1; i >= 0; i--)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     Predicate pred =
                             (Predicate)wherePredicates.getOptPredicate(i);
 					if (pred.isScopedForPush())
@@ -2184,19 +2377,23 @@ class SelectNode extends ResultSetNode
 			 * and create new VirtualColumnNodes for the original's 
 			 * ResultColumn.expressions.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             leftResultSet = fromList.elementAt(0);
 			leftRCList = leftResultSet.getResultColumns();
 			leftResultSet.setResultColumns(leftRCList.copyListAndObjects());
 			leftRCList.genVirtualColumnNodes(leftResultSet, leftResultSet.getResultColumns());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			/* Get right's ResultColumnList, assign shallow copy back to it,
 			 * create new VirtualColumnNodes for the original's 
 			 * ResultColumn.expressions and increment the virtualColumnIds.
 			 * (Right gets appended to left, so only right's ids need updating.)
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             rightResultSet = fromList.elementAt(1);
 			rightRCList = rightResultSet.getResultColumns();
 			rightResultSet.setResultColumns(rightRCList.copyListAndObjects());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			rightRCList.genVirtualColumnNodes(rightResultSet, rightResultSet.getResultColumns());
 			rightRCList.adjustVirtualColumnIds(leftRCList.size());
 
@@ -2207,6 +2404,8 @@ class SelectNode extends ResultSetNode
 			 * replace the 1st 2 entries in the FromList.
 			 */
 			fromList.setElementAt(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 new JoinNode(leftResultSet,
                              rightResultSet,
                              null,
@@ -2214,6 +2413,7 @@ class SelectNode extends ResultSetNode
                              leftRCList,
                              null,
                              //user supplied optimizer overrides
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
                              fromList.properties,
                              getContextManager()),
                 0);
@@ -2232,9 +2432,12 @@ class SelectNode extends ResultSetNode
 	 *          this SelectNode's optimizer.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return getOptimizer().getFinalCost();
 	}
 
@@ -2258,6 +2461,7 @@ class SelectNode extends ResultSetNode
 			return false;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2442
 		if (groupByList != null || havingClause != null)
 		{
 			return false;
@@ -2406,6 +2610,8 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
@@ -2457,6 +2663,7 @@ class SelectNode extends ResultSetNode
 	{
 		ColumnReference additionalCR = null;
         ResultColumn rc = getResultColumns().elementAt(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		/* Figure out if we have an additional ColumnReference
 		 * in an equality comparison.
@@ -2507,6 +2714,8 @@ class SelectNode extends ResultSetNode
     @Override
 	boolean returnsAtMostOneRow()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return (groupByList == null &&
                 selectAggregates != null &&
                 !selectAggregates.isEmpty());
@@ -2539,11 +2748,13 @@ class SelectNode extends ResultSetNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (fromList != null)
 		{
 			fromList = (FromList)fromList.accept(v);
@@ -2565,6 +2776,7 @@ class SelectNode extends ResultSetNode
 
         // visiting these clauses was added as part of DERBY-6263. a better fix might be to fix the
         // visitor rather than skip it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6263
         if ( !(v instanceof HasCorrelatedCRsVisitor) )
         {
             if (selectSubquerys != null)
@@ -2581,6 +2793,7 @@ class SelectNode extends ResultSetNode
                 groupByList = (GroupByList) groupByList.accept( v );
             }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             for (int i = 0; i < qec.size(); i++) {
                 final OrderByList obl = qec.getOrderByList(i);
 
@@ -2618,6 +2831,7 @@ class SelectNode extends ResultSetNode
 	 */
     boolean hasAggregatesInSelectList()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2442
 		return !selectAggregates.isEmpty();
 	}
 
@@ -2632,6 +2846,8 @@ class SelectNode extends ResultSetNode
 	 */
     boolean hasWindows()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		return windows != null;
 	}
 
@@ -2658,6 +2874,7 @@ class SelectNode extends ResultSetNode
      * A no-op for SelectNode.
      */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
     void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)
@@ -2666,6 +2883,7 @@ class SelectNode extends ResultSetNode
     }
 
     boolean hasOffsetFetchFirst() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         return qec.hasOffsetFetchFirst();
     }
 

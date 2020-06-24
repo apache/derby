@@ -43,6 +43,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
     
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         Properties props = new Properties();
         // first disable the automatic statistics gathering so we get
         // clean statistics
@@ -52,6 +53,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         props.setProperty("derby.language.statementCacheSize", "0");
         // set the props, and boot the db
         Test test = new DatabasePropertyTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(SelectivityTest.class), props, true);
         
         return new CleanDatabaseTestSetup(test) {
@@ -89,7 +91,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 s.executeUpdate("create index test_id on test(id)");
                 s.executeUpdate("insert into test select * from template");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
                 s.executeUpdate("create view showstats as "
+//IC see: https://issues.apache.org/jira/browse/DERBY-6977
                                 + "select cast (conglomeratename as varchar(60)) indexname, "
                                 + "cast (statistics as varchar(60)) stats, "
                                 + "creationtimestamp createtime, "
@@ -110,6 +114,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 s
                         .executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST',null)");
                 statsrs = s
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
                         .executeQuery("select indexname, stats, ncols from showstats order by indexname, stats, createtime, ncols");
                 JDBC.assertFullResultSet(statsrs, new String[][] {
                         {"TEMPLATE_102","numunique= 100 numrows= 4000","1"},
@@ -118,6 +123,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                         {"TEMPLATE_22","numunique= 40 numrows= 4000","2"},
                         {"TEMPLATE_TWENTY","numunique= 20 numrows= 4000","1"},
                         {"TEMPLATE_TWO","numunique= 2 numrows= 4000","1"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
                         {"TEST_ID","numunique= 4000 numrows= 4000","1"},
                         });
                 
@@ -159,6 +165,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 statsrs = s.executeQuery(
                         "select indexname, stats, ncols from showstats " +
                         "where indexname like 'T1%' " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6495
                         "order by indexname, stats");
                 JDBC.assertFullResultSet(statsrs, new String[][] {
                         {"T1_HUNDRED","numunique= 100 numrows= 4000","1"},
@@ -233,6 +240,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "test, template --DERBY-PROPERTIES joinStrategy=hash \n" +
                 "where test.two = template.two").close();
         checkEstimatedRowCount(conn,8020012.5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         RuntimeStatisticsParser rtsp = 
               SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
@@ -245,6 +253,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=null \n" +
                 "where test.two = template.two").close();
         checkEstimatedRowCount(conn,8020012.5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertFalse(rtsp.usedHashJoin());
         
@@ -256,6 +265,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=template_two \n" +
                 "where test.two = template.two").close();
         checkEstimatedRowCount(conn,8020012.5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWO"));
         
@@ -269,6 +279,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty").close();
         // Rowcount should be same as testSingleColumnSelectivityHash
         checkEstimatedRowCount(conn,802001.25);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWENTY"));
         
@@ -282,6 +293,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=template_22 \n" +
                 "where test.twenty = template.twenty").close();
         checkEstimatedRowCount(conn,802001.25);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_22"));
         
@@ -309,6 +321,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.hundred = template.hundred and test.id <= 100").close();
         // note: original cloudscape result was expecting 3884.85 here.
         checkEstimatedRowCount(conn,3924.9);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEST", "TEST_ID"));
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_102"));
@@ -321,6 +334,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=null \n" +
                 "where test.hundred = template.hundred and test.id <= 100").close();
         checkEstimatedRowCount(conn,3924.9);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEST", "TEST_ID"));
         
@@ -332,6 +346,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=null \n" +
                 "where test.hundred = template.hundred and test.id <= 100").close();
         checkEstimatedRowCount(conn,3924.9);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEST", "TEST_ID"));
@@ -351,6 +366,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         
         // join on twenty/two. template inner, hash, index=null, all rows.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
                 "('APP','TEST',NULL)");
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
@@ -363,6 +379,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         RuntimeStatisticsParser rtsp = 
                 SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
@@ -375,6 +392,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWO"));
         
@@ -387,6 +405,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWENTY"));
         
@@ -398,6 +417,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_22"));
         
@@ -416,6 +436,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
         
@@ -428,6 +449,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWO"));
         
@@ -469,6 +491,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,80200.12500000001);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWENTY"));
         
@@ -506,6 +529,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         // row count is 16*10^6 * 0.005 = 8*10^4.
         
         // join on hundred. constant pred on two. NL, index=null, all rows.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
                 "('APP','TEMPLATE',NULL)");
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
@@ -531,6 +555,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.hundred = template.hundred " +
                 "and 1 = template.two").close();
         checkEstimatedRowCount(conn,80200.125);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         RuntimeStatisticsParser rtsp = 
                 SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_102"));
@@ -558,6 +583,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.hundred = template.hundred " +
                 "and 1 = template.twenty").close();
         checkEstimatedRowCount(conn,8020.0125);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_102"));
     }
@@ -583,6 +609,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.twenty = t2.twenty and " +
                 "t2.two = t3.two").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         RuntimeStatisticsParser rtsp = 
                 SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
@@ -663,6 +690,11 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
@@ -681,6 +713,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
@@ -727,6 +760,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
@@ -742,6 +776,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T3", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
@@ -765,6 +802,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.hundred = t3.hundred " +
                 "and t1.hundred='1'").close();
         checkEstimatedRowCount(conn,30458.025);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("T2", "T2_HUNDRED"));
         assertTrue(rtsp.findString("Bit set of columns fetched=All", 1));
@@ -785,6 +823,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.hundred = t3.hundred " +
                 "and t2.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
@@ -803,6 +842,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
@@ -820,6 +860,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
@@ -836,6 +877,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
@@ -852,6 +894,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
         assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
@@ -867,6 +910,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_TWO_TWENTY"));
         assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
@@ -882,6 +926,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_TWO_TWENTY"));
         assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
@@ -898,6 +943,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,6.4240300125000015E7);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_TWO_TWENTY"));
         assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
@@ -941,6 +987,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where t1.two = s.two " +
                 "and s.hundred = CAST(CHAR(t1.hundred) AS INTEGER)").close();
         checkEstimatedRowCount(conn,802001.25);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         RuntimeStatisticsParser rtsp = 
                 SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
@@ -952,6 +999,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "t1, scratch_table s " +
                 "where t1.twenty = s.twenty").close();
         checkEstimatedRowCount(conn,1604002.5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("T1", "T1_TWO_TWENTY"));
         assertTrue(rtsp.usedHashJoin());
@@ -964,6 +1012,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where t1.twenty = s.twenty " +
                 "and s.hundred = CAST(CHAR(t1.hundred) AS INTEGER)").close();
         checkEstimatedRowCount(conn,160400.2500000);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("T1", "T1_TWENTY_HUNDRED"));
         assertTrue(rtsp.usedHashJoin());
@@ -978,6 +1027,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
                 "('APP','T1',NULL)");
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
                 "('APP','T2',NULL)");
@@ -989,6 +1039,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.twenty = t2.twenty " +
                 "and t1.hundred = t2.hundred").close();
         checkEstimatedRowCount(conn,4010.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         RuntimeStatisticsParser rtsp = 
                 SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
@@ -1000,6 +1051,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.hundred = t2.hundred " +
                 "and t1.twenty = t2.twenty").close();
         checkEstimatedRowCount(conn,4010.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
         
@@ -1009,6 +1061,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.twenty = t2.twenty " +
                 "and t1.two = t2.two").close();
         checkEstimatedRowCount(conn,4010.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
         
@@ -1018,6 +1071,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.two = t2.two " +
                 "and t1.twenty = t2.twenty").close();
         checkEstimatedRowCount(conn,4010.00625);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedHashJoin());
         
@@ -1065,6 +1119,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t10.a = 2 " +
                 "and t10.b = 2").close();
         checkEstimatedRowCount(conn,7945.920000000);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3955
         RuntimeStatisticsParser rtsp = 
                 SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedSpecificIndexForIndexScan("COMPLEX", "COMPLEXIND"));
@@ -1175,6 +1230,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         
         statsrs = s.executeQuery(
                 "select indexname, stats, ncols from showstats " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6495
                 "where indexname = 'TBASIC2_CH_DT' order by indexname, stats");
         JDBC.assertFullResultSet(statsrs, new String[][] {
                 {"TBASIC2_CH_DT","numunique= 3 numrows= 7","1"},
@@ -1188,6 +1244,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(statsrs, new String[][] {{"7"}});
         statsrs = s.executeQuery(
                 "select indexname, stats, ncols from showstats " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6495
                 "where indexname = 'TBASIC2_DT_VC' " +
                 "order by indexname, stats, ncols");
         JDBC.assertFullResultSet(statsrs, new String[][] {

@@ -1086,6 +1086,8 @@ public final class TypeId
 		 */
 		public boolean isFixedStringTypeId()
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 				return (formatId == StoredFormatIds.CHAR_TYPE_ID);
 		}
 
@@ -1114,6 +1116,8 @@ public final class TypeId
 		 */
 		public boolean isLongVarcharTypeId()
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 				return (formatId == StoredFormatIds.LONGVARCHAR_TYPE_ID);
 		}
 
@@ -1176,6 +1180,7 @@ public final class TypeId
                         case StoredFormatIds.CLOB_TYPE_ID:
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
                         case StoredFormatIds.XML_TYPE_ID:
+//IC see: https://issues.apache.org/jira/browse/DERBY-392
                         case StoredFormatIds.LONGVARBIT_TYPE_ID:
                                 return false;
 
@@ -1431,6 +1436,7 @@ public final class TypeId
                         // Implementation of DECIMAL can change.
                         case StoredFormatIds.DECIMAL_TYPE_ID:
                             return new SQLDecimal();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                         case StoredFormatIds.DOUBLE_TYPE_ID:
                                 return new SQLDouble();
@@ -1438,6 +1444,8 @@ public final class TypeId
                         case StoredFormatIds.INT_TYPE_ID:
                                 return new SQLInteger();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         case StoredFormatIds.BIGINT_TYPE_ID:
                                 return new SQLLongint();
 
@@ -1685,6 +1693,7 @@ public final class TypeId
                         case StoredFormatIds.CHAR_TYPE_ID:
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                         case StoredFormatIds.BLOB_TYPE_ID:
+//IC see: https://issues.apache.org/jira/browse/DERBY-786
                         case StoredFormatIds.CLOB_TYPE_ID:
                                  return true;
 

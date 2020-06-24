@@ -65,6 +65,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     {
         JDBCType.ARRAY,
         JDBCType.DATALINK,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         JDBCType.DISTINCT,
         JDBCType.LONGNVARCHAR,
         JDBCType.NCHAR,
@@ -81,6 +82,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
 
     private static  final   int[]  ILLEGAL_SQL_TYPES = new int[]
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         Types.ARRAY,
         Types.DATALINK,
         Types.DISTINCT,
@@ -104,6 +106,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
 
     private static  ColumnDesc[]    _columnDescs =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         new ColumnDesc( JDBCType.BIGINT, "bigint", 0L, 1L, null ),
         new ColumnDesc( JDBCType.BLOB, "blob", makeBlob( "01234" ), makeBlob( "56789" ), null ),
         new ColumnDesc( JDBCType.BOOLEAN, "boolean", Boolean.FALSE, Boolean.TRUE, null ),
@@ -112,6 +115,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         new ColumnDesc( JDBCType.CLOB, "clob", makeClob( "01234" ), makeClob( "56789" ), null ),
         new ColumnDesc( JDBCType.DATE, "date", new Date( 0L ), new Date( 1L ), null ),
         new ColumnDesc( JDBCType.DECIMAL, "decimal", new BigDecimal( 0 ), new BigDecimal( 1 ), null ),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         new ColumnDesc( JDBCType.DOUBLE, "double", 0.0, 1.0, null ),
         new ColumnDesc( JDBCType.FLOAT, "float", 0.0, 1.0, null ),
         new ColumnDesc( JDBCType.INTEGER, "int", 0, 1, null ),
@@ -180,6 +184,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("PreparedStatementTest42");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( TestConfiguration.defaultSuite( PreparedStatementTest42.class ) );
 
@@ -201,10 +206,12 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     {
         Connection conn = getConnection();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         setupPrice( conn );
         makeTable( conn );
         populateTable( conn );
         vetTableContents( conn );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         updateColumns( conn );
     }
     private void    makeTable( Connection conn ) throws Exception
@@ -227,6 +234,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     private void    populateTable( Connection conn ) throws Exception
     {
         PreparedStatement   insert = prepareInsert( conn );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         for ( int rowIdx = 0; rowIdx < ColumnDesc.VALUE_COUNT; rowIdx++ )
         {
@@ -249,6 +257,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         {
             try {
                 insert.setObject( 1, null, ILLEGAL_JDBC_TYPES[ i ] );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 fail( "setObject() should have failed." );
             }
             catch (SQLException se) { assertUnimplemented( se ); }
@@ -264,6 +273,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     }
     private PreparedStatement   prepareInsert( Connection conn ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         StringBuilder   columnBuffer = new StringBuilder();
         StringBuilder   valuesBuffer = new StringBuilder();
 
@@ -324,6 +334,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     // test the behavior of the new ResultSet methods added by JDBC 4.2
     private void    updateColumns( Connection conn ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         PreparedStatement forUpdatePS = conn.prepareStatement
             ( "select * from allTypes for update", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE );
         ResultSet   updateRS = null;
@@ -381,6 +392,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         vetTable( conn, 1, 1 );
 
         // verify that ResultSet.updateObject() fails on bad SQLTypes
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         prepTable( conn, 0 );
         updateRS = forUpdatePS.executeQuery();
         updateRS.next();
@@ -453,6 +465,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     public  void    test_02_registerObject() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         registerObjectTest( conn );
     }
@@ -569,6 +582,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         catch (SQLException se) { assertUnimplemented( se ); }
  
         // Make sure that the pre-JDBC4.2 overloads throw the correct exception too
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         valueIdx = 1;
         param = 1;
         cs.setInt( param++, valueIdx );
@@ -618,6 +632,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     public  void    test_03_setObject() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         callableStatementSetObjectTest( conn );
     }
@@ -821,6 +836,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     public  static  void    packAllTypes
         (
          int valueIdx,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
          Long    bigintValue,
          Blob   blobValue,
          Boolean booleanValue,

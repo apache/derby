@@ -251,6 +251,7 @@ public interface DataValueFactory
          * If collationType is equal to StringDataValue.COLLATION_TYPE_UCS_BASIC
          * then the call is the equivalent of the overload without collationType.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
         StringDataValue getClobDataValue(Clob value, StringDataValue previous,
                 int collationType) throws StandardException;
 
@@ -595,6 +596,7 @@ public interface DataValueFactory
         StringDataValue         getNullChar(StringDataValue dataValue,
                 int collationType)
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
 
         /**
          * Get a SQL VARCHAR (UCS_BASIC) with a SQL null value. If the supplied value
@@ -612,6 +614,7 @@ public interface DataValueFactory
         StringDataValue         getNullVarchar(StringDataValue dataValue,
                 int collationType)
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
 
         /**
          * Get a SQL LONG VARCHAR (UCS_BASIC) with a SQL null value. If the supplied value
@@ -629,6 +632,7 @@ public interface DataValueFactory
         StringDataValue         getNullLongvarchar(StringDataValue dataValue,
                 int collationType)
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
 
         /**
          * Get a SQL CLOB (UCS_BASIC) with a SQL null value. If the supplied value
@@ -646,6 +650,7 @@ public interface DataValueFactory
         StringDataValue         getNullClob(StringDataValue dataValue,
                 int collationType)
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
 
         /**
          * Get a User-defined data value with a SQL null value. If the supplied value
@@ -721,6 +726,7 @@ public interface DataValueFactory
          * @return Collator null if the collation type is UCS_BASIC.
          *  Collator based on territory if the collation type is TERRITORY_BASED
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
         RuleBasedCollator getCharacterCollator(int collationType) 
         throws StandardException;
         
@@ -741,6 +747,7 @@ public interface DataValueFactory
          * @return DataValueDescriptor which will be constructed using the 
          * passed parameters 
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2557
         DataValueDescriptor getNull(int formatId, int collationType) 
         throws StandardException;
 }

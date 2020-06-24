@@ -469,6 +469,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
      * ReadOnly databases can not be replicated
      */
     public void startReplicationMasterRole(MasterFactory masterFactory)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3051
         throws StandardException {
         throw StandardException.newException(
                   SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
@@ -481,6 +482,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
      */
     
     public boolean inReplicationMasterMode() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3551
         return false;
     }
 

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.StaticMethodCallNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -84,6 +85,8 @@ import org.apache.derby.iapi.util.JBitSet;
 		- the parameter is passed directly to the method call (no casts or expressions).
 		- the method's parameter type is a Java array type.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     Since this is a dynamic decision we compile in code to take both paths,
     based upon a boolean is INOUT which is derived from the
     ParameterValueSet. Code is logically (only single parameter String[] shown
@@ -99,6 +102,8 @@ import org.apache.derby.iapi.util.JBitSet;
 
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class StaticMethodCallNode extends MethodCallNode
 {
 	private TableName procedureName;
@@ -143,6 +148,8 @@ class StaticMethodCallNode extends MethodCallNode
      *                          method belongs to.
      * @param cm                The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     StaticMethodCallNode(
             String methodName,
             String javaClassName,
@@ -177,6 +184,7 @@ class StaticMethodCallNode extends MethodCallNode
     public  void    setAppearsInGroupBy() { appearsInGroupBy = true; }
     
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
     TableName getFullName()
 	{
 		return  procedureName;
@@ -195,7 +203,9 @@ class StaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     JavaValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -219,6 +229,7 @@ class StaticMethodCallNode extends MethodCallNode
         throws StandardException
     {
         bindParameters(fromList, subqueryList, aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 		
 		/* If javaClassName is null then we assume that the current methodName
@@ -240,9 +251,12 @@ class StaticMethodCallNode extends MethodCallNode
             // The field methodName is used by resolveRoutine and
             // is set to the name of the routine (procedureName.getTableName()).
             resolveRoutine( fromList, subqueryList, aggregates, sd, noSchema );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
 
             if ( (ad != null) && (ad.getAliasType() == AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR) )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 resolvedAggregate = new AggregateNode(
                      ((SQLToJavaValueNode) methodParms[ 0 ]).getSQLValueNode(),
                      new UserAggregateDefinition( ad ), 
@@ -254,6 +268,7 @@ class StaticMethodCallNode extends MethodCallNode
 
                 // Propagate tags used to flag nodes which need privilege checks. See DERBY-6429.
                 resolvedAggregate.copyTagsFrom( this );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
 
                 // The parser may have noticed that this aggregate is invoked in a
                 // GROUP BY clause. That is not allowed.
@@ -266,7 +281,9 @@ class StaticMethodCallNode extends MethodCallNode
             }
 
             SchemaDescriptor savedSd = sd;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-475
             if (ad == null && noSchema && !forCallStatement)
             {
                 // Resolve to a built-in SYSFUN function but only
@@ -276,6 +293,7 @@ class StaticMethodCallNode extends MethodCallNode
                 // an in-memory table, set up in DataDictioanryImpl.
                 sd = getSchemaDescriptor("SYSFUN", true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
                 resolveRoutine(fromList, subqueryList, aggregates, sd, noSchema);
             }
 
@@ -301,6 +319,7 @@ class StaticMethodCallNode extends MethodCallNode
 
                     forCallStatement = true; // temporarily: resolve
                                              // as procedure
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
                     resolveRoutine(fromList, subqueryList, aggregates, sd, noSchema);
                     forCallStatement = false; // restore it
 
@@ -313,6 +332,7 @@ class StaticMethodCallNode extends MethodCallNode
                     // Maybe a function is being CALLed ?
                     forCallStatement = false; // temporarily: resolve
                                               // as function
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
                     resolveRoutine(fromList, subqueryList, aggregates, sd, noSchema);
                     forCallStatement = true; // restore it
 
@@ -369,9 +389,13 @@ class StaticMethodCallNode extends MethodCallNode
             if (
                 javaClassName.startsWith( "org.apache.derby." ) &&
                 !javaClassName.startsWith( "org.apache.derby.impl.tools.optional." ) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 !javaClassName.startsWith( "org.apache.derby.optional.lucene." ) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
                 !javaClassName.startsWith( "org.apache.derby.optional.json." ) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
                 !javaClassName.startsWith( "org.apache.derby.optional.api." ) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
                 !javaClassName.startsWith( "org.apache.derby.optional.dump." ) &&
                 !javaClassName.startsWith( "org.apache.derby.vti." )
                 )
@@ -389,8 +413,11 @@ class StaticMethodCallNode extends MethodCallNode
 		resolveMethodCall( javaClassName, true );
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		if (isPrivilegeCollectionRequired())
 			getCompilerContext().addRequiredRoutinePriv(ad);
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
 		// If this is a function call with a variable length
 		// return type, then we need to push a CAST node.
@@ -421,6 +448,8 @@ class StaticMethodCallNode extends MethodCallNode
 							);
 							
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     ValueNode returnValueToSQL =
                             new JavaToSQLValueNode(this, getContextManager());
 
@@ -434,9 +463,12 @@ class StaticMethodCallNode extends MethodCallNode
                             returnType.getCollationType(),
                             StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     JavaValueNode returnValueToJava = new SQLToJavaValueNode(
                             returnValueCastNode, getContextManager());
 					returnValueToJava.setCollationType(returnType.getCollationType());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                     return returnValueToJava.bindExpression(fromList, subqueryList, aggregates);
 				}
 
@@ -533,11 +565,14 @@ class StaticMethodCallNode extends MethodCallNode
 	 * be required.
 	 */
     private void resolveRoutine(FromList fromList, SubqueryList subqueryList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
                                 List<AggregateNode> aggregates, SchemaDescriptor sd,
                                 boolean noSchema)
             throws StandardException {
 		if (sd.getUUID() != null) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<AliasDescriptor> list = getDataDictionary().getRoutineList(
             sd.getUUID().toString(),
             methodName,
@@ -587,9 +622,11 @@ class StaticMethodCallNode extends MethodCallNode
 				int parameterMode = rai.getParameterModes()[ getRoutineArgIdx( rai, p ) ];
 
                 if (parameterMode != (ParameterMetaData.parameterModeIn)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
 
 					String arrayType;
 					switch (typeId.getJDBCTypeId()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
 						case java.sql.Types.BOOLEAN:
 						case java.sql.Types.SMALLINT:
 						case java.sql.Types.INTEGER:
@@ -603,6 +640,7 @@ class StaticMethodCallNode extends MethodCallNode
 							break;
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 					typeId = TypeId.getUserDefinedTypeId(arrayType);
 				}
 
@@ -657,6 +695,8 @@ class StaticMethodCallNode extends MethodCallNode
                 {
                     coerceMethodParameter
                         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                          fromList, subqueryList, aggregates,
                          rai,
                          methodParms.length,
@@ -669,6 +709,7 @@ class StaticMethodCallNode extends MethodCallNode
 			if (sigParameterCount != parameterCount) {
 
 				DataTypeDescriptor dtd = new DataTypeDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 						TypeId.getUserDefinedTypeId("java.sql.ResultSet[]"),
 						0,
 						0,
@@ -693,6 +734,7 @@ class StaticMethodCallNode extends MethodCallNode
             { isSystemCode = true; }
 
             routineDefiner = sd.getAuthorizationId();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 			break;
 		}
@@ -700,6 +742,7 @@ class StaticMethodCallNode extends MethodCallNode
 
         if ( (ad == null) && (methodParms.length == 1) )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
             ad = AggregateNode.resolveAggregate
                 ( getDataDictionary(), sd, methodName, noSchema );
         }
@@ -715,6 +758,7 @@ class StaticMethodCallNode extends MethodCallNode
         (
          FromList fromList,
          SubqueryList subqueryList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
          List<AggregateNode> aggregates,
          RoutineAliasInfo rai,
          int    parameterCount, // number of declared routine args
@@ -736,8 +780,10 @@ class StaticMethodCallNode extends MethodCallNode
         }
 
         boolean isParameterMarker = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
         if ((sqlParamNode == null) || !sqlParamNode.requiresTypeFromContext())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             if (parameterMode != (ParameterMetaData.parameterModeIn))
             {
                 throw StandardException.newException
@@ -769,6 +815,7 @@ class StaticMethodCallNode extends MethodCallNode
             // type of the procedure parameter.
             if (sqlParamNode instanceof UntypedNullConstantNode)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
                 sqlParamNode.setType(paramdtd);
             }
             else
@@ -820,6 +867,7 @@ class StaticMethodCallNode extends MethodCallNode
             // correctly as 10 characters long.
             if (parameterTypeId.variableLength())
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 if (parameterMode != (ParameterMetaData.parameterModeOut))
                 { needCast = true; }
             }
@@ -837,6 +885,8 @@ class StaticMethodCallNode extends MethodCallNode
             
             if (sqlParamNode == null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 sqlParamNode =
                     new JavaToSQLValueNode(methodParms[p], getContextManager());
             }
@@ -851,6 +901,7 @@ class StaticMethodCallNode extends MethodCallNode
             methodParms[p] =
                     new SQLToJavaValueNode(castNode, getContextManager());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
             methodParms[p] = methodParms[p].bindExpression(
                     fromList, subqueryList, aggregates);
         }
@@ -864,6 +915,8 @@ class StaticMethodCallNode extends MethodCallNode
      * Wrap a parameter in a CAST node.
      */
     public static ValueNode makeCast (ValueNode parameterNode,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                       DataTypeDescriptor targetType,
                                       ContextManager cm)
         throws StandardException
@@ -876,6 +929,7 @@ class StaticMethodCallNode extends MethodCallNode
         // if truncation occurs when stuffing a string value into a
         // VARCHAR, so make sure CAST doesn't issue warning only.
         ((CastNode)castNode).setAssignmentSemantics();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
 
         return castNode;
     }
@@ -892,6 +946,7 @@ class StaticMethodCallNode extends MethodCallNode
 	 * @param mb  method builder
 	 */
     private void generatePushNestedSessionContext(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         ActivationClassBuilder acb,
         MethodBuilder mb,
         boolean hadDefinersRights,
@@ -906,9 +961,13 @@ class StaticMethodCallNode extends MethodCallNode
 					  "getLanguageConnectionContext",
 					  ClassName.LanguageConnectionContext, 0);
 		acb.pushThisAsActivation(mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         mb.push(hadDefinersRights);
         mb.push(definer);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                       "pushNestedSessionContext",
                       "void", 3);
 	}
@@ -938,8 +997,10 @@ class StaticMethodCallNode extends MethodCallNode
 			// a dynmaically registered out parameter it must be a simple ? parameter
 
             parameterMode = (ParameterMetaData.parameterModeIn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
 
 			if (sql2j != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 				if (sql2j.getSQLValueNode().requiresTypeFromContext()) {
 	  				ParameterNode pn;
 		  			if (sql2j.getSQLValueNode() instanceof UnaryOperatorNode) 
@@ -961,6 +1022,7 @@ class StaticMethodCallNode extends MethodCallNode
 											"getParameterValueSet", ClassName.ParameterValueSet, 0);
 
 						constructor.push(applicationParameterNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                         constructor.push(ParameterMetaData.parameterModeUnknown);
 						constructor.callMethod(VMOpcode.INVOKEINTERFACE, null,
 											"setParameterMode", "void", 2);
@@ -971,6 +1033,7 @@ class StaticMethodCallNode extends MethodCallNode
 		}
 
 		switch (parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         case (ParameterMetaData.parameterModeIn):
         case (ParameterMetaData.parameterModeInOut):
         case (ParameterMetaData.parameterModeUnknown):
@@ -1019,6 +1082,7 @@ class StaticMethodCallNode extends MethodCallNode
 			mb.putField(lf);
 
 			// set the IN part of the parameter into the INOUT parameter.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             if (parameterMode != (ParameterMetaData.parameterModeOut)) {
 				mb.swap();
 				mb.setArrayElement(0);
@@ -1120,6 +1184,7 @@ class StaticMethodCallNode extends MethodCallNode
 		if (returnsNullOnNullState != null) {
 			mb.push(false);
 			mb.setField(returnsNullOnNullState);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 			// for the call to the generated method below.
 			mb.pushThis();
@@ -1187,7 +1252,11 @@ class StaticMethodCallNode extends MethodCallNode
 			// If no SQL, there is no need to setup a nested session
 			// context.
 			if (sqlAllowed != RoutineAliasInfo.NO_SQL) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                 generatePushNestedSessionContext(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                     (ActivationClassBuilder) acb,
                     mb,
                     routineInfo.hasDefinersRights(),
@@ -1203,6 +1272,7 @@ class StaticMethodCallNode extends MethodCallNode
 				mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
 									"getSQLAllowed", "short", 0);
 				mb.setField(functionEntrySQLAllowed);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 			}
 			
@@ -1252,6 +1322,7 @@ class StaticMethodCallNode extends MethodCallNode
 					cons.pushNewArray("java.sql.ResultSet[]", compiledResultSets);
 					cons.setField(procedureResultSetsHolder);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 					// arguments for the dynamic result sets
 					for (int i = 0; i < compiledResultSets; i++) {
@@ -1384,6 +1455,7 @@ class StaticMethodCallNode extends MethodCallNode
 					int parameterMode = parameterModes[ getRoutineArgIdx( i ) ];
                     
                     if (parameterMode != (ParameterMetaData.parameterModeIn)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
 
 						// must be a parameter if it is INOUT or OUT.
 						ValueNode sqlParamNode = ((SQLToJavaValueNode) methodParms[i]).getSQLValueNode();
@@ -1414,6 +1486,7 @@ class StaticMethodCallNode extends MethodCallNode
 
 						// is the underlying type for the OUT/INOUT parameter primitive.
                         // if this is a varargs arg then we have to strip off another array level
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                         Class<?> cellType = ((Method) method).
                                 getParameterTypes()[ getRoutineArgIdx( i ) ].
                                 getComponentType();
@@ -1452,6 +1525,7 @@ class StaticMethodCallNode extends MethodCallNode
 						}
 
 						// The value needs to be set thorugh the setValue(Object) method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4499
 						if (isAnsiUDT)
 						{
 							mb.upCast("java.lang.Object");
@@ -1463,6 +1537,7 @@ class StaticMethodCallNode extends MethodCallNode
 							mb.push(isNumericType ? paramdtd.getPrecision() : paramdtd.getMaximumWidth());
 							mb.push(paramdtd.getScale());
 							mb.push(isNumericType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 							mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", "void", 3);
 							// mb.endStatement();
 						}
@@ -1480,6 +1555,7 @@ class StaticMethodCallNode extends MethodCallNode
 	 */
 	int getPrivType()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		return Authorizer.EXECUTE_PRIV;
 	}
 

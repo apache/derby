@@ -48,6 +48,8 @@ final class DRDAString {
      * @param w a <code>DDMWriter</code> which holds current CCSidManager
      * and which encoding is used
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
     DRDAString(DDMWriter w) {
         this.buffer = new byte[0];
         this.writer = w;
@@ -113,6 +115,8 @@ final class DRDAString {
     public String toString() {
         if (cachedString == null) {
             cachedString =
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
                 writer.getCurrentCcsidManager().convertToJavaString(buffer);
         }
         return cachedString;

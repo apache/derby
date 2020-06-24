@@ -82,6 +82,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 
     public static final int
         GRANTEE_COL_NUM_IN_GRANTEE_TABLE_TYPE_GRANTOR_INDEX = 1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
     private static final boolean[] indexUniqueness = { true, true, false};
 
@@ -91,17 +92,21 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"6074401f-0103-0e39-b8e7-00000010f010"	// heap UUID
 		,"787c0020-0103-0e39-b8e7-00000010f010"	// index1
 		,"c9a3808d-010c-42a2-ae15-0000000f67f8" //index2
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 		,"80220011-010c-bc85-060d-000000109ab8" //index3
     };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSCOLPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 		initInfo(COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexUniqueness, uuids);
 	}
 
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         UUID						oid;
         String colPermID = null;
         DataValueDescriptor grantee = null;
@@ -118,6 +123,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
         else
         {
             ColPermsDescriptor cpd = (ColPermsDescriptor) td;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
             oid = cpd.getUUID();
             if ( oid == null )
             {
@@ -137,6 +143,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
         row.setColumn( GRANTOR_COL_NUM, grantor);
         row.setColumn( TABLEID_COL_NUM, new SQLChar(tableID));
         row.setColumn( TYPE_COL_NUM, new SQLChar(type));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
         row.setColumn( COLUMNS_COL_NUM, new UserType( (Object) columns));
         return row;
     } // end of makeRow
@@ -151,6 +158,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSCOLPERMSRowFactory.buildDescriptor");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         String colPermsUUIDString = row.getColumn( COLPERMSID_COL_NUM).getString();
         UUID colPermsUUID = getUUIDFactory().recreateUUID(colPermsUUIDString);
         String tableUUIDString = row.getColumn( TABLEID_COL_NUM).getString();
@@ -163,6 +171,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
                                   "r".equals( type) || "R".equals( type),
                                   "Invalid type passed to SYSCOLPERMSRowFactory.buildDescriptor");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         ColPermsDescriptor colPermsDesc =
 	        new ColPermsDescriptor( dataDictionary, 
                     getAuthorizationID( row, GRANTEE_COL_NUM),
@@ -174,6 +183,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 
 	/** builds a column list for the catalog */
     public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
         return new SystemColumn[] {
@@ -215,11 +225,13 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
             row.setColumn(2, new SQLChar(tableUUIDStr));
             row.setColumn(3, new SQLChar(colPerms.getType()));
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         case COLPERMSID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             String colPermsUUIDStr = perm.getObjectID().toString();
             row.setColumn(1, new SQLChar(colPermsUUIDStr));
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
         case TABLEID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             colPerms = (ColPermsDescriptor) perm;
@@ -317,6 +329,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 	 * @see PermissionsCatalogRowFactory#setUUIDOfThePassedDescriptor
 	 */
     public void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
     throws StandardException
     {
         DataValueDescriptor existingPermDVD = row.getColumn(COLPERMSID_COL_NUM);

@@ -145,6 +145,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( standardDecoration( false ) );
         suite.addTest( standardDecoration( true ) );
@@ -1724,6 +1725,9 @@ public class MergeStatementTest extends GeneratedColumnsHelper
 
         /* update an identity column with default should work once we change 
          * MergeStatement implementation to handle auto generated keys
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         goodStatement
             ( dboConnection, 
               "merge into t1_007\n" +
@@ -2592,6 +2596,9 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "on t1_014.c2 = t2_014.c2\n" +
               "when matched then update set c1 = default, c3 = default, c2 = 2 * t2_014.c2, c5 = default\n"
               );*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 
         //
         // drop schema
@@ -2652,6 +2659,9 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         // column to the next DEFAULT value, i.e., the next value from the
         // sequence generator.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         goodStatement
             ( dboConnection, 
               "update t1_bug_6414 set a = default, b = -b"
@@ -4704,6 +4714,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "create function singlerow_028() returns table\n" +
              "( x int )\n" +
              "language java parameter style derby_jdbc_result_set no sql\n" +
@@ -4726,6 +4737,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              "referencing new as new\n" +
              "for each row\n" +
              "merge into t2_028\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "using table( singlerow_028() ) sr on t2_028.y = new.x\n" +
              "when not matched then insert ( y ) values ( new.x )\n"
              );
@@ -4757,6 +4769,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         goodStatement( dboConnection, "drop table t1_028" );
         goodStatement( dboConnection, "drop table t2_028" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
         goodStatement( dboConnection, "drop function singlerow_028" );
     }
     
@@ -5494,6 +5507,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "create function sr_039() returns table\n" +
              "( i int )\n" +
              "language java parameter style derby_jdbc_result_set no sql\n" +
@@ -5520,6 +5534,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             (
              dboConnection,
              "merge into t1_039\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "using table( sr_039() ) sr on ( x = 1 )\n" +
              "when matched then delete\n",
              1
@@ -5538,6 +5553,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
         goodStatement( dboConnection, "drop function sr_039" );
         goodStatement( dboConnection, "drop table t1_039" );
     }
@@ -5558,6 +5574,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "create function sr_040() returns table\n" +
              "( i int )\n" +
              "language java parameter style derby_jdbc_result_set no sql\n" +
@@ -5585,6 +5602,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             (
              dboConnection,
              "merge into t1_040\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "using table( sr_040() ) sr on ( x = 1 )\n" +
              "when matched and y = 101 then delete\n" +
              "when matched and y = 102 then update set z = -1000\n" +
@@ -5609,6 +5627,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             (
              dboConnection,
              "merge into t1_040\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "using table( sr_040() ) sr on ( x = 3 )\n" +
              "when matched and y = 103 then delete\n" +
              "when matched and y = 102 then update set z = -10000\n" +
@@ -5633,6 +5652,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
         goodStatement( dboConnection, "drop function sr_040" );
         goodStatement( dboConnection, "drop table t1_040" );
     }
@@ -5653,6 +5673,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
              "create function sr_041() returns table\n" +
              "( i int )\n" +
              "language java parameter style derby_jdbc_result_set no sql\n" +
@@ -5713,6 +5734,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         expectExecutionError
             ( dboConnection, CARDINALITY_VIOLATION,
               "merge into t1_041\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
               "using table( sr_041() ) sr on ( x = 1 )\n" +
               "when matched and y = 101 then delete\n" +
               "when matched and y = 102 then update set z = -1000\n" +
@@ -5756,6 +5778,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
         goodStatement( dboConnection, "drop function sr_041" );
         goodStatement( dboConnection, "drop table t1_041" );
         goodStatement( dboConnection, "drop table t2_041" );
@@ -9318,6 +9341,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         Connection  dboConnection = openUserConnection( TEST_DBO );
         File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
         SupportFilesSetup.deleteFile( traceFile );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6635
 
         //
         // Schema
@@ -9519,6 +9543,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
 
     public void test_061_Derby6693() throws SQLException {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6693
 
         try {
             s.execute("create table t2(x int)");
@@ -9535,6 +9560,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     }
 
     public void test_062_Derby6550() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6550
         Statement s = createStatement();
         
         s.execute("create table t(a bigint generated always as identity " +
@@ -9617,6 +9643,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     public static IntegerArrayVTI singlerow_028()
     {
         // A
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
         return new IntegerArrayVTI
             (
              new String[] { "X" },

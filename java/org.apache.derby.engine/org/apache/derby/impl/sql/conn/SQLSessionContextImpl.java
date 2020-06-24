@@ -63,6 +63,7 @@ public class SQLSessionContextImpl implements SQLSessionContext {
     }
 
     public void setUser(String user) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         currentUser = user;
     }
 
@@ -82,6 +83,11 @@ public class SQLSessionContextImpl implements SQLSessionContext {
      * {@inheritDoc}
      */
     public HashMap<UUID, Boolean> getConstraintModes() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         return constraintModes != null ?
             new HashMap<UUID, Boolean>(constraintModes) :
             null;
@@ -130,6 +136,8 @@ public class SQLSessionContextImpl implements SQLSessionContext {
      * {@inheritDoc}
      */
     public void resetConstraintModes() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         if (constraintModes != null) {
             constraintModes.clear();
         }
@@ -144,6 +152,8 @@ public class SQLSessionContextImpl implements SQLSessionContext {
         deferredAll = deferred;
         // This now overrides any individual constraint setting, so
         // clear those.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         if (constraintModes != null) {
             constraintModes.clear();
         }

@@ -794,6 +794,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     Long.toString(container_key.getContainerId()));
         }
 
@@ -820,6 +821,7 @@ public class Heap
     int                             lock_level,
     LockingPolicy                   locking_policy,
     int                             isolation_level,
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 	FormatableBitSet				scanColumnList,
     DataValueDescriptor[]	        startKeyValue,
     int                             startSearchOperator,
@@ -830,6 +832,7 @@ public class Heap
     DynamicCompiledOpenConglomInfo  dynamic_info)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         if (SanityManager.DEBUG) {
             if ((open_mode &
                     TransactionController.OPENMODE_LOCK_ROW_NOWAIT) != 0) {
@@ -841,6 +844,7 @@ public class Heap
 
         // Heap scans do not suppport start and stop scan positions (these
         // only make sense for ordered storage structures).
+//IC see: https://issues.apache.org/jira/browse/DERBY-404
 		if (!RowUtil.isRowEmpty(startKeyValue)
 			|| !RowUtil.isRowEmpty(stopKeyValue))
 		{
@@ -865,6 +869,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     id.getContainerId());
         }
 
@@ -883,6 +888,7 @@ public class Heap
 	}
 
 	public void purgeConglomerate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     TransactionManager              xact_manager,
     Transaction                     rawtran)
         throws StandardException
@@ -914,6 +920,7 @@ public class Heap
             {
                 throw StandardException.newException(
                         SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         id.getContainerId());
             }
 
@@ -936,8 +943,10 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 this.collation_ids,
                 nested_xact,
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
                 nested_xact.getRawStoreXact(),
                 true,
                 TransactionController.OPENMODE_FORUPDATE,
@@ -949,6 +958,7 @@ public class Heap
             {
                 throw StandardException.newException(
                         SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         Long.toString(id.getContainerId()));
             }
 
@@ -979,6 +989,7 @@ public class Heap
                     // the heapcontroller know this has happened.  Usually
                     // the transaction takes care of this, but this controller
                     // is internal, so the transaction does not know about it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
                     heapcontroller.closeForEndTransaction(false);
                     
                     // the commit will close the underlying 
@@ -1042,6 +1053,7 @@ public class Heap
             {
                 throw StandardException.newException(
                         SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         id.getContainerId());
             }
 
@@ -1084,12 +1096,17 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 this.collation_ids,
                 xact_manager,
                 rawtran,
                 hold,
                 open_mode,
                 lock_level,
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
                 rawtran.newLockingPolicy(
                     LockingPolicy.MODE_RECORD,
                     TransactionController.ISOLATION_REPEATABLE_READ, true),
@@ -1097,6 +1114,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     id.getContainerId());
         }
 
@@ -1143,6 +1161,9 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 this.collation_ids,
                 xact_manager,
                 rawtran,
@@ -1154,6 +1175,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     id.getContainerId());
         }
 
@@ -1207,6 +1229,7 @@ public class Heap
      **/
 	public int getTypeFormatId()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		return StoredFormatIds.ACCESS_HEAP_V3_ID;
 	}
 
@@ -1250,6 +1273,7 @@ public class Heap
 
         // write the format id of this conglomerate
         FormatIdUtil.writeFormatIdInteger(out, conglom_format_id);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2598
 
 		out.writeInt((int) id.getSegmentId());
         out.writeLong(id.getContainerId());
@@ -1272,6 +1296,7 @@ public class Heap
 	public void writeExternal(ObjectOutput out) throws IOException
     {
         writeExternal_v10_2(out);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
         if (conglom_format_id == StoredFormatIds.ACCESS_HEAP_V3_ID)
         {
@@ -1310,6 +1335,7 @@ public class Heap
 
         // In memory maintain a collation id per column in the template.
         collation_ids = new int[format_ids.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(!hasCollatedTypes);
         }
@@ -1324,6 +1350,7 @@ public class Heap
         {
             // current format id, read collation info from disk
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
             hasCollatedTypes =
                     ConglomerateUtil.readCollationIdArray(collation_ids, in);
         }

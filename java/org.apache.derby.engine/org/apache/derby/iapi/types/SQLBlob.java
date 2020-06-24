@@ -85,6 +85,7 @@ public class SQLBlob extends SQLBinary
      *      {@code false} otherwise.
      */
     public boolean hasStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         return stream != null;
     }
 
@@ -105,6 +106,7 @@ public class SQLBlob extends SQLBinary
         //       may be more effective because the data doesn't have to be
         //       decoded multiple times.
         final SQLBlob clone = new SQLBlob();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
         // Shortcut cases where value is NULL.
         if (isNull()) {
@@ -155,6 +157,7 @@ public class SQLBlob extends SQLBinary
       * Return a JDBC Blob. Originally implemented to support DERBY-2201.
       */
     public Object getObject()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4754
         throws StandardException
     {
         // the generated code for the DERBY-2201 codepath expects to get a Blob
@@ -167,6 +170,7 @@ public class SQLBlob extends SQLBinary
             if ( bytes == null ) { return null; }
             else
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 return new HarmonySerialBlob( bytes );
             }
         }
@@ -216,6 +220,7 @@ public class SQLBlob extends SQLBinary
 		// Input is a stream with unknown length. The length will be checked
 		// while reading the stream.
 		if (isLengthLess()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			return;
 		}
 
@@ -276,6 +281,8 @@ public class SQLBlob extends SQLBinary
 		}
 
     public void setInto(PreparedStatement ps, int position)
+//IC see: https://issues.apache.org/jira/browse/DERBY-217
+//IC see: https://issues.apache.org/jira/browse/DERBY-175
 		throws SQLException, StandardException
 	{
 		if (isNull()) {

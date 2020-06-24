@@ -270,6 +270,7 @@ public class OpenBTree
             if (this.container == null)
             {
                 throw(StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         SQLState.BTREE_IS_CLOSED, err_containerid));
             }
 
@@ -277,6 +278,7 @@ public class OpenBTree
                 SanityManager.ASSERT(this.init_conglomerate.format_ids != null);
 
             root = ControlRow.get(this, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             int actualpages = root.checkConsistency(this, null, true);
 
@@ -396,6 +398,7 @@ public class OpenBTree
         {
             throw StandardException.newException(
                     SQLState.BTREE_CONTAINER_NOT_FOUND,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     err_containerid);
         }
 
@@ -425,6 +428,7 @@ public class OpenBTree
         this.runtime_mem    = 
             (dynamic_info != null ? 
              ((OpenConglomerateScratchSpace) dynamic_info) : 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
               (OpenConglomerateScratchSpace)
                 conglomerate.getDynamicCompiledConglomInfo());
 
@@ -505,6 +509,7 @@ public class OpenBTree
         {
             DataValueDescriptor[] template = 
                 this.init_conglomerate.createTemplate(getRawTran());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
             for (int i = 0; i < row.length; i++)
             {
@@ -555,6 +560,7 @@ public class OpenBTree
         try
         {
             root = ControlRow.get(this, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             int height = root.getLevel() + 1;
 
@@ -591,6 +597,7 @@ public class OpenBTree
                     "p_tree", "BTREE Dump: btree " + this.init_conglomerate);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
             root = ControlRow.get(this, BTree.ROOTPAGEID);
             root.printTree(this);
         }

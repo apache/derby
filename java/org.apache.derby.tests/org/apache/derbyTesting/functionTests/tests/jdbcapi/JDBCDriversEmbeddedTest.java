@@ -35,10 +35,12 @@ public class JDBCDriversEmbeddedTest extends JDBCDriversPropertyTest {
         // Also test that the network server comes up automatically
         // when this property is set and the embedded driver
         // is autoloaded by jdbc.drivers
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         System.setProperty("derby.drda.startNetworkServer", "true");
         // if the property derby.tests.basePort has been set, we need to
         // ensure we specify the portNumber as well, because we're then
         // not using 1527 for checks and shutting down.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6181
         String portNumberString = System.getProperty("derby.tests.basePort");
         if (portNumberString != null )
         {

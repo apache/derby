@@ -53,8 +53,10 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
      */
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = baseSuite("UpdateXXXTest");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
         suite.addTest(
                 TestConfiguration.clientServerDecorator(
                         baseSuite("UpdateXXXTest:client")));
@@ -67,11 +69,13 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
      * @param name Name for the suite.
      */
     private static BaseTestSuite baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
           
         suite.addTestSuite(UpdateXXXTest.class);
         
         // requires java.math.BigDecimal
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         if (JDBC.vmSupportsJDBC3())
             suite.addTest(new UpdateXXXTest("jdbc2testUpdateBigDecimal"));
                       
@@ -87,6 +91,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void setUp()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con = getConnection();
         try {
             

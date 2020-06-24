@@ -58,6 +58,7 @@ class DirRandomAccessFile extends RandomAccessFile implements StorageRandomAcces
     DirRandomAccessFile( File name, String mode) throws FileNotFoundException
     {
         super( name, mode);
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         _name = name;
         _mode = mode;
     }

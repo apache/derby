@@ -57,6 +57,7 @@ public class AnsiTrimTest extends BaseJDBCTestCase {
      * o.a.dT.ft.tests.replicationTests.StandardTests.
      */
     public static void decorate(Statement s)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3163
     throws SQLException
     {
         s.executeUpdate("create table tt (id int, v varchar(16), c char(16), cl clob(10240))");
@@ -65,6 +66,7 @@ public class AnsiTrimTest extends BaseJDBCTestCase {
         s.executeUpdate("insert into nt values (null)");
     }
    public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("AnsiTrimTest");
         suite.addTestSuite(AnsiTrimTest.class);
         return new CleanDatabaseTestSetup(suite) {
@@ -106,6 +108,7 @@ public class AnsiTrimTest extends BaseJDBCTestCase {
         positiveTest(
                 "SELECT count(*) FROM tt  " +
                 "WHERE id = 1 AND (trim (leading substr(v,1,1) from v)) = 'bcaca'", 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         positiveTest(
                 "select trim (both (case when length(v) = 6 then 'a' else 'b' end) from v) from tt",

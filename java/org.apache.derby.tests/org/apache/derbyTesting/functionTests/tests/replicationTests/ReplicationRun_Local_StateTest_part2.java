@@ -51,6 +51,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_StateTest_part2 Suite");
         
@@ -81,10 +82,12 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 masterDbSubPath);
         
         startServer(slaveJvmVersion, derbySlaveVersion,
@@ -192,6 +195,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     }
 
     private void _testPreStoppedSlave(Connection mConn)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
         throws Exception
     {
         util.DEBUG("_testPreStoppedSlave");
@@ -206,12 +210,14 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         
         // Tests against slave:
         assertException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
                 _startSlave(slaveServerHost,slaveServerPort,
                     slaveDatabasePath, replicatedDb,
                     slaveReplPort),
                 "XRE09");
 
         assertException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4246
                 stopSlave(slaveServerHost,slaveServerPort,
                           slaveDatabasePath, replicatedDb,
                           true),
@@ -257,6 +263,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         /* No value-adding suggestions here exept that calling startSlave 
          * should hang now. 
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
         util.DEBUG("_testPostStoppedSlave Not yet implemented."
                 + " No value-adding suggestions here"
                 + " exept that calling startSlave should hang now.");
@@ -274,6 +281,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         /* No value-adding suggestions here since the stopMaster method will 
          * not do anything when called after failover
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3738
         util.DEBUG("_testPostStoppedMaster Not yet implemented."
                 + "No value-adding suggestions here since the stopMaster method"
                 + " will not do anything when called after failover");
@@ -286,10 +294,13 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
                 + " No value-adding suggestions here.");
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
     SQLException _startSlave(String slaveServerHost, int slaveServerPort,
             String slaveDatabasePath, String replicatedDb,
             int slaveReplPort)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
@@ -311,9 +322,11 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
     SQLException _failOver(String serverHost, int serverPort, 
             String databasePath, String dbSubPath, String replicatedDb)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + serverHost + ":" + serverPort + "/"
@@ -332,11 +345,13 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
     SQLException _startMaster(String masterServerHost, int masterServerPort,
             String databasePath, String replicatedDb,
             String slaveServerHost,
             int slaveReplPort)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         String db = databasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
@@ -360,6 +375,8 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     SQLException connectTo(String serverHost, int serverPort,
             String databasePath, String dbSubPath, String replicatedDb)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + serverHost + ":" + serverPort + "/"
@@ -377,6 +394,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
     SQLException _executeQuery(Connection conn, String query)
     {
         util.DEBUG("executeQuery: " + query);

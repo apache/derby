@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.PredicateList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -54,6 +55,7 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class PredicateList extends QueryTreeNodeVector<Predicate>
                     implements OptimizablePredicateList
 {
@@ -63,6 +65,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
     PredicateList(ContextManager cm)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         super(Predicate.class, cm);
 	}
 
@@ -87,6 +90,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	public final void removeOptPredicate(int predCtr) throws StandardException
 	{
         Predicate predicate = removeElementAt(predCtr);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         if (predicate.isStartKey())
             numberOfStartPredicates--;
@@ -289,6 +293,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	/** @see OptimizablePredicateList#markAllPredicatesQualifiers */
 	public void markAllPredicatesQualifiers()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
             p.markQualifier();
@@ -307,12 +312,15 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 													  boolean isNullOkay)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ValueNode opNode;
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
 			AndNode			andNode;
 			Predicate		predicate;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             predicate = elementAt(index);
 			//We are not looking at constant comparison predicate.
 			if (predicate.getReferencedMap().hasSingleBitSet())
@@ -321,6 +329,14 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			}
 
             andNode = predicate.getAndNode();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			// skip non-equality predicates
 			opNode = andNode.getLeftOperand();
@@ -373,6 +389,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 										  int columnNumber)
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate predicate : this)
 		{
 			// This method is used by HashJoinStrategy to determine if
@@ -436,8 +454,10 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Predicate predicate = elementAt(index);
             AndNode andNode = predicate.getAndNode();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			// skip non-equality predicates
 			ValueNode opNode = andNode.getLeftOperand();
@@ -483,6 +503,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		** Clear all the scan flags for this predicate list, so that the
 		** flags that get set are only for the given conglomerate.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
             p.clearScanFlags();
@@ -520,6 +541,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			for (int index = 0; index < size; index++)
 			{
                 Predicate pred = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 				/*
 				** Skip over it if it's not a relational operator (this includes
@@ -625,6 +647,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		** Create an array of useful predicates.  Also, count how many
 		** useful predicates there are.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate pred : this)
 		{
 			ColumnReference indexCol = null;
@@ -927,6 +951,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				Predicate predToPush;
 				if (isIn && !thisPred.isInListProbePredicate())
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                    AndNode andCopy = new AndNode(
 										thisPred.getAndNode().getLeftOperand(),
 										thisPred.getAndNode().getRightOperand(),
@@ -982,6 +1008,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addPredicate(Predicate predicate) throws StandardException
 	{
 		if (predicate.isStartKey())
@@ -1015,6 +1043,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int index = size() - 1; index >= 0; index--)
 		{
             Predicate pred = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			// Transfer each non-qualifier
 			if (!pred.isRelationalOpPredicate() ||
@@ -1036,9 +1065,12 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void categorize()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
             p.categorize();
@@ -1055,6 +1087,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 *  Like transformation on c1 like 'ASDF%' can leave
 	 *  one of these predicates in the list.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void eliminateBooleanTrueAndBooleanTrue()
 	{
 		/* Walk list backwards since we can delete while
@@ -1101,6 +1135,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 *
 	 * @return ValueNode	The rebuilt expression tree.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode restoreConstantPredicates()
 	throws StandardException
 	{
@@ -1115,6 +1151,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		{
 			/* Look at the current predicate from the predicate list */
             nextAnd = elementAt(index).getAndNode();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			// Skip over the predicate if it is not a constant expression
 			if (! nextAnd.isConstantExpression())
@@ -1198,7 +1235,11 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 *
 	 * @return ValueNode	The rebuilt expression tree.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode restorePredicates()
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 		AndNode			nextAnd;
@@ -1209,6 +1250,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int index = 0; index < size; index++)
 		{
             nextAnd = elementAt(index).getAndNode();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			/* We can skip over TRUE AND TRUE */
 			if ((nextAnd.getLeftOperand().isBooleanTrue()) &&
@@ -1266,8 +1309,11 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void remapColumnReferencesToExpressions() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
             p.setAndNode(
@@ -1301,6 +1347,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		if (searchClause != null)
 		{
 			topAnd = (AndNode) searchClause;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             BooleanConstantNode trueNode =
                     new BooleanConstantNode(true, getContextManager());
 			
@@ -1316,6 +1364,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
 				/* Add the top AndNode to the PredicateList */
 				newJBitSet = new JBitSet(numTables);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 newPred =
                     new Predicate(thisAnd, newJBitSet, getContextManager());
 				addPredicate(newPred);
@@ -1335,8 +1385,11 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 * 
 	 * @param fromMap	The JBitSet to XOR with.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void xorReferencedSet(JBitSet fromMap)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
 			if (SanityManager.DEBUG)
@@ -1399,7 +1452,9 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int index = size() - 1; index >= 0; index--)
 		{
             Predicate predicate = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             CollectNodesVisitor<ColumnReference> getCRs =
                 new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
@@ -1413,8 +1468,10 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			boolean state = colRefs.size() > 0;
 			if (state)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 for (ColumnReference ref : colRefs)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2998
 					if (!ref.pointsToColumnReference())
 					{
 						state = false;
@@ -1479,6 +1536,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                 }
 
 				// Remap this crNode to underlying column reference in the select, if possible.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				ColumnReference newCRNode = select.findColumnReferenceInResult(crNode.getColumnName());
 				if (newCRNode == null)
 					continue;
@@ -1501,8 +1559,11 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 						inNode.setLeftOperand(newCRNode);
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     BinaryRelationalOperatorNode newRelop =
                             new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                                         opNode.kind,
 										newCRNode,
 										opNode.getRightOperand(),
@@ -1528,12 +1589,15 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                 //             /   \
                 //    leftOperand  true
                 //
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                ValueNode trueNode =
                         new BooleanConstantNode(true, getContextManager());
                 AndNode newAnd =
                         new AndNode(leftOperand, trueNode, getContextManager());
 				newAnd.postBindFixup();
 				JBitSet tableMap = new JBitSet(select.getReferencedTableMap().size());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 				// Use newly constructed predicate
                 predicate =
@@ -1558,6 +1622,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			}
 
 			// Push it into the select
+//IC see: https://issues.apache.org/jira/browse/DERBY-772
  			select.pushExpressionsIntoSelect(predicate);
 		}		
 	}
@@ -1571,14 +1636,17 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	void markReferencedColumns()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<ColumnReference> collectCRs =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
             p.getAndNode().accept(collectCRs);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (ColumnReference ref : collectCRs.getList())
 		{
 			ResultColumn source = ref.getSource();
@@ -1618,6 +1686,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
     boolean     resultColTable)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
             p.getAndNode().checkTopPredicatesForEqualsConditions(
@@ -1633,6 +1702,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 */
 	 boolean allPushable()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : this)
 		{
             if (! p.getPushable())
@@ -1653,6 +1723,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
      boolean allReference(FromBaseTable fbt) {
          int tableNumber = fbt.getTableNumber();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
          for (Predicate p : this) {
              if (!p.getReferencedSet().get(tableNumber)) {
                  return false;
@@ -1681,6 +1752,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		// Walk the list backwards because of possible deletes
 		for (int index = size() - 1; index >= 0; index--)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Predicate predicate = elementAt(index);
 			if (! predicate.getPushable())
 			{
@@ -1695,6 +1767,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				/* Add the matching predicate to the push list */
 				if (pushPList == null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     pushPList = new PredicateList(getContextManager());
 				}
 				pushPList.addPredicate(predicate);
@@ -1727,6 +1801,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * CRs from the subquery and decrement their 
 		 * nesting level.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate predicate : this)
 		{
 			ColumnReference cr1 = null;
@@ -1827,12 +1902,15 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		PredicateList[] joinClauses = new PredicateList[numTables];
 		for (int index = 0; index < numTables; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             joinClauses[index] = new PredicateList(getContextManager());
 		}
 
 		/* Pull the equijoin clauses, putting each one in the list for
 		 * each of the tables being joined.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate predicate : this)
 		{
 			ValueNode vn = predicate.getAndNode().getLeftOperand();
@@ -1882,9 +1960,11 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			/* Put all of the join clauses that already have an equivalence 
              * class at the head of the outer list to optimize search.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			ArrayList<Predicate> movePreds = new ArrayList<Predicate>();
 			for (int jcIndex = outerJCL.size() - 1; jcIndex >= 0; jcIndex--)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 Predicate predicate = outerJCL.elementAt(jcIndex);
 				if (predicate.getEquivalenceClass() != -1)
 				{
@@ -1894,6 +1974,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			}
 			for (int mpIndex = 0; mpIndex < movePreds.size(); mpIndex++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 outerJCL.insertElementAt(movePreds.get(mpIndex), 0);
 			}
 
@@ -1912,6 +1994,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				 * that have not already been assigned an equivalence class.
 				 */
                 Predicate outerP = outerJCL.elementAt(outerIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 				if (outerP.getEquivalenceClass() == -1)
 				{
@@ -1944,6 +2027,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				 * in the chain/equivalence class
 				 */
 				PredicateList middleJCL = joinClauses[middleTableNumber];
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 for (Predicate middleP : middleJCL)
 				{
 					/* Skip those Predicates that have already been
@@ -2011,6 +2095,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 					for ( ; innerIndex < innerJCL.size(); innerIndex++)
 					{
                         innerP = innerJCL.elementAt(innerIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 						// Skip over predicates with other equivalence classes
 						if (innerP.getEquivalenceClass() != -1 &&
@@ -2070,7 +2155,10 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
 					// No match, add new equijoin
 					// Build a new predicate
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     BinaryRelationalOperatorNode newEquals =
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                         new BinaryRelationalOperatorNode(
                             BinaryRelationalOperatorNode.K_EQUALS,
                             outerCR.getClone(),
@@ -2111,6 +2199,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 						outerJCL.addElement(newPred);
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4387
                     if (outerJCL != innerJCL) {
                         innerJCL.addElement(newPred);
                     } else {
@@ -2149,11 +2238,14 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 void searchClauseTransitiveClosure(int numTables, boolean hashJoinSpecified)
 		 throws StandardException
 	 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         PredicateList equijoinClauses = new PredicateList(getContextManager());
         PredicateList searchClauses = new PredicateList(getContextManager());
 		RelationalOperator	equalsNode = null;
 
 		int size = size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 		for (int index = 0; index < size; index++)
 		{
 			AndNode			andNode;
@@ -2234,6 +2326,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * NOTE: We can append to the searchClauses while walking
 		 * them, thus we cannot cache the value of size().
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 		for (int scIndex = 0; scIndex < searchClauses.size(); scIndex++)
 		{
 			ColumnReference searchCR;
@@ -2252,9 +2345,12 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				searchCR = (ColumnReference) ((BinaryComparisonOperatorNode) ro).getLeftOperand();
 
 				// Don't get value for parameterNode since not known yet.
+//IC see: https://issues.apache.org/jira/browse/DERBY-808
 				if (((BinaryComparisonOperatorNode) ro).getRightOperand() instanceof ConstantNode)
 				{
 					ConstantNode currCN = (ConstantNode) ((BinaryComparisonOperatorNode) ro).getRightOperand();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     searchODV = currCN.getValue();
 				}
 				else searchODV = null;
@@ -2264,6 +2360,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			int colNumber = searchCR.getColumnNumber();
 
 			// Look for any equijoin clauses of interest
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (Predicate predicate : equijoinClauses)
 			{
 				/* Skip the current equijoin clause if it has already been used
@@ -2279,6 +2376,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				}
 
 				BinaryRelationalOperatorNode equals = (BinaryRelationalOperatorNode)
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         predicate.getAndNode().getLeftOperand();
 				ColumnReference leftCR = (ColumnReference) equals.getLeftOperand();
 				ColumnReference rightCR = (ColumnReference) equals.getRightOperand();
@@ -2313,6 +2412,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                 ColumnReference searchCR2;
                 RelationalOperator ro2;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 for (Predicate sc : searchClauses)
 				{
 					DataValueDescriptor currODV = null;
@@ -2326,9 +2426,12 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 					else
 					{
 						searchCR2 = (ColumnReference) ((BinaryComparisonOperatorNode) ro2).getLeftOperand();
+//IC see: https://issues.apache.org/jira/browse/DERBY-808
 						if (((BinaryComparisonOperatorNode) ro2).getRightOperand() instanceof ConstantNode)
 						{
 							ConstantNode currCN = (ConstantNode) ((BinaryComparisonOperatorNode) ro2).getRightOperand();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             currODV = currCN.getValue();
 						}
 						else currODV = null;
@@ -2354,6 +2457,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				if (! match)
 				{
 					// Build a new predicate
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     OperatorNode roClone =
                         (OperatorNode)ro.getTransitiveSearchClause(
                             (ColumnReference)otherCR.getClone());
@@ -2373,6 +2478,9 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                     //             /   \
                     //       roClone    true
                     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     ValueNode trueNode =
                             new BooleanConstantNode(true, getContextManager());
                     AndNode newAnd =
@@ -2405,6 +2513,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int index = size() - 1; index >= 0; index--)
 		{
             Predicate predicate = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (predicate.transitiveSearchClauseAdded(equalsNode))
 			{
@@ -2427,6 +2536,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		int outer = size() - 1;
 		while (outer >= 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Predicate predicate = elementAt(outer);
 			int equivalenceClass = predicate.getEquivalenceClass();
 
@@ -2439,6 +2549,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			// Walk the rest of the list backwards.
 			for (int inner = outer - 1; inner >= 0; inner--)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 Predicate innerPredicate = elementAt(inner);
 				if (innerPredicate.getEquivalenceClass() == equivalenceClass)
 				{
@@ -2515,6 +2626,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int index = size() - 1; index >= 0; index--)
 		{
             predicate = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (SanityManager.DEBUG)
 			{
@@ -2570,6 +2682,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	{
 		PredicateList	theOtherList = (PredicateList) otherList;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate predicate : this)
 		{
 			/*
@@ -2613,6 +2727,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 */
 	public boolean isRedundantPredicate(int predNum)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Predicate pred = elementAt(predNum);
 		if (pred.getEquivalenceClass() == -1)
 		{
@@ -2721,6 +2836,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
 			int	colNum = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (Predicate pred : this)
             {
 				if ( ! pred.isStopKey() )
@@ -2764,6 +2880,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int index = size - 1; index >= 0; index--)
 		{
             Predicate pred = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if ( ! pred.isStopKey() )
 				continue;
@@ -2866,6 +2983,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int index = size() - 1; index >= 0; index--)
 		{
             Predicate pred = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			// Don't do anything if it's not an IN-list probe predicate.
 			if (!pred.isInListProbePredicate())
@@ -2888,6 +3006,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			{
 				for (int i = 0; i < index; i++)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     if (elementAt(i).isInListProbePredicate())
 					{
 						SanityManager.THROWASSERT("Found multiple probe " +
@@ -2948,6 +3067,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
         throws StandardException
 	{
         String retvalType  = ClassName.Qualifier + "[][]";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5989
 
         // If there are no qualifiers, return null.
         if (numberOfQualifiers == 0) {
@@ -2992,6 +3112,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
             VMOpcode.INVOKESTATIC, 
             acb.getBaseClassName(), "reinitializeQualifiers", "void", 1);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5989
         if (SanityManager.DEBUG)
         {
             if (numberOfQualifiers > size())
@@ -3007,6 +3128,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
         int num_of_or_conjunctions = 0;
         for (int i = 0; i < numberOfQualifiers; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (elementAt(i).isOrList())
             {
                 num_of_or_conjunctions++;
@@ -3016,13 +3138,17 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
         /* Assign the initializer to the Qualifier[] field */
         consMB.pushNewArray(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ClassName.Qualifier + "[]", num_of_or_conjunctions + 1);
         consMB.setField(qualField);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
         // Allocate qualifiers[0] which is an entry for each of the leading
         // AND clauses.
 
         consMB.getField(qualField);             // 1st arg allocateQualArray
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         consMB.push(0);                   // 2nd arg allocateQualArray
         consMB.push(numberOfQualifiers - num_of_or_conjunctions);  // 3rd arg allocateQualArray
 
@@ -3044,6 +3170,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * instantiation.
 		 */
         orderQualifiers();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5989
 
 		/* Generate each of the qualifiers, if any */
 
@@ -3056,6 +3183,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		{
 
             Predicate pred = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (!pred.isQualifier())
             {
@@ -3107,6 +3235,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
             {
 
                 Predicate pred = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
                 if (SanityManager.DEBUG)
                 {
@@ -3118,6 +3248,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                 // call, then we walk the list assigning each of the OR's to
                 // entries in the array in generateSingleQualifierCode().
                 ArrayList<RelationalOperator> a_list = new ArrayList<RelationalOperator>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                 QueryTreeNode node = pred.getAndNode().getLeftOperand();
 
@@ -3129,6 +3260,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                     // (ie. A = 1)
                     if (or_node.getLeftOperand() instanceof RelationalOperator)
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                         a_list.add( (RelationalOperator) or_node.getLeftOperand());
                     }
 
@@ -3140,6 +3272,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                 // clause.  ie. (a = 1 or b = 2), will allocate a 2 entry array.
 
                 consMB.getField(qualField);        // 1st arg allocateQualArray
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 consMB.push(and_idx);        // 2nd arg allocateQualArray
                 consMB.push(a_list.size());  // 3rd arg allocateQualArray
 
@@ -3157,6 +3290,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                             optTable,
                             absolute,
                             acb,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                             a_list.get(i),
                             qualField,
                             and_idx,
@@ -3216,9 +3350,12 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
         for (int i = sortList.length - 1; i >= 0; i--)
             sortList[i] = new PredicateList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		int predIndex;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate pred : this)
         {
 			if (! pred.isQualifier())
@@ -3310,6 +3447,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
 			int	colNum = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (Predicate pred : this)
             {
 				if ( ! pred.isStartKey() )
@@ -3356,6 +3494,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * a start key iff it is a stop key.
 		 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate pred : this)
         {
 			if ( (pred.isStartKey() && (! pred.isStopKey())) ||
@@ -3400,6 +3539,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			acb.newFieldDeclaration(Modifier.PRIVATE, ClassName.ExecIndexRow);
 		
 		mb.setField(field);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		return field;
 	}
@@ -3571,6 +3711,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		/*
 		** Walk this list
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate pred : this)
 		{
 			RelationalOperator relop = pred.getRelop();
@@ -3638,6 +3779,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * at execution time.
 		 */
 		OrderByList orderBy = (OrderByList)ordering;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate pred : this)
 		{
 			if (!pred.isInListProbePredicate())
@@ -3679,6 +3821,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * list; we'll work with the workingPredicates list from now on in this
 		 * routine. 
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         PredicateList workingPredicates =
             new PredicateList(getContextManager());
 
@@ -3688,6 +3832,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				continue;
 
 			/* to workingPredicates only add useful predicates... */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             workingPredicates.addOptPredicate(elementAt(i));
 		}
 
@@ -3739,6 +3884,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			for (int j = 0; j < numWorkingPredicates; j++)
 			{
                 Predicate pred = workingPredicates.elementAt(j);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 				int ip = pred.hasEqualOnColumnList(baseColumnList, 
 												   optTable);
@@ -3792,9 +3938,11 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		double selectivity = 1.0;
 
 		ArrayList<Predicate> maxPreds = new ArrayList<Predicate>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		while (true)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 			maxPreds.clear();
 			int conglomIndex = chooseLongestMatch(predsForConglomerates,
 												  maxPreds, numWorkingPredicates);
@@ -3810,6 +3958,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				/* remove the predicates that we've calculated the selectivity
 				 * of, from workingPredicates.
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 Predicate p = maxPreds.get(i);
 				workingPredicates.removeOptPredicate(p);
 			}	
@@ -3910,6 +4060,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * [p2] shuld be considered again later.
 		*/
 		PredicateWrapperList pwl = predArray[position];
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<PredicateWrapper> uniquepreds = pwl.createLeadingUnique();
 		
         /* uniqueprds is a list of predicates (along with wrapper) that I'm
@@ -3918,6 +4070,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		*/
 		for (int i = 0; i < uniquepreds.size(); i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             Predicate p = uniquepreds.get(i).getPredicate();
 			ret.add(p);
 			for (int j = 0; j < predArray.length; j++)
@@ -3953,6 +4107,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	 * Compute selectivity the old fashioned way.
 	 */
 	private double selectivityNoStatistics(Optimizable optTable)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 		double selectivity = 1.0;
@@ -3960,6 +4115,8 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		for (int i = 0; i < size(); i++)
 		{
 			OptimizablePredicate pred = (OptimizablePredicate)elementAt(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             selectivity *= pred.selectivity(optTable);
 		}
 		
@@ -4023,6 +4180,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
 		PredicateWrapperList(int maxValue)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			pwList = new ArrayList<PredicateWrapper>(maxValue);
 		}
 		
@@ -4050,6 +4208,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
 		PredicateWrapper elementAt(int i)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			return pwList.get(i);
 		}
 
@@ -4065,6 +4224,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 					break;
 			}
 			numPreds++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 			pwList.add(i, pw);
 		} 
 		
@@ -4088,12 +4248,14 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 */
 		void retainLeadingContiguous()
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
             if (pwList.isEmpty()) {
 				return;
             }
 
 			if (elementAt(0).getIndexPosition() != 0)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				pwList.clear();
 				numPreds = numDuplicates = 0;
 				return;
@@ -4119,6 +4281,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 				if (elementAt(k).getIndexPosition() == 
 							elementAt(k-1).getIndexPosition())
 					numDuplicates--;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				pwList.remove(k);
 			}
 			numPreds = j + 1;
@@ -4140,8 +4303,10 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 			if (lastIndexPosition != 0)
 				return null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             ArrayList<PredicateWrapper> scratch = new ArrayList<PredicateWrapper>();
 			scratch.add(elementAt(0));	// always add 0.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
 			for (int i = 1; i < numPreds; i++)
 			{

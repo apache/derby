@@ -56,9 +56,12 @@ public  class   Wrapper41Driver
 
     public Wrapper41Driver( Object wrapped ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         if ( wrapped instanceof AutoloadedDriver ) { _embedded = (AutoloadedDriver) wrapped; }
         else if ( wrapped instanceof InternalDriver ) { _driver40 = (InternalDriver) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         else if ( wrapped instanceof ClientDriver ) { _netclient = (ClientDriver) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         else if ( wrapped instanceof ClientAutoloadedDriver )
         { _netautoloaded = (ClientAutoloadedDriver) wrapped; }
         else { throw nothingWrapped( wrapped ); }
@@ -73,8 +76,10 @@ public  class   Wrapper41Driver
     public  Logger    getParentLogger() throws SQLException
     {
         if ( _embedded != null ) { return _embedded.getParentLogger(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         else if ( _driver40 != null ) { return _driver40.getParentLogger(); }
         else if ( _netclient != null ) { return _netclient.getParentLogger(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         else if ( _netautoloaded != null ) { return _netautoloaded.getParentLogger(); }
         else { throw nothingWrapped( null ); }
     }
@@ -88,6 +93,7 @@ public  class   Wrapper41Driver
     public Driver   getWrappedObject() throws SQLException
     {
         if ( _embedded != null ) { return _embedded; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         else if ( _driver40 != null ) { return _driver40; }
         else if ( _netclient != null ) { return _netclient; }
         else { throw nothingWrapped( null ); }
@@ -101,6 +107,7 @@ public  class   Wrapper41Driver
 
     private SQLException nothingWrapped( Object wrapped )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         String  wrappedString = (wrapped == null ? "NULL" : wrapped.getClass().getName() );
         return new SQLException( "Nothing wrapped: " + wrappedString );
     }

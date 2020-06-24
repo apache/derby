@@ -45,6 +45,7 @@ import java.util.Calendar;
 import java.util.Map;
 
 public class ClientCallableStatement extends ClientPreparedStatement
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     implements PreparedStatement, CallableStatement,
                PreparedStatementCallbackInterface {
     //---------------------navigational members-----------------------------------
@@ -100,9 +101,11 @@ public class ClientCallableStatement extends ClientPreparedStatement
      * @throws SqlException on error
      */
     public ClientCallableStatement(Agent agent,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                              ClientConnection connection,
                              String sql,
                              int type, int concurrency, int holdability,
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                              ClientPooledConnection cpc) throws SqlException {
         super(agent,
               connection,
@@ -118,6 +121,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public void resetCallableStatement(Agent agent,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                        ClientConnection connection,
                                        String sql,
                                        int type, int concurrency, int holdability) throws SqlException {
@@ -154,6 +158,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public void registerOutParameter(int parameterIndex, int jdbcType) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -177,6 +182,8 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public void registerOutParameter(int parameterIndex, int jdbcType, int scale) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -195,6 +202,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
 
     private void registerOutParameterX(int parameterIndex, int jdbcType, int scale) throws SqlException {
         super.checkForValidParameterIndex(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         agent_.checkForSupportedDataType( jdbcType );
         checkForValidScale(scale);
         outputRegistered_ = true; // this variable is only used by Batch
@@ -204,9 +212,12 @@ public class ClientCallableStatement extends ClientPreparedStatement
 
     /** Derby ignores the typeName argument because UDTs don't need it */
     public void registerOutParameter(int parameterIndex, int jdbcType, String typeName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1184
+//IC see: https://issues.apache.org/jira/browse/DERBY-447
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, typeName);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         registerOutParameter( parameterIndex, jdbcType );
     }
 
@@ -346,6 +357,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "getLong", parameterIndex);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2495
                 long result = getLongX(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getLong", result);
@@ -359,6 +371,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2495
     long getLongX(int parameterIndex) throws SqlException {
         super.checkForClosedStatement();
         checkGetterPreconditions(parameterIndex);
@@ -416,6 +429,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
 
     /** @deprecated */
     public BigDecimal getBigDecimal(int parameterIndex, int scale)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException, ArithmeticException {
         try
         {
@@ -425,6 +439,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 }
                 super.checkForClosedStatement();
                 checkForValidScale(scale);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 BigDecimal result;
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -452,6 +467,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                     agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterIndex);
                 }
                 super.checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 BigDecimal result;
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -578,6 +594,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public String getString(int parameterIndex) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -612,6 +629,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "getBytes", parameterIndex);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2495
                 byte[] result = getBytesX(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getBytes", result);
@@ -625,6 +643,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2495
     byte[] getBytesX(final int parameterIndex) throws SqlException 
     {
         super.checkForClosedStatement();
@@ -643,6 +662,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Blob result = wasNullX() ? null :
                     singletonRowData_.getBlob(parameterIndex);
 
@@ -665,6 +685,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Clob result = wasNullX() ? null :
                     singletonRowData_.getClob(parameterIndex);
 
@@ -690,6 +711,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Array result = wasNullX() ? null :
                     singletonRowData_.getArray(parameterIndex);
 
@@ -719,6 +741,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Ref result = wasNullX() ? null :
                     singletonRowData_.getRef(parameterIndex);
 
@@ -794,6 +817,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-400
         throw jdbcMethodNotImplemented();
     }
 
@@ -882,6 +906,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public void setBigDecimal(String parameterName, BigDecimal x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterName, x);
@@ -914,10 +939,12 @@ public class ClientCallableStatement extends ClientPreparedStatement
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-400
         throw jdbcMethodNotImplemented();
     }
 
     public void setTimestamp(String parameterName, Timestamp x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x);
@@ -963,6 +990,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public void setCharacterStream(String parameterName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                    Reader reader,
                                    int length) throws SQLException {
         if (agent_.loggingEnabled()) {
@@ -1137,6 +1165,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public Date getDate(String parameterName, Calendar calendar)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDate", parameterName, calendar);
@@ -1170,6 +1199,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     //-------------------------- JDBC 4.0 methods --------------------------------
     
     public Reader getCharacterStream(int parameterIndex)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1147
         throws SQLException {
         try {
             synchronized (connection_) {
@@ -1195,6 +1225,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     public final void setAsciiStream(String parameterName, InputStream x, long length)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             throws SQLException {
         throw SQLExceptionFactory.notImplemented("setAsciiStream(String,InputStream,long)");
     }
@@ -1401,6 +1432,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
     public <T> T getObject(String parameterName, Class<T> type)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         throw jdbcMethodNotImplemented();
     }
 
@@ -1422,6 +1454,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
         
         for ( int i = 0; i < cursorParamCount; i++ )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             if ( parameterMetaData_.sqlxParmmode_[ i ] ==
                  ClientParameterMetaData.parameterModeInOut )
             {
@@ -1440,8 +1473,10 @@ public class ClientCallableStatement extends ClientPreparedStatement
                 //
                 // special case to coerce Integer to Short for SMALLINT
                 //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if ( parameterMetaData_.types_[ i ] == ClientTypes.SMALLINT )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     if (returnArg instanceof Integer)
                     {
                         returnArg = ((Integer) returnArg).shortValue();
@@ -1461,6 +1496,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
      * @return name of java.sql interface
      */
     protected String getJdbcStatementInterfaceName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
         return "java.sql.CallableStatement";
     }
 
@@ -1470,12 +1506,14 @@ public class ClientCallableStatement extends ClientPreparedStatement
     }
 
     private void checkForValidOutParameter(int parameterIndex) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (parameterMetaData_ == null ||
             parameterMetaData_.sqlxParmmode_[parameterIndex - 1] <
                 ClientParameterMetaData.parameterModeInOut) {
 
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.PARAM_NOT_OUT_OR_INOUT), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 parameterIndex);
         }
     }
@@ -1488,8 +1526,10 @@ public class ClientCallableStatement extends ClientPreparedStatement
         }
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     SQLException jdbcMethodNotImplemented() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             super.checkForClosedStatement();

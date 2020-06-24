@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.NormalizeResultSetNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -519,6 +520,8 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class NormalizeResultSetNode extends SingleChildResultSetNode
 {
 	/**
@@ -558,6 +561,8 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 	 * @throws StandardException 
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     NormalizeResultSetNode(ResultSetNode chldRes,
                            ResultColumnList targetResultColumnList,
                            Properties tableProperties,
@@ -580,6 +585,8 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 		 * detailed explanation of how this works.
 		 */
 		ResultColumnList prRCList = rcl;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         chldRes.setResultColumns(rcl.copyListAndObjects());
 		// Remove any columns that were generated.
 		prRCList.removeGeneratedGroupingColumns();
@@ -590,8 +597,11 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 		 * in the NormalizeResultSetNode's ResultColumnList.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, rsn, and source ResultColumn.)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         prRCList.genVirtualColumnNodes(chldRes, chldRes.getResultColumns());
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setResultColumns( prRCList );
 		// Propagate the referenced table map if it's already been created
         if (chldRes.getReferencedTableMap() != null)
@@ -603,7 +613,9 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 		if (targetResultColumnList != null) {
 		    int size = Math.min(targetRCL.size(), getResultColumns().size());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (int index = 0; index < size; index++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 ResultColumn sourceRC = getResultColumns().elementAt(index);
                 ResultColumn resultColumn = targetRCL.elementAt(index);
                 sourceRC.setType(resultColumn.getTypeServices());
@@ -625,6 +637,7 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 
 		if (SanityManager.DEBUG)
             SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -637,6 +650,7 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 
 		// Get the cost estimate for the child
 		setCostEstimate( childResult.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		erdNumber = acb.addItem(makeResultDescription());
 
@@ -649,6 +663,7 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 		mb.push(forUpdate);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getNormalizeResultSet",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 					ClassName.NoPutResultSet, 6);
 	}
 
@@ -670,6 +685,7 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 
     @Override
     public void pushQueryExpressionSuffix() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         childResult.pushQueryExpressionSuffix();
     }
 
@@ -682,6 +698,8 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 	 * @param orderByList	The order by list
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 	void pushOrderByList(OrderByList orderByList)
 	{
 		childResult.pushOrderByList(orderByList);

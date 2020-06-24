@@ -52,6 +52,7 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         if (JDBC.vmSupportsJSR169())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "InvalidLDAPServerAuthenticationTest - cannot" +
                 " run with JSR169 - missing functionality for " +
@@ -71,6 +72,7 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
     }
 
     public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         Test test = new InvalidLDAPServerAuthenticationTest("testInvalidLDAPServerConnectionError");
         suite.addTest(test);
@@ -97,6 +99,7 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
         // set the ldap properties
         setDatabaseProperty("derby.connection.requireAuthentication", "true", conn);
         setDatabaseProperty("derby.authentication.provider", "LDAP", conn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5941
         setDatabaseProperty("derby.authentication.server", "noSuchServer.invalid", conn);
         setDatabaseProperty("derby.authentication.ldap.searchBase", "o=dnString", conn);
         setDatabaseProperty("derby.authentication.ldap.searchFilter","(&(objectClass=inetOrgPerson)(uid=%USERNAME%))", conn);
@@ -115,6 +118,7 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
             ds.getConnection();
             fail("expected java.net.UnknownHostException for datasource");
         } catch (SQLException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             if (JDBC.vmSupportsJNDI()) {
                 assertSQLState("08004", se);
                 // with network server, the java.net.UnknownHostException will

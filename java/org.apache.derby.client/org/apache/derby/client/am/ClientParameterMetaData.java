@@ -60,6 +60,7 @@ public class ClientParameterMetaData implements ParameterMetaData {
         {
             columnMetaData_.checkForValidColumnIndex(param);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             if (columnMetaData_.sqlxParmmode_[param - 1] ==
                 ParameterMetaData.parameterModeUnknown) {
                 return ParameterMetaData.parameterModeUnknown;

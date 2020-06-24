@@ -38,6 +38,8 @@ import java.io.InputStream;
  *  3. the data field (data), which is the actual BLOB data.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
 final public class BLOBDataModelSetup extends BaseJDBCTestSetup
 {
     
@@ -58,6 +60,8 @@ final public class BLOBDataModelSetup extends BaseJDBCTestSetup
     protected final void setUp() 
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         Connection con = getConnection();
         con.setAutoCommit(false);
         
@@ -74,6 +78,7 @@ final public class BLOBDataModelSetup extends BaseJDBCTestSetup
             ("INSERT INTO " + tableName + "(val, length, data) VALUES (?,?, ?)");
         
         // Insert 10 records with size of 1MB
+//IC see: https://issues.apache.org/jira/browse/DERBY-1477
         for (int i = 0; i < regularBlobs; i++) {
             final int val = i;
             final InputStream stream = new TestInputStream(size, val);
@@ -84,6 +89,7 @@ final public class BLOBDataModelSetup extends BaseJDBCTestSetup
         }
         
         // Insert 1 record with size of 64 MB
+//IC see: https://issues.apache.org/jira/browse/DERBY-1477
         BaseJDBCTestCase.println("Insert BLOB with size = " + bigSize);
         preparedStatement.setInt(1, bigVal);
         preparedStatement.setInt(2, bigSize);
@@ -107,6 +113,8 @@ final public class BLOBDataModelSetup extends BaseJDBCTestSetup
         throws Exception
     {
         try { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
             Connection con = getConnection();
             Statement statement = con.createStatement();
             statement.execute("DROP TABLE " + tableName);
@@ -129,6 +137,7 @@ final public class BLOBDataModelSetup extends BaseJDBCTestSetup
     }
     
     /** Size of regular Blobs (currently 1MB) */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1477
     final static int size = 1024 * 1024;
     
     /** Number of regular Blobs */

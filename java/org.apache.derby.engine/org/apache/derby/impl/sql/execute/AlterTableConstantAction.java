@@ -305,6 +305,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * @exception StandardException		Thrown on failure
 	 */
     private void executeConstantActionBody(Activation activation)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             throws StandardException {
         // Save references to the main structures we need.
         this.activation = activation;
@@ -317,6 +318,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         boolean						tableScanned = false;
 
         if (compressTable || truncateTable) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             DeferredConstraintsMemory.compressOrTruncate(
                     lcc, tableId, tableName);
         }
@@ -344,6 +346,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 	            if (defragment)
                     defragmentRows(tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
 
 	            if (truncateEndOfTable)
 	                truncateEnd(tc);            
@@ -351,6 +354,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
         if (updateStatistics) {
             updateStatistics();
             return;
@@ -399,6 +403,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				SQLState.LANG_TABLE_NOT_FOUND_DURING_EXECUTION, tableName);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		if (truncateTable)
 			dm.invalidateFor(td, DependencyManager.TRUNCATE_TABLE, lcc);
 		else
@@ -466,6 +471,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				// Don't allow add of non-nullable column to non-empty table
 				if (numRows > 0)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					throw StandardException.newException(
                         SQLState.LANG_ADDING_NON_NULL_COLUMN_TO_NON_EMPTY_TABLE,
                         td.getQualifiedName());
@@ -482,17 +488,25 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				
 				if (columnInfo[ix].action == ColumnInfo.CREATE)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
 					addNewColumnToTable(ix);
 				}
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-2371
 						 columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 						 columnInfo[ix].action ==
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE ||
 						 columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_VALUE)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
                     modifyColumnDefault(ix);
 				}
 				else if (columnInfo[ix].action == 
@@ -530,6 +544,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						 * This is O.K. at this point since we would have
 						 * thrown an exception if any data was null
 						 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
                         modifyColumnConstraint(columnInfo[ix].name, false);
 					}
 				}
@@ -558,6 +573,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         /* Create/Drop/alter any constraints */
 		if (constraintActions != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			for (int conIndex = 0; 
                  conIndex < constraintActions.length; 
                  conIndex++)
@@ -567,6 +583,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 				if (cca instanceof CreateConstraintConstantAction)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     final CreateConstraintConstantAction ccca =
                             (CreateConstraintConstantAction)cca;
 
@@ -586,6 +603,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 							// Check to see if a constraint of the same type 
                             // already exists
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 							ConstraintDescriptorList cdl = 
                                 dd.getConstraintDescriptors(td);
 
@@ -612,6 +630,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								numRows = getSemiRowCount(tc);
 							}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             if (isCheckInitiallyDeferred) {
                                 // Need to do this early to get UUID
                                 // assigned
@@ -631,6 +650,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								ConstraintConstantAction.validateConstraint(
                                     cca.getConstraintName(),
                                     ((CreateConstraintConstantAction)cca).getConstraintText(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                     cca.getConstraintId(),
                                     td,
                                     lcc,
@@ -644,9 +664,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				{
 					if (SanityManager.DEBUG)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         if (!(cca instanceof DropConstraintConstantAction ||
                               cca instanceof AlterConstraintConstantAction))
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 							SanityManager.THROWASSERT(
                                 "constraintActions[" + conIndex + 
                                 "] expected to be instanceof " + 
@@ -656,6 +678,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					}
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (!isCheckInitiallyDeferred) {
                     constraintActions[conIndex].
                         executeConstantAction(activation);
@@ -672,6 +695,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					lockGranularity != 'R')
 				{
 					SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 						"lockGranularity expected to be 'T'or 'R', not " + 
                         lockGranularity);
 				}
@@ -686,6 +710,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Are we doing a compress table?
 		if (compressTable)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             compressTable();
 		}
 
@@ -743,11 +768,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * @throws StandardException
 	 */
     private void updateStatistics()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4937
         ConglomerateDescriptor[] cds;
         td = dd.getTableDescriptor(tableId);
 
         if (updateStatisticsAll) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
             cds = null;
         } else {
             cds = new ConglomerateDescriptor[1];
@@ -814,6 +842,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      *
      **/
     private void defragmentRows(TransactionController tc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             throws StandardException {
         GroupFetchScanController base_group_fetch_cc = null;
         int                      num_indexes         = 0;
@@ -843,6 +872,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             }
 
 			/* Get a row template for the base table */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ExecRow br =
                 lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(
                     td.getNumberOfColumns());
@@ -1195,6 +1225,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			throw 
 				StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                    SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT,
                    columnDescriptor.getDescriptorType(),
                    columnInfo[ix].name,
@@ -1208,6 +1239,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			storableDV = columnInfo[ix].dataType.getNull();
 
 		// Add the column to the conglomerate.(Column ids in store are 0-based)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		tc.addColumnToConglomerate(
             td.getHeapConglomerateId(), 
             colNumber, 
@@ -1227,6 +1259,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		// Add the column to syscolumns. 
 		// Column ids in system tables are 1-based
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		columnDescriptor = 
             new ColumnDescriptor(
                    columnInfo[ix].name,
@@ -1349,6 +1382,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // drop any generated columns which reference this column
         ColumnDescriptorList    generatedColumnList = td.getGeneratedColumns();
         int                                 generatedColumnCount = generatedColumnList.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<String>           cascadedDroppedColumns = new ArrayList<String> ();
         for ( int i = 0; i < generatedColumnCount; i++ )
         {
@@ -1391,6 +1425,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// can NOT drop a column if it is the only one in the table
 		if (sizeAfterCascadedDrops == 1)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			throw StandardException.newException(
                     SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
                     dm.getActionString(DependencyManager.DROP_COLUMN),
@@ -1402,6 +1437,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // now drop dependent generated columns
         for ( int i = 0; i < cascadedDrops; i++ )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             String      generatedColumnName = cascadedDroppedColumns.get( i );
             
             activation.addWarning
@@ -1411,6 +1447,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             // We can only recurse 2 levels since a generation clause cannot
             // refer to other generated columns.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             dropColumnFromTable(generatedColumnName);
         }
 
@@ -1427,6 +1464,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			throw 
 				StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
                     columnName,
                     td.getQualifiedName());
@@ -1439,6 +1477,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		toDrop.set(droppedColumnPosition);
 		td.setReferencedColumnMap(toDrop);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1489
+//IC see: https://issues.apache.org/jira/browse/DERBY-1909
+//IC see: https://issues.apache.org/jira/browse/DERBY-1926
 		dm.invalidateFor(td, 
                         (cascade ? DependencyManager.DROP_COLUMN
                                  : DependencyManager.DROP_COLUMN_RESTRICT),
@@ -1447,6 +1488,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// If column has a default we drop the default and any dependencies
 		if (columnDescriptor.getDefaultInfo() != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			dm.clearDependencies(
                 lcc, columnDescriptor.getDefaultDescriptor(dd));
 		}
@@ -1464,6 +1506,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		//Now go through each trigger on this table and see if the column 
 		//being dropped is part of it's trigger columns or trigger action 
 		//columns which are used through REFERENCING clause
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TriggerDescriptor trd : dd.getTriggerDescriptors(td)) {
 			//If we find that the trigger is dependent on the column being 
 			//dropped because column is part of trigger columns list, then
@@ -1474,11 +1517,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			boolean triggerDroppedAlready = false;
 
 			int[] referencedCols = trd.getReferencedCols();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4988
 			if (referencedCols != null) {
 				int refColLen = referencedCols.length, j;
 				boolean changed = false;
 				for (j = 0; j < refColLen; j++)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					if (referencedCols[j] > droppedColumnPosition)
 	                {
 						//Trigger is not defined on the column being dropped
@@ -1521,9 +1566,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					dd.dropTriggerDescriptor(trd, tc);
 					for (j = 0; j < refColLen; j++)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 						if (referencedCols[j] > droppedColumnPosition)
 							referencedCols[j]--;
 					}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
                     trd.setReferencedCols( referencedCols );
 					dd.addDescriptor(trd, sd,
 									 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
@@ -1592,6 +1639,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						if (referencedColsInTriggerAction[j] > droppedColumnPosition)
 							referencedColsInTriggerAction[j]--;
 					}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
                     trd.setReferencedColsInTriggerAction( referencedColsInTriggerAction );
 					dd.addDescriptor(trd, sd,
 							 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
@@ -1604,11 +1652,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		int csdl_size = csdl.size();
 
 		ArrayList<ConstantAction> newCongloms = new ArrayList<ConstantAction>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		// we want to remove referenced primary/unique keys in the second
 		// round.  This will ensure that self-referential constraints will
 		// work OK.
 		int tbr_size = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		ConstraintDescriptor[] toBeRemoved = 
             new ConstraintDescriptor[csdl_size];
 
@@ -1621,6 +1671,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			boolean changed = false;
 			for (j = 0; j < numRefCols; j++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 				if (referencedColumns[j] > droppedColumnPosition)
 					changed = true;
 				if (referencedColumns[j] == droppedColumnPosition)
@@ -1633,6 +1684,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					dd.dropConstraintDescriptor(cd, tc);
 					for (j = 0; j < numRefCols; j++)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 						if (referencedColumns[j] > droppedColumnPosition)
 							referencedColumns[j]--;
 					}
@@ -1647,6 +1699,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				// Reject the DROP COLUMN, because there exists a constraint
 				// which references this column.
 				//
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 				throw StandardException.newException(
                         SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
                         dm.getActionString(DependencyManager.DROP_COLUMN),
@@ -1684,6 +1737,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			{
 				ConstraintDescriptorList fkcdl = dd.getForeignKeys(cd.getUUID());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 for (ConstraintDescriptor fkcd : fkcdl)
                 {
 					dm.invalidateFor(fkcd,
@@ -1715,6 +1769,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		 * dropped again as part of another "drop constraint".
 		 */
 		createNewBackingCongloms(newCongloms, (long[])null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
 
         /*
          * The work we've done above, specifically the possible
@@ -1727,13 +1782,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
          * stale table descriptor.
          */
 		td = dd.getTableDescriptor(tableId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1489
+//IC see: https://issues.apache.org/jira/browse/DERBY-1909
+//IC see: https://issues.apache.org/jira/browse/DERBY-1926
 
         compressTable();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
 
 		ColumnDescriptorList tab_cdl = td.getColumnDescriptorList();
 
 		// drop the column from syscolumns 
 		dd.dropColumnDescriptor(td.getUUID(), columnName, tc);		
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		ColumnDescriptor[] cdlArray = 
             new ColumnDescriptor[size - columnDescriptor.getPosition()];
 
@@ -1745,9 +1805,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		//
 		for (int i = columnDescriptor.getPosition(), j = 0; i < size; i++, j++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ColumnDescriptor cd = tab_cdl.elementAt(i);
 			dd.dropColumnDescriptor(td.getUUID(), cd.getColumnName(), tc);
 			cd.setPosition(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 			if (cd.isAutoincrement())
 			{
 				cd.setAutoinc_create_or_modify_Start_Increment(
@@ -1801,6 +1863,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// able to get to the triggers dependent on the table being altered
 		//Following will get all the dependent objects that are using
 		// ALTER TABLE table as provider
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         List<DependencyDescriptor> depsOnAlterTableList =
                 dd.getProvidersDescriptorList(td.getObjectID().toString());
 
@@ -1937,6 +2000,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				trd.getTableDescriptor(),
 				trd.getTriggerEventMask(),
                 true,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
                 null,
                 null);
 
@@ -2054,6 +2118,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             throws StandardException {
 		ColumnDescriptor columnDescriptor = 
             td.getColumnDescriptor(columnInfo[ix].name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         ColumnDescriptor newColumnDescriptor =
 			new ColumnDescriptor(columnInfo[ix].name,
@@ -2082,8 +2147,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * constraint.
 	 */
     private void modifyColumnConstraint(String colName, boolean nullability)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             throws StandardException {
 		ColumnDescriptor columnDescriptor = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             td.getColumnDescriptor(colName);
         
         // Get the type and change the nullability
@@ -2093,6 +2161,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         //check if there are any unique constraints to update
         ConstraintDescriptorList cdl = dd.getConstraintDescriptors(td);
         int columnPostion = columnDescriptor.getPosition();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3456
         for (int i = 0; i < cdl.size(); i++) 
         {
             ConstraintDescriptor cd = cdl.elementAt(i);
@@ -2110,6 +2179,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
                     //check if the backing index was created when the column
                     //not null ie is backed by unique index
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     if (! (desc.getIndexDescriptor().isUnique() ||
                            desc.getIndexDescriptor().hasDeferrableChecking())) {
                         break;
@@ -2122,6 +2192,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         ColumnDescriptor newColumnDescriptor =
 			 new ColumnDescriptor(colName,
 									columnDescriptor.getPosition(),
@@ -2131,12 +2202,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									td,
 									columnDescriptor.getDefaultUUID(),
 									columnDescriptor.getAutoincStart(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 									columnDescriptor.getAutoincInc(),
 									columnDescriptor.getAutoincCycle());
         
 		// Update the ColumnDescriptor with new default info
 		dd.dropColumnDescriptor(td.getUUID(), colName, tc);
 		dd.addDescriptor(newColumnDescriptor, td,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3456
 						 DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);		
 	}
 	/**
@@ -2188,7 +2265,22 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 												   td,
 												   defaultUUID,
 												   columnInfo[ix].autoincStart,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 												   columnInfo[ix].autoincInc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 												   columnInfo[ix].autoinc_create_or_modify_Start_Increment,
 												   columnInfo[ix].autoincCycle
 												   );
@@ -2198,14 +2290,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		dd.addDescriptor(columnDescriptor, td,
 						 DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 		if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT)
 		{
 			// adding an autoincrement default-- calculate the maximum value 
 			// of the autoincrement column.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             long maxValue = getColumnMax(td, columnInfo[ix].name,
                                          columnInfo[ix].autoincInc);
 			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
 									 maxValue, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 		} else if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART)
 		{
 			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
@@ -2215,6 +2310,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		if (
             (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
             (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART) ||
              (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE) 
             )
@@ -2229,11 +2329,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 
                 // don't clobber the current value of the sequence generator if we
                 // are just changing the increment. see DERBY-6579.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
                 if ( (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT) || (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE ))
                 {
                     currentValue = dd.peekAtIdentity( td.getSchemaName(), td.getName() );
                 }
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
                 if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE)
                 {
                     if (columnInfo[ix].autoincCycle)
@@ -2280,6 +2386,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 csca.executeConstantAction( activation );
 
                 // reset the current value of the sequence generator as necessary
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
                 if ( (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT) || (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE ) )
                 {
                     SequenceDescriptor  sequence = dd.getSequenceDescriptor
@@ -2306,6 +2417,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      * @return the top or bottom of the range
      */
     private long getRangeBound(DataTypeDescriptor dtd, int topOrBottom)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6961
         throws StandardException
     {
         TypeId typeId = dtd.getTypeId();
@@ -2364,6 +2476,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
            defaultUUID,
            oldColumnDescriptor.getAutoincStart(),
            oldColumnDescriptor.getAutoincInc(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
            ColumnDefinitionNode.MODIFY_AUTOINCREMENT_ALWAYS_VS_DEFAULT,
            oldColumnDescriptor.getAutoincCycle()
            );
@@ -2396,6 +2513,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			if (lockGranularity != '\0')
 			{
 				SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					"lockGranularity expected to be '\0', not " + 
                     lockGranularity);
 			}
@@ -2405,9 +2523,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				"constraintActions expected to be null");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		ExecRow emptyHeapRow  = td.getEmptyExecRow();
         int[]   collation_ids = td.getColumnCollationIds();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		compressHeapCC = 
             tc.openConglomerate(
                 td.getHeapConglomerateId(),
@@ -2430,14 +2550,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		/* Set up index info */
         getAffectedIndexes();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
 
 		// Get an array of RowLocation template
 		compressRL = new RowLocation[bulkFetchSize];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		indexRows  = new ExecIndexRow[numIndexes];
 		if (!compressTable)
 		{
             // must be a drop column, thus the number of columns in the
             // new template row and the collation template is one less.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			ExecRow newRow = 
                 activation.getExecutionFactory().getValueRow(
                     emptyHeapRow.nColumns() - 1);
@@ -2472,6 +2595,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		for (int i = 0; i < bulkFetchSize; i++)
 		{
 			// create a base row template
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 			baseRow[i] = td.getEmptyExecRow();
 			baseRowArray[i] = baseRow[i].getRowArray();
 			compressRL[i] = compressHeapGSC.newRowLocationTemplate();
@@ -2483,6 +2607,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 "heap",
                 emptyHeapRow.getRowArray(),
                 null, //column sort order - not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 collation_ids,
                 properties,
                 TransactionController.IS_DEFAULT,
@@ -2532,6 +2657,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		 * back the same conglomerate number
 		 */
 		// Get the ConglomerateDescriptor for the heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		long oldHeapConglom       = td.getHeapConglomerateId();
 		ConglomerateDescriptor cd = 
             td.getConglomerateDescriptor(oldHeapConglom);
@@ -2602,6 +2728,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                     final ForeignKeyConstraintDescriptor fk =
                             (ForeignKeyConstraintDescriptor)fkcd;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6668
                     throw StandardException.newException
                         ( SQLState.LANG_NO_TRUNCATE_ON_FK_REFERENCE_TABLE, td.getName() );
 				}
@@ -2609,6 +2736,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 
 		//truncate is not allowed when there are enabled DELETE triggers
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TriggerDescriptor trd : dd.getTriggerDescriptors(td)) {
 			if (trd.listensForEvent(TriggerDescriptor.TRIGGER_EVENT_DELETE) &&
 				trd.isEnabled())
@@ -2620,6 +2748,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 
 		//gather information from the existing conglomerate to create new one.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		emptyHeapRow = td.getEmptyExecRow();
 		compressHeapCC = tc.openConglomerate(
 								td.getHeapConglomerateId(),
@@ -2635,6 +2764,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		compressHeapCC = null;
 
 		//create new conglomerate
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		newHeapConglom = 
             tc.createConglomerate(
                 "heap",
@@ -2645,6 +2775,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 TransactionController.IS_DEFAULT);
 		
 		/* Set up index info to perform truncate on them*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
         getAffectedIndexes();
 		if(numIndexes > 0)
 		{
@@ -2654,6 +2785,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 			for (int index = 0; index < numIndexes; index++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5530
                 IndexRowGenerator curIndex = compressIRGs[index];
 				// create a single index row template for each index
                 indexRows[index] = curIndex.getIndexRowTemplate();
@@ -2673,6 +2805,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				int numColumnOrderings;
 				numColumnOrderings = baseColumnPositions.length + 1;
 				ordering[index]    = new ColumnOrdering[numColumnOrderings];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5530
                 collation[index]   = curIndex.getColumnCollationIds(
                                                 td.getColumnDescriptorList());
 
@@ -2768,6 +2901,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	}
 
 	private void updateIndex(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     long            newHeapConglom, 
     DataDictionary  dd,
     int             index, 
@@ -2799,6 +2933,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		properties.put("baseConglomerateId", Long.toString(newHeapConglom));
 		if (cd.getIndexDescriptor().isUnique())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			properties.put(
                 "nUniqueColumns", Integer.toString(indexRowLength - 1));
 		}
@@ -2807,6 +2942,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			properties.put(
                 "nUniqueColumns", Integer.toString(indexRowLength));
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (  cd.getIndexDescriptor().isUniqueWithDuplicateNulls() &&
              !cd.getIndexDescriptor().hasDeferrableChecking() )
 		{
@@ -2824,11 +2960,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// We can finally drain the sorter and rebuild the index
 		// Populate the index.
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         RowLocationRetRowSource cCount;
 		boolean                 statisticsExist  = false;
 
 		if (!truncateTable)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 			sorters[index].completedInserts();
 			sorters[index] = null;
 
@@ -2876,6 +3014,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				for (int i = 0; i < c.length; i++)
 				{
 					StatisticsDescriptor statDesc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 						new StatisticsDescriptor(
                             dd, 
                             dd.getUUIDFactory().createUUID(), 
@@ -2901,6 +3040,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                     "BTREE",
                     indexRows[index].getRowArray(),
                     ordering[index],
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     collation[index],
                     properties,
                     TransactionController.IS_DEFAULT);
@@ -2919,6 +3059,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		 * conglomerate.
 		 */
 		dd.updateConglomerateDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             td.getConglomerateDescriptors(indexConglomerateNumbers[index]),
             newIndexCongloms[index], 
             tc);
@@ -2950,12 +3091,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		if (! (compressTable || truncateTable))		// then it's drop column
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		    ArrayList<ConstantAction> newCongloms = new ArrayList<ConstantAction>();
 			for (int i = 0; i < compressIRGs.length; i++)
 			{
 				int[] baseColumnPositions = compressIRGs[i].baseColumnPositions();
 				int j;
 				for (j = 0; j < baseColumnPositions.length; j++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					if (baseColumnPositions[j] == droppedColumnPosition) break;
 				if (j == baseColumnPositions.length)	// not related
 					continue;
@@ -3001,10 +3144,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			 * call.
 			 */
             createNewBackingCongloms(newCongloms, indexConglomerateNumbers);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
 
 			IndexRowGenerator[] newIRGs = new IndexRowGenerator[numIndexes];
 			long[] newIndexConglomNumbers = new long[numIndexes];
 			collation = new int[numIndexes][]; 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
 
 			for (int i = 0, j = 0; i < numIndexes; i++, j++)
 			{
@@ -3026,9 +3171,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				int size = baseColumnPositions.length;
 				for (int k = 0; k < size; k++)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					if (baseColumnPositions[k] > droppedColumnPosition)
                     {
 						baseColumnPositions[k]--;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
                         rewriteBaseColumnPositions = true;
                     }
 					else if (baseColumnPositions[k] == droppedColumnPosition)
@@ -3055,6 +3202,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 							step++;
 						newBCP[k] = baseColumnPositions[k + step];
 						newIsAscending[k] = isAscending[k + step];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6890
 						newCollation[k] = collation[i][k + step];
 					}
 					IndexDescriptor id = compressIRGs[j].getIndexDescriptor();
@@ -3069,6 +3217,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3352
 			collation = new int[numIndexes][]; 
 			for (int i = 0; i < numIndexes; i++)
 			{
@@ -3122,6 +3271,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *   physical conglomerate.
 	 */
 	private void createNewBackingCongloms(ArrayList<ConstantAction> newConglomActions,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
                                           long [] ixCongNums)
 		throws StandardException
 	{
@@ -3217,6 +3367,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			// Get an index row based on the base row
 			// (This call is only necessary here because we need to pass a 
             // template to the sorter.)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 			compressIRGs[index].getIndexRow(
                 sourceRow, rl, indexRows[index], (FormatableBitSet) null);
 
@@ -3299,6 +3450,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
             int bulkFetched =
                     compressHeapGSC.fetchNextGroup(baseRowArray, compressRL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			doneScan = (bulkFetched != bulkFetchSize);
 			currentCompressRow = 0;
@@ -3323,6 +3475,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			{
 				if (currentRow == null)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					currentRow = 
                         activation.getExecutionFactory().getValueRow(
                             baseRowArray[currentCompressRow].length - 1);
@@ -3389,6 +3542,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
     public boolean needsRowLocationForDeferredCheckConstraints()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return false;
     }
 
@@ -3436,6 +3590,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 			if (currentRow.getRowArray()[i] instanceof StreamStorable)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 currentRow.getRowArray()[i].getObject();
 			}
 		}
@@ -3448,6 +3603,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		indexRows[index].getNewObjectArray();
 		// Associate the index row with the source row
 		compressIRGs[index].getIndexRow(currentRow, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                                         (RowLocation) rl.cloneValue(false),
 										indexRows[index],
 										(FormatableBitSet) null);
@@ -3480,6 +3636,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			{
 				if (sorters[index] != null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 					sorters[index].completedInserts();
 				}
 				sorters[index] = null;
@@ -3553,6 +3710,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * @exception StandardException if update to default fails
 	 */
     private void updateNewColumnToDefault(ColumnDescriptor columnDescriptor)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
             throws StandardException {
         String  columnName = columnDescriptor.getColumnName();
 
@@ -3574,6 +3732,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // This is a substatement; for now, we do not set any timeout
         // for it. We might change this behaviour later, by linking
         // timeout to its parent statement's timeout settings.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 		ResultSet rs = ps.executeSubStatement(lcc, true, 0L);
 		rs.close();
 	}
@@ -3582,9 +3741,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * computes the minimum/maximum value in a column of a table.
 	 */
     private long getColumnMax(TableDescriptor td, String columnName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4899
                               long increment)
             throws StandardException {
 		String maxStr = (increment > 0) ? "MAX" : "MIN";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5157
         String maxStmt = "SELECT  " + maxStr + "(" +
                 IdUtil.normalToDelimited(columnName) + ") FROM " +
                 IdUtil.mkQualifiedName(td.getSchemaName(), td.getName());
@@ -3593,6 +3754,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
         // This is a substatement, for now we do not set any timeout for it
         // We might change this later by linking timeout to parent statement
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 		ResultSet rs = ps.executeSubStatement(lcc, false, 0L);
 		DataValueDescriptor[] rowArray = rs.getNextRow().getRowArray();
 		rs.close();
@@ -3652,6 +3814,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	{
 		boolean foundNullable = false;
         StringBuilder constraintText = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		/* 
 		 * Check for nullable columns and create a constraint string which can
@@ -3680,6 +3843,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					// column name uses lower case characters, spaces, or
 					// other unusual characters.
 					constraintText.append(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                         IdUtil.normalToDelimited(columnNames[colCtr]));
                     constraintText.append(" IS NOT NULL ");
 				}
@@ -3694,6 +3858,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		if (foundNullable && numRows > 0)
 		{
 			if (!ConstraintConstantAction.validateConstraint(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     (String) null,
                     constraintText.toString(),
                     null, /* not used for not nullable constraints yet */
@@ -3702,6 +3867,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                     false,
                     false /* not used for not nullable constraints yet */))
 			{	
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
 				if (errorMsg.equals(SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY_OR_UNIQUE_CONSTRAINT))
 				{	//alter table add primary key
 					 //soft upgrade mode
@@ -3802,6 +3968,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	}
 
     public void offendingRowLocation(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             RowLocation rl, long containdId) throws StandardException {
         if (SanityManager.DEBUG) {
             SanityManager.NOTREACHED();

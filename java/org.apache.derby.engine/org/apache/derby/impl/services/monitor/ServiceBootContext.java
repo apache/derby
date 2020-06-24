@@ -30,6 +30,7 @@ import org.apache.derby.shared.common.error.ExceptionSeverity;
 	stop cleanup on the stack at this point.
 */
 final class ServiceBootContext extends ContextImpl {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 	ServiceBootContext(ContextManager cm) {
 		super(cm, "ServiceBoot");

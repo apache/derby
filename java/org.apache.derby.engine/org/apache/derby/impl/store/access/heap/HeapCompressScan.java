@@ -154,6 +154,8 @@ class HeapCompressScan
         else if (getScanState() == SCAN_HOLD_INIT)
         {
             reopenAfterEndTransaction();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
 
             positionAtStartForForwardScan(scan_position);
 
@@ -189,6 +191,7 @@ class HeapCompressScan
                     if (row_array[ret_row_count] == null)
                     {
                         row_array[ret_row_count] = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                           open_conglom.getRuntimeMem().get_row_for_export(
                               open_conglom.getRawTran());
                     }
@@ -262,6 +265,7 @@ class HeapCompressScan
                 // then return the maximum number and come back into the same 
                 // method to fetch the remaining rows. In this block we ensure
                 // that the scan_position is appropriate.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2549
                 if (ret_row_count >= max_rowcnt)
                 {
                     // filled group buffer, exit fetch loop and return to caller

@@ -64,12 +64,16 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
  * compiled into the update plan.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 {
 	private TransactionController 	tc;
 	private ExecRow					newBaseRow;
 	private ExecRow 					row;
 	private ExecRow 					deferredSparseRow;
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	UpdateConstantAction		constants;
 	
 	NoPutResultSet			savedSource;
@@ -121,6 +125,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
      * @param activation The activation
 	 * @exception StandardException thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     UpdateResultSet(NoPutResultSet source,
 						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
@@ -143,6 +148,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 	 * @param rsdItem  id of the Result Description saved object
 	 * @exception StandardException thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     UpdateResultSet(NoPutResultSet source,
 						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
@@ -173,6 +179,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
      * @param passedInRsd
 	 * @exception StandardException thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     UpdateResultSet(NoPutResultSet source,
 						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
@@ -185,11 +192,15 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
 		// Get the current transaction controller
         tc = activation.getTransactionController();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         this.sourceResultSet = source;
         this.generationClauses = generationClauses;
 		this.checkGM = checkGM;
 
 		constants = (UpdateConstantAction) constantAction;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		fkInfoArray = constants.getFKInfo();
 		triggerInfo = constants.getTriggerInfo();
 
@@ -197,6 +208,8 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
 		baseRowReadList = constants.getBaseRowReadList();
 		if(passedInRsd ==null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 			resultDescription = source.getResultDescription();
 		else
 			resultDescription = passedInRsd;
@@ -217,6 +230,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
 		if (fkInfoArray != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             for (FKInfo fkInfo : fkInfoArray) {
                 if (fkInfo.type == FKInfo.REFERENCED_KEY) {
                     updatingReferencedKey = true;
@@ -257,6 +271,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 			beforeUpdateCopyRequired = true;
 		}
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         identitySequenceUUIDString = constants.identitySequenceUUIDString;
         initializeAIcache(constants.getAutoincRowLocation());
 	}
@@ -268,6 +285,8 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 	{
 
 		setup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
 		autoincrementGenerated = false;
 		collectAffectedRows();
 
@@ -279,6 +298,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 		if (deferred)
 		{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             runChecker(true); // check for only RESTRICT referential
                                     // action rule violations
 			fireBeforeTriggers();
@@ -294,6 +314,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 		rowChanger.finish();
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 		saveAIcacheInformation(constants.getSchemaName(), 
 			constants.getTableName(), constants.getColumnNames());
 		cleanUp();
@@ -307,18 +330,23 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 	void setup() throws StandardException
 	{
 		super.setup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 
 		/* decode lock mode */
 		lockMode = decodeLockMode(constants.lockMode);
 
 		boolean firstOpen = (rowChanger == null);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 		rowCount = 0L;
 		
 		/* Cache query plan text for source, before it gets blown away */
 		if (lcc.getRunTimeStatisticsMode())
 		{
 			/* savedSource nulled after run time statistics generation */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 			savedSource = sourceResultSet;
 		}
 
@@ -345,6 +373,8 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 		}
 
 		verifyAutoGeneratedRScolumnsList(constants.targetUUID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
 
 		/* Open the RowChanger before the source ResultSet so that
 		 * the store will see the RowChanger's lock as a covering lock
@@ -354,6 +384,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
 		if (numOpens++ == 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 			sourceResultSet.openCore();
 		}
 		else
@@ -376,6 +409,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 		{
 			if (riChecker == null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 riChecker = new RISetChecker(lcc, tc, fkInfoArray);
 			}
 			else
@@ -393,6 +427,8 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 			{
 				deferredTempRow = RowUtil.getEmptyValueRow(numberOfBaseColumns+1, lcc);
 				oldDeletedRow = RowUtil.getEmptyValueRow(numberOfBaseColumns, lcc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 				triggerResultDescription = (resultDescription != null) ?
 									resultDescription.truncateColumns(numberOfBaseColumns+1) :
 									null;
@@ -403,7 +439,10 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 			// Get the properties on the heap
 			rowChanger.getHeapConglomerateController().getInternalTablePropertySet(properties);
 			if(beforeUpdateCopyRequired){
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 				deletedRowHolder =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 					new TemporaryRowHolderImpl(activation, properties,
 											   triggerResultDescription);
 			}
@@ -414,6 +453,8 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 			rowChanger.setRowHolder(insertedRowHolder);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
 		firstExecuteSpecialHandlingAutoGen(firstOpen, rowChanger, constants.targetUUID);
 	}	
 
@@ -459,6 +500,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
     private boolean evaluateCheckConstraints() throws StandardException     {
         boolean result = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (checkGM != null) {
             // Evaluate the check constraints. If all check constraint modes are
             // immediate, a check error will throw rather than return a false
@@ -477,6 +519,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
 		boolean rowsFound = false;
 		row = getNextRowCore(sourceResultSet);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 
 		if (row!=null)
 			rowsFound = true;
@@ -497,6 +542,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
         while ( row != null )
         {
             evaluateGenerationClauses( generationClauses, activation, sourceResultSet, row, true );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 
 			/* By convention, the last column in the result set for an
 			 * update contains a SQLRef containing the RowLocation of
@@ -522,6 +570,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 				if (triggerInfo == null)
 				{
                     boolean allOk = evaluateCheckConstraints();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     if (!allOk) {
                         DataValueDescriptor[] rw = row.getRowArray();
                         SQLRef r = (SQLRef)rw[rw.length - 1];
@@ -604,6 +653,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 				RowLocation baseRowLocation = (RowLocation)
 					(row.getColumn(resultWidth)).getObject();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (!allOk) {
                     deferredChecks =
                         DeferredConstraintsMemory.rememberCheckViolations(
@@ -632,11 +682,16 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 					** a referenced key, we'll be updating in deferred
 					** mode, so we wont get here.
 					*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     riChecker.doFKCheck(activation, newBaseRow);
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 				sourceResultSet.updateRow(newBaseRow, rowChanger);
 				rowChanger.updateRow(row,newBaseRow,baseRowLocation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1421
 
 				//beetle 3865, update cursor use index.
 				if (notifyCursor)
@@ -653,10 +708,15 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 				row = getNextRowCore(sourceResultSet);
 			}
 		}
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
         if(rowCount==1 && constants.hasAutoincrement()) 
 			lcc.setIdentityValue(identityVal);
 
@@ -668,6 +728,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 		throws StandardException
 	{
         ExecRow nextRow = super.getNextRowCore( source );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
 
         if ( (nextRow != null) && constants.underMerge() ) {
             nextRow = processMergeRow( source, nextRow );
@@ -778,6 +839,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 			{
                 double rowCnt = tableScan.getEstimatedRowCount();
 				int initCapacity = 32 * 1024;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                 if (rowCnt > 0.0)
 				{
                     rowCnt = rowCnt / 0.75 + 1.0;   // load factor
@@ -813,6 +875,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 		{
 			if (triggerInfo != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 				Vector<AutoincrementCounter> v = null;
 				if (aiCache != null)
 				{
@@ -885,6 +950,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 			deferredBaseCC = 
                 tc.openCompiledConglomerate(
                     false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                     (TransactionController.OPENMODE_SECONDARY_LOCKED |
                      TransactionController.OPENMODE_FORUPDATE),
                     lockMode,
@@ -916,7 +982,11 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
 					if (triggerInfo != null)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 						sourceResultSet.setCurrentRow(deferredTempRow);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                         allOk = evaluateCheckConstraints();
 					}
 
@@ -928,15 +998,25 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 					RowLocation baseRowLocation = 
 							(RowLocation) (rlColumn).getObject();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     if (!allOk) {
                         deferredChecks =
                             DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                                 constants.targetUUID,
                                 constants.getSchemaName(),
                                 constants.getTableName(),
                                 deferredChecks,
                                 violatingCheckConstraints,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 baseRowLocation,
                                 new CheckInfo[1]);
                     }
@@ -967,6 +1047,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 				}
 			} finally
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 				sourceResultSet.clearCurrentRow();
 				rs.close();
 			}
@@ -975,6 +1058,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
 
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
     void runChecker(boolean restrictCheckOnly)
             throws StandardException
 	{
@@ -1020,6 +1104,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
                             // call to postChecks does the actual checking, and
                             // we need at least one row intact to fulfill the
                             // constraint.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                            riChecker.doRICheck(
                                     activation,
                                     i,
@@ -1029,6 +1114,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 						}
 					}	
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                     if (restrictCheckOnly) {
                         riChecker.postCheck(i);
                     }
@@ -1074,6 +1160,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 										deletedRowHolder))
 						{
                             riChecker.doRICheck(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                                 activation,
                                 i,
                                 insertedRow,
@@ -1155,6 +1242,9 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 		numOpens = 0;
 
 		/* Close down the source ResultSet tree */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
 		if (sourceResultSet != null)
 		{
 			sourceResultSet.close();
@@ -1198,6 +1288,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
     @Override
     public void close() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
         super.close( constants.underMerge() );
     }
                                
@@ -1208,6 +1299,7 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 
     @Override
     public void rememberConstraint(UUID cid) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (violatingCheckConstraints == null) {
             violatingCheckConstraints = new ArrayList<UUID>();
         }
@@ -1226,9 +1318,14 @@ class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
      * @exception StandardException if anything goes wrong.
      */
     public NumberDataValue
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
     	getSetAutoincrementValue(int columnPosition, long increment)
     	throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
         autoincrementGenerated = true;
         int index = columnPosition - 1;	// all our indices are 0 based.
         NumberDataValue newValue;

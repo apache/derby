@@ -85,6 +85,7 @@ public class ModuleUtil
         if (!JVMInfo.isModuleAware()) { return null; }
         
         initModuleInfo();  // find all of the derby modules
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         return _derbyModules.get(moduleName);
     }
@@ -112,6 +113,7 @@ public class ModuleUtil
      * @return a stream opened on the resource or null if it was not found
      */
     public static InputStream getResourceAsStream(String resourceName)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         throws StandardException
     {
         initModuleInfo();  // find all of the derby modules
@@ -138,6 +140,7 @@ public class ModuleUtil
     private static void initModuleInfo()
     {
         if (_derbyModules != null) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         HashMap<String,java.lang.Module> result = new HashMap<String,java.lang.Module>();
         ServiceLoader<DerbyModuleAPI> loader = ServiceLoader.load(DerbyModuleAPI.class);
@@ -163,6 +166,7 @@ public class ModuleUtil
      */
     private static InputStream getResourceAsStream
       (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
          final java.lang.Module module,
          final String resourceName
        )

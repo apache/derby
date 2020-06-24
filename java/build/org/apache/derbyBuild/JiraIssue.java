@@ -71,6 +71,7 @@ class JiraIssue {
     public static List createJiraIssueList(String source)
             throws IOException {
         ArrayList<JiraIssue> jiraIssues = new ArrayList<JiraIssue>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
 
         BufferedReader in = new BufferedReader(new FileReader(source));
         String line;
@@ -79,6 +80,7 @@ class JiraIssue {
             System.out.println(line);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
         ArrayList<String> comments = new ArrayList<String>();
         int state = STATE_ADD_KEY;
         String key = null;
@@ -164,6 +166,7 @@ class JiraIssue {
      * @return true iff this issue has a release note attached
      */
     public boolean hasReleaseNote() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         return (releaseNoteAttachmentID != NO_RELEASE_NOTE &&
                 releaseNoteAttachmentID != MISSING_RELEASE_NOTE);
     }
@@ -181,6 +184,7 @@ class JiraIssue {
      * @return true iff issue has version as fixVersion
      */
     public boolean isFixedIn(String version) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         return fixVersions.contains(version);
     }
 
@@ -188,6 +192,7 @@ class JiraIssue {
      * @return URL for this Jira issue
      */
     public String getJiraAddress() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4593
         return "https://issues.apache.org/jira/browse/DERBY-" + key;
     }
 
@@ -195,6 +200,7 @@ class JiraIssue {
      * @return Full URL to the latest release note
      */
     public String getReleaseNoteAddress() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         return ATTACHMENT_BASE +
                 releaseNoteAttachmentID + "/" + ATTACHMENT_NAME;
     }

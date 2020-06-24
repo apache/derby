@@ -59,6 +59,7 @@ public class SecurityUtil {
      */
     private final static SystemPermission USE_DERBY_INTERNALS = new SystemPermission
         ( SystemPermission.ENGINE, SystemPermission.USE_DERBY_INTERNALS );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
     /**
      * Creates a (read-only) Subject representing a given user
@@ -70,6 +71,7 @@ public class SecurityUtil {
      * @see <a href="http://wiki.apache.org/db-derby/UserIdentifiers">User Names & Authorization Identifiers in Derby</a>
      */
     static public Subject createSystemPrincipalSubject(String user) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         final Set<SystemPrincipal> principals = new HashSet<SystemPrincipal>();
         // add the authenticated user
         if (user != null) {
@@ -133,6 +135,7 @@ public class SecurityUtil {
     static public void checkSubjectHasPermission(final Subject subject,
                                                  final Permission perm) {
         // the checks
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         final PrivilegedAction<Void> runCheck
             = new PrivilegedAction<Void>() {
                     public Void run() {
@@ -186,10 +189,12 @@ public class SecurityUtil {
      * to perform the indicated operation.
      */
     public  static  void    authorize( Securable operation )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         throws StandardException
     {
         LanguageConnectionContext lcc = (LanguageConnectionContext)
 				getContextOrNull( LanguageConnectionContext.CONTEXT_ID );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         if ( lcc.usesSqlAuthorization() )
         {
@@ -216,6 +221,7 @@ public class SecurityUtil {
      */
     public  static  void    checkDerbyInternalsPrivilege()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() != null )
         {
             AccessController.checkPermission( USE_DERBY_INTERNALS );

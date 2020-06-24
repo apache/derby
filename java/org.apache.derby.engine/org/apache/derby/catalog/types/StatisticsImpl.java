@@ -64,6 +64,7 @@ public class StatisticsImpl	implements Statistics, Formatable
 
     /** {@inheritDoc} */
     public long getRowEstimate() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
         return numRows;
     }
 

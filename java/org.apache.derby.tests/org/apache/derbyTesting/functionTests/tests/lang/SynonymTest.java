@@ -46,6 +46,7 @@ public class SynonymTest extends BaseJDBCTestCase {
      * Create a suite of tests.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(SynonymTest.class, "SynonymTest");
 

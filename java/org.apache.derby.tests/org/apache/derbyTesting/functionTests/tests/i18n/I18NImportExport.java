@@ -38,6 +38,7 @@ public class I18NImportExport extends ScriptTestCase {
     
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("I18NImportExport");
         suite.addTest(
                 new CleanDatabaseTestSetup(

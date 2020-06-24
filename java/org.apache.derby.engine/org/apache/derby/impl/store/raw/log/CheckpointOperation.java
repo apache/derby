@@ -132,6 +132,7 @@ public class CheckpointOperation implements Loggable
 		//redo the checkpoint if we are in roll-forward recovery only
 		if(((RawTransaction)xact).inRollForwardRecovery())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3562
 			((RawTransaction)xact).
 				checkpointInRollForwardRecovery(instant, redoLWM, undoLWM);
 		}

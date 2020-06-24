@@ -48,6 +48,7 @@ import org.apache.derby.iapi.util.IdUtil;
 
 /**
  <p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   This class represents a table descriptor. The external interface to this
   class is:
  </p>
@@ -90,6 +91,7 @@ import org.apache.derby.iapi.util.IdUtil;
 	*/
 
 public class TableDescriptor extends UniqueSQLObjectDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	implements Provider, Dependent
 {
 	public static final int BASE_TABLE_TYPE = 0;
@@ -108,6 +110,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
     public static final int ISTATS_ABSDIFF_THRESHOLD;
     public static final double ISTATS_LNDIFF_THRESHOLD;
     static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
         ISTATS_CREATE_THRESHOLD = PropertyUtil.getSystemInt(
                 Property.STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD,
                 Property.STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD_DEFAULT
@@ -162,6 +165,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
      */
     private volatile long           heapConglomNumber = -1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4895
     ColumnDescriptorList            columnDescriptorList;
 	ConglomerateDescriptorList		conglomerateDescriptorList;
 	ConstraintDescriptorList		constraintDescriptorList;
@@ -186,6 +190,8 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		(FormatableBitSet newReferencedColumnMap) {
 
         LanguageConnectionContext lcc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             (LanguageConnectionContext)getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
 
@@ -319,6 +325,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public String	getQualifiedName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4476
         return IdUtil.mkQualifiedName(getSchemaName(), getName());
 	}
 
@@ -413,6 +420,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public FormatableBitSet getReferencedColumnMap()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2861
 		return referencedColumnMapGet();
 	}
 
@@ -424,6 +432,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public void setReferencedColumnMap(FormatableBitSet referencedColumnMap)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2861
 		referencedColumnMapPut(referencedColumnMap);
 	}
 
@@ -462,6 +471,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	{
 		int					maxColumnID = 1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ColumnDescriptor cd : columnDescriptorList)
 		{
 			maxColumnID = Math.max( maxColumnID, cd.getPosition() );
@@ -548,11 +558,13 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		 throws StandardException
 	{
 		int							columnCount = getNumberOfColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		ExecRow result =
             getDataDictionary().getExecutionFactory().getValueRow(columnCount);
 
 		for (int index = 0; index < columnCount; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ColumnDescriptor cd = columnDescriptorList.elementAt(index);
 			//String name = column.getColumnName();
 			DataValueDescriptor dataValue = cd.getType().getNull();
@@ -574,6 +586,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 * @exception  StandardException  Standard exception policy.
      **/
     public int[] getColumnCollationIds()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		throws StandardException
     {
         int[] collation_ids = new int[getNumberOfColumns()]; 
@@ -581,6 +594,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		for (int index = 0; index < collation_ids.length; index++)
 		{
             ColumnDescriptor cd = columnDescriptorList.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             collation_ids[index] = cd.getType().getCollationType();
 
@@ -649,6 +663,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public boolean isSynonymDescriptor()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 		if (tableType == TableDescriptor.SYNONYM_TYPE)
 			return true;
 		return false;
@@ -663,6 +678,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	public int getTotalNumberOfIndexes()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
 		return getQualifiedNumberOfIndexes(0, false);
 	}
 
@@ -680,6 +696,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
     public int getQualifiedNumberOfIndexes(int minColCount,
                                            boolean nonUniqeTrumpsColCount) {
         int matches = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ConglomerateDescriptor cd : conglomerateDescriptorList) {
             if (cd.isIndex()) {
                 IndexRowGenerator irg = cd.getIndexDescriptor();
@@ -706,6 +723,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	(
 		int						statementType,
 		int[]					changedColumnIds,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         TriggerDescriptorList   relevantTriggers
     )
 		throws StandardException
@@ -721,6 +739,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 
 		DataDictionary				dd = getDataDictionary();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TriggerDescriptor tgr : dd.getTriggerDescriptors(this)) {
             if (tgr.needsToFire(statementType, changedColumnIds)) {
                 relevantTriggers.add(tgr);
@@ -823,6 +842,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public DependableFinder getDependableFinder()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2861
 		if (referencedColumnMapGet() == null)
 			return	getDependableFinder(StoredFormatIds.TABLE_DESCRIPTOR_FINDER_V01_ID);
 		else
@@ -838,10 +858,12 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public String getObjectName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2861
 		if (referencedColumnMapGet() == null)
 			return tableName;
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             StringBuilder name = new StringBuilder();
             name.append(tableName);
 			boolean first = true;
@@ -852,6 +874,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 				{
 					if (first)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 						name.append("(").append(cd.getColumnName());
 						first = false;
 					}
@@ -899,6 +922,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			String tempString =
 				"\n" + "schema: " + schema + "\n" +
 				"tableName: " + tableName + "\n" +
@@ -909,6 +933,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 				"heapConglomNumber: " + heapConglomNumber + "\n";
 			if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				tempString = tempString + "onCommitDeleteRows: " + "\n" +
 					onCommitDeleteRows + "\n";
 				tempString = tempString + "onRollbackDeleteRows: " + "\n" +
@@ -1050,6 +1075,8 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		throws StandardException
 	{
 		// Easier just to get a new CDL then to clean out the current one
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         this.triggerDescriptorList = new TriggerDescriptorList();
 	}
 
@@ -1244,6 +1271,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public boolean tableHasAutoincrement()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ColumnDescriptor cd : columnDescriptorList)
 		{
 			if (cd.isAutoincrement())
@@ -1319,7 +1347,9 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
      * @throws StandardException if obtaining index statistics fails
      */
     public void markForIndexStatsUpdate(long tableRowCountEstimate)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         List<StatisticsDescriptor> sdl = getStatistics();
         if (sdl.isEmpty() && tableRowCountEstimate >= ISTATS_CREATE_THRESHOLD) {
             // No statistics exists, create them.
@@ -1330,6 +1360,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
         }
 
         // Check the state of the existing indexes (if any).
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (StatisticsDescriptor sd : sdl) {
             long indexRowCountEstimate = sd.getStatistic().getRowEstimate();
             long diff = Math.abs(tableRowCountEstimate - indexRowCountEstimate);
@@ -1387,6 +1418,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		throws StandardException
 	{
         List<StatisticsDescriptor> sdl = getStatistics();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		if (cd == null)
 			return (sdl.size() > 0);
@@ -1423,6 +1455,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	{
 		UUID referenceUUID = cd.getUUID();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (StatisticsDescriptor statDesc : getStatistics())
 		{
 			if (!referenceUUID.equals(statDesc.getReferenceID()))
@@ -1447,6 +1480,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
     @Override
 	public String getDescriptorType() 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 		return (tableType == TableDescriptor.SYNONYM_TYPE) ? "Synonym" : "Table/View";
 	}
 
@@ -1536,6 +1570,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

@@ -37,6 +37,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * buffering of data is done.  Hence, for efficiency #write(byte[])
  * should be used instead of #write(int).  
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class BlobLocatorOutputStream extends OutputStream {
     
     /**
@@ -50,11 +51,14 @@ class BlobLocatorOutputStream extends OutputStream {
      * @param pos the position in the <code>BLOB</code> value at which
      *        to start writing; the first position is 1
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     BlobLocatorOutputStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientConnection connection,
         ClientBlob blob,
         long pos) throws SqlException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(blob.isLocator());
         }
@@ -95,6 +99,7 @@ class BlobLocatorOutputStream extends OutputStream {
      */
     public void write(byte[] b, int off, int len) throws IOException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         if (len == 0) return;
         if ((off < 0) || (off > b.length) || (len < 0) || 
             (off+len > b.length) || (off+len < 0)) {
@@ -120,8 +125,10 @@ class BlobLocatorOutputStream extends OutputStream {
     private void writeBytes(byte[] b) throws IOException
     {
         try {         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             blob.setBytesX(currentPos, b, 0, b.length);
             currentPos += b.length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         } catch (SqlException ex) {
             IOException ioEx= new IOException();
             ioEx.initCause(ex);

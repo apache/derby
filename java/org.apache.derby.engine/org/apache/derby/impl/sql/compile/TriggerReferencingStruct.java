@@ -26,6 +26,8 @@ package org.apache.derby.impl.sql.compile;
  * a REFERENCING clause for a trigger.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class TriggerReferencingStruct
 {
     String identifier;

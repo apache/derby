@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ValueNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -59,6 +60,8 @@ public abstract class ValueNode extends QueryTreeNode
 	** Binding will replace all untyped ValueNodes with typed ValueNodes
 	** when it figures out what their types should be.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode(ContextManager cm) {
         super(cm);
 	}
@@ -72,6 +75,8 @@ public abstract class ValueNode extends QueryTreeNode
        throws StandardException
        
        {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         setType(new DataTypeDescriptor(typeId, isNullable, maximumWidth));
        }
 
@@ -86,6 +91,8 @@ public abstract class ValueNode extends QueryTreeNode
     {
         setType(
                 new DataTypeDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             typeId,
                             precision,
                             scale,
@@ -124,6 +131,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	The DataTypeServices from this ValueNode.  This
 	 *		may be null if the node isn't bound yet.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DataTypeDescriptor getTypeServices()
 	{
 		return dataTypeServices;
@@ -178,6 +187,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	The TypeId from this ValueNode.  This
 	 *		may be null if the node isn't bound yet.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TypeId getTypeId() throws StandardException
 	{
         DataTypeDescriptor dtd = getTypeServices();
@@ -201,6 +212,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	This ValueNode's TypeCompiler
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final TypeCompiler getTypeCompiler() throws StandardException
 	{
 		return getTypeCompiler(getTypeId());
@@ -214,9 +227,12 @@ public abstract class ValueNode extends QueryTreeNode
 	 *				ValueNode
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setType(DataTypeDescriptor dataTypeServices) throws StandardException
 	{
         // bind the type in case it is a user defined type. this will create a dependency on the udt.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         if ( dataTypeServices != null )
         {
             dataTypeServices = bindUserType( dataTypeServices );
@@ -256,6 +272,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @throws StandardException
 	 */
 	protected final void setCollationUsingCompilationSchema(int collationDerivation)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
 	throws StandardException {
         setCollationInfo(
                 getSchemaDescriptor(null, false).getCollationType(),
@@ -270,6 +287,8 @@ public abstract class ValueNode extends QueryTreeNode
      * is not sourced by a column.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getSourceResultColumn()
 	{
 		return null;
@@ -298,6 +317,7 @@ public abstract class ValueNode extends QueryTreeNode
 
 	
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 		throws StandardException
 	{
@@ -319,6 +339,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @exception StandardException	Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates,
@@ -351,6 +373,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode genSQLJavaSQLTree()
 		throws StandardException
 	{
@@ -362,6 +386,8 @@ public abstract class ValueNode extends QueryTreeNode
 				"genSQLJavaSQLTree() only expected to be called on user types");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         final ContextManager cm = getContextManager();
         JavaValueNode stjvn = new SQLToJavaValueNode(this, cm);
 
@@ -391,6 +417,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -410,6 +438,7 @@ public abstract class ValueNode extends QueryTreeNode
      * @throws StandardException if an error occurs during evaluation
      * @see ConstantExpressionVisitor
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4416
     ValueNode evaluateConstantExpressions() throws StandardException {
         // We normally don't know what the node evaluates to up front, so
         // don't do anything in the default implementation.
@@ -460,6 +489,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode genEqualsFalseTree()
 			throws StandardException
 	{
@@ -469,6 +500,7 @@ public abstract class ValueNode extends QueryTreeNode
 
         falseNode = new BooleanConstantNode(false, getContextManager());
         equalsNode = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_EQUALS,
                 this,
                 falseNode,
@@ -532,6 +564,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode putAndsOnTop()
 					throws StandardException
 	{
@@ -581,6 +615,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
@@ -648,6 +684,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return the default schema name for an expression -- null
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSchemaName() throws StandardException
 	{
 		return null;
@@ -668,6 +706,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return the default table name for an expression -- null
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getTableName()
 	{
 		return null;
@@ -678,6 +718,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 */
 	public boolean updatableByCursor()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		return false;
 	}
 
@@ -687,6 +728,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return the default column name for an expression -- null.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getColumnName()
 	{
 		return null;
@@ -724,6 +767,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getClone() throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -741,6 +786,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @param oldVN		The ValueNode to copy from.
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void copyFields(ValueNode oldVN) throws StandardException
 	{
 		dataTypeServices = oldVN.getTypeServices();
@@ -754,6 +801,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions() throws StandardException
 	{
 		return this;
@@ -829,6 +878,7 @@ public abstract class ValueNode extends QueryTreeNode
 		/* If the where clause is not a built-in type, then generate a bound 
 		 * conversion tree to a built-in type.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (whereTypeId.userType())
 		{
 			whereClause = whereClause.genSQLJavaSQLTree();
@@ -895,6 +945,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * in specific cases, such as the RelationalOperators.
 	 */
 	public double selectivity(Optimizable optTable)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 		// Return 1 if additional predicates have been generated from this one.
@@ -1055,6 +1106,7 @@ public abstract class ValueNode extends QueryTreeNode
 		 * It is a good = for only the All array if
 		 * the right side is a column from this query block.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if ((arg1 instanceof ConstantNode) || (arg1.requiresTypeFromContext()))
 		{
 			setValueCols(tableColMap, eqOuterCols,
@@ -1236,6 +1288,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 */
     boolean requiresTypeFromContext()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		return false;
 	}
 
@@ -1298,6 +1351,8 @@ public abstract class ValueNode extends QueryTreeNode
 	 * 
 	 * @throws StandardException 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     abstract boolean isEquivalent(ValueNode other)
 		throws StandardException;
 
@@ -1317,6 +1372,7 @@ public abstract class ValueNode extends QueryTreeNode
      */
     boolean isSameNodeKind(ValueNode other) {
         // Default implementation does not look at kinds.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return other != null && other.getClass().equals(this.getClass());
     }
 }

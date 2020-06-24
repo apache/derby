@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.IndexToBaseRowNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -56,6 +57,8 @@ class IndexToBaseRowNode extends FromTable
 	private FormatableBitSet	allReferencedCols;
 	private FormatableBitSet	heapOnlyReferencedCols;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     IndexToBaseRowNode(
             FromBaseTable    source,
             ConglomerateDescriptor  baseCD,
@@ -71,6 +74,7 @@ class IndexToBaseRowNode extends FromTable
         super(null, tableProperties, cm);
         this.source = source;
         this.baseCD = baseCD;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( resultColumns );
         this.cursorTargetTable = cursorTargetTable;
         this.restrictionList = restrictionList;
@@ -78,6 +82,7 @@ class IndexToBaseRowNode extends FromTable
         this.heapReferencedCols = heapReferencedCols;
         this.indexReferencedCols = indexReferencedCols;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2226
 		if (this.indexReferencedCols == null) {
 			this.allReferencedCols = this.heapReferencedCols;
 			heapOnlyReferencedCols = this.heapReferencedCols;
@@ -108,6 +113,8 @@ class IndexToBaseRowNode extends FromTable
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getCostEstimate()
 	{
 		return source.getTrulyTheBestAccessPath().getCostEstimate();
@@ -165,6 +172,7 @@ class IndexToBaseRowNode extends FromTable
 
 		// Get the CostEstimate info for the underlying scan
 		setCostEstimate( getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Put the predicates back into the tree */
 		if (restrictionList != null)
@@ -198,6 +206,7 @@ class IndexToBaseRowNode extends FromTable
 			heapColRefItem = acb.addItem(heapReferencedCols);
 		}
 		int allColRefItem = -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2226
 		if (allReferencedCols != null)
 		{
 			allColRefItem = acb.addItem(allReferencedCols);
@@ -233,8 +242,10 @@ class IndexToBaseRowNode extends FromTable
         // not null, but no bits are set. This can happen when we need to get
         // all of the columns from the heap due to a check constraint.
         boolean skipPropagatedCols =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
                 indexReferencedCols != null &&
                 indexReferencedCols.getNumBitsSet() != 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         mb.push(acb.addItem(getResultColumns()
                 .buildRowTemplate(heapReferencedCols, skipPropagatedCols)));
 
@@ -242,6 +253,7 @@ class IndexToBaseRowNode extends FromTable
 		mb.push(source.getBaseTableName());
 		mb.push(heapColRefItem);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2226
 		mb.push(allColRefItem);
 		mb.push(heapOnlyColRefItem);
 
@@ -285,6 +297,7 @@ class IndexToBaseRowNode extends FromTable
 		}
 
 		mb.push(forUpdate);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
         mb.push( source.getTableDescriptor().getNumberOfColumns() );
@@ -401,6 +414,7 @@ class IndexToBaseRowNode extends FromTable
 		for (int index = 0; index < rclSize; index++)
 		{
             ResultColumn rc = getResultColumns().elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			if (indexReferencedCols != null && rc.getExpression() instanceof VirtualColumnNode)
 			{
@@ -427,11 +441,13 @@ class IndexToBaseRowNode extends FromTable
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (source != null)
 		{
 			source = (FromBaseTable)source.accept(v);

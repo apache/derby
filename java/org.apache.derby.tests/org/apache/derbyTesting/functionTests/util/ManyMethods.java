@@ -228,6 +228,7 @@ public class ManyMethods implements Serializable
 
 	public Byte ByteMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return (byte) 1;
 	}
 
@@ -238,6 +239,7 @@ public class ManyMethods implements Serializable
 
 	public Character CharacterMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 'a';
 	}
 
@@ -248,6 +250,7 @@ public class ManyMethods implements Serializable
 
 	public Double DoubleMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 1.5;
 	}
 
@@ -263,6 +266,7 @@ public class ManyMethods implements Serializable
 
 	public Float FloatMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 2.5F;
 	}
 
@@ -273,6 +277,7 @@ public class ManyMethods implements Serializable
 
 	public Integer IntegerMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 2;
 	}
 
@@ -283,6 +288,7 @@ public class ManyMethods implements Serializable
 
 	public Long LongMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 3L;
 	}
 
@@ -293,6 +299,7 @@ public class ManyMethods implements Serializable
 
 	public Short ShortMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return (short) 4;
 	}
 
@@ -303,6 +310,7 @@ public class ManyMethods implements Serializable
 
 	public Boolean BooleanMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return true;
 	}
 
@@ -455,6 +463,7 @@ public class ManyMethods implements Serializable
 
 	public static Byte staticByteMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return (byte) 1;
 	}
 
@@ -475,6 +484,7 @@ public class ManyMethods implements Serializable
 
 	public static Float staticFloatMethod()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 2.5F;
 	}
 
@@ -506,6 +516,7 @@ public class ManyMethods implements Serializable
 	public static Date staticDateMethod()
 	{
         /* August 2, 1997 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(1997, Calendar.AUGUST, 2, 0, 0, 0);

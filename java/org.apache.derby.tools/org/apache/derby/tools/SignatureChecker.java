@@ -137,6 +137,7 @@ public class SignatureChecker
     {
         try {
             Connection conn = getJ2SEConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             if ( conn == null )
             {
@@ -149,6 +150,8 @@ public class SignatureChecker
                 conn.close();
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
         } catch (SQLException t) { printThrowable( t ); }
     }
 
@@ -192,6 +195,8 @@ public class SignatureChecker
         for ( int i = 0; i < count; i++ )
         {
             SQLRoutine  procedure = getProcedure( i );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
             StringBuilder buffer = new StringBuilder();
             int             argCount = procedure.getArgCount();
 
@@ -205,6 +210,8 @@ public class SignatureChecker
             }
             buffer.append( " )" );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
             checkSignature( conn, buffer.toString(), makeReadableSignature( procedure ) );
         }
     }
@@ -235,6 +242,8 @@ public class SignatureChecker
         for ( int i = 0; i < count; i++ )
         {
             SQLRoutine  function = getFunction( i );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
             StringBuilder query = new StringBuilder();
             int             argCount = function.getArgCount();
 
@@ -251,6 +260,8 @@ public class SignatureChecker
             query.append( " ) )" );
             if ( function.isTableFunction() ) { query.append( " s" ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
             checkSignature( conn, query.toString(), makeReadableSignature( function ) );
         }
     }
@@ -265,6 +276,8 @@ public class SignatureChecker
      */
     private String  makeReadableSignature( SQLRoutine routine )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
         StringBuilder signature = new StringBuilder();
         int             argCount = routine.getArgCount();
         
@@ -273,6 +286,8 @@ public class SignatureChecker
         for ( int k = 0; k < argCount; k++ )
         {
             if ( k > 0 ) { signature.append( ", " ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
             signature.append( " " );
             signature.append( routine.getArgType( k ) );
             signature.append( " " );
@@ -346,6 +361,8 @@ public class SignatureChecker
     {
         try {
             ResultSet   rs = dbmd.getFunctions(null, null, WILDCARD);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
 
             while( rs.next() )
             {
@@ -357,6 +374,8 @@ public class SignatureChecker
 
                 boolean isTableFunction =
                     functionType == DatabaseMetaData.functionReturnsTable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
 
                 putFunction( schema, name, isTableFunction );
             }
@@ -380,6 +399,8 @@ public class SignatureChecker
         throws SQLException
     {
         int     count = _functions.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
         for ( int i = 0; i < count; i++ )
         {
             SQLRoutine  function = getFunction( i );
@@ -395,6 +416,7 @@ public class SignatureChecker
                 // Skip all columns in the returned result set if this is a
                 // table function.
                 //
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 if ( columnType == DatabaseMetaData.functionReturn ) { continue; }
                 if ( columnType == DatabaseMetaData.functionColumnResult ) { continue; }
 
@@ -447,6 +469,8 @@ public class SignatureChecker
         try {
             Class.forName( "org.apache.derby.jdbc.EmbeddedDriver" );
             Class.forName( "org.apache.derby.jdbc.ClientDriver" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
             Class.forName( "java.sql.DriverManager" );
         } catch (ClassNotFoundException t) {}
 
@@ -520,6 +544,7 @@ public class SignatureChecker
      */
     private SQLRoutine getProcedure( int idx )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return _procedures.get( idx );
     }
 
@@ -543,6 +568,7 @@ public class SignatureChecker
      */
     private SQLRoutine getFunction( int idx )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return _functions.get( idx );
     }
 
@@ -555,6 +581,7 @@ public class SignatureChecker
      */
     private static String formatMessage(String key, Object... args)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         return getMessageFormatter().getTextMessage(key, args);
     }
     
@@ -599,6 +626,7 @@ public class SignatureChecker
         {
             if ( args == null ) { return; }
             if ( args.length != 1 ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             _j2seConnectionUrl = args[ 0 ];
             _isValid = true;
@@ -631,6 +659,8 @@ public class SignatureChecker
         public  String  toString()
         {
             StringBuilder    buffer = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6638
+//IC see: https://issues.apache.org/jira/browse/DERBY-6639
 
             buffer.append( "SQLRoutine( " );
             buffer.append( _schema );

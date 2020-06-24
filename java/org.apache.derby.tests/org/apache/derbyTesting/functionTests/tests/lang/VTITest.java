@@ -38,8 +38,10 @@ import org.apache.derbyTesting.junit.JDBC;
 
      public static Test suite()
      {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
          BaseTestSuite suite = new BaseTestSuite("VTITest");
          // requires DriverManager support
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
          if (JDBC.vmSupportsJDBC3()) {
             suite.addTest(new VTITest("bulkInsertVtiTest", "WAREHOUSE"));
             // Run the same test again, but now insert into a table whose name

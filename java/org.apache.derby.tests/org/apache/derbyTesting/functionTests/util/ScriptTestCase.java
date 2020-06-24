@@ -50,6 +50,8 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	 */
 	public ScriptTestCase(String script, boolean useSystemProperties)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
         this(script, null, null, null);
         this.useSystemProperties = useSystemProperties;
 	}
@@ -62,6 +64,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	 */
 	public ScriptTestCase(String script)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1726
         this(script, null, null, null);
 	}
 	
@@ -74,6 +77,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
      */
     public ScriptTestCase(String script, String encoding)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1726
         this(script, encoding, encoding, null);
     }
 
@@ -90,9 +94,11 @@ public abstract class ScriptTestCase extends CanonTestCase {
      * @param user       Run script as user
      */
     public ScriptTestCase(String script,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1726
             String inputEnc, String outputEnc, String user)
     {
         super(script, outputEnc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5342
         setSystemProperty("ij.showNoConnectionsAtStart", "true");
         setSystemProperty("ij.showNoCountForSelect", "true");
         inputEncoding = (inputEnc == null) ? DEFAULT_ENCODING : inputEnc;
@@ -126,7 +132,9 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	{
         // Need the tools to run the scripts as this
         // test uses ij as the script runner.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         if (!Derby.hasTools())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("empty: no tools support");
             
 		// No decorator needed currently.
@@ -160,6 +168,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
 		InputStream sqlIn = openTestResource(sql);
 
 		Connection conn;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3886
 
 		if (user != null) {
 			conn = openUserConnection(user);
@@ -167,6 +176,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
 			conn = getConnection();
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1726
         final String outputEnc;
         final String derby_ui_codeset = getSystemProperty("derby.ui.codeset");
 
@@ -190,6 +200,8 @@ public abstract class ScriptTestCase extends CanonTestCase {
 				sqlIn,
 				inputEncoding,
                 getOutputStream(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
 				outputEnc,
                 useSystemProperties);
 		
@@ -207,9 +219,11 @@ public abstract class ScriptTestCase extends CanonTestCase {
     protected void setUp() {
         oldLocale = Locale.getDefault();
         LocaleTestSetup.setDefaultLocale(Locale.US);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Reset IJ's locale to allow it to pick up the new locale from
         // the environment.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5217
         LocalizedResource.resetLocalizedResourceCache();
     }
 
@@ -220,8 +234,10 @@ public abstract class ScriptTestCase extends CanonTestCase {
         super.tearDown();
 
         LocaleTestSetup.setDefaultLocale(oldLocale);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Forget the locale used by this test.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5217
         LocalizedResource.resetLocalizedResourceCache();
     }
 }

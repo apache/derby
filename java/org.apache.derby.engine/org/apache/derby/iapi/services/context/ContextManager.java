@@ -82,6 +82,7 @@ public class ContextManager
 		// expensive, but those operations are infrequent.
 		private Context top_ = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-938
 		void push(Context context) { 
 			stack_.add(context); 
 			top_ = context; 
@@ -89,6 +90,7 @@ public class ContextManager
 		void pop() {
 			stack_.remove(stack_.size()-1);
 			top_ = stack_.isEmpty() ? 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 null : stack_.get(stack_.size()-1);
 		}
 		void remove(Context context) {
@@ -103,7 +105,9 @@ public class ContextManager
 		}
 		boolean isEmpty() { return stack_.isEmpty(); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         List<Context> getUnmodifiableList() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2884
 			return view_;
 		}
 	}
@@ -136,6 +140,7 @@ public class ContextManager
 		checkInterrupt();
 		final String contextId = newContext.getIdName();
 		CtxStack idStack = ctxTable.get(contextId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		// if the stack is null, create a new one.
 		if (idStack == null) {
@@ -159,6 +164,7 @@ public class ContextManager
 	public Context getContext(String contextId) {
 		checkInterrupt();
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		final CtxStack idStack = ctxTable.get(contextId);
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT( idStack == null ||
@@ -181,6 +187,7 @@ public class ContextManager
 
 		// remove the top context from the global stack
 		Context theContext = holder.remove(holder.size()-1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		// now find its id and remove it from there, too
 		final String contextId = theContext.getIdName();
@@ -210,6 +217,7 @@ public class ContextManager
 
 		final String contextId = theContext.getIdName();
 		final CtxStack idStack = ctxTable.get(contextId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		// now remove it from its id's stack.
 		idStack.remove(theContext);
@@ -218,6 +226,7 @@ public class ContextManager
     /**
      * Is the ContextManager empty containing no Contexts.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
     final boolean isEmpty()
     {
         return holder.isEmpty();
@@ -236,7 +245,9 @@ public class ContextManager
 	 * @see org.apache.derby.iapi.sql.conn.StatementContext#resetSavePoint()
 	 */
     public final List<Context> getContextStack(String contextId) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		final CtxStack cs = ctxTable.get(contextId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return cs == null ?
                Collections.<Context>emptyList() :
                cs.getUnmodifiableList();
@@ -267,6 +278,7 @@ public class ContextManager
 		if (error instanceof ThreadDeath)
 			seenThreadDeath = (ThreadDeath) error;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4010
         if (error instanceof PassThroughException) {
             error = error.getCause();
         }
@@ -279,6 +291,7 @@ public class ContextManager
 			if (! shutdown)
 			{
 				// report an id for the message if possible
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ContextImpl lcc =
                         (ContextImpl)getContext(ContextId.LANG_CONNECTION);
 				if (lcc != null) {
@@ -297,6 +310,7 @@ public class ContextManager
 			
 			if (!shutdown)		// Do this only during normal processing.
 			{	
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 				ContextImpl sc = (ContextImpl) getContext(org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
 				// Output the SQL statement that failed in the log file.
 				if (sc != null)
@@ -341,6 +355,7 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 						break;
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					Context ctx = (holder.get(index));
 					lastHandler = ctx.isLastHandler(errorSeverity);
 
@@ -551,6 +566,9 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
      */
     public int getErrorSeverity(Throwable error) {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4856
+//IC see: https://issues.apache.org/jira/browse/DERBY-4929
+//IC see: https://issues.apache.org/jira/browse/DERBY-289
         if (error instanceof StandardException) {
             return ((StandardException) error).getErrorCode();
         }

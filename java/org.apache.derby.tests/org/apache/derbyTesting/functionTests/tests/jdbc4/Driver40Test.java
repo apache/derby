@@ -71,6 +71,7 @@ public class Driver40Test extends BaseJDBCTestCase
     {
         if (JDBC.vmSupportsJSR169())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "DriverTest40 tests java.sql.Driver, not supported with JSR169");
         }

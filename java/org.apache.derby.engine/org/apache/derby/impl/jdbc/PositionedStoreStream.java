@@ -59,6 +59,7 @@ import org.apache.derby.iapi.types.Resetable;
 public class PositionedStoreStream
     extends InputStream
     implements PositionedStream, Resetable {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3935
 
     /** Underlying store stream serving bytes. */
     //@GuardedBy("EmbedConnection.getConnectionSynchronization()")
@@ -83,6 +84,7 @@ public class PositionedStoreStream
      * @param in a {@link Resetable}-stream
      */
     public PositionedStoreStream(InputStream in)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3970
             throws IOException, StandardException {
         this.stream = in;
         // We need to know the stream is in a consistent state.
@@ -100,6 +102,7 @@ public class PositionedStoreStream
      */
     public int read(byte[] b)
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3735
         return read(b, 0, b.length);
     }
 
@@ -114,6 +117,7 @@ public class PositionedStoreStream
     public int read(byte[] b, int off, int len)
             throws IOException {
         int ret = this.stream.read(b, off, len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3735
         if (ret > -1) {
             this.pos += ret;
         }
@@ -129,6 +133,7 @@ public class PositionedStoreStream
     public int read()
             throws IOException {
         int ret = this.stream.read();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3735
         if (ret > -1) {
             this.pos++;
         }
@@ -157,6 +162,7 @@ public class PositionedStoreStream
      */
     public void resetStream()
             throws IOException, StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3781
         ((Resetable)this.stream).resetStream();
         this.pos = 0L;
     }
@@ -169,6 +175,7 @@ public class PositionedStoreStream
      */
     public void initStream()
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3781
         ((Resetable)this.stream).initStream();
     }
 
@@ -178,6 +185,7 @@ public class PositionedStoreStream
      * @see Resetable#closeStream
      */
     public void closeStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3781
         ((Resetable)this.stream).closeStream();
     }
 
@@ -202,17 +210,20 @@ public class PositionedStoreStream
      */
     public void reposition(final long requestedPos)
             throws IOException, StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3935
         if (SanityManager.DEBUG) {
             if (requestedPos < 0) {
                 SanityManager.THROWASSERT("Negative position: " + requestedPos);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3781
         if (this.pos > requestedPos) {
             // Reset stream to reposition from start.
             resetStream();
         }
         if (this.pos < requestedPos) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
                 InputStreamUtil.skipFully(stream, requestedPos - pos);
             } catch (EOFException eofe) {
                 // A position after the end of the stream was requested.
@@ -235,6 +246,7 @@ public class PositionedStoreStream
     }
 
     public InputStream asInputStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3935
         return this;
     }
 

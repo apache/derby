@@ -47,6 +47,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * connections.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4157
 class UpgradeRun extends UpgradeClassLoader
 {
 
@@ -68,6 +69,7 @@ class UpgradeRun extends UpgradeClassLoader
      */
 
     static final AdditionalDb[] ADDITIONAL_DBS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3191
         new AdditionalDb("COLLATED_DB_10_3", true), // db with territory
                                                     // based collation
         new AdditionalDb("NO_ENCRYPT_10_2", true),
@@ -79,11 +81,14 @@ class UpgradeRun extends UpgradeClassLoader
     
     public static Test suite(final int[] version, boolean useCreateOnUpgrade) {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4157
         ClassLoader oldLoader = makeClassLoader( version );
         
         // If no jars then just skip.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         if (oldLoader == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite = new BaseTestSuite(
                     "Empty: Skipped upgrade Tests (no jars) for " + getTextVersion(version));
             return suite;
@@ -97,6 +102,7 @@ class UpgradeRun extends UpgradeClassLoader
         // forces us into embedded mode for releases
         // prior to 10.2.2.0.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (JVMInfo.isModuleAware() && lessThan(version, new int[] {10, 2, 2, 0}))
         {
             BaseTestSuite suite = new BaseTestSuite
@@ -123,6 +129,7 @@ class UpgradeRun extends UpgradeClassLoader
             case UpgradeChange.PH_POST_SOFT_UPGRADE:
             case UpgradeChange.PH_POST_HARD_UPGRADE:
                 loader = oldLoader;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 phaseForOldRelease = true;
                 break;
             case UpgradeChange.PH_SOFT_UPGRADE:
@@ -133,6 +140,7 @@ class UpgradeRun extends UpgradeClassLoader
             String testName = getTextVersion(version)
               + " Upgrade Phase: " + UpgradeChange.PHASES[phase] + " ";
             Test phaseTests = baseSuite(testName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
                     phase, version);
             
             Test phaseSet = new PhaseChanger(phaseTests, phase, loader, version, useCreateOnUpgrade);
@@ -145,6 +153,7 @@ class UpgradeRun extends UpgradeClassLoader
         
         for (int i = 0; i < ADDITIONAL_DBS.length; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3191
             if (ADDITIONAL_DBS[i].shutDown) {
                 setup = TestConfiguration.additionalDatabaseDecorator(
                     setup, ADDITIONAL_DBS[i].logicalName);
@@ -156,6 +165,7 @@ class UpgradeRun extends UpgradeClassLoader
         
         Properties preReleaseUpgrade = new Properties();
         preReleaseUpgrade.setProperty(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 Property.ALPHA_BETA_ALLOW_UPGRADE, "true");
         
         setup = new SystemPropertyTestSetup(setup, preReleaseUpgrade);
@@ -246,6 +256,7 @@ class UpgradeRun extends UpgradeClassLoader
      * 
      */
     private static Test baseSuite(String name, int phase, int[] version) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         
         int oldMajor = version[0];
@@ -253,6 +264,7 @@ class UpgradeRun extends UpgradeClassLoader
 
         // No connection is expected in the post hard upgrade
         // phase, so don't bother adding test fixtures.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         if (phase != UpgradeChange.PH_POST_HARD_UPGRADE)
         {
             suite.addTest(BasicSetup.suite());
@@ -262,6 +274,7 @@ class UpgradeRun extends UpgradeClassLoader
                     suite.addTest(Changes10_1.suite());
                 if (oldMinor < 2)
                    suite.addTest(Changes10_2.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2385
                 if (oldMinor < 3) {
                    //Pass the phase as a parameter to the
                    //suite method that will enable the test to add existing
@@ -269,24 +282,32 @@ class UpgradeRun extends UpgradeClassLoader
                    //run. 
                    suite.addTest(Changes10_3.suite(phase));
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3040
                 if (oldMinor < 4)
                 	suite.addTest(Changes10_4.suite(phase));
                 if (oldMinor < 5)
                 	suite.addTest(Changes10_5.suite(phase));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4281
                 if (oldMinor < 6)
                 	suite.addTest(Changes10_6.suite(phase));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4657
                 if (oldMinor < 7)
                 	suite.addTest(Changes10_7.suite(phase));
                 if (oldMinor < 9)
                 	suite.addTest(Changes10_9.suite(phase));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5578
                 if (oldMinor < 10)
                 	suite.addTest(Changes10_10.suite(phase));
                 if (oldMinor < 11)
                     suite.addTest(Changes10_11.suite(phase));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
                 if (oldMinor < 12)
                     suite.addTest(Changes10_12.suite(phase));
                 if (oldMinor < 13)
                     suite.addTest(Changes10_13.suite(phase));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6962
                 if (oldMinor < 14)
                     suite.addTest(Changes10_14.suite(phase));
             }
@@ -296,6 +317,8 @@ class UpgradeRun extends UpgradeClassLoader
             // an area that is subject to bugs. Here we run
             // all or a subset of DatabaseMetaData tests
             // as required.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
             switch (phase) {
             case UpgradeChange.PH_CREATE:
                 // No need to test, should have been covered
@@ -319,15 +342,22 @@ class UpgradeRun extends UpgradeClassLoader
             // of DatabaseMetaData should be available.
             case UpgradeChange.PH_SOFT_UPGRADE:
             case UpgradeChange.PH_HARD_UPGRADE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                 runDataBaseMetaDataTest(suite, oldMinor);
                 break;
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         else
         {
             suite.addTest(new BasicSetup("noConnectionAfterHardUpgrade"));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
+//IC see: https://issues.apache.org/jira/browse/DERBY-4835
+//IC see: https://issues.apache.org/jira/browse/DERBY-5289
+//IC see: https://issues.apache.org/jira/browse/DERBY-5105
+//IC see: https://issues.apache.org/jira/browse/DERBY-5263
         if (phase == UpgradeChange.PH_SOFT_UPGRADE &&
                 suffersFromDerby4835or5289(version)) {
             // If the old version suffers from DERBY-4835 or DERBY-5289,
@@ -392,6 +422,7 @@ class UpgradeRun extends UpgradeClassLoader
         // we need to tell the JUnit infratructure not to
         // look for the  40 datasources (e.g. EmbeddedDataSource40)
         boolean oldReleaseNeedsJDBC3 = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         switch (phase)
         {
         case UpgradeChange.PH_CREATE:
@@ -423,6 +454,7 @@ class UpgradeRun extends UpgradeClassLoader
      * Note also, that this does not execute fixture initialCompilationTest.
      */
     private static void runDataBaseMetaDataTest (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite, int oldMinor)
     {
         BaseTestSuite dmdSuite =
@@ -438,11 +470,13 @@ class UpgradeRun extends UpgradeClassLoader
             String name = m.getName();
             if (name.startsWith("test"))
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 if ((!(name.equals("testGetTablesModify") && oldMinor < 1)) &&
                    // these two tests will fail with versions before 10.2.1.6
                    // because of missing support for grant/revoke/privileges
                    (!(name.equals("testGetTablePrivileges") && oldMinor <2)) &&
                    (!(name.equals("testGetColumnPrivileges") && oldMinor <2)))
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
                     dmdSuite.addTest(new DatabaseMetaDataTest(name));
             }
         }
@@ -455,6 +489,7 @@ class UpgradeRun extends UpgradeClassLoader
 
 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3191
 class AdditionalDb
 {
     final String logicalName;

@@ -149,6 +149,7 @@ public class T_Recovery extends T_Generic {
 		Tests in here come in pairs (Snnn Rnnn), one to set it up, one to test
 		it after recovery.  Information that needs to be passed from the setup
 		to the recovery should, ideally, be written out to a database.  For
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		now, it is written out as a pair of (key,value) long in the file
 		T_Recovery.info.
 
@@ -157,6 +158,7 @@ public class T_Recovery extends T_Generic {
 		your key.  Multiple invocations which needs paramaters saved should
 		be encoded futher.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		001 &lt; nnn &lt; 200 -  no recovery undo
 		200 &lt; nnn &lt; 400 -  recovery undo
 
@@ -171,6 +173,7 @@ public class T_Recovery extends T_Generic {
 
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			uuidfactory = getMonitor().getUUIDFactory();
 			if (uuidfactory == null) {
 				throw T_Fail.testFailMsg("UUIDFactory.MODULE not found");
@@ -180,9 +183,11 @@ public class T_Recovery extends T_Generic {
 			startParams = T_Util.setEncryptionParam(startParams);
 
 			contextService = getContextService();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			if (testRecovery)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				if (!startPersistentService(testService, startParams))
 					throw T_Fail.testFailMsg("Monitor didn't know how to restart service: " + testService);
 				factory = (RawStoreFactory) findService(getModuleToTestProtocolName(), testService);
@@ -205,6 +210,7 @@ public class T_Recovery extends T_Generic {
 				// keep all log files for diagnostics
 				startParams.put(RawStoreFactory.KEEP_TRANSACTION_LOG, "true");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 																  testService,
 																  startParams);
@@ -4097,12 +4103,14 @@ public class T_Recovery extends T_Generic {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

@@ -46,14 +46,17 @@ public class OETest extends BaseJDBCTestCase {
     
       
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Order Entry");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
         suite.addTest(Schema.suite());
         // Test load part
         suite.addTest(new Populate("testLoad"));
         // perform checks tests.
         suite.addTest(Checks.suite());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         suite.addTestSuite(OperationsTester.class);
         suite.addTestSuite(OETest.class);
         

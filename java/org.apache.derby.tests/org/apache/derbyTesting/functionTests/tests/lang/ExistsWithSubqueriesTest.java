@@ -74,6 +74,7 @@ public class ExistsWithSubqueriesTest extends BaseJDBCTestCase {
     public static Test suite()
     {
        BaseTestSuite suite = new BaseTestSuite("EXISTS with SET operations");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         /* This is a language/optimization test so behavior will be the
          * same for embedded and client/server.  Therefore we only need

@@ -56,6 +56,7 @@ public abstract class StatementPermission
 	public abstract void check( LanguageConnectionContext lcc,
 								boolean forGrant,
 								Activation activation) throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 
 	/**
 	 * 
@@ -79,6 +80,7 @@ public abstract class StatementPermission
 	 */
 	public abstract PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
 	throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 
     /**
      * Return true if the passed in permission matches the one required by this
@@ -115,6 +117,7 @@ public abstract class StatementPermission
 		TransactionController tc = lcc.getTransactionExecute();
 		ExecPreparedStatement ps = activation.getPreparedStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         PermissionsDescriptor perm =
             getPermissionDescriptor( lcc.getCurrentUserId(activation), dd );
 		if( !isCorrectPermission( perm ) ) { perm = getPermissionDescriptor(Authorizer.PUBLIC_AUTHORIZATION_ID, dd ); }
@@ -137,6 +140,7 @@ public abstract class StatementPermission
 			String dbo = dd.getAuthorizationDatabaseOwner();
 			RoleGrantDescriptor rd = dd.getRoleGrantDescriptor
                 (role, lcc.getCurrentUserId(activation), dbo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 			if (rd == null) {
 				rd = dd.getRoleGrantDescriptor(
@@ -209,6 +213,7 @@ public abstract class StatementPermission
 				(forGrant
 				 ? SQLState.AUTH_NO_GENERIC_PERMISSION_FOR_GRANT
 				 : SQLState.AUTH_NO_GENERIC_PERMISSION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 lcc.getCurrentUserId(activation),
                 privilegeType,
 				getObjectType(),

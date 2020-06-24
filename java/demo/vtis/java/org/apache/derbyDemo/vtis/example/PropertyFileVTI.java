@@ -106,6 +106,7 @@ public    class   PropertyFileVTI  extends FlatFileVTI
         String[]    newRow = new String[ COLUMN_NAMES.length ];
         String      nextLine = null;
         String      oldLine = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3129
 
         while( true )
         {
@@ -144,9 +145,11 @@ public    class   PropertyFileVTI  extends FlatFileVTI
         int         equalsIdx = nextLine.indexOf( '=' );
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3129
             if ( equalsIdx >= 0 )
             {
                 newRow[ PROPERTY_KEY ] = nextLine.substring( 0, equalsIdx );
+//IC see: https://issues.apache.org/jira/browse/DERBY-3129
                 newRow[ PROPERTY_VALUE ] = nextLine.substring( equalsIdx + 1, nextLine.length() );
             }
             else

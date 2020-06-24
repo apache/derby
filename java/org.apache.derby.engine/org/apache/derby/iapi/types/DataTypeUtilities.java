@@ -35,6 +35,7 @@ public abstract class DataTypeUtilities  {
     /** Clone a Timestamp because they are mutable */
     public  static  Timestamp   clone( Timestamp original )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
         return original == null ? null : (Timestamp) original.clone();
     }
     
@@ -55,10 +56,12 @@ public abstract class DataTypeUtilities  {
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:
 		case Types.BLOB:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         case Types.SQLXML:
 				return dtd.getMaximumWidth();
 			case Types.SMALLINT:
 				return 5;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN:
 				return 1;
 		}
@@ -98,6 +101,7 @@ public abstract class DataTypeUtilities  {
 		          typeId == Types.VARCHAR ||
 		          typeId == Types.CLOB ||
 		          typeId == Types.LONGVARCHAR ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                   typeId == Types.SQLXML);
 	}
 	/**
@@ -148,6 +152,7 @@ public abstract class DataTypeUtilities  {
 		switch (typeId)
 		{
 			case Types.TIMESTAMP:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
 				size = 29;
 				break;
 			case Types.DATE:
@@ -164,6 +169,7 @@ public abstract class DataTypeUtilities  {
 				break;
 			case Types.REAL :
 			case Types.FLOAT :
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
 				size = 15;
 				break;
 			case Types.DOUBLE:
@@ -186,6 +192,7 @@ public abstract class DataTypeUtilities  {
 				size = 20;
 				break;
 			case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN:
 				// Types.BIT == SQL BOOLEAN, so 5 chars for 'false'
 				// In JDBC 3.0, Types.BIT or Types.BOOLEAN = SQL BOOLEAN
@@ -194,6 +201,7 @@ public abstract class DataTypeUtilities  {
 			default: 
 				// MaximumWidth is -1 when it is unknown.
 				int w = storageLength;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 size = (w > 0 ? w : JDBC40Translation.DEFAULT_COLUMN_DISPLAY_SIZE);
 				break;
 		}
@@ -216,6 +224,7 @@ public abstract class DataTypeUtilities  {
 	// 1. If scale = 0, only sign should be added to precision.
 	// 2. scale=precision, 3 should be added to precision for sign, decimal and an additional char '0'.
 	// 3. precision > scale > 0, 2 should be added to precision for sign and decimal.
+//IC see: https://issues.apache.org/jira/browse/DERBY-836
 	return (scale ==0) ? (precision +1) : ((scale == precision) ? (precision + 3) : (precision + 2));
     }
 }

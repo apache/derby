@@ -115,6 +115,7 @@ public class UDTAliasInfo implements AliasInfo, Formatable
      * needed to recreate this alias.
      */
 	public String toString() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4485
 		return "LANGUAGE JAVA";
 	}
 

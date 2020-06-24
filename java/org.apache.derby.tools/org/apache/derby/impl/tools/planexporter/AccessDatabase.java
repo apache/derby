@@ -80,6 +80,7 @@ public class AccessDatabase {
      */
     public AccessDatabase(String dburl, String aSchema, String aQuery)
             throws InstantiationException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    ClassNotFoundException, SQLException, NoSuchMethodException, InvocationTargetException
     {
         this(createConnection(dburl), aSchema, aQuery);
@@ -115,6 +116,7 @@ public class AccessDatabase {
      */
     private static Connection createConnection(String dbURL)
             throws InstantiationException, IllegalAccessException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    ClassNotFoundException, SQLException, NoSuchMethodException,
                    InvocationTargetException
     {
@@ -149,6 +151,7 @@ public class AccessDatabase {
      */
     private boolean schemaExists() throws SQLException {
     	ResultSet result = conn.getMetaData().getSchemas();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6297
         try {
             while (result.next()) {
                 if (result.getString(1).equals(schema)) {
@@ -590,6 +593,7 @@ public class AccessDatabase {
      * @return data array of TreeNode Objects
      */
     public TreeNode[] getData() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6197
         return (TreeNode[]) ToolUtils.copy( data );
     }
 }

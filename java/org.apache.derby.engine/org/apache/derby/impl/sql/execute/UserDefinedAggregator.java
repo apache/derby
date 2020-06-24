@@ -95,6 +95,7 @@ public final class UserDefinedAggregator  implements ExecAggregator
         String  aggregateName = udaClass.getName();
         
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             _aggregator = (Aggregator) udaClass.getConstructor().newInstance();
             _aggregator.init();
         }

@@ -117,6 +117,8 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
 
         s.executeUpdate("alter table bug4579 add column c12 int");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5459
+//IC see: https://issues.apache.org/jira/browse/DERBY-2402
         if (usingDerbyNetClient()) {
             // DERBY-2402 Client does not report added columns.
             // Take out check when DERBY-2402 is fixed
@@ -144,6 +146,8 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         assertEquals("C13", rsmd.getColumnName(3));
 
         // Check ps metadata again
+//IC see: https://issues.apache.org/jira/browse/DERBY-5459
+//IC see: https://issues.apache.org/jira/browse/DERBY-2402
         rsmd = ps.getMetaData();
         assertEquals(3, rsmd.getColumnCount());
         assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
@@ -184,9 +188,11 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
     public void testAllDataTypesMetaData()  throws SQLException
     {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2463
         SQLUtilities.createAndPopulateAllDataTypesTable(s);
         s.close();
         PreparedStatement ps = prepareStatement("SELECT * from AllDataTypesTable");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2452
         ResultSetMetaData rsmd = ps.getMetaData();
         int colCount = rsmd.getColumnCount();
         assertEquals(17, colCount);
@@ -237,6 +243,7 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         assertEquals(5, rsmd.getScale(4));
         // COLUMN 5 REAL
         assertEquals("java.lang.Float", rsmd.getColumnClassName(5));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
         assertEquals(15, rsmd.getColumnDisplaySize(5));
         assertEquals("REALCOL", rsmd.getColumnLabel(5));
         assertEquals(java.sql.Types.REAL,rsmd.getColumnType(5));
@@ -246,6 +253,7 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         
         // COLUMN 6 DOUBLE
         assertEquals("java.lang.Double", rsmd.getColumnClassName(6));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
         assertEquals(24, rsmd.getColumnDisplaySize(6));
         assertEquals("DOUBLECOL", rsmd.getColumnLabel(6));
         assertEquals(java.sql.Types.DOUBLE,rsmd.getColumnType(6));
@@ -342,6 +350,7 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         
         // COLUMN 16 TIMESTAMP
         assertEquals("java.sql.Timestamp", rsmd.getColumnClassName(16));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
         assertEquals(29, rsmd.getColumnDisplaySize(16));
         assertEquals("TIMESTAMPCOL", rsmd.getColumnLabel(16));
         assertEquals(java.sql.Types.TIMESTAMP,rsmd.getColumnType(16));

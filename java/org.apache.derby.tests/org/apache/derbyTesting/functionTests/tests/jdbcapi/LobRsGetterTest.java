@@ -167,6 +167,7 @@ public class LobRsGetterTest
      */
     public void testBlobGettersSimple()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         _testGettersSimple("dBlob", BLOB);
     }
 
@@ -175,6 +176,7 @@ public class LobRsGetterTest
      */
     public void testClobGettersSimple()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         _testGettersSimple("dClob", CLOB);
     }
 
@@ -183,6 +185,7 @@ public class LobRsGetterTest
      */
     public void testBlobGettersSimpleNegative()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         _testGettersSimpleNegative("dBlob", BLOB);
     }
 
@@ -191,6 +194,7 @@ public class LobRsGetterTest
      */
     public void testClobGettersSimpleNegative()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         _testGettersSimpleNegative("dClob", CLOB);
     }
 
@@ -203,6 +207,7 @@ public class LobRsGetterTest
      */
     public void testBlobGettersMultiInvocation()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         _testGettersMultiInvocation("dBlob", BLOB);
     }
 
@@ -214,6 +219,7 @@ public class LobRsGetterTest
      */
     public void testClobGettersMultiInvocation()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         _testGettersMultiInvocation("dClob", CLOB);
     }
 
@@ -283,6 +289,7 @@ public class LobRsGetterTest
      * Tests that data returned by the last BLOB getter invokation is correct.
      */
     public void testCorrectBlobDataWithMultiCall()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
             throws IOException, SQLException {
         setAutoCommit(false);
         PreparedStatement psId = prepareStatement("select id from " + TABLE);

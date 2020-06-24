@@ -81,6 +81,7 @@ public class BranchRow
 	}
 
 	private BranchRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Transaction         rawtran,
     BTree               btree)
         throws StandardException
@@ -131,6 +132,7 @@ public class BranchRow
      * @exception StandardException Standard exception policy.
      */
     public static BranchRow createEmptyTemplate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Transaction         rawtran,
     BTree               btree)
         throws StandardException

@@ -86,6 +86,7 @@ public abstract class InternalClobTest
 
     protected static Test addModifyingTests(Class<? extends TestCase> theClass)
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Modifying InternalClob test suite");
         Method[] methods = theClass.getMethods();
@@ -113,6 +114,7 @@ public abstract class InternalClobTest
      * when using UTF-8 as encoding.
      */
     public void testSanity() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         assertEquals(initialByteLength,
                 initialCharLength * bytesPerChar + headerLength);
         assertTrue(initialCharLength > 25);

@@ -65,6 +65,7 @@ public  class   ApacheServerLogVTI  extends XmlVTI
      * </p>
      */
     public  ApacheServerLogVTI( InputStream is )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
         throws Exception
     {        
         super
@@ -86,6 +87,7 @@ public  class   ApacheServerLogVTI  extends XmlVTI
     public  static  ApacheServerLogVTI  apacheNaturalLogFile( String xmlResourceName )
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6482
         return new ApacheServerLogVTI( new FileInputStream( xmlResourceName ) );
     }
     
@@ -104,6 +106,7 @@ public  class   ApacheServerLogVTI  extends XmlVTI
     public String getRawColumn(int columnIndex) throws SQLException
     {
         String  columnValue = super.getRawColumn( columnIndex );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
 
         if ( "-".equals( columnValue ) ) { return null; }
         else { return columnValue; }

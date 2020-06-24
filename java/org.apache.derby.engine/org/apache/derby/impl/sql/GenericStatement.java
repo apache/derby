@@ -67,6 +67,7 @@ public class GenericStatement
 	{
 		this.compilationSchema = compilationSchema;
 		this.statementText = statementText;
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 		this.isForReadOnly = isForReadOnly;
 	}
 
@@ -82,6 +83,7 @@ public class GenericStatement
 		** Note: don't reset state since this might be
 		** a recompilation of an already prepared statement.
 		*/ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5406
 		return prepare(lcc, false);
 	}
 	public PreparedStatement prepare(LanguageConnectionContext lcc, boolean forMetaData) throws StandardException
@@ -91,7 +93,9 @@ public class GenericStatement
 		** a recompilation of an already prepared statement.
 		*/ 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5406
         final int depth = lcc.getStatementDepth();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5406
         String prevErrorId = null;
         while (true) {
             boolean recompile = false;
@@ -139,6 +143,7 @@ public class GenericStatement
                 // invalidatedWhileCompiling and isValid are protected by
                 // synchronization on the prepared statement.
                 synchronized (preparedStmt) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5406
                     if (recompile || preparedStmt.invalidatedWhileCompiling) {
                         preparedStmt.isValid = false;
                         preparedStmt.invalidatedWhileCompiling = false;
@@ -250,6 +255,7 @@ public class GenericStatement
 		{
 
 			for (;;) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4279
 
 				if (foundInCache) {
 					if (preparedStmt.referencesSessionSchema()) {
@@ -266,17 +272,21 @@ public class GenericStatement
 					return preparedStmt;
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
                 if (!preparedStmt.isCompiling()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4279
 					break;
 				}
 
 				try {
 					preparedStmt.wait();
 				} catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
 				}
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
             preparedStmt.beginCompiling();
 		}
 
@@ -296,6 +306,7 @@ public class GenericStatement
 			{
 				// since this is for compilation only, set atomic
 				// param to true and timeout param to 0
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 				statementContext = lcc.pushStatementContext(true, isForReadOnly, getSource(),
                                                             null, false, 0L);
 			}
@@ -311,6 +322,7 @@ public class GenericStatement
 			CompilerContext cc = lcc.pushCompilerContext(compilationSchema);
 			
 			if (prepareIsolationLevel != 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 				TransactionControl.UNSPECIFIED_ISOLATION_LEVEL)
 			{
 				cc.setScanIsolationLevel(prepareIsolationLevel);
@@ -355,6 +367,7 @@ public class GenericStatement
 
 				//Only top level statements go through here, nested statement
 				//will invoke this method from other places
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 				StatementNode qt = (StatementNode)
                         p.parseStatement(statementText, paramDefaults);
 
@@ -362,11 +375,13 @@ public class GenericStatement
 
                 // Call user-written tree-printer if it exists
                 walkAST( lcc, qt, ASTVisitor.AFTER_PARSE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4415
 
 				if (SanityManager.DEBUG) 
 				{
 					if (SanityManager.DEBUG_ON("DumpParseTree")) 
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 						SanityManager.GET_DEBUG_STREAM().print(
 							"\n\n============PARSE===========\n\n");
 						qt.treePrint();
@@ -375,6 +390,7 @@ public class GenericStatement
 
 					if (SanityManager.DEBUG_ON("StopAfterParsing")) 
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3946
                         lcc.setLastQueryTree( qt );
                         
 						throw StandardException.newException(SQLState.LANG_STOP_AFTER_PARSING);
@@ -398,16 +414,19 @@ public class GenericStatement
 					// transaction.
 					lcc.beginNestedTransaction(true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 					qt.bindStatement();
 					bindTime = getCurrentTimeMillis(lcc);
 
                     // Call user-written tree-printer if it exists
                     walkAST( lcc, qt, ASTVisitor.AFTER_BIND);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4415
 
 					if (SanityManager.DEBUG) 
 					{
 						if (SanityManager.DEBUG_ON("DumpBindTree")) 
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 							SanityManager.GET_DEBUG_STREAM().print(
 								"\n\n============BIND===========\n\n");
 							qt.treePrint();
@@ -456,14 +475,17 @@ public class GenericStatement
 					}
 
                     // stop adding privileges for user-defined types
+//IC see: https://issues.apache.org/jira/browse/DERBY-6491
                     cc.skipTypePrivileges( true );
                     
 					qt.optimizeStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 
 					optimizeTime = getCurrentTimeMillis(lcc);
 
                     // Call user-written tree-printer if it exists
                     walkAST( lcc, qt, ASTVisitor.AFTER_OPTIMIZE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4415
 
 					// Statement logging if lcc.getLogStatementText() is true
 					if (istream != null)
@@ -534,6 +556,7 @@ public class GenericStatement
 					{
 						if (SanityManager.DEBUG_ON("DumpOptimizedTree")) 
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 							SanityManager.GET_DEBUG_STREAM().print(
 								"\n\n============OPT===========\n\n");
 							qt.treePrint();
@@ -575,7 +598,10 @@ public class GenericStatement
 					*/
 					preparedStmt.setConstantAction( qt.makeConstantAction() );
 					preparedStmt.setSavedObjects( cc.getSavedObjects() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 					preparedStmt.setRequiredPermissionsList(cc.getRequiredPermissionsList());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5459
+//IC see: https://issues.apache.org/jira/browse/DERBY-2402
                     preparedStmt.incrementVersionCounter();
 					preparedStmt.setActivationClass(ac);
 					preparedStmt.setNeedsSavepoint(qt.needsSavepoint());
@@ -586,11 +612,13 @@ public class GenericStatement
 												qt.executeSchemaName()
 												);
 					preparedStmt.setSPSName(qt.getSPSName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-424
 					preparedStmt.completeCompile(qt);
 					preparedStmt.setCompileTimeWarnings(cc.getWarnings());
 
                     // Schedule updates of any stale index statistics we may
                     // have detected when creating the plan.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
                     TableDescriptor[] tds = qt.updateIndexStatisticsFor();
                     if (tds.length > 0) {
                         IndexStatisticsDaemon isd = lcc.getDataDictionary().
@@ -615,6 +643,7 @@ public class GenericStatement
 						bindTime - parseTime, //bind time
 						optimizeTime - bindTime, //optimize time
 						generateTime - optimizeTime, //generate time
+//IC see: https://issues.apache.org/jira/browse/DERBY-4297
 						generateTime - beginTime, //total compile time
 						beginTimestamp,
 						endTimestamp);
@@ -626,6 +655,7 @@ public class GenericStatement
 				lcc.popCompilerContext( cc );
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-730
 		catch (StandardException se)
 		{
 			if (foundInCache)
@@ -635,6 +665,7 @@ public class GenericStatement
 		}
 		finally
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
             preparedStmt.endCompiling();
 		}
 
@@ -649,6 +680,7 @@ public class GenericStatement
     /** Walk the AST, using a (user-supplied) Visitor */
     private void walkAST( LanguageConnectionContext lcc, Visitable queryTree, int phase ) throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4415
         ASTVisitor visitor = lcc.getASTVisitor();
         if ( visitor != null )
         {
@@ -727,6 +759,7 @@ public class GenericStatement
 
 			GenericStatement os = (GenericStatement) other;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 			return statementText.equals(os.statementText) && isForReadOnly==os.isForReadOnly
 				&& compilationSchema.equals(os.compilationSchema) &&
 				(prepareIsolationLevel == os.prepareIsolationLevel);

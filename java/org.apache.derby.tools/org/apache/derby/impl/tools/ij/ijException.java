@@ -123,6 +123,7 @@ public class ijException extends RuntimeException {
 		return new ijException(LocalizedResource.getMessage(NoSuchProtocol, c));
 	}
 	static ijException noSuchTable(String c) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		return new ijException(LocalizedResource.getMessage(NoSuchTable, c));
 	}
 	static ijException noUsingResults() {
@@ -147,6 +148,7 @@ public class ijException extends RuntimeException {
 		return new ijException(LocalizedResource.getMessage(ZeroInvalidForAbsolute));
 	}
 	public static ijException notAvailableForDriver(String s) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		return new ijException(
 			LocalizedResource.getMessage(NotAvailableForDriver, s));
 	}

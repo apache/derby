@@ -153,6 +153,7 @@ public class SetQueryTimeoutTest
         throws
             TestFailedException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -191,9 +192,11 @@ public class SetQueryTimeoutTest
         throws
             TestFailedException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashSet<String> ignore = new HashSet<String>();
         ignore.add("42Y55");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
         exec(conn, "drop table " + tablePrefix + "_orig", ignore);
         exec(conn, "drop table " + tablePrefix + "_copy", ignore);
     }
@@ -208,6 +211,7 @@ public class SetQueryTimeoutTest
         
         exec(conn,
              "create table " + tablePrefix + "_orig (a int)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
 
         exec(conn,
              "create table " + tablePrefix + "_copy (a int)");
@@ -245,6 +249,7 @@ public class SetQueryTimeoutTest
             throw new TestFailedException("Should not happen", e);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
         try {
             exec(conn, "DROP FUNCTION DELAY");
         } catch (Exception e) {
@@ -252,6 +257,7 @@ public class SetQueryTimeoutTest
         }
 
         exec(conn, "CREATE FUNCTION DELAY(SECONDS INTEGER, VALUE INTEGER) RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest.delay'");
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
 
         prepareTables(conn, "t");
     }
@@ -296,6 +302,7 @@ public class SetQueryTimeoutTest
             this.timeout = timeout;
             highestRunTime = 0;
             sqlException = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
             if (timeout > 0) {
                 try {
                     statement.setQueryTimeout(timeout);
@@ -437,6 +444,9 @@ public class SetQueryTimeoutTest
         // D - here just to create equal contention on conn1 and conn2
 
         PreparedStatement statementA = prepare(conn1, getFetchQuery("t"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
+//IC see: https://issues.apache.org/jira/browse/DERBY-705
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
         PreparedStatement statementB = prepare(conn1, getFetchQuery("t"));
         PreparedStatement statementC = prepare(conn2, getFetchQuery("t"));
         PreparedStatement statementD = prepare(conn2, getFetchQuery("t"));
@@ -512,6 +522,7 @@ public class SetQueryTimeoutTest
     {
         System.out.println("Testing timeout with an execute operation");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
         for (int i = 0; i < connections.length; ++i) {
             try {
                 connections[i].setAutoCommit(true);
@@ -562,6 +573,7 @@ public class SetQueryTimeoutTest
          * in this class (note that the TIMEOUT constant is in seconds,
          * while the execution time is in milliseconds). 
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
         for (int i = 0; i < executors.length; ++i) {
             int timeout =
                 (i % 2 == 0)
@@ -645,6 +657,7 @@ public class SetQueryTimeoutTest
 
     /** This tests timeout with executeUpdate call. */
     private static void testTimeoutWithExecuteUpdate(Connection conn)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1698
         throws TestFailedException
     {
     	System.out.println("Testing timeout with executeUpdate call.");
@@ -681,10 +694,12 @@ public class SetQueryTimeoutTest
     {
         System.out.println("Testing that Statement remembers timeout.");
         stmt.setQueryTimeout(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6280
         long runTime=0;
         for (int i = 0; i < 3; i++) {
             try {
                 long startTime = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6280
                 ResultSet rs = stmt.executeQuery(getFetchQuery("t"));
                 while (rs.next());
                 long endTime = System.currentTimeMillis();
@@ -710,9 +725,11 @@ public class SetQueryTimeoutTest
         System.out.println("Testing that " + name + " remembers timeout.");
         ps.setQueryTimeout(1);
         for (int i = 0; i < 3; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6280
             long runTime=0;
             try {
                 long startTime = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6280
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()); 
                 long endTime = System.currentTimeMillis();
@@ -747,6 +764,7 @@ public class SetQueryTimeoutTest
         System.out.println("Test SetQueryTimeoutTest starting");
 
         Connection[] connections = new Connection[CONNECTIONS];
+//IC see: https://issues.apache.org/jira/browse/DERBY-579
 
         try {
             // Load the JDBC Driver class
@@ -768,6 +786,7 @@ public class SetQueryTimeoutTest
             testTimeoutWithExec(connections);
             testInvalidTimeoutValue(connections[0]);
             testRememberTimeoutValue(connections[0]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1698
             testTimeoutWithExecuteUpdate(connections[0]);
   
             System.out.println("Test SetQueryTimeoutTest PASSED");

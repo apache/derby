@@ -34,10 +34,13 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
     final static String REPLICATION_DB_NOT_BOOTED              = "XRE11";
     final static String REPLICATION_NOT_IN_SLAVE_MODE          = "XRE40";
     final static String SLAVE_OPERATION_DENIED_WHILE_CONNECTED = "XRE41";
     final static String REPLICATION_SLAVE_SHUTDOWN_OK          = "XRE42";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4175
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
 
     /**
      * Creates a new instance of ReplicationRun_Local_StateTest_part1
@@ -51,6 +54,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_StateTest_part1_1 Suite");
         
@@ -80,10 +84,12 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
        initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 masterDbSubPath); // Distinguishing master/slave
                 
         startServer(slaveJvmVersion, derbySlaveVersion,
@@ -197,6 +203,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         util.DEBUG("4. testPostStartedMasterAndSlave_StopSlave: " +
                    connectionURL);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4277
         waitForConnect(100L, 10, db, slaveServerHost, slaveServerPort);
     }
 }

@@ -70,6 +70,7 @@ public interface LanguageConnectionFactory {
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 		Get a Statement
 		@param compilationSchema schema
 		@param statementText the text for the statement

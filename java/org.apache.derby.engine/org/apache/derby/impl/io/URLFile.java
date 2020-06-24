@@ -33,6 +33,7 @@ import java.net.URL;
  * This class provides a http based implementation of the StorageFile interface. It is used by the
  * database engine to access persistent data and transaction logs under the http and https subsubprotocols.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6535
 class URLFile extends InputStreamFile<URLStorageFactory>
 {
 

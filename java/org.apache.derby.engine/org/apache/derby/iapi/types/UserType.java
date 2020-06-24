@@ -255,6 +255,7 @@ public class UserType extends DataType
 	 * Get the type name of this value,  overriding
 	 * with the passed in class name (for user/java types).
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	String getTypeName(String className)
 	{
 		return className;
@@ -391,6 +392,7 @@ public class UserType extends DataType
 
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			comparison = ((java.lang.Comparable<Object>) value).compareTo(other.getObject());
 		}
 		catch (ClassCastException cce)

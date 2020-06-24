@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SingleChildResultSetNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -51,6 +52,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	// Does this node have the truly... for the underlying tree
 	protected boolean hasTrulyTheBestAccessPath;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SingleChildResultSetNode(
             ResultSetNode childResult,
             Properties tableProperties,
@@ -61,6 +64,7 @@ abstract class SingleChildResultSetNode extends FromTable
 
         /* Propagate the child's referenced table map, if one exists */
         if (childResult.getReferencedTableMap() != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             setReferencedTableMap
                 ( (JBitSet)childResult.getReferencedTableMap().clone() );
         }
@@ -86,6 +90,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @return ResultSetNode	The childResult from this node.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode getChildResult()
 	{
 		return childResult;
@@ -183,6 +189,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -234,6 +242,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @param level		The query block level for this FromTable.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLevel(int level)
 	{
 		super.setLevel(level);
@@ -286,6 +296,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList) 
@@ -295,6 +307,7 @@ abstract class SingleChildResultSetNode extends FromTable
 
 		/* Build the referenced table map */
 		setReferencedTableMap( (JBitSet) childResult.getReferencedTableMap().clone() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		return this;
 	}
@@ -311,6 +324,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
@@ -330,6 +345,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void pushExpressions(PredicateList predicateList)
 					throws StandardException
 	{
@@ -370,6 +387,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
@@ -389,6 +408,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
@@ -402,6 +423,7 @@ abstract class SingleChildResultSetNode extends FromTable
 										predicates,
 										outerRows);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setCostEstimate( getOptimizerFactory().getCostEstimate() );
 		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
@@ -416,6 +438,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		childResult = childResult.modifyAccessPaths();
@@ -429,6 +453,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode changeAccessPath() throws StandardException
 	{
 		childResult = childResult.changeAccessPath();
@@ -540,6 +566,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 */
 	protected boolean reflectionNeededForProjection()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return ! (getResultColumns().allExpressionsAreColumns(childResult));
 	}
 
@@ -569,6 +596,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * 			the final cost estimate for the child node.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
@@ -578,6 +607,7 @@ abstract class SingleChildResultSetNode extends FromTable
 		** that optimization was done directly on the child node,
 		** in which case the cost estimate will be null here.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCostEstimate() == null)
         {
 			return childResult.getFinalCostEstimate();
@@ -596,11 +626,13 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (childResult != null)
 		{
 			childResult = (ResultSetNode)childResult.accept(v);

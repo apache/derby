@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.FKConstraintDefinitionNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -47,6 +48,8 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 	int                 refActionDeleteRule;  // referential action on  delete
 	int                 refActionUpdateRule;  // referential action on update
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FKConstraintDefinitionNode(
         TableName           constraintName,
         TableName           refTableName,
@@ -93,6 +96,7 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 		}
 
 		// check the referenced table, unless this is a self-referencing constraint
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		if (refTableName.equals(ddlNode.getObjectName()))
 			return;
 
@@ -128,6 +132,7 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (ResultColumn rc : refRcl)
 			{
 				ColumnDescriptor cd = td.getColumnDescriptor(rc.getName());
@@ -136,6 +141,8 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 					// Set tableDescriptor for this column descriptor. Needed for adding required table
 					// access permission. Column descriptors may not have this set already.
 					cd.setTableDescriptor(td);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 					if (isPrivilegeCollectionRequired())
 						getCompilerContext().addRequiredColumnPriv(cd);
 				}
@@ -144,6 +151,8 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 		getCompilerContext().popCurrentPrivType();
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ConstraintInfo getReferencedConstraintInfo()
 	{
 		if (SanityManager.DEBUG)
@@ -160,6 +169,7 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 
 	int getPrivType()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		return Authorizer.REFERENCES_PRIV;
 	}
 

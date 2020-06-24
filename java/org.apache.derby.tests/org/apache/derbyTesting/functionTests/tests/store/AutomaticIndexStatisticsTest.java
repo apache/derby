@@ -73,7 +73,9 @@ public class AutomaticIndexStatisticsTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test test = new BaseTestSuite(AutomaticIndexStatisticsTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6193
         test = new CleanDatabaseTestSetup(test);
         test = TestConfiguration.additionalDatabaseDecorator(test, MASTERDB);
 
@@ -112,6 +114,7 @@ public class AutomaticIndexStatisticsTest
      */
     public void testStatsCreatedOnGrowthThenDeleteDb()
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5040
         String db = "singleUse/newCleanDb";
         DataSource ds = JDBCDataSource.getDataSource();
         JDBCDataSource.setBeanProperty(ds, "databaseName", db);
@@ -273,11 +276,14 @@ public class AutomaticIndexStatisticsTest
         // Trigger stats update on secondary table, make sure the daemon can
         // still process work.
         myStats.assertNoStatsTable(TAB2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         con.prepareStatement("select * from " + TAB2 + " where id = ?");
         myStats.assertTableStats(TAB2, 1);
         myStats.release();
 
         // Shutdown database and try to delete it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6193
         JDBCDataSource.shutdownDatabase(ds);
         assertDirectoryDeleted(constructDbPath(db));
     }
@@ -335,6 +341,8 @@ public class AutomaticIndexStatisticsTest
             
             // DERBY-6144 
             // Stats cannot have been created after the current time (future).
+//IC see: https://issues.apache.org/jira/browse/DERBY-6144
+//IC see: https://issues.apache.org/jira/browse/DERBY-5046
             assertFalse(
                 "expected stat created in past:now = " + now + 
                 ";s.created = " + s.created,
@@ -368,6 +376,8 @@ public class AutomaticIndexStatisticsTest
                     ", previous stats created " + earlier,
                     s.created.after(earlier));
             // Stats cannot have been created after the current time (future).
+//IC see: https://issues.apache.org/jira/browse/DERBY-6144
+//IC see: https://issues.apache.org/jira/browse/DERBY-5046
             assertFalse(
                 "expected stat created in past:now = " + now + 
                 ";s.created = " + s.created,
@@ -445,6 +455,7 @@ public class AutomaticIndexStatisticsTest
 
         // Select from the view, using index.
         stats.assertNoStatsTable(table);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         prepareStatement("select * from " + view + " where vcol2 = 7");
         stats.assertNoStatsTable(table);
         // Trigger update of the base table.
@@ -534,6 +545,7 @@ public class AutomaticIndexStatisticsTest
         // where we aren't supposed to.
         if (!PrivilegedFileOpsForTests.exists(dest.getParentFile())) {
             AccessController.doPrivileged(new PrivilegedAction<Void>() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
                 public Void run() {
                     assertTrue(dest.getParentFile().mkdirs());
@@ -664,6 +676,7 @@ public class AutomaticIndexStatisticsTest
         // See if the table exists, and if so, drop it.
         dropIfExists(con, table);
         // Create table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         s.executeUpdate(
                 "create table " + table + "(id int primary key, val int)");
         s.executeUpdate("create index NON_UNIQUE_INDEX_" + table + " on " +
@@ -676,6 +689,7 @@ public class AutomaticIndexStatisticsTest
         println("created " + table + ", inserting " + rows + " rows");
         insertSimple(con, table, rows, 0);
         println("completed in " + (System.currentTimeMillis() - start) + " ms");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         myStats.assertNoStatsTable(table);
     }
 
@@ -708,6 +722,7 @@ public class AutomaticIndexStatisticsTest
     private void insertSimple(Connection con, String table, int rows, int start)
             throws SQLException {
         PreparedStatement ps = con.prepareStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
                                     "insert into " + table + " values (?,?)");
         boolean autoCommit = con.getAutoCommit();
         con.setAutoCommit(false);

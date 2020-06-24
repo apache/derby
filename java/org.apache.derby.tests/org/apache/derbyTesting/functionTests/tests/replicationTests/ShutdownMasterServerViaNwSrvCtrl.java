@@ -47,6 +47,7 @@ public class ShutdownMasterServerViaNwSrvCtrl extends ShutdownMaster
         
         setEnv();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ShutdownMasterServerViaNwSrvCtrl");
 

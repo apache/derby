@@ -76,6 +76,7 @@ public class Changes10_4 extends UpgradeChange {
      * @return the test suite created.
      */   
     public static Test suite(int phase) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.4");
         
         suite.addTestSuite(Changes10_4.class);
@@ -105,6 +106,7 @@ public class Changes10_4 extends UpgradeChange {
         case PH_CREATE:
             // create the database if it was not already created. Note the
         	// JDBC url attributes.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3925
             String locale = "en";
             Locale[] availableLocales = Collator.getAvailableLocales();
             for (int i = 0; i < availableLocales.length; i++) {
@@ -470,6 +472,7 @@ public class Changes10_4 extends UpgradeChange {
                 assertStatementError ("23505", s, 
                             "insert into constraintest1 (i) values (2)");
                 //should able to drop nullablity
+//IC see: https://issues.apache.org/jira/browse/DERBY-3456
                 s.executeUpdate("alter table constraintest1 " +
                         "alter column i null");
                 //try creating index without seting column as not null
@@ -490,6 +493,8 @@ public class Changes10_4 extends UpgradeChange {
      * Verifies error messages priviously generated.
      */
     private void verifyError() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
         Statement stmt = createStatement();
         PreparedStatement ps = prepareStatement("select text " +
                                     "from errormessage where state = ?");
@@ -584,6 +589,7 @@ public class Changes10_4 extends UpgradeChange {
      * Tests if alter column works for a column in unique constraint.
      */
     public void testAlterColumnOfUniqueConstraint () throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3566
         Statement stmt = createStatement();
         switch (getPhase()) {
            case PH_CREATE:

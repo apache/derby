@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BetweenOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -32,6 +33,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class BetweenOperatorNode extends BinaryListOperatorNode
 {
     /**
@@ -110,6 +113,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 
 		/* leftO < rightOList.elementAt(0) */
         leftBCO = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_LESS_THAN,
                 leftOperand,
                 rightOperandList.elementAt(0),
@@ -126,6 +130,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 
 		/* leftO > rightOList.elementAt(1) */
         rightBCO = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_GREATER_THAN,
                 leftClone,
                 rightOperandList.elementAt(1),
@@ -161,6 +166,8 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -205,6 +212,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 		/* Create the AND <= */
 		BinaryComparisonOperatorNode lessEqual = 
             new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_LESS_EQUALS,
                 leftClone1,
                 rightOperandList.elementAt(1),
@@ -221,6 +229,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 		/* Create the AND >= */
 		BinaryComparisonOperatorNode greaterEqual = 
             new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_GREATER_EQUALS,
                 leftOperand,
                 rightOperandList.elementAt(0),
@@ -274,8 +283,12 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 
 		/* leftO >= rightOList.elementAt(0) */
         leftBCO = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_GREATER_EQUALS,
                 leftOperand,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 rightOperandList.elementAt(0),
                 false,
                 cm);
@@ -286,6 +299,9 @@ class BetweenOperatorNode extends BinaryListOperatorNode
         rightBCO = new BinaryRelationalOperatorNode(
                 BinaryRelationalOperatorNode.K_LESS_EQUALS,
                 leftOperand,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 rightOperandList.elementAt(1),
                 false,
                 cm);

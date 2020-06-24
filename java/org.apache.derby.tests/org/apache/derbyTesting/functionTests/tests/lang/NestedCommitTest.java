@@ -88,6 +88,7 @@ public final class NestedCommitTest extends BaseJDBCTestCase {
                     + "       DYNAMIC RESULT SETS 0 LANGUAGE JAVA "
                     + "       EXTERNAL NAME "
                     + "'org.apache.derbyTesting.functionTests.util.Triggers"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6516
                     + ".doConnStmt' "
                     + "    CONTAINS SQL"
                     + "       PARAMETER STYLE JAVA");
@@ -101,6 +102,7 @@ public final class NestedCommitTest extends BaseJDBCTestCase {
             st.executeUpdate("CREATE FUNCTION doConnStmtInt(TEXT CHAR(50)) "
                     + "       RETURNS INT EXTERNAL NAME "
                     + "'org.apache.derbyTesting.functionTests.util.Triggers"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6516
                     + ".doConnStmtInt' "
                     + "       LANGUAGE JAVA PARAMETER STYLE JAVA");
 

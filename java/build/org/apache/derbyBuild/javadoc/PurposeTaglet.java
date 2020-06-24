@@ -58,6 +58,7 @@ public class PurposeTaglet implements Taglet {
      */
     public String toString(DocTree tag) {
         return "<tr><td>" + ROWNAME + "</td>"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
           + "<td>" + DiskLayoutTaglet.getText(tag) + "</td></tr>\n";
     }
 

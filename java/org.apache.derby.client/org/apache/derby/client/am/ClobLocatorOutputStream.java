@@ -36,6 +36,7 @@ import java.io.OutputStream;
  * buffering of data is done.  Hence, for efficiency #write(byte[])
  * should be used instead of #write(int).
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ClobLocatorOutputStream extends OutputStream {
     
     /**
@@ -59,6 +60,7 @@ class ClobLocatorOutputStream extends OutputStream {
      * @param pos the position in the <code>CLOB</code> value at which
      *        to start writing; the first position is 1
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobLocatorOutputStream(
             ClientClob clob,
             long pos) throws SqlException {
@@ -95,6 +97,7 @@ class ClobLocatorOutputStream extends OutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
         if (len == 0) return;
         if ((off < 0) || (off > b.length) || (len < 0) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
                 (len > b.length - off)) {
             throw new IndexOutOfBoundsException();
         }
@@ -126,7 +129,9 @@ class ClobLocatorOutputStream extends OutputStream {
      */
     private void writeBytes(byte[] b) throws IOException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
             String clobStr = new String(b, "ISO-8859-1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
             clob.setStringX(currentPos, clobStr, 0, clobStr.length());
             currentPos += b.length;
         } catch (SqlException ex) {

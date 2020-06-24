@@ -79,6 +79,7 @@ import java.io.IOException;
 	TransactionTable must be MT-safe it is called upon by many threads
 	simultaneously (except during recovery)
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
     <P>Methods that are only called during
     recovery don't need to take MT considerations, and can safely use iterators
     with no additional synchronization.
@@ -100,6 +101,7 @@ public class TransactionTable implements Formatable
 	*/
 	public TransactionTable()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         trans = new ConcurrentHashMap<TransactionId, TransactionTableEntry>();
 	}
 
@@ -115,6 +117,7 @@ public class TransactionTable implements Formatable
                 id != null, "findTransacionEntry with null id");
 
 		// Hashtable is synchronized
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return trans.get(id);
 	}
 
@@ -168,10 +171,12 @@ public class TransactionTable implements Formatable
      * @param visitor the visitor to apply on each transaction table entry
      */
     void visitEntries(EntryVisitor visitor) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         for (Object entry : trans.values()) {
             if (!visitor.visit((TransactionTableEntry) entry)) {
                 // The visitor returned false, meaning that it's done with
                 // all of its work and we can stop the scan.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3092
                 break;
             }
         }
@@ -182,6 +187,7 @@ public class TransactionTable implements Formatable
 	{
 		TransactionId id = xact.getId();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4512
         TransactionTableEntry newEntry = new TransactionTableEntry(
                 xact, id, 0, exclude ? TransactionTableEntry.EXCLUDE : 0);
 
@@ -237,6 +243,7 @@ public class TransactionTable implements Formatable
         }
 
 		// Hashtable is synchronized
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		 TransactionTableEntry ent = trans.remove(id);
 		 return (ent == null || ent.needExclusion());
 	}
@@ -377,6 +384,7 @@ public class TransactionTable implements Formatable
 	public ContextManager findTransactionContextByGlobalId(
     final GlobalXactId global_id)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         for (TransactionTableEntry entry : trans.values()) {
             GlobalTransactionId entry_gid = entry.getGid();
             if (entry_gid != null && entry_gid.equals(global_id)) {
@@ -403,6 +411,7 @@ public class TransactionTable implements Formatable
 	{
 		synchronized (this)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
             for (TransactionTableEntry entry : trans.values()) {
                 if (entry.isUpdate()) {
                     return true;
@@ -441,6 +450,7 @@ public class TransactionTable implements Formatable
 		synchronized(this)
         {
             int count = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
             for (TransactionTableEntry entry : trans.values()) {
                 if (entry.isUpdate()) {
                     count++;
@@ -455,6 +465,7 @@ public class TransactionTable implements Formatable
                 // Count the number of writes in debug builds.
                 int writeCount = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
                 for (TransactionTableEntry entry : trans.values()) {
                     if (entry.isUpdate()) {
                         // only write out update transactions
@@ -533,6 +544,7 @@ public class TransactionTable implements Formatable
 	*/
 	public boolean hasRollbackFirstTransaction()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         for (TransactionTableEntry ent : trans.values())
 		{
 			if (ent != null && ent.isRecovery() && 
@@ -583,6 +595,7 @@ public class TransactionTable implements Formatable
 
     private boolean hasPreparedXact(boolean recovered)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         for (TransactionTableEntry ent : trans.values())
         {
             if (ent != null && 
@@ -623,6 +636,7 @@ public class TransactionTable implements Formatable
 		}
 
 		TransactionId id = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         for (TransactionTableEntry ent : trans.values())
 		{
 			if (ent != null && ent.isUpdate() && ent.isRecovery() &&
@@ -675,6 +689,7 @@ public class TransactionTable implements Formatable
 
         if (!trans.isEmpty())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
             for (TransactionTableEntry ent : trans.values())
 			{
 				if (ent != null         && 
@@ -712,6 +727,7 @@ public class TransactionTable implements Formatable
                 else
                 {
                     // all transactions in the table must be prepared.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
                     for (TransactionTableEntry ent : trans.values())
                     {
                         SanityManager.ASSERT(ent.isPrepared());
@@ -767,6 +783,7 @@ public class TransactionTable implements Formatable
             TransactionId           id          = null;
             GlobalTransactionId     gid         = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
             for (TransactionTableEntry ent : trans.values())
 			{
 				if (ent != null         && 
@@ -790,6 +807,7 @@ public class TransactionTable implements Formatable
                     // if no entry's were found then the transaction table
                     // should have the passed in idle tran, and the rest should
                     // be non-recover, prepared global transactions.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
                     for (TransactionTableEntry ent : trans.values())
                     {
                         if (XactId.compare(ent.getXid(), tran.getId()) != 0)
@@ -814,6 +832,7 @@ public class TransactionTable implements Formatable
                 //               to take over.
                 TransactionTableEntry new_ent =
                     trans.remove(tran.getId());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                 // At this point only the found_ent should be in the table.
                 if (SanityManager.DEBUG)
@@ -842,6 +861,7 @@ public class TransactionTable implements Formatable
 		// assume for now that it is acceptable to return null if a transaction
 		// starts right in the middle of this call.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         LogInstant logInstant = null;
         for (TransactionTableEntry entry : trans.values()) {
             if (entry.isUpdate()) {
@@ -913,6 +933,7 @@ public class TransactionTable implements Formatable
         final ArrayList<TransactionTableEntry> tinfo = new ArrayList<TransactionTableEntry>();
 
         // Get clones of all the entries in the transaction table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
         for (TransactionTableEntry entry : trans.values()) {
             tinfo.add((TransactionTableEntry) entry.clone());
         }
@@ -933,6 +954,7 @@ public class TransactionTable implements Formatable
 
             boolean hasReadOnlyTransaction = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6242
             for (TransactionTableEntry entry : trans.values()) {
                 if (entry.isUpdate()) {
                     str.append(entry);

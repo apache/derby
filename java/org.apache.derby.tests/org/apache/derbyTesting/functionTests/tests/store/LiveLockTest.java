@@ -67,6 +67,7 @@ public class LiveLockTest extends BaseJDBCTestCase {
      *             if any occurred
      */
     private void checkExceptions() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Exception e : listExceptions) {
             throw e;
         }

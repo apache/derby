@@ -59,6 +59,7 @@ public class CursorInfo
 	********************************************************/
 
 	ExecCursorTableReference	targetTable; 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     List<String>          updateColumns;
 	int 						updateMode;
 
@@ -76,6 +77,7 @@ public class CursorInfo
 	(
 		int							updateMode,
 		ExecCursorTableReference	targetTable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<String>             updateColumns
 	)
 	{

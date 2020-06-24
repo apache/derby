@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DMLStatementNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -64,6 +65,8 @@ abstract class DMLStatementNode extends StatementNode
 	 */
 	ResultSetNode	resultSet;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DMLStatementNode(ResultSetNode resultSet, ContextManager cm) {
         super(cm);
         this.resultSet = resultSet;
@@ -76,6 +79,8 @@ abstract class DMLStatementNode extends StatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -95,6 +100,8 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @return ResultSetNode	The ResultSetNode from this DMLStatementNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode getResultSetNode()
 	{
 		return resultSet;
@@ -114,10 +121,12 @@ abstract class DMLStatementNode extends StatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 	QueryTreeNode bind(DataDictionary dataDictionary)
 					 throws StandardException
 	{
 		// We just need select privilege on most columns and tables
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getCompilerContext().pushCurrentPrivType(getPrivType());
 		try {
 			/*
@@ -153,6 +162,8 @@ abstract class DMLStatementNode extends StatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     QueryTreeNode bindResultSetsWithTables(DataDictionary dataDictionary)
 					 throws StandardException
 	{
@@ -186,6 +197,8 @@ abstract class DMLStatementNode extends StatementNode
 		 * the same context.
 		 */
         boolean doJOO = getOptimizerFactory().doJoinOrderOptimization();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ContextManager cm = getContextManager();
         resultSet = resultSet.bindNonVTITables(dataDictionary,
                                                new FromList(doJOO, cm));
@@ -201,6 +214,8 @@ abstract class DMLStatementNode extends StatementNode
 	protected void bindExpressions()
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         FromList fromList =
                 new FromList(getOptimizerFactory().doJoinOrderOptimization(),
                              getContextManager());
@@ -224,6 +239,8 @@ abstract class DMLStatementNode extends StatementNode
 	protected void bindExpressionsWithTables()
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         FromList fromList =
                 new FromList(getOptimizerFactory().doJoinOrderOptimization(),
                              getContextManager());
@@ -248,6 +265,8 @@ abstract class DMLStatementNode extends StatementNode
 	 */
 	int activationKind()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<ParameterNode> parameterList =
             getCompilerContext().getParameterList();
 		/*
@@ -294,6 +313,7 @@ abstract class DMLStatementNode extends StatementNode
 		// be rewritten to TRUE, which is known by the optimizer to have
 		// selectivity 1.0.)
 		accept(new ConstantExpressionVisitor());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4416
 
 		resultSet = resultSet.optimize(getDataDictionary(), null, 1.0d);
 
@@ -323,6 +343,8 @@ abstract class DMLStatementNode extends StatementNode
 			siRCList.genVirtualColumnNodes(resultSet, childRCList);
 
 			/* Finally, we create the new ScrollInsensitiveResultSetNode */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             resultSet = new ScrollInsensitiveResultSetNode(
                     resultSet, siRCList, null, getContextManager());
 
@@ -352,6 +374,7 @@ abstract class DMLStatementNode extends StatementNode
     @Override
 	public ResultDescription makeResultDescription()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 	    ResultColumnDescriptor[] colDescs = resultSet.makeResultDescriptors();
 		String statementType = statementToString();
 
@@ -371,6 +394,8 @@ abstract class DMLStatementNode extends StatementNode
 	void generateParameterValueSet(ActivationClassBuilder acb)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<ParameterNode> parameterList =
             getCompilerContext().getParameterList();
 		int	numberOfParameters = (parameterList == null) ? 0 : parameterList.size();
@@ -427,11 +452,13 @@ abstract class DMLStatementNode extends StatementNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (resultSet != null)
 		{
 			resultSet = (ResultSetNode)resultSet.accept(v);
@@ -446,6 +473,7 @@ abstract class DMLStatementNode extends StatementNode
 	 */
 	int getPrivType()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		return Authorizer.SELECT_PRIV;
 	}
 }

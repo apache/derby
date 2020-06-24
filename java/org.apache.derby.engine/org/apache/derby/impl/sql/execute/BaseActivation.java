@@ -1909,6 +1909,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
      */
     static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

@@ -140,6 +140,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 
 			if (td == null) //td null here means it is not a temporary table. Look for table in physical SESSION schema
 				td = dd.getTableDescriptor(tableName, sd, tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 
 			if (td == null) //td null means tableName is not a temp table and it is not a physical table in SESSION schema
 			{
@@ -187,6 +188,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 		lockTableForDDL(tc, heapId, true);
 
 		/* Drop the triggers */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (TriggerDescriptor trd : dd.getTriggerDescriptors(td)) {
             trd.drop(lcc);
 		}
@@ -223,6 +225,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 
 		/* Drop all table and column permission descriptors */
 		dd.dropAllTableAndColPermDescriptors(tableId, tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 
 		/* Drop the constraints */
 		dropAllConstraintDescriptors(td, activation);

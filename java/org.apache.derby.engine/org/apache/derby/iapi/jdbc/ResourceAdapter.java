@@ -38,6 +38,7 @@ import org.apache.derby.shared.common.error.StandardException;
 	global transactions, i.e., it does not know of in-doubt global transactions
 	re-created by recovery.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	<P>	The following is an overall design of the JTA implementation in Derby,
 	most of it has little to do with the ResourceAdapter interface itself.
 	<P><B>Design Overview </B>
@@ -164,6 +165,7 @@ import org.apache.derby.shared.common.error.StandardException;
 	<BR> First some ugly pictures.  Some links are not shown to reduce
 	clutter.  Externally visible object is in <B>bold</B>.
   
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	<PRE>
 * 
 * When user ask for an XAConnection via a XADataSource, the following objects
@@ -426,5 +428,6 @@ public interface ResourceAdapter {
      * @throws XAException on error
 	 */
 	public void cancelXATransaction(XAXactId xid, String messageId) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
 		throws XAException;
 }

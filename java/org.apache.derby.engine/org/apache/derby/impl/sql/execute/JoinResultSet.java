@@ -41,6 +41,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * the join's rows satisfying the filter as a result set.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 abstract class JoinResultSet extends NoPutResultSetImpl
 	implements CursorResultSet
 {
@@ -66,11 +67,13 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 	public	  boolean notExistsRightSide;  //right side is NOT EXISTS
 	
 	String userSuppliedOptimizerOverrides;
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 
     /*
      * class interface
      *
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     JoinResultSet(NoPutResultSet leftResultSet,
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
@@ -82,6 +85,7 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 								   String userSuppliedOptimizerOverrides)
     {
 		super(activation, resultSetNumber, optimizerEstimatedRowCount, 
@@ -94,6 +98,7 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 		this.oneRowRightSide = oneRowRightSide;
 		this.notExistsRightSide = notExistsRightSide;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		
 		recordConstructorTime();
@@ -145,6 +150,7 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 
 		leftResultSet.openCore();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4330
 		try {
 			leftRow = leftResultSet.getNextRowCore();
 			if (leftRow != null)
@@ -224,6 +230,8 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 			if (SanityManager.DEBUG)
 				SanityManager.DEBUG("CloseRepeatInfo","Close of JoinResultSet repeated");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3261
+//IC see: https://issues.apache.org/jira/browse/DERBY-3037
 		clearScanState();
 	}
 

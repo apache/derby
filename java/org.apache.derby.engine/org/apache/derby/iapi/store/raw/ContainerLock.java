@@ -89,6 +89,7 @@ public final class ContainerLock {
 
 	/**
 		Get an integer representation of the type of the lock. This method is guaranteed
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		to return an integer &gt;= 0 and &lt; C_NUMBER. No correlation between the value
 		and one of the static variables (CIS etc.) is guaranteed, except that
 		the values returned do not change.
@@ -98,6 +99,7 @@ public final class ContainerLock {
 	}
 
 	public boolean isCompatible(ContainerLock granted) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2122
 		return (granted.typeBit & compat) != 0;
 	}
 

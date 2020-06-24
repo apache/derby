@@ -81,6 +81,7 @@ import java.io.FileNotFoundException;
 **/
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6621
 class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Object>
 {
 
@@ -186,6 +187,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
         {
 			file = getFileName(identity, true, false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
             if (privExists(file)) 
             {
 				// note I'm left in the no-identity state as fillInIdentity()
@@ -233,6 +235,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
     {
 
 		file = getFileName(this.identity, false, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
         if (!privExists(file))
 			return null;
 
@@ -395,12 +398,14 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
 
 		AccessFactory af = (AccessFactory)
 			getServiceModule(dataFactory, AccessFactory.MODULE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		TransactionController tc = 
             (af == null) ? 
                 null : 
                 af.getTransaction(
                     getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		bufferSize = 
 			PropertyUtil.getServiceInt(tc, prop,
@@ -465,6 +470,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
 		try 
         {
 			fileOut = privGetOutputStream(file);
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 
 			FormatableBitSet validColumns = rowSource.getValidColumns();
 
@@ -623,6 +629,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
 
 				dataFactory.encrypt(
                     out.getByteArray(), startByte, encryptedLen, ciphertext, 0, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 
 				// write out the actual length, then the encrypted bytes.
 				CompressedNumber.writeInt(fileOut, realLen);
@@ -736,6 +743,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
 				if (lenRead != -1) 
                 {
 					fieldDataLength += lenRead;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4519
                     out.write(bufData, 0, lenRead);
 				} 
                 else
@@ -979,6 +987,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
     {
 		close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
         if (privExists(file))
         {
             return privDelete(file);
@@ -1018,6 +1027,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
 
 			StorageFile container = dataFactory.getContainerPath( identity, false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 			if (!privExists(container)) 
             {
 
@@ -1034,6 +1044,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
 						if (!privExists(directory)) 
                         {
                             boolean created = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
                             IOException ex = null;
                             try {
                                 created = privMkdirs(directory);
@@ -1045,6 +1056,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
                             {
 								if (errorOK)
 									return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 								else
 									throw StandardException.newException(
                                             SQLState.FILE_CANNOT_CREATE_SEGMENT,
@@ -1063,6 +1075,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
     
     private synchronized boolean privExists(StorageFile file)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
         actionCode = STORAGE_FILE_EXISTS_ACTION;
         actionStorageFile = file;
 
@@ -1083,6 +1096,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
     }
 
     private synchronized boolean privMkdirs(StorageFile file)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
             throws IOException
     {
         actionCode = STORAGE_FILE_MKDIRS_ACTION;
@@ -1096,6 +1110,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
         {
             // method executed under this priveleged block 
             // could throw IOException
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
             throw (IOException) pae.getCause();
         } 
         finally
@@ -1172,6 +1187,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
         switch(actionCode)
         {
         case STORAGE_FILE_EXISTS_ACTION:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             return actionStorageFile.exists();
         case STORAGE_FILE_DELETE_ACTION:
             return actionStorageFile.delete();
@@ -1194,6 +1210,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()

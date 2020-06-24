@@ -65,6 +65,7 @@ public class BasicSortObserver implements SortObserver
 		this.distinct = distinct;
 		this.execRow = execRow;
 		this.reuseWrappers = reuseWrappers;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		vector = new Vector<DataValueDescriptor[]>();
 	}
 
@@ -127,6 +128,7 @@ public class BasicSortObserver implements SortObserver
 
 		if (lastElement > 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			DataValueDescriptor[] retval = vector.elementAt(lastElement - 1);
 			vector.removeElementAt(lastElement - 1);
 			return retval;
@@ -168,6 +170,7 @@ public class BasicSortObserver implements SortObserver
             //          set very early, which causes store streams to fail
             //          because the container handle is closed.
             // Beetle 4896.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
             newArray[i] = origArray[i].cloneValue(true);
 		}
 
@@ -175,6 +178,9 @@ public class BasicSortObserver implements SortObserver
 	}
 
     public boolean deferred() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return false;
     }
 

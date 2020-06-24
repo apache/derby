@@ -170,6 +170,7 @@ public final class NistScripts extends ScriptTestCase {
 	 * Return the suite that runs the NIST SQL scripts.
 	 */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("NIST");
         
         String suiteUser = null;
@@ -189,7 +190,9 @@ public final class NistScripts extends ScriptTestCase {
             
             // Add the new user suite with the change user decorator to
             // the main suite but continue to add tests to the user suite.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             userSuite = new BaseTestSuite("NIST user="+testUser);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
             String password = testUser.concat("ni8s4T");
             suite.addTest(
                     TestConfiguration.changeUserDecorator(userSuite, testUser, password));
@@ -198,6 +201,7 @@ public final class NistScripts extends ScriptTestCase {
             userSuite.addTest(test);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
         Test test = getIJConfig(suite);
         
         // Setup user authentication

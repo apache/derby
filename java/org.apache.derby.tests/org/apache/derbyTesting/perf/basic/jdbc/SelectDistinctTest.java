@@ -81,6 +81,7 @@ public class SelectDistinctTest extends JDBCPerfTestCase {
      * @return all test cases in this class
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("SelectDistinctTest");
         suite.addTest(new SelectDistinctTest(TEST_CHAR5, 2000, 4));
         suite.addTest(new SelectDistinctTest(TEST_BINARY5, 2000, 4));

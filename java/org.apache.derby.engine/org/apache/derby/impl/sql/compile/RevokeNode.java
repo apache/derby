@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.RevokeNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -32,6 +33,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 /**
  * This class represents a REVOKE statement.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class RevokeNode extends DDLStatementNode
 {
     private PrivilegeNode privileges;
@@ -65,6 +68,8 @@ class RevokeNode extends DDLStatementNode
 		if (SanityManager.DEBUG)
 		{
             StringBuilder sb = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
             for(String grantee : grantees) {
                 if( sb.length() > 0)
@@ -81,6 +86,8 @@ class RevokeNode extends DDLStatementNode
 		}
     } // end of toString
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
         return "REVOKE";
@@ -95,6 +102,7 @@ class RevokeNode extends DDLStatementNode
     @Override
 	public void bindStatement() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         privileges = (PrivilegeNode) privileges.bind( new HashMap<Provider,Provider>(), grantees, false);
     } // end of bind
 

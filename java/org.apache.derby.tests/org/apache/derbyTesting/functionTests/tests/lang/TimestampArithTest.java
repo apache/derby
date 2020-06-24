@@ -74,6 +74,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 				}				
 			} catch (SQLException sqle) {
 				if (expectedSQLState == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4665
                     fail("Unexpected exception from statement '" + sql + "'",
                          sqle);
 				}
@@ -92,6 +93,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 				}
 			} catch (SQLException sqle) {
 				if (expectedSQLState == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4665
                     fail("Unexpected exception from prepared statement '" +
                          sql + "'", sqle);
 				}
@@ -384,6 +386,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseJDBCTestSetup(
             new BaseTestSuite(
                 TimestampArithTest.class, "TimestampArithTest")) {
@@ -402,6 +405,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 			}
 
             protected void tearDown() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5716
                 closeAll(tsAddPS);
                 tsAddPS = null;
                 closeAll(tsDiffPS);
@@ -481,6 +485,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 
         // TIMESTAMPDIFF with null timestamp in third argument
         expectNullResult(tsDiffPS[HOUR_INTERVAL]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4665
 
         // TIMESTAMPDIFF with null date in third argument
         tsDiffPS[HOUR_INTERVAL].setNull(2, Types.DATE);
@@ -525,6 +530,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	}
 	
 	public void testInvalidArgTypes() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         expectException( tsDiffPS[ HOUR_INTERVAL], ts( "2005-05-21 15:26:00"), 2.0, "XCL12",
                 "TIMESTAMPDIFF with double ts2");
         expectException( tsDiffPS[ HOUR_INTERVAL], 2.0, ts( "2005-05-11 15:26:00"), "XCL12",
@@ -551,6 +557,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	}
 
     private static void expectNullResult(PreparedStatement ps)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4665
             throws SQLException {
         JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
     }
@@ -597,6 +604,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 				sb.append('0');
 			s = sb.toString();
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4665
         return java.sql.Timestamp.valueOf(s);
 	}
 	

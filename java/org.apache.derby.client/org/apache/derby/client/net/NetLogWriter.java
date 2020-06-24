@@ -132,6 +132,7 @@ public class NetLogWriter extends LogWriter {
         // Initialize the codepoint name table if not previously initialized.
         // This is done lazily so that it is not created if the trace isn't used (save some init time).
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (codePointNameTable__ == null) {
             initCodePointTable();
         }
@@ -190,6 +191,7 @@ public class NetLogWriter extends LogWriter {
     // The type is needed to indicate if the data is part of the send or receive buffer.
     // The class name, method name, and trcPt number are also written to the trace.
     // Not much checking is performed on the parameters.  This is done to help performance.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized void traceProtocolFlow(byte[] buff,
                                                int offset,
                                                int len,
@@ -197,11 +199,13 @@ public class NetLogWriter extends LogWriter {
                                                String className,
                                                String methodName,
                                                int tracepoint) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (!loggingEnabled(BasicClientDataSource.TRACE_PROTOCOL_FLOWS)) {
             return;
         }
         synchronized (printWriter_) {
             tracepoint("[net]", tracepoint, className, methodName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
             int fullLen = len;
             boolean printColPos = true;
@@ -348,6 +352,7 @@ public class NetLogWriter extends LogWriter {
     // Gets the int value of the two byte unsigned codepoint.
     private static int getCodePoint(byte[] buff, int offset) {
         return ((buff[offset++] & 0xff) << 8) +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 (buff[offset] & 0xff);
     }
 

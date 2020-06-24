@@ -49,6 +49,7 @@ public class MessageBundleTest {
      * </p>
      */
     public MessageBundleTest()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1458
     {}
     
     public static void main(String [] args) throws Exception
@@ -63,6 +64,7 @@ public class MessageBundleTest {
             e.printStackTrace();
         }
         if (failbuild) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4341
             throw new Exception("Message check failed. \n" +
                 "See error in build output or call ant runmessagecheck.");
     }    
@@ -89,6 +91,7 @@ public class MessageBundleTest {
     }
     
     static void loadClassIds(Class idclass, HashSet<String> set)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
             throws Exception {
         Field[] fields = idclass.getFields();
         
@@ -111,6 +114,7 @@ public class MessageBundleTest {
             
             if ( ! set.add(id) )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1458
                 failbuild=true;
                 System.err.println("ERROR: The id " + id + 
                     " was found twice in " + idclass.getName());
@@ -144,6 +148,7 @@ public class MessageBundleTest {
             String key = (String)keys.nextElement();                
 
             if ( ! messageBundleIds.add(key) ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1458
                 failbuild=true;
                 System.err.println("ERROR: the key " + key +
                     " exists twice in messages_en.properties");
@@ -168,6 +173,8 @@ public class MessageBundleTest {
                 // XSAX1: shared SQLState explains; not exposed to users. 
                 // 01004: automatically assigned by java.sql.DataTruncation and
                 //        never used to generate a message
+//IC see: https://issues.apache.org/jira/browse/DERBY-3902
+//IC see: https://issues.apache.org/jira/browse/DERBY-1567
                 if (!(sqlStateId.equalsIgnoreCase("XCL32.S") ||
                       sqlStateId.equalsIgnoreCase("XSAX1")   ||
                       sqlStateId.equalsIgnoreCase("01004"))) {
@@ -195,6 +202,7 @@ public class MessageBundleTest {
             if ( ! messageBundleIds.contains(sqlStateId) ) {
                 // Don't fail out on the first one, we want to catch
                 // all of them.  Just note there was a failure and continue
+//IC see: https://issues.apache.org/jira/browse/DERBY-1458
                 failbuild=true;
                 System.err.println("ERROR: Message id " + sqlStateId +
                     " in MessageId.java was not found in" +
@@ -223,6 +231,7 @@ public class MessageBundleTest {
             
             // Don't fail out on the first one, we want to catch
             // all of them.  Just note there was a failure and continue
+//IC see: https://issues.apache.org/jira/browse/DERBY-1458
             failbuild=true;
             System.err.println("WARNING: Message id " + msgid + 
                 " in messages_en.properties is not " +

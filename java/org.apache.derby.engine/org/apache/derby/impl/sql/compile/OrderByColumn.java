@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.OrderByColumn
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -36,6 +37,8 @@ import org.apache.derby.iapi.sql.compile.Visitor;
  *
  */
 class OrderByColumn extends OrderedColumn {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 	private ResultColumn	resultCol;
 	private boolean			ascending = true;
@@ -56,6 +59,8 @@ class OrderByColumn extends OrderedColumn {
 	 * @param expression            Expression of this column
      * @param cm                    The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     OrderByColumn(ValueNode expression, ContextManager cm)
 	{
         super(cm);
@@ -71,6 +76,7 @@ class OrderByColumn extends OrderedColumn {
     @Override
 	public String toString() {
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			return
 				"nullsOrderedLow: " + nullsOrderedLow + "\n" +
 				"ascending; " + ascending + "\n" +
@@ -88,6 +94,8 @@ class OrderByColumn extends OrderedColumn {
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -109,6 +117,8 @@ class OrderByColumn extends OrderedColumn {
 	/**
 	 * Mark the column as descending order
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setDescending() {
 		ascending = false;
 	}
@@ -127,7 +137,10 @@ class OrderByColumn extends OrderedColumn {
 	/**
 	 * Mark the column as ordered NULL values lower than non-NULL values.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setNullsOrderedLow() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
 		nullsOrderedLow = true;
 	}
 
@@ -201,10 +214,13 @@ class OrderByColumn extends OrderedColumn {
 	 * @exception StandardException		Thrown on error
 	 * @exception StandardException		Thrown when column not found
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindOrderByColumn(ResultSetNode target, OrderByList oblist)
 				throws StandardException 
 	{
 		this.list = oblist;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 
 		if(expression instanceof ColumnReference){
 		
@@ -218,6 +234,7 @@ class OrderByColumn extends OrderedColumn {
 			if (addedColumnOffset >= 0 &&
 					target instanceof SelectNode &&
 					( (SelectNode)target ).hasDistinct())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				throw StandardException.newException(SQLState.LANG_DISTINCT_ORDER_BY, cr.getColumnName());
 		}else if(isReferedColByNum(expression)){
 			
@@ -237,6 +254,7 @@ class OrderByColumn extends OrderedColumn {
 			}
 
 		}else{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6009
             if (list.isTableValueCtorOrdering()) {
                 // For VALUES, we only allow ordering by column number,
                 // SQL-92 style. This is a more general expression, so throw.
@@ -250,6 +268,7 @@ class OrderByColumn extends OrderedColumn {
 					((SelectNode)target).hasDistinct() &&
 					!expressionMatch(target))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 CollectNodesVisitor<ColumnReference> collectNodesVisitor =
                     new CollectNodesVisitor<ColumnReference>(
                         ColumnReference.class);
@@ -257,6 +276,8 @@ class OrderByColumn extends OrderedColumn {
 
                 for (ColumnReference cr1 : collectNodesVisitor.getList())
 				{//visits through the columns in this OrderByColumn
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     String col=cr1.getColumnName();
                     boolean match = columnMatchFound(target,cr1);
 					/* breaks if a match not found, this is needed
@@ -270,10 +291,12 @@ class OrderByColumn extends OrderedColumn {
 				}
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-127
 			if( SanityManager.DEBUG)
 				SanityManager.ASSERT( addedColumnOffset >= 0,
 				"Order by expression was not pulled into the result column list");
 			resolveAddedColumn(target);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2459
 			if (resultCol == null)
 				throw StandardException.newException(SQLState.LANG_UNION_ORDER_BY);
 		}
@@ -380,6 +403,8 @@ class OrderByColumn extends OrderedColumn {
 	 * @param target	The result set being selected from
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void pullUpOrderByColumn(ResultSetNode target)
 				throws StandardException 
 	{
@@ -391,11 +416,15 @@ class OrderByColumn extends OrderedColumn {
 
 			resultCol = targetCols.findResultColumnForOrderBy(
                     cr.getColumnName(), cr.getQualifiedTableName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			if(resultCol == null){
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                resultCol = new ResultColumn(
                         cr.getColumnName(), cr, getContextManager());
 				targetCols.addResultColumn(resultCol);
+//IC see: https://issues.apache.org/jira/browse/DERBY-127
                 addedColumnOffset = targetCols.getOrderBySelect();
 				targetCols.incOrderBySelect();
 			}
@@ -457,6 +486,7 @@ class OrderByColumn extends OrderedColumn {
 	private static boolean isReferedColByNum(ValueNode expression) 
 	throws StandardException{
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6027
        return expression instanceof NumericConstantNode &&
                expression.getConstantValueAsObject() instanceof Integer;
 	}
@@ -464,6 +494,8 @@ class OrderByColumn extends OrderedColumn {
 	
 	private ResultColumn resolveColumnReference(ResultSetNode target,
 							   ColumnReference cr)
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             throws StandardException {
 		int					sourceTableNumber = -1;
 		
@@ -474,6 +506,7 @@ class OrderByColumn extends OrderedColumn {
 			throw StandardException.newException(SQLState.LANG_QUALIFIED_COLUMN_NAME_NOT_ALLOWED, fullName);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if(cr.getQualifiedTableName() != null){
 			TableName tableNameNode = cr.getQualifiedTableName();
 
@@ -487,6 +520,7 @@ class OrderByColumn extends OrderedColumn {
 								       tableNameNode.getSchemaName():null),
 								      false);
 				if(fromTable == null){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 					String fullName = cr.getQualifiedTableName().toString();
 					throw StandardException.newException(SQLState.LANG_EXPOSED_NAME_NOT_FOUND, fullName);
 				}
@@ -510,8 +544,11 @@ class OrderByColumn extends OrderedColumn {
 
 		ResultColumnList	targetCols = target.getResultColumns();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ResultColumn resCol = targetCols.getOrderByColumnToBind(
                             cr.getColumnName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 							cr.getQualifiedTableName(),
 							sourceTableNumber,
 							this);
@@ -520,10 +557,13 @@ class OrderByColumn extends OrderedColumn {
          * order by clause may be found in the user specified select list now even though it was
          * not found when pullUpOrderByColumn was called.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if( resCol == null && addedColumnOffset >= 0)
             resolveAddedColumn(target);
 							
         if (resCol == null || resCol.isNameGenerated()){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			String errString = cr.getColumnName();
 			throw StandardException.newException(SQLState.LANG_ORDER_BY_COLUMN_NOT_FOUND, errString);
 		}
@@ -544,6 +584,7 @@ class OrderByColumn extends OrderedColumn {
 	 * - resets addedColumnOffset to -1 to indicate this is not an added col
 	 * - calls back to the OrderByList to adjust any other added cols
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 	void clearAddedColumnOffset()
 	{
 		list.closeGap(addedColumnOffset);
@@ -574,17 +615,20 @@ class OrderByColumn extends OrderedColumn {
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (expression != null)
 		{
 			expression = (ValueNode)expression.accept(v);
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6008
     ValueNode getExpression() {
         return expression;
     }

@@ -316,6 +316,7 @@ final public class DatabasePermission extends Permission {
             // doPrivileged() block to allow for confined codebase permission
             // grants
             if (p.startsWith(URL_PATH_RELATIVE_PREFIX)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 final String cwd = AccessController.doPrivileged(
                     new PrivilegedAction<String>() {
                         public String run() {
@@ -333,6 +334,7 @@ final public class DatabasePermission extends Permission {
             // block to allow for confined codebase permission grants
             final File f;
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 f = AccessController.doPrivileged(
                     new PrivilegedExceptionAction<File>() {
                         public File run() throws IOException {

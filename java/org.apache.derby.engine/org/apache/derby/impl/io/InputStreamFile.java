@@ -39,6 +39,7 @@ import org.apache.derby.shared.common.error.StandardException;
  * classpath, jar, http, and https subsubprotocols
  * @param <F> the storage factory class used by the subsubprotocol
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6535
 abstract class InputStreamFile<F extends BaseStorageFactory>
     implements StorageFile
 {
@@ -57,6 +58,7 @@ abstract class InputStreamFile<F extends BaseStorageFactory>
         }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6535
             StringBuilder sb =
                     new StringBuilder(storageFactory.separatedDataDirectory);
             if( File.separatorChar != '/')
@@ -68,6 +70,7 @@ abstract class InputStreamFile<F extends BaseStorageFactory>
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6535
     InputStreamFile(F storageFactory, String parent, String name)
     {
         this.storageFactory = storageFactory;
@@ -89,6 +92,7 @@ abstract class InputStreamFile<F extends BaseStorageFactory>
         nameStart = this.path.lastIndexOf( '/') + 1;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6535
     InputStreamFile(InputStreamFile<F> dir, String name)
     {
         this.storageFactory = dir.storageFactory;
@@ -102,6 +106,7 @@ abstract class InputStreamFile<F extends BaseStorageFactory>
         nameStart = this.path.lastIndexOf( '/') + 1;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6535
     InputStreamFile(F storageFactory, String child, int pathLen)
     {
         this.storageFactory = storageFactory;

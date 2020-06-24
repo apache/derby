@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.OrNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -71,6 +72,7 @@ class OrNode extends BinaryLogicalOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -95,6 +97,8 @@ class OrNode extends BinaryLogicalOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -170,6 +174,8 @@ class OrNode extends BinaryLogicalOperatorNode
 					 	 */
 						if (left instanceof BinaryRelationalOperatorNode)
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             BinaryRelationalOperatorNode bron =
                                     (BinaryRelationalOperatorNode)left;
 							if (!bron.isInListProbeNode())
@@ -240,6 +246,8 @@ class OrNode extends BinaryLogicalOperatorNode
 			/* So, can we convert the OR chain? */
 			if (convert)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 ValueNodeList vnl = new ValueNodeList(getContextManager());
 				// Build the IN list 
                 for (vn = this;
@@ -274,6 +282,8 @@ class OrNode extends BinaryLogicalOperatorNode
 					}
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 InListOperatorNode ilon =
                         new InListOperatorNode(cr, vnl, getContextManager());
 
@@ -321,6 +331,8 @@ class OrNode extends BinaryLogicalOperatorNode
 		}
 
 		/* Convert the OrNode to an AndNode */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
        AndNode andNode =
                 new AndNode(leftOperand, rightOperand, getContextManager());
 		andNode.setType(getTypeServices());
@@ -356,6 +368,8 @@ class OrNode extends BinaryLogicalOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
@@ -366,6 +380,8 @@ class OrNode extends BinaryLogicalOperatorNode
 		 */
 		if (rightOperand instanceof AndNode)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
            BooleanConstantNode falseNode =
                     new BooleanConstantNode(false, getContextManager());
             rightOperand =
@@ -384,6 +400,8 @@ class OrNode extends BinaryLogicalOperatorNode
 		/* Add the false BooleanConstantNode if not there yet */
 		if (!(curOr.getRightOperand().isBooleanFalse()))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
            BooleanConstantNode falseNode =
                     new BooleanConstantNode(false, getContextManager());
             curOr.setRightOperand(new OrNode(

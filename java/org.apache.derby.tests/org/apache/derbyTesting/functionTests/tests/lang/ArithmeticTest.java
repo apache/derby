@@ -52,6 +52,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException 
      */
     public void testTypes() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
         String[] tableNames = { "smallint_r", "t", "bigint_r", "decimal_r" };
         String[] types = { "smallint", "int", BIGINT, DECIMAL };
         BigInteger[][] boundaries = {
@@ -87,6 +88,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException 
      */
     private void doBasically(String tableName, String type)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
             throws SQLException {
         String sql = "create table " + tableName + "(i " + 
             type + ", j " + type + ")";
@@ -204,6 +206,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
                     {"1", "101", "0", "0", "10"},
                     {"-2", "-102", "0", "0", "-10"}
                 };
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
         if (type.equals(DECIMAL)) {
             // With DECIMAL, the fraction part won't be truncated from i/j.
             result[1][3] = "0.100000000000000000000";
@@ -294,6 +297,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException 
      */
     private void doOverflow(String tableName, String type,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
             BigInteger negativeBoundary, BigInteger positiveBoundary)
         throws SQLException
     {
@@ -307,6 +311,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
         sql = "insert into " + tableName + " values (" 
                 + i + "," + positiveBoundary + ")";
         assertUpdateCount(st, 1, sql);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
 
         sql = "select i + j from " + tableName;
         assertStatementError("22003", st, sql);
@@ -321,6 +326,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
         assertStatementError("22003", st, sql);
 
         sql = "insert into " + tableName + " values "
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
                 + "(" + negativeBoundary + ", 0)";
         assertUpdateCount(st, 1, sql);
 
@@ -382,6 +388,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
             // arithmetic operation below won't lose precision when dividing
             // by two.
             final boolean negativeBoundaryIsEven = !negativeBoundary.testBit(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
 
             //different from arithmetic. This can support better test.
             sql = "select i / 2 * 2 - 1 from " + tableName;
@@ -423,6 +430,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException 
      */
     private void doMixedTypeImpl(String tableName, String type,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
         BigInteger i) throws SQLException{
         String sql = "create table " + tableName 
             + " (y "  + type+ ")" ;
@@ -474,6 +482,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testMixedType() throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5986
         String[] types = {"smallint", BIGINT, DECIMAL};
         String[] tableNames = {"smallint_r", "bigint_r", "decimal_r"};
         BigInteger[] testValues = {

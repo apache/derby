@@ -101,6 +101,7 @@ public abstract class Cursor {
     // Total number of rows read so far.
     // This should never exceed this.statement.maxRows
     long rowsRead_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
     // Maximum column size limit in bytes.
     int maxFieldSize_ = 0;
@@ -110,6 +111,7 @@ public abstract class Cursor {
     protected ArrayList<int[]> columnDataPositionCache_ = new ArrayList<int[]>();
     protected ArrayList<int[]> columnDataLengthCache_ = new ArrayList<int[]>();
     protected ArrayList<boolean[]> columnDataIsNullCache_ = new ArrayList<boolean[]>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     ArrayList<Boolean> isUpdateDeleteHoleCache_ = new ArrayList<Boolean>();
     boolean isUpdateDeleteHole_;
 
@@ -142,6 +144,7 @@ public abstract class Cursor {
     public Cursor(Agent agent) {
         agent_ = agent;
         isRowUpdated_ = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         dataBufferStream_ = new ByteArrayOutputStream();
     }
 
@@ -152,6 +155,7 @@ public abstract class Cursor {
         columns_ = numberOfColumns;
         nullable_ = new boolean[numberOfColumns];
         charset_ = new Charset[numberOfColumns];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
 
         ccsid_ = new int[numberOfColumns];
 
@@ -178,6 +182,7 @@ public abstract class Cursor {
         
         // Moving out of the hole, set isUpdateDeleteHole to false
         isUpdateDeleteHole_ = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-718
 
         isRowUpdated_ = false;
 
@@ -195,6 +200,7 @@ public abstract class Cursor {
         // scrollable cursors, for the arrays to be reused.  It is not used for forward-only
         // cursors, so just pass in 0.
         boolean rowPositionIsValid =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             calculateColumnOffsetsForRow_(0, allowServerFetch);
         markNextRowPosition();
         return rowPositionIsValid;
@@ -208,6 +214,7 @@ public abstract class Cursor {
      * @exception SqlException if an error occurs
      */
     public boolean next() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         return stepNext(true);
     }
 
@@ -234,6 +241,7 @@ public abstract class Cursor {
         return allRowsReceivedFromServer_;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final boolean currentRowPositionIsEqualToNextRowPosition() {
         return (currentRowPosition_ == nextRowPosition_);
     }
@@ -247,10 +255,13 @@ public abstract class Cursor {
         lastValidBytePosition_ = 0;
         currentRowPosition_ = 0;
         nextRowPosition_ = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         setAllRowsReceivedFromServer(false);
         dataBufferStream_.reset();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final boolean dataBufferHasUnprocessedData() {
         return (lastValidBytePosition_ - position_) > 0;
     }
@@ -381,6 +392,7 @@ public abstract class Cursor {
 
     // Build a java.math.BigDecimal from a fixed point decimal byte representation.
     private final BigDecimal get_DECIMAL(int column) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         return Decimal.getBigDecimal(dataBuffer_,
                 columnDataPosition_[column - 1],
                 getColumnPrecision(column - 1),
@@ -391,6 +403,7 @@ public abstract class Cursor {
     // Build a Java double from a fixed point decimal byte representation.
     private double getDoubleFromDECIMAL(int column) throws SqlException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return Decimal.getDouble(dataBuffer_,
                     columnDataPosition_[column - 1],
                     getColumnPrecision(column - 1),
@@ -398,6 +411,7 @@ public abstract class Cursor {
         } catch (IllegalArgumentException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 e, "double");
         }
     }
@@ -406,6 +420,7 @@ public abstract class Cursor {
     private long getLongFromDECIMAL(int column, String targetType)
             throws SqlException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             return Decimal.getLong(dataBuffer_,
                     columnDataPosition_[column - 1],
                     getColumnPrecision(column - 1),
@@ -413,6 +428,7 @@ public abstract class Cursor {
         } catch (ArithmeticException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 e, targetType);
         } catch (IllegalArgumentException e) {
             throw new SqlException(agent_.logWriter_,
@@ -428,6 +444,7 @@ public abstract class Cursor {
     // for all other cases length is the number of bytes.
     // The length does not include the null terminator.
     private String getVARCHAR(int column) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         if (ccsid_[column - 1] == 1200) {
             return getStringWithoutConvert(columnDataPosition_[column - 1] + 2,
                     columnDataComputedLength_[column - 1] - 2);
@@ -443,6 +460,7 @@ public abstract class Cursor {
                 new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         String tempString = new String(dataBuffer_,
                 columnDataPosition_[column - 1] + 2,
                 columnDataComputedLength_[column - 1] - 2,
@@ -463,11 +481,13 @@ public abstract class Cursor {
         // a mixed or double byte ccsid (ccsid = 0).  this check for null in the
         // cursor is only required for types which can have mixed or double
         // byte ccsids.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         if (charset_[column - 1] == null) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         String tempString = new String(dataBuffer_,
                 columnDataPosition_[column - 1],
                 columnDataComputedLength_[column - 1],
@@ -479,6 +499,7 @@ public abstract class Cursor {
 
     // Build a JDBC Date object from the DERBY ISO DATE field.
     private Date getDATE(int column, Calendar cal) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return DateTime.dateBytesToDate(dataBuffer_,
             columnDataPosition_[column - 1],
             cal,
@@ -487,6 +508,7 @@ public abstract class Cursor {
 
     // Build a JDBC Time object from the DERBY ISO TIME field.
     private Time getTIME(int column, Calendar cal) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return DateTime.timeBytesToTime(dataBuffer_,
                 columnDataPosition_[column - 1],
                 cal,
@@ -561,6 +583,7 @@ public abstract class Cursor {
         // Otherwise, use the smaller of maxFieldSize and the actual column length.
         int columnLength = (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] :
                 Math.min(maxFieldSize_, columnDataComputedLength_[column - 1]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         byte[] bytes = new byte[columnLength];
         System.arraycopy(dataBuffer_, columnDataPosition_[column - 1], bytes, 0, columnLength);
@@ -586,6 +609,8 @@ public abstract class Cursor {
     private Object get_UDT(int column) throws SqlException {
         byte[] bytes;
         int columnLength =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] - 2 :
             Math.min(maxFieldSize_, columnDataComputedLength_[column - 1] - 2);
         bytes = new byte[columnLength];
@@ -603,6 +628,7 @@ public abstract class Cursor {
                 (
                  agent_.logWriter_, 
                  new ClientMessageId (SQLState.NET_MARSHALLING_UDT_ERROR),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                  e,
                  e.getMessage()
                  );
@@ -619,6 +645,7 @@ public abstract class Cursor {
     {
         if (recyclableCalendar_ == null)
             recyclableCalendar_ = new GregorianCalendar();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         return recyclableCalendar_;
     }
@@ -631,6 +658,7 @@ public abstract class Cursor {
      *
      * @return The locator procedures object.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
     CallableLocatorProcedures getLocatorProcedures() {
         return agent_.connection_.locatorProcedureCall();
     }
@@ -663,6 +691,7 @@ public abstract class Cursor {
     public abstract ClientBlob getBlobColumn_(int column, Agent agent,
                                         boolean toBePublished)
             throws SqlException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2892
 
     /**
      * Returns a {@code Clob} object.
@@ -681,6 +710,7 @@ public abstract class Cursor {
 
     final boolean getBoolean(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
             return get_BOOLEAN(column);
         case Types.SMALLINT:
@@ -695,6 +725,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.getBooleanFromDouble(get_DOUBLE(column));
         case Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
             return agent_.crossConverters_.getBooleanFromLong(
                 getLongFromDECIMAL(column, "boolean"));
         case Types.CHAR:
@@ -703,6 +734,7 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getBooleanFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "boolean", column );
         }
     }
@@ -710,6 +742,7 @@ public abstract class Cursor {
     final byte getByte(int column) throws SqlException {
         // This needs to be changed to use jdbcTypes[]
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
             return agent_.crossConverters_.getByteFromBoolean(get_BOOLEAN(column));
         case Types.SMALLINT:
@@ -724,6 +757,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.getByteFromDouble(get_DOUBLE(column));
         case Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
             return agent_.crossConverters_.getByteFromLong(
                 getLongFromDECIMAL(column, "byte"));
         case Types.CHAR:
@@ -732,12 +766,14 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getByteFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "byte", column );
         }
     }
 
     final short getShort(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
             return agent_.crossConverters_.getShortFromBoolean(get_BOOLEAN(column));
         case Types.SMALLINT:
@@ -752,6 +788,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.getShortFromDouble(get_DOUBLE(column));
         case Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
             return agent_.crossConverters_.getShortFromLong(
                 getLongFromDECIMAL(column, "short"));
         case Types.CHAR:
@@ -760,12 +797,14 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getShortFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "short", column );
         }
     }
 
     final int getInt(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
             return agent_.crossConverters_.getIntFromBoolean(get_BOOLEAN(column));
         case Types.SMALLINT:
@@ -780,6 +819,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.getIntFromDouble(get_DOUBLE(column));
         case Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
             return agent_.crossConverters_.getIntFromLong(
                 getLongFromDECIMAL(column, "int"));
         case Types.CHAR:
@@ -788,12 +828,14 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getIntFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError(  "int", column );
         }
     }
 
     final long getLong(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
             return agent_.crossConverters_.getLongFromBoolean(get_BOOLEAN(column));
         case Types.SMALLINT:
@@ -808,6 +850,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.getLongFromDouble(get_DOUBLE(column));
         case Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5536
             return getLongFromDECIMAL(column, "long");
         case Types.CHAR:
             return agent_.crossConverters_.getLongFromString(getCHAR(column));
@@ -815,12 +858,14 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getLongFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "long", column );
         }
     }
 
     final float getFloat(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
             return agent_.crossConverters_.getFloatFromBoolean(get_BOOLEAN(column));
         case Types.REAL:
@@ -842,12 +887,14 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getFloatFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "float", column );
         }
     }
 
     final double getDouble(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
             return agent_.crossConverters_.getDoubleFromBoolean(get_BOOLEAN(column));
         case Types.REAL:
@@ -871,6 +918,7 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getDoubleFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "double", column );
         }
     }
@@ -900,6 +948,7 @@ public abstract class Cursor {
         case Types.LONGVARCHAR:
             return agent_.crossConverters_.getBigDecimalFromString(getVARCHAR(column));
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "java.math.BigDecimal", column );
         }
     }
@@ -918,10 +967,12 @@ public abstract class Cursor {
             return agent_.crossConverters_.
                     getDateFromString(getVARCHAR(column), cal);
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "java.sql.Date", column );
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Time getTime(int column, Calendar cal) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case Types.TIME:
@@ -936,10 +987,12 @@ public abstract class Cursor {
             return agent_.crossConverters_.
                     getTimeFromString(getVARCHAR(column), cal);
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "java.sql.Time", column );
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Timestamp getTimestamp(int column, Calendar cal)
             throws SqlException {
         switch (jdbcTypes_[column - 1]) {
@@ -957,14 +1010,17 @@ public abstract class Cursor {
             return agent_.crossConverters_.
                     getTimestampFromString(getVARCHAR(column), cal);
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "java.sql.Timestamp", column );
         }
     }
 
     final String getString(int column) throws SqlException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             String tempString;
             switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.BOOLEAN:
                 if ( get_BOOLEAN( column ) ) { return Boolean.TRUE.toString(); }
                 else { return Boolean.FALSE.toString(); }
@@ -1021,6 +1077,7 @@ public abstract class Cursor {
                 tempString = c.getSubString(1, (int) c.length());
                 return tempString;
             default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
                 throw coercionError( "String", column );
             }
         } catch ( SQLException se ) {
@@ -1031,6 +1088,7 @@ public abstract class Cursor {
     final byte[] getBytes(int column) throws SqlException {
         try {
             switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.BINARY:
                 return get_CHAR_FOR_BIT_DATA(column);
             case Types.VARBINARY:
@@ -1041,6 +1099,7 @@ public abstract class Cursor {
                 byte[] bytes = b.getBytes(1, (int) b.length());
                 return bytes;
             default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
                 throw coercionError( "byte[]", column );
             }
         } catch ( SQLException se ) {
@@ -1048,9 +1107,11 @@ public abstract class Cursor {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final InputStream getBinaryStream(int column) throws SqlException
     {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.BINARY:
                 return new ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
             case Types.VARBINARY:
@@ -1071,9 +1132,11 @@ public abstract class Cursor {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final InputStream getAsciiStream(int column) throws SqlException
     {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.CLOB:
                 ClientClob c = getClobColumn_(column, agent_, false);
                 if (c.isLocator()) {
@@ -1084,6 +1147,7 @@ public abstract class Cursor {
                     return c.getAsciiStreamX();
                 }
             case Types.CHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                 return new ByteArrayInputStream(
                         getCHAR(column).getBytes(ISO_8859_1));
             case Types.VARCHAR:
@@ -1099,14 +1163,18 @@ public abstract class Cursor {
             case Types.BLOB:
                 return getBinaryStream(column);
             default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
                 throw coercionError( "java.io.InputStream", column );
         }
     }
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Reader getCharacterStream(int column)
             throws SqlException 
     {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.CLOB:
                 ClientClob c = getClobColumn_(column, agent_, false);
                 if (c.isLocator()) {
@@ -1116,12 +1184,14 @@ public abstract class Cursor {
                 } else {
                     return c.getCharacterStreamX();
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.CHAR:
                 return new StringReader(getCHAR(column));
             case Types.VARCHAR:
             case Types.LONGVARCHAR:
                 return new StringReader(getVARCHAR(column));
             case Types.BINARY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                 return new InputStreamReader(
                     new ByteArrayInputStream(
                         get_CHAR_FOR_BIT_DATA(column)), UTF_16BE);
@@ -1133,15 +1203,18 @@ public abstract class Cursor {
             case Types.BLOB:
                 return new InputStreamReader(getBinaryStream(column), UTF_16BE);
             default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
                 throw coercionError( "java.io.Reader", column );
             }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Blob getBlob(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case ClientTypes.BLOB:
             return getBlobColumn_(column, agent_, true);
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "java.sql.Blob", column );
         }
     }
@@ -1151,10 +1224,12 @@ public abstract class Cursor {
         case ClientTypes.CLOB:
             return getClobColumn_(column, agent_, true);
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "java.sql.Clob", column );
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Array getArray(int column) throws SqlException {
         throw new SqlException(agent_.logWriter_, 
             new ClientMessageId (SQLState.NOT_IMPLEMENTED),
@@ -1168,7 +1243,9 @@ public abstract class Cursor {
 
     final Object getObject(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.BOOLEAN:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
             return get_BOOLEAN(column);
         case Types.SMALLINT:
             // See Table 4 in JDBC 1 spec (pg. 932 in jdbc book)
@@ -1202,10 +1279,14 @@ public abstract class Cursor {
         case Types.JAVA_OBJECT:
             return get_UDT( column );
         case Types.BLOB:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2892
+//IC see: https://issues.apache.org/jira/browse/DERBY-2892
             return getBlobColumn_(column, agent_, true);
         case Types.CLOB:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2892
             return getClobColumn_(column, agent_, true);
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
             throw coercionError( "Object", column );
         }
     }
@@ -1215,6 +1296,7 @@ public abstract class Cursor {
         int maxCharLength = 0;
         for (int i = 0; i < columns_; i++) {
             switch (jdbcTypes_[i]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case ClientTypes.CHAR:
             case ClientTypes.VARCHAR:
             case ClientTypes.LONGVARCHAR:
@@ -1242,9 +1324,11 @@ public abstract class Cursor {
     }
 
     private ColumnTypeConversionException coercionError
+//IC see: https://issues.apache.org/jira/browse/DERBY-4949
         ( String targetType, int sourceColumn )
     {
         return new ColumnTypeConversionException
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             (agent_.logWriter_,
              targetType,
              ClientTypes.getTypeString(jdbcTypes_[sourceColumn -1]));
@@ -1260,6 +1344,7 @@ public abstract class Cursor {
         columnDataIsNullCache_ = null;
         jdbcTypes_ = null;
         nullable_ = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         charset_ = null;
         this.ccsid_ = null;
         isUpdateDeleteHoleCache_ = null;

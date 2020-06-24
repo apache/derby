@@ -72,6 +72,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 	//the increment value or to change the start value. If none of the above,
 	//then it will be set to -1
 	long				autoinc_create_or_modify_Start_Increment = -1; 
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 
 	/**
 	 * Constructor for a ColumnDescriptor when the column involved
@@ -103,8 +104,14 @@ public final class ColumnDescriptor extends TupleDescriptor
 					 DefaultInfo columnDefaultInfo,
 					 TableDescriptor table,
 					 UUID defaultUUID, long autoincStart, long autoincInc, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 					 long userChangedWhat, boolean autoincCycle)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 		this(columnName, columnPosition, columnType, columnDefault,
 				columnDefaultInfo, table, defaultUUID, autoincStart,
 				autoincInc,autoincCycle);				
@@ -133,6 +140,11 @@ public final class ColumnDescriptor extends TupleDescriptor
 						 DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 						 DefaultInfo columnDefaultInfo,
 						 TableDescriptor table,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 						 UUID defaultUUID, long autoincStart, long autoincInc, boolean autoincCycle)
 		{
 		this.columnName = columnName;
@@ -152,6 +164,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 			      columnDefaultInfo);
 
 		this.autoincStart = autoincStart;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 		this.autoincValue = autoincStart;
 		this.autoincInc = autoincInc;
 		this.autoincCycle = autoincCycle;
@@ -181,9 +194,15 @@ public final class ColumnDescriptor extends TupleDescriptor
 	public ColumnDescriptor(String columnName, int columnPosition,
 		DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 		DefaultInfo columnDefaultInfo,
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		UUID uuid,
 		UUID defaultUUID,
         long autoincStart, long autoincInc, long autoincValue, boolean autoincCycle)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 
 	{
 		this.columnName = columnName;
@@ -199,8 +218,19 @@ public final class ColumnDescriptor extends TupleDescriptor
 			      columnDefaultInfo);
 		
 		this.autoincStart = autoincStart;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 		this.autoincValue = autoincValue;
 		this.autoincInc = autoincInc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 		this.autoincCycle = autoincCycle;
 	}
 
@@ -251,6 +281,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 	 */
 	public void	setTableDescriptor(TableDescriptor tableDescriptor)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		this.table = tableDescriptor;
 	}
 
@@ -353,6 +384,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 	}
 	public boolean updatableByCursor()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		return false;
 	}
 
@@ -369,6 +401,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 	 * Is this column to have autoincremented value always ?
 	 */
 	public boolean isAutoincAlways(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		return (columnDefaultInfo == null) && isAutoincrement();
 	}
 
@@ -384,6 +417,11 @@ public final class ColumnDescriptor extends TupleDescriptor
 
 	public boolean getAutoincCycle()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 		return autoincCycle;
 	}
 	
@@ -413,11 +451,13 @@ public final class ColumnDescriptor extends TupleDescriptor
 	 */
 	public long getAutoincValue()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3175
 		return autoincValue;
 	}
 
 	public long getAutoinc_create_or_modify_Start_Increment()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 		return autoinc_create_or_modify_Start_Increment;
 	}
 	public void setAutoinc_create_or_modify_Start_Increment(int c_or_m)
@@ -452,6 +492,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 				"columnType: " + columnType + "\n" +
 				"columnDefault: " + columnDefault + "\n" +
 				"uuid: " + uuid + "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				"defaultUUID: " + defaultUUID ;
 		}
 		else
@@ -475,6 +516,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 
 	
 	private static void assertAutoinc(boolean autoinc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 					  long autoincInc,
 					  DefaultInfo defaultInfo){
 

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ProjectRestrictNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -56,6 +57,8 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class ProjectRestrictNode extends SingleChildResultSetNode
 {
 	/**
@@ -72,6 +75,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * Restriction as a PredicateList
 	 */
     PredicateList restrictionList;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 	/**
 	 * List of subqueries in projection
@@ -110,6 +115,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
      * @param cm            The context manager
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ProjectRestrictNode(ResultSetNode    childResult,
                         ResultColumnList projection,
                         ValueNode        restriction,
@@ -120,6 +127,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
                         ContextManager   cm)
 	{
         super(childResult, tableProperties, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( projection );
         this.restriction = restriction;
         this.restrictionList = restrictionList;
@@ -254,6 +262,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		CostEstimate childCost;
 
 		setCostEstimate( getCostEstimate( optimizer ) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** Don't re-optimize a child result set that has already been fully
@@ -328,7 +337,9 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 
 			/* Copy child cost to this node's cost */
 			childCost = childResult.getCostEstimate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getCostEstimate().setCost(
 							childCost.getEstimatedCost(),
 							childCost.rowCount(),
@@ -377,6 +388,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 			optimizer.considerCost(this, restrictionList, getCostEstimate(), outerCost);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return getCostEstimate();
 	}
 
@@ -519,6 +531,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		/* Add the matching predicate to the restrictionList */
 		if (restrictionList == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             restrictionList = new PredicateList(getContextManager());
 		}
 		restrictionList.addPredicate((Predicate) optimizablePredicate);
@@ -705,6 +719,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 			(trulyTheBestAccessPath.getJoinStrategy() != null) &&
 			trulyTheBestAccessPath.getJoinStrategy().isHashJoin();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if ((restrictionList != null) &&
             !alreadyPushed &&
             !hashJoinWithThisPRN &&
@@ -811,6 +826,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		 * requalification list.
 		 */
 		PredicateList searchRestrictionList =
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 new PredicateList(getContextManager());
 		PredicateList joinQualifierList =
                 new PredicateList(getContextManager());
@@ -827,9 +844,12 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		/* Break out the non-qualifiers from HTN's join qualifier list and make that
 		 * the new restriction list for this PRN.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         restrictionList = new PredicateList(getContextManager());
         /* For non-base table, we remove first 2 lists from requal list to avoid adding duplicates.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate p : searchRestrictionList) {
             requalificationRestrictionList.removeOptPredicate(p);
         }
@@ -867,6 +887,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		searchRestrictionList.accept(rcrv);
 
 		/* We can finally put the HTN between ourself and our old child. */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         childResult = new HashTableNode(childResult,
                                         tableProperties,
                                         htRCList,
@@ -973,6 +995,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -1030,6 +1054,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList) 
@@ -1039,6 +1065,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 
 		/* Build the referenced table map */
 		setReferencedTableMap( (JBitSet) childResult.getReferencedTableMap().clone() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		return this;
 	}
@@ -1055,6 +1082,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void pushExpressions(PredicateList predicateList)
 					throws StandardException
 	{
@@ -1075,12 +1104,15 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		/* Build a list of the single table predicates that we can push down */
         PredicateList pushPList =
             predicateList.getPushablePredicates(getReferencedTableMap());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* If this is a PRN above a SelectNode, probably due to a 
 		 * view or derived table which couldn't be flattened, then see
 		 * if we can push any of the predicates which just got pushed
 		 * down to our level into the SelectNode.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		if (pushPList != null &&
 				(childResult instanceof SelectNode))
 		{
@@ -1095,6 +1127,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
             //
             // Similarly, don't push if we have OFFSET and/or FETCH FROM.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             if (childSelect.hasWindows() ||
                 childSelect.hasOffsetFetchFirst()) {
             } else {
@@ -1145,6 +1178,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
@@ -1187,6 +1222,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
@@ -1206,6 +1243,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
@@ -1221,6 +1260,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		// RESOLVE: SHOULD FACTOR IN THE NON-OPTIMIZABLE PREDICATES THAT
 		// WERE NOT PUSHED DOWN
         setCostEstimate( getOptimizerFactory().getCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
@@ -1236,6 +1276,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * 			the cost estimate for the child node.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getCostEstimate()
 	{
 		/*
@@ -1244,6 +1286,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		** that optimization was done directly on the child node,
 		** in which case the cost estimate will be null here.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (super.getCostEstimate() == null)
         {
 			return childResult.getCostEstimate();
@@ -1261,9 +1304,12 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * 			the final cost estimate for the child node.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCandidateFinalCostEstimate() != null)
         {
             // we already set it, so just return it.
@@ -1304,6 +1350,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	{
 		if (SanityManager.DEBUG)
             SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         //
         // If we are projecting and restricting the stream from a table
@@ -1365,6 +1412,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 				childResult.generateResultSet(acb, mb);
 			else
 				childResult.generate((ActivationClassBuilder)acb, mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			setCostEstimate( childResult.getFinalCostEstimate() );
 			return;
 		}
@@ -1403,8 +1451,13 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 
 		// Map the result columns to the source columns
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
         ResultColumnList.ColumnMapping mappingArrays =
             getResultColumns().mapSourceColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         int[] mapArray = mappingArrays.mapArray;
         boolean[] cloneMap = mappingArrays.cloneMap;
@@ -1473,6 +1526,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		 */
 		if (projectSubquerys != null && projectSubquerys.size() > 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			projectSubquerys.setPointOfAttachment(getResultSetNumber());
 		}
 		if (restrictSubquerys != null && restrictSubquerys.size() > 0)
@@ -1536,6 +1590,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 			// as-is, with the performance trade-off as discussed above.)
 
 			/* Generate the Row function for the projection */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().generateCore(acb, mb, false);
 		}
 		else
@@ -1585,9 +1640,12 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		
 		mb.push(mapArrayItem);
         mb.push(cloneMapItem);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(getResultColumns().reusableResult());
 		mb.push(doesProjection);
         mb.push(validatingCheckConstraints);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         if ( validatingBaseTableUUIDString == null )
         {
             mb.push( UUID.NULL );
@@ -1615,6 +1673,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		** This ProjectRestrictNode is not a No-Op if it does any
 		** restriction.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-4411
 		if ( (restriction != null) || (constantRestriction != null) ||
 			 (restrictionList != null && restrictionList.size() > 0) )
 		{
@@ -1642,6 +1701,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void generateNOPProjectRestrict()
 			throws StandardException
 	{
@@ -1657,6 +1718,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode considerMaterialization(JBitSet outerTables)
 		throws StandardException
 	{
@@ -1692,6 +1755,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 				/* We get a shallow copy of the ResultColumnList and its 
 				 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				prRCList = getResultColumns();
 				setResultColumns(getResultColumns().copyListAndObjects());
 
@@ -1702,12 +1766,15 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 				prRCList.genVirtualColumnNodes(this, getResultColumns());
 
 				/* Finally, we create the new MaterializeResultSetNode */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 mrsn = new MaterializeResultSetNode(
 									this,
 									prRCList,
 									tableProperties,
 									getContextManager());
 				// Propagate the referenced table map if it's already been created
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				if (getReferencedTableMap() != null)
 				{
 					mrsn.setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
@@ -1732,6 +1799,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 				 * they get applied while building the MaterializeResultSet.
 				 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 mrsn = new MaterializeResultSetNode(
 									childResult,
 									prRCList,
@@ -1806,7 +1875,9 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		}
 
 		HashSet<BaseColumnNode> columns = new HashSet<BaseColumnNode>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns()) {
 			BaseColumnNode bc = rc.getBaseColumnNode();
 			if (bc == null) return false;
@@ -1834,11 +1905,13 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (restriction != null)
 		{
 			restriction = (ValueNode)restriction.accept(v);
@@ -1868,12 +1941,15 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 								   dependentScan);
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRestriction(ValueNode restriction) {
 		this.restriction = restriction;
 	}
 
     @Override
     public void pushQueryExpressionSuffix() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         childResult.pushQueryExpressionSuffix();
     }
 
@@ -1886,6 +1962,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @param orderByList	The order by list
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 	void pushOrderByList(OrderByList orderByList)
 	{
 		childResult.pushOrderByList(orderByList);
@@ -1905,6 +1983,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
         childResult.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
     void setValidatingCheckConstraints( String baseTableUUIDString ) {
         validatingCheckConstraints = true;
         validatingBaseTableUUIDString = baseTableUUIDString;

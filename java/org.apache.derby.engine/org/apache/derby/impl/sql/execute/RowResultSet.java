@@ -51,6 +51,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * reasonable answers.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class RowResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
 
@@ -131,6 +132,7 @@ class RowResultSet extends NoPutResultSetImpl
 	 * @exception StandardException thrown on failure.
      */
 	public ExecRow	getNextRowCore() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

@@ -111,16 +111,20 @@ class SetSchemaConstantAction implements ConstantAction
 			DataValueDescriptor dvs = pvs.getParameter(0);
 			thisSchemaName = dvs.getString();
 			//null parameter is not allowed
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			if (thisSchemaName == null || thisSchemaName.length() > Limits.MAX_IDENTIFIER_LENGTH)
 				throw StandardException.newException(SQLState.LANG_DB2_REPLACEMENT_ERROR, "CURRENT SCHEMA");
 		}
 		else if (type == StatementType.SET_SCHEMA_USER)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             thisSchemaName = lcc.getCurrentUserId(activation);
 		}
 
                 SchemaDescriptor sd = dd.getSchemaDescriptor(thisSchemaName,
                         lcc.getTransactionExecute(), true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 		lcc.setDefaultSchema(activation, sd);
 	}
 }

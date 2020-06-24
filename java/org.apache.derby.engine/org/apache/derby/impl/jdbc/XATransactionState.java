@@ -46,8 +46,10 @@ import org.apache.derby.shared.common.reference.MessageId;
 /** 
 */
 final class XATransactionState extends ContextImpl {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
     /** Rollback-only due to timeout */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
     final static int TRO_TIMEOUT                = -3;
 	/** Rollback-only due to deadlock */
 	final static int TRO_DEADLOCK				= -2;
@@ -58,7 +60,9 @@ final class XATransactionState extends ContextImpl {
 	// final static int T2_ASSOCIATION_SUSPENDED	= 2;
 	final static int TC_COMPLETED				= 3; // rollback/commit called
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	final EmbedConnection	conn;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1155
 	final EmbedXAResource creatingResource;
         // owning XAResource
 	private EmbedXAResource  associatedResource;	
@@ -117,6 +121,7 @@ final class XATransactionState extends ContextImpl {
     
 	/**
 		When an XAResource suspends a transaction (end(TMSUSPEND)) it must be resumed
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		using the same XAConnection. This has been the traditional Cloudscape/Derby behaviour,
 		though there does not seem to be a specific reference to this behaviour in
 		the JTA spec. Note that while the transaction is suspended by this XAResource,
@@ -124,6 +129,7 @@ final class XATransactionState extends ContextImpl {
 	*/
     HashMap<EmbedXAResource, XATransactionState> suspendedList;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 	/**
 		Association state of the transaction.
@@ -156,6 +162,7 @@ final class XATransactionState extends ContextImpl {
          * @param xaState the XA state object for the transaction to cancel
          */
         public CancelXATransactionTask(XATransactionState xaState) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4137
             this.xaState = xaState;
         }
         
@@ -178,9 +185,11 @@ final class XATransactionState extends ContextImpl {
     }
 
     private static TimerFactory getTimerFactory() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return getMonitor().getTimerFactory();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1155
 	XATransactionState(ContextManager cm, EmbedConnection conn, 
                 EmbedXAResource resource, XAXactId xid) {
 
@@ -190,6 +199,7 @@ final class XATransactionState extends ContextImpl {
 		this.creatingResource = resource;
 		this.associationState = XATransactionState.T1_ASSOCIATED;
 		this.xid = xid;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
 		this.performTimeoutRollback = false; // there is no transaction yet
 	}
 
@@ -200,6 +210,7 @@ final class XATransactionState extends ContextImpl {
 
                 StandardException se = (StandardException) t;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
                 if (se.getSeverity() >= ExceptionSeverity.SESSION_SEVERITY) {
                     popMe();
                     return;
@@ -226,6 +237,7 @@ final class XATransactionState extends ContextImpl {
 	}
 
 	void start(EmbedXAResource resource, int flags) throws XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1155
 
         synchronized (this) {
             if (associationState == XATransactionState.TRO_FAIL)
@@ -257,6 +269,7 @@ final class XATransactionState extends ContextImpl {
             case XATransactionState.T0_NOT_ASSOCIATED:
                 break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
             case XATransactionState.TRO_DEADLOCK:
             case XATransactionState.TRO_TIMEOUT:
             case XATransactionState.TRO_FAIL:
@@ -353,6 +366,7 @@ final class XATransactionState extends ContextImpl {
                 if (resource != associatedResource)
                     throw new XAException(XAException.XAER_PROTO);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 if (suspendedList == null) {
                     suspendedList =
                         new HashMap<EmbedXAResource, XATransactionState>();
@@ -384,8 +398,10 @@ final class XATransactionState extends ContextImpl {
     * @param timeoutMillis The number of milliseconds to be elapsed before
     *                      the transaction will be rolled back.
     */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
     synchronized void scheduleTimeoutTask(long timeoutMillis) {
         // Mark the transaction to be rolled back bby timeout
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
         performTimeoutRollback = true;
         // schedule a time out task if the timeout was specified
         if (timeoutMillis > 0) {
@@ -424,6 +440,7 @@ final class XATransactionState extends ContextImpl {
         try {
             retVal = conn.xa_prepare();
         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (ExceptionUtil.isDeferredConstraintViolation(e.getSQLState())) {
                 // we are rolling back
                 xa_finalize();
@@ -448,8 +465,10 @@ final class XATransactionState extends ContextImpl {
     private void xa_finalize() {
         if (timeoutTask != null) {
             getTimerFactory().cancel(timeoutTask);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4137
             timeoutTask = null;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
         performTimeoutRollback = false;
     }
 
@@ -474,6 +493,7 @@ final class XATransactionState extends ContextImpl {
                 // just before the xa_commit/rollback
                 // obtained this object's monitor.
                 if (performTimeoutRollback) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
 
                     // Log the message about the transaction cancelled
                     if (messageId != null)
@@ -509,6 +529,7 @@ final class XATransactionState extends ContextImpl {
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

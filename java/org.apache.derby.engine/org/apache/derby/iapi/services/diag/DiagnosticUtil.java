@@ -24,6 +24,7 @@ package org.apache.derby.iapi.services.diag;
 /**
 
 The Diagnostic framework is meant to provide a way to include as much
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 diagnostic capability within the distributed release of the Derby
 product without adversely affecting the runtime speed or foot print of
 a running configuration that needs not use this information.
@@ -82,6 +83,7 @@ public class DiagnosticUtil
 					className.substring(0, lastDot) + 
 					"D_" + className.substring(lastDot);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				Class<?> diagClass;
 				
 				try {
@@ -97,6 +99,7 @@ public class DiagnosticUtil
 				}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Constructor<?> constructor = diagClass.getConstructor();
 				Diagnosticable diag_obj = (Diagnosticable) diagClass.getConstructor().newInstance();
 

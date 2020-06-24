@@ -153,6 +153,7 @@ public abstract class SortScan extends Scan
 	}
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
     Fetch the row at the current position of the Scan and does not apply the
     qualifiers.
     

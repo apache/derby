@@ -108,6 +108,7 @@ public class HashScanResultSet extends ScanResultSet
     //
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     HashScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
 		int resultRowTemplate,
@@ -122,6 +123,7 @@ public class HashScanResultSet extends ScanResultSet
 		int maxCapacity,
 		int hashKeyItem,
 		String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
@@ -137,7 +139,9 @@ public class HashScanResultSet extends ScanResultSet
     {
 		super(activation,
 				resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 				resultRowTemplate,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 				lockMode, tableLocked, isolationLevel,
                 colRefItem,
 				optimizerEstimatedRowCount,
@@ -165,17 +169,20 @@ public class HashScanResultSet extends ScanResultSet
 		this.loadFactor = loadFactor;
 		this.maxCapacity = maxCapacity;
         this.tableName = tableName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
         this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
         this.indexName = indexName;
 		this.isConstraint = isConstraint;
 		this.forUpdate = forUpdate;
 		this.skipNullKeyColumns = skipNullKeyColumns;
 		this.keepAfterCommit = activation.getResultSetHoldability();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
 
 		/* Retrieve the hash key columns */
 		FormatableArrayHolder fah = (FormatableArrayHolder)
 										(activation.getPreparedStatement().
 											getSavedObject(hashKeyItem));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
         FormatableIntHolder[] fihArray =
                 fah.getArray(FormatableIntHolder[].class);
 		keyColumns = new int[fihArray.length];
@@ -204,6 +211,7 @@ public class HashScanResultSet extends ScanResultSet
 	 * locks at READ COMMITTED.
 	 */
 	boolean canGetInstantaneousLocks() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 		return true;
 	}
 
@@ -226,6 +234,7 @@ public class HashScanResultSet extends ScanResultSet
         tc = activation.getTransactionController();
 
 		initIsolationLevel();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 
 		if (startKeyGetter != null)
 		{
@@ -271,6 +280,7 @@ public class HashScanResultSet extends ScanResultSet
                     keyColumns,      
                     eliminateDuplicates,// remove duplicates?
                     -1,                 // RESOLVE - is there a row estimate?
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
                     maxCapacity,
                     initialCapacity,    // in memory Hashtable initial capacity
                     loadFactor,         // in memory Hashtable load factor
@@ -364,6 +374,7 @@ public class HashScanResultSet extends ScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -742,6 +753,7 @@ public class HashScanResultSet extends ScanResultSet
 			if (positioner.areNullsOrdered(position))
 			{
 				output = output + position + " ";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				colSeen = true;
 			}
 

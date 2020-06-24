@@ -35,6 +35,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
  * max().
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 class LastIndexKeyResultSet extends ScanResultSet
 {
 	// set in constructor and not altered during
@@ -85,6 +86,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 		int resultRowTemplate,
 		long conglomId, 
 		String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String userSuppliedOptimizerOverrides,
 		String indexName,
 		int colRefItem,
@@ -97,7 +99,9 @@ class LastIndexKeyResultSet extends ScanResultSet
 	{
 		super(activation,
 				resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 				resultRowTemplate,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 				lockMode, tableLocked, isolationLevel,
                 colRefItem,
 				optimizerEstimatedRowCount,
@@ -111,6 +115,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 		}
 
 		this.tableName = tableName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
 
@@ -144,6 +149,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	 * locks at READ COMMITTED.
 	 */
 	boolean canGetInstantaneousLocks() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 		return true;
 	}
 
@@ -168,6 +174,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 		TransactionController tc = activation.getTransactionController();
 
 		initIsolationLevel();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 
 		/*
 		** Grab the last row.  Note that if there are deletes
@@ -201,6 +208,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

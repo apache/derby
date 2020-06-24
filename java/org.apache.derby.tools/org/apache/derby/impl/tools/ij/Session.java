@@ -46,6 +46,7 @@ class Session {
 	boolean singleSession = true;
 	Connection conn = null;
 	String tag, name;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	Hashtable<String,PreparedStatement> prepStmts = new Hashtable<String,PreparedStatement>();
 	Hashtable<String,Statement> cursorStmts = new Hashtable<String,Statement>();
 	Hashtable<String,ResultSet> cursors = new Hashtable<String,ResultSet>();
@@ -63,6 +64,7 @@ class Session {
 		{
 			isJCC = conn.getMetaData().getDriverName().startsWith("IBM DB2 JDBC Universal Driver");
 			isDNC = conn.getMetaData().getDriverName().startsWith("Apache Derby Network Client");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 			isEmbeddedDerby = conn.getMetaData().getDriverName().
 				startsWith("Apache Derby Embedded JDBC Driver");
 		}
@@ -90,6 +92,7 @@ class Session {
 
 	boolean getIsEmbeddedDerby()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		return isEmbeddedDerby;
 	}
 
@@ -97,6 +100,7 @@ class Session {
 		return name;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	PreparedStatement addPreparedStatement(String name, PreparedStatement ps) {
 		return prepStmts.put(name,ps);
 	}

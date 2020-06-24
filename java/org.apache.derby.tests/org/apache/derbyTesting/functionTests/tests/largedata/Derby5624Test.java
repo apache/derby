@@ -130,6 +130,7 @@ public class Derby5624Test extends BaseJDBCTestCase
 
     protected static Test baseSuite(String name) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby5624Test.class);
         return new CleanDatabaseTestSetup(suite)
@@ -164,6 +165,7 @@ public class Derby5624Test extends BaseJDBCTestCase
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Derby5624Test");
         suite.addTest(baseSuite("Derby5624Test:embedded"));
         return suite;

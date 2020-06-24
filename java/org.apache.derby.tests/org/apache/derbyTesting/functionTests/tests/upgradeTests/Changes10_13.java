@@ -234,6 +234,8 @@ public class Changes10_13 extends UpgradeChange
 	 */
      public void testDerby6892SkipHeaderLines() throws SQLException {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6892
 
         switch (getPhase()) {
 		case PH_CREATE:
@@ -310,6 +312,8 @@ public class Changes10_13 extends UpgradeChange
 	 * DERBY-6893. 
 	 */
      public void testDerby6893SkipHeaderLines() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6893
         Statement s = createStatement();
        switch (getPhase()) {
 		case PH_CREATE:

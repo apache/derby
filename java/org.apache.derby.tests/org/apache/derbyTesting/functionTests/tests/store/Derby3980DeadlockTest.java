@@ -47,11 +47,13 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class Derby3980DeadlockTest extends BaseJDBCTestCase {
     private final int THREAD_COUNT = 2;
     private final LinkedList<Throwable> listExceptions =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             new LinkedList<Throwable>();
     private final Object syncObject = new Object();
     private int startedCount = 0;
     private static final String fprefix = "javacore";
     private static final String POLICY_FILE_NAME =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         "org/apache/derbyTesting/functionTests/tests/store/Derby3980DeadlockTest.policy";
     
     public Derby3980DeadlockTest(String name) {
@@ -73,6 +75,7 @@ public class Derby3980DeadlockTest extends BaseJDBCTestCase {
     private void checkExceptions() {        
         //Due to timing, you might see ERROR 40XL1: A lock could not be obtained
         //instead of ERROR 40001 (DERBY-3980)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (Throwable t : listExceptions) {
             if (t instanceof SQLException) {
                 assertSQLState("40001", (SQLException) t);
@@ -97,6 +100,7 @@ public class Derby3980DeadlockTest extends BaseJDBCTestCase {
         test = new SystemPropertyTestSetup(test, diagProperties, true);
      
         // Install a security manager using the initial policy file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
     

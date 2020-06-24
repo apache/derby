@@ -530,6 +530,7 @@ public class LeafControlRow extends ControlRow
         }
 
         // See if this page has space.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5604
         if ((this.page.recordCount() - 1 < BTree.maxRowsPerPage) &&
             (this.page.spaceForInsert(splitrow, (FormatableBitSet) null,
 				AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD)))
@@ -564,6 +565,7 @@ public class LeafControlRow extends ControlRow
             // point must not access this object's fields.
             
             ControlRow new_root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             return(
                 new_root.splitFor(open_btree, template, null, splitrow, flag));
@@ -595,6 +597,7 @@ public class LeafControlRow extends ControlRow
         // Save away current split point leaf row, and build a branch row
         // based on it.
         DataValueDescriptor[] split_leaf_row = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             open_btree.getConglomerate().createTemplate(
                     open_btree.getRawTran());
 
@@ -623,6 +626,7 @@ public class LeafControlRow extends ControlRow
             // there is no way to know the state of the tree, so the
             // current split pass recursion must end.
             return(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
                 BranchControlRow.restartSplitFor(
                     open_btree, template, parent_page, this, 
                     branchrow.getRow(), splitrow, flag));
@@ -632,6 +636,7 @@ public class LeafControlRow extends ControlRow
         // Create a new leaf page under the parent.
         LeafControlRow newleaf = 
             LeafControlRow.allocate(open_btree, parent_page);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
         // Now that we know the page number of the new child page update
         // the branch row to be inserted with the correct value.
@@ -690,6 +695,7 @@ public class LeafControlRow extends ControlRow
 
 
         BranchRow branch_template = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             BranchRow.createEmptyTemplate(
                     open_btree.getRawTran(),
                     open_btree.getConglomerate());
@@ -801,6 +807,7 @@ public class LeafControlRow extends ControlRow
         // Allocate a new leaf page under the existing leaf root.
 
         newleaf = LeafControlRow.allocate(open_btree, leafroot);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
         // Test fail after allocation
         if (SanityManager.DEBUG)

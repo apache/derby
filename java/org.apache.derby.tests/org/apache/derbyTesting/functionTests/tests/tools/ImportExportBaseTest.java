@@ -156,6 +156,7 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
         throws SQLException 
     {
         String expsql = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE" +  
             "(? , ? , ? , ?, ?, ?, ?)";
         PreparedStatement ps = prepareStatement(expsql);
@@ -185,6 +186,7 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
         throws SQLException 
     {
         String expsql = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             "call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE" + 
             "(? , ? , ? , ?, ?, ?)";
         PreparedStatement ps = prepareStatement(expsql);
@@ -212,6 +214,7 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
         throws SQLException 
     {
         String impsql = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE" +
             "(?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = prepareStatement(impsql);
@@ -232,6 +235,7 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
      *  SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE procedure.
      */
     protected void doImportDataLobsFromExtFile(String schemaName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                                                String tableName, 
                                                String insertCols,
                                                String colIndexes, 

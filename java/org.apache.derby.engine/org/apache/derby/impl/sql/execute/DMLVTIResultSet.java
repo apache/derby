@@ -46,6 +46,7 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 
 	// passed in at construction time
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	NoPutResultSet sourceResultSet;
 	NoPutResultSet savedSource;
 	UpdatableVTIConstantAction	constants;
@@ -58,6 +59,7 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 	 *
 	 * @exception StandardException		Thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     DMLVTIResultSet(NoPutResultSet source, 
 						   Activation activation)
 		throws StandardException
@@ -68,6 +70,8 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 
         tc = activation.getTransactionController();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
         resultDescription = sourceResultSet.getResultDescription();
 	}
 	
@@ -76,6 +80,7 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 	*/
 	public void open() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 		setup();
 		// Remember if this is the 1st execution
 		firstExecute = (numOpens == 0);

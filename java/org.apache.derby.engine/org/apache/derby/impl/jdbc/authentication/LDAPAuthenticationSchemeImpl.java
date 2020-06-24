@@ -146,6 +146,7 @@ extends JNDIAuthenticationSchemeBase
 				userDN =
 					authenticationService.getProperty(
 						org.apache.derby.shared.common.reference.Property.USER_PROPERTY_PREFIX);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 			if (userDN == (String) null) {
 				userDN = getDNFromUID(userName);
@@ -167,6 +168,7 @@ extends JNDIAuthenticationSchemeBase
 
 			// it is happening right here
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-857
             DirContext ctx =   privInitialDirContext(env);
           
             
@@ -197,6 +199,7 @@ extends JNDIAuthenticationSchemeBase
      */
     private DirContext privInitialDirContext(final Properties env) throws NamingException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return AccessController.doPrivileged(
                     new PrivilegedExceptionAction<DirContext>() {
                         public DirContext run() throws NamingException {
@@ -233,6 +236,7 @@ extends JNDIAuthenticationSchemeBase
 			//
 			String ldapServer = authenticationService.getProperty(
 						org.apache.derby.shared.common.reference.Property.AUTHENTICATION_SERVER_PARAMETER);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 			if (ldapServer == (String) null) {
 
@@ -245,6 +249,7 @@ extends JNDIAuthenticationSchemeBase
 
 			} else {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1000
 				if (ldapServer.startsWith(dfltLDAPURL) || ldapServer.startsWith("ldaps://") )
 					this.providerURL = ldapServer;
 				else if (ldapServer.startsWith("//"))
@@ -368,6 +373,7 @@ extends JNDIAuthenticationSchemeBase
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (SanityManager.DEBUG &&
             SanityManager.DEBUG_ON(
                 AuthenticationServiceBase.AuthenticationTrace)) {
@@ -427,6 +433,7 @@ extends JNDIAuthenticationSchemeBase
 			env = initDirContextEnv;
 
 		DirContext ctx = privInitialDirContext(env);
+//IC see: https://issues.apache.org/jira/browse/DERBY-857
 
 		// Construct Search Filter
 		SearchControls ctls = new SearchControls();

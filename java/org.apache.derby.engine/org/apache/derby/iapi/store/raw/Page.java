@@ -283,6 +283,8 @@ public interface Page
      * mode, or if the row cannot fit on the page, or if the row is null
      **/
 	RecordHandle insert(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     Object[]            row, 
     FormatableBitSet    validColumns,
     byte                insertFlag, 
@@ -648,6 +650,7 @@ public interface Page
 		is locked but not fetched.
 		<BR>
 		The fieldId of the first field is 0.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		If the fieldId is &gt;= the number of fields on the record, 
 		column is restored to null
 		<P>
@@ -732,6 +735,7 @@ public interface Page
 		                                the slot is not on the page, or if the 
                                         record is deleted, or if the fieldId 
                                         is not on the record and (fieldId - 1)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6323
                                         does not exist, or if the container was
                                         not opened in update mode.
 
@@ -951,6 +955,7 @@ public interface Page
 
         @exception StandardException the container was not opened in update
                                      mode, or the slot is not on the page
+//IC see: https://issues.apache.org/jira/browse/DERBY-6323
 
 	*/
 	RecordHandle updateAtSlot(

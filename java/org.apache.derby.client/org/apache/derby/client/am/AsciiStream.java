@@ -25,12 +25,15 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class AsciiStream extends InputStream {
     private Reader reader_;
     private String materializedString_;
     private int charsRead_ = 0;
     
     AsciiStream(String materializedString){
+//IC see: https://issues.apache.org/jira/browse/DERBY-525
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         this(materializedString,new StringReader(materializedString));
     }
     
@@ -44,6 +47,8 @@ class AsciiStream extends InputStream {
         ++charsRead_;
         if (oneChar != -1) // if not eos
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-525
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if(oneChar <= 0x00ff)
             return oneChar;
         else

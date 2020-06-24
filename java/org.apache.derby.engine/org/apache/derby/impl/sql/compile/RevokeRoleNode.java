@@ -76,7 +76,10 @@ class RevokeRoleNode extends DDLStatementNode
 	{
 		if (SanityManager.DEBUG) {
             StringBuilder sb1 = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for( Iterator<?> it = roles.iterator(); it.hasNext();) {
 				if( sb1.length() > 0) {
 					sb1.append( ", ");
@@ -85,7 +88,10 @@ class RevokeRoleNode extends DDLStatementNode
 			}
 
             StringBuilder sb2 = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for( Iterator<?> it = grantees.iterator(); it.hasNext();) {
 				if( sb2.length() > 0) {
 					sb2.append( ", ");
@@ -104,6 +110,8 @@ class RevokeRoleNode extends DDLStatementNode
 	} // end of toString
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "REVOKE role";

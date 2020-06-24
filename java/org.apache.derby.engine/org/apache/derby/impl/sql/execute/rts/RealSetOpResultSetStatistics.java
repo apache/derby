@@ -127,6 +127,7 @@ public class RealSetOpResultSetStatistics
         initFormatInfo(depth);
 
         String rs = (opType == IntersectOrExceptNode.INTERSECT_OP) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                 ? "INTERSECT ResultSet" : "EXCEPT ResultSet";
          
         return
@@ -193,6 +194,7 @@ public class RealSetOpResultSetStatistics
      *         
      */
     public java.util.Vector<ResultSetStatistics> getChildren() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         java.util.Vector<ResultSetStatistics> children = new java.util.Vector<ResultSetStatistics>();
         children.addElement(leftResultSetStatistics);
         children.addElement(rightResultSetStatistics);
@@ -207,6 +209,7 @@ public class RealSetOpResultSetStatistics
     public String getNodeName() {
         String nodeName = 
             (opType == IntersectOrExceptNode.INTERSECT_OP) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                 ? "INTERSECT" : "EXCEPT";
 		
         return MessageService.getTextMessage(nodeName);
@@ -253,6 +256,7 @@ public class RealSetOpResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                              // the number of index updates 
            null,                           // lock mode

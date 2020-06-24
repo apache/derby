@@ -51,6 +51,7 @@ public class SubqueryTest extends BaseJDBCTestCase {
         return new DatabasePropertyTestSetup(
             new SystemPropertyTestSetup(new CleanDatabaseTestSetup(
                new BaseTestSuite(SubqueryTest.class, "SubqueryTest")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
                     /**
                      * @see org.apache.derbyTesting.junit.CleanDatabaseTestSetup#decorateSQL(java.sql.Statement)

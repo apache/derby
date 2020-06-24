@@ -86,6 +86,7 @@ public class utilMain {
 	 * grabbers as needed.
 	 */
 	Stack<StatementFinder> oldGrabbers = new Stack<StatementFinder>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	LocalizedResource langUtil = LocalizedResource.getInstance();
 	/**
@@ -93,6 +94,7 @@ public class utilMain {
 	 *
 	 * @param numConnections	The number of connections/users to test.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 	utilMain(int numConnections, LocalizedOutput out)
 		throws ijFatalException
 	{
@@ -106,6 +108,8 @@ public class utilMain {
 	 *
 	 * @param numConnections	The number of connections/users to test.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
     utilMain(int numConnections, LocalizedOutput out, boolean loadSystemProperties)
 		throws ijFatalException
 	{
@@ -138,14 +142,17 @@ public class utilMain {
 		ijTokMgr = new ijTokenManager(charStream);
 		ijParser = new ij(ijTokMgr, this);
 		this.out = out;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6195
 		if ( ignoreErrors != null ) { this.ignoreErrors = (Hashtable) ignoreErrors.clone(); }
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		showErrorCode = 
 			Boolean.valueOf(
 					util.getSystemProperty("ij.showErrorCode")
 					).booleanValue();
         
         ijExceptionTrace = util.getSystemProperty("ij.exceptionTrace");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 
 		this.numConnections = numConnections;
 		/* 1 StatementFinder and ConnectionEnv per connection/user. */
@@ -154,11 +161,13 @@ public class utilMain {
 
 		for (int ictr = 0; ictr < numConnections; ictr++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
 		    commandGrabber[ictr] = new StatementFinder(langUtil.getNewInput(System.in), out);
 			connEnv[ictr] = new ConnectionEnv(ictr, (numConnections > 1), (numConnections == 1));
 		}
 
 		/* Start with connection/user 0 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		currCE = 0;
 		fileInput = false;
 		initialFileInput = false;
@@ -171,6 +180,7 @@ public class utilMain {
 	 */
 	public void initFromEnvironment()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		ijParser.initFromEnvironment();
 		
 		for (int ictr = 0; ictr < numConnections; ictr++)
@@ -185,10 +195,12 @@ public class utilMain {
 				JDBCDisplayUtil.ShowException(out, i); // will continue past driver failure
 			} catch (IllegalAccessException ia) {
 				JDBCDisplayUtil.ShowException(out, ia); // will continue past driver failure
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			} catch (NoSuchMethodException ia) {
 				JDBCDisplayUtil.ShowException(out, ia); // will continue past driver failure
 			} catch (java.lang.reflect.InvocationTargetException ia) {
 				JDBCDisplayUtil.ShowException(out, ia); // will continue past driver failure
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
             } catch (ijException ie) {
                 JDBCDisplayUtil.ShowException(out, ie); // will continue past driver failure
             }
@@ -204,6 +216,7 @@ public class utilMain {
 	 * @param out sink for output from ij
 	 */
 	public void go(LocalizedInput[] in, LocalizedOutput out)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3420
 				   throws ijFatalException
 	{
 		this.out = out;
@@ -220,6 +233,7 @@ public class utilMain {
 			// figure out which version this is
             InputStream versionStream = util.getResourceAsStream(
                     "/" + ProductGenusNames.TOOLS_INFO);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 			// figure out which version this is
 			ProductVersionHolder ijVersion = 
@@ -245,8 +259,10 @@ public class utilMain {
 			}
 			firstRun = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5342
 			supportIJProperties(connEnv[currCE]);
     	}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		this.out = out;
 		runScriptGuts();
 		cleanupGo(in);
@@ -262,12 +278,14 @@ public class utilMain {
 	public int goScript(Connection conn,
 			LocalizedInput in)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5342
 	    connEnv[0].addSession(conn, (String) null);
         ijParser.setConnection(connEnv[0], (numConnections > 1));
 	    supportIJProperties(connEnv[0]);   
 	    		
 		fileInput = initialFileInput = !in.isStandardInput();
 		commandGrabber[0].ReInit(in);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		return runScriptGuts();
 	}
 	
@@ -276,6 +294,7 @@ public class utilMain {
         //accordingly. 
         boolean showNoCountForSelect = Boolean.valueOf(util.getSystemProperty("ij.showNoCountForSelect")).booleanValue();
         JDBCDisplayUtil.setShowSelectCount( !showNoCountForSelect );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6197
 
         //check if the property is set to not show initial connections and accordingly set the
         //static variable.
@@ -312,6 +331,7 @@ public class utilMain {
 
 			connEnv[currCE].doPrompt(true, out);
    			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
    				command = null;
 				out.flush();
 				command = commandGrabber[currCE].nextStatement();
@@ -321,6 +341,7 @@ public class utilMain {
 				while (command == null && ! oldGrabbers.empty()) {
 					// close the old input file if not System.in
 					if (fileInput) commandGrabber[currCE].close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					commandGrabber[currCE] = oldGrabbers.pop();
 					if (oldGrabbers.empty())
 						fileInput = initialFileInput;
@@ -371,6 +392,7 @@ public class utilMain {
 				}
 
     			} catch (ParseException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
  					if (command != null)
                         scriptErrorCount += doCatch(command) ? 0 : 1;
 				} catch (TokenMgrError e) {
@@ -389,6 +411,7 @@ public class utilMain {
     			} catch (Throwable e) {
                     scriptErrorCount++;
     			  	out.println(langUtil.getTextMessage("IJ_JavaErro0",e.toString()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                     e.printStackTrace();
 					doTrace(e);
 				}
@@ -397,6 +420,7 @@ public class utilMain {
 			currCE = ++currCE % connEnv.length;
 		}
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
         return scriptErrorCount;
 	}
 	
@@ -420,6 +444,7 @@ public class utilMain {
 		// similarly must close input files
 		for (int i = 0; i < numConnections; i++) {
 			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 				in[i].close();	
 			} catch (Exception e ) {
     			  	out.println(langUtil.getTextMessage("IJ_CannotCloseInFile",
@@ -485,6 +510,7 @@ public class utilMain {
 					JDBCDisplayUtil.ShowWarnings(out,result.getSQLWarnings());
 					result.clearSQLWarnings();
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 			} else if (result.isResultSet()) {
 				ResultSet rs = result.getResultSet();
 				try {
@@ -494,7 +520,9 @@ public class utilMain {
 					throw se;
 				}
 				result.closeStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2222
             } else if (result.isMultipleResultSetResult()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
               List<ResultSet> resultSets = result.getMultipleResultSets();
               try {
                 JDBCDisplayUtil.DisplayMultipleResults(out,resultSets,
@@ -541,6 +569,7 @@ public class utilMain {
 				langUtil.getNumberAsString(endTime - beginTime)));
 			}
             return true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 
 	    } catch (SQLException e) {
 			// SQL exception occurred in ij's actions; print and continue
@@ -554,9 +583,11 @@ public class utilMain {
 			doTrace(ie);
 	    } catch (Throwable t) {
 	  		out.println(langUtil.getTextMessage("IJ_JavaErro0_7", t.toString()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             t.printStackTrace();
 			doTrace(t);
 	    }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
         return false;
 	}
 
@@ -573,6 +604,7 @@ public class utilMain {
 		String sqlState = null;
 		SQLException fatalException = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		if (showErrorCode) {
 			errorCode = langUtil.getTextMessage("IJ_Erro0", 
 			langUtil.getNumberAsString(e.getErrorCode()));
@@ -584,6 +616,7 @@ public class utilMain {
 		boolean syntaxErrorOccurred = false;
 		for (; e!=null; e=e.getNextException())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3408
 			sqlState = e.getSQLState();
 			if ("42X01".equals(sqlState))
 				syntaxErrorOccurred = true;
@@ -609,12 +642,14 @@ public class utilMain {
 			String st1 = JDBCDisplayUtil.mapNull(e.getSQLState(),langUtil.getTextMessage("IJ_NoSqls"));
 			String st2 = JDBCDisplayUtil.mapNull(e.getMessage(),langUtil.getTextMessage("IJ_NoMess"));
 			out.println(langUtil.getTextMessage("IJ_Erro012",  st1, st2, errorCode));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 			doTrace(e);
 		}
 		if (fatalException != null)
 		{
 			throw new ijFatalException(fatalException);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3408
 		if (syntaxErrorOccurred)
 			out.println(langUtil.getTextMessage("IJ_SuggestHelp"));
 	}
@@ -623,6 +658,7 @@ public class utilMain {
 	 * stack trace dumper
 	 */
 	private void doTrace(Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		if (ijExceptionTrace != null) {
 			t.printStackTrace(out);
 		}
@@ -641,6 +677,7 @@ public class utilMain {
 		// if the file was opened, move to use it for input.
 		oldGrabbers.push(commandGrabber[currCE]);
 	    commandGrabber[currCE] = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
                 new StatementFinder(langUtil.getNewInput(new BufferedInputStream(newFile, BUFFEREDFILESIZE)), null);
 		fileInput = true;
 	}
@@ -650,6 +687,7 @@ public class utilMain {
 		if (is==null) throw ijException.resourceNotFound();
 		oldGrabbers.push(commandGrabber[currCE]);
 	    commandGrabber[currCE] = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2255
                 new StatementFinder(langUtil.getNewEncodedInput(new BufferedInputStream(is, BUFFEREDFILESIZE), "UTF8"), null);
 		fileInput = true;
 	}
@@ -683,6 +721,7 @@ public class utilMain {
      * @exception SQLException if a database error occurs
      */
     private void checkScrollableCursor(ResultSet rs, String operation)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
             throws ijException, SQLException {
         if (rs.getType() == ResultSet.TYPE_FORWARD_ONLY) {
             throw ijException.forwardOnlyCursor(operation);
@@ -704,6 +743,7 @@ public class utilMain {
 	ijResult absolute(ResultSet rs, int row)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "ABSOLUTE");
 		// 0 is an *VALID* value for row
 		return new ijRowResult(rs, rs.absolute(row));
@@ -724,6 +764,7 @@ public class utilMain {
 	ijResult relative(ResultSet rs, int row)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "RELATIVE");
 		return new ijRowResult(rs, rs.relative(row));
 	}
@@ -742,6 +783,7 @@ public class utilMain {
 	ijResult beforeFirst(ResultSet rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "BEFORE FIRST");
 		rs.beforeFirst();
 		return new ijRowResult(rs, false);
@@ -761,6 +803,7 @@ public class utilMain {
 	ijResult first(ResultSet rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "FIRST");
 		return new ijRowResult(rs, rs.first());
 	}
@@ -779,6 +822,7 @@ public class utilMain {
 	ijResult afterLast(ResultSet rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "AFTER LAST");
 		rs.afterLast();
 		return new ijRowResult(rs, false);
@@ -798,6 +842,7 @@ public class utilMain {
 	ijResult last(ResultSet rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "LAST");
 		return new ijRowResult(rs, rs.last());
 	}
@@ -816,6 +861,7 @@ public class utilMain {
 	ijResult previous(ResultSet rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "PREVIOUS");
 		return new ijRowResult(rs, rs.previous());
 	}
@@ -833,6 +879,7 @@ public class utilMain {
 	int getCurrentRowNumber(ResultSet rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3041
         checkScrollableCursor(rs, "GETCURRENTROWNUMBER");
 		return rs.getRow();
 	}

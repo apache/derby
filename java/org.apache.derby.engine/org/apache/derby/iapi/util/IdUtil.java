@@ -77,6 +77,8 @@ public abstract class IdUtil
 										 String id2)
 	{
         if( null == id1)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3158
+//IC see: https://issues.apache.org/jira/browse/DERBY-3159
             return normalToDelimited(id2);
 		return
         normalToDelimited(id1) +
@@ -93,6 +95,8 @@ public abstract class IdUtil
 		for (int ix=0; ix < ids.length; ix++)
 		{
 			if (ix!=0) sb.append(".");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3158
+//IC see: https://issues.apache.org/jira/browse/DERBY-3159
 			sb.append(normalToDelimited(ids[ix]));
 		}
 		return sb.toString();
@@ -126,10 +130,12 @@ public abstract class IdUtil
 	private static String[] parseMultiPartSQLIdentifier(StringReader r)
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<String> v = new Vector<String>();
 		while (true)
 		{
 			String thisId = parseId(r,true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 			v.add(thisId);
 			int dot;
 
@@ -153,6 +159,7 @@ public abstract class IdUtil
 	}
 	
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
       Parse a SQL identifier from the String provided. Raise an excepion
       if the string does not contain a valid SQL indentifier.
       The returned String  contains the normalized form of the
@@ -164,6 +171,7 @@ public abstract class IdUtil
 		 throws StandardException
 	{
 		StringReader r = new StringReader(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 		String id = parseId(r,true);
 		verifyEmpty(r);
 		return id;
@@ -194,6 +202,7 @@ public abstract class IdUtil
 			if (c == '"')
 				return parseQId(r,normalize);
 			else
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 				return parseUnQId(r,normalize);
 		}
 
@@ -264,6 +273,7 @@ public abstract class IdUtil
 		if (!needsQuote) {
 			result = authid.toLowerCase();
 		} else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 			result = normalToDelimited(authid);
 		}
 
@@ -300,6 +310,7 @@ public abstract class IdUtil
 		if (c != -1) r.reset();
         
         String id = b.toString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
 		if (normalize)
 			return StringUtil.SQLToUpperCase(id);
@@ -360,6 +371,8 @@ public abstract class IdUtil
 		if (normalize)
 			return b.toString();
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-3158
+//IC see: https://issues.apache.org/jira/browse/DERBY-3159
 			return normalToDelimited(b.toString()); //Put the quotes back.
 	}
 
@@ -412,16 +425,19 @@ public abstract class IdUtil
 		if (input.length() == 0)
 			return new String[0][];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<String[]> v = new Vector<String[]>();
 		java.io.StringReader r = new java.io.StringReader(input);
 		//
 		while (true)
 		{
 			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 				String[] thisQName = IdUtil.parseMultiPartSQLIdentifier(r);
 				if (thisQName.length != 2)
 					throw StandardException.newException(SQLState.DB_CLASS_PATH_PARSE_ERROR,input);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				v.add(thisQName);
 				int delim = r.read();
 				if (delim != ':')
@@ -456,6 +472,7 @@ public abstract class IdUtil
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 	  Scan a list of comma separated SQL identifiers from the string provided.
       This returns an array with containing the normalized forms of the identifiers.
       
@@ -470,12 +487,14 @@ public abstract class IdUtil
 		if (p==null) return null;
 		StringReader r = new StringReader(p);
 		String[] result = parseIdList(r, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 		verifyEmpty(r);
 		return result;
 	}
 	
 	
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 	  Parse a list of comma separated SQL identifiers returning
       them a as elements in an array.
 
@@ -487,12 +506,15 @@ public abstract class IdUtil
 	private static String[] parseIdList(StringReader r, boolean normalize)
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<String> v = new Vector<String>();
 		while (true)
 		{
 			int delim;
 			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 				String thisId = IdUtil.parseId(r,normalize);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				v.add(thisId);
 				r.mark(0);
 				delim = r.read();
@@ -530,9 +552,11 @@ public abstract class IdUtil
 	public static String intersect(String[] l1, String[] l2)
 	{
 		if (l1 == null || l2 == null) return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		HashSet<String> h = new HashSet<String>();
 		for(int ix=0;ix<l2.length;ix++) h.add(l2[ix]); 
 		Vector<String> v = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		for(int ix=0;ix<l1.length;ix++) if (h.contains(l1[ix])) v.add(l1[ix]);
 		return vectorToIdList(v,true); 
 	}
@@ -562,8 +586,10 @@ public abstract class IdUtil
 	 */
 	public static String getUserAuthorizationId(String userName) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		try {
             if (userName != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 			    return parseSQLIdentifier(userName);
 		}
 		catch (StandardException se) {
@@ -597,6 +623,7 @@ public abstract class IdUtil
 	public static String dups(String[] l)
 	{
 		if (l == null) return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		HashSet<String> h = new HashSet<String>();
 		Vector<String> v = new Vector<String>();
 		for(int ix=0;ix<l.length;ix++)
@@ -604,6 +631,7 @@ public abstract class IdUtil
 			if (!h.contains(l[ix]))
 				h.add(l[ix]);
 			else
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				v.add(l[ix]);
 		}
 		return vectorToIdList(v,true);
@@ -620,6 +648,7 @@ public abstract class IdUtil
 		String[] normal_a = parseIdList(l);
 		StringReader r = new StringReader(l);
 		String[] external_a = parseIdList(r,false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		HashSet<String> h = new HashSet<String>();
 		Vector<String> v = new Vector<String>();
 		for(int ix=0;ix<normal_a.length;ix++)
@@ -627,6 +656,7 @@ public abstract class IdUtil
 			if (!h.contains(normal_a[ix]))
 			{
 				h.add(normal_a[ix]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				v.add(external_a[ix]);
 			}
 		}
@@ -643,6 +673,8 @@ public abstract class IdUtil
 		for (int ix=0;ix<ids.length; ix++)
 		{
 			if (ix != 0) sb.append(",");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3158
+//IC see: https://issues.apache.org/jira/browse/DERBY-3159
 			sb.append(IdUtil.normalToDelimited(ids[ix]));
 		}
 		return sb.toString();
@@ -663,6 +695,7 @@ public abstract class IdUtil
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 	  Return true if the normalized value of an indentifier is on the list 
       of SQL identifiers provided.
 	  @param id an id in normal form
@@ -680,6 +713,7 @@ public abstract class IdUtil
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 	  Delete an normal value from a list of SQL identifiers.
       The returned list maintains its remaining identifiers in the
       format they were upon entry to the call.
@@ -699,6 +733,7 @@ public abstract class IdUtil
 		 throws StandardException
 	{
 		if (list==null) return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<String> v = new Vector<String>();
 		StringReader r = new StringReader(list);
 		String[] enteredList_a = parseIdList(r,false);
@@ -709,7 +744,9 @@ public abstract class IdUtil
 		//compare we parse each SQL indentifier in list to convert
 		//to normal form.
 		for (int ix=0; ix < enteredList_a.length; ix++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 			if (!id.equals(IdUtil.parseSQLIdentifier(enteredList_a[ix])))
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				v.add(enteredList_a[ix]);
 		if (v.size() == 0)
 			return null;
@@ -730,6 +767,8 @@ public abstract class IdUtil
 	public static String appendNormalToList(String id, String list)
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3158
+//IC see: https://issues.apache.org/jira/browse/DERBY-3159
         String delimitedId = normalToDelimited(id);
 		if (list==null)
 			return delimitedId;
@@ -747,6 +786,7 @@ public abstract class IdUtil
 	 */
 	public static String parseRoleId(String roleName) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4475
 		roleName = roleName.trim();
 		// NONE is a special case and is not allowed with its special
 		// meaning in SET ROLE <value specification>. Even if there is
@@ -754,6 +794,7 @@ public abstract class IdUtil
 		// delimited here, since it would have had to be delimited to
 		// get created, too. We could have chosen to be lenient here,
 		// but it seems safer to be restrictive.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		if (StringUtil.SQLToUpperCase(roleName).equals("NONE")) {
 			throw StandardException.newException(SQLState.ID_PARSE_ERROR);
 		}

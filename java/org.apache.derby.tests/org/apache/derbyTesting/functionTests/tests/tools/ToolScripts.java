@@ -51,6 +51,7 @@ public final class ToolScripts extends ScriptTestCase {
      *
      */
     private static final String[] CLIENT_AND_EMBEDDED_TESTS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6585
         "ij4", "ij6", "ij7", "setholdij",
     };
 
@@ -73,6 +74,7 @@ public final class ToolScripts extends ScriptTestCase {
      * (ie. can not run on JSR169).
      */
     private static final String[] JDBC3_TESTS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5345
     	"qualifiedIdentifiers", "URLCheck",
     };
 
@@ -81,6 +83,7 @@ public final class ToolScripts extends ScriptTestCase {
      * Tests that run with authentication and SQL authorization on.
      */
     private static final String[][][] SQLAUTHORIZATION_TESTS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3886
         {{"ij_show_roles_dbo"}, {"test_dbo", "donald"}, {"test_dbo"}},
         {{"ij_show_roles_usr"}, {"test_dbo", "donald"}, {"donald"}}
     };
@@ -104,14 +107,17 @@ public final class ToolScripts extends ScriptTestCase {
      */
     public static Test suite() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ToolScripts");
         suite.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         suite.addTest(getSuite(EMBEDDED_TESTS));
         if (JDBC.vmSupportsJDBC3())
             suite.addTest(getSuite(JDBC3_TESTS));
         suite.addTest(getAuthorizationSuite(SQLAUTHORIZATION_TESTS));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
         // Set up the scripts run with the network client
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite clientTests = new BaseTestSuite("ToolScripts:client");
         clientTests.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         clientTests.addTest(getAuthorizationSuite(SQLAUTHORIZATION_TESTS));
@@ -132,6 +138,7 @@ public final class ToolScripts extends ScriptTestCase {
     }
 
     private ToolScripts(String toolTest, String user){
+//IC see: https://issues.apache.org/jira/browse/DERBY-1726
         super(toolTest,
               null /* default input encoding */,
               null /* default output encoding */,
@@ -144,6 +151,7 @@ public final class ToolScripts extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite(String[] list) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Tool scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(
@@ -163,6 +171,7 @@ public final class ToolScripts extends ScriptTestCase {
      *             </ul>
      */
     private static Test getAuthorizationSuite(String[][][] list) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Tool scripts w/authorization");
 
@@ -170,6 +179,7 @@ public final class ToolScripts extends ScriptTestCase {
 
         for (int i = 0; i < list.length; i++) {
             Test clean;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3886
 
             if (list[i][0][0].startsWith("ij_show_roles")) {
                 clean = new CleanDatabaseTestSetup(

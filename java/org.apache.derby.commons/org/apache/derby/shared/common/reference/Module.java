@@ -24,6 +24,7 @@ package org.apache.derby.shared.common.reference;
 public interface Module {
 
 	String CacheFactory = "org.apache.derby.iapi.services.cache.CacheFactory";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 	String CipherFactoryBuilder = "org.apache.derby.iapi.services.crypto.CipherFactoryBuilder";
 	String ClassFactory = "org.apache.derby.iapi.services.loader.ClassFactory";
 	String DaemonFactory = "org.apache.derby.iapi.services.daemon.DaemonFactory";
@@ -33,5 +34,7 @@ public interface Module {
 	String ResourceAdapter = "org.apache.derby.iapi.jdbc.ResourceAdapter";
     
     String JMX = "org.apache.derby.iapi.services.jmx.ManagementService";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
 
 }

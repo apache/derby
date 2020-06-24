@@ -140,6 +140,7 @@ public class BlockedByteArrayTest
      * @throws IOException if something goes wrong
      */
     public void testCapacityGrowth()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4103
             throws IOException {
         BlockedByteArray src = createBlockedByteArray(0);
         src.setLength(1*1024*1024); // 1 MB
@@ -161,6 +162,7 @@ public class BlockedByteArrayTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(BlockedByteArrayTest.class);
     }
 

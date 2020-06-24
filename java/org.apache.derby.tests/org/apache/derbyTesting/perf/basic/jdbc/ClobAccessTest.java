@@ -96,6 +96,7 @@ public class ClobAccessTest
      * should be specified.
      */
     private static final String runLargeClobTests =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3810
             System.getProperty("derby.tests.runLargeClobTests", null);
     private static final int largeClobSizeMB =
             Integer.getInteger("derby.tests.largeClobSize", 15).intValue();
@@ -125,6 +126,7 @@ public class ClobAccessTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite = new BaseTestSuite("ClobAccessTest suite");
         if (!disableSmallClobs) {
             int iters = 50;
@@ -142,6 +144,7 @@ public class ClobAccessTest
         if (!disableLargeClobs) {
             int iters = 5;
             int reps = 1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3810
             String[] tests = new String[] {
                     "testFetchLargeClobs",
                     "testFetchLargeClobsModified",
@@ -153,6 +156,7 @@ public class ClobAccessTest
                     "testFetchLargeClobPieceByPieceModified",
                     "testLargeClobGetLength",
                     "testLargeClobGetLengthModified",
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
                     "testLargeClobTruncateLengthMinusOne",
                     "testFetchLargeClobPieceByPieceBackwards",
                 };
@@ -164,6 +168,7 @@ public class ClobAccessTest
                 }
             }
             println("Adding " + tests.length + " large Clob tests.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite largeSuite = new BaseTestSuite("Large Clob suite");
             for (int i=0; i < tests.length; i++) {
                 largeSuite.addTest(new ClobAccessTest(tests[i] , iters, reps));
@@ -510,6 +515,7 @@ public class ClobAccessTest
      * storage as part of the truncate operation.
      */
     public void testLargeClobTruncateLengthMinusOne()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
             throws SQLException {
         // Select just one Clob.
         PreparedStatement ps = prepareStatement(

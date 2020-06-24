@@ -56,6 +56,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("OrderByAndOffsetFetchInSubqueries");
 
@@ -74,6 +75,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
     private static Test makeSuite()
     {
         return new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(OrderByAndOffsetFetchInSubqueries.class)) {
                 @Override
                 protected void decorateSQL(Statement s)
@@ -135,6 +137,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
         setAutoCommit(false);
         Statement s = createStatement();
         ResultSet rs;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
         s.execute("insert into temp1 values 'x','a','c','b','a'");
         s.execute("insert into temp2(s) select s from temp1 order by s");
@@ -370,6 +373,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
             "insert into temp2b(s) select * from temp1 order by s " +
             "    offset 1 rows fetch next 4 rows only");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         ResultSet rs = s.executeQuery("select * from temp2b");
         JDBC.assertFullResultSet(rs, new String[][]{
                 {"1", "a"},
@@ -1026,6 +1030,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * @throws java.sql.SQLException
      */
     public void testSelectSubqueriesSortAvoidance() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
         setAutoCommit(false);
         Statement s = createStatement();
         ResultSet rs;
@@ -1121,6 +1126,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * @throws java.sql.SQLException
      */
     public void testNestingInsideSetOperation() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6008
         setAutoCommit(false);
         Statement s = createStatement();
 

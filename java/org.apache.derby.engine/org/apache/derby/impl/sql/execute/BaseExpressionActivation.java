@@ -93,6 +93,7 @@ public abstract class BaseExpressionActivation
 	{
 		DataValueDescriptor judge;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (judgeUserJDBCTypeId == -1) {
         	judge = new DataTypeDescriptor(
         			new TypeId(judgeTypeFormatId, null),

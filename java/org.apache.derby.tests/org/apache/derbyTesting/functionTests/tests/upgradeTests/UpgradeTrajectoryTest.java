@@ -243,6 +243,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("Upgrade trajectory test");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         addTrajectories( suite );
         
@@ -311,6 +312,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private static boolean shouldBuildAllTrajectories()
     {
         Boolean bool = Boolean.valueOf(getSystemProperty( ALL_TRAJECTORIES_PROPERTY ));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         return bool.booleanValue();
     }
@@ -377,6 +379,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * </p>
      */
     private static void addTrajectory(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite, Version.Trajectory trajectory )
     {
         // a valid trajectory must have a start point and a different end point
@@ -392,6 +396,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     }
 
     private static void addTrajectory(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite,
         Version.Trajectory trajectory,
         boolean[] hardUpgradeRequests,
@@ -430,6 +435,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * </p>
      */
     private static void addTrajectory(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite,
         Version.Trajectory trajectory,
         boolean[] hardUpgradeRequests )
@@ -449,6 +455,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         // prevents us from falling through and picking up the JDBC4 data source from
         // the system classpath rather than picking up a datasource from
         // the version-specific classloader.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4359
         if ( trajectory.getVersion( 0 ).compareTo( VERSION_10_2_2_0 ) < 0 )
         {
             setup = new JDBCClientSetup( setup, JDBCClient.EMBEDDED_30 );
@@ -524,6 +531,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         throws Exception
     {
         ClassLoaderTestSetup.setThreadLoader( version.getClassLoader() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
 
         DataSource leftDS = makeDataSource( leftDatabaseName );
         DataSource rightDS = makeDataSource( rightDatabaseName );
@@ -586,6 +595,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         throws Exception
     {
         ArrayList<String> result = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         StringBuffer buffer = new StringBuffer();
 
@@ -627,6 +637,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         StringBuffer columnList = new StringBuffer();
         StringBuffer insertList = new StringBuffer();
         ArrayList<String> columnNames = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         PreparedStatement leftPS = chattyPrepare( leftConn, query );
         PreparedStatement rightPS = chattyPrepare( rightConn, query );
@@ -813,6 +824,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         throws Exception
     {
         ClassLoaderTestSetup.setThreadLoader( version.getClassLoader() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
 
         DataSource ds = bootDatabase( logicalDatabaseName );
 
@@ -832,6 +845,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         throws Exception
     {
         ClassLoaderTestSetup.setThreadLoader(softwareVersion.getClassLoader());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
 
         DataSource ds = upgradeDatabase( logicalDatabaseName, hardUpgrade );
 
@@ -972,6 +987,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private void saveOriginalClassLoader()
     {
         // remember the original class loader so that we can reset
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
+//IC see: https://issues.apache.org/jira/browse/DERBY-3745
         if ( _originalClassLoader.get() == null ) { 
             _originalClassLoader.set( ClassLoaderTestSetup.getThreadLoader() ); 
         }
@@ -1223,6 +1240,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      */
     private static Version.Trajectory[] buildMinimalSet( Version[] supportedVersions )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<Version.Trajectory>   trajectoryList = new ArrayList<Version.Trajectory>();
         int  versionCount = supportedVersions.length;
         boolean[]  include = new boolean[ versionCount ];
@@ -1246,6 +1264,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      */
     private static Version.Trajectory[] buildPowerSet( Version[] supportedVersions )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<Version.Trajectory>   trajectoryList = new ArrayList<Version.Trajectory>();
         int            versionCount = supportedVersions.length;
         boolean[]  include = new boolean[ versionCount ];
@@ -1277,6 +1296,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * </p>
      */
     private static void buildPowerSetMinion
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ( Version[] supportedVersions, ArrayList<Version.Trajectory> result, boolean[] include, int idx, boolean removeSameBranchNeighbors )
     {
         int  versionCount = supportedVersions.length;
@@ -1300,6 +1320,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * </p>
      */
     private static void addSubset
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ( Version[] supportedVersions, ArrayList<Version.Trajectory> result, boolean[] include, boolean removeSameBranchNeighbors )
     {
         int  versionCount = supportedVersions.length;
@@ -1348,6 +1369,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private String filterKnownProblems( String tableName, String actual )
     {
         if (
+//IC see: https://issues.apache.org/jira/browse/DERBY-4157
+//IC see: https://issues.apache.org/jira/browse/DERBY-4214
             _trajectory.endsAt( BRANCH_10_5 ) &&
             ( contains( actual, DERBY_4214_1 ) || contains( actual, DERBY_4214_2 ) )
            )

@@ -121,9 +121,11 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	{
 		super(constraintName, constraintType, tableName, 
 			  tableId, schemaName, indexAction);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
         this.forCreateTable = forCreateTable;
 		this.columnNames = columnNames;
 		this.constraintText = constraintText;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.characteristics = characteristics.clone();
 		this.otherConstraintInfo = otherConstraint;
 		this.providerInfo = providerInfo;
@@ -222,6 +224,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 				td = dd.getTableDescriptor(tableName, sd, tc);
 			}
 
@@ -238,6 +241,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 		UUIDFactory uuidFactory = dd.getUUIDFactory();
         
         UUID constrId = uuidFactory.createUUID();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
 
 		/* Create the index, if there's one for this constraint */
 		if (indexAction != null)
@@ -251,6 +256,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			else { backingIndexName = indexAction.getIndexName(); }
 
             indexAction.setConstraintID( constrId );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
 
 			/* Create the index */
 			indexAction.executeConstantAction(activation);
@@ -286,6 +293,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 		}
 
         boolean[] defaults = new boolean[]{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             ConstraintDefinitionNode.DEFERRABLE_DEFAULT,
             ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT,
             ConstraintDefinitionNode.ENFORCED_DEFAULT
@@ -296,6 +304,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
                 dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_11,
                                 "DEFERRED CONSTRAINTS");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (constraintType == DataDictionary.NOTNULL_CONSTRAINT ||
                     !characteristics[2] /* not enforced */) {
 
@@ -333,6 +342,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			case DataDictionary.UNIQUE_CONSTRAINT:
 				conDesc = ddg.newUniqueConstraintDescriptor(
 								td, constraintName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 characteristics[0], //deferable,
                                 characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
@@ -348,8 +359,10 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			case DataDictionary.CHECK_CONSTRAINT:
 				conDesc = ddg.newCheckConstraintDescriptor(
 								td, constraintName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 characteristics[0], //deferable,
                                 characteristics[1], //initiallyDeferred,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 constrId,
 								constraintText, 
 								new ReferencedColumnsDescriptorImpl(genColumnPositions(td, false)), //int[],
@@ -358,6 +371,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 								);
 				dd.addConstraintDescriptor(conDesc, tc);
 				storeConstraintDependenciesOnPrivileges
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 					(activation, conDesc, null, providerInfo);
 				break;
 
@@ -368,9 +382,13 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				
 				conDesc = ddg.newForeignKeyConstraintDescriptor(
 								td, constraintName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 characteristics[0], //deferable,
                                 characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                 constrId,
 								indexId,
 								sd,
@@ -391,6 +409,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				if ( (! forCreateTable) && 
 					 dd.activeConstraint( conDesc ) )
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     validateFKConstraint(activation,
                                          tc,
 										 dd, 
@@ -402,6 +421,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				/* Create stored dependency on the referenced constraint */
 				dm.addDependency(conDesc, referencedConstraint, lcc.getContextManager());
 				//store constraint's dependency on REFERENCES privileges in the dependeny system
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 				storeConstraintDependenciesOnPrivileges
 					(activation,
 					 conDesc,
@@ -409,6 +429,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 					 providerInfo);
 				break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             case DataDictionary.MODIFY_CONSTRAINT:
                 throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
                        "ALTER CONSTRAINT");
@@ -435,6 +456,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				/* We should always be able to find the Provider */
 					provider = (Provider) providerInfo[ix].
 											getDependableFinder().
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
 												getDependable(dd, 
 													providerInfo[ix].getObjectId());
 
@@ -471,6 +493,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				DependencyManager.CREATE_CONSTRAINT, lcc);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.constraintId = constrId;
 	}
 	
@@ -486,6 +509,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 
 
     boolean isInitiallyDeferred() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return characteristics[1];
     }
 

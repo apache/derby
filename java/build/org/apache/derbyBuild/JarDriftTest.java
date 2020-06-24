@@ -179,6 +179,7 @@ public class JarDriftTest {
         // sanity=[false|true] except for some header/timestamp info).
         String fs = File.separator;
         String sanityFileName = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 topOfTree + fs + "generated" + fs + "java" + fs + "org.apache.derby.commons" + fs +
                 "org" + fs + "apache" + fs + "derby" + fs + "shared" + fs + "common" + fs +
                 "sanity" + fs + "state.properties";

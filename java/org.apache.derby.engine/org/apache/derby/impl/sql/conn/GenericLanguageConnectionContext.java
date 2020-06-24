@@ -333,7 +333,9 @@ public class GenericLanguageConnectionContext
      String dbname)
          throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         super(cm, org.apache.derby.shared.common.reference.ContextId.LANG_CONNECTION);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         acts = new ArrayList<Activation>();
         tran = tranCtrl;
 
@@ -366,6 +368,7 @@ public class GenericLanguageConnectionContext
                                        Property.MIN_LOCKS_ESCALATION_THRESHOLD,
                                        Integer.MAX_VALUE,
                                        Property.DEFAULT_LOCKS_ESCALATION_THRESHOLD);                                                             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         stmtValidators = new ArrayList<ExecutionStmtValidator>();
         triggerExecutionContexts = new ArrayList<TriggerExecutionContext>();
         triggerTables = new ArrayList<TableDescriptor>();
@@ -381,6 +384,7 @@ public class GenericLanguageConnectionContext
     public void initialize() throws StandardException
     {
         interruptedException = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         sessionUser = IdUtil.getUserAuthorizationId(userName);
         //
         //Creating the authorizer authorizes the connection.
@@ -393,6 +397,7 @@ public class GenericLanguageConnectionContext
         */
         if (SanityManager.DEBUG)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             if (getSessionUserId() == null)
             {
                 SanityManager.THROWASSERT("User name is null," +
@@ -428,6 +433,7 @@ public class GenericLanguageConnectionContext
             SchemaDescriptor sd =
                 dd.getSchemaDescriptor(
                     getSessionUserId(), getTransactionCompile(), false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
             if (sd == null) {
                 sd = new SchemaDescriptor(
@@ -484,6 +490,7 @@ public class GenericLanguageConnectionContext
      */
     public boolean usesSqlAuthorization()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
         return getDataDictionary().usesSqlAuthorization();
     }
 
@@ -499,8 +506,11 @@ public class GenericLanguageConnectionContext
      * Add the activation to those known about by this connection.
      */
     public void addActivation(Activation a) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-418
+//IC see: https://issues.apache.org/jira/browse/DERBY-1142
         throws StandardException {
         acts.add(a);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2150
 
         if (acts.size() > maxActsSize) {
             maxActsSize = acts.size();
@@ -526,6 +536,7 @@ public class GenericLanguageConnectionContext
                 if (i >= acts.size())
                     continue;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 Activation a1 = acts.get(i);
                 if (!a1.isInUse()) {
                     a1.close();
@@ -547,6 +558,8 @@ public class GenericLanguageConnectionContext
      * Make a note that some activations are marked unused
      */
     public void notifyUnusedActivation() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-418
+//IC see: https://issues.apache.org/jira/browse/DERBY-1142
         unusedActs = true;
     }
 
@@ -584,6 +597,7 @@ public class GenericLanguageConnectionContext
 
         if (allDeclaredGlobalTempTables == null)
             allDeclaredGlobalTempTables = new ArrayList<TempTableInfo>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         allDeclaredGlobalTempTables.add(tempTableInfo);
     }
@@ -621,6 +635,7 @@ public class GenericLanguageConnectionContext
                 allDeclaredGlobalTempTables.remove(
                         allDeclaredGlobalTempTables.indexOf(tempTableInfo));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 if (allDeclaredGlobalTempTables.isEmpty()) {
                     allDeclaredGlobalTempTables = null;
                 }
@@ -662,6 +677,7 @@ public class GenericLanguageConnectionContext
         {
             TempTableInfo tempTableInfo = 
                 allDeclaredGlobalTempTables.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             if (tempTableInfo.getDroppedInSavepointLevel() > 
                     currentSavepointLevel)
@@ -713,6 +729,7 @@ public class GenericLanguageConnectionContext
         {
             TempTableInfo tempTableInfo = 
                 allDeclaredGlobalTempTables.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             if (tempTableInfo.getDroppedInSavepointLevel() != -1)
             {
@@ -746,6 +763,7 @@ public class GenericLanguageConnectionContext
         for (int i=0; i<allDeclaredGlobalTempTables.size(); i++)
         {
             TableDescriptor td = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 allDeclaredGlobalTempTables.
                                       get(i).getTableDescriptor();
             if (td.isOnCommitDeleteRows() == false) 
@@ -792,6 +810,7 @@ public class GenericLanguageConnectionContext
             // remove all temp tables from this context.
             TableDescriptor td = 
                 allDeclaredGlobalTempTables.get(i).getTableDescriptor();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             //remove the conglomerate created for this temp table
             tc.dropConglomerate(td.getHeapConglomerateId()); 
@@ -820,13 +839,18 @@ public class GenericLanguageConnectionContext
 
         // Reset the current schema (see DERBY-3690).
         setDefaultSchema(null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3690
 
         // Reset the current role
         getCurrentSQLSessionContext().setRole(null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3859
 
         // Reset the current user
         getCurrentSQLSessionContext().setUser(getSessionUserId());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         referencedColumnMap = new WeakHashMap<TableDescriptor,FormatableBitSet>();
     }
 
@@ -912,6 +936,8 @@ public class GenericLanguageConnectionContext
             {
                 try 
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
                     e.initCause(topLevelStandardException);
                     topLevelStandardException = e;
                 } 
@@ -944,6 +970,8 @@ public class GenericLanguageConnectionContext
         {
             TempTableInfo tempTableInfo = 
                 allDeclaredGlobalTempTables.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             if (tempTableInfo.getDeclaredInSavepointLevel() >= 
                     currentSavepointLevel)
@@ -1017,6 +1045,7 @@ public class GenericLanguageConnectionContext
             // unit/transaction and not modified
         }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (allDeclaredGlobalTempTables.isEmpty())
         {
             allDeclaredGlobalTempTables = null;
@@ -1082,6 +1111,7 @@ public class GenericLanguageConnectionContext
             return null;
 
         for (int i = 0; i < allDeclaredGlobalTempTables.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             if ((allDeclaredGlobalTempTables.get(i)).matches(tableName))
                 return allDeclaredGlobalTempTables.get(i);
         }
@@ -1100,6 +1130,7 @@ public class GenericLanguageConnectionContext
      * @see LanguageConnectionContext#prepareInternalStatement
      */
         public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText, boolean isForReadOnly, boolean forMetaData) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
         throws StandardException 
         {
             if (forMetaData) {
@@ -1111,6 +1142,7 @@ public class GenericLanguageConnectionContext
                 //to system tables. 
                 compilationSchema = getDataDictionary().getSystemSchemaDescriptor(); 
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
         return connFactory.getStatement(compilationSchema, sqlText, isForReadOnly).prepare(this, forMetaData);
         }
 
@@ -1120,6 +1152,8 @@ public class GenericLanguageConnectionContext
         public PreparedStatement prepareInternalStatement(String sqlText) 
         throws StandardException 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
             return connFactory.
                 getStatement(getDefaultSchema(), sqlText, true).prepare(this);
         }      
@@ -1135,6 +1169,7 @@ public class GenericLanguageConnectionContext
         }
 
         acts.remove(a);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2150
 
         if (maxActsSize > 20 && (maxActsSize > 2 * acts.size())) {
             acts.trimToSize();
@@ -1270,6 +1305,8 @@ public class GenericLanguageConnectionContext
     public PreparedStatement lookupStatement(GenericStatement statement)
         throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2772
+//IC see: https://issues.apache.org/jira/browse/DERBY-2772
         CacheManager statementCache =
             getLanguageConnectionFactory().getStatementCache();
             
@@ -1487,6 +1524,9 @@ public class GenericLanguageConnectionContext
         }
 
         checkIntegrity();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
 
         // Log commit to error log, if appropriate
         if (logStatementText)
@@ -1608,6 +1648,7 @@ public class GenericLanguageConnectionContext
         long conglomId = 
             tc.createConglomerate(
                 "heap", // we're requesting a heap conglomerate
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
                 td.getEmptyExecRow().getRowArray(), // row template
                 null, //column sort order - not required for heap
                 td.getColumnCollationIds(),  // same ids as old conglomerate
@@ -1732,6 +1773,9 @@ public class GenericLanguageConnectionContext
         }
 
         clearDeferreds();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
 
         // Log rollback to error log, if appropriate
         if (logStatementText)
@@ -1784,6 +1828,7 @@ public class GenericLanguageConnectionContext
             // reset the savepoints to the new
             // location, since any outer nesting
             // levels expet there to be a savepoint
+//IC see: https://issues.apache.org/jira/browse/DERBY-938
             resetSavepoints();
         }
     }
@@ -1798,6 +1843,7 @@ public class GenericLanguageConnectionContext
     private void resetSavepoints() throws StandardException 
     {
         final ContextManager cm = getContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         final List<Context>
                 stmts = cm.getContextStack(ContextId.LANG_STATEMENT);
 
@@ -1979,6 +2025,7 @@ public class GenericLanguageConnectionContext
             throws StandardException
     {
         for (int i = acts.size() - 1; i >= 0; i--) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Activation a = acts.get(i);
             if (a.checkIfThisActivationHasHoldCursor(tableName))
                 return true;
@@ -2176,6 +2223,7 @@ public class GenericLanguageConnectionContext
      */
     public String getSessionUserId()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         return sessionUser;
     }
 
@@ -2184,6 +2232,8 @@ public class GenericLanguageConnectionContext
      */
     public SchemaDescriptor getDefaultSchema() 
     { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
         return getCurrentSQLSessionContext().getDefaultSchema();
     }
 
@@ -2191,6 +2241,7 @@ public class GenericLanguageConnectionContext
      * @see LanguageConnectionContext#getDefaultSchema(Activation a)
      */
     public SchemaDescriptor getDefaultSchema(Activation a) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
         return getCurrentSQLSessionContext(a).getDefaultSchema();
     }
 
@@ -2229,6 +2280,7 @@ public class GenericLanguageConnectionContext
      * @see LanguageConnectionContext#isInitialDefaultSchema
      */
     public boolean isInitialDefaultSchema(String schemaName) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-48
         return cachedInitialDefaultSchemaDescr.getSchemaName().
             equals(schemaName);
     }
@@ -2258,6 +2310,7 @@ public class GenericLanguageConnectionContext
             sd = getInitialDefaultSchemaDescriptor();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
         getCurrentSQLSessionContext(a).setDefaultSchema(sd);
     }
 
@@ -2269,6 +2322,7 @@ public class GenericLanguageConnectionContext
     public void resetSchemaUsages(Activation activation, String schemaName)
             throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
         Activation parent = activation.getParentActivation();
         SchemaDescriptor defaultSchema = getInitialDefaultSchemaDescriptor();
 
@@ -2284,6 +2338,7 @@ public class GenericLanguageConnectionContext
             if (schemaName.equals(s.getSchemaName())) {
                 ssc.setDefaultSchema(defaultSchema);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
             parent = parent.getParentActivation();
         }
 
@@ -2307,6 +2362,7 @@ public class GenericLanguageConnectionContext
      */
     public Long getIdentityValue()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return identityNotNull ? Long.valueOf(identityVal) : null;
     }
 
@@ -2466,6 +2522,7 @@ public class GenericLanguageConnectionContext
      *
      */
     public StatementContext pushStatementContext (boolean isAtomic, boolean isForReadOnly, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
                               String stmtText, ParameterValueSet pvs, 
                               boolean rollbackParentContext, 
                               long timeoutMillis)
@@ -2485,6 +2542,8 @@ public class GenericLanguageConnectionContext
         if (statementContext == null)
         {
             statementContext = statementContexts[0] = new GenericStatementContext(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
             statementContext.
                 setSQLSessionContext(getTopLevelSQLSessionContext());
         }
@@ -2512,6 +2571,8 @@ public class GenericLanguageConnectionContext
                 statementContext = new GenericStatementContext(this);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
             statementContext.setSQLSessionContext(
                 parentStatementContext.getSQLSessionContext());
 
@@ -2527,6 +2588,7 @@ public class GenericLanguageConnectionContext
 
         incrementStatementDepth();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
         statementContext.setInUse(inTrigger, isAtomic || parentIsAtomic, isForReadOnly, stmtText, pvs, timeoutMillis);
         if (rollbackParentContext)
             statementContext.setParentRollback();
@@ -2608,6 +2670,7 @@ public class GenericLanguageConnectionContext
                     SanityManager.THROWASSERT(
                         "statement depth expected to be >0, was "+statementDepth);
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
                 if (getContextManager().getContext(statementContext.getIdName()) != statementContext)
                 {
                     SanityManager.THROWASSERT("trying to pop statement context from middle of stack");
@@ -2636,6 +2699,7 @@ public class GenericLanguageConnectionContext
      */
     public void pushExecutionStmtValidator(ExecutionStmtValidator validator)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2150
         stmtValidators.add(validator);
     }
 
@@ -2677,11 +2741,13 @@ public class GenericLanguageConnectionContext
         }
 
         /* Maximum 16 nesting levels allowed */
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
         if (triggerExecutionContexts.size() >= Limits.DB2_MAX_TRIGGER_RECURSION)
         {
             throw StandardException.newException(SQLState.LANG_TRIGGER_RECURSION_EXCEEDED);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2150
         triggerExecutionContexts.add(tec);
     }
 
@@ -2718,8 +2784,10 @@ public class GenericLanguageConnectionContext
      */
     public TriggerExecutionContext getTriggerExecutionContext()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return triggerExecutionContexts.isEmpty() ?
                 null :
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 triggerExecutionContexts.get( triggerExecutionContexts.size() - 1 );   
     }
 
@@ -2743,6 +2811,7 @@ public class GenericLanguageConnectionContext
 
         if (stmtValidators.size() > 0)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             for (Iterator<ExecutionStmtValidator> it = stmtValidators.iterator(); it.hasNext(); )
             {
                 it.next()
@@ -2761,6 +2830,7 @@ public class GenericLanguageConnectionContext
      */
     public void pushTriggerTable(TableDescriptor td)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2150
         triggerTables.add(td);
     }
 
@@ -2790,8 +2860,10 @@ public class GenericLanguageConnectionContext
      */
     public TableDescriptor getTriggerTable()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return triggerTables.isEmpty() ?
             (TableDescriptor)null :
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             triggerTables.get(triggerTables.size() - 1);
     }
     /**
@@ -2955,6 +3027,7 @@ public class GenericLanguageConnectionContext
      */
     public int getCurrentIsolationLevel()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         return (isolationLevel == TransactionControl.UNSPECIFIED_ISOLATION_LEVEL) ? defaultIsolationLevel : isolationLevel;
     }
 
@@ -2963,6 +3036,7 @@ public class GenericLanguageConnectionContext
      */
     public String getCurrentIsolationLevelStr()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if( isolationLevel >= 0 && isolationLevel < TransactionControl.isolationMapCount() )
         {
             return TransactionControl.isolationTextNames( isolationLevel )[0];
@@ -2986,6 +3060,7 @@ public class GenericLanguageConnectionContext
         if (!isolationLevelExplicitlySet)
             return prepareIsolationLevel;
         else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
             return TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
     }
 
@@ -2994,6 +3069,7 @@ public class GenericLanguageConnectionContext
      */
     public StatementContext getStatementContext()
     {   
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return (StatementContext) getContextManager().getContext(org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
     }
 
@@ -3070,6 +3146,7 @@ public class GenericLanguageConnectionContext
 
         int severity = (error instanceof StandardException) ?
             ((StandardException) error).getSeverity() :
+//IC see: https://issues.apache.org/jira/browse/DERBY-1732
             ExceptionSeverity.SESSION_SEVERITY;
  
         if (statementContexts[0] != null)
@@ -3080,6 +3157,7 @@ public class GenericLanguageConnectionContext
             // left on the stack for optimization to be popped
             // when the session is closed. Ensures full cleanup
             // and no hanging refrences in the ContextManager.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
             if (severity >= ExceptionSeverity.SESSION_SEVERITY)
                 statementContexts[0].popMe();
         }
@@ -3099,6 +3177,10 @@ public class GenericLanguageConnectionContext
                 // the end of the array
                 if (i >= acts.size())
                     continue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 Activation a = acts.get(i);
                 a.reset();
                 a.close();
@@ -3106,6 +3188,7 @@ public class GenericLanguageConnectionContext
                        
             popMe();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5152
             InterruptStatus.saveInfoFromLcc(this);
         }
 
@@ -3166,6 +3249,9 @@ public class GenericLanguageConnectionContext
             if (i >= acts.size())
                 continue;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Activation a = acts.get(i);
             /*
             ** Look for stale activations.  Activations are
@@ -3184,6 +3270,7 @@ public class GenericLanguageConnectionContext
             //below.
             ResultSet activationResultSet = a.getResultSet();
             boolean resultsetReturnsRows =
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     activationResultSet != null &&
                     activationResultSet.returnsRows();
 
@@ -3278,6 +3365,7 @@ public class GenericLanguageConnectionContext
 
     public DataDictionary getDataDictionary()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
         return getDatabase().getDataDictionary();
     }
 
@@ -3334,6 +3422,7 @@ public class GenericLanguageConnectionContext
         for (int i = size - 1; i >= 0; i--)
         {
             // first loop through triggers.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             TriggerExecutionContext itec = triggerExecutionContexts.get(i);
             Long value = itec.getAutoincrementValue(aiKey);
             if (value == null)
@@ -3343,6 +3432,7 @@ public class GenericLanguageConnectionContext
         }
         if (autoincrementHT == null)
             return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return autoincrementHT.get(aiKey);
     }   
 
@@ -3373,6 +3463,7 @@ public class GenericLanguageConnectionContext
         
         if (autoincrementCacheHashtable == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             autoincrementCacheHashtable = new HashMap<String,AutoincrementCounter>();
         }
 
@@ -3413,6 +3504,7 @@ public class GenericLanguageConnectionContext
         
         AutoincrementCounter aic = 
             autoincrementCacheHashtable.get(key);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         if (aic == null)
         {
@@ -3445,6 +3537,7 @@ public class GenericLanguageConnectionContext
 
         if (autoincrementHT == null)
             autoincrementHT = new HashMap<String,Long>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         DataDictionary dd = getDataDictionary();
         for (Iterator<String> it = autoincrementCacheHashtable.keySet().iterator();
@@ -3473,6 +3566,7 @@ public class GenericLanguageConnectionContext
         if (from.isEmpty())
             return;
         if (autoincrementHT == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             autoincrementHT = new HashMap<String,Long>();
         
         autoincrementHT.putAll(from);
@@ -3515,6 +3609,7 @@ public class GenericLanguageConnectionContext
      */
     public Activation getLastActivation()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return acts.get(acts.size() - 1);
     }
 
@@ -3551,6 +3646,7 @@ public class GenericLanguageConnectionContext
      * @see LanguageConnectionContext#setCurrentRole(Activation a, String role)
      */
     public void setCurrentRole(Activation a, String role) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
         getCurrentSQLSessionContext(a).setRole(role);
     }
 
@@ -3559,6 +3655,7 @@ public class GenericLanguageConnectionContext
      * @see LanguageConnectionContext#getCurrentRoleId(Activation a)
      */
     public String getCurrentRoleId(Activation a) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
         return getCurrentSQLSessionContext(a).getRole();
     }
 
@@ -3567,6 +3664,7 @@ public class GenericLanguageConnectionContext
      * @see LanguageConnectionContext#getCurrentUserId(Activation a)
      */
     public String getCurrentUserId(Activation a) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         return getCurrentSQLSessionContext(a).getCurrentUser();
     }
 
@@ -3578,11 +3676,13 @@ public class GenericLanguageConnectionContext
             throws StandardException {
 
         String role = getCurrentSQLSessionContext(a).getRole();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 
         if (role != null) {
             beginNestedTransaction(true);
 
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 if (!roleIsSettable(a, role)) {
                     // invalid role, so lazily reset it.
                     setCurrentRole(a, null);
@@ -3593,6 +3693,7 @@ public class GenericLanguageConnectionContext
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         if (role != null) {
             role = IdUtil.normalToDelimited(role);
         }
@@ -3606,10 +3707,12 @@ public class GenericLanguageConnectionContext
      */
     public boolean roleIsSettable(Activation a, String role)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
         DataDictionary dd = getDataDictionary();
         String dbo = dd.getAuthorizationDatabaseOwner();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         RoleGrantDescriptor grantDesc;
         String currentUser = getCurrentUserId(a);
 
@@ -3635,10 +3738,14 @@ public class GenericLanguageConnectionContext
      */
     public SQLSessionContext getCurrentSQLSessionContext(
         Activation activation) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
 
         SQLSessionContext curr;
 
         Activation parent = activation.getParentActivation();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 
         if (parent == null ) {
             // top level
@@ -3683,6 +3790,7 @@ public class GenericLanguageConnectionContext
      * {@inheritDoc}
      */
     public void pushNestedSessionContext(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         Activation a,
         boolean definersRights,
         String definer) throws StandardException {
@@ -3747,9 +3855,14 @@ public class GenericLanguageConnectionContext
             sc.setDefaultSchema(getDefaultSchema(a));
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         final SQLSessionContext ssc = getCurrentSQLSessionContext(a);
         sc.setDeferredAll(ssc.getDeferredAll());
         sc.setConstraintModes(ssc.getConstraintModes());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
 
         StatementContext stmctx = getStatementContext();
 
@@ -3792,6 +3905,8 @@ public class GenericLanguageConnectionContext
         // Check all constraints that were deferred inside the routine
         // but whose constraint mode is immediate on the outside. If
         // any of these violate the constraints, roll back.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         for (ValidationInfo info : deferredHashTables.values()) {
             info.possiblyValidateOnReturn(this, nested, caller);
         }
@@ -3799,6 +3914,7 @@ public class GenericLanguageConnectionContext
 
     public boolean isEffectivelyDeferred(SQLSessionContext sc, UUID constraintId)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         final Boolean deferred = sc.isDeferred(constraintId);
         final boolean effectivelyDeferred;
@@ -3822,6 +3938,7 @@ public class GenericLanguageConnectionContext
      */
     public void setupSubStatementSessionContext(Activation a)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
         setupSessionContextMinion(a, false, false, null);
     }
@@ -3833,6 +3950,7 @@ public class GenericLanguageConnectionContext
     public SQLSessionContext getTopLevelSQLSessionContext() {
         if (topLevelSSC == null) {
             topLevelSSC = new SQLSessionContextImpl(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 getInitialDefaultSchemaDescriptor(),
                 getSessionUserId());
         }
@@ -3846,6 +3964,9 @@ public class GenericLanguageConnectionContext
     public SQLSessionContext createSQLSessionContext() {
         return new SQLSessionContextImpl(
             getInitialDefaultSchemaDescriptor(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             getSessionUserId()); /* a priori */
     }
 
@@ -3855,11 +3976,13 @@ public class GenericLanguageConnectionContext
      * @see org.apache.derby.impl.sql.compile.QueryTreeNode#treePrint(int)
      */
     Map<Object,Object> printedObjectsMap = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
     /**
      * @see org.apache.derby.iapi.sql.conn.LanguageConnectionContext#getPrintedObjectsMap
      */
     public Map<Object,Object> getPrintedObjectsMap() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
         if (printedObjectsMap == null) {
             printedObjectsMap = new IdentityHashMap<Object,Object>();
         }
@@ -3896,6 +4019,7 @@ public class GenericLanguageConnectionContext
     
     public void setASTVisitor( ASTVisitor visitor )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4415
         astWalker = visitor;
     }
     public ASTVisitor getASTVisitor( )
@@ -3908,14 +4032,17 @@ public class GenericLanguageConnectionContext
     }
 
     public StandardException getInterruptedException() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         return interruptedException;
     }
 
     public FormatableBitSet getReferencedColumnMap(TableDescriptor td) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return referencedColumnMap.get(td);
     }
 
     public void setReferencedColumnMap(TableDescriptor td,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4895
                                        FormatableBitSet map) {
         referencedColumnMap.put(td, map);
     }
@@ -3930,6 +4057,8 @@ public class GenericLanguageConnectionContext
      */
     public void setConstraintDeferred(
             final Activation a,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             ConstraintDescriptor cd,
             final boolean deferred) throws StandardException {
 
@@ -3970,6 +4099,8 @@ public class GenericLanguageConnectionContext
 
     public HashMap<UUID, ValidationInfo> getDeferredHashTables() {
         if (deferredHashTables == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             deferredHashTables = new HashMap<UUID, ValidationInfo>();
         }
         return deferredHashTables;
@@ -3986,6 +4117,8 @@ public class GenericLanguageConnectionContext
             return;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         for (ValidationInfo info : deferredHashTables.values()) {
             info.validateConstraint(this, null, rollbackOnError);
         }

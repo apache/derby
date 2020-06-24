@@ -717,6 +717,7 @@ public class BrokeredPreparedStatement extends BrokeredStatement
 	public PreparedStatement createDuplicateStatement(Connection conn, PreparedStatement oldStatement) throws SQLException {
 
         PreparedStatement newStatement;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5877
 
         if (generatedKeys == null) {
             newStatement = conn.prepareStatement(
@@ -742,6 +743,8 @@ public class BrokeredPreparedStatement extends BrokeredStatement
 	}
 
     public final long getVersionCounter() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5459
+//IC see: https://issues.apache.org/jira/browse/DERBY-2402
         return ((EnginePreparedStatement)getPreparedStatement()).
                 getVersionCounter();
     }

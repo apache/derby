@@ -29,10 +29,13 @@ import java.io.IOException;
 public class LocalizedInput extends BufferedReader{
 	private InputStream in;
 	public LocalizedInput(InputStream i){
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
+//IC see: https://issues.apache.org/jira/browse/DERBY-3176
 		super(new InputStreamReader(i));
 		this.in = i;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
 	LocalizedInput(InputStream i, String encode) throws UnsupportedEncodingException{
 		super(new InputStreamReader(i,encode));
 		this.in = i;

@@ -52,10 +52,12 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     
     NetworkServerMBeanImpl(NetworkServerControlImpl nsc) {
         this.server = nsc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         startTime = System.currentTimeMillis();
     }
     
     private static final SystemPermission CONTROL =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
         new SystemPermission(SystemPermission.SERVER,
                 SystemPermission.CONTROL);
     private static final SystemPermission MONITOR =
@@ -66,6 +68,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * Ensure the caller has permission to control the network server.
      */
     private static void checkControl() { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
         checkPermission(CONTROL);
     }
 
@@ -99,18 +103,21 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     public String getDrdaHost() {
         // Since this is sensitive information require control permission.
         checkControl();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
 
         String host = getServerProperty(Property.DRDA_PROP_HOSTNAME);
         return host;
     }
     
     public boolean getDrdaKeepAlive() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
         checkMonitor();
         String on = getServerProperty(Property.DRDA_PROP_KEEPALIVE);
         return ( "true".equals(on) ? true : false);
     }
     
     public int getDrdaMaxThreads() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         int maxThreads = 0; // default
@@ -140,6 +147,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     public int getDrdaPortNumber() {
         // Since this is sensitive information require control permission.
         checkControl();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
 
         int portNumber = NetworkServerControl.DEFAULT_PORTNUMBER; // the default
         String portString = getServerProperty(Property.DRDA_PROP_PORTNUMBER);
@@ -154,6 +162,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     public String getDrdaSecurityMechanism() {
         // Since this is sensitive information require control permission.
         checkControl();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
 
         String secmec = getServerProperty(Property.DRDA_PROP_SECURITYMECHANISM);
         if (secmec == null) {
@@ -166,6 +175,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     public String getDrdaSslMode() {
         // Since this is sensitive information require control permission.
         checkControl();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
 
         // may be null if not set (?)
         String SSLMode = getServerProperty(Property.DRDA_PROP_SSL_MODE);
@@ -174,18 +184,21 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     
     
     public int getDrdaStreamOutBufferSize() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         // TODO - Fix NetworkServerControlImpl so that this setting is included
         //        in the property values returned by getPropertyValues()?
         //String size = getServerProperty(Property.DRDA_PROP_STREAMOUTBUFFERSIZE);
         int size = PropertyUtil.getSystemInt(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3578
                 Property.DRDA_PROP_STREAMOUTBUFFERSIZE, 0);
         return size;
     }
 
        
     public int getDrdaTimeSlice() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         // relying on server to return the default if not set
@@ -205,6 +218,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }*/
     
     public boolean getDrdaTraceAll() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         String on = getServerProperty(Property.DRDA_PROP_TRACEALL);
@@ -226,6 +240,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     public String getDrdaTraceDirectory() {
         // Since this is sensitive information require control
         // (gives away information about the file system).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkControl();
         
         String traceDirectory = null;
@@ -271,14 +286,17 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      **/
 
     public int getConnectionCount() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         return getActiveConnectionCount() + getWaitingConnectionCount();
     }
     
     public int getActiveConnectionCount() {
         checkMonitor();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         return server.getActiveSessions();
     }
     
@@ -316,7 +334,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     private long lastReceiveBytes = 0;
     private int receiveResult = 0;
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
     synchronized public int getBytesReceivedPerSecond(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         long now = System.currentTimeMillis();
@@ -333,7 +353,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     private long lastSentBytes = 0;
     private int sentResult = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
     synchronized public int getBytesSentPerSecond(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         long now = System.currentTimeMillis();
@@ -350,8 +372,10 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * Return start time.
      */
     public long getStartTime() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         return startTime;
     }
 
@@ -359,6 +383,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * Return time server has been running.
      */
     public long getUptime() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         return System.currentTimeMillis() - startTime;
@@ -373,6 +398,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * @throws Exception if the ping fails.
      */
     public void ping() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3462
         checkMonitor();
         
         //String feedback = "Server pinged successfully.";

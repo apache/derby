@@ -212,6 +212,7 @@ public class PermDescriptor extends PermissionsDescriptor
      * @see Dependable#getDependableFinder
      */
     public DependableFinder getDependableFinder() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return getDependableFinder(
                 StoredFormatIds.PERM_DESCRIPTOR_FINDER_V01_ID);
     }

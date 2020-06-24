@@ -28,9 +28,12 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetConnectionRequest extends Request
     implements ConnectionRequestInterface {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
     NetConnectionRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
@@ -161,6 +164,7 @@ class NetConnectionRequest extends Request
     void writeXAFlags(int codepoint, int xaFlags) {
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
     void writeXATimeout(int codepoint, long xaTimeout) {
     }
 
@@ -246,6 +250,8 @@ class NetConnectionRequest extends Request
                 targetSecmgr,
                 targetXamgr,
                 targetSyncptmgr,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
                 targetRsyncmgr,
                 targetUnicodemgr);
 
@@ -356,6 +362,7 @@ class NetConnectionRequest extends Request
         // write the data and pad with the correct number of bytes as needed.
         // this instance variable is always required.
         buildRDBNAM(rdbnam,true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
 
         // the rdb access manager class specifies an instance of the SQLAM
         // that accesses the RDB.  the sqlam manager class codepoint
@@ -434,6 +441,7 @@ class NetConnectionRequest extends Request
                 NetConfiguration.EXTNAM_MAXSIZE);
 
         // Writing the truncated string as to preserve previous behavior
+//IC see: https://issues.apache.org/jira/browse/DERBY-4009
         writeScalarString(CodePoint.EXTNAM, extnam.substring(0, extnamTruncateLength), 0,
                 NetConfiguration.EXTNAM_MAXSIZE, SQLState.NET_EXTNAM_TOO_LONG);
     }
@@ -485,6 +493,8 @@ class NetConnectionRequest extends Request
         // see if we can optimize
         if (dontSendOnConversionError) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
                 netAgent_.getCurrentCcsidManager().convertFromJavaString(rdbnam, netAgent_);
             } catch (SqlException se)  {
                 netAgent_.exceptionConvertingRdbnam = se;
@@ -506,6 +516,8 @@ class NetConnectionRequest extends Request
         // connect request along with the RDBNAM.
         int maxRDBlength =
                  NetConfiguration.RDBNAM_MAX_LEN;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4009
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         writeScalarString(CodePoint.RDBNAM, rdbnam,
                 NetConfiguration.PKG_IDENTIFIER_FIXED_LEN, //minimum RDBNAM length in bytes
                 maxRDBlength,  
@@ -515,6 +527,7 @@ class NetConnectionRequest extends Request
 
     private void buildSECTKN(byte[] sectkn) throws SqlException {
         if (sectkn.length > NetConfiguration.SECTKN_MAXSIZE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.NET_SECTKN_TOO_LONG));
         }
@@ -523,6 +536,8 @@ class NetConnectionRequest extends Request
 
     private void buildUSRID(String usrid) throws SqlException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4009
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         writeScalarString(CodePoint.USRID, usrid,0,NetConfiguration.USRID_MAXSIZE,
                 SQLState.NET_USERID_TOO_LONG);
     }
@@ -530,6 +545,7 @@ class NetConnectionRequest extends Request
     private void buildPASSWORD(String password) throws SqlException {
         int passwordLength = password.length();
         if ((passwordLength == 0) ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.NET_PASSWORD_TOO_LONG));
         }
@@ -537,8 +553,11 @@ class NetConnectionRequest extends Request
             // remember the position of password in order to
             // mask it out in trace (see Request.sendBytes()).
             passwordIncluded_ = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
             passwordStart_ = buffer.position() + 4;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4009
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         writeScalarString(CodePoint.PASSWORD, password, 0, NetConfiguration.PASSWORD_MAXSIZE,
                 SQLState.NET_PASSWORD_TOO_LONG);
         if (netAgent_.logWriter_ != null) {
@@ -605,6 +624,7 @@ class NetConnectionRequest extends Request
         writeCodePoint4Bytes(CodePoint.SQLAM, sqlam);
         writeCodePoint4Bytes(CodePoint.RDB, rdb);
         writeCodePoint4Bytes(CodePoint.SECMGR, secmgr);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         writeCodePoint4Bytes(CodePoint.UNICODEMGR, unicodemgr);
         
         if (netAgent_.netConnection_.isXAConnection()) {

@@ -47,6 +47,8 @@ class UniqueIndexSortObserver extends BasicSortObserver
 
     public UniqueIndexSortObserver(
             LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             UUID constraintId,
             boolean doClone,
             boolean deferrable,
@@ -58,6 +60,8 @@ class UniqueIndexSortObserver extends BasicSortObserver
 	{
         super(doClone, !deferred, execRow, reuseWrappers);
         this.lcc = lcc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         this.constraintId = constraintId;
         this.deferrable = deferrable;
         this.deferred = deferred;
@@ -79,6 +83,9 @@ class UniqueIndexSortObserver extends BasicSortObserver
 
     @Override
     public boolean deferred() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return deferred;
     }
 
@@ -90,9 +97,12 @@ class UniqueIndexSortObserver extends BasicSortObserver
     @Override
     public void rememberDuplicate(DataValueDescriptor[] row)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         deferredDuplicates = DeferredConstraintsMemory.rememberDuplicate(
                 lcc,
                 deferredDuplicates,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 constraintId,
                 row);
     }

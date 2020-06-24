@@ -45,6 +45,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * and triggers to be executed based on the c's and t's
  * compiled into the insert plan.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class DeleteResultSet extends DMLWriteResultSet
 {
 	private TransactionController   	tc;
@@ -100,6 +101,8 @@ class DeleteResultSet extends DMLWriteResultSet
      *
 	 * @exception StandardException		Thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     DeleteResultSet
 	(
 		NoPutResultSet		source,
@@ -113,11 +116,14 @@ class DeleteResultSet extends DMLWriteResultSet
 
 		tc = activation.getTransactionController();
 		constants = (DeleteConstantAction) constantAction;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 		fkInfoArray = constants.getFKInfo();
 		triggerInfo = constants.getTriggerInfo();
 		noTriggersOrFks = ((fkInfoArray == null) && (triggerInfo == null));
 		baseRowReadList = constants.getBaseRowReadList();
 		if(source != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 			resultDescription = source.getResultDescription();
 		else
 			resultDescription = constants.resultDescription;
@@ -147,6 +153,7 @@ class DeleteResultSet extends DMLWriteResultSet
 		*/
 		if (constants.deferred)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             runFkChecker(true); // check for only RESTRICT referential
                                       // action rule violations
 			fireBeforeTriggers();
@@ -176,6 +183,7 @@ class DeleteResultSet extends DMLWriteResultSet
 	void  setup() throws StandardException
 	{
 		super.setup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 
 		// Remember if this is the 1st execution
 		firstExecute = (rc == null);
@@ -223,6 +231,7 @@ class DeleteResultSet extends DMLWriteResultSet
 
 		/* decode the lock mode for the execution isolation level */
 		lockMode = decodeLockMode(constants.lockMode);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 
 		/* Open the RowChanger before the source ResultSet so that
 		 * the store will see the RowChanger's lock as a covering lock
@@ -241,6 +250,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			activation.clearIndexScanInfo();
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         rowCount = 0L;
         if(!cascadeDelete)
 			row = getNextRowCore(source);
@@ -290,7 +300,10 @@ class DeleteResultSet extends DMLWriteResultSet
 			rlColumnNumber = noTriggersOrFks ? 1: numberOfBaseColumns;
 			if(cascadeDelete)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 						(resultDescription != null) ?
 							resultDescription.truncateColumns(rlColumnNumber) :
 							null, false);
@@ -299,6 +312,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			}else
 			{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
 						(resultDescription != null) ?
 							resultDescription.truncateColumns(rlColumnNumber) :
@@ -313,6 +327,7 @@ class DeleteResultSet extends DMLWriteResultSet
 		{
 			if (fkChecker == null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 fkChecker = new RISetChecker(lcc, tc, fkInfoArray);
 			}
 			else
@@ -393,6 +408,7 @@ class DeleteResultSet extends DMLWriteResultSet
                     // deferred, require at least two rows to be present in the
                     // primary table since we are deleting one of them below,
                     // and we need at least one to fulfill the constraint.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                     fkChecker.doPKCheck(activation, row, false, 2);
 				}
 
@@ -406,6 +422,7 @@ class DeleteResultSet extends DMLWriteResultSet
 				}
 
 				rc.deleteRow(row,baseRowLocation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 				source.markRowAsDeleted();
 			}
 
@@ -483,6 +500,7 @@ class DeleteResultSet extends DMLWriteResultSet
 		DataValueDescriptor		rlColumn;
  		RowLocation	baseRowLocation;
         ExecRow     defRLRow;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         deferredBaseCC = tc.openCompiledConglomerate(
                 false,
@@ -505,6 +523,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			FormatableBitSet readBitSet = RowUtil.shift(baseRowReadList, 1);
 
 			rs.open();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             while ((defRLRow = rs.getNextRow()) != null)
 			{
                 rlColumn = defRLRow.getColumn(rlColumnNumber);
@@ -531,6 +550,7 @@ class DeleteResultSet extends DMLWriteResultSet
 				}
 	
 				rc.deleteRow(deferredBaseRow, baseRowLocation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 				source.markRowAsDeleted();
 			}
 		} finally
@@ -543,6 +563,7 @@ class DeleteResultSet extends DMLWriteResultSet
     /**
      * Make sure foreign key constraints are not violated
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
     void runFkChecker(boolean restrictCheckOnly)
             throws StandardException
 	{
@@ -571,12 +592,14 @@ class DeleteResultSet extends DMLWriteResultSet
                     // the actual checking, and we need at least one to fulfill
                     // the constraint.
                     fkChecker.doPKCheck(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                             activation,
                             defRLRow,
                             restrictCheckOnly,
                             1);
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                 if (restrictCheckOnly) {
                     fkChecker.postCheck();
                 }
@@ -649,6 +672,7 @@ class DeleteResultSet extends DMLWriteResultSet
     @Override
     public void close() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
         super.close( constants.underMerge() );
     }
                                

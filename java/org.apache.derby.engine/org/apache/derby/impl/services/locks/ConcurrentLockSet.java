@@ -359,6 +359,7 @@ final class ConcurrentLockSet implements LockTable {
             //
             // This logic supports the use-case of DERBY-6554.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
             blockedByParent =
                 (timeout == 0) &&
                 compatibilitySpace.getOwner().isNestedOwner() &&
@@ -403,6 +404,7 @@ final class ConcurrentLockSet implements LockTable {
                     }
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                return null;
 			}
 
@@ -616,6 +618,7 @@ forever:	for (;;) {
                         {
                             // ending wait because of lock timeout or interrupt
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4967
                             if (wakeupReason ==
                                     Constants.WAITING_LOCK_INTERRUPTED) {
 
@@ -942,6 +945,7 @@ forever:	for (;;) {
         if (SanityManager.DEBUG)
         {
             String str = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 
             int i = 0;
             for (Entry entry : locks.values())

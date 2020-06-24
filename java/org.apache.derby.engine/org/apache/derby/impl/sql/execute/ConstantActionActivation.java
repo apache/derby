@@ -48,6 +48,7 @@ public final class ConstantActionActivation extends BaseActivation
     }
 
     protected ResultSet createResultSet() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
         return getResultSetFactory().getDDLResultSet(this);
     }
 

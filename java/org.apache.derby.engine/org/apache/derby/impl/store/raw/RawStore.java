@@ -95,6 +95,7 @@ import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 	String TransactionFactoryId=<moduleIdentifier>
 	</PRE>
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	<P>
 	Class is final as it has methods with privilege blocks
 	and implements PrivilegedExceptionAction.
@@ -174,12 +175,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         boolean transformExistingData = false;
         boolean inReplicationSlaveMode = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
         String slave = properties.getProperty(SlaveFactory.REPLICATION_MODE);
         if (slave != null && slave.equals(SlaveFactory.SLAVE_MODE)) {
             inReplicationSlaveMode = true;
         }
 
 		DaemonFactory daemonFactory =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			(DaemonFactory)startSystemModule(org.apache.derby.shared.common.reference.Module.DaemonFactory);
 		rawStoreDaemon = daemonFactory.createNewDaemon("rawStoreDaemon");
 		xactFactory = (TransactionFactory)
@@ -206,6 +209,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
         // setup database encryption engines.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if (create) {
             transformExistingData = setupEncryptionEngines(create, properties);
             if (SanityManager.DEBUG) {
@@ -231,6 +235,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         
 		// log factory is booted by the data factory
 		logFactory =(LogFactory) findServiceModule(this, getLogFactoryModule());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		// if this is a restore from backup, restore the jar files.
 		if(restoreFromBackup !=null)
@@ -275,6 +280,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		
 		// save the service properties to a file if we are doing a 
 		// restore from. This marks the end of restore from backup.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1240
 		if (restoreFromBackup !=null)
 		{
 			((UpdateServiceProperties)properties).saveServiceProperties();
@@ -301,9 +307,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             if(properties.getProperty(
                               RawStoreFactory.DB_ENCRYPTION_STATUS) !=null) 
             {   
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 handleIncompleteDbCryptoOperation(properties);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             transformExistingData = setupEncryptionEngines(create, properties);
         }
 
@@ -322,11 +330,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // If SlaveFactory is to be booted, the boot has to happen
         // before logFactory.recover since that method will be blocked
         // when in replication slave mode.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
         if (inReplicationSlaveMode) {
             // The LogFactory has already been booted in slave mode.
             // Can now start slave replication by booting the
             // SlaveFactory service
             slaveFactory = (SlaveFactory) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 bootServiceModule(create, this,
                                           getSlaveFactoryModule(),
                                           properties);
@@ -340,6 +351,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         // If user requested to encrypt an un-encrypted database or encrypt with
         // a new alogorithm then do that now.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if (transformExistingData) {
             applyBulkCryptoOperation(properties, newCipherFactory);
         }
@@ -399,6 +411,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
     
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		Get the Transaction Factory to use with this store.
 	*/
 	public TransactionFactory getXactFactory() {
@@ -459,7 +472,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 	public Transaction startNestedReadOnlyUserTransaction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     Transaction parentTransaction,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
     CompatibilitySpace compatibilitySpace,
     ContextManager  contextMgr,
     String          transName)
@@ -529,9 +544,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                       SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3551
         RawTransaction t = 
                 xactFactory.findUserTransaction(
                 this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 getContextService().getCurrentContextManager(), 
                 AccessFactoryGlobals.USER_TRANS_NAME);
 
@@ -550,6 +567,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                      replicationMode);
 
         MasterFactory masterFactory = (MasterFactory)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             bootServiceModule(true, this, getMasterFactoryModule(),
                                       replicationProps);
         masterFactory.startMaster(this, dataFactory, logFactory,
@@ -565,6 +583,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      */
     public void stopReplicationMaster() throws StandardException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
         MasterFactory masterFactory = null;
         
         if (isReadOnly()) {
@@ -578,6 +597,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
         catch (StandardException se) {
             throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3392
                       SQLState.REPLICATION_NOT_IN_MASTER_MODE);
         }
         masterFactory.stopMaster();
@@ -597,10 +617,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         try {
             masterFactory = (MasterFactory) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 findServiceModule(this, getMasterFactoryModule());
         }
         catch (StandardException se) {
             throw StandardException.newException
+//IC see: https://issues.apache.org/jira/browse/DERBY-3392
                     (SQLState.REPLICATION_NOT_IN_MASTER_MODE);
         }
         masterFactory.startFailover();
@@ -630,6 +653,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @exception StandardException thrown on error
      */
     public void backup(String backupDir, boolean wait) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
         throws StandardException 
     {
 		if (backupDir == null || backupDir.equals(""))
@@ -651,6 +676,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 		// find the user transaction, it is necessary for online backup 
 		// to open the container through page cache
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		RawTransaction t = 
             xactFactory.findUserTransaction(this,
                 getContextService().getCurrentContextManager(), 
@@ -674,6 +700,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // and stop new ones from starting until the backup is completed.
             if (!xactFactory.blockBackupBlockingOperations(wait))
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
                 throw StandardException.newException(
                       SQLState.BACKUP_BLOCKING_OPERATIONS_IN_PROGRESS);  
             }
@@ -683,6 +711,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }finally {
             // let the xactfatory know that backup is done, so that
             // it can allow backup blocking operations. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             xactFactory.unblockBackupBlockingOperations();
         }
 	}
@@ -706,6 +735,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         if (!privExists(backupDir))
 		{
             // if backup dir does not exist, go ahead and create it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
             createBackupDirectory(backupDir);
 		}
 		else
@@ -725,6 +755,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // is assumed to be a derby database directory because derby 
             // databases always have this file. 
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
             if (privExists(
                     new File(backupDir, PersistentService.PROPERTIES_NAME))) 
             { 
@@ -740,6 +771,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		File oldbackup = null;
 		File backupcopy = null;
 		OutputStreamWriter historyFile = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
         StorageFile dbHistoryFile = null;
         File backupHistoryFile = null;
 		LogInstant backupInstant = logFactory.getFirstUnflushedInstant();
@@ -750,6 +783,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			StorageFile dbase           = storageFactory.newStorageFile(null); 
             String      canonicalDbName = storageFactory.getCanonicalName();
             String      dbname = StringUtil.shortDBName( canonicalDbName, storageFactory.getSeparator() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
 			// append to end of history file
 			historyFile = 
@@ -757,6 +791,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     storageFactory.newStorageFile(BACKUP_HISTORY), true);
             
 			backupcopy = new File(backupDir, dbname);
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
 
 			logHistory(
                 historyFile,
@@ -781,6 +817,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
                 if (!privRenameTo(backupcopy,oldbackup))
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                     renameFailed = true;
                     throw StandardException.
                         newException(SQLState.RAWSTORE_ERROR_RENAMING_FILE,
@@ -792,6 +829,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                         historyFile,
                         MessageService.getTextMessage(
                             MessageId.STORE_MOVED_BACKUP,
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
                             getFilePath(backupcopy),
                             getFilePath(oldbackup)));
 					renamed = true;
@@ -800,7 +839,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             // create the backup database directory
             createBackupDirectory(backupcopy);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
             dbHistoryFile = storageFactory.newStorageFile(BACKUP_HISTORY);
             backupHistoryFile = new File(backupcopy, BACKUP_HISTORY); 
 
@@ -816,6 +858,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             StorageFile jarDir = 
                 storageFactory.newStorageFile(FileResource.JAR_DIRECTORY_NAME);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
             if (privExists(jarDir)) 
             {
                 // find the list of schema directories under the jar dir and
@@ -826,13 +869,17 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 // copy will fail while copying the backup dir onto itself in 
                 // recursion
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
                 String [] jarDirContents = privList(jarDir);
                 File backupJarDir = new File(backupcopy, 
                                              FileResource.JAR_DIRECTORY_NAME);
                 // Create the backup jar directory
                 createBackupDirectory(backupJarDir);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
                 LanguageConnectionContext lcc = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     (LanguageConnectionContext)getContextOrNull(
                         LanguageConnectionContext.CONTEXT_ID);
         
@@ -894,8 +941,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             StorageFile logdir = logFactory.getLogDirectory();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
             try 
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 String name = getServiceName(this);
                 PersistentService ps = 
                     getMonitor().getServiceType(this);
@@ -924,6 +973,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             
                 // save the service properties into the backup.
                 ps.saveServiceProperties(backupcopy.getPath(), prop);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5260
 
             }
             catch(StandardException se) 
@@ -966,6 +1016,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 			// Create the log directory
             createBackupDirectory(logBackup);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
 
 			// do a checkpoint to get the persistent store up to date.
 			logFactory.checkpoint(this, dataFactory, xactFactory, true);
@@ -977,10 +1028,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			
 			// Create the data segment directory
             createBackupDirectory(segBackup);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
 
 			// backup all the information in the data segment.
 			dataFactory.backupDataFiles(t, segBackup);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
             logHistory(historyFile,
                    MessageService.getTextMessage(
                    MessageId.STORE_DATA_SEG_BACKUP_COMPLETED,
@@ -995,6 +1049,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			logHistory(historyFile,
                 MessageService.getTextMessage(
                     MessageId.STORE_COPIED_LOG,
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
                     getFilePath(logdir),
                     getFilePath(logBackup)));
 
@@ -1015,6 +1071,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 					
 					// Abort all activity related to backup in the log factory.
 					logFactory.abortLogBackup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 
 					// remove the half backed up copy
 					// unless the error occured during  rename process;
@@ -1042,6 +1099,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 						logHistory(historyFile,
                             MessageService.getTextMessage(
                                 MessageId.STORE_REMOVED_BACKUP,
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
                                 getFilePath(oldbackup)));
  					}
 					logHistory(historyFile,
@@ -1082,6 +1141,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     private void createBackupDirectory(File dir) throws StandardException {
         boolean created = false;
         IOException ex = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
 
         try {
             created = privMkdirs(dir);
@@ -1117,6 +1177,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @exception StandardException thrown on error.
      */
     public void backupAndEnableLogArchiveMode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
     String backupDir,
     boolean deleteOnlineArchivedLogFiles,
     boolean wait) 
@@ -1126,6 +1188,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         try {
             // Enable the log archive mode, if it is not already enabled.
             if(!logFactory.logArchived()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
                 logFactory.enableLogArchiveMode();
                 enabledLogArchive = true ;
             }
@@ -1139,6 +1203,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             {
                 logFactory.deleteOnlineArchivedLogFiles();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         }catch (Throwable error) {
             // On any errors , disable the log archive, if it 
             // is enabled on this call. 
@@ -1165,6 +1230,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		logFactory.disableLogArchiveMode();
 		if(deleteOnlineArchivedLogFiles)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             logFactory.deleteOnlineArchivedLogFiles();
         }
 	}
@@ -1177,6 +1243,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	 *  2) copy backup history file. 
 	 */
 	private void restoreRemainingFromBackup(String backupPath) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1240
 		throws StandardException 
 	{
 	
@@ -1267,6 +1334,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	public void freezePersistentStore() throws StandardException
 	{
 		// do a checkpoint to get the persistent store up to date.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
 		logFactory.checkpoint(this, dataFactory, xactFactory, true);
 		logFactory.freezePersistentStore();
 
@@ -1300,6 +1368,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      *      requested configuration is denied, or if something else goes wrong
      */
     private boolean setupEncryptionEngines(boolean create,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                                            Properties properties)
         throws StandardException
     {
@@ -1319,11 +1388,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // for encrypted database, and this takes precedence over the
             // value specified by the user.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             String name = getServiceName(this);
             PersistentService ps = getMonitor().getServiceType(this);
             String canonicalName = ps.getCanonicalServiceName(name);
             Properties serviceprops = ps.getServiceProperties(canonicalName,
                                                               (Properties)null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             isEncryptedDatabase =
                     isTrue(serviceprops, Attribute.DATA_ENCRYPTION);
 
@@ -1334,6 +1405,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 reEncrypt = isSet(properties, Attribute.NEW_BOOT_PASSWORD) ||
                         isSet(properties, Attribute.NEW_CRYPTO_EXTERNAL_KEY);
                 encryptDatabase = reEncrypt;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             } else if (encryptDatabase && decryptDatabase) {
                 // We cannot both encrypt and decrypt at the same time.
                 throw StandardException.newException(
@@ -1347,6 +1419,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // it is ignored.
 
             // Prevent attempts to (re)encrypt or decrypt a read-only database.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5962
             if ((encryptDatabase || decryptDatabase) && isReadOnly()) {
                 throw StandardException.newException(
                         SQLState.CANNOT_ENCRYPT_READONLY_DATABASE);
@@ -1354,6 +1427,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
         // setup encryption engines.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if (isEncryptedDatabase || encryptDatabase) {
             // Check if database is or will be encrypted. We save encryption
             // properties as service properties, such that
@@ -1369,6 +1443,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             CipherFactoryBuilder cb = (CipherFactoryBuilder)
                 startSystemModule(org.apache.derby.shared.common.reference.Module.CipherFactoryBuilder);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
             // create instance of the cipher factory with the
             // specified encryption properties.
@@ -1413,6 +1488,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                    String.valueOf(encryptionBlockSize));
                 }
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 if (isSet(properties, RawStoreFactory.ENCRYPTION_BLOCKSIZE)) {
                     encryptionBlockSize =
                         Integer.parseInt(properties.getProperty(
@@ -1459,6 +1535,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
         // We need to transform existing data if we are (re-)encrypting an
         // existing database, or decrypting an already encrypted database.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         return (!create &&
                 (encryptDatabase || (isEncryptedDatabase && decryptDatabase)));
     }
@@ -1475,6 +1552,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                        boolean newEngine)
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if ((encryptionEngine == null && newEncryptionEngine == null)) {
             throw StandardException.newException(
                         SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
@@ -1482,6 +1560,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 		counter_encrypt++;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
         if (newEngine) {
             return newEncryptionEngine.encrypt(cleartext, offset, length,
                                             ciphertext, outputOffset);
@@ -1499,15 +1578,18 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		@exception StandardException Standard Derby Error Policy
 	 */
 	public int decrypt(byte[] ciphertext, int offset, int length,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 					   byte[] cleartext, int outputOffset) 
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
 		if (isEncryptedDatabase == false || decryptionEngine == null) {
             throw StandardException.newException(
                         SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
         }
 
 		counter_decrypt++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
         return decryptionEngine.decrypt(ciphertext, offset, length,
                                             cleartext, outputOffset);
 	}
@@ -1524,6 +1606,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	public int random()
 	{
 		// don't synchronize it, the more random the better.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
 		return isEncryptedDatabase ? random.nextInt() : 0;
 	}
 
@@ -1533,6 +1616,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		if (isReadOnly())
 			throw StandardException.newException(SQLState.DATABASE_READ_ONLY);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
 		if (!isEncryptedDatabase)
 			throw StandardException.newException(SQLState.DATABASE_NOT_ENCRYPTED);
 
@@ -1547,6 +1631,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		String changeString = (String)changePassword;
 
 		return currentCipherFactory.changeBootPassword((String)changePassword, properties, encryptionEngine);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 
 	}
 
@@ -1596,6 +1681,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             if (SanityManager.DEBUG_ON(debugFlag))
             {
                StandardException se = StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5962
                                       SQLState.DATABASE_ENCRYPTION_FAILED,
                                       debugFlag);
                markCorrupt(se);
@@ -1650,10 +1736,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @exception StandardException Standard Derby Error Policy
      */
     private void applyBulkCryptoOperation(Properties properties,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                                           CipherFactory newCipherFactory)
         throws StandardException 
     {
         boolean decryptDatabase = (isEncryptedDatabase &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 isTrue(properties, Attribute.DECRYPT_DATABASE));
         boolean reEncrypt = (isEncryptedDatabase && (
                 isSet(properties, Attribute.NEW_BOOT_PASSWORD) ||
@@ -1679,12 +1767,16 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         RawTransaction transaction =
             xactFactory.startTransaction(
                    this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     getContextService().getCurrentContextManager(),
                     AccessFactoryGlobals.USER_TRANS_NAME);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1786
         try 
 		{
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             if (decryptDatabase) {
                 dataFactory.decryptAllContainers(transaction);
             } else {
@@ -1713,6 +1805,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             // Let the log factory and data factory know whether the
             // database is encrypted.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             if (decryptDatabase) {
                 isEncryptedDatabase = false;
                 logFactory.setDatabaseEncrypted(false, true);
@@ -1723,6 +1816,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 // before enabling encryption of the log with
                 // the new key.
                 logFactory.setDatabaseEncrypted(true, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
 
                 if (reEncrypt) {
                     // Switch the encryption/decryption engine to the new ones.
@@ -1798,6 +1892,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                         properties.put(RawStoreFactory.OLD_ENCRYPTED_KEY,
                                        keyString);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             } else if (decryptDatabase) {
                 // We cannot remove the encryption properties here, as we may
                 // have to revert back to the encrypted database. Instead we set
@@ -1835,6 +1930,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             // force the checkpoint with new encryption key.
             logFactory.checkpoint(this, dataFactory, xactFactory, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
 
             if (SanityManager.DEBUG) {
                 crashOnDebugFlag(TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT, 
@@ -1850,8 +1946,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             // database is (re)encrypted successfuly, 
             // remove the old version of the container files.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             dataFactory.removeOldVersionOfContainers();
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             if (decryptDatabase) {
                 // By now we can remove all cryptographic properties.
                 removeCryptoProperties(properties);
@@ -1882,6 +1980,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             transaction.close(); 
 
         } catch (StandardException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5962
             throw StandardException.newException(
                 SQLState.DATABASE_ENCRYPTION_FAILED, se, se.getMessage());
         } finally {
@@ -1922,6 +2021,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         boolean reEncryption = false;
         boolean decryptionFailed =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 isSet(properties, Attribute.DATA_ENCRYPTION) &&
                 !isTrue(properties, Attribute.DATA_ENCRYPTION);
         // check if engine crashed when (re) encryption was in progress.
@@ -1972,6 +2072,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 
             if (SanityManager.DEBUG) {
                 crashOnDebugFlag(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1786
                    TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE, 
                    reEncryption);
             }
@@ -2005,6 +2106,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     // only incase of re-encryption there should
                     // be old verify key file. 
                     reEncryption = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 } else if (!decryptionFailed) {
                     // remove the verify key file. 
                     if (!privDelete(verifyKeyFile))
@@ -2036,8 +2138,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             }
 
             if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                 SanityManager.ASSERT(!(decryptionFailed && reEncryption));
                 crashOnDebugFlag(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1786
                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY, 
                     reEncryption);
             }
@@ -2054,11 +2158,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         if (dbEncryptionStatus == RawStoreFactory.DB_ENCRYPTION_IN_CLEANUP)
         {
             // remove all the old versions of the  containers. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             dataFactory.removeOldVersionOfContainers();
         }
         
         if (SanityManager.DEBUG) {
                 crashOnDebugFlag(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1786
                    TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP, 
                    reEncryption);
         }
@@ -2086,6 +2192,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
         // Finalize cleanup for failed decryption attempts.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if (decryptionFailed) {
             if (dbEncryptionStatus == RawStoreFactory.DB_ENCRYPTION_IN_UNDO) {
                 // This action is not idempotent in the sense that once set
@@ -2121,6 +2228,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         throws StandardException 
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         String feature;
         if (decrypt) {
             feature = Attribute.DECRYPT_DATABASE + " attribute";
@@ -2152,6 +2260,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // be read once database is reconfigure with new encryption 
         // key.
         if (xactFactory.hasPreparedXact()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5962
             throw StandardException.newException(
                     SQLState.ENCRYPTION_PREPARED_XACT_EXIST);
         }
@@ -2166,6 +2275,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // when rollforward recovery is performed. 
     
         if (logFactory.logArchived()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5962
             throw StandardException.newException(
                    SQLState.CANNOT_ENCRYPT_LOG_ARCHIVED_DATABASE);
         }
@@ -2196,11 +2306,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
     public String getSlaveFactoryModule() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
         return SlaveFactory.MODULE;
     }
 
     public String getMasterFactoryModule()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
         return MasterFactory.MODULE;
     }
 
@@ -2233,6 +2345,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * grant permissions to read user.dir property.
      */
     private String getFilePath(StorageFile file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
         String path = privGetCanonicalPath(file);
         if(path != null ) {
             return path;
@@ -2266,8 +2380,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     }
 
 	protected boolean privCopyDirectory(StorageFile from, File to)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-304
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		return privCopyDirectory(from, to, (byte[])null, 
                                  (String[])null, true);
 	}
@@ -2316,6 +2433,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	public boolean checkVersion(
     int     requiredMajorVersion, 
     int     requiredMinorVersion, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     String  feature) 
         throws StandardException
     {
@@ -2331,6 +2449,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      */
     private void removeCryptoProperties(Properties properties) {
         // Common props for external key or password.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         properties.remove(Attribute.DATA_ENCRYPTION);
         properties.remove(RawStoreFactory.LOG_ENCRYPT_ALGORITHM_VERSION);
         properties.remove(RawStoreFactory.DATA_ENCRYPT_ALGORITHM_VERSION);
@@ -2459,6 +2578,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             Object ret = AccessController.doPrivileged( this);
             return ((Boolean) ret).booleanValue();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
         catch (PrivilegedActionException pae) {
             throw (IOException) pae.getCause();
         }
@@ -2523,10 +2643,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     }
 
     private synchronized boolean privCopyDirectory(StorageFile from, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-304
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
                                                    File to, 
                                                    byte[] buffer, 
                                                    String[] filter,
                                                    boolean copySubdirs)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             throws StandardException
     {
         actionCode = COPY_STORAGE_DIRECTORY_TO_REGULAR_ACTION;
@@ -2598,8 +2721,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     }
 
     private synchronized boolean privCopyFile( StorageFile from, File to)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-304
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         actionCode = COPY_STORAGE_FILE_TO_REGULAR_ACTION;
         actionStorageFile = from;
         actionRegularFile = to;
@@ -2609,6 +2735,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             Object ret = AccessController.doPrivileged( this);
             return ((Boolean) ret).booleanValue();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         catch( PrivilegedActionException pae) {
             throw (StandardException)pae.getCause();
         }
@@ -2643,6 +2771,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
     private synchronized String[] privList(final StorageFile file)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-304
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         actionCode = STORAGE_FILE_LIST_DIRECTORY_ACTION;
         actionStorageFile = file;
 
@@ -2660,6 +2790,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
     private synchronized String privGetCanonicalPath(final StorageFile file)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
         actionCode = STORAGE_FILE_GET_CANONICALPATH_ACTION;
         actionStorageFile = file;
 
@@ -2667,6 +2799,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         {
             return (String) AccessController.doPrivileged( this);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
         catch( PrivilegedActionException pae) {
             return null;
         } // does not throw an exception
@@ -2691,6 +2824,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         {
             return (String) AccessController.doPrivileged( this);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         catch( PrivilegedActionException pae) {
             return null;
         } // does not throw an exception
@@ -2717,6 +2853,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         case REGULAR_FILE_EXISTS_ACTION:
             return actionRegularFile.exists();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 
         case STORAGE_FILE_EXISTS_ACTION:
             return actionStorageFile.exists();
@@ -2732,8 +2869,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             boolean created = actionRegularFile.mkdirs();
 
             FileUtil.limitAccessToOwner(actionRegularFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
             return created;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 
         case REGULAR_FILE_IS_DIRECTORY_ACTION:
             // SECURITY PERMISSION - MP1
@@ -2774,6 +2913,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         case COPY_STORAGE_FILE_TO_REGULAR_ACTION:
             // SECURITY PERMISSION - MP1, OP4
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             return FileUtil.copyFile((WritableStorageFactory) storageFactory,
                     actionStorageFile, actionRegularFile);
 
@@ -2783,6 +2923,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             return FileUtil.copyFile((WritableStorageFactory) storageFactory,
                     actionStorageFile, actionToStorageFile);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-709
+//IC see: https://issues.apache.org/jira/browse/DERBY-537
         case REGULAR_FILE_GET_CANONICALPATH_ACTION:
             // SECURITY PERMISSION - MP1
             return (String)(actionRegularFile.getCanonicalPath());
@@ -2798,6 +2940,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
     /** Tells if the attribute/property has been specified. */
     private static boolean isSet(Properties p, String attribute) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         return p.getProperty(attribute) != null;
     }
 
@@ -2845,6 +2988,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      */
     private static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();
@@ -2871,6 +3015,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Context>()

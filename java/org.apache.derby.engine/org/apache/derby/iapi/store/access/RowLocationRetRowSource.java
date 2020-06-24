@@ -74,6 +74,7 @@ public interface RowLocationRetRowSource extends RowSource
 
 		NeedsRowLocation and rowLocation will ONLY be called by a drainer of
 		the row source which CAN return a row location.  Drainer of row source
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         which cannot return rowLocation will guarantee to not call either
 		callbacks. Conversely, if NeedsRowLocation is called and it returns
 		true, then for every row return by getNextRowFromRowSource, a
@@ -90,6 +91,7 @@ public interface RowLocationRetRowSource extends RowSource
 	 */
 	void rowLocation(RowLocation rl) throws StandardException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     void offendingRowLocation(
             RowLocation rl, long containdId) throws StandardException;
 }

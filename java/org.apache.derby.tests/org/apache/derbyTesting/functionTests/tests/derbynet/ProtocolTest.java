@@ -153,6 +153,7 @@ public class ProtocolTest
 
     /** Cleans up test resources. */
     public void tearDown()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5732
             throws Exception {
         commandSequence = null;
         adapter.close();
@@ -433,6 +434,7 @@ public class ProtocolTest
                 return convertHex(str, ln(tkn));
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return Double.valueOf(tkn.nval).intValue() * mult;
     }
 
@@ -849,6 +851,7 @@ public class ProtocolTest
      */
     public static Test suite()
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Derby DRDA protocol tests");
         // Process the list of files and create test cases for the sub-tests.
         // NOTE: We cannot assume anything about the order in which the tests

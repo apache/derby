@@ -138,6 +138,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
      * @throws SecurityException 
      */
     private void findStartStopMethods(final Class<?> serverClass)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1966
         throws SecurityException, NoSuchMethodException
     {
         // Methods are public so no need for privilege blocks.
@@ -179,6 +180,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
             Constructor  serverConstructor;
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 serverConstructor = AccessController.doPrivileged(
 			      new PrivilegedExceptionAction<Constructor>() {
 						  public Constructor run() throws NoSuchMethodException, SecurityException
@@ -207,6 +209,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 
             }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-1966
             findStartStopMethods(serverClass);
             
 			if (listenAddress == null) {
@@ -214,10 +217,12 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
                     new Object[]{userArg, passwordArg});
             } else {
 				server = serverConstructor.newInstance(new Object[]
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 					{listenAddress, portNumber,
                      userArg, passwordArg});
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             serverThread = getMonitor().getDaemonThread( this, "NetworkServerStarter", false);
             serverThread.start();
         }
@@ -233,6 +238,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
     {
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1966
             runServerMethod.invoke( server,
                                       new Object[] {consoleWriter });
         }
@@ -259,7 +265,9 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 			{
 				serverShutdownMethod.invoke( server,
 											 null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2564
 				AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 							      new PrivilegedAction<Object>() {
 								  public Object run() {
 								      serverThread.interrupt();
@@ -298,6 +306,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

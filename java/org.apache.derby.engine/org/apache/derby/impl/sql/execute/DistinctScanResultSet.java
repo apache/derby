@@ -40,6 +40,7 @@ import java.util.Enumeration;
  * (Assumes no predicates, for now.)
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class DistinctScanResultSet extends HashScanResultSet
 {
 
@@ -49,12 +50,14 @@ class DistinctScanResultSet extends HashScanResultSet
     //
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     DistinctScanResultSet(long conglomId, 
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
 		int resultRowTemplate,
 		int resultSetNumber,
 		int hashKeyItem,
 		String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
@@ -66,6 +69,7 @@ class DistinctScanResultSet extends HashScanResultSet
 		double optimizerEstimatedCost)
 			throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 		super(conglomId, scoci, activation, resultRowTemplate, resultSetNumber,
 			  (GeneratedMethod) null, // startKeyGetter
 			  0,					  // startSearchOperator
@@ -75,11 +79,13 @@ class DistinctScanResultSet extends HashScanResultSet
 			  (Qualifier[][]) null,	  // scanQualifiers
 			  (Qualifier[][]) null,	  // nextQualifiers
 			  DEFAULT_INITIAL_CAPACITY, DEFAULT_LOADFACTOR, DEFAULT_MAX_CAPACITY,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 			  hashKeyItem, tableName, userSuppliedOptimizerOverrides, indexName, isConstraint, 
 			  false,				  // forUpdate
 			  colRefItem, lockMode, tableLocked, isolationLevel,
 			  false,
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 
 		// Tell super class to eliminate duplicates
 		eliminateDuplicates = true;
@@ -96,6 +102,7 @@ class DistinctScanResultSet extends HashScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

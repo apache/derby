@@ -107,6 +107,7 @@ public class VerifySignatures extends BaseTestCase {
      * Creates a new instance.
      */
     public VerifySignatures(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         super(name);
     }
 
@@ -129,6 +130,7 @@ public class VerifySignatures extends BaseTestCase {
         collectClassesFromConnectionPoolDataSource(classes);
         collectClassesFromXADataSource(classes);
         addClass(classes,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
                  DriverManager.getDriver(TestConfiguration.getCurrent().getJDBCUrl()).getClass(),
                  java.sql.Driver.class);
 
@@ -146,6 +148,7 @@ public class VerifySignatures extends BaseTestCase {
                 }
             }
             for (Method method : methods) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
                 checkImplementationMethod(pair.derbyImplementation,
                         method);
             }
@@ -175,11 +178,15 @@ public class VerifySignatures extends BaseTestCase {
     private static void collectClassesFromDataSource(Set<ClassInfo> classes)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         DataSource ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2089
         JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
                                        "create=true");
         addClass(classes, ds.getClass(), javax.sql.DataSource.class);
         collectClassesFromConnection(ds.getConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
                                      (TestConfiguration.getCurrent().getUserName(),
                                              TestConfiguration.getCurrent().getUserPassword()),
                                      classes);
@@ -197,11 +204,14 @@ public class VerifySignatures extends BaseTestCase {
         collectClassesFromConnectionPoolDataSource(Set<ClassInfo> classes)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();
         addClass(classes,
                  cpds.getClass(), javax.sql.ConnectionPoolDataSource.class);
 
         PooledConnection pc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
             cpds.getPooledConnection(TestConfiguration.getCurrent().getUserName(),
                     TestConfiguration.getCurrent().getUserPassword());
         addClass(classes, pc.getClass(), javax.sql.PooledConnection.class);
@@ -222,9 +232,12 @@ public class VerifySignatures extends BaseTestCase {
     private static void collectClassesFromXADataSource(Set<ClassInfo> classes)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         XADataSource xads = J2EEDataSource.getXADataSource();
         addClass(classes, xads.getClass(), javax.sql.XADataSource.class);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         XAConnection xaconn = xads.getXAConnection(TestConfiguration.getCurrent().getUserName(),
                 TestConfiguration.getCurrent().getUserPassword());
         addClass(classes, xaconn.getClass(), javax.sql.XAConnection.class);
@@ -381,7 +394,9 @@ public class VerifySignatures extends BaseTestCase {
      * @param ifaceMethod The method that should be implemented.
      */
     private static void checkImplementationMethod(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4877
             Class<?> derbyImplementation, Method ifaceMethod)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         throws NoSuchMethodException
     {
         
@@ -391,6 +406,7 @@ public class VerifySignatures extends BaseTestCase {
             Method impMethod =
                 derbyImplementation.getMethod(ifaceMethod.getName(),
                                               ifaceMethod.getParameterTypes());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             StringBuilder sb = new StringBuilder();
             Class[] pts = ifaceMethod.getParameterTypes();
             sb.append("(");
@@ -452,6 +468,7 @@ public class VerifySignatures extends BaseTestCase {
         private static Set<Class> getInterfacesToCheck() {
 
             Set<Class> jdbcInterfaces = new HashSet<Class>(Arrays.asList(JDBC_INTERFACES));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
 
             // Remove the interfaces that we know we haven't checked.
 
@@ -477,6 +494,7 @@ public class VerifySignatures extends BaseTestCase {
             jdbcInterfaces.remove(javax.sql.ConnectionEventListener.class);
             jdbcInterfaces.remove(javax.sql.StatementEventListener.class);
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
             return jdbcInterfaces;
         }
 

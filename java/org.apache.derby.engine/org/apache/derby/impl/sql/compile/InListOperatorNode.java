@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.InListOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -51,6 +52,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
      * @param cm Context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     InListOperatorNode(
             ValueNode leftOperand,
             ValueNodeList rightOperandList,
@@ -85,6 +88,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 */
 	protected InListOperatorNode shallowCopy() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         InListOperatorNode ilon = new InListOperatorNode(
 				leftOperand,
 				rightOperandList,
@@ -116,6 +121,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -133,6 +140,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		{
 			BinaryComparisonOperatorNode equal = 
                 new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     BinaryRelationalOperatorNode.K_EQUALS,
                     leftOperand,
                     rightOperandList.elementAt(0),
@@ -155,6 +163,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
         if ((leftOperand.getTypeServices().getTypeId().typePrecedence() !=
                     targetTypePrecedence) &&
                 !rightOperandList.allSamePrecendence(targetTypePrecedence)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             CastNode cn =
                     new CastNode(leftOperand, targetType, getContextManager());
             cn.bindCastNodeOnly();
@@ -255,6 +265,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 				rightOperandList.sortInAscendingOrder(judgeODV);
 				isOrdered = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ValueNode minValue = rightOperandList.elementAt(0);
                 ValueNode maxValue = rightOperandList.elementAt(
 						rightOperandList.size() - 1);
@@ -271,7 +282,10 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 				if (judgeODV.equals(minODV, maxODV).equals(true))
 				{
 					BinaryComparisonOperatorNode equal = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                             BinaryRelationalOperatorNode.K_EQUALS,
 							leftOperand, 
 							minValue,
@@ -302,7 +316,10 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			 * the list.  This is arbitrary and should not matter in the
 			 * big picture.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode srcVal = rightOperandList.elementAt(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ParameterNode pNode = new ParameterNode(
                     0,
 					null, // default value
@@ -338,7 +355,12 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			 * to "this").
 			 */
 			BinaryComparisonOperatorNode equal = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     BinaryRelationalOperatorNode.K_EQUALS,
 					leftOperand, 
 					pNode,
@@ -371,6 +393,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
             // what the dominant type is.
             ClassFactory cf = getClassFactory();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (ValueNode vn : rightOperandList) {
                 targetType = targetType.getDominantType(
                         vn.getTypeServices(), cf);
@@ -433,8 +456,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		 */
 		ValueNode leftClone = (leftOperand instanceof ColumnReference) ? leftOperand.getClone() : leftOperand;
         leftBCO = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_NOT_EQUALS,
                 leftClone,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 rightOperandList.elementAt(0),
                 false,
                 getContextManager());
@@ -448,9 +474,13 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 			/* leftO <> rightOList.elementAt(elemsDone) */
 			leftClone = (leftOperand instanceof ColumnReference) ? leftOperand.getClone() : leftOperand;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             rightBCO = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     BinaryRelationalOperatorNode.K_NOT_EQUALS,
                     leftClone,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     rightOperandList.elementAt(elemsDone),
                     false,
                     getContextManager());
@@ -480,6 +510,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
     boolean selfReference(ColumnReference cr)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ValueNode vn : rightOperandList)
 		{
             if (vn.getTablesReferenced().get(cr.getTableNumber())) {
@@ -592,6 +623,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		MethodBuilder cb = acb.getConstructor();
 		cb.pushNewArray(ClassName.DataValueDescriptor, listSize);
 		cb.setField(arrayField);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		/* Set the array elements that are constant */
 		int numConstants = 0;
@@ -637,6 +669,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			}
 
 			setArrayMethod.getField(arrayField); // first arg
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             rightOperandList.elementAt(index).generateExpression(acb, setArrayMethod);
 			setArrayMethod.upCast(ClassName.DataValueDescriptor); // second arg
 			setArrayMethod.setArrayElement(index);
@@ -723,6 +756,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 							  ((i == 0) ? 4 : 3);
 			for (int j = 0; j < numVals; j++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ValueNode vn = rightOperandList.elementAt(currentOpnd++);
 				vn.generateExpression(acb, mb);
 				mb.upCast(ClassName.DataValueDescriptor);
@@ -749,6 +783,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 			/* decide to get min or max value
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             String methodNam;
 			if ((isAsc && isStartKey) || (! isAsc && ! isStartKey))
                 methodNam = "minValue";

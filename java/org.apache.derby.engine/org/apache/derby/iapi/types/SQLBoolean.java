@@ -162,6 +162,7 @@ public final class SQLBoolean
 		if (isNull())
 			return null;
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			return value;
 	}
 
@@ -274,6 +275,7 @@ public final class SQLBoolean
 		{
 			if (!thisNull)		// otherNull must be true
 				return -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
 			if (!otherNull)		// thisNull must be true
 				return 1;
 			return 0;
@@ -501,6 +503,7 @@ public final class SQLBoolean
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             value = BigDecimal.ZERO.compareTo(bigDecimal) != 0;
 			isnull = false;
 		}
@@ -537,6 +540,7 @@ public final class SQLBoolean
 			if (cleanedValue.equals("TRUE"))
 			{
 				value = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4658
                 isnull = false;
 			}
 			else if (cleanedValue.equals("FALSE"))
@@ -560,12 +564,14 @@ public final class SQLBoolean
 	/**
 	 * @see DataValueDescriptor#setValue
 	 */	
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	void setObject(Object theValue)
 	{
 		setValue((Boolean) theValue);
 	}
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4684
         if ( theValue instanceof SQLChar ) { setValue( theValue.getString() ); }
 		else if ( theValue instanceof SQLBoolean ){ setValue(theValue.getBoolean()); }
         else
@@ -873,6 +879,7 @@ public final class SQLBoolean
 	}
 
     public BooleanDataValue throwExceptionIfImmediateAndFalse(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                     String sqlState,
                                     String tableName,
                                     String constraintName,
@@ -885,6 +892,7 @@ public final class SQLBoolean
             final UUID constrId = (UUID)ps.getSavedObject(savedUUIDIdx);
             final LanguageConnectionContext lcc =
                 a.getLanguageConnectionContext();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final boolean isDeferred = lcc.isEffectivelyDeferred(
                    lcc.getCurrentSQLSessionContext(a), constrId);
 
@@ -1045,6 +1053,7 @@ public final class SQLBoolean
 	 */
 	public BooleanDataValue getImmutable()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-742
 		if (isNull())
 			return SQLBoolean.UNKNOWN;
 		

@@ -47,6 +47,7 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
  * it should be done based on whether the resultset has dependent resultsets or not.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 class DeleteCascadeResultSet extends DeleteResultSet
 {
 
@@ -77,6 +78,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			  (ConstantAction)activation.getPreparedStatement().getSavedObject(constantActionItem)),
 			  activation);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ConstantAction passedInConstantAction;
 		if(constantActionItem == -1)
 			passedInConstantAction = activation.getConstantAction(); //root table
@@ -114,6 +117,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			{
 				setRowHoldersTypeToUniqueStream();
 				//collect until there are no more rows to found
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 while(collectAffectedRows(false)) {};
 			}else
 			{
@@ -126,6 +130,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 								SQLState.LANG_NO_ROW_FOUND));
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             runFkChecker(true); // check for only RESTRICT referential
                                       // action rule violations
             HashMap<String,String> mntHashTable =
@@ -168,6 +173,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 		super.setup();
 		activation.setParentResultSet(rowHolder, resultSetId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Vector<TemporaryRowHolder> sVector =
                 activation.getParentResultSet(resultSetId);
 		tempRowHolderId = sVector.size() -1;
@@ -210,6 +216,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 		return rowsFound;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
     void fireBeforeTriggers(HashMap<String, String> msht)
             throws StandardException
 	{
@@ -294,6 +301,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 	
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
     void runFkChecker(boolean restrictCheckOnly)
             throws StandardException
 	{
@@ -304,6 +312,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			if(dependentResultSets[i] instanceof UpdateResultSet)
 			{
                 ((UpdateResultSet) dependentResultSets[i]).runChecker(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                     restrictCheckOnly);
 			}
 			else{
@@ -360,6 +369,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	//if there is more than one node for the same table, copy the rows
 	// into one node , so that we don't fire trigger more than once.
     private void mergeRowHolders(HashMap<String, String> msht)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
             throws StandardException
 	{
 		if(msht.containsKey(resultSetId) || rowCount ==0)
@@ -393,6 +403,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
     @SuppressWarnings("UseOfObsoleteCollectionType")
 	private void mergeResultSets() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Vector<TemporaryRowHolder>
                 sVector = activation.getParentResultSet(resultSetId);
         int size = sVector.size();
@@ -411,6 +422,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 					rowHolderId++;
 					continue;
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 TemporaryRowHolder
                         currentRowHolder = sVector.elementAt(rowHolderId);
 				CursorResultSet rs = currentRowHolder.getResultSet();
@@ -444,6 +456,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
     @SuppressWarnings("UseOfObsoleteCollectionType")
 	private boolean isMultipleDeletePathsExist()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Enumeration<String> e = activation.getParentResultSetKeys() ;
              e.hasMoreElements() ;)
 		{
@@ -469,6 +482,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
     @SuppressWarnings("UseOfObsoleteCollectionType")
 	private void setRowHoldersTypeToUniqueStream()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Enumeration<String> e = activation.getParentResultSetKeys() ;
              e.hasMoreElements() ;)
 		{

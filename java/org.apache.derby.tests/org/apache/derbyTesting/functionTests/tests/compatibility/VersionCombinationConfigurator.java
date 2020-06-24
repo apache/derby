@@ -72,6 +72,7 @@ public class VersionCombinationConfigurator {
 
     private static final String EMB_DRIVER =
                                     "org.apache.derby.jdbc.EmbeddedDriver";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6126
 
     /** Name of the configuration, only used for informational purposes. */
     private final String name;
@@ -179,6 +180,7 @@ public class VersionCombinationConfigurator {
                 continue;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite clientSuites = new BaseTestSuite(
                     "Client runs against server " + serverVersion.toString());
             for (DerbyDistribution client : dists) {
@@ -287,6 +289,7 @@ public class VersionCombinationConfigurator {
      *      classes directory
      */
     private DerbyDistribution getRunningDistribution() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6126
         File libDir;
         try {
             libDir = getJarDirectoryOf(Class.forName(EMB_DRIVER));
@@ -301,6 +304,7 @@ public class VersionCombinationConfigurator {
                 sysinfo.getVersionString());
         DerbyDistribution dist = DerbyDistribution.newInstance(
                                                 version, libDir, testingDir);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5897
         if (dist == null) {
             throw new IllegalStateException(
                     "failed to get running distribution (programming error?)");
@@ -315,6 +319,7 @@ public class VersionCombinationConfigurator {
      * @throws IllegalStateException if the class isn't loaded from a JAR
      */
     private File getJarDirectoryOf(Class clazz) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6126
         File jarPath = new File(getClassURI(clazz));
         if (jarPath.isDirectory()) {
             throw new IllegalStateException("only running off jars is " +
@@ -364,6 +369,7 @@ public class VersionCombinationConfigurator {
      *      be obtained.
      */
     static URI getClassURI(final Class cl) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5897
         return AccessController.doPrivileged(new PrivilegedAction<URI>() {
             public URI run() {
                 CodeSource cs = cl.getProtectionDomain().getCodeSource();

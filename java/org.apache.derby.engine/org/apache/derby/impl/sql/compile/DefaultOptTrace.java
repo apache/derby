@@ -64,6 +64,8 @@ public  class   DefaultOptTrace implements  OptTrace
     /** Make a DefaultOptTrace */
     public  DefaultOptTrace()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         _buffer = new StringBuilder();
     }
 
@@ -202,6 +204,7 @@ public  class   DefaultOptTrace implements  OptTrace
     }
 
     public  void    traceRememberingBestJoinOrder
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap )
     {
         appendTraceString
@@ -501,6 +504,8 @@ public  class   DefaultOptTrace implements  OptTrace
          JBitSet    assignedTableMap
          )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         StringBuilder joinOrderString = new StringBuilder();
         joinOrderString.append(prefix);
 
@@ -564,6 +569,8 @@ public  class   DefaultOptTrace implements  OptTrace
     /** Append a string to the optimizer trace */
     private void    appendTraceString( String traceString )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         _buffer.append( traceString );
         _buffer.append( "\n" );
     }

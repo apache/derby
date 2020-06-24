@@ -21,15 +21,19 @@
 package org.apache.derby.jdbc;
 
 /** 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    <P>
    This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
    separate data sources for Java 5 and Java 6.
    Now that we no longer support Java 5, all functionality has migrated into the superclass, EmbeddedConnectionPoolDataSource.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    This class is preserved for backward compatibility reasons.
    </P>
    @deprecated Use {@link EmbeddedConnectionPoolDataSource} instead.
  */
 public class EmbeddedConnectionPoolDataSource40 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
     extends EmbeddedConnectionPoolDataSource
     implements javax.sql.ConnectionPoolDataSource // compile-time check for
                                                   // 4.1 extension

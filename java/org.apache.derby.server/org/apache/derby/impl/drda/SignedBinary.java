@@ -23,6 +23,7 @@ package org.apache.derby.impl.drda;
 /**
  * Converters from signed binary bytes to Java <code>short</code>, <code>int</code>, or <code>long</code>.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class SignedBinary
 {
   // Hide the default constructor, this is a static class.

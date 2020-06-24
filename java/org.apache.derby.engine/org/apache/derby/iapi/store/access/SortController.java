@@ -44,6 +44,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 public interface SortController
 {
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 	Inform SortController that all the rows have
     been inserted into it. 
 	**/

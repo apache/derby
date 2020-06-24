@@ -108,6 +108,7 @@ public class RIBulkChecker
      */
     public RIBulkChecker
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             Activation                  a,
 			GroupFetchScanController    referencedKeyScan,
 			GroupFetchScanController	foreignKeyScan,
@@ -142,6 +143,7 @@ public class RIBulkChecker
 		currFKRowIndex = -1; 
 		currRefRowIndex = -1; 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.lcc = a.getLanguageConnectionContext();
         this.deferred = deferrable && lcc.isEffectivelyDeferred(
                 lcc.getCurrentSQLSessionContext(a), constraintId);
@@ -210,6 +212,8 @@ public class RIBulkChecker
 						failure(foreignKey);
 						if (quitOnFirstFailure)
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                             return failedCounter;
 						}
 					} while ((foreignKey = getNextFK()) != null);
@@ -226,6 +230,7 @@ public class RIBulkChecker
 				}
 			}	
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 		return failedCounter;
 	}
 
@@ -285,6 +290,7 @@ public class RIBulkChecker
 	private void failure(DataValueDescriptor[] foreignKeyRow)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (deferred) {
             deferredRowsHashTable =
                     DeferredConstraintsMemory.rememberFKViolation(
@@ -310,6 +316,9 @@ public class RIBulkChecker
             failedCounter++;
             if (unreferencedCC != null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                 unreferencedCC.insert(foreignKeyRow);
             }
         }
@@ -364,6 +373,7 @@ public class RIBulkChecker
 
 			result = fkCol.compare(refCol);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6587
 			if (result > 0)
 			{
 				return GREATER_THAN;

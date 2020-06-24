@@ -110,6 +110,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         {
             // sleepy...
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
                 long    sleepTime = secondsToSleep * MILLIS_PER_SECOND;
                 printText( "SluggishAuthenticator going to sleep for " + sleepTime + " milliseconds." );
                 Thread.sleep( secondsToSleep * MILLIS_PER_SECOND );
@@ -212,6 +213,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite  suite = new BaseTestSuite();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Test embedded = new BaseTestSuite(
             LoginTimeoutTest.class, "embedded LoginTimeoutTest" );
@@ -220,6 +222,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         embedded = new SystemPropertyTestSetup( embedded, systemProperties() );
         suite.addTest( embedded );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6272
         if (Derby.hasServer() && Derby.hasClient()) {
             Test clientServer = new BaseTestSuite(
                     LoginTimeoutTest.class, "client/server LoginTimeoutTest");
@@ -273,9 +276,11 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
     public  void    testBasic() throws Exception
     {
         SluggishAuthenticator.debugPrinting = TestConfiguration.getCurrent().isVerbose();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
 
         // make sure the database is created in order to eliminate asymmetries
         // in running the tests
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         Connection  conn = openDefaultConnection( RUTH, RUTH_PASSWORD );
         conn.close();
         
@@ -289,6 +294,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
     }
     private void    vetConnector( Connector connector, boolean shouldSucceed ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         try {
             // sometimes this succeeds when we expect not, see DERBY-6250,
             // give more time to the slug sleep
@@ -323,6 +329,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         try {
             Connection  conn = connector.getConnection( RUTH, RUTH_PASSWORD );
             println( "    Got a " + conn.getClass().getName() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
             conn.close();
             if ( !shouldSucceed )   
             {
@@ -351,6 +358,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
     private void    vetExceptionPassthrough() throws Exception
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
             println( "Verifying that exceptions are not swallowed by the embedded login timer." );
             // set a long timeout which we won't exceed
             DriverManager.setLoginTimeout( LONG_TIMEOUT );
@@ -359,6 +367,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
             SluggishAuthenticator.returnValue = false;
 
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
                 Connection conn = openDefaultConnection( RUTH, RUTH_PASSWORD );
                 conn.close();
                 fail( "Didn't expect to get a connection!" );
@@ -393,11 +402,13 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         Connector   connector = new DriverManagerConnector( this );
 
         vetServerTimeout( controlConnection, connector, 1, FAIL );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         vetServerTimeout( controlConnection, connector, LONG_TIMEOUT, SUCCEED );
         vetServerTimeout( controlConnection, connector, 0, SUCCEED );
 
         // reset server timeout to default
         setServerTimeout( controlConnection, 0 );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         controlConnection.close();
     }
     private void    vetServerTimeout

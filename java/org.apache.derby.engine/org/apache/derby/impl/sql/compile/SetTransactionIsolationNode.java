@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SetTransactionIsolationNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -35,6 +36,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class SetTransactionIsolationNode extends TransactionStatementNode
 {
 	private int		isolationLevel;
@@ -71,6 +74,8 @@ class SetTransactionIsolationNode extends TransactionStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "SET TRANSACTION ISOLATION";

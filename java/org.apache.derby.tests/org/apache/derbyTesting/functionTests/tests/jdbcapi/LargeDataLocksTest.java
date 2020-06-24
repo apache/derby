@@ -132,6 +132,10 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         String value = rs.getString(1);
         assertEquals(38000, value.length());
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4825
+//IC see: https://issues.apache.org/jira/browse/DERBY-4825
+//IC see: https://issues.apache.org/jira/browse/DERBY-4825
+//IC see: https://issues.apache.org/jira/browse/DERBY-4825
         assertLockCount(0);
         commit();
     }
@@ -152,6 +156,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         // First wait for post-commit work to complete so that we don't count
         // locks held by the background worker thread.
         stmt.execute("call wait_for_post_commit()");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4825
 
         ResultSet rs = stmt.executeQuery("select * from syscs_diag.lock_table");
         ResultSetMetaData meta = rs.getMetaData();
@@ -180,6 +185,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
 
     public static Test baseSuite(String name) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(LargeDataLocksTest.class);
 
@@ -204,6 +210,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
 
                 ps.setCharacterStream(1, new java.io.StringReader(Utilities
                         .repeatChar("a", 38000)), 38000);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3780
                 try {
                     ps.setBytes(2, Utilities.repeatChar("a", 38000).getBytes("US-ASCII"));
                 } catch (UnsupportedEncodingException ue) {
@@ -217,6 +224,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
                 // Create a procedure for use by assertLockCount() to ensure
                 // that the background worker thread has completed all the
                 // post-commit work.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4825
                 s.execute("CREATE PROCEDURE WAIT_FOR_POST_COMMIT() "
                         + "LANGUAGE JAVA EXTERNAL NAME "
                         + "'org.apache.derbyTesting.functionTests.util."
@@ -229,6 +237,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("LargeDataLocksTest");
         suite.addTest(baseSuite("LargeDataLocksTest:embedded"));
         // Disable for client until DERBY-2892 is fixed

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SubqueryList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -31,6 +32,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 {
     SubqueryList(ContextManager cm) {
@@ -44,6 +46,8 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 	 *
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addSubqueryNode(SubqueryNode subqueryNode) throws StandardException
 	{
 		addElement(subqueryNode);
@@ -59,9 +63,12 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void optimize(DataDictionary dataDictionary, double outerRows)
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (SubqueryNode sqn : this)
 		{
             sqn.optimize(dataDictionary, outerRows);
@@ -75,9 +82,12 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void modifyAccessPaths()
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (SubqueryNode sqn : this)
 		{
             sqn.modifyAccessPaths();
@@ -97,6 +107,7 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
     boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (SubqueryNode sqn : this)
 		{
             if (sqn.isMaterializable())
@@ -142,9 +153,12 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setPointOfAttachment(int pointOfAttachment)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (SubqueryNode sqn : this)
 		{
             sqn.setPointOfAttachment(pointOfAttachment);
@@ -160,6 +174,7 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 	 */
 	void decrementLevel(int decrement)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (SubqueryNode sqn : this)
 		{
             sqn.getResultSet().decrementLevel(decrement);
@@ -172,6 +187,8 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
      * so we can avoid flattening later.
 	 * 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markHavingSubqueries() {
         for (SubqueryNode sqn : this)
 	    {
@@ -183,7 +200,10 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 	 * Mark all of the subqueries in this list as being part of a where clause
 	 * so we can avoid flattening later if needed.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markWhereSubqueries() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (SubqueryNode sqn : this)
 		{
             sqn.setWhereSubquery(true);

@@ -116,7 +116,9 @@ public class StatementTablePermission extends StatementPermission
 	{
 		ExecPreparedStatement ps = activation.getPreparedStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         if (!hasPermissionOnTable(lcc, activation, forGrant, ps)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
 		    DataDictionary dd = lcc.getDataDictionary();
 			TableDescriptor td = getTableDescriptor( dd);
             throw StandardException.newException(
@@ -149,13 +151,17 @@ public class StatementTablePermission extends StatementPermission
 	 *        privileges
 	 */
 	protected boolean hasPermissionOnTable(LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 										   Activation activation,
 										   boolean forGrant,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 										   ExecPreparedStatement ps)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		DataDictionary dd = lcc.getDataDictionary();
         String currentUserId = lcc.getCurrentUserId(activation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 		boolean result =
 			oneAuthHasPermissionOnTable(dd,
@@ -178,6 +184,7 @@ public class StatementTablePermission extends StatementPermission
 				String dbo = dd.getAuthorizationDatabaseOwner();
 				RoleGrantDescriptor rd = dd.getRoleGrantDescriptor
                     (role, currentUserId, dbo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 				if (rd == null) {
 					rd = dd.getRoleGrantDescriptor(
@@ -219,6 +226,7 @@ public class StatementTablePermission extends StatementPermission
 						// another role has been set), we are able to
 						// invalidate the ps or activation (the latter is used
 						// if the current role changes).
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 						DependencyManager dm = dd.getDependencyManager();
 						RoleGrantDescriptor rgd =
 							dd.getRoleDefinitionDescriptor(role);
@@ -272,6 +280,7 @@ public class StatementTablePermission extends StatementPermission
 	 * @see StatementPermission#getPermissionDescriptor
 	 */
 	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 	throws StandardException
 	{
 		//if the required type of privilege exists for the given authorizer,
@@ -292,6 +301,7 @@ public class StatementTablePermission extends StatementPermission
 		{
 		case Authorizer.SELECT_PRIV:
 		case Authorizer.MIN_SELECT_PRIV:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1824
 			return "SELECT";
 		case Authorizer.UPDATE_PRIV:
 			return "UPDATE";
@@ -309,6 +319,7 @@ public class StatementTablePermission extends StatementPermission
 
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		return "StatementTablePermission: " + getPrivName() + " " + tableUUID;
 	}
 }

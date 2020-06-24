@@ -61,6 +61,7 @@ public class StorelessDatabase extends BasicDatabase {
 	
 	protected	UUID	makeDatabaseID(boolean create, Properties startParams)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		return getMonitor().getUUIDFactory().createUUID();
 	}
 	
@@ -87,6 +88,7 @@ public class StorelessDatabase extends BasicDatabase {
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

@@ -95,6 +95,7 @@ import java.security.PrivilegedAction;
  * </ol>
  */
 public class TriggerDescriptor extends UniqueSQLObjectDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	implements Provider, Dependent, Formatable 
 {
 	// field that we want users to be able to know about
@@ -162,6 +163,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
      * @param whenClauseText the SQL text of the WHEN clause, or {@code null}
      *                       if there is no WHEN clause
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6186
     TriggerDescriptor
 	(
 		DataDictionary		dataDictionary,
@@ -198,6 +200,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		this.whenSPSId = whenSPSId;
 		this.isEnabled = isEnabled;
 		this.referencedCols = referencedCols;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		setReferencedColsInTriggerAction( referencedColsInTriggerAction );
 		this.creationTimestamp = DataTypeUtilities.clone( creationTimestamp );
 		this.triggerDefinition = triggerDefinition;
@@ -285,6 +288,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public Timestamp getCreationTimestamp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return DataTypeUtilities.clone( creationTimestamp );
 	}
 
@@ -404,6 +408,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
                                  : pa.parseStatement(originalSQL);
 			lcc.popCompilerContext(newCC);
             int[] cols;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
             cols = dd.examineTriggerNodeAndCols(stmtnode,
 					oldReferencingName,
 					newReferencingName,
@@ -411,6 +416,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 					referencedCols,
 					referencedColsInTriggerAction,
                     0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6726
 					getTableDescriptor(),
 					-1,
                     false,
@@ -423,9 +429,11 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 					referencedCols,
 					referencedColsInTriggerAction,
 					0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6726
 					getTableDescriptor(),
 					-1,
                     false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6783
                     null,
                     cols);
 
@@ -525,12 +533,14 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public int[] getReferencedCols()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return ArrayUtil.copy( referencedCols );
 	}
 
     /** Update the array of referenced columns */
     public  void    setReferencedCols( int[] newCols )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
         referencedCols = ArrayUtil.copy( newCols );
     }
 
@@ -541,6 +551,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public int[] getReferencedColsInTriggerAction()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
         return ArrayUtil.copy( referencedColsInTriggerAction );
 	}
 
@@ -811,6 +822,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		    case DependencyManager.DROP_SPS:
             case DependencyManager.DROP_VIEW:
 		    case DependencyManager.RENAME:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1643
 		    case DependencyManager.REVOKE_PRIVILEGE_RESTRICT:
             case DependencyManager.DROP_METHOD_ALIAS:
 				DependencyManager dm = getDataDictionary().getDependencyManager();
@@ -861,6 +873,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 			// make the TriggerDescriptor drop itself. 
 			// Ditto for revoking a role conferring a privilege.
 			case DependencyManager.REVOKE_PRIVILEGE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 			case DependencyManager.REVOKE_ROLE:
                 drop(lcc);
 
@@ -972,6 +985,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
  		if (dd == null)
  		{
   			LanguageConnectionContext lcc = (LanguageConnectionContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				getContext(LanguageConnectionContext.CONTEXT_ID);
   			dd = lcc.getDataDictionary();
 			setDataDictionary(dd);
@@ -1063,6 +1077,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

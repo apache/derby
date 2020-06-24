@@ -133,11 +133,13 @@ public class SlaveController
 
         String port = properties.getProperty(Attribute.REPLICATION_SLAVE_PORT);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
         try {
             //if slavePort is -1 the default port
             //value will be used.
             int slavePort = -1;
             if (port != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 slavePort = Integer.parseInt(port);
             }
             slaveAddr = new SlaveAddress(
@@ -150,6 +152,7 @@ public class SlaveController
         }
 
         dbname = properties.getProperty(SlaveFactory.SLAVE_DB);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
         repLogger = new ReplicationLogger(dbname);
     }
 
@@ -234,6 +237,7 @@ public class SlaveController
         // Retry to setup a connection with the master until a
         // connection has been established or until we are no longer
         // in replication slave mode
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
         receiver = new ReplicationMessageReceive(slaveAddr, dbname);
         while (!setupConnection()) {
             if (!inReplicationSlaveMode) {
@@ -252,6 +256,8 @@ public class SlaveController
 
         startLogReceiverThread();
         startupSuccessful = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3361
+//IC see: https://issues.apache.org/jira/browse/DERBY-3356
 
         Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_STARTED, dbname);
     }
@@ -260,6 +266,7 @@ public class SlaveController
      * Will perform all work that is needed to stop replication
      */
     private void stopSlave() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3254
         inReplicationSlaveMode = false;
         teardownNetwork();
 
@@ -273,6 +280,7 @@ public class SlaveController
      */
     public void stopSlave(boolean forcedStop) 
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         if (!forcedStop && isConnectedToMaster()){
             throw StandardException.newException(
                     SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED);
@@ -281,6 +289,7 @@ public class SlaveController
     }
 
     public void failover() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         if (isConnectedToMaster()){
             throw StandardException.newException(
                 SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED);
@@ -307,6 +316,8 @@ public class SlaveController
      * @see SlaveFactory#isStarted
      */
     public boolean isStarted() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3361
+//IC see: https://issues.apache.org/jira/browse/DERBY-3356
         return startupSuccessful;
     }
 
@@ -327,6 +338,8 @@ public class SlaveController
      */
     private boolean setupConnection() throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
         try {
             // highestLogInstant is -1 until the first log chunk has
             // been received from the master. If a log chunk has been
@@ -349,12 +362,15 @@ public class SlaveController
             return true; // will not reach this if timeout
         } catch (StandardException se) {
             throw se;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4910
+//IC see: https://issues.apache.org/jira/browse/DERBY-4812
         } catch (SocketTimeoutException ste) {
             // Got a timeout. Return normally and let the caller retry.
             return false;
         } catch (Exception e) {
             throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
                     dbname, getHostName(), String.valueOf(getPortNumber()));
         }
     }
@@ -375,6 +391,7 @@ public class SlaveController
         }
 
         repLogger.logError(MessageId.REPLICATION_SLAVE_LOST_CONN, e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
 
         try {
             while (!setupConnection()) {
@@ -398,6 +415,7 @@ public class SlaveController
      * @return true if the network connection is working, false otherwise
      */
     private boolean isConnectedToMaster() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         if (receiver == null) {
             return false;
         } else {
@@ -412,6 +430,7 @@ public class SlaveController
      */
     private void startLogReceiverThread() {
         logReceiverThread = new SlaveLogReceiverThread();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3447
         logReceiverThread.setDaemon(true);
         logReceiverThread.start();
     }
@@ -447,6 +466,7 @@ public class SlaveController
         }
 
         repLogger.logError(MessageId.REPLICATION_FATAL_ERROR, e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
 
         // todo: notify master of the problem
         try {
@@ -459,11 +479,14 @@ public class SlaveController
     private void teardownNetwork() {
         try {
             // Unplug the replication network connection layer
+//IC see: https://issues.apache.org/jira/browse/DERBY-3361
+//IC see: https://issues.apache.org/jira/browse/DERBY-3356
             if (receiver != null) {
                 receiver.tearDown();
                 receiver = null;
             }
         } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
             repLogger.logError(null, ioe);
         }
     }
@@ -474,6 +497,7 @@ public class SlaveController
      * @return a String containing the host name of the slave.
      */
     private String getHostName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
         return slaveAddr.getHostAddress().getHostName();
     }
     
@@ -500,6 +524,7 @@ public class SlaveController
          * Creates a new instance of <tt>SlaveLogReceiverThread</tt>
          * with a debugging-friendly thread name.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3437
         SlaveLogReceiverThread() {
             super("derby.slave.logger-" + dbname);
         }
@@ -515,6 +540,7 @@ public class SlaveController
                         byte[] logChunk = (byte[])message.getMessage();
                         handleLogChunk(logChunk);
                         break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3254
                     case ReplicationMessage.TYPE_FAILOVER:
                         doFailover();
                         ReplicationMessage ack = new ReplicationMessage
@@ -522,6 +548,7 @@ public class SlaveController
                         receiver.sendMessage(ack);
                         teardownNetwork();
                         break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3235
                     case ReplicationMessage.TYPE_STOP:
                         stopSlave();
                         break;
@@ -585,6 +612,7 @@ public class SlaveController
                         throw StandardException.newException
                             (SQLState.REPLICATION_LOG_OUT_OF_SYNCH,
                              dbname,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                              LogCounter.getLogFileNumber(logScan.getInstant()),
                              LogCounter.getLogFilePosition(logScan.getInstant()),
                              LogCounter.getLogFileNumber(localInstant),

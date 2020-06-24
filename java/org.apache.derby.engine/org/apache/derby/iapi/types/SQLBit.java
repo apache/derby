@@ -97,6 +97,7 @@ public class SQLBit
 									  boolean isNullable)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			setValue(resultSet.getBytes(colNumber));
 	}
 
@@ -113,6 +114,7 @@ public class SQLBit
 	/**
 	 * Set the value from an non-null object.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 	final void setObject(Object theValue)
 		throws StandardException
 	{
@@ -182,6 +184,7 @@ public class SQLBit
 		*/
 		if (getValue() == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			return;
 		}
 

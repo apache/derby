@@ -461,6 +461,7 @@ public class RollingFileStream extends OutputStream {
         Boolean value = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 
             public Boolean run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 return file.exists();
             }
 
@@ -495,6 +496,7 @@ public class RollingFileStream extends OutputStream {
         Boolean value = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 
             public Boolean run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 return file1.renameTo(file2);
             }
         });
@@ -512,6 +514,7 @@ public class RollingFileStream extends OutputStream {
         Long value = AccessController.doPrivileged(new PrivilegedAction<Long>() {
 
             public Long run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 return file.length();
             }
         });

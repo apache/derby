@@ -31,6 +31,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
  * Simple subclass of nested loop left outer join, differentiated
  * to ease RunTimeStatistics output generation.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
 {
     HashLeftOuterJoinResultSet(
@@ -47,6 +48,7 @@ class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
 					    boolean notExistsRightSide,
  					    double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 						String userSuppliedOptimizerOverrides)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,

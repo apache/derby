@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.RelationalOperator
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -35,6 +36,8 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  */
 interface RelationalOperator
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final int EQUALS_RELOP = 1;
     final int NOT_EQUALS_RELOP = 2;
     final int GREATER_THAN_RELOP = 3;
@@ -338,6 +341,8 @@ interface RelationalOperator
 	 */
     boolean compareWithKnownConstant(
         Optimizable optTable, boolean considerParameters);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 	/**
 	 * Return an Object representing the known value that this relational
@@ -345,6 +350,8 @@ interface RelationalOperator
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DataValueDescriptor getCompareValue(Optimizable optTable)
 					throws StandardException;
 
@@ -365,6 +372,8 @@ interface RelationalOperator
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException;
 }

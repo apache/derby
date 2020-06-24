@@ -54,6 +54,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public final class InvalidatePageOperation extends PhysicalPageOperation
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     InvalidatePageOperation(BasePage page)
 	{
 		super(page);

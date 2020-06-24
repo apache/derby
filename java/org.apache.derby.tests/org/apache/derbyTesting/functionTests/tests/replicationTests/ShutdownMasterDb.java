@@ -44,6 +44,7 @@ public class ShutdownMasterDb extends ShutdownMaster
         
         setEnv();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ShutdownMasterDb");
         suite.addTest(ShutdownMasterDb.suite(masterServerHost,masterServerPort)); // (masterHostName, masterPortNo));
         return (Test)suite;

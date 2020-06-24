@@ -51,6 +51,7 @@ public class DiskLayoutTaglet implements Taglet
 
     @Override
     public Set<Taglet.Location> getAllowedLocations() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
         return allowedSet;
      }
 
@@ -69,6 +70,7 @@ public class DiskLayoutTaglet implements Taglet
      */
     public String toString(DocTree tag) {
         return "<tr><td>" + ROWNAME + "</td>"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
           + "<td>" + getText(tag) + "</td></tr></table>\n";
     }
 

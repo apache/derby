@@ -59,6 +59,7 @@ public class ContainedRoles extends VTITemplate {
     RoleClosureIterator rci;
     String nextRole;
     boolean initialized;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3930
     String role;
     boolean inverse;
 
@@ -108,6 +109,7 @@ public class ContainedRoles extends VTITemplate {
             if (!initialized) {
                 initialized = true;
                 LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3930
                 DataDictionary dd = lcc.getDataDictionary();
                 RoleGrantDescriptor rdDef =
                     dd.getRoleDefinitionDescriptor(role);
@@ -120,6 +122,7 @@ public class ContainedRoles extends VTITemplate {
                             rci = dd.createRoleClosureIterator
                                 (lcc.getLastActivation().
                                      getTransactionController(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3930
                                  role, !inverse);
                         } finally {
                             dd.doneReading(mode, lcc);
@@ -172,5 +175,7 @@ public class ContainedRoles extends VTITemplate {
 
     private static final ResultSetMetaData metadata =
         new EmbedResultSetMetaData(columnInfo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3930
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
 }

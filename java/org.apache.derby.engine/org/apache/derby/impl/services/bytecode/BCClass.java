@@ -348,6 +348,7 @@ class BCClass extends GClass {
 	 * @param limit
 	 * @param value
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 	void addLimitExceeded(BCMethod mb, String limitName, int limit, int value)
 	{
 		StringBuffer sb = new StringBuffer();

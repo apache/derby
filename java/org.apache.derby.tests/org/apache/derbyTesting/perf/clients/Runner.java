@@ -59,6 +59,7 @@ public class Runner {
     private static String load; // required argument
     /** Map containing load-specific options. */
     private final static HashMap<String, String> loadOpts =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             new HashMap<String, String>();
     /** The name of the load generator to use in the test. */
     private static String generator = "b2b";
@@ -88,6 +89,7 @@ public class Runner {
             System.exit(1);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(driver);
         clazz.getConstructor().newInstance();
 
@@ -143,6 +145,7 @@ public class Runner {
             } else if (args[i].equals("-load")) {
                 load = args[++i];
             } else if (args[i].equals("-load_opts")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
                 parseLoadOpts(args[++i]);
             } else if (args[i].equals("-gen")) {
                 generator = args[++i];
@@ -172,6 +175,7 @@ public class Runner {
      * @param optsString the comma-separated list of options
      */
     private static void parseLoadOpts(String optsString) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         String[] opts = optsString.split(",");
         for (int i = 0; i < opts.length; i++) {
             String[] keyValue = opts[i].split("=", 2);
@@ -217,6 +221,7 @@ public class Runner {
 "  -init: initialize database (otherwise, reuse database)\n" +
 "  -load: type of load, required argument, valid types:\n" +
 "      * sr_select - single-record (primary key) select from table with\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
 "                    100 000 rows. It accepts the following load-specific\n" +
 "                    options (see also -load_opts):\n" +
 "            - blob or clob: use BLOB or CLOB data instead of VARCHAR\n" +
@@ -236,7 +241,9 @@ public class Runner {
 "      * sr_update_multi - single-record update on a random table\n" +
 "                    (32 tables with a single row each)\n" +
 "      * index_join - join of two tables (using indexed columns)\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
 "      * group_by - GROUP BY queries against TENKTUP1\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
 "      * bank_tx - emulate simple bank transactions, similar to TPC-B. The\n" +
 "                  following load-specific options are accepted:\n" +
 "            - branches=NN: specifies the number of branches in the db\n" +
@@ -245,15 +252,20 @@ public class Runner {
 "              in the database has (default: 10)\n" +
 "            - accountsPerBranch=NN: specifies the number of accounts in\n" +
 "              each branch (default: 100000)\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
 "      * seq_gen - sequence generator concurrency. Accepts\n" +
 "                    the following load-specific options (see also -load_opts):\n" +
 "            - numberOfGenerators: number of sequences to create\n" +
 "            - tablesPerGenerator: number of tables to create per sequence\n" +
 "            - insertsPerTransaction: number of inserts to perform per transaction\n" +
 "            - debugging: 1 means print debug chatter, 0 means do not print the chatter\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
+//IC see: https://issues.apache.org/jira/browse/DERBY-5426
+//IC see: https://issues.apache.org/jira/browse/DERBY-4526
 "            - identityTest: 1 means do identity column testing, any other number \n" +
 "                    means do sequence generator testing. If no identityTest is specified \n" +
 "                    then sequence generator testing will be done by default \n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
 "  -load_opts: comma-separated list of load-specific options\n" +
 "  -gen: load generator, default: b2b, valid types:\n" +
 "      * b2b - clients perform operations back-to-back\n" +
@@ -280,6 +292,7 @@ public class Runner {
     private static int getTextType() {
         boolean blob = hasOption("blob");
         boolean clob = hasOption("clob");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         if (blob && clob) {
             System.err.println("Cannot specify both 'blob' and 'clob'");
             printUsage(System.err);
@@ -303,6 +316,7 @@ public class Runner {
     private static DBFiller getDBFiller() {
         if (load.equals("sr_select") || load.equals("sr_update")) {
             return new SingleRecordFiller(100000, 1, getTextType(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
                                           hasOption("secondary"),
                                           hasOption("nonIndexed"));
         } else if (load.equals("sr_select_big") ||
@@ -313,13 +327,16 @@ public class Runner {
             return new SingleRecordFiller(1, 32);
         } else if (load.equals("index_join")) {
             return new WisconsinFiller();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
         } else if (load.equals("group_by")) {
             return new WisconsinFiller(getLoadOpt("numRows", 10000));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         } else if (load.equals("bank_tx")) {
             return new BankAccountFiller(
                 getLoadOpt("branches", 1),
                 getLoadOpt("tellersPerBranch", 10),
                 getLoadOpt("accountsPerBranch", 100000));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
         } else if (load.equals("seq_gen")) {
             return new SequenceGeneratorConcurrency.Filler();
         }
@@ -337,6 +354,7 @@ public class Runner {
     private static Client newClient() {
         if (load.equals("sr_select")) {
             return new SingleRecordSelectClient(100000, 1, getTextType(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
                     hasOption("secondary"), hasOption("nonIndexed"));
         } else if (load.equals("sr_update")) {
             return new SingleRecordUpdateClient(100000, 1, getTextType(),
@@ -351,13 +369,16 @@ public class Runner {
             return new SingleRecordUpdateClient(1, 32);
         } else if (load.equals("index_join")) {
             return new IndexJoinClient();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4363
         } else if (load.equals("group_by")) {
             return new GroupByClient();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         } else if (load.equals("bank_tx")) {
             return new BankTransactionClient(
                 getLoadOpt("branches", 1),
                 getLoadOpt("tellersPerBranch", 10),
                 getLoadOpt("accountsPerBranch", 100000));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
         } else if (load.equals("seq_gen")) {
             return new SequenceGeneratorConcurrency.SGClient();
         }

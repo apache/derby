@@ -61,6 +61,7 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
 public class LogicalPreparedStatement
     extends LogicalStatementEntity
     implements PreparedStatement {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /**
      * Creates a new logical prepared statement.
@@ -72,6 +73,8 @@ public class LogicalPreparedStatement
      */
     public LogicalPreparedStatement(PreparedStatement physicalPs,
                                     StatementKey stmtKey,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
                                     StatementCacheInteractor cacheInteractor) {
         super(physicalPs, stmtKey, cacheInteractor);
     }
@@ -397,6 +400,7 @@ public class LogicalPreparedStatement
     ////////////////////////////////////////////////////////////////
 
     public void setRowId(int arg0, RowId arg1)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             throws SQLException {
          getPhysPs().setRowId(arg0, arg1);
     }
@@ -515,6 +519,7 @@ public class LogicalPreparedStatement
 
     public  long    executeLargeUpdate() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return ((ClientPreparedStatement) getPhysPs()).executeLargeUpdate();
     }
 

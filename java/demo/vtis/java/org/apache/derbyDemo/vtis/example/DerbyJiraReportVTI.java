@@ -65,6 +65,7 @@ public  class   DerbyJiraReportVTI  extends XmlVTI
      */
     public  DerbyJiraReportVTI( InputStream is )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
         super
             (
              is,
@@ -84,6 +85,7 @@ public  class   DerbyJiraReportVTI  extends XmlVTI
     public  static  DerbyJiraReportVTI  apacheNaturalJiraReport( String xmlResourceName )
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6482
         return new DerbyJiraReportVTI( new FileInputStream( xmlResourceName ) );
     }
     
@@ -103,6 +105,7 @@ public  class   DerbyJiraReportVTI  extends XmlVTI
     {
         String  rawValue = super.getString( columnIndex );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         if ( !"key".equals( getColumnName( columnIndex ) ) )
         { return rawValue; }
         else

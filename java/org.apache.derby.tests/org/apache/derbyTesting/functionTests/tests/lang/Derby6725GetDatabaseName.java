@@ -60,6 +60,7 @@ public class Derby6725GetDatabaseName extends BaseJDBCTestCase {
     }
     
     private void checkDbName(Connection conn, String expectedDbName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6725
         File    systemDir = new File( "system" );
         File    dbDir = new File( systemDir, expectedDbName );
         String  databasePath = PrivilegedFileOpsForTests.getAbsolutePath( dbDir );

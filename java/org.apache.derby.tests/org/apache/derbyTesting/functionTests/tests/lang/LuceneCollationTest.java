@@ -142,6 +142,7 @@ public class LuceneCollationTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select * from table ( ruth.poems__poemText( 'star', 1000, null ) ) luceneResults order by poemID",
              new String[][]
              {
@@ -155,6 +156,7 @@ public class LuceneCollationTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select schemaName, tableName, columnName from table ( LuceneSupport.listIndexes() ) listindexes",
              new String[][]
              {

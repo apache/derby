@@ -63,6 +63,7 @@ public class KeepDisposableStatsPropertyTest
     /** Runs the real test case. */
     private void assertOnSCUI(boolean keepDisposable)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         IndexStatsUtil stats = new IndexStatsUtil(
                 openDefaultConnection(), 20*1000); // 20 seconds timeout
         // Create table.
@@ -125,6 +126,7 @@ public class KeepDisposableStatsPropertyTest
         setAutoCommit(true);
         // Trigger the scheduling logic to get the istat daemon going
         prepareStatement("select * from " + TAB + " where id = ?"); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         IndexStatsUtil.IdxStats[] newStats =
                 stats.getNewStatsTable(TAB, oldStats);
         assertEquals(oldStats.length, newStats.length);
@@ -143,7 +145,9 @@ public class KeepDisposableStatsPropertyTest
      * explicitly setting it to {@code false}.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
         String property = "derby.storage.indexStats.debug.keepDisposableStats";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("KeepDisposableStatsPropertyTestSuite");
 
@@ -154,6 +158,7 @@ public class KeepDisposableStatsPropertyTest
         // Test setting the property explicitly to true.
         Properties propsOn = new Properties();
         propsOn.setProperty(property, "true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suiteOn = new BaseTestSuite("Do KeepDisposableStats");
         suiteOn.addTest(
                 new KeepDisposableStatsPropertyTest("testPropertyTrue"));
@@ -162,6 +167,7 @@ public class KeepDisposableStatsPropertyTest
         // Test setting the property explicitly to false.
         Properties propsOff = new Properties();
         propsOff.setProperty(property, "false");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suiteOff =
             new BaseTestSuite("Don't KeepDisposableStats");
 

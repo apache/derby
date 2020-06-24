@@ -56,6 +56,7 @@ final class LogAccessFileBuffer
         prev        = null;
         next        = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
         init(0);
     }
 
@@ -68,6 +69,7 @@ final class LogAccessFileBuffer
 		length =  buffer.length - reserve;
         bytes_free  = length;
         position    = reserve;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
         greatest_instant = -1;
     }
 

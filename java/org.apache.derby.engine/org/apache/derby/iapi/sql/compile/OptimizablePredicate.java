@@ -134,6 +134,7 @@ public interface OptimizablePredicate
 	 */
 	double selectivity(Optimizable optTable)
 	throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 
 	/**
 	 * Get the position of the index column that this predicate restricts.

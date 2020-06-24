@@ -33,6 +33,7 @@ import java.net.URL;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import java.sql.SQLException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 final class ImportReadData implements java.security.PrivilegedExceptionAction<Object> {
   //Read data from this file
   private String inputFileName;
@@ -144,6 +145,8 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
   }
   //inputFileName: File to read data from
   //controlFileReader: File used to interpret data in the inputFileName
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6892
   ImportReadData(String inputFileName, ControlInfo controlFileReader,short skipLines)
   throws Exception {
     this.skipLines=skipLines;
@@ -158,6 +161,8 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
     loadMetaData();
 
     lobFileHandles = new ImportLobFile[numberOfColumns];
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
 
   }
 
@@ -179,6 +184,8 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
  	* @exception	Exception if there is an error
 	*/
   protected void ignoreHeaderLines() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
     for(int i =0;i<skipLines;i++){
        if(!readNextToken(recordSeparator, 0, recordSeparatorLength, true))
           throw LoadError.unexpectedEndOfFile(lineNumber+1);
@@ -244,6 +251,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
 
   //open the input data file for reading
   private void realOpenFile() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
 	  InputStream inputStream;
     try {
       try {
@@ -252,16 +260,19 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
            inputFileName = url.getFile(); //seems like you can't do openstream on file
            throw new MalformedURLException(); //so, get the filename from url and do it ususal way
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
         inputStream =  url.openStream();
       } catch (MalformedURLException ex) {
         inputStream = new FileInputStream(inputFileName);
         
       }
     } catch (FileNotFoundException ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
         throw LoadError.dataFileNotFound(inputFileName, ex);
     } catch (SecurityException se) {
 		throw LoadError.dataFileNotFound(inputFileName, se);
 	}
+//IC see: https://issues.apache.org/jira/browse/DERBY-777
     java.io.Reader rd = dataCodeset == null ?
     		new InputStreamReader(inputStream) : new InputStreamReader(inputStream, dataCodeset);    
     bufferedReader = new BufferedReader(rd, 32*1024);
@@ -290,6 +301,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
   /**close the input data file
  	* @exception	Exception if there is an error
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
   void closeStream() throws Exception {
     if (streamOpenForReading) {
        bufferedReader.close();
@@ -297,6 +309,8 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
     }
 
     // close external lob file resources.
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
     if (lobFileHandles != null) {
         for (int i = 0 ; i < numberOfColumns ; i++) 
         {
@@ -666,6 +680,8 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
        if (hasColumnDefinition){
           ignoreFirstRow();
        }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
        ignoreHeaderLines();
     }
     if (formatCode == DEFAULT_FORMAT_CODE)
@@ -844,6 +860,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
     }
 
     if (totalCharsSoFar > -1) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2193
 
       /* This is a hack to fix a problem: When there is missing data in columns
       and hasDelimiterAtEnd==true, then the last delimiter was read as the last column data.
@@ -853,6 +870,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
       actually same as the delimiter.
       */
       if (!hasDelimiterAtEnd) {//normal path:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2193
           returnStringArray[upperLimit] = new String(currentToken,
                           positionOfNonWhiteSpaceCharInFront, totalCharsSoFar);
       }
@@ -883,6 +901,8 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
     else
       returnStringArray[upperLimit] = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
     lineNumber++;
     return true;
   }
@@ -963,6 +983,8 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
      * @param colIndex number of the column. starts at 1.      
      * @exception  SQLException  on any errors. 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
     String getClobColumnFromExtFileAsString(String lobLocationStr, int colIndex) 
         throws SQLException 
     {
@@ -994,6 +1016,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
     {
 		try {
             initExternalLobFile(lobLocationStr, colIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
             if (lobLength == -1 ){
                 // lob length -1 indicates columnn value is a NULL, 
                 // just return null. 
@@ -1015,10 +1038,13 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
      * @param colIndex number of the column. starts at 1.                   
      * @exception  SQLException  on any errors. 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
     java.sql.Blob getBlobColumnFromExtFile(String lobLocationStr, int colIndex)
         throws SQLException
     {
         initExternalLobFile(lobLocationStr, colIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         if (lobLength == -1) {
             // lob length -1 indicates columnn value is a NULL, 
             // just return null. 
@@ -1050,6 +1076,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
         int lengthIndex = lobLocationStr.lastIndexOf(".") ;
         int offsetIndex = lobLocationStr.lastIndexOf(".", 
                                                      lengthIndex -1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 
         lobLength = Integer.parseInt(lobLocationStr.substring(
                                      lengthIndex + 1, 
@@ -1058,12 +1085,15 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
                                      offsetIndex+1, 
                                      lengthIndex));
         lobFileName = lobLocationStr.substring(0 , offsetIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
         if (lobFileHandles[colIndex-1] == null) {
             // open external file where the lobs are stored.
             try {
                 // each lob column in the table has it's own file handle. 
                 // separate file handles are must, lob stream objects
                 // can not be reused until the whole row is inserted.
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                 File lobsFile = new File (lobFileName);
                 if (lobsFile.getParentFile() == null) {
                     // lob file name is unqualified. lob file 

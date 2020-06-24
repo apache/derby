@@ -118,10 +118,12 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSSTATEMENTSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
 		initInfo(SYSSTATEMENTS_COLUMN_COUNT, TABLENAME_STRING, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 				 indexColumnPositions, uniqueness, uuids);
 	}
 
@@ -206,6 +208,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 
 		/* 5th column is VALID */
 		row.setColumn(5, new SQLBoolean(valid));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 6th column is TEXT */
 		row.setColumn(6, dvf.getLongvarcharDataValue(text));
@@ -225,6 +228,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		** CONSTANTSTATE is really a formatable StorablePreparedStatement.
 		*/
 		row.setColumn(10, new UserType(preparedStatement));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 11th column is INITIALLY_COMPILABLE */
 		row.setColumn(11, new SQLBoolean(initiallyCompilable));
@@ -307,6 +311,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 
 		// In soft upgrade mode the plan may not be understand by this engine
 		// so force a recompile.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 		if (dd.isReadOnlyUpgrade()) {
 			valid = false;
 		} else {
@@ -380,6 +385,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
             return new SystemColumn[] {

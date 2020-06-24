@@ -52,6 +52,7 @@ public class ReEncodedInputStream extends InputStream {
     private ByteArrayInputStream encodedInputStream_;
     
     public ReEncodedInputStream(Reader reader) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     throws IOException {
     
     reader_ = reader;
@@ -70,6 +71,7 @@ public class ReEncodedInputStream extends InputStream {
     {
     
         int count;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1396
         do{
             count = reader.read(decodedBuffer_, 0, BUFFERED_CHAR_LEN);
             

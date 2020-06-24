@@ -72,6 +72,7 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
             min();
             
             // Variance population
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
             var_pop();
             // Variance sample (n - 1)
             var_samp();
@@ -82,6 +83,7 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
         	stddev_samp();
 
             // bugs
+//IC see: https://issues.apache.org/jira/browse/DERBY-7041
             derby7041();
         	
         } finally {
@@ -106,6 +108,7 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
     {
         x
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-7041
              "CREATE TABLE T1_7041\n" +
              "(\n" +
              "	T1_7041_KEY INTEGER,\n" +
@@ -4392,6 +4395,7 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
     }
 
     private void var_pop() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
         x("create table t (i int, s smallint, l bigint,"
             + "             c char(10), v varchar(50), lvc long varchar,"
             + "             d double precision, r real, "

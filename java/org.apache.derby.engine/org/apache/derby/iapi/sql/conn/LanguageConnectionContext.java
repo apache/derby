@@ -100,6 +100,7 @@ public interface LanguageConnectionContext extends Context {
 	 * @exception StandardException thrown if something goes wrong
 	 */
 	void initialize() throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
 	/**
 	 * Get value of logStatementText.
@@ -137,6 +138,8 @@ public interface LanguageConnectionContext extends Context {
 	 * Add the activation to those known about by this connection.
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-418
+//IC see: https://issues.apache.org/jira/browse/DERBY-1142
 	void addActivation(Activation a)
 		throws StandardException;
 
@@ -230,6 +233,7 @@ public interface LanguageConnectionContext extends Context {
 	public TableDescriptor getTableDescriptorForDeclaredGlobalTempTable(String tableName);
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-130
 		Reset the connection before it is returned (indirectly) by
 		a PooledConnection object. See EmbeddedConnection.
 	 */
@@ -237,6 +241,7 @@ public interface LanguageConnectionContext extends Context {
 		 throws StandardException;
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		Do a commit, as internally needed by Derby.  E.g.
 	 	a commit for sync, or a commit for autocommit.  Skips
 		checks that a user isn't doing something bad like issuing
@@ -279,6 +284,7 @@ public interface LanguageConnectionContext extends Context {
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		Do a rollback, as internally needed by Derby.  E.g.
 	 	a rollback for sync, or a rollback for an internal error.  Skips
 		checks that a user isn't doing something bad like issuing
@@ -477,6 +483,8 @@ public interface LanguageConnectionContext extends Context {
 	 */
 	public void setDefaultSchema(Activation a, SchemaDescriptor sd)
 		throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 
 	/**
 	 * Reset any occurence of schemaName as current default schema in
@@ -606,8 +614,10 @@ public interface LanguageConnectionContext extends Context {
 	 * @return StatementContext The statement context.
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 	StatementContext pushStatementContext(boolean isAtomic, boolean isForReadOnly, String stmtText,
 		ParameterValueSet pvs, boolean rollbackParentContext, long timeoutMillis);
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
 
 	/**
 	 * Pop a StatementContext of the context stack.
@@ -882,8 +892,10 @@ public interface LanguageConnectionContext extends Context {
 	 *                      metadata query is getting executed.
 	 */
          public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
          		String sqlText, boolean isForReadOnly, boolean allowInternalSyntax) 
 	    throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 
         /**
 	 * Return a PreparedStatement object for the query.
@@ -1088,6 +1100,7 @@ public interface LanguageConnectionContext extends Context {
 	 */
 	public String getCurrentRoleIdDelimited(Activation a)
 			throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3667
 
 	/**
 	 * Checks whether the given role can be legally set for the current user.
@@ -1103,6 +1116,7 @@ public interface LanguageConnectionContext extends Context {
 	 */
     public boolean roleIsSettable(Activation a, String role)
             throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 	/**
 	 * Create a new SQL session context for the current activation on the basis
@@ -1126,6 +1140,9 @@ public interface LanguageConnectionContext extends Context {
 	 */
     public void pushNestedSessionContext(Activation a,
                                         boolean definersRights,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                                         String definer)
             throws StandardException;
 
@@ -1167,6 +1184,7 @@ public interface LanguageConnectionContext extends Context {
 	 */
     public void setupSubStatementSessionContext(Activation a)
             throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 	/**
 	 * Create a fresh SQLSessionContext for this connection.
@@ -1271,6 +1289,7 @@ public interface LanguageConnectionContext extends Context {
      */
     public void setReferencedColumnMap(TableDescriptor td,
                                        FormatableBitSet map);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4895
 
     /**
      * Set the constraint mode for this constraint to {@code deferred}.
@@ -1283,6 +1302,8 @@ public interface LanguageConnectionContext extends Context {
      * @throws StandardException
      */
     public void setConstraintDeferred(Activation a,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                                     ConstraintDescriptor cd,
                                     boolean deferred) throws StandardException;
 
@@ -1320,8 +1341,11 @@ public interface LanguageConnectionContext extends Context {
      * constraints.
      * @return the set
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
     HashMap<UUID, DeferredConstraintsMemory.ValidationInfo>
         getDeferredHashTables();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
     /**
      * Check that deferred constraints are valid, if not roll back the

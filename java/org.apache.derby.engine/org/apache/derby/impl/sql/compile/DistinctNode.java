@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DistinctNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -50,6 +51,8 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  * NOTE: A DistinctNode extends FromTable since it can exist in a FromList.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class DistinctNode extends SingleChildResultSetNode
 {
 	boolean inSortedOrder;
@@ -99,6 +102,7 @@ class DistinctNode extends SingleChildResultSetNode
 		 */
         final ResultColumnList prRCList =
                 this.childResult.getResultColumns().copyListAndObjects();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( this.childResult.getResultColumns() );
 		this.childResult.setResultColumns(prRCList);
 
@@ -131,6 +135,8 @@ class DistinctNode extends SingleChildResultSetNode
 									RowOrdering rowOrdering)
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ((Optimizable) childResult).optimizeIt(optimizer,
                 predList,
                 outerCost,
@@ -161,6 +167,7 @@ class DistinctNode extends SingleChildResultSetNode
 									optimizer,
 									rowOrdering);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setCostEstimate( getCostEstimate(optimizer) );
 		getCostEstimate().setCost(childCost.getEstimatedCost(),
 							 childCost.rowCount(),
@@ -171,6 +178,7 @@ class DistinctNode extends SingleChildResultSetNode
 		** No need to use estimateCost on join strategy - that has already
 		** been done on the child.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return getCostEstimate();
 	}
 
@@ -201,6 +209,8 @@ class DistinctNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
@@ -216,6 +226,7 @@ class DistinctNode extends SingleChildResultSetNode
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.
         setCostEstimate( getOptimizerFactory().getCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							 childResult.getCostEstimate().rowCount(),
@@ -240,6 +251,8 @@ class DistinctNode extends SingleChildResultSetNode
     @Override
     boolean isOrderedOn(ColumnReference[] crs,
                         boolean permuteOrdering,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         List<FromBaseTable> fbtHolder)
 	{
 		/* RESOLVE - DistinctNodes are ordered on their RCLs.
@@ -266,6 +279,7 @@ class DistinctNode extends SingleChildResultSetNode
 
 		// Get the final cost estimate based on the child's cost.
 		setCostEstimate( childResult.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 			create the orderItem and stuff it in.
@@ -289,12 +303,14 @@ class DistinctNode extends SingleChildResultSetNode
 		mb.push(true);
 		mb.push(inSortedOrder);
 		mb.push(orderItem);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         mb.push(acb.addItem(getResultColumns().buildRowTemplate()));
 		mb.push(getResultColumns().getTotalColumnSize());
 		mb.push(getResultSetNumber());
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getSortResultSet",
                 ClassName.NoPutResultSet, 9);
 	}

@@ -48,6 +48,7 @@ public class Util42
         {
             int     jdbcType = ((JDBCType) sqlType).getVendorTypeNumber();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
             Util.checkForSupportedDataType( jdbcType );
         
             return jdbcType;

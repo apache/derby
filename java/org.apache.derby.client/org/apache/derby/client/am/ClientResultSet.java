@@ -226,6 +226,7 @@ public abstract class ClientResultSet implements ResultSet,
     //---------------------constructors/finalizer---------------------------------
 
     protected ClientResultSet(Agent agent,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         ClientStatement statement,
                         Cursor cursor,
                         int resultSetType,
@@ -244,6 +245,7 @@ public abstract class ClientResultSet implements ResultSet,
         fetchDirection_ = statement_.fetchDirection_;
         suggestedFetchSize_ = statement_.fetchSize_;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
         maxRows_ = statement_.maxRows_;
         
         // Only set the warning if actual resultSetType returned by the server is less
@@ -256,6 +258,7 @@ public abstract class ClientResultSet implements ResultSet,
                 new SqlWarning(
                     agent_.logWriter_, 
                     new ClientMessageId(SQLState.INVALID_RESULTSET_TYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         statement_.resultSetType_, resultSetType_));
         }
 
@@ -278,6 +281,7 @@ public abstract class ClientResultSet implements ResultSet,
     // ---------------------------jdbc 1------------------------------------------
 
     public final boolean next() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -310,8 +314,10 @@ public abstract class ClientResultSet implements ResultSet,
         resetUpdatedColumns();
 
         unuseStreamsAndLOBs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
         // for TYPE_FORWARD_ONLY ResultSet, just call cursor.next()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             // cursor is null for singleton selects that do not return data.
             isValidCursorPosition_ = (cursor_ == null) ? false : cursor_.next();
@@ -343,6 +349,7 @@ public abstract class ClientResultSet implements ResultSet,
 //    if (!isValidCursorPosition_ && // We've gone past the end (+100)
 //        cursor_ != null) {
             if ((!isValidCursorPosition_ && cursor_ != null) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
                     (maxRows_ > 0 && cursor_.rowsRead_ > maxRows_)) {
                 isValidCursorPosition_ = false;
 
@@ -363,6 +370,7 @@ public abstract class ClientResultSet implements ResultSet,
                 }
             
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-213
                     statement_.resultSetCommitting(this);
                 } catch (SqlException sqle) {
                     sqlException = Utils.accumulateSQLException(sqle, sqlException);
@@ -412,6 +420,7 @@ public abstract class ClientResultSet implements ResultSet,
         // maxRows_ will be ignored by sensitive dynamic cursors since we don't know the rowCount
         if (!openOnClient_) {
             isValidCursorPosition_ = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
         } else if (sensitivity_ != sensitivity_sensitive_dynamic__ && maxRows_ > 0 &&
                 (firstRowInRowset_ + currentRowInRowset_ > maxRows_)) {
             isValidCursorPosition_ = false;
@@ -421,6 +430,7 @@ public abstract class ClientResultSet implements ResultSet,
 
 
     public void close() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -443,18 +453,22 @@ public abstract class ClientResultSet implements ResultSet,
         if (!openOnClient_) {
             return;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
         closeOpenStreams();
         // See if there are open locators on the current row, if valid.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
         if (isValidCursorPosition_ && !isOnInsertRow_) {
             lobState.checkCurrentRow(cursor_);
         }
         // NOTE: The preClose_ method must also check for locators if
         //       prefetching of data is enabled for result sets containing LOBs.
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         preClose_();
         try {
             if (openOnServer_) {
                 flowCloseAndAutoCommitIfNotAutoCommitted();
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-213
                 statement_.resultSetCommitting(this);
             }
         } finally {
@@ -465,13 +479,16 @@ public abstract class ClientResultSet implements ResultSet,
             statement_.closeX();
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         nullDataForGC();
     }
 
     /** Close Statement if it is set to closeOnCompletion */
     private void    closeStatementOnCompletion()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         statement_.closeMeOnCompletion();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if ( (outerStatement_ != null) && (outerStatement_ != statement_) ) { outerStatement_.closeMeOnCompletion(); }
         outerStatement_ = null;
     }
@@ -488,10 +505,12 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private void flowCloseAndAutoCommitIfNotAutoCommitted()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         agent_.beginWriteChain(statement_);
         boolean performedAutoCommit = writeCloseAndAutoCommit();
         agent_.flow(statement_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-213
         readCloseAndAutoCommit(performedAutoCommit);
         agent_.endReadChain();
     }
@@ -519,6 +538,8 @@ public abstract class ClientResultSet implements ResultSet,
         // close cursor if autoCommit is true.
         autoCommitted_ = false;
         if (generatedSection_ == null) { // none call statement result set case
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             writeCursorClose_(statement_.getSection());
         } else { // call statement result set(s) case
             writeCursorClose_(generatedSection_);
@@ -552,6 +573,7 @@ public abstract class ClientResultSet implements ResultSet,
             }
             checkForClosedResultSet("wasNull");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             if (wasNull_ == ClientResultSet.WAS_NULL_UNSET) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.WASNULL_INVALID));
@@ -576,12 +598,14 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBoolean", column);
             }
             checkGetterPreconditions(column, "getBoolean");
             boolean result = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
                     result = false;
@@ -593,6 +617,7 @@ public abstract class ClientResultSet implements ResultSet,
             } else {
                 result = isNull(column) ? false : cursor_.getBoolean(column);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getBoolean", result);
             }
@@ -610,12 +635,14 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getByte", column);
             }
             checkGetterPreconditions(column, "getByte");
             byte result = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if ((isOnInsertRow_) && (updatedColumns_[column - 1] == null)) {
                     result = 0;
@@ -644,17 +671,20 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getShort", column);
             }
             checkGetterPreconditions(column, "getShort");
             short result = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
                     result = 0;
                 } else {
                     result = ((Short) agent_.crossConverters_.setObject(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             Types.SMALLINT,
                             updatedColumns_[column - 1])).shortValue();
                 }
@@ -678,17 +708,20 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getInt", column);
             }
             checkGetterPreconditions(column, "getInt");
             int result = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
                     result = 0;
                 } else {
                     result = ((Integer) agent_.crossConverters_.setObject(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             Types.INTEGER,
                             updatedColumns_[column - 1])).intValue();
                 }
@@ -712,17 +745,20 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getLong", column);
             }
             checkGetterPreconditions(column, "getLong");
             long result = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
                     result = 0;
                 } else {
                     result = ((Long) agent_.crossConverters_.setObject(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             Types.BIGINT,
                             updatedColumns_[column - 1])).longValue();
                 }
@@ -746,17 +782,20 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getFloat", column);
             }
             checkGetterPreconditions(column, "getFloat");
             float result = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if ((isOnInsertRow_ && updatedColumns_[column - 1] == null)) {
                     result = 0;
                 } else {
                     result = ((Float) agent_.crossConverters_.setObject(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             Types.REAL,
                             updatedColumns_[column - 1])).floatValue();
                 }
@@ -780,17 +819,20 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDouble", column);
             }
             checkGetterPreconditions(column, "getDouble");
             double result = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
                     result = 0;
                 } else {
                     result = ((Double) agent_.crossConverters_.setObject(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             Types.DOUBLE,
                             updatedColumns_[column - 1])).doubleValue();
                 }
@@ -815,11 +857,13 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", column, scale);
             }
             checkGetterPreconditions(column, "getBigDecimal");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             BigDecimal result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = ((BigDecimal) agent_.crossConverters_.setObject(
@@ -849,11 +893,13 @@ public abstract class ClientResultSet implements ResultSet,
         {
 
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBigDecimal", column);
             }
             checkGetterPreconditions(column, "getBigDecimal");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             BigDecimal result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (BigDecimal)agent_.crossConverters_.setObject(
@@ -879,6 +925,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", column);
@@ -890,6 +937,7 @@ public abstract class ClientResultSet implements ResultSet,
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Date result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (Date)agent_.crossConverters_.setObject(
@@ -923,6 +971,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", column, cal);
@@ -934,6 +983,7 @@ public abstract class ClientResultSet implements ResultSet,
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Time result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (Time)agent_.crossConverters_.setObject(
@@ -968,6 +1018,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(
@@ -980,6 +1031,7 @@ public abstract class ClientResultSet implements ResultSet,
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Timestamp result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (Timestamp)agent_.crossConverters_.setObject(
@@ -1014,6 +1066,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @return a calendar initialized to the specified time
      */
     private static Calendar createCalendar(java.util.Date date) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         return cal;
@@ -1028,6 +1081,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @return a date object that represents the date in {@code cal}
      */
     private Date convertFromDefaultCalendar(Date date, Calendar cal) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Calendar from = createCalendar(date);
         cal.clear();
         cal.set(from.get(Calendar.YEAR),
@@ -1045,6 +1099,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @return a time object that represents the time in {@code cal}
      */
     private Time convertFromDefaultCalendar(Time time, Calendar cal) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Calendar from = createCalendar(time);
         cal.clear();
         cal.set(1970, Calendar.JANUARY, 1, // normalized date: 1970-01-01
@@ -1063,6 +1118,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @return a timestamp object that represents the timestamp in {@code cal}
      */
     private Timestamp convertFromDefaultCalendar(Timestamp ts, Calendar cal) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Calendar from = createCalendar(ts);
         cal.clear();
         cal.set(from.get(Calendar.YEAR),
@@ -1087,7 +1143,9 @@ public abstract class ClientResultSet implements ResultSet,
             }
             checkGetterPreconditions(column, "getString");
             int type = resultSetMetaData_.types_[column - 1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             if (type == ClientTypes.BLOB || type == ClientTypes.CLOB) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
                 checkLOBMultiCall(column);
                 // If the above didn't fail, this is the first getter
                 // invocation, or only getBytes and/or getString have been
@@ -1096,6 +1154,7 @@ public abstract class ClientResultSet implements ResultSet,
             }
             String result = null;
             if (wasNonNullSensitiveUpdate(column)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 result = (String)agent_.crossConverters_.setObject(
                     Types.CHAR, updatedColumns_[column - 1]);
             } else {
@@ -1118,13 +1177,16 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBytes", column);
             }
             checkGetterPreconditions(column, "getBytes");
             int type = resultSetMetaData_.types_[column - 1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             if (type == ClientTypes.BLOB) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
                 checkLOBMultiCall(column);
                 // If the above didn't fail, this is the first getter
                 // invocation, or only getBytes has been invoked previously.
@@ -1133,6 +1195,7 @@ public abstract class ClientResultSet implements ResultSet,
             }
             byte[] result = null;
             if (wasNonNullSensitiveUpdate(column)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 result = (byte[])agent_.crossConverters_.setObject(
                     Types.BINARY, updatedColumns_[column - 1]);
             } else {
@@ -1155,6 +1218,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBinaryStream", column);
@@ -1163,6 +1227,7 @@ public abstract class ClientResultSet implements ResultSet,
             checkGetterPreconditions(column, "getBinaryStream");
             useStreamOrLOB(column);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             InputStream result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = new ByteArrayInputStream(
@@ -1188,6 +1253,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getAsciiStream", column);
@@ -1196,6 +1262,7 @@ public abstract class ClientResultSet implements ResultSet,
             checkGetterPreconditions(column, "getAsciiStream");
             useStreamOrLOB(column);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             InputStream result = null;
             if (wasNonNullSensitiveUpdate(column)) {
 
@@ -1227,6 +1294,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @deprecated
      */
     public InputStream getUnicodeStream(int column) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-253
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream",
                                                    column);
@@ -1240,6 +1308,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getCharacterStream", column);
@@ -1248,6 +1317,7 @@ public abstract class ClientResultSet implements ResultSet,
             checkGetterPreconditions(column, "getCharacterStream");
             useStreamOrLOB(column);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Reader result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = new StringReader
@@ -1260,6 +1330,7 @@ public abstract class ClientResultSet implements ResultSet,
                 agent_.logWriter_.traceExit(this, "getCharacterStream", result);
             }
             setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
             currentReader = result;
             return result;
         }
@@ -1274,12 +1345,14 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBlob", column);
             }
             checkGetterPreconditions(column, "getBlob");
             useStreamOrLOB(column);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Blob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (Blob) agent_.crossConverters_.setObject(Types.BLOB,
@@ -1304,12 +1377,14 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getClob", column);
             }
             checkGetterPreconditions(column, "getClob");
             useStreamOrLOB(column);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Clob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (Clob) agent_.crossConverters_.setObject(Types.CLOB,
@@ -1334,11 +1409,13 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getRef", column);
             }
             checkGetterPreconditions(column, "getRef");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Ref result = isNull(column) ? null : cursor_.getRef(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
@@ -1361,11 +1438,13 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getArray", column);
             }
             checkGetterPreconditions(column, "getArray");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Array result = isNull(column) ? null : cursor_.getArray(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
@@ -1388,6 +1467,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getObject", column);
@@ -1408,7 +1488,13 @@ public abstract class ClientResultSet implements ResultSet,
     Object getObjectX(int column) throws SqlException {
         checkGetterPreconditions(column, "getObject");
         int type = resultSetMetaData_.types_[column - 1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (type == ClientTypes.BLOB || type == ClientTypes.CLOB) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
             useStreamOrLOB(column);
         }
         Object result = null;
@@ -1423,9 +1509,11 @@ public abstract class ClientResultSet implements ResultSet,
 
     // Live life on the edge and run unsynchronized
     public Object getObject(int column, Map map) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             closeOpenStreams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getObject", column, map);
@@ -1477,6 +1565,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private void setWasNull(int column) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
         if (wasNullSensitiveUpdate(column) || (isOnInsertRow_ && updatedColumns_[column - 1] == null)) {
             wasNull_ = WAS_NULL;
         } else {
@@ -1495,6 +1584,7 @@ public abstract class ClientResultSet implements ResultSet,
     // ------------- Methods for accessing results by column name ----------------
 
     public final boolean getBoolean(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1906,6 +1996,7 @@ public abstract class ClientResultSet implements ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-860
         return warnings_ == null ? null : warnings_.getSQLWarning();
     }
 
@@ -1947,7 +2038,11 @@ public abstract class ClientResultSet implements ResultSet,
                 if (generatedSection_ != null) {
                     return "stored procedure generated cursor:" + generatedSection_.getServerCursorName();
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1036
+//IC see: https://issues.apache.org/jira/browse/DERBY-1183
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
                 if (statement_.cursorName_ == null) {// cursor name is not assigned yet
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                     statement_.cursorName_ = statement_.getSection().getServerCursorName();
                 }
                 if (agent_.loggingEnabled()) {
@@ -1970,6 +2065,7 @@ public abstract class ClientResultSet implements ResultSet,
             }
 
             ResultSetMetaData resultSetMetaData = getMetaDataX();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getMetaData", resultSetMetaData);
@@ -1990,6 +2086,7 @@ public abstract class ClientResultSet implements ResultSet,
 
 
     public final int findColumn(String columnName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2018,6 +2115,7 @@ public abstract class ClientResultSet implements ResultSet,
     //-------------------------- Traversal/Positioning ---------------------------
 
     public boolean isBeforeFirst() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
@@ -2049,6 +2147,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public boolean isAfterLast() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
@@ -2077,11 +2176,13 @@ public abstract class ClientResultSet implements ResultSet,
                     (firstRowInRowset_ == currentRowInRowset_ &&
                     currentRowInRowset_ == lastRowInRowset_ &&
                     lastRowInRowset_ == 0 &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
                     absolutePosition_ == (maxRows_ == 0 ? rowCount_ + 1 : maxRows_ + 1)));
         }
     }
 
     public boolean isFirst() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
@@ -2111,6 +2212,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public boolean isLast() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (agent_.loggingEnabled()) {
@@ -2141,6 +2243,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void beforeFirst() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2182,6 +2285,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void afterLast() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2222,6 +2326,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public boolean first() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2255,6 +2360,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         resetRowsetFlags();
         unuseStreamsAndLOBs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
         // if first row is not in the current rowset, fetch the first rowset from the server.
         // rowIsInCurrentRowset with orientation first will always return false for dynamic cursors.
@@ -2277,6 +2383,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public boolean last() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2304,18 +2411,23 @@ public abstract class ClientResultSet implements ResultSet,
         moveToCurrentRowX();
 
         wasNull_ = ClientResultSet.WAS_NULL_UNSET;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         // discard all previous updates when moving the cursor
         resetUpdatedColumns();
 
         resetRowsetFlags();
         unuseStreamsAndLOBs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
         // only get the rowCount for static cursors.
         if (rowCountIsUnknown()) {
             getRowCount();
         }
         long row = rowCount_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
         if (sensitivity_ != sensitivity_sensitive_dynamic__ && maxRows_ > 0) {
             if (rowCount_ > maxRows_) {
                 row = maxRows_;
@@ -2342,6 +2454,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public int getRow() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2365,10 +2478,12 @@ public abstract class ClientResultSet implements ResultSet,
         checkForClosedResultSet("getRow");
         long row;
         checkThatResultSetIsNotDynamic();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY)
         // for forward-only cursors, getRow() should return 0 if cursor is not on a valid row,
         // i.e. afterlast.
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
             row = (cursor_.allRowsReceivedFromServer() &&
                     cursor_.currentRowPositionIsEqualToNextRowPosition()) ? 0 : cursor_.rowsRead_;
         } else {
@@ -2388,12 +2503,14 @@ public abstract class ClientResultSet implements ResultSet,
         if (row > Integer.MAX_VALUE) {
             this.accumulateWarning(new SqlWarning(agent_.logWriter_, 
                 new ClientMessageId(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 row));
         }
         return (int) row;
     }
 
     public boolean absolute(int row) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2427,6 +2544,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         resetRowsetFlags();
         unuseStreamsAndLOBs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
         if (maxRows_ > 0) {
             // if "row" is positive and > maxRows, fetch afterLast
@@ -2435,6 +2553,7 @@ public abstract class ClientResultSet implements ResultSet,
                 afterLastX();
                 isValidCursorPosition_ = false;
                 return isValidCursorPosition_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             } else if (row <= 0 && Math.abs(row) > maxRows_) {
                 beforeFirstX();
                 isValidCursorPosition_ = false;
@@ -2479,6 +2598,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public boolean relative(int rows) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2510,8 +2630,10 @@ public abstract class ClientResultSet implements ResultSet,
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
         unuseStreamsAndLOBs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
         // If the resultset is empty, relative(n) is a null operation
+//IC see: https://issues.apache.org/jira/browse/DERBY-276
         if (resultSetContainsNoRows()) {
             isValidCursorPosition_ = false;
             return isValidCursorPosition_;
@@ -2560,6 +2682,7 @@ public abstract class ClientResultSet implements ResultSet,
         // Ok, now we are on a row and ready to do some real positioning.....
 
         resetRowsetFlags();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
         // currentAbsoluteRowNumber is used for static cursors only.
         long currentAbsoluteRowNumber = firstRowInRowset_ + currentRowInRowset_;
@@ -2569,6 +2692,7 @@ public abstract class ClientResultSet implements ResultSet,
         // the currentrow number, will fetch beforeFirst anyways.  do not need to check
         // for maxRows.
         if (sensitivity_ != sensitivity_sensitive_dynamic__ &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
                 maxRows_ > 0 && rows > 0 && currentAbsoluteRowNumber + rows > maxRows_) {
             afterLastX();
             isValidCursorPosition_ = false;
@@ -2583,6 +2707,7 @@ public abstract class ClientResultSet implements ResultSet,
             long rowNumber =
                     (sensitivity_ == sensitivity_sensitive_dynamic__) ? currentRowInRowset_ + rows :
                     currentAbsoluteRowNumber + rows - absolutePosition_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
             if (maxRows_ < Math.abs(rowNumber) && maxRows_ != 0) {
                 if (rowNumber > 0) {
                     afterLastX();
@@ -2605,6 +2730,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public boolean previous() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2632,6 +2758,9 @@ public abstract class ClientResultSet implements ResultSet,
         moveToCurrentRowX();
 
         wasNull_ = ClientResultSet.WAS_NULL_UNSET;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
@@ -2660,6 +2789,7 @@ public abstract class ClientResultSet implements ResultSet,
             return isValidCursorPosition_;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
         if (sensitivity_ != sensitivity_sensitive_dynamic__ && maxRows_ > 0 &&
                 (firstRowInRowset_ + currentRowInRowset_ > maxRows_)) {
             isValidCursorPosition_ = false;
@@ -2669,6 +2799,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void setFetchDirection(int direction) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2679,6 +2810,7 @@ public abstract class ClientResultSet implements ResultSet,
                 checkThatResultSetTypeIsScrollable();
 
                 switch (direction) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 case ResultSet.FETCH_FORWARD:
                 case ResultSet.FETCH_REVERSE:
                 case ResultSet.FETCH_UNKNOWN:
@@ -2687,6 +2819,7 @@ public abstract class ClientResultSet implements ResultSet,
                 default:
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_FETCH_DIRECTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         direction);
                 }
             }
@@ -2720,9 +2853,11 @@ public abstract class ClientResultSet implements ResultSet,
                     agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
                 }
                 checkForClosedResultSet("setFetchSize");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3573
                 if (rows < 0) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_FETCH_SIZE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         rows).getSQLException();
                 }
                 setFetchSize_(rows);
@@ -2786,6 +2921,7 @@ public abstract class ClientResultSet implements ResultSet,
         {
             checkForClosedResultSet("rowUpdated");
             checkPositionedOnPlainRow();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
 
             boolean rowUpdated = cursor_.getIsRowUpdated();
 
@@ -2805,6 +2941,7 @@ public abstract class ClientResultSet implements ResultSet,
         {
             checkForClosedResultSet("rowInserted");
             checkPositionedOnPlainRow();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
 
             boolean rowInserted = false;
 
@@ -2827,6 +2964,7 @@ public abstract class ClientResultSet implements ResultSet,
         {
             checkForClosedResultSet("rowDeleted");
             checkPositionedOnPlainRow();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
 
             boolean rowDeleted = 
                 (resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE) ?
@@ -2856,6 +2994,7 @@ public abstract class ClientResultSet implements ResultSet,
                 if (!resultSetMetaData_.nullable_[column - 1]) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.LANG_NULL_INTO_NON_NULL),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         column);
                 }
                 updateColumn(column, null);
@@ -3095,6 +3234,7 @@ public abstract class ClientResultSet implements ResultSet,
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
                     agent_.logWriter_.traceEntry(this, "", column, x, length);
                 }
                 checkUpdatePreconditions(column, "updateBinaryStream");
@@ -3117,6 +3257,7 @@ public abstract class ClientResultSet implements ResultSet,
                     agent_.logWriter_.traceEntry(this, "updateAsciiStream", column, x, length);
                 }
                 checkUpdatePreconditions(column, "updateAsciiStream");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                 updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(
                         resultSetMetaData_.types_[column - 1], x, Cursor.ISO_8859_1, length));
             }
@@ -3181,6 +3322,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void updateNCharacterStream(int columnIndex, Reader x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         throw jdbc3MethodNotSupported();
     }
@@ -3407,6 +3549,10 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void updateAsciiStream(String columnName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   InputStream x,
                                   int length) throws SQLException {
         try
@@ -3423,6 +3569,8 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void updateCharacterStream(String columnName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                       Reader x,
                                       int length) throws SQLException {
         try
@@ -3467,6 +3615,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void updateNCharacterStream(String columnName, Reader x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         throw jdbc3MethodNotSupported();
     }
@@ -3485,6 +3634,7 @@ public abstract class ClientResultSet implements ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "insertRow");
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
                 insertRowX();
             }
         }
@@ -3503,6 +3653,7 @@ public abstract class ClientResultSet implements ResultSet,
        }
  
         // if not on a valid row, then do not accept updateXXX calls
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
         if (!isValidCursorPosition_) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
@@ -3624,7 +3775,9 @@ public abstract class ClientResultSet implements ResultSet,
                 } else {
                     // Check if the original column is null.  Calling CrossConverters.setObject on a null
                     // column causes "Data Conversion" Exception.
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                     Object originalObj;
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                     try {
                         originalObj = getObject(i + 1);
                     } catch ( SQLException se ) {
@@ -3650,6 +3803,7 @@ public abstract class ClientResultSet implements ResultSet,
             } else {
                 positionToCurrentRowAndUpdate();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
         } finally {
             resetUpdatedColumns();
         }
@@ -3695,6 +3849,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1266
                 new ClientMessageId(SQLState.NO_CURRENT_ROW));
         }
 
@@ -3710,9 +3865,11 @@ public abstract class ClientResultSet implements ResultSet,
             positionToCurrentRowAndDelete();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             cursor_.isUpdateDeleteHole_ = true;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
             if (preparedStatementForDelete_.updateCount_ > 0) {
                 
                 cursor_.isUpdateDeleteHoleCache_.set((int) currentRowInRowset_,
@@ -3725,6 +3882,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void refreshRow() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -3743,13 +3901,17 @@ public abstract class ClientResultSet implements ResultSet,
     private void refreshRowX() throws SqlException {
         checkForClosedResultSet("refreshRow");
         checkThatResultSetTypeIsScrollable();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     checkForUpdatableResultSet("refreshRow");
         if (isBeforeFirstX() || isAfterLastX() || isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1266
+//IC see: https://issues.apache.org/jira/browse/DERBY-1266
                 new ClientMessageId(SQLState.NO_CURRENT_ROW));
         }
     
         // this method does nothing if ResultSet is TYPE_SCROLL_INSENSITIVE
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ == ResultSet.TYPE_SCROLL_SENSITIVE) {
             isValidCursorPosition_ = getRefreshRowset();
             try {
@@ -3759,6 +3921,9 @@ public abstract class ClientResultSet implements ResultSet,
             }
 
             unuseStreamsAndLOBs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
 
         }
     }
@@ -3801,6 +3966,7 @@ public abstract class ClientResultSet implements ResultSet,
                 checkForClosedResultSet("moveToInsertRow");
                 checkForUpdatableResultSet("moveToInsertRow");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
                 resetUpdatedColumnsForInsert();
                 
                 // Note that even though we navigate "away" from the current row
@@ -3816,6 +3982,7 @@ public abstract class ClientResultSet implements ResultSet,
                 // the insert row. This is important since attempting to 
                 // release locators for a non-valid cursor position will trigger 
                 // an error on the server. See DERBY-6228.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
                 savedIsValidCursorPosition_ = isValidCursorPosition_;
                 isValidCursorPosition_ = true;
             }
@@ -3852,7 +4019,9 @@ public abstract class ClientResultSet implements ResultSet,
      * @throws SqlException if releasing a LOB locator fails
      */
     private void moveToCurrentRowX() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
         if (isOnInsertRow_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1251
             resetUpdatedColumns();
             isOnInsertRow_ = false;
             isOnCurrentRow_ = true;
@@ -3860,8 +4029,10 @@ public abstract class ClientResultSet implements ResultSet,
                 updateColumnInfoFromCache();
             }
             // Restore the old value when leaving the insert row. See DERBY-6228.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
             isValidCursorPosition_ = savedIsValidCursorPosition_;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
         if (isValidCursorPosition_) {
             // isOnInsertRow must be false here.
             if (SanityManager.DEBUG) {
@@ -3891,6 +4062,7 @@ public abstract class ClientResultSet implements ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getStatement", statement_);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3446
         if (statement_.getOwner() != null) {
             return statement_.getOwner();
         } else {
@@ -3932,6 +4104,7 @@ public abstract class ClientResultSet implements ResultSet,
      * or this method is called on a closed result set
      */
     public void updateBlob(int columnIndex, Blob x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateBlob",
@@ -4002,6 +4175,7 @@ public abstract class ClientResultSet implements ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                     resultSetMetaData_.types_[columnIndex -1],
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                     new ClientBlob(agent_, x, (int)length)));
             } catch (SqlException se) {
                 throw se.getSQLException();
@@ -4046,6 +4220,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     boolean repositionScrollableResultSetBeforeJDBC1PositionedUpdateDelete()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         boolean repositionedCursor = false;
 
@@ -4053,7 +4228,9 @@ public abstract class ClientResultSet implements ResultSet,
         long rowToFetch = getRowUncast() - absolutePosition_;
 
         // if rowToFetch is zero, already positioned on the current row
+//IC see: https://issues.apache.org/jira/browse/DERBY-1361
         if (rowToFetch != 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation_relative__,
                     rowToFetch);
@@ -4072,6 +4249,7 @@ public abstract class ClientResultSet implements ResultSet,
         try {
             agent_.beginWriteChain(statement_);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation,
                     rowToFetch);
@@ -4096,12 +4274,15 @@ public abstract class ClientResultSet implements ResultSet,
         if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation_relative__,
                     currentRowPosRelativeToAbsoluteRowPos);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-611
             writeUpdateRow(false);
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -4147,6 +4328,7 @@ public abstract class ClientResultSet implements ResultSet,
         agent_.beginWriteChain(statement_);
 
         if (isRowsetCursor_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             try {
                 preparedStatementForUpdate_.setInt(updatedColumns_.length + 1, (int) (currentRowInRowset_ + 1));
             } catch ( SQLException se ) {
@@ -4185,11 +4367,13 @@ public abstract class ClientResultSet implements ResultSet,
         if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation_relative__,
                     currentRowPosRelativeToAbsoluteRowPos);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try {
             writeDeleteRow();
         } catch ( SQLException sqle ) {
@@ -4201,6 +4385,10 @@ public abstract class ClientResultSet implements ResultSet,
         // adjust the absolute position on the client.
         absolutePosition_ += currentRowPosRelativeToAbsoluteRowPos;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
@@ -4248,6 +4436,7 @@ public abstract class ClientResultSet implements ResultSet,
     private void setRowsetAfterLastEvent() throws SqlException {
         firstRowInRowset_ = 0;
         lastRowInRowset_ = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
         absolutePosition_ = (maxRows_ == 0) ? rowCount_ + 1 : maxRows_ + 1;
         currentRowInRowset_ = 0;
         rowsReceivedInCurrentRowset_ = 0;
@@ -4283,6 +4472,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private void moveToAfterLast() throws DisconnectException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         flowPositioningFetch(ClientResultSet.scrollOrientation_after__, 0);
     }
 
@@ -4292,10 +4482,13 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private void writeInsertRow(boolean chainedWritesFollowingSetLob)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
         try
         {
             preparedStatementForInsert_.materialPreparedStatement_.writeExecute_(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                     preparedStatementForInsert_.getSection(),
                     preparedStatementForInsert_.parameterMetaData_,
                     preparedStatementForInsert_.parameters_,
@@ -4312,8 +4505,10 @@ public abstract class ClientResultSet implements ResultSet,
     
     private void writeUpdateRow(boolean chainedWritesFollowingSetLob)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             preparedStatementForUpdate_.materialPreparedStatement_.writeExecute_(preparedStatementForUpdate_.getSection(),
                     preparedStatementForUpdate_.parameterMetaData_,
                     preparedStatementForUpdate_.parameters_,
@@ -4328,9 +4523,14 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private void writeDeleteRow() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         try
         {
             if (isRowsetCursor_) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                 preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.getSection(),
                         preparedStatementForDelete_.parameterMetaData_,
                         preparedStatementForDelete_.parameters_,
@@ -4373,12 +4573,14 @@ public abstract class ClientResultSet implements ResultSet,
     public void listenToUnitOfWork() {
         if (!listenToUnitOfWork_) {
             listenToUnitOfWork_ = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
             connection_.CommitAndRollbackListeners_.put(this, null);
         }
     }
 
     public void completeLocalCommit(Iterator listenerIterator) {
         cursorUnpositionedOnServer_ = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
         lobState.discardState(); // Locators released on server side.
         markAutoCommitted();
         if (!cursorHold_) {
@@ -4392,6 +4594,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public void completeLocalRollback(Iterator listenerIterator) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3571
         lobState.discardState(); // Locators released on server side.
         markAutoCommitted();
         // all cursors need to be closed at rollback
@@ -4445,6 +4648,7 @@ public abstract class ClientResultSet implements ResultSet,
         if (removeListener) {
             connection_.CommitAndRollbackListeners_.remove(this);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         closeStatementOnCompletion();
     }
 
@@ -4532,6 +4736,7 @@ public abstract class ClientResultSet implements ResultSet,
         int column;
         boolean foundOneUpdatedColumnAlready = false;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
         StringBuffer insertSQL = new StringBuffer("INSERT INTO ");
         StringBuffer valuesSQL = new StringBuffer("VALUES (");
 
@@ -4571,6 +4776,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         // For Derby, eg update t1 set c1=?, c2=? where current of cursorname
         boolean foundOneUpdatedColumnAlready = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
         StringBuffer updateString = new StringBuffer(64);
         updateString.append("UPDATE ").append(getTableName()).append(" SET ");
 
@@ -4579,6 +4785,7 @@ public abstract class ClientResultSet implements ResultSet,
                 if (foundOneUpdatedColumnAlready) {
                     updateString.append(",");
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                 try {
                     updateString.append(Utils.quoteSqlIdentifier(
                             resultSetMetaData_.getColumnName(column))).append(" = ? ");
@@ -4594,6 +4801,7 @@ public abstract class ClientResultSet implements ResultSet,
             return null;
         }
         updateString.append(" WHERE CURRENT OF ").append(getServerCursorName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 
         if (isRowsetCursor_) {
             updateString.append(" FOR ROW ? OF ROWSET");
@@ -4629,6 +4837,7 @@ public abstract class ClientResultSet implements ResultSet,
         String tableName = "";
         int baseTableColumn = 0;
         int totalColumns;
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try {
             totalColumns = resultSetMetaData_.getColumnCount();
         } catch ( SQLException sqle ) {
@@ -4656,14 +4865,17 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private String getServerCursorName() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
         return statement_.getSection().getServerCursorName();
     }
 
     private void getPreparedStatementForInsert() throws SqlException {
         // each column is associated with a tableName in the extended describe info.
         String insertString = buildInsertString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-100
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             preparedStatementForInsert_ = (ClientPreparedStatement)statement_.
                 connection_.prepareStatement(insertString);
         } catch ( SQLException sqle ) {
@@ -4682,6 +4894,7 @@ public abstract class ClientResultSet implements ResultSet,
         preparedStatementForUpdate_ =
                 statement_.connection_.preparePositionedUpdateStatement(updateString,
                         statement_.getSection().getPositionedUpdateSection());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
 
     }
 
@@ -4691,11 +4904,13 @@ public abstract class ClientResultSet implements ResultSet,
 
         preparedStatementForDelete_ =
                 statement_.connection_.preparePositionedUpdateStatement(deleteString,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                         statement_.getSection().getPositionedUpdateSection()); // update section
     }
 
     private final void resetUpdatedColumnsForInsert() {
         // initialize updateColumns with nulls for all columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-5012
         for (int i = 0; i < resultSetMetaData_.columns_; i++) {
             updateColumn(i+1, null);
             columnUpdated_[i] = false;
@@ -4704,6 +4919,7 @@ public abstract class ClientResultSet implements ResultSet,
 
     private final void resetUpdatedColumns() {
         if (updatedColumns_ != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5015
             Arrays.fill(updatedColumns_, null);
         }
         if (columnUpdated_ != null) {
@@ -4723,6 +4939,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private final void checkUpdatePreconditions(int column, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         String operation)
     throws SqlException {
 
@@ -4750,6 +4967,7 @@ public abstract class ClientResultSet implements ResultSet,
         if (column < 1 || column > resultSetMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_INVALID_COLUMN_POSITION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 column, resultSetMetaData_.columns_);
         }
     }
@@ -4767,6 +4985,7 @@ public abstract class ClientResultSet implements ResultSet,
 
     private final void checkForUpdatableResultSet(String operation) 
         throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetConcurrency_ == ResultSet.CONCUR_READ_ONLY) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED),
@@ -4783,6 +5002,7 @@ public abstract class ClientResultSet implements ResultSet,
 
 
     private final void checkPositionedOnPlainRow() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1323
         if (isOnInsertRow_ || !isValidCursorPosition_) {
             throw new SqlException
                 (agent_.logWriter_, 
@@ -4792,6 +5012,7 @@ public abstract class ClientResultSet implements ResultSet,
 
 
     private final void checkThatResultSetTypeIsScrollable() throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.CURSOR_MUST_BE_SCROLLABLE));
@@ -4880,6 +5101,7 @@ public abstract class ClientResultSet implements ResultSet,
         // currentRowInRowset_ should never be bigger than the max value of an int,
         // because we have a driver imposed limit of fetch size 1000.
         cursor_.columnDataPosition_ =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 cursor_.columnDataPositionCache_.get((int) currentRowInRowset_);
         cursor_.columnDataComputedLength_ =
                 cursor_.columnDataLengthCache_.get((int) currentRowInRowset_);
@@ -4910,6 +5132,7 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void parseScrollableRowset() throws SqlException {
         // modified check from qrydtaReturned to cursor.dataBufferHasUnprocesseData()
         if (cursor_.dataBufferHasUnprocessedData() && scrollable_) {
@@ -4918,6 +5141,7 @@ public abstract class ClientResultSet implements ResultSet,
 
             // This method is only called after open query to parse out the very first rowset
             // received.
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
             if (cursor_.allRowsReceivedFromServer() &&
                 rowsReceivedInCurrentRowset_ == 0) {
                 setRowsetNoRowsEvent();
@@ -4955,6 +5179,7 @@ public abstract class ClientResultSet implements ResultSet,
         agent_.beginWriteChain(statement_);
 
         Section section = (generatedSection_ == null) ? statement_.getSection() : generatedSection_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
 
         // send the first CNTQRY to place cursor after last to retrieve the rowCount_.
         writePositioningFetch_(section, scrollOrientation_after__, 0);
@@ -4981,16 +5206,19 @@ public abstract class ClientResultSet implements ResultSet,
         if (isRowsetCursor_ && sensitivity_ != sensitivity_sensitive_dynamic__ && firstRowInRowset_ != 0) {
             absolutePosition_ = firstRowInRowset_;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
             absolutePosition_ = (maxRows_ == 0) ? rowCount_ + 1 : maxRows_ + 1;
         }
     }
 
     private void flowGetRowset(int orientation, long rowNumber) throws SqlException {
         // clear lobs before fetching rows
+//IC see: https://issues.apache.org/jira/browse/DERBY-1382
         cursor_.clearLobData_();
         cursor_.resetDataBuffer();
         agent_.beginWriteChain(statement_);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
         writeScrollableFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                 fetchSize_,
                 orientation,
@@ -5121,6 +5349,7 @@ public abstract class ClientResultSet implements ResultSet,
             
             // If afterLast and maxRows > 0, go backward from maxRows and not 
             // from last row in the resultSet
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
             if (maxRows_ > 0 && orientation == scrollOrientation_relative__ && isAfterLast) {
                 rowNumber += maxRows_ + 1;
                 orientation = scrollOrientation_absolute__;
@@ -5133,6 +5362,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         // If no row was received but received sqlcode +100, then the cursor is
         // positioned before first.
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (rowsReceivedInCurrentRowset_ == 0 &&
             cursor_.allRowsReceivedFromServer()) {
             isBeforeFirst_ = true;
@@ -5158,6 +5388,7 @@ public abstract class ClientResultSet implements ResultSet,
             lastRowInRowset_ = rowsReceivedInCurrentRowset_;
             absolutePosition_ = (isAfterLastRow) ? lastRowInRowset_ + 1 : lastRowInRowset_;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
             if (maxRows_ == 0)
                 lastRowInRowset_ = (isAfterLastRow) ? rowCount_ : firstRowInRowset_ - 1;
             else
@@ -5183,6 +5414,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         // If no row was received but received sqlcode +100, then the cursor is
         // positioned after last or before first.
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if ((rowsReceivedInCurrentRowset_ == 0 &&
              cursor_.allRowsReceivedFromServer()) ||
                 orientation == scrollOrientation_before__) {
@@ -5213,6 +5445,7 @@ public abstract class ClientResultSet implements ResultSet,
 
     private boolean getRelativeRowset(long rows) throws SqlException {
         if (rows == 0 &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
                 (cursor_.allRowsReceivedFromServer() ||
                  absolutePosition_ > rowCount_)) {
             setRowsetAfterLastEvent();
@@ -5223,6 +5456,7 @@ public abstract class ClientResultSet implements ResultSet,
         flowGetRowset(scrollOrientation_relative__, rows);
         parseRowset_();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (rowsReceivedInCurrentRowset_ == 0 &&
             cursor_.allRowsReceivedFromServer()) {
             if (rows > 0) {
@@ -5254,6 +5488,7 @@ public abstract class ClientResultSet implements ResultSet,
         parseRowset_();
 
         // If no row was received but received sqlcode +100, then no row in the result set
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (rowsReceivedInCurrentRowset_ == 0 &&
             cursor_.allRowsReceivedFromServer()) {
             resetRowsetFlags();
@@ -5288,6 +5523,7 @@ public abstract class ClientResultSet implements ResultSet,
             // If fetchSize_ is smaller than the total number of rows in the ResultSet,
             // then fetch one rowset of fetchSize_ number of rows.  Otherwise, we will
             // fetch all rows in the ResultSet, so start fetching from row 1.
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
             long rowNumber;
             if (maxRows_ == 0) {
                 rowNumber = (fetchSize_ < row) ? ((-1) * fetchSize_) : 1;
@@ -5298,7 +5534,10 @@ public abstract class ClientResultSet implements ResultSet,
         }
         parseRowset_();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (rowsReceivedInCurrentRowset_ == 0 &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
             cursor_.allRowsReceivedFromServer()) {
             isAfterLast_ = true;
             setRowsetAfterLastEvent();
@@ -5317,6 +5556,7 @@ public abstract class ClientResultSet implements ResultSet,
     private void adjustLastRowset(long row) {
         lastRowInRowset_ = row;
         firstRowInRowset_ = lastRowInRowset_ - rowsReceivedInCurrentRowset_ + 1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
         if (firstRowInRowset_ <= 0) {
             firstRowInRowset_ = 1;
         }
@@ -5347,6 +5587,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private void setAbsolutePositionBasedOnAllRowsReceived() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         absolutePosition_ = (cursor_.allRowsReceivedFromServer()) ?
                 lastRowInRowset_ + 1 : lastRowInRowset_;
     }
@@ -5439,22 +5680,27 @@ public abstract class ClientResultSet implements ResultSet,
 
     private void resetRowsetSqlca() {
         if (rowsetSqlca_ != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5015
             Arrays.fill(rowsetSqlca_, null);
         }
     }
     
     
     private CloseFilterInputStream createCloseFilterInputStream(InputStream is)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if(is == null){
             return null;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
         if( currentStream == is ){
             return currentStream;
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
         closeOpenStreams();
         
         currentStream = new CloseFilterInputStream(is);
@@ -5479,6 +5725,7 @@ public abstract class ClientResultSet implements ResultSet,
             } catch (IOException ioe) {                
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.JAVA_EXCEPTION), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                         ioe, "java.io.IOException", ioe.getMessage());
             }
             currentStream = null;
@@ -5490,6 +5737,7 @@ public abstract class ClientResultSet implements ResultSet,
             } catch (IOException ioe) {                
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.JAVA_EXCEPTION), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                         ioe, "java.io.IOException", ioe.getMessage());
             }
             currentReader = null;
@@ -5505,6 +5753,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @throws SQLException if the column has already been accessed
      */
     private void useStreamOrLOB(int columnIndex) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5489
         checkLOBMultiCall(columnIndex);
         columnUsedFlags_[columnIndex - 1] = true;
     }
@@ -5525,6 +5774,7 @@ public abstract class ClientResultSet implements ResultSet,
      */
     private void checkLOBMultiCall(int columnIndex)
             throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
         if (columnUsedFlags_ == null) {
             columnUsedFlags_ = new boolean[resultSetMetaData_.columns_];
         }
@@ -5546,6 +5796,7 @@ public abstract class ClientResultSet implements ResultSet,
 
     private SQLException jdbc3MethodNotSupported()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
         return new SqlException(agent_.logWriter_,
             new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED)).
             getSQLException();
@@ -5562,6 +5813,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @exception SQLException if a database error occurs
      */
     public final int getHoldability() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-948
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getHoldability");
         }
@@ -5615,6 +5867,7 @@ public abstract class ClientResultSet implements ResultSet,
      *      result set
      */
     public void updateAsciiStream(int columnIndex, InputStream x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -5627,6 +5880,7 @@ public abstract class ClientResultSet implements ResultSet,
                         agent_.crossConverters_.setObjectFromCharacterStream(
                             resultSetMetaData_.types_[columnIndex -1],
                             x,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                             Cursor.ISO_8859_1,
                             CrossConverters.UNKNOWN_LENGTH));
             } catch (SqlException se) {
@@ -5653,10 +5907,12 @@ public abstract class ClientResultSet implements ResultSet,
      *                if a database-access error occurs
      */
     public void updateAsciiStream(int columnIndex, InputStream x,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
                     long length) throws SQLException {
         if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     length, Integer.MAX_VALUE).getSQLException();
         else
             updateAsciiStream(columnIndex,x,(int)length);
@@ -5680,6 +5936,7 @@ public abstract class ClientResultSet implements ResultSet,
      *      result set
      */
     public void updateBinaryStream(int columnIndex, InputStream x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -5721,6 +5978,7 @@ public abstract class ClientResultSet implements ResultSet,
          if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     length, Integer.MAX_VALUE).getSQLException();
         else
             updateBinaryStream(columnIndex,x,(int)length);
@@ -5745,6 +6003,7 @@ public abstract class ClientResultSet implements ResultSet,
      *      result set
      */
     public void updateBlob(int columnIndex, InputStream x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -5756,6 +6015,7 @@ public abstract class ClientResultSet implements ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                     resultSetMetaData_.types_[columnIndex -1],
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                     new ClientBlob(agent_, x)));
             } catch (SqlException se) {
                 throw se.getSQLException();
@@ -5822,6 +6082,7 @@ public abstract class ClientResultSet implements ResultSet,
         if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     length, Integer.MAX_VALUE).getSQLException();
         else
             updateCharacterStream(columnIndex,x,(int)length);
@@ -5848,6 +6109,7 @@ public abstract class ClientResultSet implements ResultSet,
      *      result set
      */
     public void updateClob(int columnIndex, Reader reader)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -5859,6 +6121,7 @@ public abstract class ClientResultSet implements ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                  resultSetMetaData_.types_[columnIndex -1], 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                  new ClientClob(agent_, reader)));
             } catch (SqlException se) {
                 throw se.getSQLException();
@@ -5941,6 +6204,7 @@ public abstract class ClientResultSet implements ResultSet,
      *      result set
      */
     public void updateBinaryStream(String columnLabel, InputStream x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         try {
             updateBinaryStream(findColumnX(columnLabel, "updateBinaryStream"), x);
@@ -5996,6 +6260,7 @@ public abstract class ClientResultSet implements ResultSet,
      *      result set
      */
     public void updateBlob(String columnLabel, InputStream x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         try {
             updateBlob(findColumnX(columnLabel, "updateBlob"), x);
@@ -6126,6 +6391,7 @@ public abstract class ClientResultSet implements ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                  resultSetMetaData_.types_[columnIndex -1],
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                  new ClientClob(agent_, x, (int)length)));
             } catch (SqlException se) {
                 throw se.getSQLException();
@@ -6240,6 +6506,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @param index 1-based column index
      */
     public final void markLOBAsPublished(int index) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
         this.lobState.markAsPublished(index);
     }
 
@@ -6255,6 +6522,7 @@ public abstract class ClientResultSet implements ResultSet,
             SanityManager.ASSERT(this.lobState == null,
                     "LOB state tracker already initialized.");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
         if (this.connection_.supportsSessionDataCaching() &&
                 this.resultSetMetaData_.hasLobColumns()) {
             final int columnCount = this.resultSetMetaData_.columns_;
@@ -6263,6 +6531,7 @@ public abstract class ClientResultSet implements ResultSet,
             boolean[] tmpIsBlob = new boolean[columnCount];
             for (int i=0; i < columnCount; i++) {
                 int type = this.resultSetMetaData_.types_[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (type == ClientTypes.BLOB || type == ClientTypes.CLOB) {
                     tmpIndexes[lobCount] = i +1; // Convert to 1-based index.
                     tmpIsBlob[lobCount++] = (type == ClientTypes.BLOB);
@@ -6273,6 +6542,7 @@ public abstract class ClientResultSet implements ResultSet,
             boolean[] isBlob = new boolean[lobCount];
             System.arraycopy(tmpIndexes, 0, lobIndexes, 0, lobCount);
             System.arraycopy(tmpIsBlob, 0, isBlob, 0, lobCount);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3601
             this.lobState = new LOBStateTracker(lobIndexes, isBlob, true);
         } else {
             // Use a no-op state tracker to simplify code expecting a tracker.
@@ -6281,6 +6551,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     public Reader getNCharacterStream(int columnIndex)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throws SQLException {
         throw SQLExceptionFactory.notImplemented("getNCharacterStream(int)");
     }
@@ -6464,6 +6735,19 @@ public abstract class ClientResultSet implements ResultSet,
      */
 
      public void updateNClob(String columnName, Reader x, long length)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                            throws SQLException {
          throw SQLExceptionFactory.notImplemented("updateNClob(String,Reader,long)");
      }

@@ -130,6 +130,7 @@ public class RealRowCountStatistics
      * @see RealBasicNoPutResultSetStatistics#getChildren
      */
     public Vector<ResultSetStatistics> getChildren() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Vector<ResultSetStatistics> children = new Vector<ResultSetStatistics>();
         children.addElement(childResultSetStatistics);
 

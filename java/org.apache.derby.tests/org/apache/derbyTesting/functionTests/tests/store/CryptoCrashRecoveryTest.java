@@ -82,7 +82,9 @@ public class CryptoCrashRecoveryTest
             suite = TestConfiguration.embeddedSuite(
                     CryptoCrashRecoveryTest.class);
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             suite = new BaseTestSuite(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
                     "CryptoCrashRecovery disabled due to non-debug build");
             println("CryptoCrashRecoveryTest disabled due to non-debug build");
         }
@@ -155,6 +157,7 @@ public class CryptoCrashRecoveryTest
     private void runCrashRecoveryTestCases(DataSource ds, int operation,
                                            boolean useEncPwd)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         Connection con = null; // silence the compiler
         switch (operation) {
             case OP_DECRYPT:
@@ -227,6 +230,7 @@ public class CryptoCrashRecoveryTest
         crash(ds, operation, useEncPwd, TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT);
         crashInRecovery(ds, useEncPwd, useNewCredential,
                      TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         if (operation == OP_DECRYPT) {
             useNewCredential = null;
         }
@@ -250,6 +254,7 @@ public class CryptoCrashRecoveryTest
         setDebugFlag(debugFlag);
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
             switch (operation) {
                 case OP_REENCRYPT:
                     reEncryptDatabase(ds, useEncPwd);
@@ -588,6 +593,7 @@ public class CryptoCrashRecoveryTest
      * @throws SQLException if any database exception occurs
      */
     private Connection decryptDatabase(DataSource ds, boolean useEncPwd)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
         throws SQLException {
         String connAttrs = "decryptDatabase=true;";
         if (useEncPwd) {

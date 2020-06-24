@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.StaticClassFieldReferenceNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -64,6 +65,8 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 * @param	fieldName		The field name
      * @param   cm              The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     StaticClassFieldReferenceNode(
             String javaClassName,
             String fieldName,
@@ -89,6 +92,8 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JavaValueNode bindExpression(FromList fromList,
                                  SubqueryList subqueryList,
                                  List<AggregateNode> aggregates)
@@ -221,6 +226,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 		/*

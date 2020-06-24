@@ -116,6 +116,7 @@ public interface JoinStrategy {
 	 * @return	The extra selectivity due to non-base predicates
 	 */
 	double nonBasePredicateSelectivity(Optimizable innerTable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 										OptimizablePredicateList predList)
 	throws StandardException;
 
@@ -178,6 +179,7 @@ public interface JoinStrategy {
 
     /** Get the operator symbol used to represent this join strategy in optimizer traces */
     String  getOperatorSymbol();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
 	/**
 	 * Get the name of the result set method for base table scans
@@ -188,6 +190,7 @@ public interface JoinStrategy {
      * @param validatingCheckConstraint True of this is a special scan to
      *        validate a check constraint.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String resultSetMethodName(
         boolean bulkFetch,
         boolean multiprobe,

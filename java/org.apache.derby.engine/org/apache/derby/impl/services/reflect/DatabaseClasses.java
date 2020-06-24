@@ -64,6 +64,7 @@ import org.apache.derby.iapi.util.ByteArray;
 	@see org.apache.derby.iapi.services.loader.ClassFactory
 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
 abstract class DatabaseClasses
 	implements ClassFactory, ModuleControl
 {
@@ -79,6 +80,7 @@ abstract class DatabaseClasses
 	** Constructor
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
 	DatabaseClasses() {
 	}
 
@@ -170,6 +172,7 @@ abstract class DatabaseClasses
         int lastDot = fullyQualifiedName.lastIndexOf((int)'.');
         String filename = fullyQualifiedName.substring(lastDot+1,fullyQualifiedName.length()).concat(".class");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		Object env = getMonitor().getEnvironment();
 		File dir = env instanceof File ? (File) env : null;
 
@@ -181,6 +184,7 @@ abstract class DatabaseClasses
 		try {
             FileOutputStream fis;
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 fis = AccessController.doPrivileged(
                         new PrivilegedExceptionAction<FileOutputStream>() {
                             public FileOutputStream run() throws IOException {
@@ -199,6 +203,7 @@ abstract class DatabaseClasses
 			fis.close();
 		} catch (IOException e) {
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4859
 				SanityManager.THROWASSERT("Unable to write .class file", e);
 		}
 	}
@@ -228,6 +233,7 @@ abstract class DatabaseClasses
             }
         }
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-485
 		Throwable loadError;
 		try {
 			try {
@@ -305,6 +311,7 @@ abstract class DatabaseClasses
 	** Keep track of loaded generated classes and their GeneratedClass objects.
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	abstract LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump); 
     
     /**
@@ -313,6 +320,7 @@ abstract class DatabaseClasses
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

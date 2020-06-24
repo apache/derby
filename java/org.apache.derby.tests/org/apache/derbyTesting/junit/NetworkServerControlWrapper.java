@@ -58,6 +58,7 @@ public class NetworkServerControlWrapper {
     NetworkServerControlWrapper()
             throws Exception {
         // Try to load the NetworkServerControl class.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Class<?> clazzSC = null;
         try {
             clazzSC =

@@ -48,6 +48,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
     public static Test suite() {
 
         if (!Derby.hasTools())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("empty: no tools support");
         
         // check to see if we have derbynet.jar or derbyclient.jar
@@ -57,9 +58,11 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         if (!Derby.hasClient())
             isClient=false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test suite = new BaseTestSuite(
             SysinfoCPCheckTest.class, "Sysinfo ClassPath Checker");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5211
         return new LocaleTestSetup(suite, Locale.ENGLISH);
     }
 
@@ -74,6 +77,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
      *  Test Classpath Checker output for 3 supported variations
      */
     public void testClassPathChecker() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
         String Success = "Success: All Derby related classes found in class path.";
         // for testing the -cp with valid class
         String thisclass = "org.apache.derbyTesting.functionTests.tests.tools." +
@@ -92,8 +96,11 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                     "libraries; typically, only some are needed.", null},
                 // incorrect syntax, or 'args' - should return usage
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4806
+//IC see: https://issues.apache.org/jira/browse/DERBY-4597
                         "a",
                         "0",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                         "Usage: java org.apache.derby.tools.sysinfo -cp ["
                                 + " [ embedded ][ server ][ client] [ tools ]"
                                 + " [ anyClass.class ] ]", null },
@@ -114,8 +121,10 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         for (tst=0; tst<tstargs.length ; tst++)
         {
             ByteArrayOutputStream rawBytes = getOutputStream();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2903
 
             // First obtain the output for the sysinfo command
+//IC see: https://issues.apache.org/jira/browse/DERBY-3771
             PrintStream testOut = new PrintStream(rawBytes,
                     false);
             setSystemOut(testOut);
@@ -145,6 +154,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                 BufferedReader sysinfoOutput = new BufferedReader(
                     new InputStreamReader(
                         new ByteArrayInputStream(testRawBytes)));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3771
 
                 // evaluate the output
                 // compare the sentence picked
@@ -183,6 +193,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                 if (tstargs[tst][3] != null && !found)
                     fail ("did not find the string searched for: " + 
                          tstargs[tst][3] + " for command -cp: " + tstargs[tst][0]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2903
 
                 // read the line to be compared
                 s = sysinfoOutput.readLine();
@@ -197,6 +208,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                 // read one more line - should be the next command's sequence number
                 s = sysinfoOutput.readLine();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2903
                 sysinfoOutput.close();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -211,6 +223,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         // if there is no derbynet.jar, the syntax should still
         // work, but the comparisons will fail. So never mind.
         // JSR169 / J2ME does not support client or server
+//IC see: https://issues.apache.org/jira/browse/DERBY-2903
         if ((kind.equals("server") || kind.equals("client")) 
                 && JDBC.vmSupportsJSR169())
             return false;
@@ -223,11 +236,13 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         return true;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2903
     ByteArrayOutputStream getOutputStream() {
         return new ByteArrayOutputStream(20 * 1024);
     }
     
     public void testjavaVersion(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
         assertEquals(JVMInfo.J2SE_18, JVMInfo.JDK_ID);
     }
      

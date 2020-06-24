@@ -92,6 +92,7 @@ public class Triggers
 		if (stmt.execute(text))
 		{
 			ResultSet rs = stmt.getResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6516
             try {
                 while (rs.next()) {}
             } catch (SQLException e) {
@@ -111,6 +112,8 @@ public class Triggers
 
 	public static void getConnection() throws Throwable
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-551
+//IC see: https://issues.apache.org/jira/browse/DERBY-1261
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		conn.close();
 		System.out.println("getConnection() called");

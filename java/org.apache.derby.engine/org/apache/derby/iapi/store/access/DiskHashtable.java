@@ -94,8 +94,10 @@ public class DiskHashtable
         this.tc                         = tc;
         this.key_column_numbers         = key_column_numbers;
         this.remove_duplicates          = remove_duplicates;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
         this.keepAfterCommit            = keepAfterCommit;
         LanguageConnectionContext lcc   = (LanguageConnectionContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
 
@@ -129,6 +131,7 @@ public class DiskHashtable
                 "heap",
                 template,
                 (ColumnOrdering[]) null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 collation_ids,
                 (Properties) null,
                 tempFlags);
@@ -166,6 +169,7 @@ public class DiskHashtable
 
         // default collation is used for hash code and row location
         int[] index_collation_ids = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             {StringDataValue.COLLATION_TYPE_UCS_BASIC,
              StringDataValue.COLLATION_TYPE_UCS_BASIC};
 
@@ -260,6 +264,7 @@ public class DiskHashtable
     {
         int hashCode = key.hashCode();
         int rowCount = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         DataValueDescriptor[] firstRow = null;
         List<DataValueDescriptor[]> allRows = null;
 
@@ -290,6 +295,7 @@ public class DiskHashtable
                     if( existenceOnly)
                         return this;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     DataValueDescriptor[] clonedRow =
                             BackingStoreHashtable.shallowCloneRow(row);
 
@@ -322,6 +328,7 @@ public class DiskHashtable
                     }
                     if( remove_duplicates)
                         // This must be the only row with the key
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                         return clonedRow;
                 }
             }
@@ -331,6 +338,7 @@ public class DiskHashtable
             scan.close();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (allRows == null) {
             // No duplicates. Return the single row, or null if no row was
             // found for the given key.
@@ -403,6 +411,7 @@ public class DiskHashtable
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );
@@ -433,6 +442,7 @@ public class DiskHashtable
             try
             {
                 scan = tc.openScan( rowConglomerateId,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
                                     keepAfterCommit,
                                     0, // read only
                                     TransactionController.MODE_TABLE,
@@ -448,6 +458,7 @@ public class DiskHashtable
                 {
                     scan.close();
                     scan = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
                 } else if (keepAfterCommit) {
                     rowloc = rowConglomerate.newRowLocationTemplate();
                     scan.fetchLocation(rowloc);
@@ -479,6 +490,7 @@ public class DiskHashtable
                 throw new NoSuchElementException();
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
                 if (scan.isHeldAfterCommit()) {
                     // automatically reopens scan:
                     if (!scan.positionAtRowLocation(rowloc)) {

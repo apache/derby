@@ -40,6 +40,7 @@ import org.apache.derby.iapi.sql.depend.Provider;
  */
 
 public final class DefaultDescriptor 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	extends UniqueTupleDescriptor
 	implements Provider, Dependent
 {
@@ -208,6 +209,7 @@ public final class DefaultDescriptor
 
 				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT, 
 									dm.getActionString(action), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
 									p.getObjectName(), "DEFAULT",
 									td.getQualifiedName() + "." +
 									cd.getColumnName());

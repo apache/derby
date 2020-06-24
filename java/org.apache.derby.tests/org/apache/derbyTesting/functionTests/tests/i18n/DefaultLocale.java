@@ -30,6 +30,7 @@ public class DefaultLocale {
 
 	static {
 		savedLocale=java.util.Locale.getDefault().toString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
 		setDefaultLocale("rr", "TT");
 	}
 
@@ -46,6 +47,7 @@ public class DefaultLocale {
 	// used in urlLocale test
 	public static void checkRDefaultLocale() throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-834
 		String dbLocale = org.apache.derby.iapi.db.Factory.getDatabaseOfConnection().getLocale().toString();
 		//System.out.println(savedLocale);
 		//System.out.println(dbLocale);
@@ -70,6 +72,7 @@ public class DefaultLocale {
 		// called through a SQL statement and thus a generated
 		// class. The generated class on the stack has no permissions
 		// granted to it. Needs write permission on user.language
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         LocaleTestSetup.setDefaultLocale(
                 new java.util.Locale(Locale.trim(), Code.trim()));
 	}

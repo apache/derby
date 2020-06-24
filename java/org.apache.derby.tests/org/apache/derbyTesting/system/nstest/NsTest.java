@@ -72,6 +72,7 @@ public class NsTest extends Thread
     private static  final   long    MILLIS_PER_MINUTE = 1000L * 60L;
     
     private static  final   String  USAGE =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         "Usage:\n" +
         "\n" +
         "    java org.apache.derbyTesting.system.nstest.NsTest [ DerbyClient | Embedded [ small ] ]\n" +
@@ -84,6 +85,7 @@ public class NsTest extends Thread
         "\n" +
         "    -D" + OUTPUT_FILE + "=fileName    Redirects output and errors to a file.\n" +
         "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         "    -D" + JUST_COUNT_ERRORS + "=true    Makes the test run quietly at steady-state, counting errors, and printing a summary at the end.\n" +
         "\n" +
         "    -D" + DURATION + "=$number    Run for this number of minutes.\n";
@@ -246,8 +248,10 @@ public class NsTest extends Thread
 	public static int numActiveTestThreads() {
 		int activeThreadCount=0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( testThreads != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
             for (int i = 0; i < testThreads.length ; i++)
             {
                 if (testThreads[i] != null && testThreads[i].isAlive())
@@ -259,6 +263,7 @@ public class NsTest extends Thread
 	}
 
     public  static  void    updateMemoryTracker
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         ( long newTotalMemory, long newFreeMemory, Date newTimestamp )
     {
         _totalMemory = newTotalMemory;
@@ -268,6 +273,7 @@ public class NsTest extends Thread
 
     public  static  void    updateSequenceTracker( long newValue )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         _maxSequenceCounter = newValue;
     }
 
@@ -341,6 +347,7 @@ public class NsTest extends Thread
 	private static void setSmallConfig() {
         
 		INIT_THREADS = 3; //keep this low to avoid deadlocks
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 		MAX_INITIAL_ROWS = 150; //for a small test
 		MAX_ITERATIONS = 50; //for a small test
 		MAX_LOW_STRESS_ROWS = 10; //for a small test
@@ -360,9 +367,11 @@ public class NsTest extends Thread
 	//
 	// ****************************************************************************
 	public static void main(String[] args) throws SQLException, IOException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 	InterruptedException, Exception, Throwable
     {
         _startTimestamp = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 		String outputFile = System.getProperty( OUTPUT_FILE );
         statisticsLogger = System.out;
@@ -371,6 +380,7 @@ public class NsTest extends Thread
             statisticsLogger = new PrintStream( outputFile );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		String duration = System.getProperty( DURATION );
         if ( duration != null )
         {
@@ -385,6 +395,7 @@ public class NsTest extends Thread
         Runtime.getRuntime().addShutdownHook( new Thread( new ShutdownHook() ) );
 
 		Connection conn = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 		if (args.length >= 1) {
 			driver_type = args[0];
 			if (!((driver_type.equalsIgnoreCase("DerbyClient"))
@@ -393,20 +404,25 @@ public class NsTest extends Thread
 				printUsage();
 				return;
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			logger.println("Test nstest starting....., using driver: "
 					+ driver_type);
 		} else {
 			driver_type = "DerbyClient";
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 		if (args.length >= 2) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 			String testConfiguration = args [1];
 			if (testConfiguration.equalsIgnoreCase("small"))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				logger.println("using small config");
 				setSmallConfig();
 			}    
 		}
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		TimerThread timerThread = null;
         if ( _duration > 0L )
         {
@@ -416,10 +432,12 @@ public class NsTest extends Thread
 
 		// Load the driver and get a connection to the database
 		String jdbcUrl = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
 		try {
 			if (driver_type.equalsIgnoreCase("Embedded")) {
 				// logger.println("Driver embedd : " + driver_type);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				logger.println("Loading the embedded driver...");
 				clazz = Class.forName(embedDriver);
                 clazz.getConstructor().newInstance();
@@ -439,6 +457,7 @@ public class NsTest extends Thread
 			}
 			prop.setProperty("user", user);
 			prop.setProperty("password", password);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			logger
 			.println("Getting a connection using the url: " + jdbcUrl);
 			logger.println("JDBC url= " + jdbcUrl);
@@ -477,6 +496,7 @@ public class NsTest extends Thread
 		try {
 			conn.close();
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			logger
 			.println("FAIL - Error closing the connection in nstest.main():");
 			printException("Closing connection in nstest.main()", e);
@@ -485,6 +505,7 @@ public class NsTest extends Thread
 		// check memory in separate thread-- allows us to monitor usage during
 		// database calls
 		// 200,000 msec = 3min, 20 sec delay between checks
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		logger.println("Starting memory checker thread");
 		MemCheck mc = new MemCheck(200000);
 		mc.start();
@@ -504,6 +525,7 @@ public class NsTest extends Thread
 
 		if (NsTest.schemaCreated == false) {
 			// Table was created by this object, so we need to load it
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			logger
 			.println("Kicking off initialization threads that will populate the test table");
 			NsTest initThreads[] = new NsTest[INIT_THREADS];
@@ -524,6 +546,7 @@ public class NsTest extends Thread
 		// created the schema
 		if (NsTest.schemaCreated) // true means that the schema was created by
 			// another jvm
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			logger
 			.println("Schema has already been created by another process!");
 
@@ -532,6 +555,7 @@ public class NsTest extends Thread
 		// not need to create one of their own.
 		// The CREATE_DATABASE_ONLY FLAG is set with the rest of the flags
 		if (CREATE_DATABASE_ONLY) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			logger
 			.println("Finished creating the database, TEST THREADS WILL NOT RUN!!");
 			// Finally also stop the memory checker and sequence threads, else the test will
@@ -546,17 +570,20 @@ public class NsTest extends Thread
 		// Now kick off the actual test threads that will do the work for us.
 		// Note that we use the value TESTER when initializing the threads.
 		// The total number of threads is NUMTESTER1+NUMTESTER2+NUMTESTER3
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		logger
 		.println("Kicking off test threads that will work over the test table");
 
 		int numTestThread = 0;
 		int maxTestThreads = 0;
 		String runBackup = System.getProperty( BACKUP_FLAG );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 		if ((runBackup != null) && (runBackup.equalsIgnoreCase("false")))
 				maxTestThreads = NUMTESTER1 + NUMTESTER2 + NUMTESTER3;
 		else
 				maxTestThreads = 1 + NUMTESTER1 + NUMTESTER2 + NUMTESTER3;
 		testThreads = new NsTest[maxTestThreads];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 
 		// This loop is made of 3 subloops that will initialize the required
 		// amount of tester threads
@@ -566,6 +593,7 @@ public class NsTest extends Thread
 			// Check for property setting to decide the need for starting
 			// BackupRestore thread
 			if ((runBackup != null) && (runBackup.equalsIgnoreCase("false"))) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				logger.println("BackupRestore Thread not started...");
 			} else {
 				// Otherwise, start the BackupRestore Thread by default
@@ -597,17 +625,20 @@ public class NsTest extends Thread
 
 		// check sequence value thread
 		// 60,000 msec = 1 minute delay between checks
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		logger.println("Starting sequence reader thread");
 		SequenceReader  sequenceReader = new SequenceReader( DriverManager.getConnection( jdbcUrl, prop ), 60000 );
 		sequenceReader.start();
 
 		// Wait for the test threads to finish and join back
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		for (int j = 0; j < maxTestThreads; j++)
         {
             logger.println("Waiting for thread " + j+ " to join back/finish");
 			testThreads[j].join();
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( timerThread != null )
         {
             timerThread.stopNow();
@@ -616,6 +647,7 @@ public class NsTest extends Thread
         }
 
         // stop the sequence reader thread
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 		sequenceReader.stopNow = true;
 		sequenceReader.interrupt();
 		sequenceReader.join();
@@ -638,6 +670,7 @@ public class NsTest extends Thread
         else { _statisticsAlreadyPrinted = true; }
 
         _endTimestamp = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 		statisticsLogger.println("");
 		statisticsLogger.println("STATISTICS OF OPERATIONS DONE");
@@ -666,13 +699,16 @@ public class NsTest extends Thread
 		.println("NOTE: Failing operations could be because of locking issue that are\n"
 				+ "directly related to the application logic.  They are not necessarily bugs.");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         statisticsLogger.println( "\nMax sequence counter peeked at = " + _maxSequenceCounter + "\n" );
         
         statisticsLogger.println( "\nLast total memory = " + _totalMemory + ", last free memory = " + _freeMemory + " as measured at " + _lastMemoryCheckTime + "\n" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
         if ( _errors.size() > 0 )
         {
             // sort the errors by the timestamps of their first occurrences
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
             NsTestError[]   errors = new NsTestError[ _errors.size() ];
             _errors.values().toArray( errors );
             Arrays.sort( errors );
@@ -726,8 +762,10 @@ public class NsTest extends Thread
     private static  void    printError( NsTestError error )
     {
         Throwable   throwable = error.throwable();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         String          stackTrace = getStackTrace( throwable );
         int             count = error.count();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         Timestamp   firstOccurrenceTime = new Timestamp( error.getFirstOccurrenceTime() );
         Timestamp   lastOccurrenceTime = new Timestamp( error.getLastOccurrenceTime() );
         String      sqlState = (throwable instanceof SQLException) ? 
@@ -745,6 +783,7 @@ public class NsTest extends Thread
         buffer.append( "\n" );
         buffer.append( ERROR_BANNER2 );
         buffer.append( "\n" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         buffer.append( ERROR_BANNER2 );
         buffer.append( "First occurrence at " + firstOccurrenceTime );
         buffer.append( ", last occurrence at " + lastOccurrenceTime );
@@ -798,6 +837,7 @@ public class NsTest extends Thread
 	public void run() {
 
 		logger.println(this.getName() + " is now running");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 		if (this.type == INIT) {
 			Initializer Init = new Initializer(this.getName());
@@ -821,6 +861,7 @@ public class NsTest extends Thread
 				Tstr4 = new BackupRestoreReEncryptTester(
 						"BackupRestoreReEncrypt" + this.getName());
 			} catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				logger
 				.println(ioe
 						+ "=====> Unable to create backup log file, test cannot proceed ");
@@ -848,9 +889,11 @@ public class NsTest extends Thread
 	// ****mixed but rather one exception printed at a time
     public static synchronized void printException(String where, Exception e)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( justCountErrors() )
         {
             addError( e );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
             vetError( e );
             return;
         }
@@ -871,6 +914,7 @@ public class NsTest extends Thread
 						+ " SQLSTATE: " + m);
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5452
 		if (e.getMessage() == null) {
 			logger.println("NULL error message detected");
 			logger.println("Here is the NULL exection - " + e.toString());
@@ -880,6 +924,7 @@ public class NsTest extends Thread
 		logger.println("At this point - " + where
 				+ ", exception thrown was : " + e.getMessage());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         vetError( e );
 	}
 
@@ -922,6 +967,7 @@ public class NsTest extends Thread
 			nsw.start();
 			Thread.sleep(10000);
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			e.printStackTrace( logger );
 			throw e;
 		}
@@ -931,6 +977,7 @@ public class NsTest extends Thread
     /** Return true if the connection is dead */
     public  static  boolean deadConnection( Throwable t )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( t instanceof SQLException )
         {
             SQLException    se = (SQLException) t;

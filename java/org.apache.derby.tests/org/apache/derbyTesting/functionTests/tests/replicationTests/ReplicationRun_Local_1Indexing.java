@@ -51,6 +51,7 @@ public class ReplicationRun_Local_1Indexing extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_1Indexing Suite");
         
@@ -127,6 +128,7 @@ public class ReplicationRun_Local_1Indexing extends ReplicationRun
     {
         ClientDataSourceInterface ds;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");

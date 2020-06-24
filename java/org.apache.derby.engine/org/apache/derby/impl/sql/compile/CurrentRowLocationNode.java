@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CurrentRowLocationNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -39,6 +40,8 @@ import org.apache.derby.iapi.types.TypeId;
  * that represents the ResultSet to be deleted or updated.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CurrentRowLocationNode extends ValueNode
 {
 
@@ -60,6 +63,8 @@ class CurrentRowLocationNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates)
@@ -133,6 +138,7 @@ class CurrentRowLocationNode extends ValueNode
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getRowLocation", ClassName.RowLocation, 0);
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateDataValue(mb, getTypeCompiler(), 
 				getTypeServices().getCollationType(), field);
 

@@ -254,10 +254,12 @@ public class BigDataTest extends BaseJDBCTestCase {
 
     public void tearDown() throws Exception {
         dropTable(BIG_TABLE_NAME);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5710
         super.tearDown();
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("BigDataTest");
         suite.addTest(TestConfiguration.defaultSuite(BigDataTest.class));
         return suite;

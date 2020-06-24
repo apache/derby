@@ -55,6 +55,7 @@ public class DeclareGlobalTempTableJavaJDBC30Test extends BaseJDBCTestCase {
         super(name);
     }	
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite();
         suite.addTest(TestConfiguration.embeddedSuite(
                 DeclareGlobalTempTableJavaJDBC30Test.class));
@@ -69,6 +70,7 @@ public class DeclareGlobalTempTableJavaJDBC30Test extends BaseJDBCTestCase {
      * @return A suite of tests being run with client only
      */
     private static Test getClientSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Client/Server");
         // skip the tests with more than 1 savepoint -  
         // see (lack of support described in) DERBY-3687

@@ -46,6 +46,7 @@ public class BitTypeCompiler extends BaseTypeCompiler
         {
             if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
 
 			return (otherType.isBitTypeId() ||
 					otherType.isBlobTypeId() ||

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UnaryOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -46,6 +47,8 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class UnaryOperatorNode extends OperatorNode
 {
 	String	operator;
@@ -74,6 +77,7 @@ class UnaryOperatorNode extends OperatorNode
     // class for XMLPARSE and XMLSERIALIZE.
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_XMLPARSE = 0;
     final static int K_XMLSERIALIZE = 1;
     final static int K_BASE = 2; // when UnaryOperatorNode is used as
@@ -127,6 +131,7 @@ class UnaryOperatorNode extends OperatorNode
         this.operand = operand;
         this.operator = operator;
         this.methodName = methodNameOrAddedArgs;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         this.kind = K_BASE;
     }
 
@@ -232,6 +237,8 @@ class UnaryOperatorNode extends OperatorNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -251,6 +258,8 @@ class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @return	The operand of this unary operator.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getOperand()
 	{
 		return operand;
@@ -266,8 +275,11 @@ class UnaryOperatorNode extends OperatorNode
 	 * 
 	 * @return	The parameter operand of this unary operator else null.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ParameterNode getParameterOperand() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if (requiresTypeFromContext() == false)
 			return null;
 		else {
@@ -297,11 +309,13 @@ class UnaryOperatorNode extends OperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
         bindOperand(fromList, subqueryList, aggregates);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_XMLPARSE) {
             bindXMLParse();
         } else if (kind == K_XMLSERIALIZE) {
@@ -318,6 +332,7 @@ class UnaryOperatorNode extends OperatorNode
      * method to bind the operand.
 	 */
 	protected void bindOperand(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -337,6 +352,7 @@ class UnaryOperatorNode extends OperatorNode
 		 * tree to a built-in type.
 		 */
 		if (! (operand instanceof UntypedNullConstantNode) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			operand.getTypeId().userType() &&
 			! (this instanceof IsNullNode))
 		{
@@ -375,6 +391,7 @@ class UnaryOperatorNode extends OperatorNode
 
         // The result type of XMLParse() is always an XML type.
         setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 Types.SQLXML));
     }
 
@@ -449,6 +466,8 @@ class UnaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -508,6 +527,8 @@ class UnaryOperatorNode extends OperatorNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -552,6 +573,7 @@ class UnaryOperatorNode extends OperatorNode
 
 	void bindParameter() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind == K_XMLPARSE)
 		{
 			/* SQL/XML[2006] allows both binary and character strings for
@@ -584,6 +606,7 @@ class UnaryOperatorNode extends OperatorNode
 			throw StandardException.newException(
 				SQLState.LANG_XMLPARSE_UNKNOWN_PARAM_TYPE);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         else if (kind == K_XMLSERIALIZE) {
         // For now, since JDBC has no type defined for XML, we
         // don't allow binding to an XML parameter.
@@ -610,6 +633,7 @@ class UnaryOperatorNode extends OperatorNode
 									throws StandardException
 	{
 		String resultTypeName = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             (kind == K_BASE)
 				? getTypeCompiler().interfaceName()
 				: resultInterfaceType;
@@ -643,6 +667,8 @@ class UnaryOperatorNode extends OperatorNode
 			*/
 			mb.putField(field);
 		} else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-688
+//IC see: https://issues.apache.org/jira/browse/DERBY-567
 			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 				methodName, resultTypeName, 0);
 		}
@@ -657,6 +683,8 @@ class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getReceiverInterfaceName() throws StandardException {
 		if (SanityManager.DEBUG)
 		{
@@ -664,6 +692,7 @@ class UnaryOperatorNode extends OperatorNode
 								"cannot get interface without operand");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (kind != K_BASE)
 			return receiverInterfaceType;
 		
@@ -704,11 +733,13 @@ class UnaryOperatorNode extends OperatorNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (operand != null)
 		{
 			operand = (ValueNode)operand.accept(v);
@@ -727,6 +758,7 @@ class UnaryOperatorNode extends OperatorNode
     int addXmlOpMethodParams(ExpressionClassBuilder acb,
 		MethodBuilder mb, LocalField resultField) throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if ((kind != K_XMLPARSE) &&
                 (kind != K_XMLSERIALIZE)) {
             // nothing to do.
@@ -784,6 +816,7 @@ class UnaryOperatorNode extends OperatorNode
      */
     boolean isEquivalent(ValueNode o) throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
     		UnaryOperatorNode other = (UnaryOperatorNode)o;
     		return (operator.equals(other.operator) && 

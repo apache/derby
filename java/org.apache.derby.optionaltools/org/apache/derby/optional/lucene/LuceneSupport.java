@@ -142,10 +142,12 @@ public class LuceneSupport implements OptionalTool
         forbidReadOnlyConnections();
 
         // not allowed during soft-upgrade
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         try {
             ConnectionUtil.getCurrentLCC().getDataDictionary().checkVersion
                 ( DataDictionary.DD_VERSION_DERBY_10_11, "luceneSupport" );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (StandardException se)    { throw ToolUtilities.sqlException( se ); }
         
         Connection  conn = getDefaultConnection();
@@ -155,8 +157,10 @@ public class LuceneSupport implements OptionalTool
         // Lucene indexes are not allowed in encrypted databases. They leak
         // encrypted data in plaintext.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         if ( getDataFactory( conn ).databaseEncrypted() )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException( SQLState.LUCENE_ENCRYPTED_DB );
         }
 
@@ -178,6 +182,7 @@ public class LuceneSupport implements OptionalTool
 		listFunction.append("lastupdated timestamp,");
 		listFunction.append("luceneversion varchar( 20 ),");
 		listFunction.append("analyzer varchar( 32672 ),");
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		listFunction.append("indexdescriptormaker varchar( 32672 )");
 		listFunction.append(")");
 		listFunction.append("language java ");
@@ -192,6 +197,7 @@ public class LuceneSupport implements OptionalTool
 		createProcedure.append(" (schemaname varchar( 128 ),");
 		createProcedure.append("tablename varchar( 128 ),");
 		createProcedure.append("textcolumn varchar( 128 ),");
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		createProcedure.append("indexdescriptormaker varchar( 32672 ),");
 		createProcedure.append("keyColumns varchar( 32672 )...)");
 		createProcedure.append("parameter style derby modifies sql data language java external name ");
@@ -214,6 +220,7 @@ public class LuceneSupport implements OptionalTool
 		updateProcedure.append(" (schemaname varchar( 128 ),");
 		updateProcedure.append("tablename varchar( 128 ),");
 		updateProcedure.append("textcolumn varchar( 128 ),");
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		updateProcedure.append("indexdescriptormaker varchar( 32672 ))");
 		updateProcedure.append("parameter style java reads sql data language java external name ");
 		updateProcedure.append("'" + getClass().getName() + ".updateIndex'");
@@ -222,6 +229,7 @@ public class LuceneSupport implements OptionalTool
 
         if ( sqlAuthorizationEnabled ) { grantPermissions(); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         createLuceneDir( conn );
 	}
 
@@ -245,10 +253,13 @@ public class LuceneSupport implements OptionalTool
 	public void unloadTool(String... configurationParameters)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         forbidReadOnlyConnections();
         
         Connection  conn = getDefaultConnection();
         ToolUtilities.mustBeDBO( conn );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
         if ( !luceneSchemaExists( conn ) )
         {
@@ -261,6 +272,7 @@ public class LuceneSupport implements OptionalTool
         String      className = getClass().getName();
         int             endPackageIdx = className.lastIndexOf( "." );
         String      packageName = className.substring( 0, endPackageIdx );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         PreparedStatement   ps = conn.prepareStatement
             (
              "select s.schemaName, a.alias, a.aliastype\n" +
@@ -292,6 +304,7 @@ public class LuceneSupport implements OptionalTool
         //
         // Now delete the Lucene subdirectory;
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         StorageFactory storageFactory = getStorageFactory(conn);
         StorageFile luceneDir =
                 storageFactory.newStorageFile(Database.LUCENE_DIR);
@@ -320,10 +333,13 @@ public class LuceneSupport implements OptionalTool
         (
          String queryText,
          int    windowSize,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          Float scoreCeiling
          )
         throws ParseException, IOException, SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 		LuceneQueryVTI lqvti = new LuceneQueryVTI( queryText, windowSize, scoreCeiling );
 		return lqvti;
 	}
@@ -365,19 +381,23 @@ public class LuceneSupport implements OptionalTool
         throws SQLException, IOException, PrivilegedActionException
     {
         forbidReadOnlyConnections();
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         Connection              conn = getDefaultConnection();
 
         vetIdentifiers( schema, table, textcol );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
 
         // only the dbo or the schema owner can perform this function
         ToolUtilities.mustBeOwner( conn, schema );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
         if ( !tableFunctionExists( conn, schema, table, textcol ) )
         {
             throw ToolUtilities.newSQLException( SQLState.LUCENE_INDEX_DOES_NOT_EXIST );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         createOrRecreateIndex( conn, schema, table, textcol, indexDescriptorMaker, false );
 	}
 	
@@ -408,16 +428,19 @@ public class LuceneSupport implements OptionalTool
          )
         throws SQLException, IOException, PrivilegedActionException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         forbidReadOnlyConnections();
         
         Connection              conn = getDefaultConnection();
         DatabaseMetaData    dbmd = conn.getMetaData();
 
         vetIdentifiers( schema, table, textcol );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
 
         // First make sure that the text column exists and is a String type
         vetTextColumn( dbmd, schema, table, textcol );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         createOrRecreateIndex( conn, schema, table, textcol, indexDescriptorMaker, true, keyColumns );
 	}
 
@@ -435,13 +458,20 @@ public class LuceneSupport implements OptionalTool
 	private static void createOrRecreateIndex
         (
          Connection conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          String schema,
          String table,
          String textcol,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          String indexDescriptorMaker,
          boolean create,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          String... keyColumns
          )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException, IOException, PrivilegedActionException
     {
         VTITemplate.ColumnDescriptor[] primaryKeys = new VTITemplate.ColumnDescriptor[ 0 ];
@@ -458,11 +488,13 @@ public class LuceneSupport implements OptionalTool
         // can't create an index without specifying keys for joining it back to Derby data
         if ( primaryKeys.length == 0 )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException( SQLState.LUCENE_NO_PRIMARY_KEY );
         }
 
         // don't let the user create a table function with duplicate column names
         vetColumnName( ToolUtilities.derbyIdentifier( textcol ) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         for ( VTITemplate.ColumnDescriptor key : primaryKeys )
         {
             vetColumnName(  key.columnName );
@@ -470,6 +502,7 @@ public class LuceneSupport implements OptionalTool
         
         int             keyCount = 0;
         StorageFile propertiesFile = getIndexPropertiesFile( conn, schema, table, textcol );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         //
         // Drop the old index directory if we're recreating the index.
@@ -484,8 +517,10 @@ public class LuceneSupport implements OptionalTool
 
         // create the new directory
         DerbyLuceneDir  derbyLuceneDir = getDerbyLuceneDir( conn, schema, table, textcol );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         // get the Analyzer and the field names. use the default if the user didn't specify an override
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         if ( indexDescriptorMaker == null ) { indexDescriptorMaker = LuceneUtils.class.getName() + ".defaultIndexDescriptor"; }
         LuceneIndexDescriptor   indexDescriptor = getIndexDescriptor( indexDescriptorMaker );
         String[]  fieldNames = indexDescriptor.getFieldNames();
@@ -493,6 +528,7 @@ public class LuceneSupport implements OptionalTool
 
         // make sure the field names don't overlap with the key names
         sortAndVetFieldNames( fieldNames, primaryKeys );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         Properties  indexProperties = new Properties();
         indexProperties.setProperty( LUCENE_VERSION, luceneVersion.toString() );
@@ -502,9 +538,11 @@ public class LuceneSupport implements OptionalTool
             
         StringBuilder   tableFunction = new StringBuilder();
         tableFunction.append( "create function " + makeTableFunctionName( schema, table, textcol ) + "\n" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         tableFunction.append( "( query varchar( 32672 ), windowSize int, scoreCeiling real )\n" );
         tableFunction.append( "returns table\n(" );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6597
         writeIndexProperties( propertiesFile, indexProperties );
         
         PreparedStatement   ps = null;
@@ -512,12 +550,14 @@ public class LuceneSupport implements OptionalTool
         IndexWriter iw = null;
         try {
             iw = getIndexWriter( luceneVersion, analyzer, derbyLuceneDir );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
             // select all keys and the textcol from this column, add to lucene index
             StringBuilder query = new StringBuilder("select ");
         
             for ( VTITemplate.ColumnDescriptor keyDesc : primaryKeys )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
                 String  keyName = delimitID( keyDesc.columnName );
                 if ( keyCount > 0 ) { query.append( ", " ); }
                 query.append( keyName );
@@ -528,10 +568,12 @@ public class LuceneSupport implements OptionalTool
                 tableFunction.append( "\n\t" + keyName + " " + keyType );
                 keyCount++;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             tableFunction.append(",\n\t" + DOCUMENT_ID + " int");
             tableFunction.append(",\n\t" + SCORE + " real");
             tableFunction.append( "\n)\nlanguage java parameter style derby_jdbc_result_set contains sql\n" );
             tableFunction.append( "external name '" + LuceneSupport.class.getName() + ".luceneQuery'" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
             // now create the table function for this text column
             if ( create )
@@ -540,6 +582,7 @@ public class LuceneSupport implements OptionalTool
             }
         
             query.append(", ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             query.append( delimitID( ToolUtilities.derbyIdentifier( textcol ) ) );
             query.append(" from " + makeTableName( schema, table ) );
 
@@ -559,6 +602,7 @@ public class LuceneSupport implements OptionalTool
                 String  textcolValue = rs.getString( keyCount + 1 );
                 if ( textcolValue != null )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                     for ( String fieldName : fieldNames )
                     {
                         doc.add( new TextField( fieldName, textcolValue, Store.NO ) );
@@ -586,6 +630,7 @@ public class LuceneSupport implements OptionalTool
     /** Verify that the schema, table, and column names aren't null */
 	private static void vetIdentifiers
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
          String schema,
          String table,
          String textcol
@@ -602,12 +647,14 @@ public class LuceneSupport implements OptionalTool
      * fields have the same name.
      */
     private static  void    sortAndVetFieldNames( String[] fieldNames, VTITemplate.ColumnDescriptor[] keys )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         for ( String fieldName : fieldNames )
         {
             if ( fieldName == null )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
                 throw ToolUtilities.newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
             }
         }
@@ -621,6 +668,7 @@ public class LuceneSupport implements OptionalTool
         {
             if ( fieldName.equals( previousFieldName ) )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
                 throw ToolUtilities.newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
             }
             previousFieldName = fieldName;
@@ -648,11 +696,14 @@ public class LuceneSupport implements OptionalTool
 	 * @throws SQLException
 	 */
 	public static void dropIndex( String schema, String table, String textcol )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         forbidReadOnlyConnections();
         
         vetIdentifiers( schema, table, textcol );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
 
         getDefaultConnection().prepareStatement
             (
@@ -668,9 +719,11 @@ public class LuceneSupport implements OptionalTool
      * </p>
      */
 	private static void dropIndexDirectories( String schema, String table, String textcol )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         DerbyLuceneDir  derbyLuceneDir = getDerbyLuceneDir( getDefaultConnection(), schema, table, textcol );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         StorageFile indexDir = derbyLuceneDir.getDirectory();
 		StorageFile tableDir = indexDir.getParentDir();
@@ -737,6 +790,7 @@ public class LuceneSupport implements OptionalTool
         case    Types.VARBINARY:        return "varchar " + precisionToLength( precision ) + "  for bit data";
         case    Types.VARCHAR:          return "varchar" + precisionToLength( precision );
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         default:  throw ToolUtilities.newSQLException( SQLState.LUCENE_UNSUPPORTED_TYPE, typeName );
         }
     }
@@ -837,12 +891,14 @@ public class LuceneSupport implements OptionalTool
             break;
             
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException
                 ( SQLState.LUCENE_UNSUPPORTED_TYPE, keyDescriptor.typeName );
         }
 
         // Lucene fields do not allow null values
         if ( rs.wasNull() ) { field = null; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
 
         if ( field != null ) { doc.add( field ); }
     }
@@ -1025,6 +1081,7 @@ public class LuceneSupport implements OptionalTool
 	private static void vetTextColumn( DatabaseMetaData dbmd, String schema, String table, String textcol )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         schema = ToolUtilities.derbyIdentifier( schema );
         table = ToolUtilities.derbyIdentifier( table );
         textcol = ToolUtilities.derbyIdentifier( textcol );
@@ -1044,6 +1101,7 @@ public class LuceneSupport implements OptionalTool
                 }
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.sqlException
                 ( StandardException.newException( SQLState.LUCENE_NOT_A_STRING_TYPE ) );
         }
@@ -1065,15 +1123,18 @@ public class LuceneSupport implements OptionalTool
      * or text columns supplied by the user.
      */
     private static  void    vetColumnName( String columnName )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         String  derbyColumnName = columnName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
 
         if (
             DOCUMENT_ID.equals( derbyColumnName ) ||
             SCORE.equals( derbyColumnName )
             )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException( SQLState.LUCENE_BAD_COLUMN_NAME, derbyColumnName );
         }
     }
@@ -1084,6 +1145,7 @@ public class LuceneSupport implements OptionalTool
 	static String   makeTableName( String schema, String table )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         schema = ToolUtilities.derbyIdentifier( schema );
         table = ToolUtilities.derbyIdentifier( table );
 
@@ -1100,6 +1162,7 @@ public class LuceneSupport implements OptionalTool
         forbidCharacter( schema, table, textcol, "/" );
         forbidCharacter( schema, table, textcol, "\\" );
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         schema = ToolUtilities.derbyIdentifier( schema );
         String  function = makeUnqualifiedTableFunctionName( table, textcol );
 
@@ -1110,6 +1173,7 @@ public class LuceneSupport implements OptionalTool
     private static  String  makeUnqualifiedTableFunctionName( String table, String textcol )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         return ToolUtilities.derbyIdentifier( table ) + SEPARATOR +
             ToolUtilities.derbyIdentifier( textcol );
     }
@@ -1155,6 +1219,7 @@ public class LuceneSupport implements OptionalTool
 	static StorageFile getIndexPropertiesFile( Connection conn, String schema, String table, String textcol )
         throws SQLException, IOException, PrivilegedActionException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         return getIndexPropertiesFile( getDerbyLuceneDir( conn, schema, table, textcol ) );
     }
     
@@ -1188,6 +1253,7 @@ public class LuceneSupport implements OptionalTool
 
     /** Write the index properties file */
     private static  void    writeIndexProperties( final StorageFile file, Properties properties )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws IOException
     {
         if (file == null || properties == null) {
@@ -1221,10 +1287,12 @@ public class LuceneSupport implements OptionalTool
      * Raise an error if the connection is readonly.
      */
     private static  void    forbidReadOnlyConnections()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         if ( ConnectionUtil.getCurrentLCC().getAuthorizer().isReadOnlyConnection() )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException( SQLState.AUTH_WRITE_WITH_READ_ONLY_CONNECTION );
         }
     }
@@ -1276,15 +1344,18 @@ public class LuceneSupport implements OptionalTool
     /** Double quote an identifier in order to preserver casing */
     static String delimitID( String id )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
         return IdUtil.normalToDelimited( id );
     }
 
     /** Raise an error if an argument is being given a null value */
     static  void    checkNotNull( String argumentName, String argumentValue )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
         throws SQLException
     {
         if ( argumentValue == null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException( SQLState.ARGUMENT_MAY_NOT_BE_NULL, argumentName );
         }
     }
@@ -1300,6 +1371,7 @@ public class LuceneSupport implements OptionalTool
          )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         ResultSet   keysRS = conn.getMetaData().getPrimaryKeys
             ( null, ToolUtilities.derbyIdentifier( schema ), ToolUtilities.derbyIdentifier( table ) );
         ArrayList<VTITemplate.ColumnDescriptor>    keyArray = new ArrayList<VTITemplate.ColumnDescriptor>();
@@ -1342,6 +1414,7 @@ public class LuceneSupport implements OptionalTool
      */
     private static  VTITemplate.ColumnDescriptor[] getKeys
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          Connection conn,
          String schema,
          String table,
@@ -1349,6 +1422,7 @@ public class LuceneSupport implements OptionalTool
          )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         schema = ToolUtilities.derbyIdentifier( schema );
         String  functionName = makeUnqualifiedTableFunctionName( table, textcol );
         ArrayList<VTITemplate.ColumnDescriptor>    keyArray = new ArrayList<VTITemplate.ColumnDescriptor>();
@@ -1409,9 +1483,11 @@ public class LuceneSupport implements OptionalTool
         for ( String key : keyColumns )
         {
             checkNotNull( "KEYCOLUMNS", key );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
 
             if ( counter > 0 ) { buffer.append( ", " ); }
             counter++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             buffer.append( delimitID( ToolUtilities.derbyIdentifier( key ) ) );
         }
         buffer.append( "\nfrom " + qualifiedName );
@@ -1457,8 +1533,10 @@ public class LuceneSupport implements OptionalTool
     /** Return true if the directory is empty */
     private static  boolean isEmpty( final StorageFile dir )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         String[]  contents = AccessController.doPrivileged
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              new PrivilegedAction<String[]>()
              {
                  public String[] run()
@@ -1478,6 +1556,7 @@ public class LuceneSupport implements OptionalTool
     {
         return AccessController.doPrivileged
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              new PrivilegedAction<Boolean>()
              {
                  public Boolean run()
@@ -1490,6 +1569,7 @@ public class LuceneSupport implements OptionalTool
 
     /** Really delete a file */
     private static  boolean deleteFile( final StorageFile file )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         boolean result = AccessController.doPrivileged(
@@ -1500,6 +1580,7 @@ public class LuceneSupport implements OptionalTool
         });
 
         if (!result) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException
                 ( SQLState.UNABLE_TO_DELETE_FILE, file.getPath() );
         }
@@ -1513,6 +1594,7 @@ public class LuceneSupport implements OptionalTool
     {
 		if (schema.indexOf( invalidCharacter ) > 0 || table.indexOf( invalidCharacter ) > 0 || textcol.indexOf( invalidCharacter ) > 0)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException( SQLState.LUCENE_INVALID_CHARACTER, invalidCharacter );
 		}		
     }
@@ -1534,10 +1616,13 @@ public class LuceneSupport implements OptionalTool
 	 */
 	private static IndexWriter getIndexWriter
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          final Version  luceneVersion,
          final  Analyzer    analyzer,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          final DerbyLuceneDir   derbyLuceneDir
          )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws IOException
     {
         try {
@@ -1549,6 +1634,7 @@ public class LuceneSupport implements OptionalTool
                  {
                      // allow this to be overridden in the configuration during load later.
                      IndexWriterConfig iwc = new IndexWriterConfig( luceneVersion, analyzer );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                      IndexWriter iw = new IndexWriter( derbyLuceneDir, iwc );
 		
                      return iw;
@@ -1568,6 +1654,7 @@ public class LuceneSupport implements OptionalTool
          final IndexWriter  indexWriter,
          final Document     document
          )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws IOException
     {
         try {
@@ -1583,6 +1670,7 @@ public class LuceneSupport implements OptionalTool
                  }
              }
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         } catch (PrivilegedActionException pae) {
             throw (IOException) pae.getCause();
         }
@@ -1607,6 +1695,8 @@ public class LuceneSupport implements OptionalTool
                  }
              }
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         } catch (PrivilegedActionException pae) {
             throw (IOException) pae.getCause();
         }
@@ -1617,10 +1707,12 @@ public class LuceneSupport implements OptionalTool
      * The method has no arguments.
 	 */
 	private static LuceneIndexDescriptor getIndexDescriptor( final String indexDescriptorMaker )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
         throws PrivilegedActionException, SQLException
     {
         return AccessController.doPrivileged
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              new PrivilegedExceptionAction<LuceneIndexDescriptor>()
              {
                  public LuceneIndexDescriptor run()
@@ -1656,6 +1748,7 @@ public class LuceneSupport implements OptionalTool
 	 * Add a document to a Lucene index wrier.
 	 */
     private static void createLuceneDir( final Connection conn )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         try {
@@ -1675,6 +1768,7 @@ public class LuceneSupport implements OptionalTool
                  }
                  );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         catch (PrivilegedActionException pae) {
             throw (SQLException) pae.getCause();
         }
@@ -1696,6 +1790,7 @@ public class LuceneSupport implements OptionalTool
     {
         StorageFactory  storageFactory = getStorageFactory( conn );
         DerbyLuceneDir  result = DerbyLuceneDir.getDirectory( storageFactory, schema, table, textcol );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         return result;
     }
@@ -1712,14 +1807,17 @@ public class LuceneSupport implements OptionalTool
         throws SQLException
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             Object monitor = findService
                 ( Property.DATABASE_MODULE, ((EmbedConnection) conn).getDBName() ) ;
             return (DataFactory) findServiceModule( monitor, DataFactory.MODULE );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (StandardException se) { throw ToolUtilities.wrap( se ); }
     }
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
 		Get the ClassFactory to use with this database.
 	*/
 	static  ClassFactory getClassFactory()
@@ -1733,6 +1831,7 @@ public class LuceneSupport implements OptionalTool
      * can't call this entry point.
      */
     private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

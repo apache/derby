@@ -47,6 +47,7 @@ public class ConnectTest extends BaseJDBCTestCase{
         if ( JDBC.vmSupportsJSR169())
             // Test uses DriverManager which
             // is not supported with JSR169
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                         return 
             new BaseTestSuite("empty ConnectTest:DriverManager not supported");
         else  {

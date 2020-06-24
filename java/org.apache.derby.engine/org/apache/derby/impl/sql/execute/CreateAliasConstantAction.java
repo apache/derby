@@ -93,6 +93,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR;
 				break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR;
 				break;
@@ -134,6 +135,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 				type = "CREATE FUNCTION ";
 				break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				type = "CREATE SYNONYM ";
 				break;
@@ -198,6 +200,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 		DataDictionary dd = lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 
 		// For routines no validity checking is made
         // on the Java method, that is checked when the
@@ -244,6 +247,8 @@ class CreateAliasConstantAction extends DDLConstantAction
             }
 
             // also don't want to collide with 1-arg functions by the same name
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             List<AliasDescriptor> funcList =
                 dd.getRoutineList(sd.getUUID().toString(),
                                   aliasName,
@@ -295,8 +300,11 @@ class CreateAliasConstantAction extends DDLConstantAction
             
             break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 			// If target table/view exists already, error.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 			TableDescriptor targetTD = dd.getTableDescriptor(aliasName, sd, tc);
 			if (targetTD != null)
 			{
@@ -332,6 +340,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 			// If synonym final target is not present, raise a warning
 			if (nextSD != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 				targetTD = dd.getTableDescriptor(nextSynTable, nextSD, tc);
 			if (nextSD == null || targetTD == null)
 				activation.addWarning(
@@ -367,6 +376,8 @@ class CreateAliasConstantAction extends DDLConstantAction
          )
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<AliasDescriptor> list = dd.getRoutineList(
             sd.getUUID().toString(), aliasName, aliasType);
         

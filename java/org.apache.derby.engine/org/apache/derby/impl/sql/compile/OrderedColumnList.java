@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.OrderedColumnList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -30,6 +31,7 @@ import org.apache.derby.impl.sql.execute.IndexColumnOrder;
  *
  */
 public abstract class OrderedColumnList<E extends OrderedColumn>
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     extends QueryTreeNodeVector<E>
 {
     public OrderedColumnList(Class<E> eltClass,
@@ -57,20 +59,24 @@ public abstract class OrderedColumnList<E extends OrderedColumn>
 			so we use a hashtable for lookup of the positions
 		*/
         HashSet<Integer> hashColumns = new HashSet<Integer>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		actualCols = 0;
 
 		for (int i = 0; i < numCols; i++)
 		{
             OrderedColumn oc = elementAt(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			// order by (lang) positions are 1-based,
 			// order items (store) are 0-based.
 			int position = oc.getColumnPosition() - 1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
 			if (hashColumns.add(position))
 			{
 				ordering[i] = new IndexColumnOrder(position,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
 												oc.isAscending(),
 												oc.isNullsOrderedLow());
 				actualCols++;

@@ -82,6 +82,7 @@ public class ClasspathSetup extends TestSetup
     {
         AccessController.doPrivileged
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
              new PrivilegedAction<Void>()
              {
                  public Void run()

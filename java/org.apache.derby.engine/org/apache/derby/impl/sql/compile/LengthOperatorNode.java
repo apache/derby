@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.LengthOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -45,6 +46,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
             throws StandardException {
         super(operator, cm);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         String op = "char_length";
         String methodNam = "charLength";
         parameterType = Types.VARCHAR;
@@ -67,6 +69,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -87,6 +90,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 				case Types.VARBINARY:
 				case Types.LONGVARBINARY:
 				case Types.LONGVARCHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                 case Types.BLOB:
                 case Types.CLOB:
 					break;
@@ -126,6 +130,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 		** is required) and hence we will not worry about the collation setting
 		*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(parameterType, true, 
 												parameterWidth));
 	}
@@ -135,6 +140,8 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 	 * in UnaryOperatorNode for code generation purposes.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getReceiverInterfaceName() {
 	    return ClassName.ConcatableDataValue;
 	}

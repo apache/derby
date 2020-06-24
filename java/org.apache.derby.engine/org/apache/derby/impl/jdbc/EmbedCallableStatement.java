@@ -64,6 +64,7 @@ import org.apache.derby.iapi.types.StringDataValue;
  *
  */
 public class EmbedCallableStatement extends EmbedPreparedStatement
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
     implements EngineCallableStatement
 {
 	/*
@@ -87,6 +88,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 			  resultSetType,
 			  resultSetConcurrency,
 			  resultSetHoldability,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			  Statement.NO_GENERATED_KEYS,
 			  null,
 			  null);
@@ -160,6 +162,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 
 				try
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 					DataValueDescriptor returnValue = pvs.getReturnValueForSet();
 					returnValue.setValueFromResultSet(results, 1, true);
 				} catch (StandardException e)
@@ -167,6 +170,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 					throw EmbedResultSet.noStateChangeException(e);
 				}
 				finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3496
 					results.close();
 					results = null;
 				}
@@ -212,6 +216,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 		checkStatus();
 
 		if (scale < 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			throw newSQLException(SQLState.BAD_SCALE_VALUE, scale);
 		try {
 			getParms().registerOutParameter(parameterIndex-1, sqlType, scale);
@@ -234,6 +239,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
  									 String typeName) 
  		 throws SQLException
  	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
  		registerOutParameter( parameterIndex, sqlType );
  	}
  		 
@@ -564,6 +570,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 	{
 		checkStatus();
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			Object v = getParms().getParameterForGet(parameterIndex-1).getObject();
 			wasNull = (v == null);
 			return v;
@@ -668,6 +675,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 		for (int j=1; j<=numberOfParameters; j++) {
 
 			switch (pvs.getParameterMode(j)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             case (ParameterMetaData.parameterModeIn):
             case (ParameterMetaData.parameterModeUnknown):
 				break;
@@ -693,6 +701,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
      * @exception SQLException if a database-access error occurs.
      */
     public final Object getObject(int i, Map<String, Class<?>> map) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         checkStatus();
         if (map == null) {
             throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER, map, "map",

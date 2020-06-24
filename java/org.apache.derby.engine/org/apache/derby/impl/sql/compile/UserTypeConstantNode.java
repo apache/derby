@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UserTypeConstantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -50,6 +51,8 @@ import org.apache.derby.iapi.types.TypeId;
 	This is also used to represent nulls in user types, which occurs
 	when NULL is inserted into or supplied as the update value for
    a user type column.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
  */
 class UserTypeConstantNode extends ConstantNode {
@@ -63,6 +66,8 @@ class UserTypeConstantNode extends ConstantNode {
 	** should be represented the same way.
 	*/
     Object  val;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
     UserTypeConstantNode(TypeId t, ContextManager cm)
             throws StandardException {
@@ -172,6 +177,8 @@ class UserTypeConstantNode extends ConstantNode {
     @Override
     boolean isNull()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return (val == null);
 	}
 
@@ -187,6 +194,8 @@ class UserTypeConstantNode extends ConstantNode {
 	 *
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     Object getConstantValueAsObject()
 	{
         return val;
@@ -231,8 +240,11 @@ class UserTypeConstantNode extends ConstantNode {
 		*/
 		
 		/* Are we generating a SQL null value? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if (val == null)
 	    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 			acb.generateNull(mb, tc, getTypeServices().getCollationType());
 	    }
         // The code generated here is invoked when the generated class is constructed. However the prepared statement
@@ -271,11 +283,14 @@ class UserTypeConstantNode extends ConstantNode {
 		 	*/
 			String typeName = getTypeId().getCorrespondingJavaTypeName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             mb.push(val.toString());
 			mb.callMethod(VMOpcode.INVOKESTATIC, typeName, "valueOf", typeName, 1);
 
 			LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, fieldType);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 			acb.generateDataValue(mb, tc, getTypeServices().getCollationType(), field);
 		}
 	}

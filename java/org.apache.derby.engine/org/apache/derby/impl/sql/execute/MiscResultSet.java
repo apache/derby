@@ -57,6 +57,7 @@ class MiscResultSet extends NoRowsResultSetImpl
 	 */
 	public void open() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
 		setup();
 		activation.getConstantAction().executeConstantAction(activation);
 		close();

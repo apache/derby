@@ -43,6 +43,7 @@ public class LOBStoredProcedure {
      * @throws SQLException
      */
     public static int CLOBCREATELOCATOR() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3576
         EngineLOB clob = (EngineLOB)getEmbedConnection().createClob();
         return clob.getLocator();
     }
@@ -149,6 +150,7 @@ public class LOBStoredProcedure {
         long pos, int len) throws SQLException {
         // Don't read more than what we can represent as a VARCHAR.
         // See DERBY-3769.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         len = Math.min(len, Limits.MAX_CLOB_RETURN_LEN);
         return getClobObjectCorrespondingtoLOCATOR(LOCATOR).getSubString(pos, len);
     }
@@ -211,6 +213,7 @@ public class LOBStoredProcedure {
      * @throws SQLException
      */
     public static int BLOBCREATELOCATOR() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3576
         EngineLOB blob = (EngineLOB)getEmbedConnection().createBlob();
         return blob.getLocator();
     }
@@ -308,6 +311,7 @@ public class LOBStoredProcedure {
     throws SQLException {
         // Don't read more than what we can represent as a VARBINARY.
         // See DERBY-3769.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         len = Math.min(len, Limits.MAX_BLOB_RETURN_LEN);
         return getBlobObjectCorrespondingtoLOCATOR(LOCATOR).getBytes(pos, len);
     }
@@ -369,8 +373,11 @@ public class LOBStoredProcedure {
     private static EmbedConnection getEmbedConnection() throws SQLException {
         //DERBY-4664 Do not use DriverManager("jdbc:default:connection") because
         // some other product's Driver might hijack our stored procedure.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4664
+//IC see: https://issues.apache.org/jira/browse/DERBY-4668
         InternalDriver id = InternalDriver.activeDriver();
         if (id != null) { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
             EmbedConnection conn = (EmbedConnection) id.connect( "jdbc:default:connection", null, 0 );
             if (conn != null)
                 return conn;

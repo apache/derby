@@ -98,6 +98,7 @@ public final class TestConfiguration {
         	lastAssignedPort = Integer.parseInt(port);
         }
         basePort = lastAssignedPort;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
         bogusPort = ++lastAssignedPort;
     }
     private static int assignedPortCount = 2;
@@ -153,11 +154,13 @@ public final class TestConfiguration {
     private static final TestConfiguration DEFAULT_CONFIG;
         
     static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2446
         DEFAULT_CONFIG = JUNIT_CONFIG;
         
         final   File dsh = new File("system");
 
         String absolutePath = PrivilegedFileOpsForTests.getAbsolutePath(dsh);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         BaseTestCase.setSystemProperty(
                 "derby.system.home", absolutePath);
@@ -169,10 +172,12 @@ public final class TestConfiguration {
      * concurrently with different configurations.
      */
     private static final ThreadLocal<TestConfiguration>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             CURRENT_CONFIG = new ThreadLocal<TestConfiguration>() {
         protected TestConfiguration initialValue() {
             return DEFAULT_CONFIG;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
     };
    
     /**
@@ -200,6 +205,7 @@ public final class TestConfiguration {
      * @see ReleaseRepository
      */
     public static synchronized ReleaseRepository getReleaseRepository() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5475
         if (releaseRepository == null) {
             try {
                 releaseRepository = ReleaseRepository.getInstance();
@@ -235,6 +241,7 @@ public final class TestConfiguration {
      */
     public static Test defaultSuite(Class testClass)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
         return defaultSuite(testClass, true);
     }
 
@@ -254,6 +261,7 @@ public final class TestConfiguration {
          
         if (cleanDB)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
             suite.addTest(new CleanDatabaseTestSetup(embeddedSuite(testClass)));
             suite.addTest(new CleanDatabaseTestSetup(clientServerSuite(testClass)));
         }
@@ -283,6 +291,7 @@ public final class TestConfiguration {
      */
     public static Test defaultExistingServerSuite(Class testClass)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2807
         return defaultExistingServerSuite(testClass, true);
     }
     
@@ -347,6 +356,7 @@ public final class TestConfiguration {
         if (cleanDB)
         {
             suite.addTest(new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4427
                     clientExistingServerSuite(testClass, hostName, portNumber)));
         }
         else
@@ -358,10 +368,15 @@ public final class TestConfiguration {
     }
     public static Test existingServerSuite(Class testClass, 
             boolean cleanDB,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
             String hostName,
             int portNumber,
             String dbPath)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
          final BaseTestSuite suite = new BaseTestSuite(suiteName(testClass));
          
         if (cleanDB)
@@ -389,6 +404,7 @@ public final class TestConfiguration {
     public static Test forceJDBC3Suite(Class testClass)
     {
         final BaseTestSuite suite = new BaseTestSuite(suiteName(testClass));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(
             new CleanDatabaseTestSetup(
@@ -408,6 +424,8 @@ public final class TestConfiguration {
     static String suiteName(Class testClass)
     {
         int lastDot = testClass.getName().lastIndexOf('.');
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-1971
         String suiteName = testClass.getName();
         if (lastDot != -1)
             suiteName = suiteName.substring(lastDot + 1, suiteName.length());
@@ -421,6 +439,7 @@ public final class TestConfiguration {
       */
     public static Test embeddedSuite(Class testClass)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(testClass,
                 suiteName(testClass)+":embedded");
     }
@@ -433,6 +452,7 @@ public final class TestConfiguration {
      */
     public static Test clientServerSuite(Class testClass)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         return clientServerDecorator(bareClientServerSuite(testClass));
     }
     /**
@@ -443,6 +463,7 @@ public final class TestConfiguration {
      */
 
     public static Test clientServerSuiteWithAlternativePort(Class testClass) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         return clientServerDecoratorWithAlternativePort(
                 bareClientServerSuite(testClass));
     }
@@ -455,6 +476,7 @@ public final class TestConfiguration {
     public static Test clientExistingServerSuite(Class testClass)
     {
         // Will not start server and does not stop it when done.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         return defaultExistingServerDecorator(bareClientServerSuite(testClass));
     }
     
@@ -470,6 +492,7 @@ public final class TestConfiguration {
     public static Test clientExistingServerSuite(Class testClass, String hostName, int portNumber)
     {
                // Will not start server and does not stop it when done!.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         return existingServerDecorator(bareClientServerSuite(testClass),
                 hostName, portNumber);
     }
@@ -495,6 +518,7 @@ public final class TestConfiguration {
      */
     public static Test clientServerDecorator(Test suite)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
         Test test = new NetworkServerTestSetup(suite, false);
             
         return defaultServerDecorator(test);
@@ -513,6 +537,7 @@ public final class TestConfiguration {
      */
     public static Test clientServerDecorator
       (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
        Test suite,
        String[] systemProperties,
        String[] startupArgs,
@@ -546,6 +571,8 @@ public final class TestConfiguration {
     public static Test clientServerDecoratorWithPort(Test suite, int port)
     {
         Test test = new NetworkServerTestSetup(suite, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
 
         return existingServerDecorator(test,"localhost",port);
     }
@@ -555,7 +582,10 @@ public final class TestConfiguration {
      */
     public static Test clientServerDecoratorWithAlternativePort(Test suite) {
         Test test = new NetworkServerTestSetup(suite, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3211
         return defaultServerDecoratorWithAlternativePort(test);
     }
     /**
@@ -568,9 +598,11 @@ public final class TestConfiguration {
         // server is already started.
         // Need to have client 
         // and not running in J2ME (JSR169).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2807
         if (!(Derby.hasClient())
                 || JDBC.vmSupportsJSR169())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "empty: no network server support in JSR169 " +
                 "(or derbyclient.jar missing).");
@@ -606,6 +638,7 @@ public final class TestConfiguration {
     * non-default hostname and portnumber.
     */
     public static Test existingServerDecorator(Test test, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3163
             String hostName, int PortNumber)
     {
     	// Need to have network server and client and not
@@ -624,11 +657,16 @@ public final class TestConfiguration {
     * non-default hostname, portnumber and database name.
     */
     public static Test existingServerDecorator(Test test, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
             String hostName, int PortNumber, String dbPath)
     {
     	// Need to have network server and client and not
         // running in J2ME (JSR169).
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         if (!supportsClientServer()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("empty: no network server support");
         }
 
@@ -645,7 +683,11 @@ public final class TestConfiguration {
     public static Test defaultServerDecoratorWithAlternativePort(Test test) {
         // Need to have network server and client and not
         // running in J2ME (JSR169).
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         if (!supportsClientServer()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("empty: no network server support");
         }
 
@@ -663,6 +705,7 @@ public final class TestConfiguration {
      * Check if client and server testing is supported in the test environment.
      */
     private static boolean supportsClientServer() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         return JDBC.vmSupportsJDBC3() && Derby.hasClient() && Derby.hasServer();
     }
 
@@ -676,6 +719,7 @@ public final class TestConfiguration {
      * environment
      */
     private static Test bareClientServerSuite(Class testClass) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(suiteName(testClass) + ":client");
 
@@ -693,6 +737,7 @@ public final class TestConfiguration {
         // Forward slash is ok, Derby treats database names
         // as URLs and translates forward slash to the local
         // separator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         String dbName = "singleUse/oneuse";
         dbName = dbName.concat(Integer.toHexString(uniqueDB++));
         return dbName;
@@ -716,6 +761,7 @@ public final class TestConfiguration {
     {
         String dbName = generateUniqueDatabaseName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2295
         return new DatabaseChangeSetup(new DropDatabaseSetup(test, dbName), dbName, dbName, true);
     }
 
@@ -735,6 +781,9 @@ public final class TestConfiguration {
      */
     public static TestSetup singleUseDatabaseDecorator(Test test, String dbName)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4179
+//IC see: https://issues.apache.org/jira/browse/DERBY-4646
+//IC see: https://issues.apache.org/jira/browse/DERBY-4647
         return new DatabaseChangeSetup(
             new DropDatabaseSetup(test, dbName), dbName, dbName, true);
     }
@@ -759,6 +808,7 @@ public final class TestConfiguration {
         String dbName = generateUniqueDatabaseName();
 
         return new DatabaseChangeSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6546
             new DropDatabaseSetup(test, dbName, false),
             dbName, dbName, true);
     }
@@ -781,6 +831,7 @@ public final class TestConfiguration {
      */
     public static DatabaseChangeSetup additionalDatabaseDecorator(Test test, String logicalDbName)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2295
         return new DatabaseChangeSetup(new DropDatabaseSetup(test, logicalDbName),
                                        logicalDbName,
                                        generateUniqueDatabaseName(),
@@ -827,6 +878,7 @@ public final class TestConfiguration {
         )
     {
         return new DatabaseChangeSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6546
             new DropDatabaseSetup(test, logicalDbName, false),
             logicalDbName,
             generateUniqueDatabaseName(),
@@ -851,6 +903,7 @@ public final class TestConfiguration {
         String logicalDbName, String physicalDbName )
     {
         return new DatabaseChangeSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6546
             new DropDatabaseSetup(test, logicalDbName, false),
             logicalDbName,
             physicalDbName,
@@ -872,6 +925,7 @@ public final class TestConfiguration {
      */
     public static Test changeUserDecorator(Test test, String user, String password)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         return new ChangeUserSetup(test, user, password);
     }   
     
@@ -893,6 +947,7 @@ public final class TestConfiguration {
      * This decorator must be the outer one in this mode.
      * <code>
      * test = DatabasePropertyTestSetup.builtinAuthentication(test,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
                 new String[] {TEST_DBO,"U1","U2",},
                 "nh32ew");
        test = TestConfiguration.sqlAuthorizationDecorator(test);
@@ -912,11 +967,14 @@ public final class TestConfiguration {
         // reset it.
         final Properties sqlAuth = new Properties();
         sqlAuth.setProperty("derby.database.sqlAuthorization", "true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5705
         Test setSQLAuthMode = DatabasePropertyTestSetup.getNoTeardownInstance(
                 test, sqlAuth, true);
         
         return changeUserDecorator(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
             new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true),
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
             DerbyConstants.TEST_DBO, "dummy"); // DRDA doesn't like empty pw
     }
 
@@ -932,6 +990,7 @@ public final class TestConfiguration {
      */
     public static Test sqlAuthorizationDecoratorSingleUse(Test test)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6546
         return sqlAuthorizationDecoratorSingleUse(
                 test, DEFAULT_DBNAME_SQL, false);
     }
@@ -957,9 +1016,11 @@ public final class TestConfiguration {
         // reset it.
         final Properties sqlAuth = new Properties();
         sqlAuth.setProperty("derby.database.sqlAuthorization", "true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5705
         Test setSQLAuthMode = DatabasePropertyTestSetup.getNoTeardownInstance(
                 test, sqlAuth, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6546
         setSQLAuthMode = new DropDatabaseSetup(
                 setSQLAuthMode, dbName, shutdownDatabase);
         
@@ -967,6 +1028,7 @@ public final class TestConfiguration {
             ( setSQLAuthMode, dbName, dbName, true );
 
         return changeUserDecorator(setSQLAuthMode,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
                                    DerbyConstants.TEST_DBO,
                                    "dummy"); // DRDA doesn't like empty pw
     }
@@ -992,6 +1054,7 @@ public final class TestConfiguration {
             String[] users, String passwordToken)
     {
         String[] usersWithDBO = new String[users.length + 1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
         usersWithDBO[0] = DerbyConstants.TEST_DBO;
         System.arraycopy(users, 0, usersWithDBO, 1, users.length);
         return sqlAuthorizationDecorator(
@@ -1016,9 +1079,11 @@ public final class TestConfiguration {
     public static Test connectionCPDecorator(Test test)
     {
         if (JDBC.vmSupportsJDBC3()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
             return new ConnectorSetup(test,
              "org.apache.derbyTesting.junit.ConnectionPoolDataSourceConnector");
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("ConnectionPoolDataSource not supported");
         }
 
@@ -1038,9 +1103,11 @@ public final class TestConfiguration {
     public static Test connectionXADecorator(Test test)
     {
         if (JDBC.vmSupportsJDBC3()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2215
             return new ConnectorSetup(test,
                 "org.apache.derbyTesting.junit.XADataSourceConnector");
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("XADataSource not supported");
         }
     }
@@ -1055,6 +1122,7 @@ public final class TestConfiguration {
      */
     public static TestSetup connectionDSDecorator(Test test)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         return new ConnectorSetup(test,
             "org.apache.derbyTesting.junit.DataSourceConnector");
     }
@@ -1069,6 +1137,7 @@ public final class TestConfiguration {
      */
     public static Test forceJDBC3Embedded(Test test)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         if (JDBC.vmSupportsJDBC4()) {
             test = new JDBCClientSetup(test, JDBCClient.EMBEDDED_30);
         }
@@ -1106,6 +1175,7 @@ public final class TestConfiguration {
      */
     public static Test changeSSLDecorator(Test test, String ssl)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         return new ChangeSSLSetup(test, ssl);
     }   
     
@@ -1116,6 +1186,7 @@ public final class TestConfiguration {
     private TestConfiguration() {
         // Check for possibly passed in DatabaseName
         // this is used in OCRecoveryTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-5382
         String propDefDbName = getSystemProperties().getProperty(
                 "derby.tests.defaultDatabaseName");
         if (propDefDbName != null)
@@ -1123,22 +1194,28 @@ public final class TestConfiguration {
         else
             this.defaultDbName=DEFAULT_DBNAME;
         usedDbNames.add(DEFAULT_DBNAME);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         logicalDbMapping.put(DEFAULT_DBNAME, DEFAULT_DBNAME);
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4898
         this.connectionAttributes = new Properties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         this.hostName = DEFAULT_HOSTNAME;
         this.port = basePort;
         this.isVerbose = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_VERBOSE)).
             booleanValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
         this.doTrace = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_TRACE)).
             booleanValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6401
         this.stopAfterFirstFail = Boolean.valueOf(
                 getSystemProperties().getProperty(KEY_STOP_AFTER_FIRST_FAIL)).
                 booleanValue();
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         this.ssl = null;
         this.jmxPort = getNextAvailablePort();
         println("basePort=" + basePort + ", bogusPort=" + bogusPort +
@@ -1151,6 +1228,7 @@ public final class TestConfiguration {
     /**
      * Obtain a new configuration identical to the passed one.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
     TestConfiguration(TestConfiguration copy)
     {
         this.defaultDbName = copy.defaultDbName;
@@ -1174,6 +1252,7 @@ public final class TestConfiguration {
         initConnector(copy.connector);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2215
     TestConfiguration(TestConfiguration copy, JDBCClient client,
             String hostName, int port)
     {
@@ -1202,6 +1281,7 @@ public final class TestConfiguration {
         initConnector(copy.connector);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4417
     TestConfiguration(TestConfiguration copy, JDBCClient client,
             String hostName, int port, String dataBasePath)
     {
@@ -1213,9 +1293,13 @@ public final class TestConfiguration {
         this.connectionAttributes = new Properties(copy.connectionAttributes);
 
         this.isVerbose = copy.isVerbose;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
         this.doTrace = copy.doTrace;
         this.port = port;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         this.jmxPort = copy.jmxPort;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
         if (bogusPort == port) {
             throw new IllegalStateException(
                     "port cannot equal bogusPort: " + bogusPort);
@@ -1224,8 +1308,10 @@ public final class TestConfiguration {
         this.jdbcClient = client;
         this.hostName = hostName;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         this.ssl = copy.ssl;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         this.url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(copy.connector);
     }
@@ -1240,9 +1326,13 @@ public final class TestConfiguration {
     TestConfiguration(TestConfiguration copy, String user,
             String password, String passwordToken)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         this.defaultDbName = copy.defaultDbName;
         this.usedDbNames.addAll(copy.usedDbNames);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         logicalDbMapping.putAll(copy.logicalDbMapping);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         this.userName = user;
         this.userPassword = password;
         this.passwordToken = passwordToken == null ?
@@ -1257,9 +1347,12 @@ public final class TestConfiguration {
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         this.ssl = copy.ssl;
         
         this.url = copy.url;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         initConnector(copy.connector);
     }
 
@@ -1273,6 +1366,7 @@ public final class TestConfiguration {
      * @param copy configuration to copy
      * @param ssl default SSL mode
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
     TestConfiguration(TestConfiguration copy, String ssl)
     {
         this(copy);
@@ -1290,9 +1384,11 @@ public final class TestConfiguration {
      * @param defaultDb Indicates that the passed <code>dbName</code> is supposed
      * to be used as the default database name.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
     TestConfiguration(TestConfiguration copy, String logicalDbName,
                       String dbName, boolean defaultDb)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         this.usedDbNames.addAll(copy.usedDbNames);
         this.usedDbNames.add(dbName);
         logicalDbMapping.putAll(copy.logicalDbMapping);
@@ -1302,6 +1398,7 @@ public final class TestConfiguration {
         // since having more physical databases accessible throught the same
         // logical database name will access only the last physical database
         Assert.assertNull(logicalDbMapping.put(logicalDbName, dbName));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         if (defaultDb) {
             this.defaultDbName = dbName;
@@ -1312,18 +1409,33 @@ public final class TestConfiguration {
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
         this.connectionAttributes = new Properties(copy.connectionAttributes);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
 
         this.isVerbose = copy.isVerbose;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
         this.doTrace = copy.doTrace;
         this.port = copy.port;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         this.jmxPort = copy.jmxPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         this.ssl = copy.ssl;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         this.url = createJDBCUrlWithDatabaseName(this.defaultDbName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         initConnector(copy.connector);
     }
   
@@ -1335,21 +1447,28 @@ public final class TestConfiguration {
     private TestConfiguration(Properties props) 
         throws NumberFormatException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         defaultDbName = props.getProperty(KEY_DBNAME, DEFAULT_DBNAME);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         usedDbNames.add(defaultDbName);
         logicalDbMapping.put(defaultDbName, defaultDbName);
         userName = props.getProperty(KEY_USER_NAME, DEFAULT_USER_NAME);
         userPassword = props.getProperty(KEY_USER_PASSWORD, 
                                          DEFAULT_USER_PASSWORD);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4898
         connectionAttributes = new Properties();
         hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
         doTrace =  Boolean.valueOf(props.getProperty(KEY_TRACE)).booleanValue();
         port = basePort;
         jmxPort = getNextAvailablePort();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
         println("basePort=" + basePort + ", bogusPort=" + bogusPort +
                 ", jmxPort=" + jmxPort);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         ssl = props.getProperty(KEY_SSL);
         
         String framework = props.getProperty(KEY_FRAMEWORK, DEFAULT_FRAMEWORK);
@@ -1361,7 +1480,10 @@ public final class TestConfiguration {
         } else {
             jdbcClient = JDBCClient.getDefaultEmbedded();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         url = createJDBCUrlWithDatabaseName(defaultDbName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         initConnector(null);
     }
 
@@ -1372,6 +1494,7 @@ public final class TestConfiguration {
      * @param attrs the extra connection attributes
      * @return a copy of the configuration with extra attributes
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
     TestConfiguration addConnectionAttributes(Properties attrs) {
         TestConfiguration copy = new TestConfiguration(this);
         Enumeration e = attrs.propertyNames();
@@ -1391,6 +1514,7 @@ public final class TestConfiguration {
      */
     public  static final Properties getSystemProperties() {
         // Fetch system properties in a privileged block.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                 new PrivilegedAction<Properties>() {
             public Properties run() {
@@ -1405,8 +1529,11 @@ public final class TestConfiguration {
      * @return JDBC connection url, without attributes.
      */
     private String createJDBCUrlWithDatabaseName(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         if (JDBC.vmSupportsJDBC3())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             String url;
            if (jdbcClient.isEmbedded()) {
                url = jdbcClient.getUrlBase();
@@ -1434,15 +1561,18 @@ public final class TestConfiguration {
             // configuration we are copying from.
             
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = Class.forName(oldConnector.getClass().getName());
                 connector = (Connector) clazz.getConstructor().newInstance();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
             }            
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         else if (JDBC.vmSupportsJDBC3())
         {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = Class.forName("org.apache.derbyTesting.junit.DriverManagerConnector");
                 connector = (Connector) clazz.getConstructor().newInstance();
             } catch (Exception e) {
@@ -1454,6 +1584,7 @@ public final class TestConfiguration {
         }
         connector.setConfiguration(this);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         try {
             String  loginTimeoutString = BaseTestCase.getSystemProperty( KEY_LOGIN_TIMEOUT );
             
@@ -1519,6 +1650,7 @@ public final class TestConfiguration {
      * @return Physical name of the database.
      */
     public String getPhysicalDatabaseName(String logicalName) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2295
         return (String) logicalDbMapping.get(logicalName);
     }
 
@@ -1549,6 +1681,7 @@ public final class TestConfiguration {
      * @return connection attributes (never {@code null})
      */
     public Properties getConnectionAttributes() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
         return connectionAttributes;
     }
 
@@ -1588,6 +1721,7 @@ public final class TestConfiguration {
      * @return host name.
      */
     public String getHostName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1157
         return hostName;
     }
 
@@ -1597,10 +1731,12 @@ public final class TestConfiguration {
      * @return true if base port is default.
      */
     public static boolean isDefaultBasePort() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6178
         return (basePort == DEFAULT_PORT);
     }
 
     public static int getBasePort() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2076
         return basePort;
     }
 
@@ -1645,6 +1781,7 @@ public final class TestConfiguration {
      *         connections
      */
     public int getJmxPort() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         return jmxPort;
     }
 
@@ -1655,6 +1792,7 @@ public final class TestConfiguration {
      * @return A port number where no Derby network servers are started.
      */
     public int getBogusPort() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
         return bogusPort;
     }
 
@@ -1664,6 +1802,7 @@ public final class TestConfiguration {
      * @return ssl mode
      */
     public String getSsl() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2274
         return ssl;
     }
 
@@ -1677,6 +1816,9 @@ public final class TestConfiguration {
      */
     public Connection openDefaultConnection()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2036
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return connector.openConnection();
     }
     
@@ -1702,6 +1844,7 @@ public final class TestConfiguration {
      * to <code>additionalDatabaseDecorator</code> function.
      * @return connection to specified database.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
     Connection openConnection(String logicalDatabaseName)
         throws SQLException
     {
@@ -1774,7 +1917,11 @@ public final class TestConfiguration {
      */
     public void shutdownDatabase()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2036
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
             connector.shutDatabase();
             Assert.fail("Database failed to shut down");
         } catch (SQLException e) {
@@ -1792,6 +1939,7 @@ public final class TestConfiguration {
     public void shutdownEngine()
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             connector.shutEngine(true);
             Assert.fail("Engine failed to shut down");
         } catch (SQLException e) {
@@ -1809,6 +1957,8 @@ public final class TestConfiguration {
      */
     public void shutdownEngine(boolean deregisterDeriver)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         try {
             connector.shutEngine(deregisterDeriver);
             Assert.fail("Engine failed to shut down");
@@ -1820,6 +1970,7 @@ public final class TestConfiguration {
     /** Get the login timeout from the connector */
     public  int getLoginTimeout() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         return connector.getLoginTimeout();
     }
 
@@ -1868,7 +2019,9 @@ public final class TestConfiguration {
      *
      */
     public void stopNetworkServer() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2855
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3151
             NetworkServerControlWrapper networkServer =
                     new NetworkServerControlWrapper();
 
@@ -1891,9 +2044,11 @@ public final class TestConfiguration {
         Exception failException = null;
         try {
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-3151
             NetworkServerControlWrapper networkServer =
                     new NetworkServerControlWrapper();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
  	    serverOutput = AccessController.doPrivileged(
                             new PrivilegedAction<FileOutputStream>() {
                 public FileOutputStream run() {
@@ -1967,6 +2122,7 @@ public final class TestConfiguration {
      * than the println method in <tt>BaseJDBCTestCase</tt>.
      */
     private void println(CharSequence msg) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
         if (isVerbose) {
             System.out.println("DEBUG: {TC@" + hashCode() + "} " + msg);
         }
@@ -1978,10 +2134,12 @@ public final class TestConfiguration {
      * @return JUnit test method trace flag.
      */
     public boolean doTrace() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2667
         return doTrace;
     }
 
     public boolean stopAfterFirstFail() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6401
         return stopAfterFirstFail;
     }
 	/**
@@ -2038,6 +2196,7 @@ public final class TestConfiguration {
         sb.append(className);
         sb.append(File.separatorChar);
         // DERBY-5620: Ensure valid file name.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5620
         char[] tmpName = test.getName().toCharArray();
         for (int i=0; i < tmpName.length; i++) {
             switch (tmpName[i]) {
@@ -2058,6 +2217,7 @@ public final class TestConfiguration {
         // Create the folder
         // TODO: Dump this configuration in some human readable format
         synchronized (base) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
                 public Boolean run() {
                     if (folder.exists()) {
@@ -2113,6 +2273,7 @@ public final class TestConfiguration {
      * Indirection for obtaining connections based upon
      * this configuration.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2215
     Connector connector;
     
     /*
@@ -2133,7 +2294,9 @@ public final class TestConfiguration {
     		SecurityManagerSetup.noSecurityManager();
     		return false;
     	} else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5631
             if (SecurityManagerSetup.NO_POLICY.equals(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2033
                     BaseTestCase.getSystemProperty("java.security.policy")))
             {
                 // Explict setting of no security manager

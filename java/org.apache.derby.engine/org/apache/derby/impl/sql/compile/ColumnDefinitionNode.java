@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ColumnDefinitionNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -74,6 +75,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	//This information is later used to make sure that the autoincrement
 	//column's increment value is not 0 at the time of create, or is not
 	//getting set to 0 at the time of increment value modification.
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 	long						autoinc_create_or_modify_Start_Increment;
 	boolean						autoincrementVerify;
 
@@ -102,6 +104,8 @@ public class ColumnDefinitionNode extends TableElementNode
      * @param cm            The context manager
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ColumnDefinitionNode(
                     String name,
                     ValueNode defaultNode,
@@ -113,6 +117,7 @@ public class ColumnDefinitionNode extends TableElementNode
         super(name, cm);
         this.type = dataTypeServices;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (defaultNode instanceof UntypedNullConstantNode)
 		{
 			/* No DTS yet for MODIFY DEFAULT */
@@ -142,15 +147,23 @@ public class ColumnDefinitionNode extends TableElementNode
 			this.defaultNode = (DefaultNode) defaultNode;
 			if (autoIncrementInfo != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 long[] aii = autoIncrementInfo;
 				autoincrementStart = aii[QueryTreeNode.AUTOINCREMENT_START_INDEX];
 				autoincrementIncrement = aii[QueryTreeNode.AUTOINCREMENT_INC_INDEX];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 				autoincrementCycle = aii[QueryTreeNode.AUTOINCREMENT_CYCLE] == 1 ? true : false;
 				//Parser has passed the info about autoincrement column's status in the
 				//following array element. It will tell if the autoinc column is part of 
 				//a create table or if is a part of alter table. And if it is part of 
 				//alter table, is it for changing the increment value or for changing 
 				//the start value?
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 				autoinc_create_or_modify_Start_Increment = aii[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY];
 				
 				/*
@@ -207,6 +220,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return	the name of the column
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getColumnName()
 	{
 		return this.name;
@@ -217,6 +232,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return	the data type of the column
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final DataTypeDescriptor getType()
 	{
 		return type;
@@ -228,6 +245,8 @@ public class ColumnDefinitionNode extends TableElementNode
     /**
      * Set the nullability of the column definition node.
       */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final void setNullability(boolean nullable)
     {
         type = getType().getNullabilityType(nullable);
@@ -250,6 +269,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * @return	The default value of the column
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DataValueDescriptor getDefaultValue()
 	{
 		return this.defaultValue;
@@ -262,6 +283,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * @return	The default info for the column
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DefaultInfo getDefaultInfo()
 	{
 		return defaultInfo;
@@ -277,6 +300,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return The DefaultNode, if any, associated with this node.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DefaultNode getDefaultNode()
 	{
 		return defaultNode;
@@ -290,6 +315,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	/**
 	 * Get the generation clause.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     GenerationClauseNode getGenerationClauseNode() {
         return generationClauseNode;
     }
@@ -306,6 +333,7 @@ public class ColumnDefinitionNode extends TableElementNode
 			//increment value for autoincrement column can't be 0 if the autoinc column
 			//is part of create table or it is part of alter table to change the 
 			//increment value. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 			if (isAutoincrement && autoincrementIncrement == 0 && 
 					(autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
 							autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE))
@@ -378,6 +406,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *   ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE 
 	 * 		if this definition is for alter autoincrement column to change the increment value
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 	long getAutoinc_create_or_modify_Start_Increment()
 	{
 		if (SanityManager.DEBUG)
@@ -396,6 +425,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void checkUserType(TableDescriptor td)
 		throws StandardException
 	{
@@ -404,6 +435,7 @@ public class ColumnDefinitionNode extends TableElementNode
         // continue if this is a generated column and the datatype has been
         // omitted. we can't check generation clauses until later on
         if ( hasGenerationClause() && (getType() == null ) ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
 
 		/* Built-in types need no checking */
 		if (!getType().getTypeId().userType())
@@ -478,6 +510,7 @@ public class ColumnDefinitionNode extends TableElementNode
 		throws StandardException
 	{
 		/* DB2 requires non-nullable columns to have a default in ALTER TABLE */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
 		if (td != null && !hasGenerationClause() && !getType().isNullable() && defaultNode == null)
 		{
 			if (!isAutoincrement )
@@ -516,6 +549,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * 				if increment is 0 or if initial or increment values are out
 	 * 				of range for the datatype.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void validateAutoincrement(DataDictionary dd,
                                TableDescriptor td,
                                int tableType) throws StandardException
@@ -529,6 +564,7 @@ public class ColumnDefinitionNode extends TableElementNode
 		//increment value for autoincrement column can't be 0 if the autoinc column
 		//is part of create table or it is part of alter table to change the 
 		//increment value. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-783
 		if (autoincrementIncrement == 0 && 
 				(autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
 						autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE))
@@ -553,6 +589,8 @@ public class ColumnDefinitionNode extends TableElementNode
 			break;
 		case Types.BIGINT:
 			autoincrementCheckRange(Long.MIN_VALUE, Long.MAX_VALUE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                     TypeId.BIGINT_NAME);
 			break;
 		default:
@@ -597,6 +635,7 @@ public class ColumnDefinitionNode extends TableElementNode
 			return;
 
 		//Examin whether default value is autoincrement.
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		if (isAutoincrement){
 			defaultInfo = createDefaultInfoOfAutoInc();
 			return;
@@ -634,11 +673,14 @@ public class ColumnDefinitionNode extends TableElementNode
 			// Tell the compiler context to only allow deterministic nodes
 			cc.setReliability( CompilerContext.DEFAULT_RESTRICTION );
 			defaultTree = defaultTree.bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             new FromList(
                                 getOptimizerFactory().doJoinOrderOptimization(),
 								getContextManager()), 
 							(SubqueryList) null,
 							(List<AggregateNode>) null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			TypeId columnTypeId = getType().getTypeId();
 			TypeId defaultTypeId = defaultTree.getTypeId();
@@ -664,6 +706,7 @@ public class ColumnDefinitionNode extends TableElementNode
 
 			// Save off the default text
 			// RESOLVEDEFAULT - Convert to constant if possible
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 			defaultInfo = new DefaultInfoImpl(false,
 							  defaultNode.getDefaultText(), 
 							  defaultValue);
@@ -689,6 +732,7 @@ public class ColumnDefinitionNode extends TableElementNode
 
 
 	protected static DefaultInfoImpl createDefaultInfoOfAutoInc(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 		return new DefaultInfoImpl(true,
 					   null, 
 					   null);
@@ -713,6 +757,7 @@ public class ColumnDefinitionNode extends TableElementNode
     boolean defaultTypeIsValid(TypeId columnType,
 		DataTypeDescriptor columnDesc, TypeId defaultType,
 		ValueNode defaultNode, String defaultText)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 
@@ -749,6 +794,7 @@ public class ColumnDefinitionNode extends TableElementNode
 				(colType == StoredFormatIds.LONGVARCHAR_TYPE_ID));
 
 			if (defaultNode instanceof SpecialFunctionNode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 switch (((SpecialFunctionNode)defaultNode).kind) {
                     case SpecialFunctionNode.K_USER:
                     case SpecialFunctionNode.K_CURRENT_USER:
@@ -759,6 +805,7 @@ public class ColumnDefinitionNode extends TableElementNode
                         // Note also: any size under 30 gives a warning in DB2.
                         return (charCol && (columnDesc.getMaximumWidth() >=
                                 Limits.DB2_MIN_COL_LENGTH_FOR_CURRENT_USER));
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 
                     case SpecialFunctionNode.K_CURRENT_SCHEMA:
                         // DB2 enforces min length of 128.
@@ -773,6 +820,7 @@ public class ColumnDefinitionNode extends TableElementNode
 
 		switch (colType) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
 			case StoredFormatIds.BOOLEAN_TYPE_ID:
                 return ( defaultNode instanceof BooleanConstantNode );
                 
@@ -786,6 +834,8 @@ public class ColumnDefinitionNode extends TableElementNode
 			// value if it's integer.
 				return (defType == StoredFormatIds.INT_TYPE_ID);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             case StoredFormatIds.BIGINT_TYPE_ID:
 			// This is a BIGINT column: we allow smallints, ints,
 			// and big int constants.  Smallint and int literals
@@ -811,6 +861,8 @@ public class ColumnDefinitionNode extends TableElementNode
 						((precision - scale) <=
 						(columnDesc.getPrecision() - columnDesc.getScale())));
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 else if ((defType == StoredFormatIds.BIGINT_TYPE_ID) ||
 					(defType == StoredFormatIds.INT_TYPE_ID)) {
 				// only valid if number of digits is within limits of
@@ -835,6 +887,7 @@ public class ColumnDefinitionNode extends TableElementNode
 			// to here instead of waiting until insert time.
 				return (defType == StoredFormatIds.CHAR_TYPE_ID);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-34
 			case StoredFormatIds.BIT_TYPE_ID:
 			case StoredFormatIds.VARBIT_TYPE_ID:
 			case StoredFormatIds.LONGVARBIT_TYPE_ID:
@@ -878,8 +931,11 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);

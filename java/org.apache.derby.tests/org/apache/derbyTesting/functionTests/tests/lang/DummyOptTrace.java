@@ -108,6 +108,7 @@ public  class   DummyOptTrace   implements  OptTrace
     public  void    traceCheapestPlanSoFar( int planType, CostEstimate currentCost ) {}
     public  void    traceSortNeededForOrdering( int planType, RequiredRowOrdering requiredRowOrdering ) {}
     public  void    traceRememberingBestJoinOrder
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap ) {}
     public  void    traceSkippingBecauseTooMuchMemory( int maxMemoryPerTable ) {}
     public  void    traceCostOfNScans( int tableNumber, double rowCount, CostEstimate cost ) {}

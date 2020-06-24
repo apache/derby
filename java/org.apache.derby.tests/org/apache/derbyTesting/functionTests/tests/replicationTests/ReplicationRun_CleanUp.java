@@ -47,6 +47,7 @@ public class ReplicationRun_CleanUp extends ReplicationRun
         
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ReplicationRun_CleanUp");
         
         suite.addTestSuite( ReplicationRun_CleanUp.class );

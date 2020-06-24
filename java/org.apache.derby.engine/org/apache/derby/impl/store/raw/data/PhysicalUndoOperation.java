@@ -58,6 +58,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public final class PhysicalUndoOperation extends PageBasicOperation
         implements Compensation {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
 
 	/** The operation to be rolled back */
 	transient private	PhysicalPageOperation undoOp; 
@@ -143,6 +144,7 @@ public final class PhysicalUndoOperation extends PageBasicOperation
 
 		if (SanityManager.DEBUG) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-361
             if (oldversion >= this.page.getPageVersion())
             {
                 SanityManager.THROWASSERT(

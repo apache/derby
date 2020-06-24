@@ -183,6 +183,7 @@ public class GenericPreparedStatement
 		/* Get the UUID for this prepared statement */
 		UUIDFactory uuidFactory = 
 			getMonitor().getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		UUIDValue = uuidFactory.createUUID();
 		UUIDString = UUIDValue.toString();
@@ -228,6 +229,7 @@ public class GenericPreparedStatement
     }
 
     /** Check if this statement is currently being compiled. */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
     final synchronized boolean isCompiling() {
         return compilingStatement;
     }
@@ -257,9 +259,11 @@ public class GenericPreparedStatement
 
     public void rePrepare(LanguageConnectionContext lcc, boolean forMetaData)
         throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
 		if (!upToDate()) {
             PreparedStatement ps = statement.prepare(lcc, forMetaData);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4279
 			if (SanityManager.DEBUG)
 				SanityManager.ASSERT(ps == this, "ps != this");
 		}
@@ -279,6 +283,7 @@ public class GenericPreparedStatement
 			GeneratedClass gc = getActivationClass();
 
 			if (gc == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4279
 				rePrepare(lcc);
 				gc = getActivationClass();
 			}
@@ -292,6 +297,7 @@ public class GenericPreparedStatement
 		// deadlock.
 		lcc.closeUnusedActivations();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 		Activation parentAct = null;
 		StatementContext stmctx = lcc.getStatementContext();
 
@@ -368,6 +374,7 @@ public class GenericPreparedStatement
     private ResultSet executeStmt(Activation activation,
 								  boolean rollbackParentContext,
                                   boolean forMetaData,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 								  long timeoutMillis)
         throws
             StandardException 
@@ -430,6 +437,7 @@ recompileOutOfDatePlan:
 
 			/* put it in try block to unlock the PS in any case
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-388
 			if (!spsAction) {
 			// only re-prepare if this isn't an SPS for a trigger-action;
 			// if it _is_ an SPS for a trigger action, then we can't just
@@ -447,8 +455,11 @@ recompileOutOfDatePlan:
 
 			StatementContext statementContext = lccToUse.pushStatementContext(
 				isAtomic, updateMode==CursorNode.READ_ONLY, getSource(), pvs, rollbackParentContext, timeoutMillis);
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 
 			statementContext.setActivation(activation);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3327
+//IC see: https://issues.apache.org/jira/browse/DERBY-1331
 
 			if (needsSavepoint())
 			{
@@ -464,6 +475,7 @@ recompileOutOfDatePlan:
 				lccToUse.validateStmtExecution(executionConstants);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultSet resultSet;
 			try {
 	
@@ -488,6 +500,9 @@ recompileOutOfDatePlan:
 			}
 
             lccToUse.popStatementContext(statementContext, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
 
             if (activation.getSQLSessionContextForChildren() != null) {
                 lccToUse.popNestedSessionContext(activation);
@@ -513,12 +528,14 @@ recompileOutOfDatePlan:
 	}
 
 	public DataTypeDescriptor[]	getParameterTypes()	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return ArrayUtil.copy(paramTypeDescriptors);
 	}
 
     /** Return the type of the parameter (0-based indexing) */
     public DataTypeDescriptor  getParameterType( int idx ) throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		if ( paramTypeDescriptors == null )
         {
 			throw StandardException.newException( SQLState.NO_INPUT_PARAMETERS );
@@ -531,6 +548,7 @@ recompileOutOfDatePlan:
 			throw StandardException.newException
                 (
                  SQLState.LANG_INVALID_PARAM_POSITION, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                  idx+1,
                  paramTypeDescriptors.length
                  );
@@ -620,6 +638,7 @@ recompileOutOfDatePlan:
 	 */
 	public Timestamp getBeginCompileTimestamp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		return DataTypeUtilities.clone( beginCompileTimestamp );
 	}
 
@@ -630,6 +649,7 @@ recompileOutOfDatePlan:
 	 */
 	public Timestamp getEndCompileTimestamp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		return DataTypeUtilities.clone( endCompileTimestamp );
 	}
 
@@ -843,7 +863,9 @@ recompileOutOfDatePlan:
 
 		boolean alreadyInvalid;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		switch (action) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		case DependencyManager.RECHECK_PRIVILEGES:
 			return;
 		}
@@ -858,7 +880,9 @@ recompileOutOfDatePlan:
                 // flag to indicate that an invalidation was requested. A
                 // re-compilation will be triggered if this flag is set, but
                 // not until the current compilation is done.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5406
                 invalidatedWhileCompiling = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-424
 				return;
             }
 
@@ -868,6 +892,7 @@ recompileOutOfDatePlan:
 			isValid = false;
 
 			// block compiles while we are invalidating
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
             beginCompiling();
 		}
 
@@ -903,6 +928,7 @@ recompileOutOfDatePlan:
 				}
 			}
 		} finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
             endCompiling();
 		}
 	}
@@ -998,6 +1024,7 @@ recompileOutOfDatePlan:
 	 * @return	true if references SESSION schema tables/views, else false
 	 */
 	public boolean referencesSessionSchema(StatementNode qt)
+//IC see: https://issues.apache.org/jira/browse/DERBY-424
 	throws StandardException {
 		//If the query references a SESSION schema table (temporary or permanent), then
 		// mark so in this statement
@@ -1018,6 +1045,7 @@ recompileOutOfDatePlan:
 
 		@exception StandardException thrown on failure.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 	void completeCompile(StatementNode qt)
 						throws StandardException {
 		//if (finished)
@@ -1050,6 +1078,7 @@ recompileOutOfDatePlan:
 		}
 		isValid = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
         rowCountStats.reset();
 	}
 
@@ -1224,6 +1253,7 @@ recompileOutOfDatePlan:
 		clone.updateMode = updateMode;	
 		clone.needsSavepoint = needsSavepoint;
         clone.rowCountStats = rowCountStats;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
 
 		return clone;
 	}
@@ -1239,6 +1269,7 @@ recompileOutOfDatePlan:
 			if (!isValid || (inUseCount != 0))
 				return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			ContextManager cm = getContextService().getCurrentContextManager();
 			LanguageConnectionContext lcc = 
 				(LanguageConnectionContext) 
@@ -1258,6 +1289,8 @@ recompileOutOfDatePlan:
 			{
 				if (SanityManager.DEBUG)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 					SanityManager.THROWASSERT("Unexpected exception", se);
 				}
 			}
@@ -1274,8 +1307,10 @@ recompileOutOfDatePlan:
 	}
 
     public void setRequiredPermissionsList(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             List<StatementPermission> requiredPermissionsList)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		this.requiredPermissionsList = requiredPermissionsList;
 	}
 
@@ -1285,6 +1320,8 @@ recompileOutOfDatePlan:
 	}
 
     public final long getVersionCounter() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5459
+//IC see: https://issues.apache.org/jira/browse/DERBY-2402
         return versionCounter;
     }
 
@@ -1329,6 +1366,7 @@ recompileOutOfDatePlan:
         synchronized long getInitialRowCount(int rsNum, long rowCount) {
             // Allocate the list of row counts lazily.
             if (rowCounts == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 rowCounts = new ArrayList<Long>();
             }
 
@@ -1337,6 +1375,7 @@ recompileOutOfDatePlan:
             if (rsNum >= rowCounts.size()) {
                 int newSize = rsNum + 1;
                 rowCounts.addAll(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                                  Collections.nCopies(newSize - rowCounts.size(), (Long) null));
             }
 
@@ -1344,6 +1383,7 @@ recompileOutOfDatePlan:
             // set it if it is not already set.
             Long initialCount = rowCounts.get(rsNum);
             if (initialCount == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                 rowCounts.set(rsNum, rowCount);
                 return rowCount;
             } else {
@@ -1401,6 +1441,7 @@ recompileOutOfDatePlan:
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()

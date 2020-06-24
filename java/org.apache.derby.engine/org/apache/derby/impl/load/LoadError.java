@@ -37,6 +37,7 @@ import org.apache.derby.shared.common.error.PublicAPI;
 class LoadError {
 	
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	 Raised if, the Derby database connection is null.
 	*/
 
@@ -53,6 +54,7 @@ class LoadError {
 	static SQLException dataAfterStopDelimiter(int lineNumber, int columnNumber) {
 		return PublicAPI.wrapStandardException(
 			   StandardException.newException(SQLState.DATA_AFTER_STOP_DELIMITER,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 											  lineNumber, columnNumber));				 	
 	}
 
@@ -64,6 +66,7 @@ class LoadError {
 	static SQLException dataFileNotFound(String fileName, Exception ex) {
 
 		return PublicAPI.wrapStandardException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 			   StandardException.newException(SQLState.DATA_FILE_NOT_FOUND, ex,
 											  fileName));
 	}
@@ -102,6 +105,7 @@ class LoadError {
 
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	   Raised if, field and record separators are substring of each other.
 	*/
 	static SQLException fieldAndRecordSeparatorsSubset() {
@@ -127,6 +131,7 @@ class LoadError {
 	static SQLException invalidColumnNumber(int numberOfColumns) {
 		
 		return PublicAPI.wrapStandardException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				StandardException.newException(SQLState.INVALID_COLUMN_NUMBER, numberOfColumns ));
 	}
 
@@ -159,6 +164,8 @@ class LoadError {
 	static SQLException unexpectedEndOfFile(int lineNumber) {
     return  PublicAPI.wrapStandardException(
 			StandardException.newException(SQLState.UNEXPECTED_END_OF_FILE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 										   lineNumber));
 	}
 
@@ -167,6 +174,7 @@ class LoadError {
 	*/
 	static SQLException errorWritingData(IOException ioe) {
 		return PublicAPI.wrapStandardException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2858
 			StandardException.newException(SQLState.ERROR_WRITING_DATA, ioe));
 	}
 

@@ -47,6 +47,7 @@ import java.util.Calendar;
 
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1983
    An abstract implementation of PreparedStatement (JDBC 3.0) that is useful
 	when writing a read-write (updatable) virtual table interface (VTI).
 	
@@ -279,6 +280,7 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
 	 */
 	public int getResultSetConcurrency() throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         return ResultSet.CONCUR_UPDATABLE;
 	}
 
@@ -688,6 +690,7 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
 	}
 
     public void setURL(int arg0, URL arg1) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1983
         throw new SQLException("setURL");    
     }
 
@@ -728,6 +731,7 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
     }
 
     public ParameterMetaData getParameterMetaData() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1983
         throw new SQLException("getParameterMetaData");
     }
 
@@ -735,6 +739,7 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
     public  <T> T unwrap(Class<T> iface) throws SQLException { throw new SQLException( "unwrap" ); }
 
     public boolean isClosed() throws SQLException
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     { throw new SQLException("isClosed"); }
     public boolean isPoolable() throws SQLException
     { throw new SQLException("isPoolable"); }

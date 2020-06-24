@@ -79,6 +79,7 @@ public abstract class KeyConstraintDescriptor extends ConstraintDescriptor
 	{
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, referencedColumns,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
               constraintId, schemaDesc, enforced);
 		this.indexId = indexId;
 	}

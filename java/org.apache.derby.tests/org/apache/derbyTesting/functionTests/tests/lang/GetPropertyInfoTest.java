@@ -51,6 +51,7 @@ public class GetPropertyInfoTest
 		try
 		{
 			Properties info = new Properties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(driver);
 			clazz.getConstructor().newInstance();
 			Driver cDriver = DriverManager.getDriver(protocol);
@@ -76,6 +77,7 @@ public class GetPropertyInfoTest
 				{
 					System.out.print(attributes[j].name + " - value: " + attributes[j].value);
 					// Also check on the other PropertyInfo fields
+//IC see: https://issues.apache.org/jira/browse/DERBY-1618
 					String[] choices = attributes[j].choices;
 					System.out.print(" - description: " 
 						+ attributes[j].description +
@@ -139,6 +141,7 @@ public class GetPropertyInfoTest
 				{
 					System.out.print(attributes[j].name + " - value: " + attributes[j].value);
 					// Also check on the other PropertyInfo fields
+//IC see: https://issues.apache.org/jira/browse/DERBY-1618
 					String[] choices = attributes[j].choices;
 					System.out.print(" - description: " 
 						+ attributes[j].description +

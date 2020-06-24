@@ -39,6 +39,7 @@ class ClassEnumeration implements Enumeration {
 	ClassHolder	cpt;
 	Enumeration			inner;
 	CONSTANT_Index_info	position;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	HashSet<String>           foundClasses;
     Enumeration         classList;
 
@@ -49,6 +50,7 @@ class ClassEnumeration implements Enumeration {
     {
 		this.cpt = cpt;
 		inner = e;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		foundClasses = new HashSet<String>(30, 0.8f);
 		findMethodReferences(methods, foundClasses);
 		findFieldReferences(fields, foundClasses);
@@ -108,6 +110,7 @@ class ClassEnumeration implements Enumeration {
 	}
 
 	private void findMethodReferences(  Enumeration methods,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	                                    HashSet<String> foundClasses)
 	{
 	    while (methods.hasMoreElements())
@@ -119,6 +122,7 @@ class ClassEnumeration implements Enumeration {
 	}
 
 	private void findFieldReferences(   Enumeration fields,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	                                    HashSet<String> foundClasses)
 	{
 	    while (fields.hasMoreElements())
@@ -129,6 +133,7 @@ class ClassEnumeration implements Enumeration {
 	    }
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	void distillClasses(String fieldOrMethodSig, HashSet<String> foundClasses)
 	{
 	    if (fieldOrMethodSig == null || fieldOrMethodSig.length() < 1)

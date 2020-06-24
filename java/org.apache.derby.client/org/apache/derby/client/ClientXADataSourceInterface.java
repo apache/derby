@@ -31,9 +31,13 @@ import javax.sql.XADataSource;
  */
 public interface ClientXADataSourceInterface
     extends ClientDataSourceInterface, XADataSource {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /** Added by Java 9 */
     public default ShardingKeyBuilder createShardingKeyBuilder()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
         throws SQLException
     {
         throw new java.sql.SQLFeatureNotSupportedException();

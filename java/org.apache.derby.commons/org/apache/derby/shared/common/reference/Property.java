@@ -52,6 +52,7 @@ public interface Property {
 
 	/**
 		By convention properties that must not be stored any persistent form of
+//IC see: https://issues.apache.org/jira/browse/DERBY-6220
 		service properties start with this prefix. These properties are not documented.
 	*/
 	public static final String PROPERTY_RUNTIME_PREFIX = "derby.__rt.";
@@ -97,7 +98,9 @@ public interface Property {
 	String LOG_BOOT_TRACE = "derby.stream.error.logBootTrace";
     
         /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 		derby.stream.error.style=<b>The error stream error style.</b>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         <b>rollingFile</b> is the only file currently supported.
 		Takes precendence over derby.stream.error.file.
 		Takes precendence over derby.stream.error.method.
@@ -106,7 +109,9 @@ public interface Property {
 	String ERRORLOG_STYLE_PROPERTY = "derby.stream.error.style";
 
         /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-862
 		derby.stream.error.file=<b>absolute or relative error log filename</b>
+//IC see: https://issues.apache.org/jira/browse/DERBY-205
 		Takes precendence over derby.stream.error.method.
 		Takes precendence over derby.stream.error.field
 	*/
@@ -115,6 +120,7 @@ public interface Property {
 
         /**
 		derby.stream.error.method=
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			$className.$methodName returning an OutputStream or Writer object
 		Takes precendence over derby.stream.error.field
 	*/
@@ -123,12 +129,14 @@ public interface Property {
 
         /**
 		derby.stream.error.field=
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			className.fieldName returning an OutputStream or Writer object
 	*/
 	
 	String ERRORLOG_FIELD_PROPERTY = "derby.stream.error.field";
 
         /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6350
 		derby.stream.error.rollingfile.pattern=<b>the pattern</b>
         A pattern consists of a string that includes the following special
         components that will be replaced at runtime:
@@ -200,6 +208,9 @@ public interface Property {
 	* info stream is started.  
 	*/
 	String LOG_FILE_APPEND = "derby.infolog.append";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
 
 	/*
 	** derby.service.* and related properties
@@ -244,6 +255,7 @@ public interface Property {
 	/**
         derby.database.forceDatabaseLock
 		<BR>
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
         Derby attempts to prevent two instances of Derby from booting
         the same database with the use of a file called db.lck inside the 
         database directory.
@@ -272,6 +284,7 @@ public interface Property {
 
         The warning message looks like this:
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
         WARNING: Derby (instance 80000000-00d2-3265-de92-000a0a0a0200) is
         attempting to boot the database /export/home/sky/wombat even though
         Derby (instance 80000000-00d2-3265-8abf-000a0a0a0200) may still be
@@ -284,6 +297,7 @@ public interface Property {
         This warning is primarily a Technical Support aid to determine the 
         cause of corruption. However, if you see this warning, your best 
         choice is to close the connection and exit the JVM. This minimizes the
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
         risk of a corruption. Close all instances of Derby, then restart
         one instance of Derby and shut down the database properly so that
         the db.lck file can be removed. The warning message continues to appear
@@ -397,6 +411,7 @@ public interface Property {
 	/**
 		internal use only, passes the database classpathinto the class manager
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6220
         Undocumented.
 	*/
 	String BOOT_DB_CLASSPATH = PROPERTY_RUNTIME_PREFIX + "database.classpath";
@@ -498,6 +513,9 @@ public interface Property {
 	public static final String ROW_LOCKING = "derby.storage.rowLocking";
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
 		derby.storage.propertiesId
 		<BR>
 		Stores the id of the conglomerate that holds the per-database
@@ -509,6 +527,7 @@ public interface Property {
 	String PROPERTIES_CONGLOM_ID = "derby.storage.propertiesId";
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
        <p>
 		derby.storage.tempDirectory
 		</p>
@@ -606,6 +625,9 @@ public interface Property {
 	 */
 	String LOG_ARCHIVE_MODE = "derby.storage.logArchiveMode";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
 
 	/**
 	 *	derby.storage.logDeviceWhenBackedUp
@@ -634,6 +656,7 @@ public interface Property {
      * </UL>
      */
     String MODULE_PREFIX = "derby.module.";
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 
     /**
      *  derby.subSubProtocol.xxx
@@ -674,6 +697,7 @@ public interface Property {
      * See org.apache.derby.shared.common.info.JVMInfo.JDK_ID
      */
     String MODULE_ENV_JDK_PREFIX = "derby.env.jdk.";
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 
     /**
      * Declare a set of classes that the class for a module or sub sub protocol requires.
@@ -692,6 +716,9 @@ public interface Property {
 	 * <p>
 	 * Undocumented.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
 	String	LANG_TD_CACHE_SIZE = "derby.language.tableDescriptorCacheSize";
 	int		LANG_TD_CACHE_SIZE_DEFAULT = 64;
 
@@ -701,6 +728,7 @@ public interface Property {
 	 * <p>
 	 * Undocumented.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 	String	LANG_PERMISSIONS_CACHE_SIZE = "derby.language.permissionsCacheSize";
 	int		LANG_PERMISSIONS_CACHE_SIZE_DEFAULT = 64;
 	/**
@@ -742,6 +770,7 @@ public interface Property {
 	  be executed before checking whether its plan is stale.  Database.
 	  Dynamic.
 	  <P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6220
 	  Externally visible but undocumented.
 	 */
 	String LANGUAGE_STALE_PLAN_CHECK_INTERVAL =
@@ -866,6 +895,7 @@ public interface Property {
      * Undocumented.
      * </p>
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
     String STORAGE_AUTO_INDEX_STATS_DEBUG_KEEP_DISPOSABLE_STATS =
             "derby.storage.indexStats.debug.keepDisposableStats";
 
@@ -877,6 +907,7 @@ public interface Property {
       * timeout in seconds. Zero means no timout.
       */
     String PROP_XA_TRANSACTION_TIMEOUT = "derby.jdbc.xaTransactionTimeout";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
 
     /** The default value for XA transaction timeout if the corresponding
       * property is not found in system properties. Zero means no timeout.
@@ -889,6 +920,7 @@ public interface Property {
 	public static final String DATABASE_MODULE = "org.apache.derby.database.Database";
 
 	/*
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		Property to enable Grant & Revoke SQL authorization. Introduced in Derby 10.2
 		release. New databases and existing databases (in Derby 10.2) still use legacy
 		authorization by default and by setting this property to true could request for
@@ -1035,6 +1067,7 @@ public interface Property {
 	/**
 		Property name for specifying log switch interval
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6220
         Undocumented.
 	 */
 	public static final String LOG_SWITCH_INTERVAL = "derby.storage.logSwitchInterval";
@@ -1257,10 +1290,12 @@ public interface Property {
 	// type should be ignored. The TERRITORY_BASED collation uses the default
 	// collator strength while the four with a colon uses a specific strength.
 	public static final String UCS_BASIC_COLLATION =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
 								"UCS_BASIC";
 	public static final String TERRITORY_BASED_COLLATION =
 								"TERRITORY_BASED";
 	public static final String TERRITORY_BASED_PRIMARY_COLLATION =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
 								"TERRITORY_BASED:PRIMARY";
 	public static final String TERRITORY_BASED_SECONDARY_COLLATION =
 								"TERRITORY_BASED:SECONDARY";
@@ -1337,6 +1372,7 @@ public interface Property {
      * the server, too (i.e. started via API).
      * </p>
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
     String STORAGE_USE_DEFAULT_FILE_PERMISSIONS =
         "derby.storage.useDefaultFilePermissions";
 

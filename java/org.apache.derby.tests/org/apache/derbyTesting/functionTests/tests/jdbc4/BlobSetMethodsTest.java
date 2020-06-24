@@ -55,6 +55,7 @@ public class BlobSetMethodsTest extends BaseJDBCTestCase {
      * Create test suite.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         return TestConfiguration.defaultSuite (BlobSetMethodsTest.class);
     }
 
@@ -163,6 +164,7 @@ public class BlobSetMethodsTest extends BaseJDBCTestCase {
             assertEquals (data1 [i], data2 [i]);
 
         //test truncate on small size blob
+//IC see: https://issues.apache.org/jira/browse/DERBY-2345
         blob = con.createBlob();
         data = new byte [100];
         for (int i = 0; i < 100; i++) {

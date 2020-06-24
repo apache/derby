@@ -78,6 +78,7 @@ public class NetXAResource implements XAResource {
     private static final String XAFUNCSTR_START = "XAResource.start()";
 
     SqlException exceptionsOnXA = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     NetXAConnection netXAConn_;
     NetConnection conn_;
@@ -91,6 +92,7 @@ public class NetXAResource implements XAResource {
     private int timeoutSeconds = 0;
 
     public NetXAResource(XAConnection xaconn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                          NetXAConnection conn) {
         conn_ = conn.getNetConnection();
         netXAConn_ = conn;
@@ -101,12 +103,14 @@ public class NetXAResource implements XAResource {
 
         // construct the NetXACallInfo object for the array.
         for (int i = 0; i < INITIAL_CALLINFO_ELEMENTS; ++i) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             callInfoArray_[i] = new NetXACallInfo(null, XAResource.TMNOFLAGS,
                     null);
         }
 
         // initialize the first XACallInfo element with the information from the
         //  primary connection
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
         callInfoArray_[0].actualConn_ = conn;
         // ~~~ save conn_ connection variables in callInfoArray_[0]
         callInfoArray_[0].saveConnectionVariables();
@@ -129,6 +133,7 @@ public class NetXAResource implements XAResource {
         callInfo.xaFlags_ = (onePhase ? XAResource.TMONEPHASE :
                 XAResource.TMNOFLAGS);
         callInfo.xid_ = xid;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
@@ -208,6 +213,7 @@ public class NetXAResource implements XAResource {
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xaFlags_ = flags;
         callInfo.xid_ = xid;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
@@ -231,6 +237,7 @@ public class NetXAResource implements XAResource {
             // is changed by setXaStateForXAException inside the call
             // to throwXAException according the error code of the XAException
             // to be thrown.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throwXAException(rc);
         }else {
             conn_.setXAState(ClientConnection.XA_T0_NOT_ASSOCIATED);
@@ -259,6 +266,7 @@ public class NetXAResource implements XAResource {
         }
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xid_ = xid;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             // flow the required PROTOCOL to the server
@@ -273,12 +281,14 @@ public class NetXAResource implements XAResource {
             netAgent.netConnectionReply_.readXaForget(netAgent.netConnection_);
 
             netAgent.endReadChain();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
             if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_FORGET;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
                 callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
         } catch (SqlException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             exceptionsOnXA = Utils.accumulateSQLException(sqle, exceptionsOnXA);
             throwXAException(getSqlExceptionXAErrorCode(sqle));
         }
@@ -308,6 +318,7 @@ public class NetXAResource implements XAResource {
         }
 
         if (conn_.agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
             conn_.agent_.logWriter_.traceExit(this, "getTransactionTimeout", timeoutSeconds);
         }
         return timeoutSeconds;
@@ -341,6 +352,7 @@ public class NetXAResource implements XAResource {
         int rc = XAResource.XA_OK;
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xid_ = xid;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
@@ -350,6 +362,7 @@ public class NetXAResource implements XAResource {
 
             // read the reply to the prepare
             rc = netAgent.netConnectionReply_.readXaPrepare(conn_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
             if ((callInfo.xaRetVal_ != XAResource.XA_OK) &&
                     (callInfo.xaRetVal_ != XAException.XA_RDONLY)) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_PREPARE;
@@ -363,7 +376,9 @@ public class NetXAResource implements XAResource {
             exceptionsOnXA = Utils.accumulateSQLException(sqle, exceptionsOnXA);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-960
         if ((rc != XAResource.XA_OK ) && (rc != XAResource.XA_RDONLY)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throwXAException(rc);
         }
         if (conn_.agent_.loggingEnabled()) {
@@ -403,6 +418,7 @@ public class NetXAResource implements XAResource {
 
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xaFlags_ = flag;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
@@ -417,6 +433,7 @@ public class NetXAResource implements XAResource {
             }
             netAgent.endReadChain();
             xidList = conn_.getIndoubtTransactionIds();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         } catch (SqlException sqle) {
             rc = getSqlExceptionXAErrorCode(sqle);
@@ -455,6 +472,7 @@ public class NetXAResource implements XAResource {
         // update the XACallInfo
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xid_ = xid;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
@@ -463,6 +481,7 @@ public class NetXAResource implements XAResource {
             // read the reply to the rollback
             rc = netAgent.netConnectionReply_.readXaRollback(conn_);
             netAgent.endReadChain();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
             if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_END;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
@@ -500,6 +519,7 @@ public class NetXAResource implements XAResource {
      */
     public boolean setTransactionTimeout(int seconds) throws XAException {
         if (conn_.agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
             conn_.agent_.logWriter_.traceEntry(this, "setTransactionTimeout");
         }
         if (seconds < 0) {
@@ -539,6 +559,8 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "start", xid, flags);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
         if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
@@ -546,10 +568,12 @@ public class NetXAResource implements XAResource {
         // DERBY-1025 - Flow an auto-commit if in auto-commit mode before 
         // entering a global transaction
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             if(conn_.autoCommit_)
                 conn_.flowAutoCommit();
         } catch (SqlException sqle) {
             rc = getSqlExceptionXAErrorCode(sqle);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             exceptionsOnXA = Utils.accumulateSQLException(sqle, exceptionsOnXA);
         } 
 
@@ -558,8 +582,10 @@ public class NetXAResource implements XAResource {
         callInfo.xaFlags_ = flags;
         callInfo.xid_ = xid;
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
 
         // check and setup the transaction timeout settings
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
         if (flags == TMNOFLAGS) {
             if (timeoutSeconds == Integer.MAX_VALUE) {
                 // Disable the transaction timeout.
@@ -591,15 +617,27 @@ public class NetXAResource implements XAResource {
             // Setting this is currently required to avoid client from sending
             // commit for autocommit.
             if (rc == XAResource.XA_OK) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 conn_.setXAState(ClientConnection.XA_T1_ASSOCIATED);
             }
 
         } catch (SqlException sqle) {
             rc = getSqlExceptionXAErrorCode(sqle);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             exceptionsOnXA = Utils.accumulateSQLException(sqle, exceptionsOnXA);
         }
 
         if (rc != XAResource.XA_OK) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throwXAException(rc);
         }
     }
@@ -607,6 +645,7 @@ public class NetXAResource implements XAResource {
     private String getXAExceptionText(int rc) {
         String xaExceptionText;
         switch (rc) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case XAException.XA_RBROLLBACK:
             xaExceptionText = "XA_RBROLLBACK";
             break;
@@ -688,12 +727,15 @@ public class NetXAResource implements XAResource {
 
     private void throwXAException(int rc)
             throws XAException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         StringBuilder xaExceptionText = new StringBuilder(64);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
         xaExceptionText.append(getXAExceptionText(rc));
         // save the SqlException chain to add it to the XAException
         SqlException sqlExceptions = exceptionsOnXA;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         while (exceptionsOnXA != null) { // one or more SqlExceptions received, format them
             xaExceptionText.append(" : ").append(exceptionsOnXA.getMessage());
@@ -721,11 +763,13 @@ public class NetXAResource implements XAResource {
      * @throws XAException
      */
     private void setXaStateForXAException(int rc) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         switch (rc)
         {
             // Reset to T0, not  associated for XA_RB*, RM*
            // XAER_RMFAIL and XAER_RMERR will be fatal to the connection
            // but that is not dealt with here
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
            case XAException.XAER_RMFAIL:
            case XAException.XAER_RMERR:
            case XAException.XA_RBROLLBACK:
@@ -736,6 +780,7 @@ public class NetXAResource implements XAResource {
            case XAException.XA_RBPROTO:
            case XAException.XA_RBTIMEOUT:
            case XAException.XA_RBTRANSIENT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                conn_.setXAState(ClientConnection.XA_T0_NOT_ASSOCIATED);
            break;
             // No change for other XAExceptions
@@ -764,6 +809,22 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "isSameRM", xares);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
+//IC see: https://issues.apache.org/jira/browse/DERBY-339
+//IC see: https://issues.apache.org/jira/browse/DERBY-246
         if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
@@ -846,10 +907,13 @@ public class NetXAResource implements XAResource {
 
 
     private void connectionClosedFailure() throws XAException { // throw an XAException XAER_RMFAIL, with a chained SqlException - closed
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         exceptionsOnXA = Utils.accumulateSQLException
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
                 (new SqlException(null, 
                         new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)),
                         exceptionsOnXA);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         throwXAException(XAException.XAER_RMFAIL);
     }
 
@@ -883,6 +947,7 @@ public class NetXAResource implements XAResource {
             // create an SqlException to report this error within
             SqlException accumSql = new SqlException(conn_.netAgent_.logWriter_,
                 new ClientMessageId(SQLState.NET_XARETVAL_ERROR),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                 SqlCode.queuedXAError,
                 getXAFuncStr(callInfo.xaFunction_),
                 getXAExceptionText(rc));

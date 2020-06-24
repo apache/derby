@@ -44,6 +44,7 @@ public final class AllocPageOperation extends PhysicalPageOperation
 	protected int doStatus;		// what the doMe operation should set the status to
 	protected int undoStatus;	// what the undoMe operation should set the status to
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     AllocPageOperation(AllocPage allocPage, long pageNumber, int doStatus, int undoStatus)
 		 throws StandardException
 	{

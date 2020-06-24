@@ -166,6 +166,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.source = source;
 		this.sourceRowWidth = sourceRowWidth;
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
         keepAfterCommit = activation.getResultSetHoldability();
 		maxRows = activation.getMaxRows();
 		if (SanityManager.DEBUG)
@@ -174,6 +175,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 				"maxRows not expected to be -1");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		positionInHashTable = new SQLInteger();
 		needsRepositioning = false;
 		if (isForUpdate()) {
@@ -225,6 +227,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		 * We need BackingStoreHashtable to actually go to disk when it doesn't fit.
 		 * This is a known limitation.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
 		ht = new BackingStoreHashtable(getTransactionController(),
 									   null,
 									   keyCols,
@@ -235,6 +238,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 									   HashScanResultSet.DEFAULT_MAX_CAPACITY,
 									   false,
                                        keepAfterCommit);
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
 
 		// When re-using language result sets (DERBY-827) we need to
 		// reset some member variables to the value they would have
@@ -247,6 +251,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		seenFirst = false;
 		seenLast = false;
 		maxRows = activation.getMaxRows();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3397
 
 		openTime += getElapsedMillis(beginTime);
 		setBeforeFirstRow();
@@ -310,6 +315,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
                 // Absolute 0 is defined to be before first!
 		if (row == 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-276
                     setBeforeFirstRow();
                     return null;
 		}
@@ -343,6 +349,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 					break;
 				}
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1277
 			if (result != null) {
 				result = getRowFromHashTable(row);
 			}
@@ -416,6 +423,9 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		// Return the current row for 0
 		if (row == 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-918
+//IC see: https://issues.apache.org/jira/browse/DERBY-934
+//IC see: https://issues.apache.org/jira/browse/DERBY-797
                     if (beforeFirst || afterLast || currentPosition==0) {
                         return null;
                     } else {
@@ -499,6 +509,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -519,6 +530,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			 * Get row from the source.
 			 */
 			result = getNextRowFromSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1277
 			if (result !=null) {
 				result = getRowFromHashTable(currentPosition);
 			}
@@ -563,6 +575,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	{
 	    if ( ! isOpen ) 
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4776
 			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "previous");
 		}
 
@@ -628,6 +641,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "next");
 		}
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-1277
 		if (!seenLast) 
 		{
 			attachStatementContext();
@@ -739,6 +753,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		case ISFIRST:
 			return (currentPosition == 1);
 		case ISLAST:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1276
 			if (beforeFirst || afterLast || currentPosition==0 ||
 				currentPosition<positionInSource)
 			{
@@ -797,6 +812,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		if (needsRepositioning) {
 			positionInLastFetchedRow();
 			needsRepositioning = false;
@@ -820,6 +836,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			positionInSource++;
 			currentPosition = positionInSource;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 			RowLocation rowLoc = null;
 			if (source.isForUpdate()) {
 				rowLoc = ((CursorResultSet)source).getRowLocation();
@@ -844,6 +861,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			else
 			{
 				afterLast = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-186
 				currentPosition = positionInSource + 1;
 			}
 		}
@@ -943,6 +961,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow getCurrentRow() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		if (isForUpdate() && isDeleted()) {
 			return null;
 		} else {
@@ -970,6 +989,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 *
 	 */
 	private void addRowToHashTable(ExecRow sourceRow, int position,
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 			RowLocation rowLoc, boolean rowUpdated)
 		throws StandardException
 	{
@@ -978,6 +998,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		// 1st element is the key
 		hashRowArray[0] = new SQLInteger(position);
 		if (isForUpdate()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 			hashRowArray[POS_ROWLOCATION] = rowLoc.cloneValue(false);
 			hashRowArray[POS_ROWDELETED] = new SQLBoolean(false);
 			hashRowArray[POS_ROWUPDATED] = new SQLBoolean(rowUpdated);
@@ -990,6 +1011,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		 */
 		DataValueDescriptor[] sourceRowArray = sourceRow.getRowArray();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		System.arraycopy(sourceRowArray, 0, hashRowArray, extraColumns, 
 				sourceRowArray.length);
 
@@ -1022,6 +1044,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 				"hashRowArray expected to be non-null");
 		}
 		// Copy out the Object[] without the position.
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		DataValueDescriptor[] resultRowArray = new 
 				DataValueDescriptor[hashRowArray.length - extraColumns];
 		System.arraycopy(hashRowArray, extraColumns, resultRowArray, 0, 
@@ -1040,6 +1063,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			afterLast = false;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		if (isForUpdate()) {
 			RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
 			// Keep source and target with the same currentRow
@@ -1101,8 +1125,10 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 */
 	public void updateRow(ExecRow row, RowChanger rowChanger)
 			throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 
 		ProjectRestrictResultSet prRS = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
 
 		if (source instanceof ProjectRestrictResultSet) {
 			prRS = (ProjectRestrictResultSet)source;
@@ -1122,6 +1148,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		// modified column will need to go (we do our own projection).
 		int[] map;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 		if (prRS != null) {
 			map = prRS.getBaseProjectMapping();
 		} else {

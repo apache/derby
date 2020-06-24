@@ -41,6 +41,7 @@ public final class ImportExportIJTest extends ScriptTestCase {
 	 * @param script - the name of the script
 	 */
 	private ImportExportIJTest(String script) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5217
 		super(script, true);
 	}
 
@@ -49,6 +50,7 @@ public final class ImportExportIJTest extends ScriptTestCase {
 	 * Return the suite that runs the script.
 	 */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("importExportIJ");
 		
         // only run with embedded
@@ -59,6 +61,7 @@ public final class ImportExportIJTest extends ScriptTestCase {
         // server side, and import would be looking on the client.
         // Also, running client & embedded would require some cleanup magic to
         // remove the exported files (see e.g. ImportExportTest).
+//IC see: https://issues.apache.org/jira/browse/DERBY-5368
 		Test test = new ImportExportIJTest("importExportIJ");
 		
         // This test should run in English locale since it compares error

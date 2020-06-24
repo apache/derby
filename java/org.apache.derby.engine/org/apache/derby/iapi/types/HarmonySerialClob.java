@@ -104,6 +104,7 @@ public class HarmonySerialClob implements Clob, Serializable, Cloneable {
         checkValidation();
         if (length < 0)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {length} );
         }
         if (pos < 1 || pos > len || pos + length > len + 1)
@@ -179,6 +180,7 @@ public class HarmonySerialClob implements Clob, Serializable, Cloneable {
         checkValidation();
         if (pos < 1)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {pos} );
         }
         if (length < 0)
@@ -205,6 +207,7 @@ public class HarmonySerialClob implements Clob, Serializable, Cloneable {
         checkValidation();
         if (length < 0)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {length} );
         }
         if (length > len)

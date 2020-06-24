@@ -544,6 +544,7 @@ public  class   DataFileVTI extends VTITemplate
          )
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName( customProvider );
         UserAuthenticator   authenticator = (UserAuthenticator) clazz.getConstructor().newInstance();
 
@@ -891,6 +892,7 @@ public  class   DataFileVTI extends VTITemplate
             
             File    serviceProperties = new File( _dbDirectory, "service.properties" );
             Properties  properties = unpackEncryptionProperties( encryptionProperties );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6864
             try (FileInputStream in = new FileInputStream(serviceProperties)) {
                 properties.load(in);
             }

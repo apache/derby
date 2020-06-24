@@ -54,6 +54,7 @@ class RowCountResultSet extends NoPutResultSetImpl
     final private boolean runTimeStatsOn;
     private long offset;
     private long fetchFirst;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
     final private GeneratedMethod offsetMethod;
     final private GeneratedMethod fetchFirstMethod;
     final private boolean hasJDBClimitClause;
@@ -91,6 +92,7 @@ class RowCountResultSet extends NoPutResultSetImpl
         (NoPutResultSet s,
          Activation a,
          int resultSetNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
          GeneratedMethod offsetMethod,
          GeneratedMethod fetchFirstMethod,
          boolean hasJDBClimitClause,
@@ -162,6 +164,7 @@ class RowCountResultSet extends NoPutResultSetImpl
 
         source.reopenCore();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
         virginal = true;
         rowsFetched = 0;
         isOpen = true;
@@ -180,6 +183,7 @@ class RowCountResultSet extends NoPutResultSetImpl
      * @return the next row in the result
      */
     public ExecRow  getNextRowCore() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 	if( isXplainOnlyMode() )
 		return null;
 
@@ -187,6 +191,7 @@ class RowCountResultSet extends NoPutResultSetImpl
 
         beginTime = getCurrentTimeMillis();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
         if (virginal) {
             if (offsetMethod != null) {
                 DataValueDescriptor offVal

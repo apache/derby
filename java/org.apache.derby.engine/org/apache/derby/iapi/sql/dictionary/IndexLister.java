@@ -83,6 +83,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( indexRowGenerators == null ) { getAllIndexes(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return ArrayUtil.copy(indexRowGenerators);
 	}
 
@@ -97,6 +98,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( indexConglomerateNumbers == null ) { getAllIndexes(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return	ArrayUtil.copy( indexConglomerateNumbers );
 	}
 
@@ -112,6 +114,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( distinctIndexRowGenerators == null ) { getAllIndexes(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return ArrayUtil.copy(distinctIndexRowGenerators);
 	}
 
@@ -127,6 +130,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( distinctIndexConglomerateNumbers == null ) { getAllIndexes(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return	ArrayUtil.copy( distinctIndexConglomerateNumbers );
 	}
 
@@ -140,6 +144,7 @@ public class IndexLister
 	  */
     public	String[]		getDistinctIndexNames()	throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5111
 		if ( distinctIndexNames == null ) { getAllIndexes(); }
 		return	ArrayUtil.copy( distinctIndexNames );
 	}
@@ -213,6 +218,7 @@ public class IndexLister
 			if ( ! cd.isIndex())
 				continue;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             indexRowGenerators[++j] = cd.getIndexDescriptor();
 			indexConglomerateNumbers[j] = cd.getConglomerateNumber();
 			if (!(cd.isConstraint()))

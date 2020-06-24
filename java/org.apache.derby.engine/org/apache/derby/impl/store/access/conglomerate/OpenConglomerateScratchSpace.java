@@ -115,6 +115,7 @@ public class OpenConglomerateScratchSpace
     {
         this.format_ids     = format_ids;
         this.collation_ids  = collation_ids;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         this.hasCollatedTypes = hasCollatedTypes;
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(GenericConglomerate.hasCollatedColumns(
@@ -154,6 +155,7 @@ public class OpenConglomerateScratchSpace
             row_for_export_template = 
                 RowUtil.newTemplate(
                     rawtran.getDataValueFactory(), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                     null, format_ids, collation_ids);
         }
 
@@ -182,6 +184,7 @@ public class OpenConglomerateScratchSpace
         // parameters.
         if (scratch_row == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             scratch_row = get_row_for_export(rawtran);
         }
 
@@ -207,6 +210,7 @@ public class OpenConglomerateScratchSpace
         if (scratch_template == null)
         {
             scratch_template = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 TemplateRow.newRow(
                     rawtran, 
                     (FormatableBitSet) null, format_ids, collation_ids);
@@ -228,6 +232,7 @@ public class OpenConglomerateScratchSpace
      **/
     public RowPosition get_scratch_row_position()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-806
         if (scratch_row_position == null)
         {
             scratch_row_position = new RowPosition();
@@ -244,6 +249,7 @@ public class OpenConglomerateScratchSpace
      *      different than UCS BASIC.
      */
     public boolean hasCollatedTypes() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         return hasCollatedTypes;
     }
 }

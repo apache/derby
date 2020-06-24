@@ -48,6 +48,7 @@ public class ForeignKeyRIChecker extends GenericRIChecker
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     ForeignKeyRIChecker(
         LanguageConnectionContext lcc,
         TransactionController tc,
@@ -83,6 +84,7 @@ public class ForeignKeyRIChecker extends GenericRIChecker
      * @exception StandardException on unexpected error, or
 	 *		on a foreign key violation
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     void doCheck(Activation a,
                  ExecRow row,
                  boolean restrictCheckOnly,
@@ -108,6 +110,7 @@ public class ForeignKeyRIChecker extends GenericRIChecker
 		ScanController scan = getScanController(fkInfo.refConglomNumber, refScoci, refDcoci, row);
 		if (!scan.next())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final UUID fkId = fkInfo.fkIds[0];
             close();
 

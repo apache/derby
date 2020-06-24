@@ -531,9 +531,11 @@ public class Submitter {
     
     private String percent(int count, int total)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4892
         BigDecimal c = BigDecimal.valueOf((long) count * 100L);
         BigDecimal t = BigDecimal.valueOf((long) total);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         BigDecimal p = c.divide(t, 2, RoundingMode.DOWN);
         
         return p.toString().concat("%");

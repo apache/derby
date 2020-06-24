@@ -67,6 +67,7 @@ public interface EmbeddedDataSourceInterface extends javax.sql.DataSource {
      * @throws SQLException on error
      */
     public Connection getConnection(String username,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                                    String password,
                                    boolean requestPassword)
       throws SQLException;

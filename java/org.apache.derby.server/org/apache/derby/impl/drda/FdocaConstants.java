@@ -105,6 +105,7 @@ class FdocaConstants
 
     protected static boolean isNullable(int fdocaType)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return ( (fdocaType & 1) == 1);
     }
 
@@ -139,9 +140,11 @@ class FdocaConstants
     {
         int drdaType = 0;
         switch (jdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
             case Types.BOOLEAN:
                 if ( appRequester.supportsBooleanValues() )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     drdaType = DRDAConstants.DRDA_TYPE_NBOOLEAN;
                     outlen[0] = 1;
                 }
@@ -150,6 +153,7 @@ class FdocaConstants
                     drdaType = DRDAConstants.DRDA_TYPE_NSMALL;
                     outlen[0] = 2;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 break;
             case java.sql.Types.BIT:
             case java.sql.Types.TINYINT:
@@ -219,6 +223,7 @@ class FdocaConstants
                     drdaType = DRDAConstants.DRDA_TYPE_NLONG;
                     outlen[0] = LONGVARCHAR_MAX_LEN;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 break;
             case java.sql.Types.LONGVARCHAR:
                     drdaType = DRDAConstants.DRDA_TYPE_NLONG;

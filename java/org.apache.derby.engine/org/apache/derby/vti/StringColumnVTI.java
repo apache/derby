@@ -109,6 +109,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      */
     public  StringColumnVTI( String[] columnNames )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
         if ( columnNames != null )
         {
             _columnNames = ArrayUtil.copy( columnNames );
@@ -132,10 +133,12 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      * @throws SQLException on error
      */
     public  void    setColumnNames( String[] columnNames )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
         throws SQLException
     {
         if ( _columnNames != null ) { throw makeSQLException( SQLState.LANG_CANNOT_CHANGE_COLUMN_NAMES ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6197
         _columnNames = ArrayUtil.copy( columnNames );
     }
 
@@ -227,6 +230,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         else
         {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
                 return Integer.parseInt( columnValue );
             } catch (NumberFormatException e) { throw wrap( e ); }
         }
@@ -253,6 +257,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         else
         {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
                 return Float.parseFloat( columnValue );
             } catch (NumberFormatException e) { throw wrap( e ); }
         }
@@ -266,6 +271,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         else
         {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
                 return Double.parseDouble( columnValue );
             } catch (NumberFormatException e) { throw wrap( e ); }
         }
@@ -435,6 +441,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
     private SQLException    makeSQLException( String sqlstate, Object... args )
     {
         StandardException   se = StandardException.newException( sqlstate, args );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
 
         return new SQLException( se.getMessage(), se.getSQLState() );
     }

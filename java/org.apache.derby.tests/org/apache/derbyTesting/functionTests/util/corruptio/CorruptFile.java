@@ -362,6 +362,7 @@ class CorruptFile implements StorageFile {
 	}
 
     public void limitAccessToOwner() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         realFile.limitAccessToOwner();
     }
 

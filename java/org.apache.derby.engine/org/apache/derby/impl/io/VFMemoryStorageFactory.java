@@ -98,17 +98,20 @@ public class VFMemoryStorageFactory
      * @exception IOException on an error (unexpected).
      */
     public void init(String home, String databaseName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4093
                      String tempDirNameIgnored, String uniqueName)
             throws IOException {
         // Handle cases where a database name is specified.
         if (databaseName != null) {
             if (home != null &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
                     !new File(databaseName).isAbsolute()) {
                 canonicalName = new File(home, databaseName).getCanonicalPath();
             } else {
                 canonicalName = new File(databaseName).getCanonicalPath();
             }
             synchronized (DATABASES) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
                 this.dbData = (DataStore)DATABASES.get(canonicalName);
                 // If the store has been scheduled for deletion, purge it.
                 if (dbData != null && dbData.scheduledForDeletion()) {
@@ -122,6 +125,7 @@ public class VFMemoryStorageFactory
                         // Create a new data store.
                         this.dbData = new DataStore(canonicalName);
                         DATABASES.put(canonicalName, dbData);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
                     } else {
                         // We have a database name, but no unique name.
                         // Assume that the client only wants to do some
@@ -133,6 +137,7 @@ public class VFMemoryStorageFactory
             }
             // Specify the data directory and the temp directory.
             dataDirectory = new VirtualFile(canonicalName, dbData);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4094
             tempDir = new VirtualFile(normalizePath(canonicalName, "tmp"),
                                       dbData);
 
@@ -145,6 +150,7 @@ public class VFMemoryStorageFactory
             // directory names of the database locations, but the
             // databases themselves will be stored in separate stores.
             final String absHome = new File(home).getCanonicalPath();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4432
             dbData = DUMMY_STORE;
             dataDirectory = new VirtualFile(absHome, dbData);
             tempDir = new VirtualFile(getSeparator() + "tmp", dbData);
@@ -154,8 +160,10 @@ public class VFMemoryStorageFactory
         // Creating the temporary directory too early casues the
         // BaseDataFileFactory to fail, hence the check for uniqueName.
         // This check is also used by BaseStorageFactory.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4093
         if (uniqueName != null && tempDir != null && !tempDir.exists()) {
             tempDir.mkdirs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             tempDir.limitAccessToOwner(); // nop, but follow pattern
         }
     }
@@ -168,6 +176,7 @@ public class VFMemoryStorageFactory
         // If the data store has been scheduled for deletion, which happens
         // when the store detects that the service root has been deleted, then
         // delete the whole store to release the memory.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
         if (dbData.scheduledForDeletion()) {
             DataStore store;
             synchronized (DATABASES) {
@@ -212,6 +221,7 @@ public class VFMemoryStorageFactory
             // Return the database directory as described by StorageFactory.
             return dataDirectory;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4094
         return new VirtualFile(normalizePath(path), dbData);
     }
 
@@ -223,6 +233,7 @@ public class VFMemoryStorageFactory
      * @return A path handle.
      */
     public StorageFile newStorageFile(String directoryName, String fileName) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4094
             return new VirtualFile(
                                 normalizePath(directoryName, fileName), dbData);
     }
@@ -236,6 +247,7 @@ public class VFMemoryStorageFactory
      */
     public StorageFile newStorageFile(StorageFile directoryName,
                                       String fileName) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4094
         return newStorageFile(directoryName == null ? null
                                                     : directoryName.getPath(),
                               fileName);
@@ -336,8 +348,11 @@ public class VFMemoryStorageFactory
      * @throws NullPointerException if {@code file} is {@code null}
      */
     private String normalizePath(String dir, String file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5393
         if (dir == null || dir.length() == 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4094
             dir = dataDirectory.getPath();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         } else if (!new File(dir).isAbsolute()) {
             dir = new File(dataDirectory.getPath(), dir).getPath();
         }
@@ -353,8 +368,10 @@ public class VFMemoryStorageFactory
      * @return A path.
      */
     private String normalizePath(String path) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5393
         if (path == null || path.length() == 0) {
             return dataDirectory.getPath();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4125
         } else if (new File(path).isAbsolute()) {
             return path;
         } else {
@@ -369,6 +386,7 @@ public class VFMemoryStorageFactory
      * @param dbPath absolute path of the dropped database
      */
     private void dbDropCleanupInDummy(String dbPath) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
         while (dbPath != null && DUMMY_STORE.deleteEntry(dbPath)) {
             dbPath = new File(dbPath).getParent();
         }

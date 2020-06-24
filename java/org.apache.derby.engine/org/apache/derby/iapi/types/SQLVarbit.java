@@ -92,6 +92,7 @@ public class SQLVarbit extends SQLBit
 		int		desiredWidth = desiredType.getMaximumWidth();
 
 		byte[] sourceData = source.getBytes();
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		setValue(sourceData);
 		if (sourceData.length > desiredWidth)
 			setWidth(desiredWidth, 0, true);
@@ -120,6 +121,7 @@ public class SQLVarbit extends SQLBit
 		*/
 		if (getValue() == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			return;
 		}
 

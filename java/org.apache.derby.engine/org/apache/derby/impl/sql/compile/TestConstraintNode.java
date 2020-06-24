@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.TestConstraintNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -59,6 +60,7 @@ class TestConstraintNode extends UnaryLogicalOperatorNode
             ValueNode booleanValue,
             String sqlState,
             String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             ConstraintDescriptor cd,
             ContextManager cm) throws StandardException {
         super(booleanValue,
@@ -87,6 +89,7 @@ class TestConstraintNode extends UnaryLogicalOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -98,6 +101,8 @@ class TestConstraintNode extends UnaryLogicalOperatorNode
 
 		if (!operand.getTypeServices().getTypeId().isBooleanTypeId())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             operand = new CastNode(
 					operand,
 					new DataTypeDescriptor(TypeId.BOOLEAN_ID, true),
@@ -136,6 +141,7 @@ class TestConstraintNode extends UnaryLogicalOperatorNode
 		mb.push(sqlState);
 		mb.push(tableName);
         mb.push(constraintName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         if (deferrable) {
             acb.pushThisAsActivation(mb); // arg 4

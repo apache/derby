@@ -236,6 +236,7 @@ public  class   XmlVTI  extends StringColumnVTI
      * @throws Exception on error
      */
     public  static  XmlVTI  xmlVTI( String fileName, String rowTag, String... childTags )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
         throws Exception
     {
         return xmlVTI( fileName, rowTag, null, asList( childTags ) );
@@ -413,6 +414,8 @@ public  class   XmlVTI  extends StringColumnVTI
             else { return false; }
         } catch (Throwable t)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6820
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
             throw new SQLException( t.getMessage(), t );
         }
     }
@@ -444,7 +447,10 @@ public  class   XmlVTI  extends StringColumnVTI
 
         _builder = factory.newDocumentBuilder();
         _builder.setErrorHandler(new XMLErrorHandler());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6820
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
         Document        doc = _builder.parse( _xmlResource );
         Element             root = doc.getDocumentElement();
                          
@@ -468,6 +474,7 @@ public  class   XmlVTI  extends StringColumnVTI
 
         for ( int i = 0; i < columnCount; i++ )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6256
             _currentRow[ i ] = findColumnValue( rawRow, i );
         }
     }
@@ -549,6 +556,8 @@ public  class   XmlVTI  extends StringColumnVTI
     {
         private void closeInput()
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6820
+//IC see: https://issues.apache.org/jira/browse/DERBY-6810
             try
             {
                 if( _xmlResource != null )

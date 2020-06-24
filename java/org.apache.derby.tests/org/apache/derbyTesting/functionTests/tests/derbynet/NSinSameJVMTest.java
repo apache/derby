@@ -32,6 +32,7 @@ import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 
 public class NSinSameJVMTest extends BaseJDBCTestCase {
     public NSinSameJVMTest(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3211
         super(name);
     }
 

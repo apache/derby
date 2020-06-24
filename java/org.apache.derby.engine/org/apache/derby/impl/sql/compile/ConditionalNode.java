@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ConditionalNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -44,6 +45,8 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class ConditionalNode extends ValueNode
 {
     /**
@@ -77,6 +80,7 @@ class ConditionalNode extends ValueNode
 	{
         super(cm);
         this.caseOperand = caseOperand;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         this.testConditions = testConditions;
         this.thenElseList = thenElseList;
 	}
@@ -88,12 +92,15 @@ class ConditionalNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
             if (testConditions != null)
 			{
                 printLabel(depth, "testConditions: ");
@@ -125,7 +132,11 @@ class ConditionalNode extends ValueNode
 
 		// need to have nullNodes nullable
 		castType = castType.getNullabilityType(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2775
+//IC see: https://issues.apache.org/jira/browse/DERBY-3346
+//IC see: https://issues.apache.org/jira/browse/DERBY-3342
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         for (int i = 0; i < thenElseList.size(); i++) {
             ValueNode vn = thenElseList.elementAt(i);
             if (vn instanceof UntypedNullConstantNode) {
@@ -150,6 +161,7 @@ class ConditionalNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -163,6 +175,10 @@ class ConditionalNode extends ValueNode
         testConditions.bindExpression(fromList,
 			subqueryList,
             aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
         // If we have a simple case expression in which the case operand
         // requires type from context (typically because it's an untyped
@@ -229,6 +245,7 @@ class ConditionalNode extends ValueNode
 
         // Set the type of the parameters.
         thenElseList.setParameterDescriptor(getTypeServices());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
 
 		/* The then and else expressions must be type compatible */
 		ClassInspector cu = getClassFactory().getClassInspector();
@@ -239,6 +256,7 @@ class ConditionalNode extends ValueNode
 		** since we are going to generate a cast node, but that might
 		** be confusing to users...
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         for (ValueNode expr : thenElseList) {
             DataTypeDescriptor dtd = expr.getTypeServices();
             String javaTypeName =
@@ -265,6 +283,7 @@ class ConditionalNode extends ValueNode
 		** stick it over the original expression
 		*/
 		TypeId condTypeId = getTypeId();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         for (int i = 0; i < thenElseList.size(); i++) {
             ValueNode expr = thenElseList.elementAt(i);
             if (expr.getTypeId().typePrecedence()
@@ -304,6 +323,7 @@ class ConditionalNode extends ValueNode
      */
     private ValueNodeList bindCaseOperand(
                     CompilerContext cc, FromList fromList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     SubqueryList subqueryList, List<AggregateNode> aggregates)
             throws StandardException {
 
@@ -395,12 +415,15 @@ class ConditionalNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         testConditions.preprocess(numTables,
                                   outerFromList, outerSubqueryList,
                                   outerPredicateList);
@@ -450,6 +473,7 @@ class ConditionalNode extends ValueNode
 
 		boolean pushable;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         pushable = testConditions.categorize(referencedTabs, simplePredsOnly);
 		pushable = (thenElseList.categorize(referencedTabs, simplePredsOnly) && pushable);
 		return pushable;
@@ -464,9 +488,12 @@ class ConditionalNode extends ValueNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         testConditions = testConditions.remapColumnReferencesToExpressions();
 		thenElseList = thenElseList.remapColumnReferencesToExpressions();
 		return this;
@@ -480,6 +507,7 @@ class ConditionalNode extends ValueNode
     @Override
     boolean isConstantExpression()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         return (testConditions.isConstantExpression() &&
 			    thenElseList.isConstantExpression());
 	}
@@ -488,6 +516,7 @@ class ConditionalNode extends ValueNode
     @Override
     boolean constantExpression(PredicateList whereClause)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         return (testConditions.constantExpression(whereClause) &&
 			    thenElseList.constantExpression(whereClause));
 	}
@@ -516,6 +545,7 @@ class ConditionalNode extends ValueNode
         // CASE WHEN a THEN NOT b ELSE NOT c END, so just push the
         // NOT node down to the THEN and ELSE expressions.
         thenElseList.eliminateNots(underNotNode);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
 
         // Eliminate NOTs in the WHEN expressions too. The NOT node above us
         // should not be pushed into the WHEN expressions, though, as that
@@ -537,6 +567,7 @@ class ConditionalNode extends ValueNode
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         if (SanityManager.DEBUG) {
             // There should be at least one test condition.
             SanityManager.ASSERT(testConditions.size() > 0);
@@ -582,11 +613,13 @@ class ConditionalNode extends ValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
         if (testConditions != null)
 		{
             testConditions = (ValueNodeList) testConditions.accept(v);
@@ -603,8 +636,10 @@ class ConditionalNode extends ValueNode
 	 */
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
 			ConditionalNode other = (ConditionalNode)o;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6566
             return testConditions.isEquivalent(other.testConditions) &&
                     thenElseList.isEquivalent(other.thenElseList);
 		}

@@ -87,6 +87,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     private static  final   String  USAGE =
         "Usage:\n" +
         "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         "  java org.apache.derbyBuild.ReleaseNotesGenerator SUMMARY BUG_LIST OUTPUT_PAMPHLET\n" +
         "\n" +
         "    where\n" +
@@ -99,6 +100,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         "individual JIRAs. Before running this program, make sure that you can\n" +
         "ping issues.apache.org.\n" +
         "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         "The ReleaseNoteGenerator assumes that the JIRA report contains\n" +
         "key, title, fix versions and attachment id elements for each Derby\n" +
         "issue. For each issue in with an attachment id element the\n" +
@@ -182,10 +184,12 @@ public class ReleaseNotesGenerator extends GeneratorBase {
             beginOutput();
             buildOverview();
             buildNewFeatures();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
             parseBugsList();
             buildFixedBugsList();
             buildReleaseNoteIssuesList();
             buildEnvironment();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
             buildReleaseVerification();
             replaceVariables();
             printOutput();
@@ -212,6 +216,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
      * Start the RELEASE_NOTES html docment.
      */
     private void beginOutput() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
         String titleText = "Release Notes for Apache Derby " + releaseID;
         Element html = outputDoc.createElement(HTML);
         Element title = createTextElement(outputDoc, "title", titleText);
@@ -222,6 +227,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         // See http://www.w3.org/TR/WCAG10/#gl-abbreviated-and-foreign
         //
         html.setAttribute( "lang", "en" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5181
 
         outputDoc.appendChild(html);
         html.appendChild(title);
@@ -242,6 +248,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
                 ISSUES_SECTION, ISSUES_SECTION);
         createSection(body, MAIN_SECTION_LEVEL, toc,
                 BUILD_ENVIRONMENT_SECTION, BUILD_ENVIRONMENT_SECTION);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
         createSection(body, MAIN_SECTION_LEVEL, toc,
                 RELEASE_VERIFICATION_SECTION, RELEASE_VERIFICATION_SECTION);
     }
@@ -258,6 +265,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
      */
     private void buildOverview() throws Exception {
         // copy the details out of the summary file into the overview section
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
         cloneChildren(summary.getElementByTagName(SUM_OVERVIEW),
                 getSection(outputDoc, MAIN_SECTION_LEVEL, OVERVIEW_SECTION));
     }
@@ -273,6 +281,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
      */
     private void buildNewFeatures() throws Exception {
         // copy the details out of the summary file into the overview section
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
         cloneChildren(summary.getElementByTagName(SUM_NEW_FEATURES),
                 getSection(outputDoc, MAIN_SECTION_LEVEL,
                 NEW_FEATURES_SECTION));
@@ -285,6 +294,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     //////////////////////////////////
 
     private void parseBugsList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
             throws Exception {
         bugList = JiraIssue.createJiraIssueList(bugListFileName);
         // Parse the file for the release version and the previous version to
@@ -317,6 +327,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     private void buildFixedBugsList()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
         Element bugListSection = getSection(outputDoc, MAIN_SECTION_LEVEL,
                 BUG_FIXES_SECTION );
 
@@ -333,7 +344,9 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         // If we don't fix the width of the first column, the string
         // "DERBY-XXXX" is often broken up at the hyphen by some browsers.
         fixWidthOfFirstColumn(table);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6044
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         for ( Iterator i=bugList.iterator(); i.hasNext(); ) {
             JiraIssue issue = (JiraIssue) i.next();
             //println("Fixed: "+ issue.getKey());
@@ -359,6 +372,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
      * Build the Issues section.
      */
     private void buildReleaseNoteIssuesList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
         throws Exception {
         Element issuesSection = getSection(outputDoc, MAIN_SECTION_LEVEL,
                 ISSUES_SECTION);
@@ -367,11 +381,13 @@ public class ReleaseNotesGenerator extends GeneratorBase {
             "), Derby release " + releaseID + " introduces the following " +
             "new features " +
             "and incompatibilities. These merit your special attention.";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6941
         String noDetailedReleaseNotes = "No issues required detailed release notes.";
         boolean deltaStatementPrinted = false;
 
         Element toc = createList(issuesSection);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         for (Iterator i=bugList.iterator(); i.hasNext(); ) {
             JiraIssue issue = (JiraIssue) i.next();
             if (issue.hasReleaseNote()) {
@@ -392,6 +408,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
                             getReleaseNoteDetails(releaseNote);
                 } catch (Throwable t) {
                     errors.add(formatError("Unable to read or parse " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4593
                             "release note for DERBY-" +
                             issue.getKey(), t));
                     missingReleaseNotes.add(issue);
@@ -400,6 +417,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
 
                 String key = "Note for DERBY-" + issue.getKey();
                 //println("Release note: "+issue.getKey()+" - "+issue.getTitle());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5204
                 Element paragraph = outputDoc.createElement(SPAN);
                 paragraph.appendChild(outputDoc.createTextNode(key + ": "));
                 cloneChildren(summaryText, paragraph);
@@ -407,10 +425,12 @@ public class ReleaseNotesGenerator extends GeneratorBase {
                 Element issueSection = createSection(issuesSection,
                         ISSUE_DETAIL_LEVEL, toc, key, paragraph);
                 cloneChildren(details, issueSection);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
             } else if (issue.hasMissingReleaseNote()) {
                 missingReleaseNotes.add(issue);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6941
         if (!deltaStatementPrinted) { addParagraph(issuesSection, noDetailedReleaseNotes); }
     }
 
@@ -458,6 +478,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
      */
     private void buildReleaseVerification() throws Exception {
         // copy the details out of the summary file into the release verification section
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
         cloneChildren(summary.getElementByTagName(SUM_RELEASE_VERIFICATION),
                 getSection(outputDoc, MAIN_SECTION_LEVEL, RELEASE_VERIFICATION_SECTION));
     }
@@ -473,6 +494,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
      * Print missing release notes
      */
     private void printMissingReleaseNotes() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
         if (missingReleaseNotes.isEmpty()) {
             return;
         }
@@ -499,12 +521,14 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         throws Exception
     {
         if ( (args == null) || (args.length != 3) ) { return false; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4593
 
         int     idx = 0;
 
         setSummaryFileName( args[ idx++ ] );
         setBugListFileName( args[ idx++ ] );
         setOutputFileName( args[ idx++ ] );
+//IC see: https://issues.apache.org/jira/browse/DERBY-3598
 
         return true;
     }

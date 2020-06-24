@@ -27,6 +27,8 @@ import org.apache.derby.iapi.sql.compile.Visitable;
  * Find out if we have a user-defined table function anywhere in the
  * tree.  Stop traversal as soon as we find one.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class HasTableFunctionVisitor extends HasNodeVisitor
 {
     ///////////////////////////////////////////////////////////////////////////////////

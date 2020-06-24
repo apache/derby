@@ -74,6 +74,7 @@ public class HalfCreatedDatabaseTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("HalfCreatedDatabaseTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( decorateTest() );
         
@@ -83,6 +84,7 @@ public class HalfCreatedDatabaseTest extends BaseJDBCTestCase
     private static Test decorateTest()
     {
         Test test = new BaseTestSuite( HalfCreatedDatabaseTest.class );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         test = TestConfiguration.singleUseDatabaseDecorator( test, DB_NAME );
 

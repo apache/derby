@@ -90,6 +90,7 @@ public class SingleRecordFiller implements DBFiller {
                               boolean withSecIndex, boolean withNonIndexed) {
         tableSize = records;
         numberOfTables = tables;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         dataType = type;
         switch (type) {
             case Types.VARCHAR:
@@ -104,6 +105,7 @@ public class SingleRecordFiller implements DBFiller {
             default:
                 throw new IllegalArgumentException("type = " + type);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         withSecIndexColumn = withSecIndex;
         withNonIndexedColumn = withNonIndexed;
     }
@@ -116,6 +118,7 @@ public class SingleRecordFiller implements DBFiller {
                     withSecIndexColumn, withNonIndexedColumn);
             WisconsinFiller.dropTable(c, tableName);
             s.executeUpdate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
                     "CREATE TABLE " + tableName + "(ID INT NOT NULL, " +
                     (withSecIndexColumn ? "SEC INT, " : "") +
                     (withNonIndexedColumn ? "NI INT, " : "") +
@@ -172,9 +175,11 @@ public class SingleRecordFiller implements DBFiller {
                 }
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
             s.executeUpdate("ALTER TABLE " + tableName + " ADD CONSTRAINT " +
                     tableName + "_PK PRIMARY KEY (ID)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
             if (withSecIndexColumn) {
                 s.executeUpdate(
                         "CREATE INDEX " + tableName + "_SECONDARY_INDEX ON " +
@@ -201,6 +206,7 @@ public class SingleRecordFiller implements DBFiller {
                 buf.append(alphabet.charAt(r.nextInt(alphabet.length())));
             }
             RANDOM_STRINGS[i] = buf.toString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
             for (int j = 0; j < TEXT_SIZE; j++) {
                 RANDOM_BYTES[i][j] = (byte) RANDOM_STRINGS[i].charAt(j);
             }
@@ -239,6 +245,7 @@ public class SingleRecordFiller implements DBFiller {
      */
     static String getTableName(int records, int table, int dataType,
                                boolean withSecIndex, boolean withNonIndexed) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         String name = "SINGLE_RECORD_" + records + "_" + table;
         if (withSecIndex) {
             name += "_SECIDX";

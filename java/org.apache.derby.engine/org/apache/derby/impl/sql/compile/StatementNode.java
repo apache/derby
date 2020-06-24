@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.StatementNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -54,6 +55,8 @@ public abstract class StatementNode extends QueryTreeNode
     /** Cached empty list object. */
     static final TableDescriptor[] EMPTY_TD_LIST = new TableDescriptor[0];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     StatementNode(ContextManager cm) {
         super(cm);
     }
@@ -88,6 +91,7 @@ public abstract class StatementNode extends QueryTreeNode
 	 */
 	public boolean needsSavepoint()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 		return true;
 	}
 	
@@ -98,6 +102,7 @@ public abstract class StatementNode extends QueryTreeNode
 	 * @return the name of the underlying sps
 	 */
 	public String getSPSName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
 		return null;
 	}
 
@@ -159,6 +164,8 @@ public abstract class StatementNode extends QueryTreeNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     abstract String statementToString();
 	
 	/**
@@ -306,6 +313,7 @@ public abstract class StatementNode extends QueryTreeNode
         // executing this statement. Implements the abstract method
         // BaseActivation.createResultSet().
         MethodBuilder mbWorker = generatingClass.getClassBuilder().newMethodBuilder(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
                 Modifier.PROTECTED,
                 ClassName.ResultSet,
                 "createResultSet");
@@ -328,10 +336,12 @@ public abstract class StatementNode extends QueryTreeNode
 		// for us, given the resultSetExpr to use.
 		//   return (this.resultSet = #resultSetExpr);
 		generatingClass.finishExecuteMethod();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
 
 		// wrap up the constructor by putting a return at the end of it
 		generatingClass.finishConstructor();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		try {
 			// cook the completed class into a real class
 			// and stuff it into activationClass
@@ -364,6 +374,7 @@ public abstract class StatementNode extends QueryTreeNode
      *      table fails
      */
     public TableDescriptor[] updateIndexStatisticsFor()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4938
             throws StandardException {
         // Do nothing, overridden by appropriate nodes.
         return EMPTY_TD_LIST;

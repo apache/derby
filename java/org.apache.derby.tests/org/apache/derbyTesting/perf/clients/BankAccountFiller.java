@@ -97,6 +97,7 @@ public class BankAccountFiller implements DBFiller {
      */
     public BankAccountFiller(int branches, int tellersPerBranch,
                              int accountsPerBranch) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         if (branches <= 0 || tellersPerBranch <= 0 || accountsPerBranch <= 0) {
             throw new IllegalArgumentException(
                 "all arguments must be greater than 0");
@@ -116,6 +117,7 @@ public class BankAccountFiller implements DBFiller {
      * @param scale the scale factor for this database
      */
     public BankAccountFiller(int scale) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         this(scale, DEFAULT_TELLERS_PER_BRANCH, DEFAULT_ACCOUNTS_PER_BRANCH);
     }
 
@@ -147,6 +149,7 @@ public class BankAccountFiller implements DBFiller {
         Statement s = c.createStatement();
 
         s.executeUpdate("CREATE TABLE " + ACCOUNT_TABLE +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
                         "(ACCOUNT_ID INT NOT NULL, " +
                         "BRANCH_ID INT NOT NULL, " +
                         // The balance column must be able to hold 10
@@ -156,6 +159,7 @@ public class BankAccountFiller implements DBFiller {
                         "EXTRA_DATA CHAR(" + ACCOUNT_EXTRA + ") NOT NULL)");
 
         s.executeUpdate("CREATE TABLE " + BRANCH_TABLE +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
                         "(BRANCH_ID INT NOT NULL, " +
                         // The balance column must be able to hold 10
                         // digits and sign per TPC-B spec, so BIGINT
@@ -164,6 +168,7 @@ public class BankAccountFiller implements DBFiller {
                         "EXTRA_DATA CHAR(" + BRANCH_EXTRA + ") NOT NULL)");
 
         s.executeUpdate("CREATE TABLE " + TELLER_TABLE +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
                         "(TELLER_ID INT NOT NULL, " +
                         "BRANCH_ID INT NOT NULL, " +
                         // The balance column must be able to hold 10
@@ -193,12 +198,14 @@ public class BankAccountFiller implements DBFiller {
     private void fillTables(Connection c) throws SQLException {
 
         Statement s = c.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
 
         PreparedStatement atIns =
             c.prepareStatement("INSERT INTO " + ACCOUNT_TABLE +
                                "(ACCOUNT_ID, BRANCH_ID, ACCOUNT_BALANCE, " +
                                "EXTRA_DATA) VALUES (?, ?, 0, ?)");
         atIns.setString(3, createJunk(ACCOUNT_EXTRA)); // same for all rows
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         for (int id = 0; id < accountsPerBranch * branches; id++) {
             atIns.setInt(1, id);
             atIns.setInt(2, id / accountsPerBranch);
@@ -206,6 +213,7 @@ public class BankAccountFiller implements DBFiller {
         }
         atIns.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
         s.executeUpdate("ALTER TABLE " + ACCOUNT_TABLE + " ADD CONSTRAINT " +
                 ACCOUNT_TABLE + "_PK PRIMARY KEY (ACCOUNT_ID)");
 
@@ -216,12 +224,14 @@ public class BankAccountFiller implements DBFiller {
                                "(BRANCH_ID, BRANCH_BALANCE, EXTRA_DATA) " +
                                "VALUES (?, 0, ?)");
         btIns.setString(2, createJunk(BRANCH_EXTRA)); // same for all rows
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         for (int id = 0; id < branches; id++) {
             btIns.setInt(1, id);
             btIns.executeUpdate();
         }
         btIns.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
         s.executeUpdate("ALTER TABLE " + BRANCH_TABLE + " ADD CONSTRAINT " +
                 BRANCH_TABLE + "_PK PRIMARY KEY (BRANCH_ID)");
 
@@ -232,6 +242,7 @@ public class BankAccountFiller implements DBFiller {
                                "(TELLER_ID, BRANCH_ID, TELLER_BALANCE, " +
                                "EXTRA_DATA) VALUES (?, ?, 0, ?)");
         ttIns.setString(3, createJunk(TELLER_EXTRA)); // same for all rows
+//IC see: https://issues.apache.org/jira/browse/DERBY-3619
         for (int id = 0; id < tellersPerBranch * branches; id++) {
             ttIns.setInt(1, id);
             ttIns.setInt(2, id / tellersPerBranch);
@@ -239,6 +250,7 @@ public class BankAccountFiller implements DBFiller {
         }
         ttIns.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5067
         s.executeUpdate("ALTER TABLE " + TELLER_TABLE + " ADD CONSTRAINT " +
                 TELLER_TABLE + "_PK PRIMARY KEY (TELLER_ID)");
 

@@ -45,6 +45,7 @@ import java.util.Properties;
  * Update the rows from the source into the specified
  * base table.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class UpdateVTIResultSet extends DMLVTIResultSet
 {
 	private java.sql.ResultSet		rs;
@@ -73,6 +74,7 @@ class UpdateVTIResultSet extends DMLVTIResultSet
         
         rs = activation.getTargetVTI();
 		ExecRow row = getNextRowCore(sourceResultSet);
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
         if( null != row)
             rowLocationColumn = row.nColumns();
@@ -95,7 +97,10 @@ class UpdateVTIResultSet extends DMLVTIResultSet
 			/*
 			** If deferred we save a copy of the entire row.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 			rowHolder =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 				new TemporaryRowHolderImpl(activation, properties,
 										   resultDescription);
 		}
@@ -121,6 +126,7 @@ class UpdateVTIResultSet extends DMLVTIResultSet
                     rowHolder.insert(row);
                 }
                 else
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
                     updateVTI(rs, row);
                 rowCount++;
 
@@ -154,6 +160,7 @@ class UpdateVTIResultSet extends DMLVTIResultSet
 			try
 			{
 				tempRS.open();
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 				while ((row = tempRS.getNextRow()) != null)
 				{
                     int rowNumber = row.getColumn( rowLocationColumn).getInt();

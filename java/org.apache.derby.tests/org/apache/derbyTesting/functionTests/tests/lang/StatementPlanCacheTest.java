@@ -62,6 +62,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
      * Runs in embedded only since it's testing the server side cache.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("StatementPlanCacheTest");
         
         CACHE_SIZE = 100; // default cache size
@@ -75,6 +76,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
                 "derby.language.statementCacheSize", "0", true));
         
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2772
         return new CleanDatabaseTestSetup(suite);
     }
     
@@ -89,6 +91,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(
             "StatementPlanCacheTest:derby.language.statementCacheSize=" + name);
         suite.addTestSuite(StatementPlanCacheTest.class);
@@ -114,6 +117,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
     
     protected void tearDown() throws Exception {
         cacheInPlanPS_ID.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2709
         cacheInPlanPS_ID = null;
         cacheInPlanPS_TEXT.close();
         cacheInPlanPS_TEXT = null;

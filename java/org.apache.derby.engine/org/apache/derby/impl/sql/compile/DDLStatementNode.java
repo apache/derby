@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DDLStatementNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -81,6 +82,8 @@ abstract class DDLStatementNode extends StatementNode
 	//
 	/////////////////////////////////////////////////////////////////////////
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DDLStatementNode(TableName tableName, ContextManager cm) {
         super(cm);
         this.tableName = tableName;
@@ -101,6 +104,8 @@ abstract class DDLStatementNode extends StatementNode
 		throws StandardException {
 
         this.tableName = (TableName) objectName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		initOk = true;
 	}
@@ -122,6 +127,8 @@ abstract class DDLStatementNode extends StatementNode
 	 *
 	 * @return the relative name
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getRelativeName()
 	{
         return tableName.getTableName() ;
@@ -133,6 +140,8 @@ abstract class DDLStatementNode extends StatementNode
 	 * 
 	 * @return the full name
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getFullName()
 	{
         return tableName.getFullTableName() ;
@@ -151,6 +160,8 @@ abstract class DDLStatementNode extends StatementNode
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             return ((tableName==null)?"":
                     "name: " + tableName.toString() +"\n") + super.toString();
 		}
@@ -243,17 +254,22 @@ abstract class DDLStatementNode extends StatementNode
 	*/
 	protected final SchemaDescriptor getSchemaDescriptor(boolean ownerCheck,
 			boolean doSystemSchemaCheck)
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		 throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         String schemaName = tableName.getSchemaName();
 		//boolean needError = !(implicitCreateSchema || (schemaName == null));
 		boolean needError = !implicitCreateSchema;
 		SchemaDescriptor sd = getSchemaDescriptor(schemaName, needError);
 		CompilerContext cc = getCompilerContext();
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
 		if (sd == null) {
 			/* Disable creating schemas starting with SYS */
 			if (schemaName.startsWith("SYS"))
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 				throw StandardException.newException(
 					SQLState.LANG_NO_USER_DDL_IN_SYSTEM_SCHEMA,
 					statementToString(),
@@ -262,7 +278,9 @@ abstract class DDLStatementNode extends StatementNode
 			sd  = new SchemaDescriptor(getDataDictionary(), schemaName,
 				(String) null, (UUID)null, false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 			if (isPrivilegeCollectionRequired())
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 				cc.addRequiredSchemaPriv(schemaName, null, Authorizer.CREATE_SCHEMA_PRIV);
 		}
 
@@ -286,6 +304,8 @@ abstract class DDLStatementNode extends StatementNode
 	protected final TableDescriptor getTableDescriptor()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return getTableDescriptor(tableName);
 	}
 
@@ -307,6 +327,8 @@ abstract class DDLStatementNode extends StatementNode
 	protected final TableDescriptor getTableDescriptor(boolean doSystemTableCheck)
 	throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         TableDescriptor td = justGetDescriptor(tableName);
 		td = checkTableDescriptor(td,doSystemTableCheck);
 		return td;
@@ -376,6 +398,7 @@ abstract class DDLStatementNode extends StatementNode
 		String sqlState = null;
 
 		switch (td.getTableType()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-571
 		case TableDescriptor.VTI_TYPE:
 			sqlState = SQLState.LANG_INVALID_OPERATION_ON_SYSTEM_TABLE;
 			break;
@@ -438,6 +461,8 @@ abstract class DDLStatementNode extends StatementNode
         if (tableName.getSchemaName() == null)
         { tableName.setSchemaName(getSchemaDescriptor().getSchemaName()); }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         FromList fromList = new FromList(
                 getOptimizerFactory().doJoinOrderOptimization(),
                 getContextManager());
@@ -454,6 +479,8 @@ abstract class DDLStatementNode extends StatementNode
         {
             table.setTableNumber(0);
 			fromList.addFromTable(table);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             table.setResultColumns(new ResultColumnList(getContextManager()));
         }
         else // ALTER TABLE

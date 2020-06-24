@@ -1104,6 +1104,7 @@ implements NoPutResultSet
         for ( Field field : fields )
         {
             Object  fieldContents = field.get( outerRS );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
 
             if ( fieldContents != null )
             {
@@ -1149,6 +1150,7 @@ implements NoPutResultSet
     {
         if ( klass == null ) { return; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         Field[] fields = AccessController.doPrivileged
             (
              new PrivilegedAction<Field[]>()
@@ -1163,6 +1165,7 @@ implements NoPutResultSet
         for ( Field field : fields )
         {
             if ( ResultSet.class.isAssignableFrom( field.getType() ) ) { fieldList.add( field ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
             else if ( field.getType().isArray() )
             {
                 if ( ResultSet.class.isAssignableFrom( field.getType().getComponentType() ) )

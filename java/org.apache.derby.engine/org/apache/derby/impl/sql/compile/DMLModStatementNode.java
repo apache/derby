@@ -896,8 +896,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
     )
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<FKInfo>         fkList = new ArrayList<FKInfo>();
 		int 								type;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         UUID[]                              uuids;
         long[]                              conglomNumbers;
         String[]                            fkNames;
@@ -908,8 +911,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		int[]								rowMap = getRowMap(readColsBitSet, td);
         int[]                               raRules;
         boolean[]                           deferrable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         UUID[]                              fkIds;
 		ArrayList<String>              refSchemaNames = new ArrayList<String>(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		ArrayList<String>              refTableNames = new ArrayList<String>(1);
 		ArrayList<Long>               refIndexConglomNum = new ArrayList<Long>(1);
 		ArrayList<Integer>            refActions = new ArrayList<Integer>(1);
@@ -930,6 +935,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				type = FKInfo.FOREIGN_KEY;
 				refcd = ((ForeignKeyConstraintDescriptor)cd).getReferencedConstraint();
 				uuids = new UUID[1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 deferrable = new boolean[1];
                 fkIds = new UUID[1];
 				conglomNumbers = new long[1];
@@ -965,6 +971,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				}
 
 				uuids = new UUID[size];
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 deferrable = new boolean[size];
                 fkIds = new UUID[size];
 				fkNames = new String[size];
@@ -978,8 +985,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				int[] colArray = remapReferencedColumns(cd, rowMap);
 				for (int inner = 0; inner < size; inner++)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     ForeignKeyConstraintDescriptor fkcd =
                         (ForeignKeyConstraintDescriptor) fkcdl.elementAt(inner);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     fkSetupArrays(
                         dd, fkcd,
                         inner, uuids, conglomNumbers, fkNames,
@@ -992,6 +1002,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 						fktd = fkcd.getTableDescriptor();
 						refSchemaNames.add(fktd.getSchemaName());
 						refTableNames.add(fktd.getName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         refActions.add(Integer.valueOf(raRules[inner]));
 						//find the referencing column name required for update null.
 						refColumns = fkcd.getReferencedColumns();
@@ -1014,6 +1026,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				continue;
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6559
             final TableDescriptor   pktd = refcd.getTableDescriptor();
             final UUID pkIndexId = refcd.getIndexId();
             final ConglomerateDescriptor pkIndexConglom =
@@ -1024,13 +1037,17 @@ abstract class DMLModStatementNode extends DMLStatementNode
             fkList.add(
                 new FKInfo(
                     fkNames,                // foreign key names
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                     cd.getSchemaDescriptor().getSchemaName(),
                     refTd.getName(),        // table being modified
                     statementType,          // INSERT|UPDATE|DELETE
                     type,                   // FOREIGN_KEY|REFERENCED_KEY
+//IC see: https://issues.apache.org/jira/browse/DERBY-6559
                     pkIndexId,              // referenced backing index uuid
                     pkIndexConglom.getConglomerateNumber(),
                                             // referenced backing index conglom
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                     refcd.getUUID(),
                     refcd.deferrable(),     // referenced constraint is
                                             // deferrable?
@@ -1051,6 +1068,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		
         // Now convert the list into an array.
         if (!fkList.isEmpty()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             fkInfo = fkList.toArray(new FKInfo[fkList.size()]);
         }
 
@@ -1066,6 +1085,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			fkColArrays = new int[size][];
 			for (int i = 0; i < size; i++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				fkTableNames[i] = refTableNames.get(i);
 				fkSchemaNames[i] = refSchemaNames.get(i);
 				fkRefActions[i]  = (refActions.get(i)).intValue();
@@ -1093,6 +1113,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		boolean[]							isSelfReferencingFK,
         int[]                               raRules,
         boolean[]                           isDeferrable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         UUID[]                              fkIds
 	)
 		throws StandardException
@@ -1129,6 +1150,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return the array of fkinfos
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FKInfo[] getFKInfo()
 	{
 		if (SanityManager.DEBUG)
@@ -1146,6 +1169,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return the trigger info
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     TriggerInfo getTriggerInfo()
 	{
 		if (SanityManager.DEBUG)
@@ -1161,6 +1186,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return the check constraints, may be null
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getCheckConstraints()
 	{
 		if (SanityManager.DEBUG)
@@ -1183,6 +1210,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 */
 	private void createTriggerDependencies
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         TriggerDescriptorList       tdl,
 		Dependent					dependent
 	)
@@ -1195,6 +1223,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
             ** The dependent now depends on this trigger.
             ** The default dependent is the statement being compiled.
             */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5737
             if (dependent == null) {
                 compilerContext.createDependency(td);
             } else {
@@ -1229,6 +1258,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		if ( relevantTriggers !=  null ) { return relevantTriggers; }
 
         relevantTriggers =  new TriggerDescriptorList();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		if(!includeTriggers)
 			return relevantTriggers;
@@ -1422,6 +1452,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 		Visitable qt = p.parseStatement(select);
 		if (SanityManager.DEBUG)
 		{
@@ -1549,6 +1581,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	  */
 	public	void	generateGenerationClauses
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         ResultColumnList        rcl,
         int                     resultSetNumber,
         boolean                 isUpdate,
@@ -1647,9 +1680,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
         for ( int i = startColumn; i < size; i++ )
         {
             ResultColumn rc = rcl.elementAt( i );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             if ( !rc.hasGenerationClause() ) { continue; }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4142
             userExprFun.dup();       // instance (current row)
             userExprFun.push(i + 1); // arg1
 
@@ -1712,6 +1747,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
         if ( !inMatchingClause() )
         {
             /* First optimize the query */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2096
             super.optimizeStatement();
         }
         else if ( this instanceof UpdateNode )
@@ -1756,6 +1792,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 					throws StandardException
 	{
         ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         DMLModStatementNode.getXAffectedIndexes(
                 td, updatedColumns, colBitSet, conglomerates);
@@ -1784,6 +1821,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		TableDescriptor		baseTable,
 		ResultColumnList	updatedColumns,
         FormatableBitSet    colBitSet,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<ConglomerateDescriptor>                conglomerates
 	)
 		throws StandardException
@@ -1811,6 +1849,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 					cd.getIndexDescriptor().baseColumnPositions())))
 			{ continue; }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
             if ( conglomerates != null )
 			{
 				int i;
@@ -1822,6 +1861,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				if (i == distinctCount)		// first appearence
 				{
 					distinctConglomNums[distinctCount++] = cd.getConglomerateNumber();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                     conglomerates.add( cd );
 				}
 			}
@@ -1842,6 +1882,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 	protected	void	markAffectedIndexes
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<ConglomerateDescriptor> affectedConglomerates
     )
 		throws StandardException
@@ -1857,6 +1899,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		for ( int ictr = 0; ictr < indexCount; ictr++ )
 		{
             cd = affectedConglomerates.get( ictr );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			indicesToMaintain[ ictr ] = cd.getIndexDescriptor();
 			indexConglomerateNumbers[ ictr ] = cd.getConglomerateNumber();
@@ -1869,6 +1913,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "DML MOD";
@@ -1952,7 +1998,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void normalizeSynonymColumns(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
     ResultColumnList    rcl, 
     TableName           targetTableName)
 		throws StandardException
@@ -1962,6 +2011,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		
 		String synTableName = synonymTableName.getTableName();
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : rcl)
 		{
             ColumnReference reference = rc.getReference();
@@ -1973,6 +2023,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				{
 					if ( synTableName.equals( crTableName ) )
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 						reference.setQualifiedTableName( targetTableName );
 					}
 					else
@@ -1994,8 +2045,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
@@ -2022,6 +2077,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-791
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

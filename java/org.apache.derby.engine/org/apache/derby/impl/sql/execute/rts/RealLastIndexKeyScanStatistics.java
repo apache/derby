@@ -253,6 +253,7 @@ public class RealLastIndexKeyScanStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                           // the number of index updates 
            lockMode,

@@ -60,6 +60,7 @@ import java.util.Calendar;
  *
  */
 public abstract class DataType
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
     implements DataValueDescriptor, Comparable
 {
 	/*
@@ -223,6 +224,7 @@ public abstract class DataType
 	 */
 	public InputStream	getStream() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
 		throw dataTypeConversion( "InputStream" );
 	}
 
@@ -236,6 +238,7 @@ public abstract class DataType
      * @return {@code false}
      */
     public boolean hasStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         return false;
     }
 
@@ -249,6 +252,7 @@ public abstract class DataType
      * @see DataValueDescriptor#getString
      */
     public String getTraceString() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1693
         return getString();  
     }
 
@@ -272,6 +276,7 @@ public abstract class DataType
      * @see java.io.Externalizable#readExternal
      */
     public void readExternalFromArray(ArrayInputStream in)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2920
             throws IOException, ClassNotFoundException {
         readExternal(in);
     }
@@ -385,6 +390,7 @@ public abstract class DataType
 	 */
 	public void setValue(Object theValue) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4499
 		throwLangSetMismatch("java.lang.Object");
 	}
 
@@ -407,6 +413,7 @@ public abstract class DataType
 	 */
 	public void setValue(Blob theValue) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
 		throwLangSetMismatch("java.sql.Blob");
 	}
  
@@ -585,6 +592,7 @@ public abstract class DataType
 	 * 
 	 */
 	public void setObjectForCast(Object theValue, boolean instanceOfResultType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			String resultTypeClassName) throws StandardException {
 		
 		if (theValue == null)
@@ -643,6 +651,7 @@ public abstract class DataType
 
 
 	void genericSetObject(Object theValue) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 		throwLangSetMismatch(theValue);
 	}
@@ -659,6 +668,7 @@ public abstract class DataType
      * @return A shallow clone.
      */
     public DataValueDescriptor cloneHolder() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 		return cloneValue(false);
 	}
 

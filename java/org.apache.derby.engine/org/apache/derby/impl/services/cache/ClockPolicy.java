@@ -136,6 +136,7 @@ final class ClockPolicy implements ReplacementPolicy {
 
     @Override
     public int size() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
         synchronized (clock) {
             return clock.size();
         }
@@ -366,6 +367,7 @@ final class ClockPolicy implements ReplacementPolicy {
      */
     private Holder moveHand() {
         synchronized (clock) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3582
             if (clock.isEmpty()) {
                 return null;
             }
@@ -414,6 +416,7 @@ final class ClockPolicy implements ReplacementPolicy {
 
             final Holder h = moveHand();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3582
             if (h == null) {
                 // There are no elements in the clock, hence there is no
                 // reusable entry.

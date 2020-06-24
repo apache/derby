@@ -1,7 +1,9 @@
 /*
 
    Derby - Class org.apache.derby.impl.sql.compile.IntersectNode
+//IC see: https://issues.apache.org/jira/browse/DERBY-330
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -87,6 +89,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
      * @param cm                The context manager
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     IntersectOrExceptNode(int            opType,
                           ResultSetNode  leftResult,
                           ResultSetNode  rightResult,
@@ -117,6 +121,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -144,6 +150,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
          * expressions to see if a sort can be avoided.
          */
         final OrderByList obl = qec.getOrderByList(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
 
         if( obl != null)
         {
@@ -173,6 +180,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                     intermediateOrderByIdx++;
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
             qec.setOrderByList(0, null); // It will be pushed down.
         }
         else // The output of the intersect/except does not have to be ordered
@@ -197,6 +205,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
     {
         ContextManager cm = getContextManager();
         OrderByList orderByList = new OrderByList(null, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
         for( int i = 0; i < intermediateOrderByColumns.length; i++)
         {
@@ -219,6 +229,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
             orderByList.addOrderByColumn( orderByColumn);
         }
         orderByList.bindOrderByColumns( rsn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         rsn.pushQueryExpressionSuffix();
         rsn.pushOrderByList( orderByList);
     } // end of pushOrderingDown
@@ -234,6 +245,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                                       RowOrdering rowOrdering)
                           throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-219
 		leftResultSet = optimizeSource(
 							optimizer,
 							leftResultSet,
@@ -246,6 +258,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
 							(PredicateList) null,
 							outerCost);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         CostEstimate costEst = getCostEstimate(optimizer);
         CostEstimate leftCostEstimate = leftResultSet.getCostEstimate();
         CostEstimate rightCostEstimate = rightResultSet.getCostEstimate();
@@ -290,6 +304,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		ResultSetNode retRSN;
@@ -325,11 +341,14 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
         ResultSetNode treeTop = this;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         for (int i = 0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
 
             if(obl != null) {
                 // Generate an order by node on top of the intersect/except
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 treeTop = new OrderByNode(
                         treeTop,
                         obl,
@@ -377,6 +396,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
 		// Get our final cost estimate based on the child estimates.
 		setCostEstimate( getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// build up the tree.
 
@@ -400,6 +420,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 		getRightResultSet().generate( acb, mb);
 
 		acb.pushThisAsActivation(mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(getResultSetNumber());
         mb.push( getCostEstimate().getEstimatedRowCount());
         mb.push( getCostEstimate().getEstimatedCost());
@@ -408,6 +429,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByColumns));
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByDirection));
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByNullsLow));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE,
                       (String) null,
@@ -426,9 +448,12 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 *  getRowCountEstimate() in this class for more).
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getCandidateFinalCostEstimate() != null)
         {
 			return getCandidateFinalCostEstimate();

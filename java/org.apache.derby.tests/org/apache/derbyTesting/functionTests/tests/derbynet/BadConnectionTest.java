@@ -99,6 +99,9 @@ public class BadConnectionTest extends BaseJDBCTestCase
 		} catch (SQLException e)
 		{
 			assertSQLState("XJ05B", e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
             assertErrorCode(40000, e);
 		}
 	}

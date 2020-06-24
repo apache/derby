@@ -135,6 +135,7 @@ public abstract class SequenceUpdater implements Cacheable
     /** Normal constructor */
     public SequenceUpdater( DataDictionaryImpl dd )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
         this();
         
         _dd = dd;
@@ -214,6 +215,7 @@ public abstract class SequenceUpdater implements Cacheable
         //
         boolean gapClosed = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
         try {
             if ( _sequenceGenerator == null ) { gapClosed = true; }
             else
@@ -245,6 +247,7 @@ public abstract class SequenceUpdater implements Cacheable
                 Monitor.getStream().println( errorMessage );
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
             _uuidString = null;
             _sequenceGenerator = null;
         }
@@ -262,6 +265,7 @@ public abstract class SequenceUpdater implements Cacheable
         {
             //Doing check for lcc and db to be certain
             LanguageConnectionContext lcc = getLCC();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5054
             if (lcc != null)
             {
                 Database db = lcc.getDatabase();
@@ -407,6 +411,7 @@ public abstract class SequenceUpdater implements Cacheable
                 return;
                 
             case SequenceGenerator.RET_MARK_EXHAUSTED:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 updateCurrentValueOnDisk( currentValue, null );
                 returnValue.setValue( currentValue );
                 return;
@@ -472,6 +477,7 @@ public abstract class SequenceUpdater implements Cacheable
 				SanityManager.ASSERT( oldValue == null, "We should be flushing unused sequence values here." );
 			}
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             ContextService csf = getContextService();
             ContextManager cm = csf.getCurrentContextManager();
             AccessFactory af = _dd.af;
@@ -495,10 +501,12 @@ public abstract class SequenceUpdater implements Cacheable
             
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 retval = updateCurrentValueOnDisk( nestedTransaction, oldValue, newValue, false );
             }
             catch (StandardException se)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 if ( !se.isLockTimeout() )
                 {
                     if ( se.isSelfDeadlock() )
@@ -523,11 +531,13 @@ public abstract class SequenceUpdater implements Cacheable
                 nestedTransaction.commit();
                 nestedTransaction.destroy();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 if ( escalateToParentTransaction )
                 {
                     retval = updateCurrentValueOnDisk( executionTransaction, oldValue, newValue, false );
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 return retval;
             }
         }
@@ -562,12 +572,14 @@ public abstract class SequenceUpdater implements Cacheable
                 return new SequenceRange( Integer.parseInt( className ) );
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
             Class<?> klass = Class.forName(className);
             if (!SequencePreallocator.class.isAssignableFrom(klass)) {
                 throw StandardException.newException(
                     SQLState.LANG_NOT_A_SEQUENCE_PREALLOCATOR, propertyName);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return (SequencePreallocator) klass.getConstructor().newInstance();
         }
         catch (ClassNotFoundException e) { throw missingAllocator( propertyName, className, e ); }
@@ -597,6 +609,7 @@ public abstract class SequenceUpdater implements Cacheable
 	private static LanguageConnectionContext getLCC()
     {
 		return (LanguageConnectionContext) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 					getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 	}
 
@@ -612,6 +625,7 @@ public abstract class SequenceUpdater implements Cacheable
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();

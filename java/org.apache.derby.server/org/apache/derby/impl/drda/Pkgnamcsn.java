@@ -24,6 +24,7 @@ package org.apache.derby.impl.drda;
  * Class representing a PKGNAMCSN object (RDB Package Name,
  * Consistency Token, and Section Number).
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
 final class Pkgnamcsn {
     /** Database name. */
     private final String rdbnam;
@@ -49,6 +50,7 @@ final class Pkgnamcsn {
      * @param pkgsn RDB Package Section Number
      * @param pkgcnstkn RDB Package Consistency Token
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     Pkgnamcsn(String rdbnam, String rdbcolid, String pkgid,
                      int pkgsn, ConsistencyToken pkgcnstkn) {
         this.rdbnam = rdbnam;

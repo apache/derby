@@ -219,6 +219,7 @@ public abstract class GenericConglomerate
      * @return {@code true} if a collation other than UCS BASIC was found.
      */
     public static boolean hasCollatedColumns(int[] collationIds) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         for (int i=0; i < collationIds.length; i++) {
             if (collationIds[i] != StringDataValue.COLLATION_TYPE_UCS_BASIC) {
                 return true;

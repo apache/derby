@@ -53,6 +53,7 @@ public class ParseException extends Exception {
     super("");
     specialConstructor = true;
     currentToken = currentTokenVal;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6195
     expectedTokenSequences = ToolUtils.copy2( expectedTokenSequencesVal );
     tokenImage = ToolUtils.copy( tokenImageVal );
   }

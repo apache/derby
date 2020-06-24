@@ -61,8 +61,10 @@ public class ClassSize
         int tmpRefSize = fetchRefSizeFromSystemProperties();
         // If we didn't understand the properties, or were not allowed to read
         // them, use a heuristic.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3731
         if (tmpRefSize < 4) {
             Runtime runtime = Runtime.getRuntime();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3731
             runtime.gc();
             runtime.runFinalization();
             long memBase = runtime.totalMemory() - runtime.freeMemory();
@@ -204,6 +206,7 @@ public class ClassSize
             return 0;
 
         ClassSizeCatalog catalog = ClassSizeCatalog.getInstance();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         if( SanityManager.DEBUG)
 			SanityManager.ASSERT( catalog != null, "The class size catalog could not be initialized.");
@@ -309,8 +312,10 @@ public class ClassSize
      */
     private static final int fetchRefSizeFromSystemProperties() {
         // Try the direct way first, by looking for 'sun.arch.data.model'
+//IC see: https://issues.apache.org/jira/browse/DERBY-3731
         String dataModel = getSystemProperty("sun.arch.data.model");
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             return Integer.parseInt(dataModel) / 8;
         } catch (NumberFormatException ignoreNFE) {}
 
@@ -344,6 +349,7 @@ public class ClassSize
      */
     private static final String getSystemProperty(final String propName) {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             return AccessController.doPrivileged(
                     new PrivilegedAction<String>() {
                         public String run() {

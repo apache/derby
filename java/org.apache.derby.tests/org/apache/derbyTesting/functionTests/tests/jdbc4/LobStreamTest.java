@@ -46,6 +46,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
     }
 
     protected void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         Connection conn = getConnection();
         blob = conn.createBlob();
         in = blob.getBinaryStream();
@@ -54,6 +55,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
 
     protected void tearDown() throws Exception {
         blob.free();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         blob = null;
         super.tearDown();
     }
@@ -153,6 +155,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
             int count = in.read(b, offset, 100);
             for (int j=0; j<count; j++) {
                 int value = b[j + offset] & 0xFF;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
                 assertEquals("Output does not match input",
                                         (((i * 100) + j) % 255), value);
             }
@@ -254,6 +258,9 @@ public class LobStreamTest extends BaseJDBCTestCase {
         while (i < 8000) {
             if ((i%255) < 100) {
                 int value = in.read();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
                 assertEquals("Output does not match input", i%255, value);
                 i++;
             } else {
@@ -308,6 +315,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset + length > b.length
         try {
             out.write(b, 50, 100);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("length + offset > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
@@ -362,6 +370,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
         byte[] b = null;
         try {
             in.read(b, 100, 20);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("byte[] = null should cause exception");
         } catch (Exception e) {
             assertTrue("Expected NullPointerException",
@@ -372,6 +382,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
         b = new byte[100];
         try {
             int count = in.read(b, 0, 200);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("length > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
@@ -381,6 +393,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset > b.length
         try {
             in.read(b, 150, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("offset > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
@@ -390,6 +404,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset + length > b.length
         try {
             int count = in.read(b, 50, 100);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("offset + length > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
@@ -399,6 +414,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset is negative
         try {
             in.read(b, -50, 100);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("negative offset should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
@@ -408,6 +425,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
         //length is negative
         try {
             in.read(b, 0, -100);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("negative length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
@@ -418,6 +437,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
         in.close();
         try {
             in.read(b, 0, 100);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             fail("Stream should be closed");
         } catch (Exception e) {
             assertTrue("Expected IOException", e instanceof IOException);
@@ -432,6 +453,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
     public static Test suite() {
         //testing only embedded driver generic test suite testing both
         //client and ebedded is present in jdbcapi/LobStreamsTest
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite ts  = new BaseTestSuite("LobStreamTest");
         ts.addTest(TestConfiguration.embeddedSuite(LobStreamTest.class));
 

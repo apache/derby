@@ -87,6 +87,8 @@ import org.apache.derby.shared.common.error.MessageUtils;
 	Currently information on those can be found at url: 
 	ftp://ftp.software.ibm.com/ps/products/db2/info/vr8/pdf/letter/db2l2e80.pdf
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-475
+//IC see: https://issues.apache.org/jira/browse/DERBY-592
 	<P>
 	Also used for builtin-routines, such as SYSFUN functions, when direct calls
 	into Java libraries cannot be made.
@@ -100,6 +102,7 @@ public class SystemProcedures  {
 	private final static String ODBC_DRIVER_OPTION = "'ODBC'";
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	  Method used by Derby Network Server to get localized message (original call
 	  from jcc.
 
@@ -134,6 +137,8 @@ public class SystemProcedures  {
 		// translated and append to make the final result.
 		for (int index=0; ; numMessages++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6802
+//IC see: https://issues.apache.org/jira/browse/DERBY-6823
 			if (sqlerrmc.indexOf(MessageUtils.SQLERRMC_MESSAGE_DELIMITER, index) == -1)
 				break;
 			index = sqlerrmc.indexOf(MessageUtils.SQLERRMC_MESSAGE_DELIMITER, index) + 
@@ -153,6 +158,8 @@ public class SystemProcedures  {
 			String[] errMsg = new String[2];
 			for (int i=0; i<numMessages; i++)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6802
+//IC see: https://issues.apache.org/jira/browse/DERBY-6823
 				endIdx = sqlerrmc.indexOf(MessageUtils.SQLERRMC_MESSAGE_DELIMITER, startIdx);
 				if (i == numMessages-1)				// last error message
 					sqlError = sqlerrmc.substring(startIdx);
@@ -166,6 +173,8 @@ public class SystemProcedures  {
 					msg[0] += " SQLSTATE: " + sqlState + ": ";
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6802
+//IC see: https://issues.apache.org/jira/browse/DERBY-6823
 				MessageUtils.getLocalizedMessage(sqlcode, (short)sqlError.length(), sqlError,
 											sqlerrp, errd0, errd1, errd2, errd3, errd4, errd5,
 											warn, sqlState, file, localeStr, errMsg, rc);
@@ -176,6 +185,8 @@ public class SystemProcedures  {
 						msg[0] = errMsg[0];
 					else msg[0] += errMsg[0];	// append the new message
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6802
+//IC see: https://issues.apache.org/jira/browse/DERBY-6823
 				startIdx = endIdx + MessageUtils.SQLERRMC_MESSAGE_DELIMITER.length();
 			}
 		}
@@ -194,6 +205,7 @@ public class SystemProcedures  {
 	{
 		InternalDriver id = InternalDriver.activeDriver();
 		if (id != null) { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
 			Connection conn = id.connect( "jdbc:default:connection", null, 0 );
 			if (conn != null)
 				return conn;
@@ -229,6 +241,7 @@ public class SystemProcedures  {
 	public static void SQLPROCEDURES (String catalogName, String schemaName, String procName,
 										String options, ResultSet[] rs) throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		rs[0] = isForODBC(options)
 			? ((EmbedDatabaseMetaData)getDMD()).getProceduresForODBC(
 				catalogName, schemaName, procName)
@@ -249,6 +262,7 @@ public class SystemProcedures  {
      * @throws SQLException on error
 	 */
 	public static void SQLFUNCTIONS(String catalogName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
 									String schemaName, 
 									String funcName,
 									String options, 
@@ -303,6 +317,7 @@ public class SystemProcedures  {
 			return;
 		}
 		optionValue = getOption("GETSCHEMAS", options);
+//IC see: https://issues.apache.org/jira/browse/DERBY-970
 		if (optionValue != null) {
 			optionValue = optionValue.trim();
 			if (optionValue.equals("1")) {
@@ -421,6 +436,7 @@ public class SystemProcedures  {
 										String paramName, String options, ResultSet[] rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		rs[0] = isForODBC(options)
 			? ((EmbedDatabaseMetaData)getDMD()).getProcedureColumnsForODBC(
 				catalogName, schemaName, procName, paramName)
@@ -447,6 +463,7 @@ public class SystemProcedures  {
      * @throws SQLException on error
 	 */
 	public static void SQLFUNCTIONPARAMS(String catalogName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
 										 String schemaName,
 										 String funcName,
 										 String paramName,
@@ -454,6 +471,7 @@ public class SystemProcedures  {
 										 ResultSet[] rs) throws SQLException
         {
 			rs[0] = ((EmbedDatabaseMetaData)getDMD()).
+//IC see: https://issues.apache.org/jira/browse/DERBY-1530
 				getFunctionColumns(catalogName, schemaName, funcName, 
 									  paramName);
         }
@@ -478,6 +496,7 @@ public class SystemProcedures  {
 										String columnName, String options, ResultSet[] rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		rs[0] = isForODBC(options)
 			? ((EmbedDatabaseMetaData)getDMD()).getColumnsForODBC(
 				catalogName, schemaName, tableName, columnName)
@@ -540,6 +559,7 @@ public class SystemProcedures  {
 	public static void SQLPRIMARYKEYS (String catalogName, String schemaName, String tableName, String options, ResultSet[] rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
 		rs[0] = getDMD().getPrimaryKeys(catalogName, schemaName, tableName);
 	}
 
@@ -558,6 +578,7 @@ public class SystemProcedures  {
 	public static void SQLGETTYPEINFO (short dataType, String options, ResultSet[] rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		rs[0] = isForODBC(options)
 			? ((EmbedDatabaseMetaData)getDMD()).getTypeInfoForODBC()
 			: getDMD().getTypeInfo();
@@ -586,6 +607,7 @@ public class SystemProcedures  {
 		boolean boolUnique = (unique == 0) ? true: false;
 		boolean boolApproximate = (approximate == 1) ? true: false;
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		rs[0] = isForODBC(options)
 			? ((EmbedDatabaseMetaData)getDMD()).getIndexInfoForODBC(
 				catalogName, schemaName, tableName, boolUnique, boolApproximate)
@@ -618,6 +640,7 @@ public class SystemProcedures  {
 		boolean boolNullable = (nullable == 1) ? true: false;
 		if (colType == SQL_BEST_ROWID)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 			rs[0] = isForODBC(options)
 				? ((EmbedDatabaseMetaData)getDMD()).getBestRowIdentifierForODBC(
 					catalogName, schemaName, tableName, scope, boolNullable)
@@ -689,6 +712,7 @@ public class SystemProcedures  {
 	public static void METADATA (ResultSet[] rs)
 		throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
 		rs[0] = ((EmbedDatabaseMetaData) getDMD()).getClientCachedMetaData();
 	}
 
@@ -699,6 +723,7 @@ public class SystemProcedures  {
 	 */
 	private static boolean isForODBC(String options) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		String optionValue = getOption(DRIVER_TYPE_OPTION, options);
 		return ((optionValue != null) && optionValue.toUpperCase().equals(ODBC_DRIVER_OPTION));
 
@@ -719,6 +744,7 @@ public class SystemProcedures  {
     String  value)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         setDatabaseProperty( key, value, Securable.SET_DATABASE_PROPERTY );
     }
 
@@ -758,6 +784,7 @@ public class SystemProcedures  {
     String  key)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         return getProperty( key, Securable.GET_DATABASE_PROPERTY );
     }
 
@@ -775,6 +802,7 @@ public class SystemProcedures  {
         throws SQLException
     {
         LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
 
         try {
             // make sure that application code doesn't bypass security checks
@@ -1037,6 +1065,7 @@ public class SystemProcedures  {
     public static void SYSCS_BACKUP_DATABASE(String  backupDir)
 		throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         Factory.getDatabaseOfConnection().backup(backupDir, true);
     }
 
@@ -1090,6 +1119,7 @@ public class SystemProcedures  {
     short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
                 backupDir, 
                 (deleteOnlineArchivedLogFiles != 0),
@@ -1125,6 +1155,7 @@ public class SystemProcedures  {
     short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
                 backupDir,
                 (deleteOnlineArchivedLogFiles != 0),
@@ -1145,6 +1176,7 @@ public class SystemProcedures  {
     short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         Factory.getDatabaseOfConnection().disableLogArchiveMode(
                 (deleteOnlineArchivedLogFiles != 0));
     }
@@ -1310,6 +1342,8 @@ public class SystemProcedures  {
     	//is really a no-op. In order to avoid having to go throught
     	//the ALTER TABLE code just for a no-op, we simply do the check
     	//here and return if we are dealing with VTI.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3674
+//IC see: https://issues.apache.org/jira/browse/DERBY-1062
 		LanguageConnectionContext lcc       = ConnectionUtil.getCurrentLCC();
 		TransactionController     tc        = lcc.getTransactionExecute();
 
@@ -1469,6 +1503,9 @@ public class SystemProcedures  {
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
 			String[] st = IdUtil.parseMultiPartSQLIdentifier(jar.trim());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
             String schemaName;
             String sqlName;
@@ -1568,6 +1605,7 @@ public class SystemProcedures  {
      * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     String  schemaName,
     String  tableName,
     String  fileName,
@@ -1645,6 +1683,7 @@ public class SystemProcedures  {
      * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     String  selectStatement,
     String  fileName,
     String  columnDelimiter,
@@ -1698,6 +1737,7 @@ public class SystemProcedures  {
 		Connection conn = getDefaultConn();
 		try{
 			Import.importTable(conn, schemaName , tableName , fileName ,
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
                                columnDelimiter , characterDelimiter, codeset, 
                                replace, false);
 		}catch(SQLException se)
@@ -1735,6 +1775,8 @@ public class SystemProcedures  {
      * @throws SQLException on error
      **/
 	public static void SYSCS_IMPORT_TABLE_BULK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6892
 	String  schemaName,
     	String  tableName,
 	String  fileName,
@@ -1796,6 +1838,7 @@ public class SystemProcedures  {
      * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     String  schemaName,
     String  tableName,
     String  fileName,
@@ -1863,6 +1906,7 @@ public class SystemProcedures  {
 			Import.importData(conn, schemaName , tableName ,
 								  insertColumnList, columnIndexes, fileName,
 								  columnDelimiter, characterDelimiter, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 								  codeset, replace, false);
 		}catch(SQLException se)
 		{
@@ -1900,6 +1944,8 @@ public class SystemProcedures  {
      * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_IMPORT_DATA_BULK(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6893
     String  schemaName,
     String  tableName,
 	String  insertColumnList,
@@ -1956,6 +2002,7 @@ public class SystemProcedures  {
      * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     String  schemaName,
     String  tableName,
     String  insertColumnList,
@@ -2005,6 +2052,7 @@ public class SystemProcedures  {
 	)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
@@ -2017,9 +2065,11 @@ public class SystemProcedures  {
         // Use default schema if schemaName is null. This isn't consistent
         // with the other procedures, as they would fail if schema was null.
         String entityName = IdUtil.mkQualifiedName(schemaName, tableName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4866
 
 		String binsertSql = 
 			"insert into " + entityName +
+//IC see: https://issues.apache.org/jira/browse/DERBY-1660
 			" --DERBY-PROPERTIES insertMode=bulkInsert \n" +
 			"select * from new " + IdUtil.normalToDelimited(vtiName) +
 			"(" + 
@@ -2048,6 +2098,7 @@ public class SystemProcedures  {
     public static void SYSCS_RELOAD_SECURITY_POLICY()
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
@@ -2067,6 +2118,7 @@ public class SystemProcedures  {
         
         try {
             AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     new PrivilegedAction<Object>() {
                         public Object run() {
                             Policy.getPolicy().refresh();
@@ -2129,9 +2181,12 @@ public class SystemProcedures  {
      * @throws SQLException Error setting the permission
      */
     public static void SYSCS_SET_USER_ACCESS(String userName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
             String connectionPermission)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3158
+//IC see: https://issues.apache.org/jira/browse/DERBY-3159
          try {
             
             if (userName == null)
@@ -2167,6 +2222,7 @@ public class SystemProcedures  {
             
             
             if (addListProperty != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
                 String addList = getProperty( addListProperty, Securable.SET_USER_ACCESS );
                 setDatabaseProperty
                     (
@@ -2194,6 +2250,7 @@ public class SystemProcedures  {
             String listProperty, String userName)
         throws SQLException, StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         String removeList = getProperty( listProperty, Securable.SET_USER_ACCESS );
         if (removeList != null)
         {
@@ -2216,6 +2273,7 @@ public class SystemProcedures  {
     {
         try {
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-3160
             if (userName == null)
             {
                 throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME,
@@ -2223,6 +2281,7 @@ public class SystemProcedures  {
             }
            
             String fullUserList =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
                 getProperty( Property.FULL_ACCESS_USERS_PROPERTY, Securable.GET_USER_ACCESS );
             if (IdUtil.idOnList(userName, fullUserList))
             {
@@ -2242,6 +2301,7 @@ public class SystemProcedures  {
             {
                 defaultAccess = StringUtil.SQLToUpperCase(defaultAccess);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
             else
             {
                 defaultAccess = Property.FULL_ACCESS; // is the default.
@@ -2261,6 +2321,7 @@ public class SystemProcedures  {
      * @throws SQLException on error
      */
     public static void SYSCS_INVALIDATE_STORED_STATEMENTS()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5578
        throws SQLException
     {
     	LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
@@ -2270,6 +2331,7 @@ public class SystemProcedures  {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
             SecurityUtil.authorize( Securable.INVALIDATE_STORED_STATEMENTS );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
 
         	dd.invalidateAllSPSPlans(lcc);
         } catch (StandardException se) {
@@ -2286,8 +2348,10 @@ public class SystemProcedures  {
      * @throws SQLException on error
      */
     public static void SYSCS_EMPTY_STATEMENT_CACHE()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2772
        throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
@@ -2313,6 +2377,7 @@ public class SystemProcedures  {
      * @throws StandardException on error
      */
     public static void SYSCS_SET_XPLAIN_MODE(int mode)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         throws SQLException, StandardException
     {
         try {
@@ -2336,6 +2401,7 @@ public class SystemProcedures  {
      * @throws StandardException on error
      */
     public static int SYSCS_GET_XPLAIN_MODE()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         throws SQLException, StandardException
     {
         try {
@@ -2360,6 +2426,7 @@ public class SystemProcedures  {
     public static void SYSCS_SET_XPLAIN_SCHEMA(String schemaName)
                 throws SQLException, StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
@@ -2420,6 +2487,7 @@ public class SystemProcedures  {
         Connection conn = getDefaultConn();
         if (!hasSchema(conn, schemaName))
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
             String escapedSchema = IdUtil.normalToDelimited(schemaName);
             Statement s = conn.createStatement();
             s.executeUpdate("CREATE SCHEMA " + escapedSchema);
@@ -2462,6 +2530,7 @@ public class SystemProcedures  {
     public static String SYSCS_GET_XPLAIN_SCHEMA()
                 throws SQLException, StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
@@ -2489,6 +2558,7 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
         userName = normalizeUserName( userName );
             
         LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
@@ -2500,6 +2570,7 @@ public class SystemProcedures  {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
             SecurityUtil.authorize( Securable.CREATE_USER );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
 
             DataDictionary dd = lcc.getDataDictionary();
             String  dbo = dd.getAuthorizationDatabaseOwner();
@@ -2619,6 +2690,7 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         try {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
@@ -2626,6 +2698,7 @@ public class SystemProcedures  {
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
         resetAuthorizationIDPassword( normalizeUserName( userName ), password );
     }
 
@@ -2684,6 +2757,7 @@ public class SystemProcedures  {
     {
         String currentUser = ConnectionUtil.getCurrentLCC().getStatementContext().getSQLSessionContext().getCurrentUser();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
         resetAuthorizationIDPassword( currentUser, password );
     }
   
@@ -2700,11 +2774,13 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
         userName = normalizeUserName( userName );
             
         try {
             // make sure that application code doesn't bypass security checks
             // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
             SecurityUtil.authorize( Securable.DROP_USER );
             
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
@@ -2760,6 +2836,7 @@ public class SystemProcedures  {
      * @throws SQLException on error
      */
     private static  String  normalizeUserName( String userName )
+//IC see: https://issues.apache.org/jira/browse/DERBY-5762
         throws SQLException
     {
         try {
@@ -2773,6 +2850,7 @@ public class SystemProcedures  {
      * @throws SQLException on error
      */
     public static String SYSCS_GET_DATABASE_NAME()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6725
         throws SQLException
     {
         //DERBY-6725(Add a system function which returns the name of the database.)
@@ -2821,6 +2899,7 @@ public class SystemProcedures  {
      */
     private static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6725
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

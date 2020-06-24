@@ -38,14 +38,17 @@ public class _Suite extends BaseTestCase{
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("BasicPerf");
         
         suite.addTest(ValuesTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2200
         suite.addTest(CountTest.suite());
         suite.addTest(HeapScan.suite());
         suite.addTest(CoveredIdxScan.suite());
         suite.addTest(SortTest.suite());
         suite.addTest(SelectDistinctTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3981
 
         return suite;
     }

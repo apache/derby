@@ -73,8 +73,11 @@ public class T_SortController extends T_Generic
 	}
 
 	private void setSortBufferSize(final String buf_length) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     	AccessController.doPrivileged(new PrivilegedAction<Void>() {
 		    public Void run()  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 		    	System.setProperty("derby.storage.sortBufferMax", buf_length);
 		    	return null;
 		    }
@@ -136,6 +139,7 @@ public class T_SortController extends T_Generic
 		int failcount = 0;
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			store = (AccessFactory) createPersistentService(getModuleToTestProtocolName(), 
 				testService + tail, startParams);
 		} catch (StandardException mse) {
@@ -147,6 +151,7 @@ public class T_SortController extends T_Generic
 
 		tc = store.getTransaction(
                 getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		if (!sortExample(tc))
 			failcount++;
@@ -699,6 +704,7 @@ public class T_SortController extends T_Generic
 		// available to be retrieved.
         // It also means we are getting final sort statistics.
         sort.completedInserts();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 
         // Test the SortInfo part of sort.
         SortInfo   sort_info = sort.getSortInfo();
@@ -731,6 +737,7 @@ public class T_SortController extends T_Generic
         {
             int numMergeRuns = Integer.parseInt(sortprop.getProperty(
 			 MessageService.getTextMessage(SQLState.STORE_RTS_NUM_MERGE_RUNS)));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Vector<Integer> mergeRuns = new Vector<Integer>();
             StringTokenizer st = new StringTokenizer(sortprop.getProperty(
 			 MessageService.getTextMessage(SQLState.STORE_RTS_MERGE_RUNS_SIZE)),
@@ -745,6 +752,7 @@ public class T_SortController extends T_Generic
 
             int totRunSize = 0;
             for (int i = 0; i < mergeRuns.size(); i++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 totRunSize += mergeRuns.elementAt(i);
             if (totRunSize != numRowsInput)
                FAIL("(testSort) the sum of the elements of the vector SortInfo.mergeRunsSize (value: " +
@@ -847,6 +855,7 @@ public class T_SortController extends T_Generic
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getFactory();
@@ -871,6 +880,7 @@ public class T_SortController extends T_Generic
      * can't call this entry point.
      */
     private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {
@@ -898,6 +908,7 @@ class T_DummySortObserver implements SortObserver
 {
 	T_AccessRow  template;
 	Vector<DataValueDescriptor[]> vector;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 	T_DummySortObserver(T_AccessRow template)
 	{
@@ -938,12 +949,16 @@ class T_DummySortObserver implements SortObserver
 
 		if (lastElement > 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return vector.remove(lastElement - 1);
 		}
 		return template.getRowArrayClone();
 	}
 
     public boolean deferred() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return false;
     }
 
@@ -1033,6 +1048,9 @@ class T_SumForIntCol implements SortObserver
 	}
 
     public boolean deferred() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return false;
     }
 

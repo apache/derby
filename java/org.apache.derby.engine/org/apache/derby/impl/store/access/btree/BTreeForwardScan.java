@@ -242,6 +242,7 @@ public class BTreeForwardScan extends BTreeScan
                         if (row_array[ret_row_count] == null)
                         {
                             row_array[ret_row_count] = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                                 runtime_mem.get_row_for_export(getRawTran());
                         }
 
@@ -250,6 +251,7 @@ public class BTreeForwardScan extends BTreeScan
                     else
                     {
                         // get a brand new row.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                         fetch_row = 
                             runtime_mem.get_row_for_export(getRawTran()); 
                     }
@@ -311,6 +313,7 @@ public class BTreeForwardScan extends BTreeScan
                 // row was marked deleted - the key value cannot change.
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
                         this, pos,
                         init_lock_fetch_desc,
                         pos.current_lock_template,

@@ -42,6 +42,7 @@ public class EncryptionKeyAESTest
 
     public static Test suite() {
         // This test runs only in embedded due to the use of external files.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(EncryptionKeyAESTest.class,
                                         "EncryptionKey AES suite");
         return new SupportFilesSetup(suite);

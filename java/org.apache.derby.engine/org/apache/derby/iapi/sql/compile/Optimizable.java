@@ -376,6 +376,7 @@ public interface Optimizable extends Visitable {
      */
     public boolean memoryUsageOK( double rowCount, int maxMemoryPerTable)
 			throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
 
 	/**
      * Return the maximum capacity of the hash table, for hash join strategy

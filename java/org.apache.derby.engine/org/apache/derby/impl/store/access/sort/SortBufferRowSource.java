@@ -104,6 +104,7 @@ public class SortBufferRowSource extends Scan
 
     public boolean needsRowLocationForDeferredCheckConstraints()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return false;
     }
 
@@ -123,6 +124,7 @@ public class SortBufferRowSource extends Scan
 	}
 
     public void offendingRowLocation(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             RowLocation rl, long containdId) throws StandardException {
         if (SanityManager.DEBUG) {
             SanityManager.NOTREACHED();
@@ -191,6 +193,7 @@ public class SortBufferRowSource extends Scan
      * @see org.apache.derby.iapi.store.access.ScanController#fetchWithoutQualify
      **/
     public void fetchWithoutQualify(DataValueDescriptor[] result) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
         throws StandardException
     {
         throw StandardException.newException(

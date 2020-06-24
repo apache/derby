@@ -105,6 +105,7 @@ public class T_AccessFactory extends T_Generic
 		startParams = T_Util.setEncryptionParam(startParams);
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			store = (AccessFactory) createPersistentService(
 				getModuleToTestProtocolName(), testService, startParams);
 		} catch (StandardException mse) {
@@ -124,6 +125,7 @@ public class T_AccessFactory extends T_Generic
 
             ContextManager cm = 
                     getContextService().getCurrentContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			tc = store.getAndNameTransaction(
                     cm, AccessFactoryGlobals.USER_TRANS_NAME);
@@ -135,6 +137,7 @@ public class T_AccessFactory extends T_Generic
 				&& readUncommitted(tc)
                 && updatelocks(tc)
 				&& nestedUserTransaction(tc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
                 && positionAtRowLocation(tc)
                 && sortCost(tc)
                 && storeCost(tc)
@@ -143,6 +146,7 @@ public class T_AccessFactory extends T_Generic
 				&& insertAndUpdateExample(tc)
 				&& insertAndFetchExample(tc)
 				&& scanExample(tc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3371
                 && alterTable(tc, false)
                 && alterTable(tc, true)
 				&& tempTest(tc)
@@ -188,6 +192,7 @@ public class T_AccessFactory extends T_Generic
     {
         // flush and empty cache to make sure rereading stuff works.
         RawStoreFactory rawstore = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             (RawStoreFactory) findServiceModule(
                 this.store, RawStoreFactory.MODULE);
 
@@ -209,6 +214,7 @@ public class T_AccessFactory extends T_Generic
                     "heap", // create a heap conglomerate
                     null,   // ERROR - Heap requires a template!!!
 					null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 					null, 	// default collation
                     null,   // default properties
                     TransactionController.IS_DEFAULT); // not temporary
@@ -289,6 +295,7 @@ public class T_AccessFactory extends T_Generic
 		cc.insertAndFetchLocation(r1.getRowArray(), rowloc);
 
         // quick test to make sure we can hash insert and find row location.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Hashtable<RowLocation, RowLocation> test_rowloc_hash =
                 new Hashtable<RowLocation, RowLocation>();
         test_rowloc_hash.put(rowloc, rowloc);
@@ -998,6 +1005,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",         // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(),   // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, 	// default collation
                 null,           // default properties
                 TransactionController.IS_DEFAULT);         // not temporary
@@ -1055,6 +1063,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, 	// default collation
                 prop,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
@@ -1176,6 +1185,7 @@ public class T_AccessFactory extends T_Generic
 		// Create a heap conglomerate.
         T_AccessRow template_row = new T_AccessRow(1);
         int temporaryFlag = temporary ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-3371
             TransactionController.IS_TEMPORARY :
             TransactionController.IS_DEFAULT;
 		long conglomid = 
@@ -1185,6 +1195,7 @@ public class T_AccessFactory extends T_Generic
 				null, 	// column sort order not required for heap
                 null, 	// default collation
                 null,         // default properties
+//IC see: https://issues.apache.org/jira/browse/DERBY-3371
                 temporaryFlag);
 		// Open the conglomerate.
 		ConglomerateController cc =	
@@ -1360,6 +1371,7 @@ public class T_AccessFactory extends T_Generic
 
 
         // now alter the conglomerate, add another int column
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         tc.addColumnToConglomerate(
             conglomid, 1, c1, StringDataValue.COLLATION_TYPE_UCS_BASIC);
 
@@ -1835,6 +1847,7 @@ public class T_AccessFactory extends T_Generic
                     "heap",               // create a heap conglomerate
                     new T_AccessRow(numcols).getRowArray(),   // 1 SQLInteger() column template.
 					null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     null, 	// default collation
                     null,                 // default properties
                     TransactionController.IS_DEFAULT);               // not temporary
@@ -1989,6 +2002,7 @@ public class T_AccessFactory extends T_Generic
         // Test 1 - Just call for various types of sorts.  Not sure how 
         // to test the validity.
 		SortCostController scc = tc.openSortCostController();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
         double estimated_cost = 
             scc.getSortCost(
@@ -2036,6 +2050,11 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
@@ -2529,6 +2548,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",         // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(),   // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, 	// default collation
                 null,           // default properties
                 temporary ? TransactionController.IS_TEMPORARY : TransactionController.IS_DEFAULT);
@@ -2616,6 +2636,7 @@ public class T_AccessFactory extends T_Generic
 		baseRow[0] = col0;
 
 		// Create a btree secondary index conglomerate.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		long iid = 
             tc.createConglomerate(
                 "BTREE", 
@@ -2978,6 +2999,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",         // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(),   // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, 	// default collation
                 null,           // default properties
                 TransactionController.IS_TEMPORARY);
@@ -2985,6 +3007,7 @@ public class T_AccessFactory extends T_Generic
         TransactionController current_xact = 
             store.getTransaction(
                 getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         // get a nested user transaction
         TransactionController child_tc = 
@@ -2993,6 +3016,7 @@ public class T_AccessFactory extends T_Generic
         TransactionController current_xact_after_nest = 
             store.getTransaction(
                 getContextService().getCurrentContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         if (current_xact_after_nest != current_xact)
         {
@@ -3002,6 +3026,7 @@ public class T_AccessFactory extends T_Generic
                 ";current_xact_after_nest = "  + current_xact_after_nest);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
         T_Fail.T_ASSERT(tc.getLockSpace() == child_tc.getLockSpace(),
                         "getLockSpace() returned different object for child.");
 
@@ -3342,6 +3367,7 @@ public class T_AccessFactory extends T_Generic
 
 		// get another transaction going
 		ContextManager cm2 = getContextService().newContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		getContextService().setCurrentContextManager(cm2);
 
@@ -3387,6 +3413,7 @@ public class T_AccessFactory extends T_Generic
 		tc.commit();
 		
 		getContextService().setCurrentContextManager(cm2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		try {
 		cc2.fetch(rowloc, r1.getRowArray(), (FormatableBitSet)null);
@@ -3395,6 +3422,8 @@ public class T_AccessFactory extends T_Generic
 		tc2.destroy();
 		}
 		finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			getContextService().resetCurrentContextManager(cm2);
 		}
 
@@ -3782,6 +3811,7 @@ public class T_AccessFactory extends T_Generic
 
     // test position at row location, in terms of holdability
     protected boolean positionAtRowLocation(TransactionController tc)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
         throws StandardException, T_Fail
     {
         REPORT("(positionAtRowLocation)");
@@ -4077,6 +4107,7 @@ public class T_AccessFactory extends T_Generic
         }
              
         // Test heap replace of row on page which does not exist.
+//IC see: https://issues.apache.org/jira/browse/DERBY-707
         FormatableBitSet   update_desc = new FormatableBitSet(1);
         if (cc.replace(deleted_page_rowloc, big_row.getRowArray(), update_desc)) 
         {
@@ -4197,6 +4228,7 @@ public class T_AccessFactory extends T_Generic
         }
         
         // test heap replace of row on page where row does not exist.
+//IC see: https://issues.apache.org/jira/browse/DERBY-707
         if (cc.replace(deleted_page_rowloc, big_row.getRowArray(), update_desc)) 
         {
             throw T_Fail.testFailMsg(
@@ -4245,6 +4277,18 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 big_row.getRowArray(),
 				null, 	// column sort order not required for heap
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
@@ -4378,12 +4422,14 @@ public class T_AccessFactory extends T_Generic
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

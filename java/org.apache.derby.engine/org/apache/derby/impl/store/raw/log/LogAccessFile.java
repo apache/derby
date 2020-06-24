@@ -59,6 +59,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
     the buffers. 
 
     Log Buffers are used in circular fashion, each buffer moves through following stages: 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	freeBuffers --&gt; dirtyBuffers --&gt; freeBuffers. Movement of buffers from one
     stage to 	another stage is synchronized using	the object(this) of this class. 
 
@@ -69,6 +70,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
 	when buffers is switched. Checksum log record is written into the reserved
 	space in the beginning buffer. 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2939
     In case of a large log record that does not fit into a buffer, the
     checksum is written to the byte[] allocated for the big log
     record. 
@@ -109,6 +111,7 @@ public class LogAccessFile
 	static int                      mon_numBytesToLog;
 
     // the MasterFactory that will accept log when in replication master mode
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
     MasterFactory masterFac; 
     boolean inReplicationMasterMode = false;
     boolean inReplicationSlaveMode = false;
@@ -126,6 +129,7 @@ public class LogAccessFile
 	private boolean databaseEncrypted=false;
 		
 	public LogAccessFile(LogToFile logFactory,
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 						 StorageRandomAccessFile    log, 
 						 int                 bufferSize) 
     {
@@ -138,15 +142,18 @@ public class LogAccessFile
 		// Puts this LogAccessFile object in replication slave or
 		// master mode if the database has such a role
 		logFactory.checkForReplication(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
 
 		this.log            = log;
 		logFileSemaphore    = log;
 		this.logFactory     = logFactory;
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 
 		if (SanityManager.DEBUG)
             SanityManager.ASSERT(LOG_NUMBER_LOG_BUFFERS >= 1);
 				
 		//initialize buffers lists
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		freeBuffers = new LinkedList<LogAccessFileBuffer>();
 		dirtyBuffers = new LinkedList<LogAccessFileBuffer>();
 
@@ -165,11 +172,14 @@ public class LogAccessFile
 		// writing the checksum log records.  Otherwise recovery will fail
 		// incase user tries to revert back to versions before 10.1 in 
 		// soft upgrade mode. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		writeChecksum = logFactory.checkVersion(RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10, 
 												RawStoreFactory.DERBY_STORE_MINOR_VERSION_1);
 
 		// Checksums are received from the master if in slave replication mode
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
 		if (inReplicationSlaveMode) writeChecksum = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		if(writeChecksum)
 		{
 			/**
@@ -263,6 +273,7 @@ public class LogAccessFile
     {
         int total_log_record_length = length + LOG_RECORD_FIXED_OVERHEAD_SIZE;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2939
         if (total_log_record_length <= currentBuffer.bytes_free) {
             int newpos = appendLogRecordToBuffer(currentBuffer.buffer,
                                                  currentBuffer.position,
@@ -275,6 +286,7 @@ public class LogAccessFile
                                                  optional_data_length);
             currentBuffer.position = newpos;
             currentBuffer.bytes_free -= total_log_record_length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
             currentBuffer.greatest_instant = instant;
             if (SanityManager.DEBUG) {
                 int normalizedPosition = currentBuffer.position;
@@ -339,6 +351,7 @@ public class LogAccessFile
             // following direct log to file call finishes.
 
 			// write the log record directly to the log file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
             writeToLog(bigbuffer, 0, bigBufferLength, instant);
         }
     }
@@ -414,6 +427,7 @@ public class LogAccessFile
         b[p++] = (byte) (((int)(l >>> 16)) & 0xff); 
         b[p++] = (byte) (((int)(l >>> 8)) & 0xff); 
         b[p++] = (byte) (((int)l) & 0xff); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		return p;
 	}
 
@@ -519,6 +533,7 @@ public class LogAccessFile
 		
 				noOfBuffers = dirtyBuffers.size();
 				if(noOfBuffers > 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					buf = dirtyBuffers.removeFirst();
 				
 				flushInProgress = true;
@@ -526,6 +541,7 @@ public class LogAccessFile
 			
 			while(nFlushed < noOfBuffers)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
 				if (buf.position != 0) {
 					writeToLog(buf.buffer, 0, buf.position, buf.greatest_instant);
 				}
@@ -536,6 +552,7 @@ public class LogAccessFile
 					//add the buffer that was written previosly to the free list
 					freeBuffers.addLast(buf);
 					if(nFlushed < noOfBuffers)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 						buf = dirtyBuffers.removeFirst();
 					else
 					{
@@ -546,6 +563,7 @@ public class LogAccessFile
 						if(size > 0 && nFlushed <= LOG_NUMBER_LOG_BUFFERS)
 						{
 							noOfBuffers += size;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 							buf = dirtyBuffers.removeFirst();
 						}
 					}
@@ -585,12 +603,14 @@ public class LogAccessFile
 		synchronized(this)
 		{
 			// ignore empty buffer switch requests
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 			if(currentBuffer.position == checksumLogRecordSize)
 				return;
 
 			// calculate the checksum for the current log buffer 
 			// and write the record to the space reserverd in 
 			// the beginning of the buffer. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2939
 			if(writeChecksum)
 			{
 				checksumLogOperation.reset();
@@ -616,8 +636,10 @@ public class LogAccessFile
 				SanityManager.ASSERT(freeBuffers.size() > 0);
 
 			//switch over to the next log buffer, let someone else write it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			currentBuffer = freeBuffers.removeFirst();
 			currentBuffer.init(checksumLogRecordSize);
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 
 			if (SanityManager.DEBUG)
 			{
@@ -656,6 +678,7 @@ public class LogAccessFile
             {
                 synchronized( this)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
                     log.sync();
                 }
 
@@ -673,11 +696,14 @@ public class LogAccessFile
                 }
                 catch( InterruptedException ie )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
                 }
 
                 if( i > 20 )
                     throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-336
                         SQLState.LOG_FULL, sfe);
             }
         }
@@ -700,6 +726,7 @@ public class LogAccessFile
     {
 		if (SanityManager.DEBUG) 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 			if (currentBuffer.position !=  checksumLogRecordSize)
 				SanityManager.THROWASSERT(
 				"Log file being closed with data still buffered " + 
@@ -722,6 +749,7 @@ public class LogAccessFile
      * controlling the master side replication behaviour.
      */
     protected void setReplicationMasterRole(MasterFactory masterFac) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
         this.masterFac = masterFac;
         inReplicationMasterMode = true;
     }
@@ -780,6 +808,7 @@ public class LogAccessFile
                     try 
                     {
                         log.write(b, off, len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
                         if (inReplicationMasterMode) {
                             masterFac.appendLog(highestInstant,
                                                 b, off, len);
@@ -814,6 +843,7 @@ public class LogAccessFile
 	 * @return the space that is needed to write a checksum log record.
 	 */
 	protected long reserveSpaceForChecksum(int length, long logFileNumber, long currentPosition )
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		throws StandardException, IOException 
 	{
 
@@ -881,6 +911,7 @@ public class LogAccessFile
      * checksum is always written at the beginning of buffer.
 	 */
 	private void writeChecksumLogRecord(byte[] buffer)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2939
 		throws IOException, StandardException{
 		
 		int    p    = 0; //checksum is written in the beginning of the buffer
@@ -900,6 +931,7 @@ public class LogAccessFile
 		{
 			//encrypt the checksum log operation part.
 			int len = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2939
 				logFactory.encrypt(buffer, LOG_RECORD_HEADER_SIZE, checksumLength, 
 								   buffer, LOG_RECORD_HEADER_SIZE);
 			
@@ -912,6 +944,7 @@ public class LogAccessFile
 		p = LOG_RECORD_HEADER_SIZE + checksumLength ;
 
 		// writeInt(length) trailing
+//IC see: https://issues.apache.org/jira/browse/DERBY-2939
 		p = writeInt(checksumLength, buffer, p );
 		
 		if (SanityManager.DEBUG)
@@ -943,6 +976,7 @@ public class LogAccessFile
 		int    p    = 0; //end is written in the beginning of the buffer, no
 						 //need to checksum a int write.
 		p = writeInt(marker , b , p);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
 		writeToLog(b, 0, p, -1); //end marker has no instant
 	}
 

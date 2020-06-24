@@ -49,6 +49,7 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
  * result set) MUST be unique for this to work correctly.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class MergeJoinResultSet extends JoinResultSet
 {
 	private static final int GREATER_THAN = 1;
@@ -76,6 +77,7 @@ class MergeJoinResultSet extends JoinResultSet
 	 * @param optimizerEstimatedRowCount	self-explanatory
 	 * @param optimizerEstimatedCost		self-explanatory
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     MergeJoinResultSet(NoPutResultSet leftResultSet,
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
@@ -93,6 +95,7 @@ class MergeJoinResultSet extends JoinResultSet
 			  activation, restriction, resultSetNumber, 
 			  oneRowRightSide, notExistsRightSide, optimizerEstimatedRowCount, 
 			  optimizerEstimatedCost, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 
 		this.leftGreaterThanRight = leftGreaterThanRight;
     }
@@ -116,6 +119,7 @@ class MergeJoinResultSet extends JoinResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -257,6 +261,7 @@ class MergeJoinResultSet extends JoinResultSet
 		for (colInCtr = 1, colOutCtr = 1; colInCtr <= leftNumCols;
 			 colInCtr++, colOutCtr++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
             DataValueDescriptor src_col = leftRow.getColumn(colInCtr);
             // Clone the value if it is represented by a stream (DERBY-3650).
             if (src_col != null && src_col.hasStream()) {

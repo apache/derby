@@ -82,6 +82,7 @@ public final class DeleteOperation extends LogicalPageOperation
 
 	transient protected ByteArray preparedLog;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     DeleteOperation(RawTransaction t, BasePage page, int slot, int recordId,
 						   boolean delete, LogicalUndo undo)
 		throws StandardException

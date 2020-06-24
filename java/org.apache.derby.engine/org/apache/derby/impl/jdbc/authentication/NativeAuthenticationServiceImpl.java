@@ -208,6 +208,7 @@ public final class NativeAuthenticationServiceImpl
         if ( _credentialsDB != null )
         {
             // make sure that it is a well-formed database name
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             if ( getMonitor().getCanonicalServiceName( _credentialsDB ) == null )
             {
                 throw StandardException.newException( SQLState.BAD_CREDENTIALS_DB_NAME, _credentialsDB );
@@ -342,6 +343,7 @@ public final class NativeAuthenticationServiceImpl
     private boolean authenticatingInThisDatabase( String userVisibleDatabaseName )
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return authenticatingInThisService( getMonitor().getCanonicalServiceName( userVisibleDatabaseName ) );
     }
 
@@ -368,6 +370,7 @@ public final class NativeAuthenticationServiceImpl
         String  canonicalCredentialsDBName = getCanonicalServiceName( _credentialsDB );
 
         String canonicalDB = getMonitor().getCanonicalServiceName( canonicalDatabaseName );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         if ( canonicalCredentialsDBName == null ) { return false; }
         else { return canonicalCredentialsDBName.equals( canonicalDatabaseName ); }
@@ -384,6 +387,7 @@ public final class NativeAuthenticationServiceImpl
     private String  getCanonicalServiceName( String rawName )
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return getMonitor().getCanonicalServiceName( rawName );
     }
 
@@ -420,12 +424,14 @@ public final class NativeAuthenticationServiceImpl
         SQLWarning  warnings = null;
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5607
             Properties  properties = new Properties();
             properties.setProperty( Attribute.USERNAME_ATTR, userName );
             properties.setProperty( Attribute.PASSWORD_ATTR, userPassword );
 
             String  connectionURL = Attribute.PROTOCOL + _credentialsDB;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
             Connection  conn = InternalDriver.activeDriver().connect( connectionURL, properties, 0 );
             
             warnings = conn.getWarnings();
@@ -496,6 +502,7 @@ public final class NativeAuthenticationServiceImpl
         //
         // we expect to find a data dictionary
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         DataDictionary      dd = (DataDictionary) AuthenticationServiceBase.getServiceModule( this, DataDictionary.MODULE );        
         UserDescriptor      userDescriptor = dd.getUser( userName );
         
@@ -555,6 +562,7 @@ public final class NativeAuthenticationServiceImpl
             
             if ( remainingLifetime <= expirationThreshold )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5647
                 if ( dd.getAuthorizationDatabaseOwner().equals( userName ) )
                 {
                     throw SQLWarningFactory.newSQLWarning( SQLState.DBO_PASSWORD_EXPIRES_SOON, databaseName );
@@ -575,6 +583,7 @@ public final class NativeAuthenticationServiceImpl
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

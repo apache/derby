@@ -35,6 +35,8 @@ import org.apache.derby.iapi.types.TypeId;
  * Definition for the SUM()/AVG() aggregates.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class SumAvgAggregateDefinition
 		implements AggregateDefinition 
 {
@@ -67,6 +69,7 @@ class SumAvgAggregateDefinition
 			TypeId compType = inputType.getTypeId();
 		
 			CompilerContext cc = (CompilerContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				QueryTreeNode.getContext(CompilerContext.CONTEXT_ID);
 			TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
 			TypeCompiler tc = tcf.getTypeCompiler(compType);
@@ -92,6 +95,7 @@ class SumAvgAggregateDefinition
 		{
 			if (SanityManager.DEBUG)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", e);
 			}
 		}
@@ -129,6 +133,8 @@ class SumAvgAggregateDefinition
 	/**
 	 * This is set by the parser.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final void setSumOrAvg(boolean isSum)
 	{
 		this.isSum = isSum;

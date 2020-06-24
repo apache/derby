@@ -36,6 +36,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   <P>
   A set of static utility methods to work with rows.
   </P>
@@ -56,6 +57,7 @@ import java.util.Vector;
   that the format for a partial row changed from a "packed" representation
   in the 3.0 release to a "sparse" representation in later releases:
   </P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
   <blockquote><pre>
 
@@ -73,6 +75,7 @@ import java.util.Vector;
   FormatableBitSet.set(7);
   </pre></blockquote>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
   <BR>
   <P>
@@ -97,6 +100,7 @@ import java.util.Vector;
        returns false.</LI>
   <LI> Column N is in the partial row if validColumns.isSet(N) returns true.</LI>
   <LI> If column N is in the partial row then it maps to row[N].
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	   If N &gt;= row.length then the column is taken as non existent for an
 	   insert or update, and not fetched on a fetch.</LI>
   </UL>
@@ -256,6 +260,7 @@ public class RowUtil
 	/**
 		See if a row actually contains no columns.
 		Returns true if row is null or row.length is zero.
+//IC see: https://issues.apache.org/jira/browse/DERBY-404
 
 		@return true if row is empty.
 	*/
@@ -371,6 +376,7 @@ public class RowUtil
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static DataValueDescriptor[] newTemplate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     DataValueFactory    dvf,
     FormatableBitSet    column_list,
     int[]               format_ids,
@@ -379,6 +385,7 @@ public class RowUtil
     {
         int                   num_cols = format_ids.length;
         DataValueDescriptor[] ret_row  = new DataValueDescriptor[num_cols];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
 		int column_listSize = 
             (column_list == null) ? 0 : column_list.getLength();
@@ -398,6 +405,7 @@ public class RowUtil
 
                 // get empty instance of object identified by the format id.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 ret_row[i] = dvf.getNull(format_ids[i], collation_ids[i]);
             }
         }
@@ -422,6 +430,7 @@ public class RowUtil
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static DataValueDescriptor[] newRowFromTemplate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     DataValueDescriptor[]    template) 
         throws StandardException
     {
@@ -460,6 +469,7 @@ public class RowUtil
         {
 
             String str = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 
             if (row != null)
             {
@@ -501,6 +511,7 @@ public class RowUtil
         if (SanityManager.DEBUG)
         {
             String str = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 
             Object  row_or_vector;
 
@@ -524,6 +535,7 @@ public class RowUtil
                         str += 
                             "vec[" + i + "]:" + 
                             RowUtil.toString((Object[]) vec.get(i));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
                         str += "\n";
                     }

@@ -50,6 +50,7 @@ public class ReplicationRun_Local_StateTest_part1_3 extends ReplicationRun
         
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_StateTest_part1_3 Suite");
         
@@ -79,10 +80,12 @@ public class ReplicationRun_Local_StateTest_part1_3 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 masterDbSubPath); // Distinguishing master/slave
         
         startServer(slaveJvmVersion, derbySlaveVersion,
@@ -133,6 +136,7 @@ public class ReplicationRun_Local_StateTest_part1_3 extends ReplicationRun
     private void _testPostStartedMasterAndSlave_Failover()
     {
         Connection conn = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
@@ -155,6 +159,7 @@ public class ReplicationRun_Local_StateTest_part1_3 extends ReplicationRun
         // Default replication test sequence still OK.
         
         // Failover on master should succeed:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"

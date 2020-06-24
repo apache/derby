@@ -132,6 +132,7 @@ class TempRAFContainer extends RAFContainer {
 		needsSync = false;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	StorageFile getFileName(ContainerKey identity, boolean stub,
         boolean errorOK, boolean tryAlternatePath)
 	{

@@ -73,6 +73,7 @@ public class DbTasks {
 					.logMsg("\n\n*****************************************************");
 			// setting the properties like user, password etc for both the
 			// database and the backup database
+//IC see: https://issues.apache.org/jira/browse/DERBY-4203
 			if (useexistingdb)
 		        setSystemProperty("database", "jdbc:derby:mailsdb");
 			else
@@ -81,6 +82,9 @@ public class DbTasks {
 			setSystemProperty("ij.password", "Refresh");
 		} else {
 			setSystemProperty("driver", "org.apache.derby.jdbc.ClientDriver");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 			MailJdbc.logAct
 			.logMsg(" \n*****************************************************");
 			MailJdbc.logAct
@@ -98,6 +102,7 @@ public class DbTasks {
 			
 		}
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4203
 			if (useexistingdb)
 			{
 				MailJdbc.logAct
@@ -131,10 +136,12 @@ public class DbTasks {
 	public static Connection getConnection(String usr, String passwd){
 		try {
 			// Returns the Connection object
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(System.getProperty("driver"));
             clazz.getConstructor().newInstance();
 
 			Connection con = DriverManager.getConnection(System
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 					.getProperty("database"), usr, passwd);
 			return con;
 		} catch (Exception e) {
@@ -154,12 +161,15 @@ public class DbTasks {
 		boolean saveAutoCommit = conn.getAutoCommit();
 		int saveIsolation = conn.getTransactionIsolation();
 		Statement stmt = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 		Statement attach_stmt = null;
 		int inbox_count = 0;
 		int attach_count = 0;
 		long size = 0;
 		try {
 			conn.setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			long s_select = System.currentTimeMillis();
 			stmt = conn.createStatement();
@@ -186,6 +196,7 @@ public class DbTasks {
 			log.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Time taken to scan the entire REFRESH.INBOX for count :"
 					+ PerfTime.readableTime(e_select - s_select));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			rs.close();
 			rs1.close();
 			attach_stmt.close();
@@ -199,6 +210,7 @@ public class DbTasks {
 		}
 		try {
 			int inbox_id = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 			if((inbox_count - 1) <= 0)
 				inbox_id = 1;
 			else {
@@ -253,6 +265,8 @@ public class DbTasks {
 							+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			conn.rollback();
 			throw sqe;
 		}
@@ -276,9 +290,11 @@ public class DbTasks {
 					.prepareStatement(Statements.updateStr);
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 					.executeQuery("select max(id) from REFRESH.INBOX ");
 			if (rs.next())
 				id_count = rs.getInt(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			rs.close();
 			stmt.close();
 			short to_delete = 1;
@@ -313,6 +329,8 @@ public class DbTasks {
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			conn.rollback();
 			throw sqe;
 		}
@@ -338,8 +356,10 @@ public class DbTasks {
 					+ "Time taken to delete mails by thread :"
 					+ PerfTime.readableTime(e_delete - s_delete));
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : " + count
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 					+ " rows deleted from REFRESH.INBOX");
 			delete_count = delete_count + count;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			deleteThread.close();
 			stmt.close();
 			conn.commit();
@@ -349,6 +369,8 @@ public class DbTasks {
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			conn.rollback();
 			throw sqe;
 		}
@@ -374,6 +396,7 @@ public class DbTasks {
 				int message_id = 0;
 				int count = rs.getInt(1);
                 //If there is zero row, nothing to do	
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 				if (count==0)
 					return;
 				//If there is just one row, id is 1 (start from 1)
@@ -397,8 +420,10 @@ public class DbTasks {
 						+ PerfTime.readableTime(e_folder - s_folder));
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 						+ "Mail with id : " + message_id
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 						+ " is moved to folder" + folder_id);
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			stmt.close();
 			moveToFolder.close();
 			rs.close();
@@ -409,6 +434,10 @@ public class DbTasks {
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			conn.rollback();
 			throw sqe;
 		}
@@ -432,6 +461,7 @@ public class DbTasks {
 					Statements.insertStr, Statement.RETURN_GENERATED_KEYS);
 			String name = new String("ABCD");
 			String l_name = new String("WXYZ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 			long total_ins_inb = 0;
 			long total_ins_att = 0;
 			int row_count = 0;
@@ -441,6 +471,8 @@ public class DbTasks {
 			for (int i = 0; i < num; i++) {
 				long s_insert = System.currentTimeMillis();
 				String new_name = new String(increment(name, 60));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 				String new_lname = new String(decrement(l_name, 60));
 				insertFirst.setString(1, new_name);
 				insertFirst.setString(2, new_lname);
@@ -451,6 +483,8 @@ public class DbTasks {
 				try {
 					// to create a stream of random length between 200 bytes and 3MB
 					int clobLength = Rn.nextInt(3078000 - 200 + 1) + 200;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 					streamReader = new LoopingAlphabetReader(clobLength,
 							CharAlphabet.modernLatinLowercase());
 					insertFirst.setCharacterStream(4, streamReader, clobLength);
@@ -465,6 +499,9 @@ public class DbTasks {
 					insert_count = insert_count + 1;
 				}
 				streamReader.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 
 				long e_insert = System.currentTimeMillis();
 				total_ins_inb = total_ins_inb + (e_insert - s_insert);
@@ -501,6 +538,8 @@ public class DbTasks {
 						throw e;
 					}
 					int result_attach = insertAttach.executeUpdate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 					streamIn.close();
 					if (result_attach != 0) {
 						blob_count = blob_count + 1;
@@ -511,6 +550,7 @@ public class DbTasks {
 				 }
 				}
 			id_count++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			rs.close();
 			stmt1.close();
 			insertAttach.close();
@@ -521,6 +561,7 @@ public class DbTasks {
 			log.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Time taken to insert " + row_count + " rows to REFRESH.ATTACH :"			
 					+ PerfTime.readableTime(total_ins_att));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			insertFirst.close();
 			conn.commit();
 		}
@@ -529,6 +570,8 @@ public class DbTasks {
 					+ "Error while inserting REFRESH.ATTACH:" + sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			conn.rollback();
 			throw sqe;
 		}
@@ -546,6 +589,7 @@ public class DbTasks {
 			long s_delExp = System.currentTimeMillis();
 			Statement selExp = conn.createStatement();
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 				+ "delete mails which are older than 1 day with sleep 250000 ");
 			int count = 0;
 			count = selExp.executeUpdate(Statements.del_jdbc_exp);
@@ -565,6 +609,10 @@ public class DbTasks {
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			conn.rollback();
 			throw sqe;
 		}
@@ -582,6 +630,8 @@ public class DbTasks {
 			conn.setAutoCommit(true);
 			CallableStatement cs = conn
 					.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(?, ?)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 			cs.setString(1, System.getProperty("user.dir") + File.separator
 					+ "mailbackup");
 			cs.setInt(2, 1);
@@ -597,6 +647,8 @@ public class DbTasks {
 			sqe.printStackTrace();
 			errorPrint(sqe);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 		finally{
 			conn.setAutoCommit(saveAutoCommit);
 		}
@@ -608,12 +660,15 @@ public class DbTasks {
 	}
 
 	public void compressTable(Connection conn, String tabname,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			String thread_name) throws Exception
 	// periodically compresses the table to get back the free spaces available
 	// after
 	// the deletion of some rows
 	{
 		long s_compress = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 		long dbsize = databaseSize(new File("mailsdb"));
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 				+ "dbsize before compress : " + dbsize);
@@ -636,7 +691,11 @@ public class DbTasks {
 			sqe.printStackTrace();
 			errorPrint(sqe);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 		finally{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 		    conn.setAutoCommit(saveAutoCommit);
 		}
 		long e_compress = System.currentTimeMillis();
@@ -644,7 +703,9 @@ public class DbTasks {
 				+ "Finished Compressing the table: " + tabname);
 		log.logMsg(LogFile.INFO + thread_name + " : "
 				+ "Time taken to compress the table : " + tabname
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 				+ " " + PerfTime.readableTime(e_compress - s_compress));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 		dbsize = databaseSize(new File("mailsdb"));
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 				+ "dbsize after compress : " + dbsize);
@@ -658,6 +719,7 @@ public class DbTasks {
 			int del_count = 0;
 			int count = 0;
 			int diff = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			ArrayList<Integer> idArray = new ArrayList<Integer>();
 			Statement stmt = conn.createStatement();
 			Statement stmt1 = conn.createStatement();
@@ -667,6 +729,7 @@ public class DbTasks {
 			while (rs.next())
 				count = rs.getInt(1);
 			//Generate the random number between (count - 36)==>24 to 1
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 			if (count > 50) {
 				diff = Rn.nextInt((count - 36) - 1);
 				if (diff == 0) 
@@ -674,15 +737,18 @@ public class DbTasks {
 				ResultSet rs1 = stmt1
 						.executeQuery("select id from REFRESH.INBOX");
 				while (rs1.next()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 					idArray.add(rs1.getInt(1));
 				}
 				for (int i = 0; i <= diff; i++) {
 					del_count = del_count
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 							+ stmt2
 									.executeUpdate("delete from REFRESH.INBOX where id ="
 											+ idArray.get(i));
 
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 				rs1.close();
 			}
 			delete_count = delete_count + del_count;
@@ -725,6 +791,7 @@ public class DbTasks {
 			stmt.execute(Statements.grantExe4);
 			stmt.execute(Statements.grantExe5);
 			conn.commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 			stmt.close();
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Finished Granting permissions");
@@ -734,11 +801,14 @@ public class DbTasks {
 			sqe.printStackTrace();
 			errorPrint(sqe);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 		finally {
 			conn.setAutoCommit(saveAutoCommit);
 		}
 	}
 	public static long databaseSize(File dbname) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 	    long length = 0;
 	    if (dbname.isDirectory()) {
 	        String[] children = dbname.list();
@@ -760,6 +830,7 @@ public class DbTasks {
 	}
 
 	public void totals(String thread_name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : " + "total number of inserts : "
 				+ insert_count);
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : " + "total number of deletes : "

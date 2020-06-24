@@ -30,6 +30,7 @@ import java.util.List;
 
 /**
   Utility class for constructing and reading and writing arrays from/to
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
   formatId streams and for performing other operations on arrays.
  
   @version 0.1
@@ -60,6 +61,7 @@ public abstract class ArrayUtil
      */
     public  static <T> T[] copy( T[] original )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return (original == null) ?
                 null :
                 Arrays.copyOf(original, original.length);
@@ -86,6 +88,7 @@ public abstract class ArrayUtil
      */
     public  static  byte[]   copy( byte[] original )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
         return (original == null) ? null : (byte[]) original.clone();
     }
 
@@ -110,6 +113,7 @@ public abstract class ArrayUtil
      */
     public  static  long[]   copy( long[] original )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
         return (original == null) ? null : (long[]) original.clone();
     }
 
@@ -146,6 +150,7 @@ public abstract class ArrayUtil
      */
     @SafeVarargs
     public static <T> List<T> asReadOnlyList(T... array) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (array == null) {
             return Collections.emptyList();
         } else {
@@ -360,6 +365,7 @@ public abstract class ArrayUtil
     {
         if (value == null || value.length == 0)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
             return "null";
         }
         else

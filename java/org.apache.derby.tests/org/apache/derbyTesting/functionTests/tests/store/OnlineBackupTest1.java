@@ -70,6 +70,7 @@ public class OnlineBackupTest1 {
 		DatabaseActions dbActions = new DatabaseActions(conn);
 		//create the test  tables. 
 		dbActions.createTable(TEST_TABLE_NAME);
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         dbActions.createTable(TEST_TABLE_NAME_1);
         dbActions.createTable(TEST_TABLE_NAME_2);
         conn.commit();
@@ -91,6 +92,7 @@ public class OnlineBackupTest1 {
 		Thread backupThread = new Thread(backup, "BACKUP");
         
         // run some dml actions in another thread
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
         Connection dmlConn = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         DatabaseActions dmlActions = 
             new DatabaseActions(DatabaseActions.DMLACTIONS, dmlConn);
@@ -127,6 +129,7 @@ public class OnlineBackupTest1 {
                 logMessage("Backup is not waiting for unlogged actions to commit");
 
             // end the unlogged work transaction.
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             dbActions.endUnloggedAction(TEST_TABLE_NAME_1);
             // end the unlogged work transaction.
             dbActions1.endUnloggedAction(TEST_TABLE_NAME_2);
@@ -142,7 +145,9 @@ public class OnlineBackupTest1 {
             ddlThread.join(); 
         }        
         // close the connections.
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         conn.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         conn1.close();
         dmlConn.close();
         ddlConn.close() ;
@@ -167,10 +172,12 @@ public class OnlineBackupTest1 {
 	 * @param  dbName  consistency checks are performed on this database.
 	 */
 	void runConsistencyChecker(String dbName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
         Connection conn = TestUtil.getConnection(dbName, null);
 		Statement stmt = conn.createStatement();
 		stmt.execute("values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP',  'EMP')");
         //check the data in the EMP table.
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         DatabaseActions dbActions = new DatabaseActions(conn);
         dbActions.select(TEST_TABLE_NAME);
         dbActions.select(TEST_TABLE_NAME_1);
@@ -189,6 +196,7 @@ public class OnlineBackupTest1 {
 
 		try{
 			//shutdown
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
 			TestUtil.getConnection(dbName, "shutdown=true");
 		}catch(SQLException se){
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
@@ -280,6 +288,7 @@ public class OnlineBackupTest1 {
 		 */
 		void performDmlActions() throws SQLException {
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 			while(!stopActivity) {
 				insert(TEST_TABLE_NAME, 100, COMMIT, 10);
 				insert(TEST_TABLE_NAME, 100, ROLLBACK, 10);
@@ -302,6 +311,7 @@ public class OnlineBackupTest1 {
 			Statement s = conn.createStatement();
 			
             // index creation does not log the index entries 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             s.executeUpdate("create index " + tableName + "_name_idx on " + 
                             tableName + "(name) ");
 			s.close();
@@ -420,6 +430,7 @@ public class OnlineBackupTest1 {
 		{
 
 			PreparedStatement ps = conn.prepareStatement("update " + tableName + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 								 " SET name = ?  where id=?");
 		
 			for (int i = 0; i < rowCount; i++) {
@@ -452,6 +463,7 @@ public class OnlineBackupTest1 {
 			{
 				int tid = rs.getInt(1);
 				String name = rs.getString(2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
  				if(name.equals("skywalker" + id) && tid!= id)
 				{
 					logMessage("DATA IN THE TABLE IS NOT AS EXPECTED");
@@ -465,6 +477,7 @@ public class OnlineBackupTest1 {
             
 			rs.close();
 			s.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             conn.commit();
 		}
 

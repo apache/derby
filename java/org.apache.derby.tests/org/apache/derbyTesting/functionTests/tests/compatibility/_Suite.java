@@ -91,6 +91,7 @@ public class _Suite
      */
     private static List<DerbyVersion> parseVersionList(String versions) {
         if (versions == null || versions.length() == 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return Collections.emptyList();
         }
         String[] vlist = versions.split(",");
@@ -121,16 +122,19 @@ public class _Suite
 
         // Don't run from the module path. Old clients and servers
         // should always be run from the classpath.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (JVMInfo.isModuleAware())
         {
             return new BaseTestSuite("tests.compatibility disabled when using a module path");
         }
         // DERBY-5889: Disabling tests on Windows where the old releases are
         // run off of UNC paths (network drives).
+//IC see: https://issues.apache.org/jira/browse/DERBY-5889
         if (suffersFromDerby5889()) {
             String msg = ("tests.compatibility disabled on Windows " +
                     "with UNC paths, see DERBY-5889");
             println(msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(msg);
         }
         // DERBY-6610: the compatibility tests don't run with classes;
@@ -162,6 +166,7 @@ public class _Suite
      * residing on an UNC path (network drive).
      */
     public static boolean suffersFromDerby5889() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5889
         if (!isWindowsPlatform()) {
             return false;
         }

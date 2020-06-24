@@ -57,11 +57,13 @@ public class ReplicationRun_Local extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ReplicationRun_Local Suite");
         
         suite.addTestSuite( ReplicationRun_Local.class );
         
         return SecurityManagerSetup.noSecurityManager(suite);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
 
     }
     
@@ -69,6 +71,7 @@ public class ReplicationRun_Local extends ReplicationRun
     {
         String      user = "KIWI";
         String      password = "KIWI_password";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(
             "ReplicationRun_Local Suite Local Authentication Suite");
 
@@ -105,14 +108,17 @@ public class ReplicationRun_Local extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6179
         NetworkServerTestSetup.waitForAvailablePort(masterServerPort);
         NetworkServerTestSetup.waitForAvailablePort(slaveServerPort);
         NetworkServerTestSetup.waitForAvailablePort(slaveReplPort);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 masterDbSubPath); // Distinguishing master/slave
         
         startServer(slaveJvmVersion, derbySlaveVersion,
@@ -203,6 +209,7 @@ public class ReplicationRun_Local extends ReplicationRun
         initEnvironment();
         initMaster(masterServerHost, replicatedDb);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion,
                                    derbyMasterVersion,
                                    masterServerHost,

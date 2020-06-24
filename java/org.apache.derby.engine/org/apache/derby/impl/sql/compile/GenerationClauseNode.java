@@ -61,6 +61,8 @@ class GenerationClauseNode extends ValueNode
     ///////////////////////////////////////////////////////////////////////////////////
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     GenerationClauseNode( ValueNode generationExpression,
                           String expressionText,
                           ContextManager cm)
@@ -84,6 +86,8 @@ class GenerationClauseNode extends ValueNode
 
 	/** Return the auxiliary provider list. */
     ProviderList getAuxiliaryProviderList() { return _apl; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -96,6 +100,7 @@ class GenerationClauseNode extends ValueNode
 	 */
     @Override
     ValueNode bindExpression
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ( FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
 	{
@@ -122,6 +127,7 @@ class GenerationClauseNode extends ValueNode
     boolean isEquivalent(ValueNode other)
 		throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (! isSameNodeKind(other)) {
             return false;
         }
@@ -139,6 +145,7 @@ class GenerationClauseNode extends ValueNode
     public List<ColumnReference> findReferencedColumns()
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<ColumnReference> visitor =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
@@ -156,6 +163,7 @@ class GenerationClauseNode extends ValueNode
      */
     @Override
     void acceptChildren(Visitor v) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6690
 
         super.acceptChildren(v);
 
@@ -174,6 +182,7 @@ class GenerationClauseNode extends ValueNode
     @Override
 	public String toString()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
         return
             "expressionText: GENERATED ALWAYS AS ( " +
             _expressionText + " )\n" +
@@ -188,6 +197,8 @@ class GenerationClauseNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)

@@ -59,6 +59,7 @@ public class T_LockFactory extends T_MultiIterations
 
 	protected String getModuleToTestProtocolName() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		return org.apache.derby.shared.common.reference.Module.LockFactory;
 	}
 
@@ -71,6 +72,7 @@ public class T_LockFactory extends T_MultiIterations
 	protected  void setupTest() throws T_Fail {
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			lf = (LockFactory) startSystemModule(getModuleToTestProtocolName());
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -326,6 +328,10 @@ public class T_LockFactory extends T_MultiIterations
 
 	void S004() throws StandardException, T_Fail {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Object g0 = new Object();	// create an object for a lock group
 		Object g1 = new Object();
@@ -402,6 +408,7 @@ public class T_LockFactory extends T_MultiIterations
 	*/
 	void S005() throws StandardException, T_Fail {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs0 = lf.createCompatibilitySpace(null);
 		CompatibilitySpace cs1 = lf.createCompatibilitySpace(null);
 
@@ -473,6 +480,7 @@ public class T_LockFactory extends T_MultiIterations
 	*/
 	void S007() throws StandardException, T_Fail {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Object g0 = new Object();	// create an object for a lock group
 		Object g1 = new Object();	// create an object for a lock group
@@ -511,6 +519,7 @@ public class T_LockFactory extends T_MultiIterations
 
 		Create two lockable objects and pass them off to two threads.
 		Each thread will run lock the first object, set its value then lock
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		the second object and set its value, yield and then release the lock
 		on one and then on two. Various checks are made to ensure the
 		values are as expected.
@@ -697,6 +706,7 @@ public class T_LockFactory extends T_MultiIterations
 
 		@exception T_Fail	Number of locks is not as expected.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 	void checkLockCount(CompatibilitySpace cs, int expected) throws T_Fail {
 		boolean expect = expected != 0;
 		boolean got = lf.areLocksHeld(cs);
@@ -710,6 +720,7 @@ public class T_LockFactory extends T_MultiIterations
 		@exception T_Fail	Number of locks is not as expected.
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 	void checkLockGroupCount(CompatibilitySpace cs, Object group, int expected)
 			throws T_Fail {
 		boolean expect = expected != 0;
@@ -724,6 +735,7 @@ public class T_LockFactory extends T_MultiIterations
      * can't call this entry point.
      */
     private  static  Object  startSystemModule( final String factoryInterface )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

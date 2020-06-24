@@ -95,6 +95,7 @@ public class HeapRowLocation extends DataType implements RowLocation, RefDataVal
 	}
 
 	public DataValueDescriptor getNewNull() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		return new HeapRowLocation();
 	}
 

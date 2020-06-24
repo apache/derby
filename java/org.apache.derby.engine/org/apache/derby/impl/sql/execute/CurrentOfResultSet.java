@@ -100,6 +100,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
      */
 	public ExecRow	getNextRowCore() throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -113,6 +114,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 
 				// requalify the current row
 				if (cursorRow == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1361
 					throw StandardException.newException(SQLState.NO_CURRENT_ROW);
 				}
 				// we know it will be requested, may as well get it now.
@@ -127,6 +129,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 				// opened), the cursor result set (scroll insensitive) will 
 				// return the cached row, while the target result set will 
 				// return null (row has been deleted under owr feet).
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 				if (rowLocation == null  || 
 						(cursorRow != null && currentRow == null)) {
 					activation.addWarning(StandardException.
@@ -299,6 +302,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 			if (cursorActivation != null)
 			{
 				
+//IC see: https://issues.apache.org/jira/browse/DERBY-787
 				cursor = cursorActivation.getCursorResultSet();
 				target = cursorActivation.getTargetResultSet();
 				/* beetle 3865: updateable cursor using index. 2 way communication between
@@ -313,6 +317,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 		}
 
 		if (cursor == null || cursor.isClosed()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
 			throw StandardException.newException(SQLState.LANG_CURSOR_NOT_FOUND, cursorName);	
 		}
 	}
@@ -321,6 +326,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 	 * @see NoPutResultSet#updateRow
 	 */
 	public void updateRow (ExecRow row, RowChanger rowChanger)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 			throws StandardException {
 		((NoPutResultSet)cursor).updateRow(row, rowChanger);
 	}
@@ -329,6 +335,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 	 * @see NoPutResultSet#markRowAsDeleted
 	 */
 	public void markRowAsDeleted() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		((NoPutResultSet)cursor).markRowAsDeleted();
 	}
 	

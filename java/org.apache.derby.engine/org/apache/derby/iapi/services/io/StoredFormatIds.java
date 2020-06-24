@@ -37,6 +37,7 @@ package org.apache.derby.iapi.services.io;
   <UL>
   <LI>The interface(s) the stored object must support. Any implementation
   which reads the object must support these interfaces.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6168
   <LI>The format of the stored object. All implementations which support
   the format must be able to read and write it.
   </UL>
@@ -48,6 +49,7 @@ package org.apache.derby.iapi.services.io;
 
   <P>When you add a format id to this file, please include the list
   of interfaces an implementation must support when it supports
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
   the format id. When Derby code reads a stored form it returns an 
   object of a Class which supports the stored form. A reader may
   cast this object to any interface listed in this file. It is an error for
@@ -58,6 +60,7 @@ package org.apache.derby.iapi.services.io;
   states the name of the class. The first implementation of a format defines
   the stored form.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
   <P>This interface defines all the format ids for Derby.
   If you define a format id please be sure to declare it in this
   file. If you remove support for a one please document that the
@@ -320,6 +323,7 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 137);
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
     class org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo
      */
     static public final int ROUTINE_PERMISSION_FINDER_V01_ID =
@@ -338,6 +342,7 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 463);
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3666
     class org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo
      */
     static public final int ROLE_GRANT_FINDER_V01_ID =
@@ -1456,6 +1461,7 @@ public interface StoredFormatIds {
 
     public static final int ACCESS_T_INTCOL_V1_ID =      
             (MIN_ID_4 + 4);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
     public static final int ACCESS_B2I_V4_ID =
             (MIN_ID_2 + 466);
@@ -1464,6 +1470,7 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 467);
 
     public static final int ACCESS_B2I_V5_ID = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
             (MIN_ID_2 + 470);
     /******************************************************************
     **
@@ -1566,6 +1573,7 @@ public interface StoredFormatIds {
     /* org.apache.derby.impl.store.raw.log.ChecksumOperation */
     public static final int LOGOP_CHECKSUM =
             (MIN_ID_2 + 453);
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 
     /* org.apache.derby.impl.store.raw.data.CompressSpacePageOperation10_2 */
     public static final int LOGOP_COMPRESS10_2_SPACE =
@@ -1578,6 +1586,7 @@ public interface StoredFormatIds {
     /* org.apache.derby.impl.store.raw.data.EncryptContainerOperation */
     public static final int LOGOP_ENCRYPT_CONTAINER =
             (MIN_ID_2 + 459);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 
     /* org.apache.derby.impl.store.raw.data.EncryptContainerUndoOperation */
     public static final int LOGOP_ENCRYPT_CONTAINER_UNDO =

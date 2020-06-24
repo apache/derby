@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CreateTableNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -48,6 +49,8 @@ import org.apache.derby.impl.sql.execute.CreateConstraintConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateTableNode extends DDLStatementNode
 {
 	private char				lockGranularity;
@@ -72,6 +75,8 @@ class CreateTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateTableNode(
             TableName        tableName,
             TableElementList tableElementList,
@@ -94,6 +99,8 @@ class CreateTableNode extends DDLStatementNode
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         this.tableElementList = tableElementList;
         this.properties = properties;
 	}
@@ -112,6 +119,8 @@ class CreateTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateTableNode(
             TableName tableName,
             TableElementList tableElementList,
@@ -148,6 +157,8 @@ class CreateTableNode extends DDLStatementNode
 	 * @param queryExpression	The query expression for the table.
      * @param cm                The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CreateTableNode(
             TableName tableName,
             ResultColumnList resultColumns,
@@ -197,6 +208,7 @@ class CreateTableNode extends DDLStatementNode
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			String tempString = "";
 			if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
 			{
@@ -222,7 +234,10 @@ class CreateTableNode extends DDLStatementNode
 	 * @param depth		The depth to indent the sub-nodes
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG) {
 			printLabel(depth, "tableElementList: ");
 			tableElementList.treePrint(depth + 1);
@@ -230,6 +245,8 @@ class CreateTableNode extends DDLStatementNode
 	}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
@@ -258,11 +275,15 @@ class CreateTableNode extends DDLStatementNode
         int numUniqueConstraints;
         int numGenerationClauses;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
         SchemaDescriptor sd = getSchemaDescriptor
             ( tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE, true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-64
 		if (queryExpression != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             FromList fromList = new FromList(
                     getOptimizerFactory().doJoinOrderOptimization(),
 					getContextManager());
@@ -317,8 +338,11 @@ class CreateTableNode extends DDLStatementNode
 			int schemaCollationType = sd.getCollationType();
 	    
 			/* Create table element list from columns in query expression */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             tableElementList = new TableElementList(getContextManager());
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (ResultColumn rc : qeRCL)
 			{
 				if (rc.isGenerated()) 
@@ -358,9 +382,12 @@ class CreateTableNode extends DDLStatementNode
 					throw StandardException.newException(
 							SQLState.LANG_CAN_NOT_CREATE_TABLE,
 							dtd.getCollationName(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
 							DataTypeDescriptor.getCollationName(schemaCollationType));
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 ColumnDefinitionNode column = new ColumnDefinitionNode(
                         rc.getName(),
                         null,
@@ -386,6 +413,7 @@ class CreateTableNode extends DDLStatementNode
 			//exception for 'T%' having collation of territory based and 
 			//EMPNAME having the default collation of UCS_BASIC
 			tableElementList.setCollationTypesOnCharacterStringColumns(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3266
 				getSchemaDescriptor(
 					tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
 					true));
@@ -394,6 +422,7 @@ class CreateTableNode extends DDLStatementNode
 		tableElementList.validate(this, dataDictionary, (TableDescriptor) null);
 
 		/* Only 1012 columns allowed per table */
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		if (tableElementList.countNumberOfColumns() > Limits.DB2_MAX_COLUMNS_IN_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_COLUMNS_IN_TABLE_OR_VIEW,
@@ -430,6 +459,7 @@ class CreateTableNode extends DDLStatementNode
 
 		//each of these constraints have a backing index in the back. We need to make sure that a table never has more
 		//more than 32767 indexes on it and that is why this check.
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		if ((numPrimaryKeys + numReferenceConstraints + numUniqueConstraints) > Limits.DB2_MAX_INDEXES_ON_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEXES_ON_TABLE, 
@@ -455,6 +485,7 @@ class CreateTableNode extends DDLStatementNode
 			/* Now that we've finally goobered stuff up, bind and validate
 			 * the check constraints and generation clauses.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4145
 			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses( sd, fromList, generatedColumns, null ); }
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
             if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
@@ -475,6 +506,7 @@ class CreateTableNode extends DDLStatementNode
 		throws StandardException
 	{
 		//If table being created/declared is in SESSION schema, then return true.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3266
 		return isSessionSchema(
 			getSchemaDescriptor(
 				tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
@@ -499,6 +531,8 @@ class CreateTableNode extends DDLStatementNode
 		/* If we've seen a constraint, then build a constraint list */
 		CreateConstraintConstantAction[] conActions = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3266
+//IC see: https://issues.apache.org/jira/browse/DERBY-3266
 		SchemaDescriptor sd = getSchemaDescriptor(
 			tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
 			true);
@@ -509,6 +543,7 @@ class CreateTableNode extends DDLStatementNode
 			conActions =
                 new CreateConstraintConstantAction[numConstraints];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3008
 			coldefs.genConstraintActions(true,
                 conActions, getRelativeName(), sd, getDataDictionary());
 		}

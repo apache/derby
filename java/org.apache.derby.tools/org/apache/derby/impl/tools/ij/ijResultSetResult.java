@@ -65,6 +65,7 @@ public class ijResultSetResult extends ijResultImpl {
 		resultSet = r;
 		statement = resultSet.getStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6195
 		displayColumns = ToolUtils.copy( display );
 		columnWidths   = ToolUtils.copy( widths );
 	}

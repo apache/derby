@@ -54,6 +54,7 @@ public final class DateTimeTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DateTimeTest");
         suite.addTest(baseSuite("DateTimeTest:Embedded"));
         suite.addTest(TestConfiguration
@@ -62,6 +63,7 @@ public final class DateTimeTest extends BaseJDBCTestCase {
     }
 
     protected static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(DateTimeTest.class);
         return new CleanDatabaseTestSetup(suite) {

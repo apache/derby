@@ -56,6 +56,7 @@ public class Compat_BlobClob4BlobTest extends BlobClob4BlobTest {
      *
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Compat_BlobClob4BlobTest");
         /* Embedded is not relevant for a running server....
          suite.addTest(

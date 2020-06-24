@@ -49,6 +49,7 @@ public class T_DaemonService extends T_MultiThreadedIterations
 	public T_DaemonService()
 	{
 		super();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		serviceRecord = new Vector<T_Serviceable>(9, 1);
 		random = new Random();
 	}
@@ -59,6 +60,7 @@ public class T_DaemonService extends T_MultiThreadedIterations
 	*/
 
 	protected String getModuleToTestProtocolName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		return org.apache.derby.shared.common.reference.Module.DaemonFactory;
 	}
 
@@ -71,6 +73,7 @@ public class T_DaemonService extends T_MultiThreadedIterations
 
 		DaemonFactory daemonFactory;
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			daemonFactory = (DaemonFactory)startSystemModule(org.apache.derby.shared.common.reference.Module.DaemonFactory);
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -330,6 +333,7 @@ public class T_DaemonService extends T_MultiThreadedIterations
      * can't call this entry point.
      */
     private  static  Object  startSystemModule( final String factoryInterface )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

@@ -1,6 +1,7 @@
 /*
 
    Derby - Class SetDerbyVersion
+//IC see: https://issues.apache.org/jira/browse/DERBY-4400
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -63,12 +64,15 @@ public class SetDerbyVersion {
     private static final File INSANE = new File(REL_JAR_PATH, "insane");
     /** List of required jar files the Maven 2 Derby artifacts. */
     private static final String[] JARS = new String[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-7020
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         "derbyshared.jar",
         "derby.jar",
         "derby.war",
         "derbynet.jar",
         "derbyclient.jar",
         "derbytools.jar",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6720
         "derbyoptionaltools.jar",
         // Ignore derbyTesting.jar, not part of the Maven 2 artifacts.
         // "derbyTesting.jar",
@@ -195,6 +199,8 @@ public class SetDerbyVersion {
         URLClassLoader cl = new URLClassLoader(URLS, null);
 
         // Fire up Derby to get the version string.
+//IC see: https://issues.apache.org/jira/browse/DERBY-7020
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Connection con = DriverManager.getConnection(JDBC_URL);
         DatabaseMetaData meta = con.getMetaData();
 
@@ -221,6 +227,8 @@ public class SetDerbyVersion {
             }
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-7020
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         con.close();
         // Delete the derby.log file.
         new File("derby.log").delete();

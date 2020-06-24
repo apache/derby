@@ -150,6 +150,7 @@ public class LogRecord implements Formatable {
 	public static int getStoredSize(int group, TransactionId xactId)
 	{
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(xactId == null, 
@@ -309,6 +310,7 @@ public class LogRecord implements Formatable {
 
 
 	public boolean isChecksum()	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 		return ((group & Loggable.CHECKSUM) != 0);
 	}
 }

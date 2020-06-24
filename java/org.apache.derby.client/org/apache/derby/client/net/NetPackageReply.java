@@ -23,6 +23,7 @@ package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DisconnectException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetPackageReply extends NetConnectionReply {
     NetPackageReply(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
@@ -112,6 +113,7 @@ class NetPackageReply extends NetConnectionReply {
             if (peekCP == CodePoint.RDBNAM) {
                 foundInPass = true;
                 rdbnamReceived = checkAndGetReceivedFlag(rdbnamReceived);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 parseRDBNAM(true);
                 peekCP = peekCodePoint();
             }

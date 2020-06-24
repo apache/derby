@@ -100,6 +100,7 @@ public class B2IController extends BTreeController
                     static_info.base_table_static_info, 
                     /* TODO - maintain a dynamic info for this */
                     ((Conglomerate) static_info.getConglom()).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                         getDynamicCompiledConglomInfo());
         }
         else
@@ -139,6 +140,7 @@ public class B2IController extends BTreeController
 		// Do generic b-tree initialization.
 		super.init(
             xact_manager, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1058
             hold,
             (ContainerHandle) null, 
             rawtran, 

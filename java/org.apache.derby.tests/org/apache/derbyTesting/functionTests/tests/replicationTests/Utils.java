@@ -57,6 +57,7 @@ class Utils
     * @param destPath Directory or file to copy to
     * @throws IOException If copying failed.
     */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
     void copyFiles(String srcPath, String destPath) 
     throws IOException
     {
@@ -78,6 +79,7 @@ class Utils
         }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
             copy(src,dest);  // Also works w/ JVM 1.4
             // NIOcopy(src,dest); // Requires JVM 1.5 or 1.6
         }
@@ -104,6 +106,7 @@ class Utils
         out.close();
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
     void mkDirs(String dirPath)
     {
         File dir = new File(dirPath);
@@ -135,6 +138,7 @@ class Utils
     /**
      * Convert a list of strings to an array of strings.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     String[] toStringArray(List<String> list) {
         return list.toArray(new String[list.size()]);
     }
@@ -143,6 +147,7 @@ class Utils
      * Splice together strings. Separate the sub-strings by the specified
      * separator character.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5791
     String splice(String[] strings, char sep) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < strings.length; i++) {

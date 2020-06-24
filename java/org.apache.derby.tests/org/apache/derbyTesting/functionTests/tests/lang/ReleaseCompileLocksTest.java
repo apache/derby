@@ -57,6 +57,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 	protected void setUp() throws SQLException {
 	    Statement stmt = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2518
 	    stmt.execute("create function dmlstatic() returns INT " +
 	    	"parameter style java language java external name " +
 	    	"'org.apache.derbyTesting.functionTests.util.StaticInitializers." +
@@ -83,6 +84,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
          * Create a suite of tests.
          **/
         public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite =
                 new BaseTestSuite("ReleasecompileLocksTest");
 
@@ -113,9 +115,11 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
     		// the procedures use DriverManager to get the default connection.
     		// Of course, this makes this test not fully useful with jsr169,
     		// but at least performing the call to locktable is performed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3056
             if (JDBC.vmSupportsJDBC3()) 
             	JDBC.assertFullResultSet(stmt.executeQuery(
             		"select (dmlstatic()) from sys.systables where " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
         			"CAST(tablename AS VARCHAR(128))= 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
     		else
     			JDBC.assertFullResultSet(stmt.executeQuery(
@@ -134,6 +138,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		// the procedures use DriverManager to get the default connection.
 		// Of course, this makes this test not fully useful with jsr169,
 		// but at least performing the call to locktable is performed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3056
 		if (JDBC.vmSupportsJDBC3())
 			JDBC.assertFullResultSet(stmt.executeQuery(
         		"select (insertstatic()) from sys.systables where " +
@@ -141,6 +146,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		else
 			JDBC.assertFullResultSet(stmt.executeQuery(
         		"select count(*) from sys.systables where " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2962
         		"CAST(tablename AS VARCHAR(128)) = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
 			
         assertNoLocks(stmt);
@@ -169,6 +175,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 
 		try { 
 		  	stmt.execute("drop table t1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2518
 		  	fail ("expected SQLException; table t should not exist");
 		} catch (SQLException e) {
 			assertSQLState("42Y55", e);

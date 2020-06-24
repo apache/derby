@@ -174,12 +174,14 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LangHarnessJavaTest.suite());
         		
         suite.addTest(ResultSetsFromPreparedStatementTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5412
         if (!isPhoneME())
         { // Disable temporarily until CVM/phoneME is fixed.. See DERBY-4290)
         suite.addTest(OrderByAndSortAvoidance.suite());
         }
 
         // tests that do not run with JSR169
+//IC see: https://issues.apache.org/jira/browse/DERBY-2525
         if (JDBC.vmSupportsJDBC3())  
         {
             // test uses triggers interwoven with other tasks
@@ -190,13 +192,17 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(GrantRevokeDDLTest.suite());
 
             // test uses regex classes that are not available in Foundation 1.1
+//IC see: https://issues.apache.org/jira/browse/DERBY-2829
+//IC see: https://issues.apache.org/jira/browse/DERBY-2817
             suite.addTest(ErrorMessageTest.suite());
             // Test uses DriverManager to connect to database in jar.
             suite.addTest(DBInJarTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3754
             suite.addTest(ConnectTest.suite());
             
             // test uses PooledConnections and Savepoints
             suite.addTest(DeclareGlobalTempTableJavaJDBC30Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2895
 
             // requires Java 5 (generics)
             suite.addTest(UserDefinedAggregatesTest.suite());
@@ -208,61 +214,105 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(OptionalToolsTest.suite());
         }
        
+//IC see: https://issues.apache.org/jira/browse/DERBY-3724
         suite.addTest(BigDataTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3751
         suite.addTest(MixedCaseExpressionTest.suite());
         suite.addTest(UpdateStatisticsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3760
         suite.addTest(MiscErrorsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3767
         suite.addTest(NullsTest.suite());
         suite.addTest(ArithmeticTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3750
         suite.addTest(ConstantExpressionTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3802
         suite.addTest(OptimizerOverridesTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3758
         suite.addTest(PrecedenceTest.suite());
         suite.addTest(GeneratedColumnsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3932
         suite.addTest(GeneratedColumnsPermsTest.suite());
         suite.addTest(RestrictedVTITest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
         suite.addTest(AwareVTITest.suite());
         suite.addTest(UDTTest.suite());
         suite.addTest(UDTPermsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4663
         suite.addTest(BooleanValuesTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4013
+//IC see: https://issues.apache.org/jira/browse/DERBY-4014
         suite.addTest(AlterColumnTest.suite());
         suite.addTest(UserLobTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
         suite.addTest(OffsetFetchNextTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6523
         suite.addTest(TriggerBeforeTrigTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6520
         suite.addTest(TriggerGeneralTest.suite());
         suite.addTest(SequenceTest.suite());
         suite.addTest(SequencePermsTest.suite());
         suite.addTest(SequenceGeneratorTest.suite());
         suite.addTest(DBOAccessTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
         suite.addTest(OLAPTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
         suite.addTest(OrderByAndOffsetFetchInSubqueries.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5005
         suite.addTest(Derby5005Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4509
         suite.addTest(AutoIncrementTest.suite());
         suite.addTest(HalfCreatedDatabaseTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5601
+//IC see: https://issues.apache.org/jira/browse/DERBY-5607
         suite.addTest(NativeAuthenticationServiceTest.suite());
         suite.addTest(Derby5652.suite());
         suite.addTest(TruncateTableAndOnlineBackupTest.suite()); 
         suite.addTest(QueryPlanTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6519
         suite.addTest(JoinDeadlockTest.suite());
         suite.addTest(Derby6131.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6514
+//IC see: https://issues.apache.org/jira/browse/DERBY-5614
         suite.addTest(AggBuiltinTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         suite.addTest(NewOptimizerOverridesTest.suite());
         suite.addTest(MergeStatementTest.suite());
         suite.addTest(IdentitySequenceTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6516
+//IC see: https://issues.apache.org/jira/browse/DERBY-6515
         suite.addTest(NestedCommitTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6507
+//IC see: https://issues.apache.org/jira/browse/DERBY-6707
         suite.addTest(ForeignKeysNonSpsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6508
         suite.addTest(LOBDB2compatibilityTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6509
         suite.addTest(CurrentSchemaTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6496
         suite.addTest(Test_6496.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         suite.addTest(ConstraintCharacteristicsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         suite.addTest(ForeignKeysDeferrableTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6276
         suite.addTest(DB2IsolationLevelsTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         suite.addTest(LuceneSuite.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         suite.addTest(JsonSuite.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6517
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
         suite.addTest(ConsistencyCheckerTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6136
         suite.addTest(RawDBReaderTest.suite());
         suite.addTest(Derby5866TriggerOrderTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         suite.addTest(NoDBInternalsPermissionTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6654
         suite.addTest(ClassLoadingTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (TestConfiguration.loadingFromJars()) { suite.addTest(VetJigsawTest.suite()); }
         return suite;
 	}

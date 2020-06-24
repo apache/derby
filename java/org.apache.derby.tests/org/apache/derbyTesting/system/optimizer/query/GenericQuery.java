@@ -59,6 +59,7 @@ public  class GenericQuery {
 		Enumeration qenum=prop.keys();
 		while(qenum.hasMoreElements()){
 			String queryName=(String)qenum.nextElement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			queries.add(prop.getProperty(queryName));
 		}
 	}
@@ -70,6 +71,7 @@ public  class GenericQuery {
 		rowsExpected=new int[queries.size()]; //initialize the array with correct size
 		String query="";
 		if(prepare){	
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 			if (verbose)
 				System.out.println("=====================> Using java.sql.PreparedStatement <====================");					
 		}else{
@@ -80,6 +82,7 @@ public  class GenericQuery {
 		try{
 			for(int k=0;k<queries.size();k++){
 				
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 				query = queries.get(k);
 				String [] times=new String [StaticValues.ITER];
 				int rowsReturned=0;
@@ -110,6 +113,7 @@ public  class GenericQuery {
 						rowsReturned++;
 					}
 					long time_taken=(System.currentTimeMillis() - start);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2392
 					if (verbose){
 						System.out.println("Time required to execute:");
 						System.out.println(query);
@@ -117,6 +121,7 @@ public  class GenericQuery {
 					
 						System.out.println("==> "+time_taken+" milliseconds "+" OR "+TestUtils.getTime(time_taken));
 					}
+//IC see: https://issues.apache.org/jira/browse/DERBY-3845
 					times[i]=TestUtils.getTime(time_taken);
 					rs.close();
 					if(prepare){

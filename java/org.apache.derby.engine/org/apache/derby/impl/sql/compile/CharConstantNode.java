@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CharConstantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -33,6 +34,7 @@ public final class CharConstantNode extends ConstantNode
 {
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_CHAR = 0;
     final static int K_VARCHAR = 1;
     final static int K_LONGVARCHAR = 2;
@@ -45,6 +47,8 @@ public final class CharConstantNode extends ConstantNode
      */
     final int kind;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CharConstantNode(String value, ContextManager cm)
             throws StandardException {
         super(TypeId.CHAR_ID,
@@ -53,6 +57,7 @@ public final class CharConstantNode extends ConstantNode
               cm);
 
         setValue(getDataValueFactory().getCharDataValue(value));
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         kind = K_CHAR;
     }
 
@@ -91,6 +96,7 @@ public final class CharConstantNode extends ConstantNode
               cm);
 
         kind = K_CHAR;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         if (newValue.length() > newLength) {
            throw StandardException.newException(
@@ -116,6 +122,8 @@ public final class CharConstantNode extends ConstantNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String  getString() throws StandardException
 	{
 		return value.getString();
@@ -154,6 +162,8 @@ public final class CharConstantNode extends ConstantNode
 	
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         FromList fromList,
         SubqueryList subqueryList,
         List<AggregateNode> aggregates) throws StandardException
@@ -171,6 +181,8 @@ public final class CharConstantNode extends ConstantNode
 	    //if at this bind time, we find that the char constant's collation
 	    //type is territory based, then we should change value from SQLxxx
 	    //to CollatorSQLxxx. That is what is getting done below.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
 	    value = ((StringDataValue)value).getValue(
 	    		getLanguageConnectionContext().getDataValueFactory().getCharacterCollator(
 	    				getTypeServices().getCollationType()));
@@ -195,5 +207,6 @@ public final class CharConstantNode extends ConstantNode
 
     @Override
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) && ((CharConstantNode)o).kind == kind;
     }}

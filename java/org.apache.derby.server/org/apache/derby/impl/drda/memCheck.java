@@ -30,6 +30,7 @@ public class memCheck extends Thread {
 public memCheck () {}
 
 public  memCheck (int num) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     delay = num;
 }
 

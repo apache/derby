@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SimpleStringOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -57,6 +58,7 @@ class SimpleStringOperatorNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -77,6 +79,7 @@ class SimpleStringOperatorNode extends UnaryOperatorNode
 				case Types.LONGVARCHAR:
 				case Types.CLOB:
 					break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 				case Types.JAVA_OBJECT:
 				case Types.OTHER:	
 				{
@@ -91,6 +94,8 @@ class SimpleStringOperatorNode extends UnaryOperatorNode
 								getCastToCharWidth(
 									operand.getTypeServices()));
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     operand = new CastNode(operand, dtd, getContextManager());
 					
 				// DERBY-2910 - Match current schema collation for implicit cast as we do for
@@ -133,6 +138,7 @@ class SimpleStringOperatorNode extends UnaryOperatorNode
 		** for a bit.
 		*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR));
 		//collation of ? operand should be same as the compilation schema
 		operand.setCollationUsingCompilationSchema();
@@ -143,6 +149,8 @@ class SimpleStringOperatorNode extends UnaryOperatorNode
 	 * in UnaryOperatorNode for code generation purposes.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getReceiverInterfaceName() {
 	    return ClassName.StringDataValue;
 	}

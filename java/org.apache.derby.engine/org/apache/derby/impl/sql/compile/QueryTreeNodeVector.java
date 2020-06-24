@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.QueryTreeNodeVector
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -36,6 +37,7 @@ import org.apache.derby.iapi.sql.compile.Visitable;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
                                                    implements Iterable<E>
 {
@@ -52,8 +54,11 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 		return v.size();
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final E elementAt(int index)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return v.get(index);
 	}
 
@@ -64,6 +69,8 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 
     final E removeElementAt(int index)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return v.remove(index);
 	}
 
@@ -79,6 +86,7 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 
     final void setElementAt(E qt, int index)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 		v.set(index, qt);
 	}
 
@@ -90,6 +98,7 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 
     final void nondestructiveAppend(QueryTreeNodeVector<E> qtnv)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         v.addAll(qtnv.v);
 	}
 
@@ -98,6 +107,7 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 		v.clear();
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final void insertElementAt(E qt, int index)
 	{
 		v.add(index, qt);
@@ -111,9 +121,11 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 	 */
     @Override
     void printSubNodes(int depth) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG) {
 			for (int index = 0; index < size(); index++) {
 				debugPrint(formatNodeString("[" + index + "]:", depth));
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 E elt = elementAt(index);
 				elt.treePrint(depth);
 			}
@@ -129,6 +141,7 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -137,6 +150,7 @@ class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Visitable vbl = elementAt(index).accept(v);
             setElementAt(eltClass.cast(vbl), index);
 		}

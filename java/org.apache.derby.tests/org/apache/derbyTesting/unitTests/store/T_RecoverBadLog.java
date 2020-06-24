@@ -231,6 +231,7 @@ public class T_RecoverBadLog extends T_Generic {
 
 		try {
 			contextService = getContextService();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 			File ifile = new File(infoPath);
 
@@ -262,6 +263,7 @@ public class T_RecoverBadLog extends T_Generic {
 				// remove the service directory to ensure a clean run
 				startParams.put(Property.DELETE_ON_CREATE, Boolean.TRUE.toString());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 															  testService,
 															  startParams);
@@ -318,6 +320,7 @@ public class T_RecoverBadLog extends T_Generic {
 					throw T_Fail.exceptionFail(ioe);
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				if (!startPersistentService(testService, startParams))
 					throw T_Fail.testFailMsg("Monitor didn't know how to restart service: " + testService);
 
@@ -512,6 +515,8 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(numcol*20));
 			}
 			
@@ -648,6 +653,8 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES,Integer.toString(numcol*20));
 			}
 
@@ -1071,6 +1078,8 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, "200");
 			}
 			logFactory.flushAll();
@@ -1283,6 +1292,8 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(11));
 			}
 
@@ -1425,6 +1436,8 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(3));
 			}
 			logFactory.flushAll();
@@ -1565,6 +1578,8 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString((1997/2) + 16));
 			}
 			logFactory.flushAll();
@@ -1705,6 +1720,8 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
+//IC see: https://issues.apache.org/jira/browse/DERBY-616
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(1997+15));
 			}
 			logFactory.flushAll();
@@ -1822,6 +1839,8 @@ public class T_RecoverBadLog extends T_Generic {
 				filepos +=512;
 
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
             log.sync();
 			log.close();
 		}catch(IOException ie)
@@ -1838,12 +1857,14 @@ public class T_RecoverBadLog extends T_Generic {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

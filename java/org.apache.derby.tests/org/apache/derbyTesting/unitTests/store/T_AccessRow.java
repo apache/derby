@@ -129,6 +129,7 @@ public class T_AccessRow
 	public DataValueDescriptor[] getRowArrayClone() {
 		DataValueDescriptor[] retval = new DataValueDescriptor[column.length];
 		for (int index = 0; index < column.length; index++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 			retval[index] = column[index].cloneValue(false);
 		return retval;
 	}

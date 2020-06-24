@@ -58,6 +58,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
     private static final int[][] indexColumnPositions =
     {
         {SYSROLES_ROLEID, SYSROLES_GRANTEE, SYSROLES_GRANTOR},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         {SYSROLES_ROLEID, SYSROLES_ISDEF},
         {SYSROLES_ROLE_UUID}
     };
@@ -116,6 +117,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         throws StandardException
     {
         ExecRow                 row;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         String                  oid_string = null;
         String                  roleid = null;
         String                  grantee = null;
@@ -126,6 +128,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         if (td != null)
         {
             RoleGrantDescriptor rgd = (RoleGrantDescriptor)td;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
             roleid = rgd.getRoleName();
             grantee = rgd.getGrantee();
@@ -133,6 +136,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
             wao = rgd.isWithAdminOption();
             isdef = rgd.isDef();
             UUID oid = rgd.getUUID();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             oid_string = oid.toString();
         }
 
@@ -185,7 +189,9 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         throws StandardException {
 
         DataValueDescriptor         col;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         RoleGrantDescriptor              descriptor;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         String                      oid_string;
         String                      roleid;
         String                      grantee;
@@ -203,6 +209,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         // first column is uuid of this role grant descriptor (char(36))
         col = row.getColumn(1);
         oid_string = col.getString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
         // second column is roleid (varchar(128))
         col = row.getColumn(2);
@@ -224,6 +231,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         col = row.getColumn(6);
         isdef = col.getString();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
         descriptor = ddg.newRoleGrantDescriptor
             (getUUIDFactory().recreateUUID(oid_string),
              roleid,
@@ -242,9 +250,11 @@ public class SYSROLESRowFactory extends CatalogRowFactory
      * @return array of SystemColumn suitable for making this catalog.
      */
     public SystemColumn[]   buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
         return new SystemColumn[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
             SystemColumnImpl.getUUIDColumn("UUID", false),
             SystemColumnImpl.getIdentifierColumn("ROLEID", false),
             SystemColumnImpl.getIdentifierColumn("GRANTEE", false),

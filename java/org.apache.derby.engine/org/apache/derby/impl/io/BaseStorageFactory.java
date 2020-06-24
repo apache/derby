@@ -266,6 +266,7 @@ abstract class BaseStorageFactory implements StorageFactory
         tempDir.deleteAll();
 
         tempDir.mkdirs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
         tempDir.limitAccessToOwner();
         tempDirPath = tempDir.getPath();
     } // end of createTempDir
@@ -293,6 +294,7 @@ abstract class BaseStorageFactory implements StorageFactory
      */
     public StorageFile createTemporaryFile (String prefix, String suffix)
                                                             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         File tmpFile = File.createTempFile (prefix, suffix,
                 new File (getTempDir().getPath()));
         return newStorageFile (getTempDir(), tmpFile.getName());

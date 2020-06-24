@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CollectNodesVisitor
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -49,6 +50,7 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 	 */
     public CollectNodesVisitor(Class<T> nodeClass)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         this(nodeClass, null);
 	}
 
@@ -61,8 +63,10 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 	 * node when searching for nodeClass.
 	 */
     public CollectNodesVisitor(Class<T> nodeClass,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                Class<? extends Visitable> skipOverClass)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         this.nodeList = new ArrayList<T>();
         this.nodeClass = nodeClass;
 		this.skipOverClass = skipOverClass;
@@ -70,6 +74,7 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 
@@ -94,6 +99,7 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 	{
 		if (nodeClass.isInstance(node))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             nodeList.add(nodeClass.cast(node));
 		}
 		return node;

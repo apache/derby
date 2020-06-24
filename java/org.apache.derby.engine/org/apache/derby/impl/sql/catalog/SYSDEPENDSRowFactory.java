@@ -86,10 +86,12 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSDEPENDSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
 		initInfo(SYSDEPENDS_COLUMN_COUNT,TABLENAME_STRING, indexColumnPositions,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 				 uniqueness, uuids );
 	}
 
@@ -153,6 +155,7 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 		/* 2nd column is DEPENDENTFINDER */
 		row.setColumn(SYSDEPENDS_DEPENDENTTYPE,
 				new UserType(dependentBloodhound));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		/* 3rd column is PROVIDERID (UUID - char(36)) */
 		row.setColumn(SYSDEPENDS_PROVIDERID, new SQLChar(providerID));
@@ -232,6 +235,7 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[]	buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
             return new SystemColumn[] {

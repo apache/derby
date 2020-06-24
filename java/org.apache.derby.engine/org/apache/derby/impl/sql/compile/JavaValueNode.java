@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.JavaValueNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -57,6 +58,8 @@ abstract class JavaValueNode extends QueryTreeNode
         // * Collation type of schema where method is defined. 
 	private int collationType;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JavaValueNode(ContextManager cm) {
         super(cm);
     }
@@ -66,6 +69,7 @@ abstract class JavaValueNode extends QueryTreeNode
      */
     DataTypeDescriptor getDataType() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
         return DataTypeDescriptor.getSQLDataTypeDescriptor( getJavaTypeName()) ;
     }
 
@@ -113,6 +117,8 @@ abstract class JavaValueNode extends QueryTreeNode
 		switch( myType.getCategory() )
 		{
 		    case JSQLType.JAVA_PRIMITIVE: return JSQLType.getPrimitiveName( myType.getPrimitiveKind() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4293
+//IC see: https://issues.apache.org/jira/browse/DERBY-4293
 
 		    default:
 
@@ -165,6 +171,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	  *
 	  */
     static TypeId mapToTypeID(JSQLType jsqlType)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
 		DataTypeDescriptor	dts = jsqlType.getSQLType();
@@ -206,6 +213,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     abstract JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 							throws StandardException;
 	/**
@@ -350,6 +358,7 @@ abstract class JavaValueNode extends QueryTreeNode
 		** type to the Java domain.
 		*/
 		if ( (! valueReturnedToSQLDomain()) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
 				ClassInspector.primitiveType(getJavaTypeName()))
 		{
 			return false;

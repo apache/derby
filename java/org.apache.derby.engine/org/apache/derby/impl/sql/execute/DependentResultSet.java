@@ -79,6 +79,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	int    sArrayIndex;
     Vector<TemporaryRowHolder> sVector;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
     protected ScanController scanController;
 	protected boolean		scanControllerOpened;
@@ -112,6 +113,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	//
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 	DependentResultSet(
 		long conglomId,
 		StaticCompiledOpenConglomInfo scoci, 
@@ -123,6 +125,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		boolean sameStartStopPosition,
 		Qualifier[][] qualifiers,
 		String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
@@ -141,6 +144,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		int rltItem
 		)	throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 		super(activation, resultSetNumber, resultRowTemplate,
 			  lockMode, tableLocked,
 			  //Because the scan for the tables in this result set are done
@@ -164,6 +168,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		if (SanityManager.DEBUG) {
             // This ResultSet doesn't use start or stop keys, so expect them
             // to be null.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
             SanityManager.ASSERT(startKeyGetter == null, "start key not null");
             SanityManager.ASSERT(stopKeyGetter == null, "stop key not null");
 		}
@@ -172,6 +177,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		this.stopSearchOperator = stopSearchOperator;
 		this.qualifiers = qualifiers;
 		this.tableName = tableName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = "On Foreign Key";  // RESOLVE , get actual indexName;
 		this.isConstraint = isConstraint;
@@ -180,6 +186,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		this.oneRowScan = oneRowScan;
 		
         runTimeStatisticsOn = (activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		tc = activation.getTransactionController();
 		//values required to scan the forein key index.
@@ -272,6 +279,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 			//create a template for the index row
 			indexRow = indexQualifierRow.getClone();
 			indexRow.setColumn(numFkColumns + 1, rowLocation.cloneValue(false));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
 		}else
 		{
@@ -335,6 +343,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -516,6 +525,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		sourceResultSets = new TemporaryRowHolderResultSet[size];
 		for(int i = 0 ; i < size ; i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             sourceRowHolders[i] = sVector.elementAt(i);
 			sourceOpened[i] = 0;
 		}
@@ -542,6 +552,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		//copy the new sources
 		for(int i = sourceRowHolders.length; i < size ; i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             tsourceRowHolders[i] = sVector.elementAt(i);
 			tsourceOpened[i] = 0;
 		}
@@ -629,6 +640,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	{
 		String output = "";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         String searchOp;
 		switch (searchOperator)
 		{
@@ -672,6 +684,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 				if (positioner.areNullsOrdered(position))
 				{
 					output = output + position + " ";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 					colSeen = true;
 				}
 

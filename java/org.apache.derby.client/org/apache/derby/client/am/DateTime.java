@@ -69,8 +69,10 @@ public class DateTime {
      */
     static final Date dateBytesToDate(byte[] buffer,
             int offset,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Calendar recyclableCal,
             Charset encoding) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
 
         int year, month, day;
 
@@ -83,7 +85,9 @@ public class DateTime {
             monthIndx = 5;
             dayIndx = 8;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throw new IllegalArgumentException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
                 SqlException.getMessageUtil().getTextMessage(
                     SQLState.LANG_FORMAT_EXCEPTION));
         }
@@ -160,6 +164,7 @@ public class DateTime {
      * @return TimeStamp translated from buffer with specified encoding
      */
     static final Timestamp timestampBytesToTimestamp(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
             byte[] buffer, int offset, Calendar recyclableCal,
             Charset encoding, boolean supportsTimestampNanoseconds)
     {
@@ -173,6 +178,7 @@ public class DateTime {
          * the parsed nanoseconds value and use that to set nanos.
          */
         int nanos = parseTimestampString(timestamp, cal, supportsTimestampNanoseconds);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Timestamp ts = new Timestamp(cal.getTimeInMillis());
         ts.setNanos( nanos );
         return ts;
@@ -263,11 +269,13 @@ public class DateTime {
     public static final int dateToDateBytes(byte[] buffer,
                                             int offset,
                                             DateTimeValue date)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     throws SqlException {
         int year = date.getYear();
         if (year > 9999) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 year, "9999");
         }
         int month = date.getMonth() + 1;
@@ -348,11 +356,13 @@ public class DateTime {
                                                       int offset,
                                                       DateTimeValue timestamp,
                                                       boolean supportsTimestampNanoseconds) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     throws SqlException {
         int year = timestamp.getYear();
         if (year > 9999) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 year, "9999");
         }
         int month = timestamp.getMonth() + 1;
@@ -430,6 +440,7 @@ public class DateTime {
     static final Timestamp dateBytesToTimestamp(byte[] buffer,
                                                                 int offset,
                                                                 Calendar recyclableCal,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                                                                 Charset encoding)
     {
         int year, month, day;
@@ -461,6 +472,7 @@ public class DateTime {
 
         Calendar cal = getCleanCalendar(recyclableCal);
         cal.set(year, month, day, 0, 0, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Timestamp ts = new Timestamp(cal.getTimeInMillis());
         ts.setNanos(0);
         return ts;
@@ -480,6 +492,8 @@ public class DateTime {
      */
     static final Timestamp timeBytesToTimestamp(byte[] buffer,
                                                 int offset,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                                                 Calendar recyclableCal,
                                                 Charset encoding)
 {
@@ -515,6 +529,7 @@ public class DateTime {
 
         // Derby's resolution for the TIME type is only seconds.
         cal.set(Calendar.MILLISECOND, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return new Timestamp(cal.getTimeInMillis());
     }
     
@@ -530,6 +545,7 @@ public class DateTime {
      */
     static final Date timestampBytesToDate(byte[] buffer,
                                            int offset,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                                            Calendar recyclableCal,
                                            Charset encoding)
      {
@@ -555,6 +571,8 @@ public class DateTime {
 
         Calendar cal = getCleanCalendar(recyclableCal);
         cal.set(year, month, day);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return new Date(cal.getTimeInMillis());
     }
 
@@ -570,6 +588,7 @@ public class DateTime {
      */
     static final Time timestampBytesToTime(byte[] buffer,
                                            int offset,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                                            Calendar recyclableCal,
                                            Charset encoding)
     {
@@ -603,6 +622,8 @@ public class DateTime {
          * must be set to January 1, 1970. So override those values now.
          */
         cal.set(1970, Calendar.JANUARY, 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return new Time(cal.getTimeInMillis());
     }
 
@@ -626,6 +647,7 @@ public class DateTime {
          * Make sure we clear that out before returning, per the
          * contract of this method.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Calendar result = new GregorianCalendar();
         result.clear();
         return result;
@@ -651,6 +673,7 @@ public class DateTime {
     public static int getTimestampLength( boolean supportsTimestampNanoseconds )
     {
         return supportsTimestampNanoseconds ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
             DRDAConstants.JDBC_TIMESTAMP_LENGTH : DRDAConstants.DRDA_OLD_TIMESTAMP_LENGTH;
     }
 

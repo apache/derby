@@ -1293,6 +1293,7 @@ public class SQLToJUnit
             "    }\n\n" +
             "    public static Test suite()\n" +
             "    {\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             "        BaseTestSuite suite = " +
             "new BaseTestSuite(\"IJToJUnitTest Test\");\n" +
             "        suite.addTest(TestConfiguration.defaultSuite(IJToJUnitTest.class));\n" +

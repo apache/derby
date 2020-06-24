@@ -89,6 +89,7 @@ public class ClientDataSourceFactory implements ObjectFactory {
      * @throws Exception if recreating the object fails
      */
     public Object getObjectInstance(Object refObj,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                     Name name,
                                     Context nameContext,
                                     Hashtable environment) throws Exception {
@@ -101,11 +102,13 @@ public class ClientDataSourceFactory implements ObjectFactory {
             if (className != null &&
                     className.startsWith("org.apache.derby.jdbc.Client")) {
                 // Create the proper data source object shell.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = Class.forName(className);
                 ds = clazz.getConstructor().newInstance();
 
                 // Fill in the data source object shell with values from the
                 // jndi reference.
+//IC see: https://issues.apache.org/jira/browse/DERBY-446
                 ClientDataSourceFactory.setBeanProperties(ds, ref);
             }
         }
@@ -142,6 +145,7 @@ public class ClientDataSourceFactory implements ObjectFactory {
 
             String methodName = "set"
                     + propertyName.substring(0, 1).toUpperCase(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             Locale.ENGLISH)
                     + propertyName.substring(1);
 

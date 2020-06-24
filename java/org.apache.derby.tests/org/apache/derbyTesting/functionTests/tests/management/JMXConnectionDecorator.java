@@ -51,6 +51,7 @@ class JMXConnectionDecorator extends BaseTestSetup {
      */
     static Test platformMBeanServer(Test test)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         return new JMXConnectionDecorator(test, false);
     }
     
@@ -69,6 +70,7 @@ class JMXConnectionDecorator extends BaseTestSetup {
         oldGetter =
             JMXConnectionGetter.mbeanServerConnector.get();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         JMXConnectionGetter getter = remote ?
                 new RemoteConnectionGetter(getJmxUrl()) :
                 new PlatformConnectionGetter();

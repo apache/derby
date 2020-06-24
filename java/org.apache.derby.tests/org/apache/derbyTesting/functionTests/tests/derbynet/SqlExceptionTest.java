@@ -83,6 +83,7 @@ public class SqlExceptionTest extends BaseJDBCTestCase
         SQLException javae = sqle.getSQLException();
         
         assertEquals(sqle, javae.getCause());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         assertEquals(nexte, javae.getCause().getCause());
         assertEquals(nexte, javae.getNextException());
         
@@ -98,6 +99,7 @@ public class SqlExceptionTest extends BaseJDBCTestCase
         
         assertNotNull(javae.getNextException());
         assertEquals(javae.getNextException().getSQLState(), "08000");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         assertEquals(internalException, javae.getCause().getCause());
     }
 
@@ -312,6 +314,7 @@ public class SqlExceptionTest extends BaseJDBCTestCase
     public static Test suite() {
     	if ( JDBC.vmSupportsJSR169())
     		// see DERBY-2157 for details
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                         return new BaseTestSuite(
                 "empty SqlExceptionTest - client not supported on JSR169");
     	else

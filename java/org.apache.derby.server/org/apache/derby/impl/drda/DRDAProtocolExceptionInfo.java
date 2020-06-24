@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.drda;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class DRDAProtocolExceptionInfo {
     
     /*
@@ -53,10 +54,12 @@ class DRDAProtocolExceptionInfo {
     // Sends an originating Codepoint
     protected boolean sendsCodpntArg;
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     DRDAProtocolExceptionInfo(int errorCodePoint, int svrcod,  
                     int errCdCodePoint,
                     boolean sendsCodpntArg)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     this.errorCodePoint = errorCodePoint;
     this.svrcod = svrcod;
     this.errCdCodePoint = errCdCodePoint;

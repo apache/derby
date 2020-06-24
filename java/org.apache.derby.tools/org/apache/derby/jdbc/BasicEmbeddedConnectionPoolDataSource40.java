@@ -37,6 +37,7 @@ import org.apache.derby.impl.jdbc.EmbedPooledConnection;
  * @see EmbeddedConnectionPoolDataSource40
  */
 public class BasicEmbeddedConnectionPoolDataSource40
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
     extends BasicEmbeddedDataSource40
     implements javax.sql.ConnectionPoolDataSource,
         EmbeddedConnectionPoolDataSourceInterface {
@@ -83,6 +84,7 @@ public class BasicEmbeddedConnectionPoolDataSource40
             String password,
             boolean requestPassword) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         findDriver();
         return new EmbedPooledConnection(this, user, password, requestPassword);
     }

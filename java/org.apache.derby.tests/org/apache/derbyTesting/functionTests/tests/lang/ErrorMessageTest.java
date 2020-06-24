@@ -47,6 +47,7 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("ErrorMessageTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         if (JDBC.vmSupportsJSR169()) {
             // Foundation 1.1 doesn't support the regex classes. Return an
@@ -140,6 +141,7 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
     public void testDeadlockTimeout()
             throws SQLException, InterruptedException {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4323
 
         // Make the main transaction (T1) lock row 1 exclusively
         Statement s = createStatement();

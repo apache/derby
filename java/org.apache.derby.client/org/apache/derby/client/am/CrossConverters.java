@@ -66,6 +66,7 @@ final class CrossConverters {
     public static final int UNKNOWN_LENGTH = Integer.MIN_VALUE;
 
     private final static BigDecimal bdMaxByteValue__ =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             BigDecimal.valueOf(Byte.MAX_VALUE);
     private final static BigDecimal bdMinByteValue__ =
             BigDecimal.valueOf(Byte.MIN_VALUE);
@@ -115,12 +116,14 @@ final class CrossConverters {
     final Object setObject(int targetType, boolean source) throws SqlException {
         short numVal = source ? (short) 1 : 0;
         switch (targetType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.BIT:
         case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source);
 
         case ClientTypes.SMALLINT:
             return Short.valueOf(numVal);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
         case ClientTypes.INTEGER:
             return Integer.valueOf(numVal);
@@ -159,6 +162,7 @@ final class CrossConverters {
     // In support of PS.setShort()
     final Object setObject(int targetType, short source) throws SqlException {
         switch (targetType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.BIT:
         case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source != 0);
@@ -209,6 +213,7 @@ final class CrossConverters {
             }
             return Short.valueOf((short) source);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.INTEGER:
             return Integer.valueOf(source);
 
@@ -240,6 +245,7 @@ final class CrossConverters {
     // don't support the BIT/BOOLEAN as underlying DERBY targetTypes.
     final boolean setBooleanFromObject(Object source, int sourceType) throws SqlException {
         switch (sourceType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.SMALLINT:
             return getBooleanFromShort(((Short) source).shortValue());
         case ClientTypes.INTEGER:
@@ -266,6 +272,7 @@ final class CrossConverters {
     // don't support the BIT/BOOLEAN as underlying DERBY targetTypes.
     final byte setByteFromObject(Object source, int sourceType) throws SqlException {
         switch (sourceType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.SMALLINT:
             return getByteFromShort(((Short) source).shortValue());
         case ClientTypes.INTEGER:
@@ -312,6 +319,7 @@ final class CrossConverters {
             }
             return Integer.valueOf((int) source);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.BIGINT:
             return Long.valueOf(source);
 
@@ -368,6 +376,7 @@ final class CrossConverters {
             }
             return Long.valueOf((long) source);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     // change the check from (source > Float.MAX_VALUE || source < -Float.MIN_VALUE))
@@ -397,6 +406,7 @@ final class CrossConverters {
                     //            |                          |________________________
                     //-------------------------------------------------------------------------------------
                     (source == Double.POSITIVE_INFINITY || source == Double.NEGATIVE_INFINITY)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "DOUBLE");
             }
@@ -404,7 +414,9 @@ final class CrossConverters {
             // Convert to Double via String to avoid changing the precision,
             // which may happen if we cast float to double.
             return Double.valueOf(String.valueOf(source));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.DECIMAL:
             // Can't use the following commented out line because it changes precision of the result.
             //return new java.math.BigDecimal (source);
@@ -427,6 +439,10 @@ final class CrossConverters {
     // In support of PS.setDouble()
     final Object setObject(int targetType, double source) throws SqlException {
         switch (targetType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.BIT:
         case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source != 0);
@@ -434,10 +450,15 @@ final class CrossConverters {
         case ClientTypes.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "SMALLINT");
             }
             return Short.valueOf((short) source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
         case ClientTypes.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
@@ -446,6 +467,9 @@ final class CrossConverters {
                     agent_.logWriter_, "INTEGER");
             }
             return Integer.valueOf((int) source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
         case ClientTypes.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
@@ -454,7 +478,10 @@ final class CrossConverters {
                     agent_.logWriter_, "BIGINT");
             }
             return Long.valueOf((long) source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Float.MAX_VALUE || source < -Float.MAX_VALUE)) {
@@ -462,7 +489,10 @@ final class CrossConverters {
                     agent_.logWriter_, "REAL");
             }
             return Float.valueOf((float) source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
                     // change the check from (source > Double.MAX_VALUE || source < -Double.MIN_VALUE))
@@ -481,6 +511,7 @@ final class CrossConverters {
             }
             return Double.valueOf(source);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.DECIMAL:
             // Use BigDecimal.valueOf(source) instead of new BigDecimal(source),
             // as the latter may change the precision.
@@ -510,11 +541,14 @@ final class CrossConverters {
         case ClientTypes.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxShortValue__) == 1 || source.compareTo(bdMinShortValue__) == -1)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "SMALLINT");
             }
             return Short.valueOf(source.shortValue());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxIntValue__) == 1 || source.compareTo(bdMinIntValue__) == -1)) {
@@ -522,7 +556,9 @@ final class CrossConverters {
                     agent_.logWriter_, "INTEGER");
             }
             return Integer.valueOf(source.intValue());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxLongValue__) == 1 || source.compareTo(bdMinLongValue__) == -1)) {
@@ -530,15 +566,20 @@ final class CrossConverters {
                     agent_.logWriter_, "BIGINT");
             }
             return Long.valueOf(source.longValue());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxFloatValue__) == 1 || source.compareTo(bdMinFloatValue__) == -1)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "REAL");
             }
             return Float.valueOf(source.floatValue());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxDoubleValue__) == 1 || source.compareTo(bdMinDoubleValue__) == -1)) {
@@ -546,7 +587,9 @@ final class CrossConverters {
                     agent_.logWriter_, "DOUBLE");
             }
             return Double.valueOf(source.doubleValue());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.DECIMAL:
             return source;
 
@@ -601,6 +644,7 @@ final class CrossConverters {
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 "java.sql.Time", ClientTypes.getTypeString(targetType));
         }
     }
@@ -639,6 +683,7 @@ final class CrossConverters {
     final Object setObject(int targetDriverType, String source) throws SqlException {
         try {
             switch (targetDriverType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case ClientTypes.BIT:
             case ClientTypes.BOOLEAN:
             {
@@ -652,24 +697,33 @@ final class CrossConverters {
                 } else {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.LANG_FORMAT_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         ClientTypes.getTypeString(targetDriverType));
                 }
             }
 
             case ClientTypes.SMALLINT:
                 return Short.valueOf(source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case ClientTypes.INTEGER:
                 return Integer.valueOf(source);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case ClientTypes.BIGINT:
                 return Long.valueOf(source);
 
             case ClientTypes.REAL:
                 return Float.valueOf(source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
             case ClientTypes.DOUBLE:
                 return Double.valueOf(source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
 
             case ClientTypes.DECIMAL:
                 return new BigDecimal(source);
@@ -706,6 +760,7 @@ final class CrossConverters {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId 
                     (SQLState.LANG_FORMAT_EXCEPTION), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e,
                     ClientTypes.getTypeString(targetDriverType));
         }
@@ -717,6 +772,7 @@ final class CrossConverters {
      */
     public static int getInputJdbcType(int jdbcType) {
         switch (jdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case Types.TINYINT:
         case Types.SMALLINT:
             return Types.INTEGER;
@@ -738,6 +794,7 @@ final class CrossConverters {
     // In support of PS.setBytes()
     final Object setObject(int targetType, byte[] source) throws SqlException {
         switch (targetType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientTypes.BINARY:
         case ClientTypes.VARBINARY:
         case ClientTypes.LONGVARBINARY:
@@ -793,6 +850,7 @@ final class CrossConverters {
             if (length != CrossConverters.UNKNOWN_LENGTH &&
                     length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
             return sw.toString();
@@ -804,6 +862,7 @@ final class CrossConverters {
     // Convert from InputStream source to target type.
     // In support of PS.setAsciiStream, PS.setUnicodeStream
     // Note: PS.setCharacterStream() is handled by setObject(Reader)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Object setObjectFromCharacterStream(
             int targetType,
             InputStream source,
@@ -835,6 +894,8 @@ final class CrossConverters {
     // create a String by reading all of the bytes from inputStream, applying encoding
     private String setStringFromStream(
             InputStream is,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
             Charset encoding,
             int length) throws SqlException {
 
@@ -848,15 +909,18 @@ final class CrossConverters {
                     baos.write(read);
                     read = is.read();
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             } catch (IOException e) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.JAVA_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, e.getClass().getName(), e.getMessage());
             }
 
             if (length != CrossConverters.UNKNOWN_LENGTH &&
                     length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
 
@@ -865,6 +929,7 @@ final class CrossConverters {
 
     // Convert from Blob source to target type
     // In support of PS.setBlob()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Object setObject(int targetType, Blob source) throws SqlException {
         switch (targetType) {
         case ClientTypes.BLOB:
@@ -902,6 +967,7 @@ final class CrossConverters {
 
     // create a byte[] by reading all of the bytes from inputStream
     private byte[] setBytesFromStream(InputStream is, int length)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int totalRead = 0;
@@ -914,12 +980,19 @@ final class CrossConverters {
                 read = is.read();
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             if (length != CrossConverters.UNKNOWN_LENGTH &&
                     length != totalRead) {
                 throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (IOException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
             throw SqlException.javaException(agent_.logWriter_, e);
         }
         return baos.toByteArray();
@@ -927,6 +1000,7 @@ final class CrossConverters {
 
     // Convert from Clob source to target type
     // In support of PS.setClob()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final Object setObject(int targetType, Clob source) throws SqlException {
         switch (targetType) {
         case ClientTypes.CLOB:
@@ -941,6 +1015,7 @@ final class CrossConverters {
     // The Java compiler uses static binding, so we can't rely on the strongly
     // typed setObject() methods above for each of the Java Object instance types.
     final Object setObject(int targetType, Object source) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1177
         if (source == null) {
             return null;
         } else if (source instanceof Boolean) {
@@ -953,6 +1028,7 @@ final class CrossConverters {
             return setObject(targetType, ((Float) source).floatValue());
         } else if (source instanceof Double) {
             return setObject(targetType, ((Double) source).doubleValue());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } else if (source instanceof BigDecimal) {
             return setObject(targetType, (BigDecimal) source);
         } else if (source instanceof Date) {
@@ -1091,7 +1167,17 @@ final class CrossConverters {
 
     final byte getByteFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 (source > Byte.MAX_VALUE || source < Byte.MIN_VALUE)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "TINYINT");
         }
@@ -1109,6 +1195,7 @@ final class CrossConverters {
         } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     (SQLState.LANG_FORMAT_EXCEPTION), e, "byte");
         }
     }
@@ -1147,7 +1234,18 @@ final class CrossConverters {
 
     final short getShortFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "SMALLINT");
         }
@@ -1162,10 +1260,13 @@ final class CrossConverters {
     final short getShortFromString(String source) throws SqlException {
         try {
             return parseShort(source);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId 
                     (SQLState.LANG_FORMAT_EXCEPTION), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, "short");
         }
     }
@@ -1194,7 +1295,13 @@ final class CrossConverters {
 
     final int getIntFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "INTEGER");
         }
@@ -1212,6 +1319,7 @@ final class CrossConverters {
         } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, "int");
         }
     }
@@ -1230,7 +1338,11 @@ final class CrossConverters {
 
     final long getLongFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 (source > Long.MAX_VALUE || source < Long.MIN_VALUE)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "BIGINT");
         }
@@ -1248,6 +1360,7 @@ final class CrossConverters {
         } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, "long");
         }
     }
@@ -1256,7 +1369,10 @@ final class CrossConverters {
 
     final float getFloatFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-1136
                 Float.isInfinite((float)source)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
+//IC see: https://issues.apache.org/jira/browse/DERBY-5533
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "DOUBLE");
         }
@@ -1274,6 +1390,7 @@ final class CrossConverters {
         } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, "float");
         }
     }
@@ -1290,6 +1407,7 @@ final class CrossConverters {
         } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, "double");
         }
     }
@@ -1302,9 +1420,17 @@ final class CrossConverters {
             // Unfortunately, the big decimal constructor calls java.lang.Long.parseLong(),
             // which doesn't like spaces, so we have to call trim() to get rid of the spaces from CHAR columns.
             return new BigDecimal(source.trim());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                     e, "java.math.BigDecimal");
         }
     }
@@ -1359,6 +1485,9 @@ final class CrossConverters {
             return timestamp_valueOf(source, cal);
         } catch (IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
@@ -1513,6 +1642,8 @@ final class CrossConverters {
      */
     private static Timestamp timestamp_valueOf(String s, Calendar cal) {
         if (s == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throw new IllegalArgumentException();
         }
 
@@ -1705,6 +1836,7 @@ final class CrossConverters {
         if (negative) {
             if (i > 1) {
                 return result;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             } else {    // Only got "-"
                 throw new NumberFormatException(s);
             }
@@ -1714,6 +1846,7 @@ final class CrossConverters {
     }
 
     private static void skipPadding(String s, int i, int length)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws NumberFormatException {
         while (i < length) {
             if (s.charAt(i++) != ' ') {

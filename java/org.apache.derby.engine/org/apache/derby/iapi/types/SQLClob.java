@@ -65,6 +65,7 @@ public class SQLClob
     /** The header generator used for 10.5 databases. */
     private static final StreamHeaderGenerator TEN_FIVE_CLOB_HEADER_GENERATOR =
             new ClobStreamHeaderGenerator(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
 
     /**
      * The maximum number of bytes used by the stream header.
@@ -73,6 +74,7 @@ public class SQLClob
      */
     private static final int MAX_STREAM_HEADER_LENGTH =
             TEN_FIVE_CLOB_HEADER_GENERATOR.getMaxHeaderLength();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4661
 
     /**
      * The descriptor for the stream. If there is no stream this should be
@@ -120,6 +122,7 @@ public class SQLClob
         // TODO: Add optimization for materializing "smallish" streams. This
         //       may be more effective because the data doesn't have to be
         //       decoded multiple times.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
         final SQLClob clone = new SQLClob();
         // Copy the soft upgrade mode state.
         clone.inSoftUpgradeMode = inSoftUpgradeMode;
@@ -153,6 +156,7 @@ public class SQLClob
                 clone.setValue(getString());
             } catch (StandardException se) {
                 if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                     SanityManager.THROWASSERT("Unexpected exception", se);
                 }
                 return null;
@@ -167,6 +171,7 @@ public class SQLClob
 	 */
 	public DataValueDescriptor getNewNull()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4278
         SQLClob newClob = new SQLClob();
         // Copy the soft upgrade mode state.
         newClob.inSoftUpgradeMode = inSoftUpgradeMode;
@@ -176,6 +181,7 @@ public class SQLClob
 	/** @see StringDataValue#getValue(RuleBasedCollator) */
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2534
 		if (collatorForComparison == null)
 		{//null collatorForComparison means use UCS_BASIC for collation
 		    return this;			
@@ -266,6 +272,7 @@ public class SQLClob
      * @throws StandardException if obtaining the length fails
      */
     public int getLength() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         if (stream == null) {
             return super.getLength();
         }
@@ -294,6 +301,7 @@ public class SQLClob
         long charLength = 0;
         try {
             if (repositionStream) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
                 rewindStream(stream, csd.getDataOffset());
             }
             charLength = UTF8Util.skipUntilEOF(stream);
@@ -344,6 +352,7 @@ public class SQLClob
      */
     public Object   getObject() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4754
         if ( _clobValue != null ) { return _clobValue; }
         else
         {
@@ -376,6 +385,7 @@ public class SQLClob
             // Lazily reset the descriptor here, to avoid further changes in
             // {@code SQLChar}.
             csd = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
             throw StandardException.newException(
                     SQLState.LANG_STREAM_INVALID_ACCESS, getTypeName());
         }
@@ -389,6 +399,7 @@ public class SQLClob
                 try {
                     ((Resetable)stream).resetStream();
                     // Make sure the stream is in sync with the descriptor.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                     InputStreamUtil.skipFully(stream, csd.getCurBytePos());
                 } catch (IOException ioe) {
                     throwStreamingIOException(ioe);
@@ -405,9 +416,11 @@ public class SQLClob
             // First time, read the header format of the stream.
             try {
                 // Assume new header format, adjust later if necessary.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
                 int read = stream.read(header);
                 // Expect at least two header bytes.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
                 if (SanityManager.DEBUG) {
                     SanityManager.ASSERT(read > 1,
                             "Too few header bytes: " + read);
@@ -416,6 +429,7 @@ public class SQLClob
                 if (read > hdrInfo.headerLength()) {
                     // We have read too much. Reset the stream.
                     read = hdrInfo.headerLength();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
                     rewindStream(stream, read);
                 }
                 csd = new CharacterStreamDescriptor.Builder().stream(stream).
@@ -430,6 +444,7 @@ public class SQLClob
                 // Check here to see if the root cause is a container closed
                 // exception. If so, this most likely means that the Clob was
                 // accessed after a commit or rollback on the connection.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
                 Throwable rootCause = ioe;
                 while (rootCause.getCause() != null) {
                     rootCause = rootCause.getCause();
@@ -455,6 +470,7 @@ public class SQLClob
      *      {@code false} otherwise.
      */
     public boolean hasStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         return stream != null;
     }
 
@@ -475,11 +491,13 @@ public class SQLClob
      */
     public final String getTraceString() throws StandardException {
         // Check if the value is SQL NULL.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1693
         if (isNull()) {
             return "NULL";
         }
 
         // Check if we have a stream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
         if (hasStream()) {
             return (getTypeName() + "(" + getStream().toString() + ")");
         }
@@ -555,12 +573,14 @@ public class SQLClob
      * @param stream the new stream
      */
     public final void setStream(InputStream stream) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         super.setStream(stream);
         // Discard the old stream descriptor.
         this.csd = null;
     }
 
     public final void restoreToNull() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         this.csd = null;
         super.restoreToNull();
     }
@@ -623,11 +643,13 @@ public class SQLClob
             // down this code path when in soft upgrade mode, because the code
             // reading the header bytes ends up reading zero bytes (i.e., it
             // doesn't get the header / EOF marker).
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
             if (vcl < 32*1024) {
                 setValue(vc.getSubString(1, (int)vcl));
             } else {
                 ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
                         vc.getCharacterStream(), (int) vcl, 0, TypeId.CLOB_NAME,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                         getStreamHeaderGenerator());
                 setValue(utfIn, (int) vcl);
             }
@@ -644,6 +666,7 @@ public class SQLClob
      * @throws IOException if writing to the destination stream fails
      */
     public void writeExternal(ObjectOutput out)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             throws IOException {
         super.writeClobUTF(out);
     }
@@ -770,6 +793,7 @@ public class SQLClob
                                             : (int)csd.getByteLength();
             hdrInfo = new HeaderInfo(hdrLen, valueLength);
             // Make sure the stream is correctly positioned.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
             rewindStream((InputStream)in, hdrLen);
         } else {
             final InputStream srcIn = (InputStream)in;
@@ -797,6 +821,7 @@ public class SQLClob
                     // 1) Reset the stream to the previously set mark.
                     srcIn.reset();
                     InputStreamUtil.skipFully(srcIn, hdrInfo.headerLength());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
                 } else if (in instanceof FormatIdInputStream) {
                     // 2) Add a push back stream on top of the underlying
                     // source, and unread the surplus bytes we read. Set the
@@ -840,6 +865,7 @@ public class SQLClob
         byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
         int read = in.read(header);
         // Expect at least two header bytes.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4122
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(read > 1, "Too few header bytes: " + read);
         }
@@ -868,6 +894,7 @@ public class SQLClob
     private void rewindStream(InputStream in, long offset)
             throws IOException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
             ((Resetable)in).resetStream();
             InputStreamUtil.skipFully(in, offset);
         } catch (StandardException se) {

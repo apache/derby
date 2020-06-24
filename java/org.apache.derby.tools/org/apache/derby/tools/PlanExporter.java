@@ -224,6 +224,7 @@ public class PlanExporter {
      * @throws IOException if an error occurs when writing the XML file
      */
     private static void generateXML(AccessDatabase access,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
             String arg, String stmt, String time, String xsl)
             throws IOException {
         CreateXMLFile xmlFile = new CreateXMLFile(access);
@@ -280,6 +281,7 @@ public class PlanExporter {
     {
         AccessController.doPrivileged
         (new java.security.PrivilegedAction<Object>() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             public Object run() {
                 File delFile = new File(fileName);

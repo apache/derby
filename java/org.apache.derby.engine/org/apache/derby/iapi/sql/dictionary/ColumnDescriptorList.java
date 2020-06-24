@@ -64,6 +64,7 @@ public class ColumnDescriptorList extends ArrayList<ColumnDescriptor>
 	{
 		ColumnDescriptor	returnValue = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (ColumnDescriptor columnDescriptor : this)
 		{
 			if ( columnName.equals( columnDescriptor.getColumnName() ) &&
@@ -89,6 +90,7 @@ public class ColumnDescriptorList extends ArrayList<ColumnDescriptor>
 	{
 		ColumnDescriptor	returnValue = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (ColumnDescriptor columnDescriptor : this)
 		{
 			if ( ( columnID == columnDescriptor.getPosition() ) &&
@@ -111,6 +113,7 @@ public class ColumnDescriptorList extends ArrayList<ColumnDescriptor>
 	 */
 	public ColumnDescriptor elementAt(int n)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return get(n);
 	}
 
@@ -128,6 +131,7 @@ public class ColumnDescriptorList extends ArrayList<ColumnDescriptor>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             ColumnDescriptor columnDescriptor = elementAt(index);
 			strings[index] = columnDescriptor.getColumnName();
 		}

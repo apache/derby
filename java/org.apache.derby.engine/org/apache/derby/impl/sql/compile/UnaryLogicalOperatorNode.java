@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UnaryLogicalOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -30,6 +31,8 @@ import org.apache.derby.iapi.types.TypeId;
 
 public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     UnaryLogicalOperatorNode(ValueNode operand,
             String methodName,
             ContextManager cm) throws StandardException {
@@ -51,6 +54,7 @@ public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{

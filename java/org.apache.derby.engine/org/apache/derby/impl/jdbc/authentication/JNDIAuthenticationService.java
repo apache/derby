@@ -80,6 +80,7 @@ public class JNDIAuthenticationService
 		authenticationProvider = PropertyUtil.getPropertyFromSet(
 					properties,
 						org.apache.derby.shared.common.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 		 if ( (authenticationProvider != null) &&
 			   (StringUtil.SQLEqualsIgnoreCase(authenticationProvider,

@@ -49,6 +49,8 @@ class XADatabase extends Database {
     private ResourceAdapter ra;
 
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     XADatabase (String dbName)
     {
         super(dbName);
@@ -60,9 +62,11 @@ class XADatabase extends Database {
      * @throws java.sql.SQLException
      */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
     synchronized void makeConnection(Properties p) throws SQLException
     {
         if (xaDataSource == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz;
             try {
                 if (JVMInfo.hasJNDI()) {
@@ -83,6 +87,7 @@ class XADatabase extends Database {
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         xaDataSource.setDatabaseName(getShortDbName());
         appendAttrString(p);
         if (attrString != null)
@@ -93,7 +98,9 @@ class XADatabase extends Database {
         if (conn == null)
         {
             xaConnection = xaDataSource.getXAConnection(userId,password);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
             ra = xaDataSource.getResourceAdapter();
+//IC see: https://issues.apache.org/jira/browse/DERBY-706
             setXAResource(xaConnection.getXAResource());
         }
         else // this is just a connection reset. Close the logical connection.
@@ -104,6 +111,7 @@ class XADatabase extends Database {
         // Get a new logical connection.
         // Contract between network server and embedded engine
         // is that any connection returned implements EngineConnection.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         conn = (EngineConnection) xaConnection.getConnection();
         // Client will always drive the commits so connection should
         // always be autocommit false on the server. DERBY-898/DERBY-899
@@ -131,6 +139,7 @@ class XADatabase extends Database {
      * @return The ResourceAdapter instance for
      *         the underlying database.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
     ResourceAdapter getResourceAdapter()
     {
         return this.ra;

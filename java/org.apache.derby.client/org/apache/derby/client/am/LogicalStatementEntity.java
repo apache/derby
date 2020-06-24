@@ -50,6 +50,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 //@ThreadSafe
 abstract class LogicalStatementEntity
         implements Statement {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /**
      * Tells if we're holding a callable statement or not.
@@ -91,6 +92,8 @@ abstract class LogicalStatementEntity
      */
     protected LogicalStatementEntity(PreparedStatement physicalPs,
                                      StatementKey stmtKey,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
                                      StatementCacheInteractor cacheInteractor) {
         if (cacheInteractor.getCache() == null) {
             // Internal check, failure indicates programming error.
@@ -100,8 +103,10 @@ abstract class LogicalStatementEntity
         }
         this.stmtKey = stmtKey;
         this.cache = cacheInteractor.getCache();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3457
         this.owner = cacheInteractor;
         this.physicalPs = physicalPs;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (physicalPs instanceof CallableStatement) {
             this.hasCallableStmt = true;
             this.physicalCs = (CallableStatement)physicalPs;
@@ -118,6 +123,7 @@ abstract class LogicalStatementEntity
      * @return A prepared statement.
      * @throws SQLException if the logical statement has been closed
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized PreparedStatement getPhysPs()
             throws SQLException {
         if (physicalPs == null) {
@@ -134,6 +140,7 @@ abstract class LogicalStatementEntity
      * @return A callable statement.
      * @throws SQLException if the logical statement has been closed
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized CallableStatement getPhysCs()
             throws SQLException {
         if (SanityManager.DEBUG) {
@@ -155,6 +162,7 @@ abstract class LogicalStatementEntity
      * @throws SQLException if the logical statement has been closed
      */
     private synchronized Statement getPhysStmt()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             throws SQLException
     {
         if ( hasCallableStmt ) { return getPhysCs(); }
@@ -168,12 +176,14 @@ abstract class LogicalStatementEntity
      */
     public synchronized void close() throws SQLException {
         if (physicalPs != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             final ClientPreparedStatement temporaryPsRef =
                     (ClientPreparedStatement)physicalPs;
             // Nullify both references.
             physicalPs = null;
             physicalCs = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3457
             this.owner.markClosed(this);
             // Nullify the reference, since the entity object might stick around
             // for a while.
@@ -182,6 +192,7 @@ abstract class LogicalStatementEntity
             temporaryPsRef.setOwner(null);
             // NOTE: Accessing ps state directly below only to avoid tracing.
             // If the underlying statement has become closed, don't cache it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4843
             if (!temporaryPsRef.openOnClient_) {
                 return;
             }
@@ -193,6 +204,7 @@ abstract class LogicalStatementEntity
 
             // Reset the statement for reuse.
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
                 temporaryPsRef.resetForReuse();
             } catch (SqlException sqle) {
                 // Get a wrapper and throw it.
@@ -234,6 +246,7 @@ abstract class LogicalStatementEntity
      * instance implements {@code iface}
      */
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
         getPhysStmt(); // Just to check that the statement is not closed.
         return iface.isInstance(this);
     }
@@ -248,6 +261,7 @@ abstract class LogicalStatementEntity
      * interface
      */
     public <T> T unwrap(Class<T> iface) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (((ClientStatement) getPhysStmt()).isClosed()) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.ALREADY_CLOSED),
@@ -272,6 +286,7 @@ abstract class LogicalStatementEntity
 
     public  void    closeOnCompletion() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ((ClientStatement) getPhysStmt()).closeOnCompletion();
     }
 
@@ -288,6 +303,7 @@ abstract class LogicalStatementEntity
 
     public  long[] executeLargeBatch() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return ((ClientStatement) getPhysStmt()).executeLargeBatch();
     }
     public  long executeLargeUpdate( String sql ) throws SQLException

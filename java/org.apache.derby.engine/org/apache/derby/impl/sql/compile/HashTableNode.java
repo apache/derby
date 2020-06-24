@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.HashTableNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -65,6 +66,8 @@ class HashTableNode extends SingleChildResultSetNode
 	 * @param hashKeyColumns		Hash key columns
      * @param cm                    The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     HashTableNode(ResultSetNode  childResult,
                   Properties     tableProperties,
                   ResultColumnList resultColumns,
@@ -78,6 +81,7 @@ class HashTableNode extends SingleChildResultSetNode
                   ContextManager cm)
 	{
         super(childResult, tableProperties, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( resultColumns );
         this.searchPredicateList = searchPredicateList;
         this.joinPredicateList = joinPredicateList;
@@ -110,6 +114,8 @@ class HashTableNode extends SingleChildResultSetNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -148,6 +154,7 @@ class HashTableNode extends SingleChildResultSetNode
 	{
 		if (SanityManager.DEBUG)
             SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         //
         // If we are projecting and restricting the stream from a table
@@ -238,8 +245,13 @@ class HashTableNode extends SingleChildResultSetNode
 
 
 		// Map the result columns to the source columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
         ResultColumnList.ColumnMapping  mappingArrays =
             getResultColumns().mapSourceColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         int[] mapArray = mappingArrays.mapArray;
 
@@ -288,6 +300,7 @@ class HashTableNode extends SingleChildResultSetNode
 		 */
 		if (pSubqueryList != null && pSubqueryList.size() > 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			pSubqueryList.setPointOfAttachment(getResultSetNumber());
 			if (SanityManager.DEBUG)
 			{
@@ -297,6 +310,7 @@ class HashTableNode extends SingleChildResultSetNode
 		}
 		if (rSubqueryList != null && rSubqueryList.size() > 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			rSubqueryList.setPointOfAttachment(getResultSetNumber());
 			if (SanityManager.DEBUG)
 			{
@@ -307,6 +321,7 @@ class HashTableNode extends SingleChildResultSetNode
 
 		// Get the final cost estimate based on child's cost.
 		setCostEstimate( childResult.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// if there is no searchClause, we just want to pass null.
 		if (searchClause == null)
@@ -372,6 +387,7 @@ class HashTableNode extends SingleChildResultSetNode
 			// as-is, with the performance trade-off as discussed above.)
 
 			/* Generate the Row function for the projection */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getResultColumns().generateCore(acb, mb, false);
 		}
 		else
@@ -390,6 +406,7 @@ class HashTableNode extends SingleChildResultSetNode
 		mb.push(getCostEstimate().singleScanRowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getHashTableResultSet",
                 ClassName.NoPutResultSet, 14);
 	}
@@ -402,11 +419,13 @@ class HashTableNode extends SingleChildResultSetNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (searchPredicateList != null)
 		{
 			searchPredicateList = (PredicateList)searchPredicateList.accept(v);

@@ -35,6 +35,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 **/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 final class MergeInserter implements SortController
 {
 	/**
@@ -73,6 +74,7 @@ final class MergeInserter implements SortController
     int     stat_numMergeRuns;
     Vector<Integer>  stat_mergeRunsSize;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	/*
 	 * Methods of SortController
@@ -188,8 +190,10 @@ final class MergeInserter implements SortController
             stat_sortType = "external";
 			long conglomid = sort.createMergeRun(tran, sortBuffer);
 			if (mergeRuns == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				mergeRuns = new Vector<Long>();
 			mergeRuns.addElement(conglomid);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
             stat_numMergeRuns++;
             // calculate size of this merge run
@@ -226,6 +230,7 @@ final class MergeInserter implements SortController
         if (stat_sortType == "external")
         {
             stat_numMergeRuns++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             stat_mergeRunsSize.addElement(stat_numRowsInput - totalRunSize);
         }
 
@@ -284,6 +289,7 @@ final class MergeInserter implements SortController
         stat_numMergeRuns = 0;
         stat_numRowsInput = 0;
         stat_numRowsOutput = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         stat_mergeRunsSize = new Vector<Integer>();
         runSize = 0;
         totalRunSize = 0;

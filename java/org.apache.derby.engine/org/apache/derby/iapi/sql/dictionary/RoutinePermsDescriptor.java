@@ -44,11 +44,13 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
                                    UUID routineUUID,
                                    boolean hasExecutePermission) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
         super (dd, grantee, grantor);
         this.routineUUID = routineUUID;
         this.hasExecutePermission = hasExecutePermission;
         //routineUUID can be null only if the constructor with routineePermsUUID
         //has been invoked.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         if (routineUUID != null)
         	routineName = dd.getAliasDescriptor(routineUUID).getObjectName();
 	}
@@ -58,6 +60,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
                                    String grantor,
                                    UUID routineUUID) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
         this( dd, grantee, grantor, routineUUID, true);
 	}
 
@@ -66,12 +69,14 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
      */
 	public RoutinePermsDescriptor( DataDictionary dd,
                                    String grantee,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
                                    String grantor) throws StandardException
     {
         this( dd, grantee, grantor, (UUID) null);
     }
 	   
     public RoutinePermsDescriptor( DataDictionary dd, UUID routineePermsUUID) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
     throws StandardException
 	{
         this( dd, null, null, null, true);
@@ -89,6 +94,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
 
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		return "routinePerms: grantee=" + getGrantee() + 
         ",routinePermsUUID=" + getUUID() +
           ",grantor=" + getGrantor() +
@@ -121,6 +127,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
 	 */
 	public boolean checkOwner(String authorizationId) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		UUID sd = getDataDictionary().getAliasDescriptor(routineUUID).getSchemaUUID();
 		if (getDataDictionary().getSchemaDescriptor(sd, null).getAuthorizationId().equals(authorizationId))
 			return true;
@@ -161,6 +168,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
 	 */
 	public DependableFinder getDependableFinder() 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return getDependableFinder(
                 StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID);
 	}

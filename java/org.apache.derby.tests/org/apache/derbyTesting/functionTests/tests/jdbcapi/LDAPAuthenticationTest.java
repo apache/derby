@@ -55,6 +55,7 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
 
     // create own policy file, so we can connect to the ldap server
     private static final String POLICY_FILE_NAME =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         "org/apache/derbyTesting/functionTests/tests/jdbcapi/LDAPTests.policy";
     
     /** Creates a new instance of the Test */
@@ -71,6 +72,7 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         if (JDBC.vmSupportsJSR169())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "cannot run with JSR169 - missing functionality" +
                 " for org.apache.derby.iapi.jdbc.AuthenticationService");
@@ -116,8 +118,10 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
                 "-DderbyTesting.dnString=myJNDIstring");
 
         ldapContextFactory=getSystemProperty("derbyTesting.ldapContextFactory");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
 
         BaseTestSuite suite = new BaseTestSuite("LDAPAuthenticationTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3659
         suite.addTest(baseSuite("LDAPAuthenticationTest:embedded",
             "testLDAPConnection"));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -125,10 +129,12 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
 
         // Grant ALL FILES execute, and getPolicy permissions, as well as
         // resolve/connect for the LDAP server identified with the property.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         return new SecurityManagerSetup(suite, POLICY_FILE_NAME);
     }
 
     public static Test baseSuite(String name, String fixture) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         Test test = new LDAPAuthenticationTest(fixture);
         setBaseProps(suite, test);
@@ -194,6 +200,7 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
         // but using literal string here to avoid unnecessary import.
         // If the initial context factory is not provided it'll default to 
         // com.sun.jndi.ldap.LdapCtxFactory in LDAPAuthenticationSchemeImpl.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
         if ((ldapContextFactory != null) && (ldapContextFactory.length() > 0))
             setDatabaseProperty("java.naming.factory.initial", ldapContextFactory, conn);
         commit();

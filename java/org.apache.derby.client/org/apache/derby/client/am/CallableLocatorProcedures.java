@@ -91,6 +91,7 @@ class CallableLocatorProcedures
      *
      * @param conn the connection to be used to prepare calls.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     CallableLocatorProcedures(ClientConnection conn)
     {
         this.connection = conn;
@@ -109,15 +110,18 @@ class CallableLocatorProcedures
         //is available is cached in the boolean
         //isLocatorSupportAvailable. If this is false
         //we can return -1
+//IC see: https://issues.apache.org/jira/browse/DERBY-2587
         if (!isLocatorSupportAvailable) {
             return INVALID_LOCATOR;
         }
         
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
             if (blobCreateLocatorCall == null ||
                     !blobCreateLocatorCall.openOnClient_) {
                 blobCreateLocatorCall = connection.prepareCallX
                         ("? = CALL SYSIBM.BLOBCREATELOCATOR()",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
                         connection.holdability());
@@ -165,10 +169,12 @@ class CallableLocatorProcedures
      */
     void blobReleaseLocator(int locator) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (blobReleaseLocatorCall == null ||
                 !blobReleaseLocatorCall.openOnClient_) {
             blobReleaseLocatorCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBRELEASELOCATOR(?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -177,6 +183,7 @@ class CallableLocatorProcedures
         }
 
         blobReleaseLocatorCall.setIntX(1, locator);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             blobReleaseLocatorCall.executeX();
         } catch (SqlException sqle) {
@@ -201,10 +208,12 @@ class CallableLocatorProcedures
                                     int searchLocator, 
                                     long fromPosition) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (blobGetPositionFromLocatorCall == null ||
                 !blobGetPositionFromLocatorCall.openOnClient_) {
             blobGetPositionFromLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETPOSITIONFROMLOCATOR(?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -217,6 +226,7 @@ class CallableLocatorProcedures
         blobGetPositionFromLocatorCall.setIntX(2, locator);
         blobGetPositionFromLocatorCall.setIntX(3, searchLocator);
         blobGetPositionFromLocatorCall.setLongX(4, fromPosition);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             blobGetPositionFromLocatorCall.executeX();
         } catch (SqlException sqle) {
@@ -327,10 +337,12 @@ class CallableLocatorProcedures
                                           int offset,
                                           int length) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (blobGetPositionFromBytesCall == null ||
                 !blobGetPositionFromBytesCall.openOnClient_) {
             blobGetPositionFromBytesCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETPOSITIONFROMBYTES(?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -352,6 +364,7 @@ class CallableLocatorProcedures
         blobGetPositionFromBytesCall.setIntX(2, locator);
         blobGetPositionFromBytesCall.setBytesX(3, bytesToBeCompared);
         blobGetPositionFromBytesCall.setLongX(4, fromPosition);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             blobGetPositionFromBytesCall.executeX();
         } catch (SqlException sqle) {
@@ -371,9 +384,11 @@ class CallableLocatorProcedures
      */
     long blobGetLength(int sourceLocator) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (blobGetLengthCall == null || !blobGetLengthCall.openOnClient_) {
             blobGetLengthCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETLENGTH(?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -383,6 +398,7 @@ class CallableLocatorProcedures
         }
 
         blobGetLengthCall.setIntX(2, sourceLocator);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             blobGetLengthCall.executeX();
         } catch (SqlException sqle) {
@@ -420,9 +436,11 @@ class CallableLocatorProcedures
     {
         if (forLength == 0) return new byte[0];
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (blobGetBytesCall == null || !blobGetBytesCall.openOnClient_) {
             blobGetBytesCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETBYTES(?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -437,6 +455,7 @@ class CallableLocatorProcedures
             blobGetBytesCall.setIntX(2, sourceLocator);
             blobGetBytesCall.setLongX(3, fromPosition + gotSoFar);
             blobGetBytesCall.setIntX(4, forLength - gotSoFar);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             try {
                 blobGetBytesCall.executeX();
             } catch (SqlException sqle) {
@@ -493,9 +512,11 @@ class CallableLocatorProcedures
                       int forLength, 
                       byte[] bytes) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (blobSetBytesCall == null || !blobSetBytesCall.openOnClient_) {
             blobSetBytesCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBSETBYTES(?, ?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -523,6 +544,7 @@ class CallableLocatorProcedures
             blobSetBytesCall.setLongX(2, fromPosition + sentSoFar);
             blobSetBytesCall.setIntX(3, numBytesThisRound);
             blobSetBytesCall.setBytesX(4, bytesToBeSent);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             try {
                 blobSetBytesCall.executeX();
             } catch (SqlException sqle) {
@@ -548,9 +570,11 @@ class CallableLocatorProcedures
      */
     void blobTruncate(int sourceLocator, long length) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (blobTruncateCall == null || !blobTruncateCall.openOnClient_) {
             blobTruncateCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBTRUNCATE(?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -560,6 +584,7 @@ class CallableLocatorProcedures
 
         blobTruncateCall.setIntX(1, sourceLocator);
         blobTruncateCall.setLongX(2, length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             blobTruncateCall.executeX();
         } catch (SqlException sqle) {
@@ -581,15 +606,20 @@ class CallableLocatorProcedures
         //is available is cached in the boolean
         //isLocatorSupportAvailable. If this is false
         //we can return -1
+//IC see: https://issues.apache.org/jira/browse/DERBY-2587
         if (!isLocatorSupportAvailable) {
             return INVALID_LOCATOR;
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2587
+//IC see: https://issues.apache.org/jira/browse/DERBY-2587
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
             if (clobCreateLocatorCall == null ||
                     !clobCreateLocatorCall.openOnClient_) {
                 clobCreateLocatorCall = connection.prepareCallX
                         ("? = CALL SYSIBM.CLOBCREATELOCATOR()",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
                         ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -637,10 +667,12 @@ class CallableLocatorProcedures
      */
     void clobReleaseLocator(int locator) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (clobReleaseLocatorCall == null ||
                 !clobReleaseLocatorCall.openOnClient_) {
             clobReleaseLocatorCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBRELEASELOCATOR(?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -649,6 +681,7 @@ class CallableLocatorProcedures
         }
 
         clobReleaseLocatorCall.setIntX(1, locator);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             clobReleaseLocatorCall.executeX();
         } catch (SqlException sqle) {
@@ -755,10 +788,12 @@ class CallableLocatorProcedures
                                            int offset,
                                            int length) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (clobGetPositionFromStringCall == null ||
                 !clobGetPositionFromStringCall.openOnClient_) {
             clobGetPositionFromStringCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETPOSITIONFROMSTRING(?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -777,8 +812,10 @@ class CallableLocatorProcedures
         }
 
         clobGetPositionFromStringCall.setIntX(2, locator);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         clobGetPositionFromStringCall.setStringX(3, stringToBeCompared);
         clobGetPositionFromStringCall.setLongX(4, fromPosition);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             clobGetPositionFromStringCall.executeX();
         } catch (SqlException sqle) {
@@ -804,10 +841,12 @@ class CallableLocatorProcedures
                                     int searchLocator, 
                                     long fromPosition) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (clobGetPositionFromLocatorCall == null ||
                 !clobGetPositionFromLocatorCall.openOnClient_) {
             clobGetPositionFromLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETPOSITIONFROMLOCATOR(?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -820,6 +859,7 @@ class CallableLocatorProcedures
         clobGetPositionFromLocatorCall.setIntX(2, locator);
         clobGetPositionFromLocatorCall.setIntX(3, searchLocator);
         clobGetPositionFromLocatorCall.setLongX(4, fromPosition);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             clobGetPositionFromLocatorCall.executeX();
         } catch (SqlException sqle) {
@@ -838,9 +878,11 @@ class CallableLocatorProcedures
      */
     long clobGetLength(int sourceLocator) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (clobGetLengthCall == null || !clobGetLengthCall.openOnClient_) {
             clobGetLengthCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETLENGTH(?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -850,6 +892,7 @@ class CallableLocatorProcedures
         }
 
         clobGetLengthCall.setIntX(2, sourceLocator);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         try {
             clobGetLengthCall.executeX();
         } catch (SqlException sqle) {
@@ -886,11 +929,14 @@ class CallableLocatorProcedures
         throws SqlException
     {
         if (forLength == 0) return "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2495
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (clobGetSubStringCall == null ||
                 !clobGetSubStringCall.openOnClient_) {
             clobGetSubStringCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETSUBSTRING(?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -906,6 +952,7 @@ class CallableLocatorProcedures
             clobGetSubStringCall.setIntX(2, sourceLocator);
             clobGetSubStringCall.setLongX(3, fromPosition + gotSoFar);
             clobGetSubStringCall.setIntX(4, forLength - gotSoFar);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             try {
                 clobGetSubStringCall.executeX();
             } catch (SqlException sqle) {
@@ -963,9 +1010,11 @@ class CallableLocatorProcedures
                        int forLength, 
                        String string) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (clobSetStringCall == null || !clobSetStringCall.openOnClient_) {
             clobSetStringCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBSETSTRING(?, ?, ?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -989,6 +1038,7 @@ class CallableLocatorProcedures
             clobSetStringCall.setLongX(2, fromPosition + sentSoFar);
             clobSetStringCall.setIntX(3, numCharsThisRound);
             clobSetStringCall.setStringX(4, stringToBeSent);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
             try {
                 clobSetStringCall.executeX();
             } catch (SqlException sqle) {
@@ -1014,9 +1064,11 @@ class CallableLocatorProcedures
      */
     void clobTruncate(int sourceLocator, long length) throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3799
         if (clobTruncateCall == null || !clobTruncateCall.openOnClient_) {
             clobTruncateCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBTRUNCATE(?, ?)",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                  ResultSet.TYPE_FORWARD_ONLY,
                  ResultSet.CONCUR_READ_ONLY,
                  ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -1047,6 +1099,7 @@ class CallableLocatorProcedures
      */
     private SqlException handleInvalidLocator(SqlException sqle)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2770
         SqlException ex = sqle;
         while (ex != null) {
             if (ex.getSQLState().compareTo

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ConstantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -60,6 +61,8 @@ abstract class ConstantNode extends ValueNode
 	** two fields holding the same constant).
 	*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ConstantNode(
             TypeId typeId,
             boolean nullable,
@@ -84,6 +87,8 @@ abstract class ConstantNode extends ValueNode
 	/**
 	  * Get the value in this ConstantNode
 	  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DataValueDescriptor getValue()
 	{
 		return	value;
@@ -127,6 +132,8 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getClone()
 	{
 		/* All constants can simply be reused */
@@ -151,9 +158,12 @@ abstract class ConstantNode extends ValueNode
 	 * signature here needs to have throws StandardException 
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
             throws StandardException
 	{
 		/*
@@ -202,6 +212,7 @@ abstract class ConstantNode extends ValueNode
 		/* Are we generating a SQL null value? */
 	    if (isNull())
 	    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 			acb.generateNull(mb, getTypeCompiler(), 
 					getTypeServices().getCollationType());
 		}
@@ -257,6 +268,7 @@ abstract class ConstantNode extends ValueNode
         
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
 			ConstantNode other = (ConstantNode)o;
 			

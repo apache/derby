@@ -250,6 +250,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
      * Assert that a table has the correct column types.
      */
     protected void assertColumnTypes( Connection conn, String tableName, String[][] columnTypes )
+//IC see: https://issues.apache.org/jira/browse/DERBY-3923
         throws Exception
     {
         PreparedStatement   ps = chattyPrepare
@@ -366,6 +367,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
      */
     protected <T> ArrayList<T> fill( T[] raw )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return new ArrayList<T>(Arrays.asList(raw));
     }
     

@@ -90,6 +90,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 	{
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, columns, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
               constraintId, indexId, schemaDesc, enforced);
 		this.referenceCount = referenceCount;
 		this.constraintType = constraintType;
@@ -131,6 +132,8 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 			cdl = getForeignKeyConstraints(type);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ConstraintDescriptor cd : cdl)
 		{
 			if (! (cd instanceof ForeignKeyConstraintDescriptor))
@@ -160,6 +163,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 		throws StandardException
 	{
         ConstraintDescriptorList result = new ConstraintDescriptorList();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 		if (SanityManager.DEBUG)
 		{
@@ -168,6 +172,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 	
 		ForeignKeyConstraintDescriptor fkcd;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         for (ConstraintDescriptor cd : getForeignKeyConstraints(type))
 		{
 			if (! (cd instanceof ForeignKeyConstraintDescriptor))
@@ -178,6 +183,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 			fkcd = (ForeignKeyConstraintDescriptor) cd;
 			if(!(fkcd.getTableId().equals(getTableId())))
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 result.add(fkcd);
 			}
 		}
@@ -305,6 +311,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 		/*
 		** If we are disabled, we never fire
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (!enforced())
 		{
 			return false;

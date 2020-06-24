@@ -3681,6 +3681,7 @@ class DRDAConnThread extends Thread {
         writer.startDdm(CodePoint.ACCRDBRM);
         writer.writeScalar2Bytes(CodePoint.SVRCOD, svrcod);
         writer.writeScalarString(CodePoint.PRDID,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
                                  NetworkServerControlImpl.prdId());
         //TYPDEFNAM -required - JCC doesn't support QTDSQLJVM so for now we
         // just use ASCII, though we should eventually be able to use QTDSQLJVM
@@ -3695,6 +3696,8 @@ class DRDAConnThread extends Thread {
          // data caching.
          // Sending the session data on connection initialization was introduced
          // in Derby 10.7.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5847
+//IC see: https://issues.apache.org/jira/browse/DERBY-436
          if ((appRequester.getClientType() == AppRequester.DNC_CLIENT) &&
                  appRequester.greaterThanOrEqualTo(10, 7, 0)) {
              try {
@@ -3704,6 +3707,7 @@ class DRDAConnThread extends Thread {
                  errorInChain(se);
              }
          }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         finalizeChain();
     }
     
@@ -3711,6 +3715,8 @@ class DRDAConnThread extends Thread {
     {
         //TYPDEFOVR - required - only single byte and mixed byte are specified
         writer.startDdm(CodePoint.TYPDEFOVR);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5847
+//IC see: https://issues.apache.org/jira/browse/DERBY-436
         writer.writeScalar2Bytes(CodePoint.CCSIDSBC,
                                  NetworkServerControlImpl.CCSIDSBC);
         writer.writeScalar2Bytes(CodePoint.CCSIDMBC,
@@ -3719,6 +3725,8 @@ class DRDAConnThread extends Thread {
         if (database.sendTRGDFTRT)
         {
             // default to multibyte character
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             writer.startDdm(CodePoint.PKGDFTCST);
             writer.writeShort(CodePoint.CSTMBCS);
             writer.endDdm();
@@ -3877,6 +3885,7 @@ class DRDAConnThread extends Thread {
         boolean rtnsqlda = false;
         boolean rtnOutput = true;   // Return output SQLDA is default
         Pkgnamcsn pkgnamcsn = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
 
         Database databaseToSet = null;
 
@@ -3952,6 +3961,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
      */
     private String parsePRPSQLSTTobjects(DRDAStatement stmt) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         throws DRDAProtocolException, SQLException
     {
         String sqlStmt = null;
@@ -4071,6 +4081,7 @@ class DRDAConnThread extends Thread {
 
         if (attrs.indexOf("WITH HOLD") != -1)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
             stmt.withHoldCursor = ResultSet.HOLD_CURSORS_OVER_COMMIT;
             validAttribute = true;
         }
@@ -4165,6 +4176,7 @@ class DRDAConnThread extends Thread {
 
         codePoint = reader.getCodePoint();
         boolean outputExpected = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         Pkgnamcsn pkgnamcsn = null;
         int numRows = 1;    // default value
         int blkSize =  0;
@@ -4180,6 +4192,8 @@ class DRDAConnThread extends Thread {
             switch (codePoint)
             {
                 // optional
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                 case CodePoint.RDBNAM:
                     setDatabase(CodePoint.EXCSQLSTT);
                     break;
@@ -4288,6 +4302,7 @@ class DRDAConnThread extends Thread {
             if ( stmt == null  || !(stmt.wasExplicitlyPrepared()))
             {
                 stmt  = database.newDRDAStatement(pkgnamcsn);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 stmt.setQryprctyp(CodePoint.QRYBLKCTL_DEFAULT);
                 needPrepareCall = true;
             }
@@ -4305,6 +4320,7 @@ class DRDAConnThread extends Thread {
             stmt.setQryprctyp(CodePoint.QRYBLKCTL_DEFAULT);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         stmt.nbrrow = numRows;
         stmt.qryrowset = qryrowset;
         stmt.blksize = blkSize;
@@ -4312,6 +4328,7 @@ class DRDAConnThread extends Thread {
         stmt.maxrslcnt = maxrslcnt;
         stmt.outovropt = outovropt;
         stmt.rslsetflg = rslsetflg;
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
         if (pendingStatementTimeout >= 0) {
             stmt.getPreparedStatement().setQueryTimeout(pendingStatementTimeout);
             pendingStatementTimeout = -1;
@@ -4322,6 +4339,7 @@ class DRDAConnThread extends Thread {
         database.setCurrentStatement(stmt);
         
         boolean hasResultSet;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1559
         if (reader.isChainedWithSameID()) 
         {
             hasResultSet = parseEXCSQLSTTobjects(stmt);
@@ -4332,6 +4350,8 @@ class DRDAConnThread extends Thread {
                 // if we had parameters the callable statement would
                 // be prepared with parseEXCQLSTTobjects, otherwise we
                 // have to do it here
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                 String prepareString = "call " + stmt.procName +"()";
                 if (SanityManager.DEBUG) {
                     trace ("$$$prepareCall is: "+prepareString);
@@ -4372,6 +4392,7 @@ class DRDAConnThread extends Thread {
                 writer.endDdm();
                 writer.startDdm(CodePoint.FDODTA);
                 writeFDODTA(stmt);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
                 writer.endDdm();
                 writer.endDdmAndDss();
 
@@ -4381,6 +4402,7 @@ class DRDAConnThread extends Thread {
                     writeEXTDTA(stmt);
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             else if (hasResultSet) {
             // DRDA spec says that we MUST return either an
             // SQLDTARD or an SQLCARD--the former when we have
@@ -4400,6 +4422,7 @@ class DRDAConnThread extends Thread {
         // are ready to send resultset info.
         stmt.finishParams();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         EnginePreparedStatement ps = stmt.getPreparedStatement();
         int rsNum = 0;
         do {
@@ -4431,6 +4454,7 @@ class DRDAConnThread extends Thread {
         else  if (! sendSQLDTARD)
         {
             long updateCount = ps.getLargeUpdateCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
             // The protocol wants us to send RDBUPDRM here, but we don't do
             // that because it used to cause protocol errors. DERBY-5847 has
@@ -4494,6 +4518,7 @@ class DRDAConnThread extends Thread {
                     // optional
                     case CodePoint.TYPDEFNAM:
                         setStmtOrDbByteOrder(false, stmt, parseTYPDEFNAM());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1559
                         stmt.setTypDefValues();
                         break;
                     // optional
@@ -4507,7 +4532,9 @@ class DRDAConnThread extends Thread {
                         gotSQLDTA = true;
                         break;
                     // optional
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     case CodePoint.EXTDTA:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1559
                         readAndSetAllExtParams(stmt, true);
                         stmt.ps.clearWarnings();
                         result = stmt.execute();
@@ -4528,6 +4555,7 @@ class DRDAConnThread extends Thread {
             missingCodePoint(CodePoint.SQLDTA);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1559
         if (! gotEXTDTA) {
             stmt.ps.clearWarnings();
             result = stmt.execute();
@@ -4549,11 +4577,13 @@ class DRDAConnThread extends Thread {
         writer.createDssObject();
         writer.startDdm(CodePoint.SQLCINRD);
         if (sqlamLevel >= MGRLVL_7) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             writeSQLDHROW(rs.getHoldability());
         }
 
         ResultSetMetaData rsmeta = rs.getMetaData();
         int ncols = rsmeta.getColumnCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         writer.writeShort(ncols);   // num of columns
         if (sqlamLevel >= MGRLVL_7)
         {
@@ -4589,6 +4619,7 @@ class DRDAConnThread extends Thread {
 
         for (int i = 0; i < numResults; i ++)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 writer.writeInt(i); // rsLocator
                 writeVCMorVCS(stmt.getResultSetCursorName(i));
                 writer.writeInt(1); // num of rows XXX resolve, it doesn't matter for now
@@ -4616,6 +4647,7 @@ class DRDAConnThread extends Thread {
         writer.startDdm(CodePoint.PKGSNLST);
         
         for (int i = 0; i < numResults; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
             writePKGNAMCSN(stmt.getResultSetPkgcnstkn(i).getBytes());
         }
         writer.endDdm();
@@ -4653,12 +4685,15 @@ class DRDAConnThread extends Thread {
     private void parseSQLDTA_work(DRDAStatement stmt) throws DRDAProtocolException,SQLException
     {
         String strVal;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         EnginePreparedStatement ps = stmt.getPreparedStatement();
         int codePoint;
         ParameterMetaData pmeta = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
 
         // Clear params without releasing storage
         stmt.clearDrdaParams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
 
         int numVars = 0;
         boolean rtnParam = false;
@@ -4678,10 +4713,12 @@ class DRDAConnThread extends Thread {
                         if (SanityManager.DEBUG) {
                             trace("num of vars in this group is: "+numVarsInGrp);
                         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         reader.readByte();      // tripletType
                         reader.readByte();      // id
                         for (int j = 0; j < numVarsInGrp; j++)
                         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
                             final byte t = reader.readByte();
                             if (SanityManager.DEBUG)  {
                                 trace("drdaType is: "+ "0x" +
@@ -4698,6 +4735,7 @@ class DRDAConnThread extends Thread {
                     if (SanityManager.DEBUG) {
                         trace("numVars = " + numVars);
                     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     if (ps == null)     // it is a CallableStatement under construction
                     {
                         StringBuilder marks = new StringBuilder();  // construct parameter marks
@@ -4739,8 +4777,10 @@ class DRDAConnThread extends Thread {
                                 // The first exception is the most likely suspect
                                 throw se;
                             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
                             rtnParam = true;
                         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                         ps = (EnginePreparedStatement) cs;
                         stmt.ps = ps;
                     }
@@ -4751,6 +4791,7 @@ class DRDAConnThread extends Thread {
                     break;
                 // optional
                 case CodePoint.FDODTA:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     reader.readByte();  // row indicator
                     for (int i = 0; i < numVars; i++)
                     {
@@ -4775,10 +4816,14 @@ class DRDAConnThread extends Thread {
                         }
 
                         // not null, read and set it
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
                         readAndSetParams(i, stmt, pmeta);
                     }
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 case CodePoint.EXTDTA:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1559
+//IC see: https://issues.apache.org/jira/browse/DERBY-1559
                     readAndSetAllExtParams(stmt, false);
                     break;
                 default:
@@ -4830,7 +4875,10 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
      */
     private void readAndSetParams(int i,
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                                   DRDAStatement stmt,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
                                   ParameterMetaData pmeta)
                 throws DRDAProtocolException, SQLException
     {
@@ -4860,15 +4908,19 @@ class DRDAConnThread extends Thread {
                 ps.setBoolean(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             case DRDAConstants.DRDA_TYPE_NSMALL:
             {
                 short paramVal = (short) reader.readShort(getByteOrder());
                 if (SanityManager.DEBUG) {
                     trace("short parameter value is: "+paramVal);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4889
                 ps.setShort(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case  DRDAConstants.DRDA_TYPE_NINTEGER:
             {
                 int paramVal = reader.readInt(getByteOrder());
@@ -4878,6 +4930,7 @@ class DRDAConnThread extends Thread {
                 ps.setInt(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NINTEGER8:
             {
                 long paramVal = reader.readLong(getByteOrder());
@@ -4887,6 +4940,7 @@ class DRDAConnThread extends Thread {
                 ps.setLong(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NFLOAT4:
             {
                 float paramVal = reader.readFloat(getByteOrder());
@@ -4896,6 +4950,7 @@ class DRDAConnThread extends Thread {
                 ps.setFloat(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NFLOAT8:
             {
                 double paramVal = reader.readDouble(getByteOrder());
@@ -4905,6 +4960,7 @@ class DRDAConnThread extends Thread {
                 ps.setDouble(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NDECIMAL:
             {
                 int precision = (paramLenNumBytes >> 8) & 0xff;
@@ -4916,12 +4972,14 @@ class DRDAConnThread extends Thread {
                 ps.setBigDecimal(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NDATE:
             {
                 String paramVal = reader.readStringData(10).trim();  //parameter may be char value
                 if (SanityManager.DEBUG) {
                     trace("ndate parameter value is: \""+paramVal+"\"");
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-157
                 try {
                     Calendar cal = getGMTCalendar();
                     ps.setDate(i+1, parseDate(paramVal, cal), cal);
@@ -4936,6 +4994,7 @@ class DRDAConnThread extends Thread {
                 }
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NTIME:
             {
                 String paramVal = reader.readStringData(8).trim();  //parameter may be char value
@@ -4951,6 +5010,7 @@ class DRDAConnThread extends Thread {
                 }
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
             {
                 // JCC represents ts in a slightly different format than Java standard, so
@@ -4971,6 +5031,7 @@ class DRDAConnThread extends Thread {
                 }
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NCHAR:
             case DRDAConstants.DRDA_TYPE_NVARCHAR:
             case DRDAConstants.DRDA_TYPE_NLONG:
@@ -4984,6 +5045,7 @@ class DRDAConnThread extends Thread {
                 ps.setString(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case  DRDAConstants.DRDA_TYPE_NFIXBYTE:
             {
                 byte[] paramVal = reader.readBytes();
@@ -5010,6 +5072,7 @@ class DRDAConnThread extends Thread {
                 ps.setObject(i+1, paramVal);
                 break;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DRDA_TYPE_NLOBBYTES:
             case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
             case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
@@ -5018,6 +5081,7 @@ class DRDAConnThread extends Thread {
                  long length = readLobLength(paramLenNumBytes);
                  if (length != 0) //can be -1 for CLI if "data at exec" mode, see clifp/exec test
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
                     stmt.addExtPosition(i);
                  }
                  else   /* empty */
@@ -5030,6 +5094,7 @@ class DRDAConnThread extends Thread {
                  }
                  break;
              }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2506
                         case DRDAConstants.DRDA_TYPE_NLOBLOC:
                         {
                             //read the locator value
@@ -5068,6 +5133,7 @@ class DRDAConnThread extends Thread {
                             ps.setClob(i+1, clobFromLocator);
                             break;
                         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             default:
                 {
                 String paramVal = reader.readLDStringData(stmt.ccsidMBCEncoding);
@@ -5102,6 +5168,7 @@ class DRDAConnThread extends Thread {
 
 
     private long readLobLength(int extLenIndicator) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         throws DRDAProtocolException
     {
         switch (extLenIndicator)
@@ -5245,8 +5312,10 @@ class DRDAConnThread extends Thread {
     }
 
     private void readAndSetAllExtParams(final DRDAStatement stmt, final boolean streamLOB) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         throws SQLException, DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
         final int numExt = stmt.getExtPositionCount();
         for (int i = 0; i < numExt; i++)
                     {
@@ -5292,6 +5361,7 @@ class DRDAConnThread extends Thread {
                 checkNullability = true;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             final EXTDTAReaderInputStream stream =
                 reader.getEXTDTAReaderInputStream(checkNullability);
 
@@ -5314,9 +5384,12 @@ class DRDAConnThread extends Thread {
 
             traceEXTDTARead(drdaType, i+1, stream, streamLOB, encoding);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             try {
                 switch (drdaType)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     case  DRDAConstants.DRDA_TYPE_LOBBYTES:
                     case  DRDAConstants.DRDA_TYPE_NLOBBYTES:
                         setAsBinaryStream(stmt, i+1, stream, streamLOB);
@@ -5365,6 +5438,7 @@ class DRDAConnThread extends Thread {
     {
         int codePoint;
         reader.markCollection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         Pkgnamcsn pkgnamcsn = null;
         codePoint = reader.getCodePoint();
         while (codePoint != -1)
@@ -5396,6 +5470,7 @@ class DRDAConnThread extends Thread {
         // initialize statement for reuse
         drdaStmt.initialize();
         String sqlStmt = parseEXECSQLIMMobjects();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         EngineStatement statement = drdaStmt.getStatement();
         statement.clearWarnings();
         if (pendingStatementTimeout >= 0) {
@@ -5454,6 +5529,7 @@ class DRDAConnThread extends Thread {
                     // NOTE: This codepoint is not in the DDM spec for 'EXCSQLSET',
                     // but since it DOES get sent by jcc1.2, we have to have
                     // a case for it...
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
                     Pkgnamcsn pkgnamcsn = parsePKGNAMCSN();
                     break;
                 default:
@@ -5549,6 +5625,8 @@ class DRDAConnThread extends Thread {
 
         do
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             correlationID = reader.readDssHeader();
             while (reader.moreDssData())
             {
@@ -5573,12 +5651,15 @@ class DRDAConnThread extends Thread {
                             gotSqlStt = true;
                         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
                         if (sqlStmt.startsWith(TIMEOUT_STATEMENT)) {
                             String timeoutString = sqlStmt.substring(TIMEOUT_STATEMENT.length());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
                             pendingStatementTimeout = Integer.parseInt(timeoutString);
                             break;
                         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         if (canIgnoreStmt(sqlStmt)) {
                         // We _know_ Derby doesn't recognize this
                         // statement; don't bother trying to execute it.
@@ -5689,6 +5770,7 @@ class DRDAConnThread extends Thread {
         if (reader.getDdmLength() == CodePoint.PKGNAMCSN_LEN)
         {
             // This is a scalar object with the following fields
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
             reader.readString(rdbnam, CodePoint.RDBNAM_LEN, true);
             if (SanityManager.DEBUG) {
                 trace("rdbnam = " + rdbnam);
@@ -5704,6 +5786,7 @@ class DRDAConnThread extends Thread {
                         
             // This check was added because of DERBY-1434  
             // check the client version first
+//IC see: https://issues.apache.org/jira/browse/DERBY-5565
             if (appRequester.greaterThanOrEqualTo(10,3,0) ) {
                 // check the database name
                 if (!rdbnam.toString().equals(database.getDatabaseName())) {
@@ -5711,6 +5794,7 @@ class DRDAConnThread extends Thread {
                 }
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             reader.readString(rdbcolid, CodePoint.RDBCOLID_LEN, true);
             if (SanityManager.DEBUG)  {
                 trace("rdbcolid = " + rdbcolid);
@@ -5764,6 +5848,7 @@ class DRDAConnThread extends Thread {
             }
 
             //RDBCOLID can be variable length in this format
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             length = reader.readNetworkShort();
             reader.readString(rdbcolid, length, true);
             if (SanityManager.DEBUG) {
@@ -5804,6 +5889,8 @@ class DRDAConnThread extends Thread {
             // The byte array returned by pkgcnstkn.getBytes() might
             // be modified by DDMReader.readString() later, so we have
             // to create a copy of the array.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             byte[] token = new byte[pkgcnstkn.length()];
             System.arraycopy(pkgcnstkn.getBytes(), 0, token, 0, token.length);
 
@@ -5926,6 +6013,7 @@ class DRDAConnThread extends Thread {
         if (length == 0) {
             // Can't return null here as that will indicate that the cp is 
             // missing, when it in fact was present, but contained an empty string
+//IC see: https://issues.apache.org/jira/browse/DERBY-5806
             return ""; 
         }
         byte [] byteStr = reader.readBytes(length);
@@ -5953,6 +6041,7 @@ class DRDAConnThread extends Thread {
     private String parseCcsidSBC(int length) throws DRDAProtocolException
     {
         String strVal = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-706
         DRDAStatement  currentStatement;
         
         currentStatement = database.getCurrentStatement();
@@ -5997,6 +6086,8 @@ class DRDAConnThread extends Thread {
      */
     private DRDAStatement parseCLSQRY() throws DRDAProtocolException, SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         Pkgnamcsn pkgnamcsn = null;
         reader.markCollection();
         long qryinsid = 0;
@@ -6008,6 +6099,8 @@ class DRDAConnThread extends Thread {
             switch (codePoint)
             {
                 // optional
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                 case CodePoint.RDBNAM:
                     setDatabase(CodePoint.CLSQRY);
                     break;
@@ -6023,6 +6116,7 @@ class DRDAConnThread extends Thread {
                 case CodePoint.MONITOR:
                     parseMONITOR();
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 default:
                     invalidCodePoint(codePoint);
             }
@@ -6040,6 +6134,8 @@ class DRDAConnThread extends Thread {
         if (stmt == null)
         {
             //XXX should really throw a SQL Exception here
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             invalidValue(CodePoint.PKGNAMCSN);
         }
 
@@ -6106,6 +6202,8 @@ class DRDAConnThread extends Thread {
         {
             writeSQLERRRM(severity);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
         writeSQLCARD(e, updateCount, 0);
     }
 
@@ -6160,8 +6258,10 @@ class DRDAConnThread extends Thread {
     }
 
     private void writeSQLCARD(SQLException e,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         long updateCount, long rowCount ) throws DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         writer.createDssObject();
         writer.startDdm(CodePoint.SQLCARD);
         writeSQLCAGRP(e, updateCount, rowCount);
@@ -6195,6 +6295,7 @@ class DRDAConnThread extends Thread {
     {
         writer.createDssObject();
         writer.startDdm(CodePoint.SQLCARD);
+//IC see: https://issues.apache.org/jira/browse/DERBY-825
         writeSQLCAGRP(nullSQLState, 0, 0, 0);
         writer.endDdmAndDss();
     }
@@ -6252,6 +6353,8 @@ class DRDAConnThread extends Thread {
         int ec = e.getErrorCode();
         switch (ec)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             case ExceptionSeverity.STATEMENT_SEVERITY:
             case ExceptionSeverity.TRANSACTION_SEVERITY:
                 severity = CodePoint.SVRCOD_ERROR;
@@ -6305,6 +6408,9 @@ class DRDAConnThread extends Thread {
     {
         int sqlcode = getSqlCode(e);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-825
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         if (e == null) {
             // Forwarding to the optimized version when there is no
             // exception object
@@ -6312,12 +6418,16 @@ class DRDAConnThread extends Thread {
             return;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (rowCount < 0 && updateCount < 0)
         {
             writer.writeByte(CodePoint.NULLDATA);
             return;
         }
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (SanityManager.DEBUG && server.debugOutput() && sqlcode < 0) {
             trace("handle SQLException here");
             trace("reason is: "+e.getMessage());
@@ -6330,16 +6440,21 @@ class DRDAConnThread extends Thread {
         
         //null indicator
         writer.writeByte(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
         // SQLCODE
         writer.writeInt(sqlcode);
 
         // SQLSTATE
         writer.writeString(e.getSQLState());
+//IC see: https://issues.apache.org/jira/browse/DERBY-825
 
         // SQLERRPROC
         // Write the byte[] constant rather than the string, for efficiency
         writer.writeBytes( getProductIDBytes() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 
         // SQLCAXGRP
         writeSQLCAXGRP(updateCount, rowCount, buildSqlerrmc(e), e.getNextException());
@@ -6375,8 +6490,12 @@ class DRDAConnThread extends Thread {
      */
 
     private void writeSQLCAGRP(byte[] sqlState, int sqlcode, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                                long updateCount, long rowCount) throws DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
         if (rowCount < 0 && updateCount < 0) {
             writer.writeByte(CodePoint.NULLDATA);
             return;
@@ -6393,6 +6512,7 @@ class DRDAConnThread extends Thread {
 
         // SQLERRPROC
         writer.writeBytes( getProductIDBytes() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 
         // SQLCAXGRP (Uses null as sqlerrmc since there is no error)
         writeSQLCAXGRP(updateCount, rowCount, null, null);
@@ -6448,9 +6568,11 @@ class DRDAConnThread extends Thread {
     {
         boolean severe = (se.getErrorCode() >=  ExceptionSeverity.SESSION_SEVERITY);    
         String sqlerrmc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
         // get exception which carries Derby messageID and args, per DERBY-1178
         StandardException ferry = StandardException.getArgumentFerry(se);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
 
         if (se instanceof DataTruncation) {
             // Encode DataTruncation in a special way.
@@ -6462,6 +6584,9 @@ class DRDAConnThread extends Thread {
             // If this is not a Derby exception or is a severe excecption where
             // we have no hope of succussfully calling the SYSIBM.SQLCAMESSAGE send
             // preformatted message using the server locale
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
             sqlerrmc = buildPreformattedSqlerrmc(se);
         }
 
@@ -6499,6 +6624,7 @@ class DRDAConnThread extends Thread {
             sb.append("SQLSTATE: ");
             sb.append(se.getSQLState());
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return sb.toString();
     }
 
@@ -6519,6 +6645,8 @@ class DRDAConnThread extends Thread {
             StandardException ferry = StandardException.getArgumentFerry(se);
             if (ferry != null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6802
+//IC see: https://issues.apache.org/jira/browse/DERBY-6823
                 sqlerrmc += MessageUtils.encodeMessageAndArgumentsAsSqlerrmc(
                                 ferry.getMessageId(),
                                 ferry.getArguments());
@@ -6615,6 +6743,9 @@ class DRDAConnThread extends Thread {
         writer.writeByte(0);        // SQLCAXGRP INDICATOR
         if (sqlamLevel < 7)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
             writeRDBNAM(database.getDatabaseName());
             writeSQLCAERRWARN(updateCount, rowCount);
         }
@@ -6639,6 +6770,7 @@ class DRDAConnThread extends Thread {
     private void writeSQLCAERRWARN(long updateCount, long rowCount) 
     {
         // SQL ERRD1 = Sqlca.HIGH_ORDER_ROW_COUNT
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         writer.writeInt((int)((rowCount>>>32)));
         // SQL ERRD2 = Sqlca.LOW_ORDER_ROW_COUNT
         writer.writeInt((int)(rowCount & 0x0000000ffffffffL));
@@ -6731,6 +6863,7 @@ class DRDAConnThread extends Thread {
             // only send arguments for diagnostic level 0
             if (diagnosticLevel == CodePoint.DIAGLVL0) {
                 // we are only able to get arguments of Derby exceptions
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
                 StandardException ferry =
                         StandardException.getArgumentFerry(se);
                 if (ferry != null) {
@@ -6775,6 +6908,7 @@ class DRDAConnThread extends Thread {
         for (se = nextException; se != null; se = se.getNextException()) {
             i++;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1313
         writer.writeShort(i);
     }
 
@@ -6827,6 +6961,7 @@ class DRDAConnThread extends Thread {
         writer.writeString(sqlState);
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         writer.writeInt(0);                     // REASON_CODE
         writer.writeInt(0);                     // LINE_NUMBER
         writer.writeLong(rowNum);               // ROW_NUMBER
@@ -6878,6 +7013,7 @@ class DRDAConnThread extends Thread {
     {
         PreparedStatement ps = stmt.getPreparedStatement();
         ResultSetMetaData rsmeta = ps.getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
         ParameterMetaData pmeta = stmt.getParameterMetaData();
         int numElems = 0;
         if (e == null || e instanceof SQLWarning)
@@ -6896,6 +7032,7 @@ class DRDAConnThread extends Thread {
         writeSQLCAGRP(e, 0, 0);
 
         if (sqlamLevel >= MGRLVL_7) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3311
             writeSQLDHROW(ps.getResultSetHoldability());
         }
 
@@ -6934,10 +7071,12 @@ class DRDAConnThread extends Thread {
 
         ResultSet rs = null;
         ResultSetMetaData rsmeta = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
         ParameterMetaData pmeta = null;
         if (!stmt.needsToSendParamData) {
             rs = stmt.getResultSet();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (rs == null) {
             // this is a CallableStatement, use parameter meta data
             pmeta = stmt.getParameterMetaData();
@@ -7037,6 +7176,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
      */
     private void writeSQLDTAGRP(DRDAStatement stmt, ResultSetMetaData rsmeta, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
                                 ParameterMetaData pmeta,
                                 int colStart, int colEnd, boolean first)
         throws DRDAProtocolException, SQLException
@@ -7066,6 +7206,8 @@ class DRDAConnThread extends Thread {
         for (int i = colStart; i <= colEnd; i++)
         {
             boolean nullable = hasRs ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-5847
+//IC see: https://issues.apache.org/jira/browse/DERBY-436
                 (rsmeta.isNullable(i) == ResultSetMetaData.columnNullable) :
                 (pmeta.isNullable(i) == ParameterMetaData.parameterNullable);
             int colType = (hasRs ? rsmeta.getColumnType(i) : pmeta.getParameterType(i));
@@ -7079,6 +7221,7 @@ class DRDAConnThread extends Thread {
             {
                 precision = rsmeta.getPrecision(i);
                 scale = rsmeta.getScale(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 stmt.setRsDRDAType(i,drdaType);
                 stmt.setRsPrecision(i, precision);
                 stmt.setRsScale(i,scale);
@@ -7088,6 +7231,7 @@ class DRDAConnThread extends Thread {
             {
                 if (stmt.isOutputParam(i))
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2381
                     precision = pmeta.getPrecision(i);
                     scale = pmeta.getScale(i);
                     ((CallableStatement) stmt.ps).registerOutParameter(i,Types.DECIMAL,scale);
@@ -7134,6 +7278,7 @@ class DRDAConnThread extends Thread {
      */
     private void writeSQLDHROW(int holdability) throws DRDAProtocolException,SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (JVMInfo.JDK_ID < 2) //write null indicator for SQLDHROW because there is no holdability support prior to jdk1.3
         {
             writer.writeByte(CodePoint.NULLDATA);
@@ -7143,6 +7288,7 @@ class DRDAConnThread extends Thread {
         writer.writeByte(0);        // SQLDHROW INDICATOR
 
         //SQLDHOLD
+//IC see: https://issues.apache.org/jira/browse/DERBY-3311
         writer.writeShort(holdability);
         
         //SQLDRETURN
@@ -7156,6 +7302,7 @@ class DRDAConnThread extends Thread {
         //SQLDKEYTYPE
         writer.writeShort(0);
         //SQLRDBNAME
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         writer.writeShort(0);   //CCC on Windows somehow does not take any dbname
         //SQLDSCHEMA
         writeVCMorVCS(null);
@@ -7274,6 +7421,7 @@ class DRDAConnThread extends Thread {
             writer.endDdmAndDss();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (!stmt.hasdata()) {
             final boolean qryclsOnLmtblkprc =
                 appRequester.supportsQryclsimpForLmtblkprc();
@@ -7343,6 +7491,7 @@ class DRDAConnThread extends Thread {
 
         if (rs != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             numCols = stmt.getNumRsCols();
             if (stmt.isScrollable()) {
                 hasdata = positionCursor(stmt, rs);
@@ -7353,6 +7502,7 @@ class DRDAConnThread extends Thread {
         else    // it's for a CallableStatement
         {
             hasdata = stmt.hasOutputParams();
+//IC see: https://issues.apache.org/jira/browse/DERBY-815
             numCols = stmt.getDrdaParamCount();
         }
 
@@ -7367,6 +7517,7 @@ class DRDAConnThread extends Thread {
             
             // Send ResultSet warnings if there are any
             SQLWarning sqlw = (rs != null)? rs.getWarnings(): null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1481
             if (rs != null) {
                 rs.clearWarnings();
             }
@@ -7376,7 +7527,9 @@ class DRDAConnThread extends Thread {
             // popped by client onto its rowUpdated state, i.e. this 
             // warning should not reach API level.
             if (rs != null && rs.rowUpdated()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1374
                 SQLWarning w = new SQLWarning("", SQLState.ROW_UPDATED,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1313
                         ExceptionSeverity.WARNING_SEVERITY);
                 if (sqlw != null) {
                     sqlw.setNextWarning(w);
@@ -7388,6 +7541,7 @@ class DRDAConnThread extends Thread {
             // SQLCARD and a null data group. The SQLCARD has a warning
             // SQLSTATE of 02502
             if (rs != null && rs.rowDeleted()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1374
                 SQLWarning w = new SQLWarning("", SQLState.ROW_DELETED,
                         ExceptionSeverity.WARNING_SEVERITY);
                 if (sqlw != null) {
@@ -7402,6 +7556,9 @@ class DRDAConnThread extends Thread {
             final int sqlcagrpStart = writer.getBufferPosition();
 
             if (sqlw == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-825
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                 writeSQLCAGRP(nullSQLState, 0, -1, -1);
             } else {
                 writeSQLCAGRP(sqlw, 1, -1);
@@ -7443,10 +7600,13 @@ class DRDAConnThread extends Thread {
 
                     if (SanityManager.DEBUG) {
                         trace("!!drdaType = " + java.lang.Integer.toHexString(drdaType) + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2941
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                                  " precision=" + precision +" scale = " + scale);
                     }
                     switch (ndrdaType)
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         case DRDAConstants.DRDA_TYPE_NLOBBYTES:
                         case  DRDAConstants.DRDA_TYPE_NLOBCMIXED:
                             EXTDTAInputStream extdtaStream=  
@@ -7465,6 +7625,7 @@ class DRDAConnThread extends Thread {
                                 writer.writeInt(ival);
                             }
                             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         case DRDAConstants.DRDA_TYPE_NSMALL:
                             short sval = rs.getShort(i);
                             valNull = rs.wasNull();
@@ -7476,6 +7637,7 @@ class DRDAConnThread extends Thread {
                                 writer.writeShort(sval);
                             }
                             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         case DRDAConstants.DRDA_TYPE_NINTEGER8:
                             long lval = rs.getLong(i);
                             valNull = rs.wasNull();
@@ -7487,6 +7649,7 @@ class DRDAConnThread extends Thread {
                                 writer.writeLong(lval);
                             }
                             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         case DRDAConstants.DRDA_TYPE_NFLOAT4:
                             float fval = rs.getFloat(i);
                             valNull = rs.wasNull();
@@ -7498,6 +7661,7 @@ class DRDAConnThread extends Thread {
                                 writer.writeFloat(fval);
                             }
                             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         case DRDAConstants.DRDA_TYPE_NFLOAT8:
                             double dval = rs.getDouble(i);
                             valNull = rs.wasNull();
@@ -7509,6 +7673,7 @@ class DRDAConnThread extends Thread {
                                 writer.writeDouble(dval);
                             }
                             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         case DRDAConstants.DRDA_TYPE_NCHAR:
                         case DRDAConstants.DRDA_TYPE_NVARCHAR:
                         case DRDAConstants.DRDA_TYPE_NVARMIX:
@@ -7540,6 +7705,7 @@ class DRDAConnThread extends Thread {
                     if (stmt.isOutputParam(i)) {
                         int[] outlen = new int[1];
                         drdaType = FdocaConstants.mapJdbcTypeToDrdaType( stmt.getOutputParamType(i), true, appRequester, outlen );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2381
                         precision = stmt.getOutputParamPrecision(i);
                         scale = stmt.getOutputParamScale(i);
                                                 
@@ -7577,6 +7743,7 @@ class DRDAConnThread extends Thread {
             }
 
             // does all this fit in one QRYDTA
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             if (writer.getDSSLength() > blksize)
             {
                 splitQRYDTA(stmt, blksize);
@@ -7699,6 +7866,7 @@ class DRDAConnThread extends Thread {
                 return cs.getTime(index, getGMTCalendar());
             case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
                 return cs.getTimestamp(index, getGMTCalendar());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4066
             case DRDAConstants.DRDA_TYPE_NLOBBYTES:
             case  DRDAConstants.DRDA_TYPE_NLOBCMIXED:
                 return EXTDTAInputStream.getEXTDTAStream(cs, index, drdaType);
@@ -7819,10 +7987,13 @@ class DRDAConnThread extends Thread {
                                 
                 // for scrollable cursors - calculate the row count
                 // since we may not have gone through each row
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                 rs.last();
                 stmt.rowCount  = rs.getRow();
 
                                 // reposition after last or before first
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
                                 if (isAfterLast) {
                                     rs.afterLast();
                                 }
@@ -7830,8 +8001,10 @@ class DRDAConnThread extends Thread {
                                     rs.beforeFirst();
                                 } 
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             else  // non-scrollable cursor
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
                 final boolean qryclsOnLmtblkprc =
                     appRequester.supportsQryclsimpForLmtblkprc();
                 if (stmt.isRSCloseImplicit(qryclsOnLmtblkprc)) {
@@ -7848,11 +8021,14 @@ class DRDAConnThread extends Thread {
         boolean isQRYSCRAFT = (stmt.getQryscrorn() == CodePoint.QRYSCRAFT);
 
         // Using sqlstate 00000 or 02000 for end of data.
+//IC see: https://issues.apache.org/jira/browse/DERBY-825
                 writeSQLCAGRP((isQRYSCRAFT ? eod00000 : eod02000),
                               (isQRYSCRAFT ? 0 : 100), 0, stmt.rowCount);
                 
         writer.writeByte(CodePoint.NULLDATA);
         // does all this fit in one QRYDTA
+//IC see: https://issues.apache.org/jira/browse/DERBY-1454
+//IC see: https://issues.apache.org/jira/browse/DERBY-1454
         if (writer.getDSSLength() > blksize)
         {
             splitQRYDTA(stmt, blksize);
@@ -7870,14 +8046,18 @@ class DRDAConnThread extends Thread {
         boolean retval = false;
         switch (stmt.getQryscrorn())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             case CodePoint.QRYSCRREL:
                                 int rows = (int)stmt.getQryrownbr();
+//IC see: https://issues.apache.org/jira/browse/DERBY-517
                                 if ((rs.isAfterLast() && rows > 0) || (rs.isBeforeFirst() && rows < 0)) {
                                     retval = false;
                                 } else {
                                     retval = rs.relative(rows);
                                 }
                                 break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             case CodePoint.QRYSCRABS:
                 // JCC uses an absolute value of 0 which is not allowed in JDBC
                 // We translate it into beforeFirst which seems to work.
@@ -7954,6 +8134,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
      */
     private void writeSQLDAGRP(ResultSetMetaData rsmeta,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
                                ParameterMetaData pmeta,
                                int elemNum, boolean rtnOutput)
         throws DRDAProtocolException, SQLException
@@ -7978,6 +8159,8 @@ class DRDAConnThread extends Thread {
         writer.writeShort(scale);
 
         boolean nullable = rtnOutput ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-5847
+//IC see: https://issues.apache.org/jira/browse/DERBY-436
          (rsmeta.isNullable(jdbcElemNum) == ResultSetMetaData.columnNullable) :
          (pmeta.isNullable(jdbcElemNum) == ParameterMetaData.parameterNullable);
         
@@ -8139,6 +8322,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
      */
     private void writeSQLUDTGRP(ResultSetMetaData rsmeta,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
                                 ParameterMetaData pmeta,
                                 int jdbcElemNum, boolean rtnOutput)
         throws DRDAProtocolException,SQLException
@@ -8152,6 +8336,7 @@ class DRDAConnThread extends Thread {
             return;
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         String typeName = rtnOutput ?
             rsmeta.getColumnTypeName( jdbcElemNum ) : pmeta.getParameterTypeName( jdbcElemNum );
         String className = rtnOutput ?
@@ -8184,6 +8369,7 @@ class DRDAConnThread extends Thread {
 
 
     private void writeSQLDXGRP(ResultSetMetaData rsmeta,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
                                ParameterMetaData pmeta,
                                int jdbcElemNum, boolean rtnOutput)
         throws DRDAProtocolException,SQLException
@@ -8207,6 +8393,8 @@ class DRDAConnThread extends Thread {
         if (pmeta != null && !rtnOutput)
         {
             int mode = pmeta.getParameterMode(jdbcElemNum);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5847
+//IC see: https://issues.apache.org/jira/browse/DERBY-436
             if (mode ==  ParameterMetaData.parameterModeUnknown)
             {
                 // For old style callable statements. We assume in/out if it
@@ -8265,6 +8453,7 @@ class DRDAConnThread extends Thread {
 
     protected void writeFdocaVal(int index, Object val, int drdaType,
                                  int precision, int scale, boolean valNull,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                                  DRDAStatement stmt, boolean isParam)
             throws DRDAProtocolException, SQLException
     {
@@ -8282,6 +8471,7 @@ class DRDAConnThread extends Thread {
                 case DRDAConstants.DRDA_TYPE_NSMALL:
                     // DB2 does not have a BOOLEAN java.sql.bit type,
                     // so we need to send it as a small
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     if (val instanceof Boolean)
                     {
                         writer.writeShort(((Boolean) val).booleanValue());
@@ -8291,6 +8481,7 @@ class DRDAConnThread extends Thread {
                         writer.writeShort(((Number) val).shortValue());
                     }
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                 case  DRDAConstants.DRDA_TYPE_NINTEGER:
                     writer.writeInt(((Integer) val).intValue());
                     break;
@@ -8319,6 +8510,7 @@ class DRDAConnThread extends Thread {
                 case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
                     writer.writeString(formatTimestamp((Timestamp) val));
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                 case DRDAConstants.DRDA_TYPE_NCHAR:
                     writer.writeString(((String) val).toString());
                     break;
@@ -8334,6 +8526,7 @@ class DRDAConnThread extends Thread {
                 case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
 
                     // do not send EXTDTA for lob of length 0, beetle 5967
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                     if( ! ((EXTDTAInputStream) val).isEmptyStream() ){
                         stmt.addExtDtaObject(val, index);
                     
@@ -8350,12 +8543,14 @@ class DRDAConnThread extends Thread {
                 case  DRDAConstants.DRDA_TYPE_NFIXBYTE:
                     writer.writeBytes((byte[]) val);
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                 case DRDAConstants.DRDA_TYPE_NVARBYTE:
                 case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
                         writer.writeLDBytes((byte[]) val, index);
                     break;
                 case DRDAConstants.DRDA_TYPE_NLOBLOC:
                 case DRDAConstants.DRDA_TYPE_NCLOBLOC:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3576
                     writer.writeInt(((EngineLOB)val).getLocator());
                     break;
                 case DRDAConstants.DRDA_TYPE_NUDT:
@@ -8499,6 +8694,7 @@ class DRDAConnThread extends Thread {
      */
     private void copyToRequired(int [] req)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         currentRequiredLength = req.length;
         if (currentRequiredLength > required.length) {
             required = new int[currentRequiredLength];
@@ -8572,6 +8768,7 @@ class DRDAConnThread extends Thread {
      * @throws DRDAProtocolException
      */
     private void invalidClient(String prdid) throws DRDAProtocolException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5565
         Monitor.logMessage(new Date()
                 + " : "
                 + server.localizeMessage("DRDA_InvalidClient.S",
@@ -8598,6 +8795,7 @@ class DRDAConnThread extends Thread {
      */
     private void badObjectLength(int codePoint) throws DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         throwSyntaxrm(CodePoint.SYNERRCD_OBJ_LEN_NOT_ALLOWED, codePoint);
     }
     /**
@@ -8726,6 +8924,7 @@ class DRDAConnThread extends Thread {
             xaProto.rollbackCurrentTransaction();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         server.removeFromSessionTable(session.connNum);
         try {
             session.close();
@@ -8852,7 +9051,9 @@ class DRDAConnThread extends Thread {
      */
     protected  void trace(String value)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (SanityManager.DEBUG && server.debugOutput() == true) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3706
             server.consoleMessage(value, true);
         }
     }
@@ -8870,8 +9071,10 @@ class DRDAConnThread extends Thread {
      * @param encoding the encoding of the data, if any
      */
     private void traceEXTDTARead(int drdaType, int index,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
                                  EXTDTAReaderInputStream stream,
                                  boolean streamLOB, String encoding) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (SanityManager.DEBUG && server.debugOutput() == true) {
             StringBuilder sb = new StringBuilder("Reading/setting EXTDTA: ");
             // Data: t<type>/i<ob_index>/<streamLOB>/<encoding>/
@@ -8899,6 +9102,7 @@ class DRDAConnThread extends Thread {
     public static void showmem() {
         Runtime rt = Runtime.getRuntime();
         Date d = new Date();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         rt.gc();
         System.out.println("total memory: "
                            + rt.totalMemory()
@@ -9044,6 +9248,7 @@ class DRDAConnThread extends Thread {
 
   void writeEXTDTA (DRDAStatement stmt) throws SQLException, DRDAProtocolException
   {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
       ArrayList<Object> extdtaValues = stmt.getExtDtaObjects();
     // build the EXTDTA data, if necessary
     if (extdtaValues == null) {
@@ -9072,7 +9277,9 @@ class DRDAConnThread extends Thread {
         if (o instanceof EXTDTAInputStream) {
             EXTDTAInputStream stream = (EXTDTAInputStream) o;
                         
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             try{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2941
                         stream.initInputStream();
             writer.writeScalarStream (chainedWithSameCorrelator,
                                       CodePoint.EXTDTA,
@@ -9106,6 +9313,7 @@ class DRDAConnThread extends Thread {
      * @exception DRDAProtocolException
      */
     private void checkWarning(Connection conn, Statement stmt, ResultSet rs,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                           long updateCount, boolean alwaysSend, boolean sendWarn)
         throws DRDAProtocolException, SQLException
     {
@@ -9161,6 +9369,7 @@ class DRDAConnThread extends Thread {
     }
 
     boolean hasSession() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         return session != null;
     }
     
@@ -9280,6 +9489,7 @@ class DRDAConnThread extends Thread {
             // 
             // if monitor is never setup by any ModuleControl, getMonitor
             // returns null and no Derby database has been booted. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             if (getMonitor() != null) {
                 databaseObj = (org.apache.derby.iapi.db.Database)
                     findService(Property.DATABASE_MODULE, dbName);
@@ -9292,6 +9502,7 @@ class DRDAConnThread extends Thread {
 
                 // now try to find it again
                 databaseObj = (org.apache.derby.iapi.db.Database)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                     findService(Property.DATABASE_MODULE, dbName);
             }
 
@@ -9299,6 +9510,7 @@ class DRDAConnThread extends Thread {
             // does not exist - we just return security mechanism not
             // supported down below as we could not verify we can handle
             // it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
             try {
                 if (databaseObj != null) {
                     authenticationService =
@@ -9325,6 +9537,7 @@ class DRDAConnThread extends Thread {
 
         // SECMEC_USRSSBPWD target initialization
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5055
             myTargetSeed = DecryptionManager.generateSeed();
             database.secTokenOut = myTargetSeed;
         } catch (SQLException se) {
@@ -9344,6 +9557,7 @@ class DRDAConnThread extends Thread {
      * the stream failed
      */
     private static void closeStream(InputStream stream) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5396
         try {
             if (stream != null) {
                 stream.close();
@@ -9361,6 +9575,7 @@ class DRDAConnThread extends Thread {
         // Suppress the exception that may be thrown when reading the status
         // byte here, we want the embedded statement to fail while executing.
         stream.setSuppressException(true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
 
         final int byteArrayLength = 
             stream instanceof StandardEXTDTAReaderInputStream ?
@@ -9385,6 +9600,7 @@ class DRDAConnThread extends Thread {
 
         // Check if the client driver encountered any errors when reading the
         // source on the client side.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         if (stream.isStatusSet() &&
                 stream.getStatus() != DRDAConstants.STREAM_OK) {
             // Create a stream that will just fail when accessed.
@@ -9427,6 +9643,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException if setting the stream fails
      */
     private static void setAsCharacterStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
                                          DRDAStatement stmt,
                                          int i,
                                          EXTDTAReaderInputStream extdtaStream,
@@ -9450,6 +9667,7 @@ class DRDAConnThread extends Thread {
             new InputStreamReader( is,
                                    encoding ) ;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         ps.setCharacterStream(i, streamReader);
     }
 
@@ -9485,6 +9703,7 @@ class DRDAConnThread extends Thread {
                 ps.setBinaryStream(index, stream, length);
 
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
                 ps.setBinaryStream(index, stream);
             }
         } else {
@@ -9503,6 +9722,7 @@ class DRDAConnThread extends Thread {
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

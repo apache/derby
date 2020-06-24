@@ -36,6 +36,7 @@ public class T_Access
 	public static AccessFactory getAccessFactory() throws SQLException
 	{
 		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
 		return lcc.getTransactionExecute().getAccessManager();
 	}
 

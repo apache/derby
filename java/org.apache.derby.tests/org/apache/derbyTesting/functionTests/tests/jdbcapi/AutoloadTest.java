@@ -66,6 +66,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      * desired configuration
      */
     private AutoloadTest(Class<?> wrapper) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5664
         this("spawnProcess");
         spawnedTestClass = wrapper;
     }
@@ -91,9 +92,11 @@ public class AutoloadTest extends BaseJDBCTestCase
      * @return the test
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2024
         if (!JDBC.vmSupportsJDBC3())
             return new BaseTestSuite("empty: no java.sql.DriverManager");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         boolean embeddedAutoLoad = false;
         boolean clientAutoLoad = false;
@@ -107,6 +110,7 @@ public class AutoloadTest extends BaseJDBCTestCase
             // does not start up. Unlike when the embedded driver is
             // put in jdbc.drivers.
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
             jdbc4Autoload = true;
         }
 
@@ -122,6 +126,7 @@ public class AutoloadTest extends BaseJDBCTestCase
 
             embeddedAutoLoad = jdbcDrivers
                     .contains("org.apache.derby.jdbc.EmbeddedDriver");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
 
             clientAutoLoad = jdbcDrivers
                     .contains("org.apache.derby.jdbc.ClientDriver");
@@ -134,6 +139,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         
         if (jdbc4Autoload || embeddedAutoLoad || clientAutoLoad)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite = new BaseTestSuite("AutoloadTest");
             
             if (jdbc4Autoload && !embeddedAutoLoad)
@@ -166,6 +172,7 @@ public class AutoloadTest extends BaseJDBCTestCase
 
         // Run a single test that ensures that the driver is
         // not loaded implicitly by some other means.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("AutoloadTest: no autoloading expected");
         
@@ -185,9 +192,12 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     private static Test baseAutoLoadSuite(String which)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("AutoloadTest: " + which);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         suite.addTest(new AutoloadTest("testRegisteredDriver"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         if ("embedded".equals(which))
         {
             // Tests to see if the full engine is booted correctly
@@ -199,6 +209,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         
         suite.addTest(new AutoloadTest("testSuccessfulConnect"));
       	
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         if ("embedded".equals(which)) {
             suite.addTest(SecurityManagerSetup.noSecurityManager(
                 new AutoloadTest("testEmbeddedStarted")));
@@ -234,7 +245,9 @@ public class AutoloadTest extends BaseJDBCTestCase
      * @return the test constructed
      */
     static Test fullAutoloadSuite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("AutoloadTest:All");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5664
         suite.addTest(new AutoloadTest(AutoloadTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversEmbeddedTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversClientTest.class));
@@ -258,6 +271,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      * @throws java.lang.Exception something went wrong
      */
     public void spawnProcess() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
         final List<String> args = new ArrayList<String>();
         args.add("-Dderby.system.durability=" +
                 getSystemProperty("derby.system.durability"));
@@ -347,6 +361,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     public void testAutoloadDriverUnregister() throws Exception {
         if (usingEmbedded()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             String AutoloadedDriver = getAutoloadedDriverName();
             String Driver40 = "org.apache.derby.jdbc.Driver40";
             String Driver30 = "org.apache.derby.jdbc.Driver30";
@@ -374,6 +389,7 @@ public class AutoloadTest extends BaseJDBCTestCase
 
             //Derby should be able to get a connection if AutoloaderDriver is
             //not in DriverManager. Make a connection to test it. Derby-2905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(driverClass);
             clazz.getConstructor().newInstance();
             url = getTestConfiguration().getJDBCUrl();
@@ -393,10 +409,12 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
     private String  getAutoloadedDriverName()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return "org.apache.derby.iapi.jdbc.AutoloadedDriver";
     }
     private String  getClientDriverName()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return "org.apache.derby.client.ClientAutoloadedDriver";
     }
     
@@ -409,6 +427,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         String protocol =
             getTestConfiguration().getJDBCClient().getUrlBase();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         println("Test case '" + getName() + "'. Looking up driver for protocol " + protocol);
         Driver driver = DriverManager.getDriver(protocol);
         assertNotNull("Expected registered driver", driver);
@@ -435,8 +454,10 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     private boolean isEmbeddedDriverRegistered()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         String  clientDriverName = getClientDriverName();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
         for (Enumeration<Driver> e = DriverManager.getDrivers();
                 e.hasMoreElements(); )
         {
@@ -444,6 +465,7 @@ public class AutoloadTest extends BaseJDBCTestCase
             String driverClass = d.getClass().getName();
             if (!driverClass.startsWith("org.apache.derby."))
                 continue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
             if (driverClass.equals( clientDriverName ))
                 continue;
 
@@ -518,6 +540,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     
     private void explicitLoad(boolean instanceOnly) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         String driverClass =
             getTestConfiguration().getJDBCClient().getJDBCDriverName();
         
@@ -529,6 +552,7 @@ public class AutoloadTest extends BaseJDBCTestCase
             testUnsuccessfulConnect();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(driverClass);
         clazz.getConstructor().newInstance();
         testSuccessfulConnect();
@@ -580,9 +604,11 @@ public class AutoloadTest extends BaseJDBCTestCase
         String user = getTestConfiguration().getUserName();
         String pw = getTestConfiguration().getUserPassword();
         int port = TestConfiguration.getBasePort();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6181
         final InetAddress host = InetAddress.getByName(TestConfiguration.getCurrent().getHostName());
         NetworkServerControl control = new NetworkServerControl(host, port, user, pw);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5643
         if (!serverShouldBeUp) {
             // If we expect the server not to come up, wait a little before
             // checking if the server is up. If the server is (unexpectedly)
@@ -608,6 +634,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     private boolean fullEngineAutoBoot()
     {
         String jdbcDrivers = getSystemProperty("jdbc.drivers");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
         return jdbcDrivers.contains("org.apache.derby.jdbc.EmbeddedDriver");
     }
     
@@ -618,6 +645,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     
     public void testEmbeddedNotStarted()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         assertFalse(hasDerbyThreadGroup());
     }
     
@@ -635,6 +663,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     private boolean getRegisteredDrivers(String driver) {
 
     Enumeration<Driver> e = DriverManager.getDrivers();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6704
 
         while(e.hasMoreElements())
         {
@@ -676,6 +705,8 @@ public class AutoloadTest extends BaseJDBCTestCase
             //Case 2: Test with deregister=false, AutoloadedDriver should
             //still be in DriverManager
             JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5029
+//IC see: https://issues.apache.org/jira/browse/DERBY-2095
                     "shutdown=true;deregister=false");
             try {
                 ds.getConnection();

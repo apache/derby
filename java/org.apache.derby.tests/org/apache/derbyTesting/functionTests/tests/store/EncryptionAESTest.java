@@ -96,6 +96,7 @@ extends BaseJDBCTestCase {
 */
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Encryption AES suite");
         // we're using SupportFilesSetup so the created databases will get 
         // removed. Databases get created in subdirectory EXTINOUT.
@@ -201,6 +202,7 @@ extends BaseJDBCTestCase {
         // Pop a message to the console and only test encryptionKeyLength 128.
         if (con == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3711
             if (TestConfiguration.getCurrent().doTrace())
                 System.out.println("no unrestricted policy jars; cannot test AES " +
                     "encryption with encryptionKeyLengths 192 nor 256");
@@ -298,6 +300,7 @@ extends BaseJDBCTestCase {
      */
     private String obtainDbName(String dbName) {
         File tmp = new File(dbName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return PrivilegedFileOpsForTests.getAbsolutePath(
                 new File(SupportFilesSetup.EXTINOUT, tmp.getPath()));
     }
@@ -429,6 +432,7 @@ extends BaseJDBCTestCase {
         String driver =
             getTestConfiguration().getJDBCClient().getJDBCDriverName();
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName(driver);
             clazz.getConstructor().newInstance();
         } catch (ClassNotFoundException cnfe) {

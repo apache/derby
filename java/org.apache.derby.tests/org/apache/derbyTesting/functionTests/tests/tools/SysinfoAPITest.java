@@ -51,6 +51,7 @@ public class SysinfoAPITest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test suite = new BaseTestSuite(SysinfoAPITest.class, "Sysinfo API");
     	
     	return suite;
@@ -166,6 +167,7 @@ public class SysinfoAPITest extends BaseJDBCTestCase {
      *          database information with what is reported by sysinfo
      */
     public void setUp() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         dm = getConnection().getMetaData();
     }
 

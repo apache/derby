@@ -49,6 +49,7 @@ public class UniqueConstraintSetNullTest extends BaseJDBCTestCase {
      *         implemented tests to run.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("UniqueConstraintSetNullTest");
 
@@ -61,6 +62,7 @@ public class UniqueConstraintSetNullTest extends BaseJDBCTestCase {
      * Create table for test cases to use.
      */
     protected void setUp() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5718
         Statement stmt = createStatement();
         stmt.executeUpdate("create table constraintest (" +
                 "val1 varchar (20) not null, " +

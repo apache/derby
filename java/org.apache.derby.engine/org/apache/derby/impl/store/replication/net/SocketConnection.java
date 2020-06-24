@@ -94,6 +94,7 @@ public class SocketConnection {
      */
     public void writeMessage(Object message) throws IOException {
         // reset stream so that previously shipped objects can be gc'ed
+//IC see: https://issues.apache.org/jira/browse/DERBY-3497
         objOutputStream.reset();
         objOutputStream.writeObject(message);
         //flush the stream to ensure that all the data that is part

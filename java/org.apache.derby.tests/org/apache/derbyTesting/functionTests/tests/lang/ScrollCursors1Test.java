@@ -548,6 +548,7 @@ public class ScrollCursors1Test extends BaseJDBCTestCase {
         }
         
         public void testSimpleScrollCursors() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2561
             Connection conn = getConnection();
             Statement s = conn.createStatement();
             s.executeUpdate("create table t (a int)");
@@ -678,6 +679,8 @@ public class ScrollCursors1Test extends BaseJDBCTestCase {
             assertEquals(1, rs.getInt(1));
             assertEquals(2, rs.getInt(2));
             rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
+//IC see: https://issues.apache.org/jira/browse/DERBY-3176
             s.executeUpdate("drop table u1.t1");
         }
         
@@ -698,8 +701,10 @@ public class ScrollCursors1Test extends BaseJDBCTestCase {
         
         public static Test baseSuite(String name) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(ScrollCursors1Test.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2561
 
         return new CleanDatabaseTestSetup(suite) {
 
@@ -725,6 +730,7 @@ public class ScrollCursors1Test extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ScrollCursors1");
         suite.addTest(baseSuite("ScrollCursors1:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("ScrollCursors1:client")));

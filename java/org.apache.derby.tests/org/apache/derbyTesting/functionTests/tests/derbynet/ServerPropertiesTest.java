@@ -56,6 +56,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     //create own policy file
     private static final String POLICY_FILE_NAME =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         "org/apache/derbyTesting/functionTests/tests/derbynet/ServerPropertiesTest.policy";
     private int[] portsSoFar;
     private int basePort;
@@ -67,6 +68,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ServerPropertiesTest");
           
         if (!Derby.hasServer()) return suite;
@@ -77,6 +79,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         // this fixture doesn't use a client/server setup, instead does the 
         // relevant starting/stopping inside the test
         // Add security manager policy that allows executing java commands
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         suite.addTest(decorateTest("ttestSetPortPriority", 
                 new String[] {}, new String[] {}, false));
         
@@ -98,6 +101,9 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 };
         // fixture hits error DRDA_MissingNetworkJar (Cannot find derbynet.jar) so,
         // only run with jars
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
+//IC see: https://issues.apache.org/jira/browse/DERBY-4319
+//IC see: https://issues.apache.org/jira/browse/DERBY-5192
         if (TestConfiguration.loadingFromJars()) 
             suite.addTest(decorateTest("ttestDefaultProperties", 
                 badServerProperties, new String[] {}, true));
@@ -121,6 +127,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         super.tearDown();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         if (portsSoFar != null)
         {
             for (int i = 0 ; i < portsSoFar.length ; i++)
@@ -142,6 +149,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
      * </p>
      */
     private static Test decorateTest(String testName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
             String[] startupProperties, String[] startupArgs,
             boolean startServer)
     {
@@ -153,11 +161,13 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             startupProps = startupProperties;
         if (startupArgs == null)
             startupArgs = new String[]{};
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         NetworkServerTestSetup networkServerTestSetup;
         if (startServer)
         {
             // start networkServer as a process
             networkServerTestSetup = new NetworkServerTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3504
                 spt, startupProps, startupArgs, true);
         }
         else
@@ -177,12 +187,14 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         //
         // Install a security manager using the initial policy file.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
     
     private static Properties getTheProperties() {
         Properties p;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
             p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
         } catch (Exception e) {
             p = null; // should be ok to set to null (to satisfy compiler)
@@ -190,6 +202,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             e.printStackTrace();
             fail("unexpected exception getting properties from server");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-858
         return p;
     }
 
@@ -240,6 +253,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     throws SQLException {
         
         boolean serverUp = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         try {
             serverUp = NetworkServerTestSetup.pingForServerUp(
                 NetworkServerTestSetup.getNetworkServerControl(port), null,
@@ -257,6 +271,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         try {
             if (specifyPort)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
                 NetworkServerControl nsctrl = 
                     NetworkServerTestSetup.getNetworkServerControl(port);
                 nsctrl.shutdown();
@@ -284,6 +299,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         try {
             if (specifyPort)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
                 NetworkServerControl nsctrl = 
                     NetworkServerTestSetup.getNetworkServerControl(port);
                 // For debugging, to make output come to console uncomment:
@@ -294,6 +310,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             }
             else
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
                 NetworkServerControl nsctrl = 
                     NetworkServerTestSetup.getNetworkServerControlDefault();
                 // For debugging, to make output come to console uncomment:
@@ -306,6 +323,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             return "failed to start server with port " + port;
         }
         // check that we have this server up now
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         if (!canPingServer(port, true)) {
             return "Cannot ping server started with port set to " + port;
         }
@@ -328,6 +346,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     * @throws IOException
     */
    private void  assertSuccessfulCmd(String expectedString, String[] Cmd) throws InterruptedException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
        assertExecJavaCmdAsExpected(new String[] {expectedString}, Cmd, 0);
    }
 
@@ -335,6 +354,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
      *  Test port setting priority
      */
     public void ttestSetPortPriority() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
     throws SQLException, InterruptedException, IOException {
         // default is 1527. The test harness configuration would
         // use the API and add the port number. We want to test all
@@ -350,6 +370,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         //    appropriate than shutting down the default server.
         // we really expect the server to be down, let's
         // not do any waiting around
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         NetworkServerTestSetup.setWaitTime(0);
         if (canPingServer(basePort, false)) {
             // for now, shutdown
@@ -360,6 +381,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         // Wait until the server has shut down completely and released the
         // port.
         NetworkServerTestSetup.waitForAvailablePort();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5547
 
         /* 
          * The port should be default, but it might not be, so the second argument
@@ -373,9 +395,12 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         final Properties derbyProperties = new Properties();
         derbyProperties.put("derby.drda.portNumber", 
                 Integer.toString(firstAlternatePort));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         final String derbyHome = getSystemProperty("derby.system.home");
         boolean b = AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         (new java.security.PrivilegedAction<Boolean>(){
             public Boolean run(){
                 boolean fail = false;
@@ -387,6 +412,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 } catch (IOException ioe) {
                     fail = true;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 return fail;
             }
         });
@@ -402,6 +428,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         final int secondAlternatePort = TestConfiguration.getCurrent().getNextAvailablePort();
         // Now set system properties.
         setSystemProperty("derby.drda.portNumber", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Integer.toString(secondAlternatePort));
         actionResult = startServer(secondAlternatePort, false);
         checkWhetherNeedToShutdown( new int[] {basePort, firstAlternatePort, secondAlternatePort},
@@ -422,6 +449,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             "org.apache.derby.drda.NetworkServerControl", "-p",
             String.valueOf(fourthAlternatePort).toString(), 
             "-noSecurityManager", "start"};
+//IC see: https://issues.apache.org/jira/browse/DERBY-3829
         execJavaCmd(commandArray);
         
         if (!canPingServer(fourthAlternatePort, true)) {
@@ -436,6 +464,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 String.valueOf(fourthAlternatePort).toString(), 
                 "-noSecurityManager", "shutdown"};
         execJavaCmd(commandArray);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3829
 
         if (canPingServer(fourthAlternatePort, false)) {
             actionResult = "Can still ping server specified with -p";
@@ -460,6 +489,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         checkWhetherNeedToShutdown ( new int[] {basePort, firstAlternatePort},
             actionResult);
         // remove derby.properties
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (!PrivilegedFileOpsForTests.delete(
                 new File(derbyHome, "derby.properties"))) {
             checkWhetherNeedToShutdown ( new int[] {basePort, firstAlternatePort},
@@ -480,6 +510,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     {
         //check that default properties are used
         verifyProperties(new String[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-858
                 "derby.drda.maxThreads=0", 
                 "derby.drda.sslMode=off", 
                 "derby.drda.keepAlive=true", 
@@ -501,6 +532,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     throws SQLException, IOException, InterruptedException
     {        
         // we only care about the traceAll property, the rest will be unchanged
+//IC see: https://issues.apache.org/jira/browse/DERBY-858
         String expectedTraceOff = "derby.drda.traceAll=false";
         String expectedTraceOn = "derby.drda.traceAll=true";     
         
@@ -527,6 +559,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     throws SQLException, IOException, InterruptedException
     {
         // only care about the LogConnections property; the rest is unchanged
+//IC see: https://issues.apache.org/jira/browse/DERBY-858
         String expectedLogConnectionsOff = "derby.drda.logConnections=false";
         String expectedLogConnectionsOn = "derby.drda.logConnections=true";
         
@@ -536,6 +569,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
 
         String[] cmd = new String[] {
             "org.apache.derby.drda.NetworkServerControl", "logconnections", "on","-p",String.valueOf(port) };
+//IC see: https://issues.apache.org/jira/browse/DERBY-5888
         assertSuccessfulCmd("Log Connections turned on.", cmd);
         verifyProperties(expectedLogConnectionsOn);     
 

@@ -36,6 +36,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * A WindowResultSetNode represents a result set for a window partitioning on a
  * select. Modeled on the code in GroupByNode.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class WindowResultSetNode extends SingleChildResultSetNode
 {
     /**
@@ -81,6 +83,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         ** nodes above it now point to us).  Map our RCL to its columns.
         */
         newBottomRCL = childResult.getResultColumns().copyListAndObjects();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( childResult.getResultColumns() );
         childResult.setResultColumns(newBottomRCL);
 
@@ -103,7 +106,10 @@ class WindowResultSetNode extends SingleChildResultSetNode
         ** Get the new PR, put above the WindowResultSetNode.
         */
         ResultColumnList rclNew = new ResultColumnList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns())
         {
             if (!rc.isGenerated()) {
@@ -115,7 +121,10 @@ class WindowResultSetNode extends SingleChildResultSetNode
         // remember it in the new RCL as well. After the sort is done it will
         // have to be projected out upstream.
         rclNew.copyOrderBySelect(getResultColumns());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         parent = new ProjectRestrictNode(this, // child
                                          rclNew,
                                          null, // havingClause,
@@ -136,10 +145,12 @@ class WindowResultSetNode extends SingleChildResultSetNode
          */
         setResultColumns( new ResultColumnList(getContextManager()) );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         // Add all referenced columns in select list to windowing node's RCL
         // and substitute references in original node to point to the Windowing
         // result set. (modelled on GroupByNode's action for addUnAggColumns)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         CollectNodesVisitor<ColumnReference> getCRVisitor =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
@@ -147,6 +158,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
 
         // Find all unique columns referenced and add those to windowing result
         // set.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<ValueNode> uniqueCols = new ArrayList<ValueNode>();
         for (ColumnReference cr : getCRVisitor.getList()) {
             if (!colRefAlreadySeen(uniqueCols, cr)) {
@@ -165,10 +177,12 @@ class WindowResultSetNode extends SingleChildResultSetNode
 
         // Add any virtual columns to windowing result.
         uniqueCols.addAll(getVCVisitor.getList());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         ResultColumnList bottomRCL  = childResult.getResultColumns();
         ResultColumnList windowingRCL = getResultColumns();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6565
         for (ValueNode crOrVcn : uniqueCols) {
             ResultColumn newRC = new ResultColumn(
                     "##UnWindowingColumn",
@@ -182,6 +196,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
             newRC.setVirtualColumnId(bottomRCL.size());
 
             // now add this column to the windowing result column list
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ResultColumn wRC = new ResultColumn(
                     "##UnWindowingColumn",
                     crOrVcn,
@@ -195,6 +211,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
              ** Reset the original node to point to the
              ** Windowing result set.
              */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             VirtualColumnNode vc = new VirtualColumnNode(
                     this, // source result set.
                     wRC,
@@ -219,6 +237,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
                                       ColumnReference cand)
             throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6565
         for (ValueNode uniqueColRef : uniqueColRefs) {
             ColumnReference cr = (ColumnReference) uniqueColRef;
 
@@ -243,6 +262,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
          */
         ResultColumnList bottomRCL  = childResult.getResultColumns();
         ResultColumnList windowingRCL = getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         ReplaceWindowFuncCallsWithCRVisitor replaceCallsVisitor =
             new ReplaceWindowFuncCallsWithCRVisitor(
@@ -252,6 +273,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         parent.getResultColumns().accept(replaceCallsVisitor);
 
         for (WindowFunctionNode winFunc : windowFuncCalls) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6565
 
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
@@ -264,6 +286,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
                 (WindowDefinitionNode)winFunc.getWindow();
 
             if (funcWindow == wdn) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 ResultColumn newRC = new ResultColumn(
                     "##winFuncResult",
                     winFunc.getNewNullResultExpression(),
@@ -279,6 +303,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
                 ** The Windowing Node result was created when we called
                 ** ReplaceWindowFuncCallsWithCRVisitor.
                 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 ColumnReference newColumnRef = new ColumnReference(
                         newRC.getName(), null, getContextManager());
 
@@ -323,6 +349,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         // Get the final cost estimate from the child.
         setCostEstimate( childResult.getFinalCostEstimate() );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         acb.pushGetResultSetFactoryExpression(mb);
 
@@ -334,6 +361,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
          */
 
         for (int index = rclSize-1; index >= 0; index--) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             ResultColumn rc = getResultColumns().elementAt(index);
             ValueNode expr = rc.getExpression();
 
@@ -357,6 +385,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
 
         /* row allocator */
         mb.push(acb.addItem(getResultColumns().buildRowTemplate())); // arg 3
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         mb.push(getResultSetNumber()); //arg 4
 
@@ -366,6 +395,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         /* There is no restriction at this level, we just want to pass null. */
         mb.pushNull(ClassName.GeneratedMethod); // arg 6
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         mb.push(getCostEstimate().rowCount()); //arg 7
         mb.push(getCostEstimate().getEstimatedCost()); // arg 8
 

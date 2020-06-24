@@ -80,11 +80,14 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         timeSuiteStarted = (new Date()).getTime();
         BaseTestSuite allTests =
             new BaseTestSuite(XplainStatisticsTest.class,
                                "XplainStatisticsTest");
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         Test test = allTests;
         test = new SupportFilesSetup(test); //added by DERBY-4587
             
@@ -481,6 +484,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 	}
 	
     private static boolean hasTable(Statement s,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
                                     String schemaName, String tableName)
         throws SQLException
     {
@@ -505,6 +509,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     {
         verifyXplainUnset(s);
         for (int i = 0; i < tableNames.length; i++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
             if (hasTable(s, "XPLTEST", tableNames[i]))
                 s.execute("delete from XPLTEST." + tableNames[i]);
         s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
@@ -520,6 +525,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     }
     
     private static void enableXplainOnlyMode(Statement s)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
             throws SQLException
     {
         s.execute("call syscs_util.syscs_set_xplain_mode(1)");
@@ -547,6 +553,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	 * Added by DERBY-4587 to test the generation of XML files
     	 * from PlanExporter tool.
     	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         if (exportPlan) {
             String dbUrl = s.getConnection().getMetaData().getURL();
 
@@ -563,6 +570,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
         s.execute("call syscs_util.syscs_set_xplain_schema('')");
     }
 
@@ -600,6 +608,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * on successful execution)
      */
     private static String invokePlanExporterTool(String... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         PrintStream out = System.out;
         PrintStream err = System.err;
 
@@ -661,6 +670,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     }
     
     private void dumpStatements(Statement s)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
         throws SQLException
     {
         ResultSet rs;
@@ -693,6 +703,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @return stmt_id
      * */
     private String getStmtID(Statement s) throws SQLException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
     	ResultSet rs;
         String stmt_id;
         rs = s.executeQuery( 
@@ -738,6 +750,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	DocumentBuilder builder = factory.newDocumentBuilder();
 
     	InputSource xml = new InputSource(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     			AccessController.doPrivileged
     			(new java.security.PrivilegedExceptionAction<InputStream>(){
     				public InputStream run()throws Exception{
@@ -763,6 +776,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     throws Exception
     {
         Document document = (Document) getADocument(file);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4781
 
     	return document.getElementsByTagName("statement").item(0).getChildNodes().item(0).getNodeValue();
 
@@ -777,6 +791,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      */
     private int countNode(final String file) throws Exception{
         Document document = (Document) getADocument(file);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4781
 
     	return document.getElementsByTagName("node").getLength();
     }
@@ -790,6 +805,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     private String getNodeName(final String file) throws Exception{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4781
         Document document = (Document) getADocument(file);
     	NodeList lst=document.getElementsByTagName("node");
     	String name= "";
@@ -809,6 +825,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     private String getNodeAttribute(final String file, String attribute, int node) throws Exception{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4781
     	Document document = (Document) getADocument(file);
     	NodeList lst=document.getElementsByTagName("node");
     	if(lst.item(node).getAttributes().getNamedItem(attribute)==null)
@@ -829,6 +846,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 	throws Exception
     {
         // Make sure there is a statement with recorded statistics.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         Statement s = createStatement();
         enableXplainStyle(s);
         JDBC.assertDrainResults(s.executeQuery("values 1"));
@@ -895,6 +913,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         rs.close();
 
         // Create the XML file. This used to result in a syntax error.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         String output = invokePlanExporterTool(
                 getConnection().getMetaData().getURL(),
                 schema,
@@ -924,6 +943,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @throws Exception if something goes wrong
      */
     public void testSimpleQueryMultiWithInvalidation()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
             throws Exception {
         // Start two threads; one selecting from COUNTRIES with XPLAIN on, and
         // one generating statistics for the same table.
@@ -988,6 +1008,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             new String[][] {  {"Belize"}, {"Costa Rica"}, {"El Salvador"},
                 {"Guatemala"}, {"Honduras"}, {"Nicaragua"} } );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         disableXplainStyle(s, true);
         
         // The statement should have been executed as a PROJECTION
@@ -1079,6 +1100,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          * */
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -1110,6 +1133,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     }
     
     private String getStmtIDByName(Statement s, String sName)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 			throws SQLException
     {
     	ResultSet rs;
@@ -1137,6 +1161,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 	         "WHERE region = 'Central America'" ));
         clearXplainOnlyMode(s);
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
 	// dumpStatements(s);
         // dumpResultSets(s);
@@ -1328,8 +1353,11 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(ps.executeQuery());
         clearXplainOnlyMode(s);
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // Verify that statistics were collected.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6297
         JDBC.assertDrainResults(
                 s.executeQuery("select * from xpltest.sysxplain_statements"),
                 1);
@@ -1357,6 +1385,9 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 {"Europe", "29"}, {"Middle East", "7"},
                 {"North Africa", "5"}, {"North America", "3"},
                 {"Pacific Islands", "3"}, {"South America", "11"} } );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         disableXplainStyle(s, true);
 	//dumpStatements(s);
         //dumpResultSets(s);
@@ -1599,6 +1630,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             new String[][] {  {"AA1112"}, {"AA1114"}, {"AA1116"} } );
 
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // This query should have been executed as a PROJECTION whose child
         // is a ROWIDSCAN whose child is an INDEXSCAN. The INDEXSCAN should
@@ -1648,6 +1680,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         /* This test is added by DERBY-4587, to verify the content
          * of the XML file generated by the new tool, PlanExporter.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -1693,6 +1727,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "SELECT region from countries where country = 'Cameroon'";
         JDBC.assertSingleValueResultSet(s.executeQuery(selectStatement),
                 "Africa");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         disableXplainStyle(s, true);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select op_identifier from xpltest.sysxplain_resultsets"),
@@ -1716,6 +1751,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * This test is added by DERBY-4587, to verify the content
          * of the XML file generated by the new tool, PlanExporter.
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -1769,6 +1806,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 {"Pacific Islands", "3"}, {"South America", "11"} } );
 
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // This statement is executed as a PROJECTION with a child GROUPBY
         // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
@@ -1822,6 +1860,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         /* * This test is added by DERBY-4587, to verify the content
          * of the XML file generated by the new tool, PlanExporter.
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -1868,6 +1908,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         // to look at the statistics.
         s.executeQuery(selectStatement).close();
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         JDBC.assertSingleValueResultSet(s.executeQuery(
             "select count(*) from xpltest.sysxplain_sort_props"), "1");
@@ -1891,6 +1932,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	// This statement is executed as a PROJECTION with a child GROUPBY
         	// with a child PROJECTION with a child TABLESCAN. 
@@ -1932,6 +1975,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "select count(distinct region) from countries";
         JDBC.assertSingleValueResultSet(s.executeQuery(selectStatement), "12");
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // The above statement results in the query execution:
         // PROJECTION(AGGREGATION(PROJECTION(TABLESCAN)))
@@ -1953,6 +1997,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2037,6 +2083,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2074,6 +2122,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         throws Exception
     {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4188
         s.executeUpdate("delete from AIRLINES");
         String insertStatement = 
             "insert into AIRLINES values " +
@@ -2086,6 +2135,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         numRows = s.executeUpdate(updateStatement);
         assertEquals("Failed to update AIRLINES", 1, numRows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         disableXplainStyle(s, true);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
@@ -2171,6 +2221,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2279,6 +2331,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2316,6 +2370,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "select region from countries order by country";
         s.executeQuery(selectStatement).close(); // Discard the results
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // The above statement results in the query execution:
         // PROJECTION(SORT(PROJECTION(TABLESCAN)))
@@ -2355,6 +2410,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          **/ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2398,6 +2455,9 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "select country from countries where region = 'Africa'";
         s.executeQuery(selectStatement).close(); // Discard the results
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // The above statement results in the query execution:
         // SORT(UNION(PROJECTION(TABLESCAN),PROJECTION(TABLESCAN)))
@@ -2453,6 +2513,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2506,6 +2568,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         // result set graph recorded for DDL statements, so the PlanExporter
         // tool will complain.
         disableXplainStyle(s, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
@@ -2527,6 +2590,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "select max(country_iso_code) from countries";
         s.executeQuery(selectStatement).close();
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // The above query is executed as
         // PROJECTION(AGGREGATION(PROJECTION(LASTINDEXKEYSCAN)))
@@ -2577,6 +2641,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2642,6 +2708,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     {"AKL",null},{"NRT",null}
         });
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // We should get a Nested Loop Outer Join which  reads 10 rows
         // from the left (SEEN_ROWS), constructs 10 EMPTY_RIGHT_ROWS,
@@ -2673,6 +2740,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2737,6 +2806,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         for (int i = 0; i < searches.length; i++)
             s.executeQuery(searches[i]).close();
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         ResultSet rs = s.executeQuery(
                 "select s.stmt_text, sp.start_position, sp.stop_position " +
@@ -2802,6 +2872,12 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
       * A simple test of a non-zero value for numDeletedRowsVisited.
       */
     public void testScanDeletedRows()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         throws Exception
     {
         Statement s = createStatement();
@@ -2809,6 +2885,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = "select x from t";
         JDBC.assertUnorderedResultSet(s.executeQuery(selectStatement),
                 new String[][] { {"1"},{"2"},{"4"} });
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
         disableXplainStyle(s, true);
         
         // There should be a CONSTRAINTSCAN result set with a SCAN PROPS
@@ -2834,6 +2911,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
          * of the XML file generated by the new tool, PlanExporter.
          *  
          * */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
         if(XML.classpathMeetsXMLReqs()){
         	//getting the stmt_id, because files are generated using
         	//stmt_id as their name.
@@ -2883,6 +2962,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(sql));
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         // Now, see if we find the query among the recorded statements.
         PreparedStatement ps = prepareStatement(
@@ -2899,6 +2979,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     {
         Statement s = createStatement();
         for (int i = 0; i < tableNames.length; i++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
             if (hasTable(s, "XPLTEST", tableNames[i]))
                 s.executeUpdate("drop table xpltest."+tableNames[i]);
         s.executeUpdate("create table xpltest.sysxplain_resultsets(a int)");
@@ -2914,6 +2995,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             if (e.getMessage().indexOf("RS_ID") < 0)
                 fail("Expected message about missing column RS_ID, not " +
                         e.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4188
         } finally {
             // Drop the created table if this testcase is not run as the last.
             s.executeUpdate("drop table xpltest.sysxplain_resultsets");
@@ -2970,6 +3052,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(queryText));
         disableXplainStyle(s, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
+//IC see: https://issues.apache.org/jira/browse/DERBY-6629
 
         ResultSet rs = s.executeQuery(
         "SELECT STMT_ID, STMT_TEXT FROM XPLTEST.SYSXPLAIN_STATEMENTS");
@@ -3000,6 +3084,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      */
     private static abstract class AbstractMTThread
             implements Runnable {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
 
         protected final Connection con;
         /** Duration of the run. */

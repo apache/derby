@@ -111,6 +111,7 @@ final class GenericParameter
 	{
 		this.pvs = pvs;
 		parameterMode = (this.isReturnOutputParameter = isReturnOutputParameter)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             ? (short) (ParameterMetaData.parameterModeOut) : (short) (ParameterMetaData.parameterModeIn);
 	}
 
@@ -126,6 +127,7 @@ final class GenericParameter
 	public GenericParameter getClone(GenericParameterValueSet pvs)
 	{
 		GenericParameter gpClone = new GenericParameter(pvs, isReturnOutputParameter);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
         gpClone.initialize(this.getValue().cloneValue(false),
                            jdbcTypeId, declaredClassName);
 		gpClone.isSet = true;
@@ -191,6 +193,7 @@ final class GenericParameter
 		}
 
 		switch (parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         case (ParameterMetaData.parameterModeIn):
         case (ParameterMetaData.parameterModeUnknown):
 		default:
@@ -244,6 +247,7 @@ final class GenericParameter
 	void validate() throws StandardException
 	{
 		switch (parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         case (ParameterMetaData.parameterModeUnknown):
 			break;
         case (ParameterMetaData.parameterModeIn):
@@ -312,6 +316,7 @@ final class GenericParameter
 		{
 			try
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1693
 				return value.getTraceString();
 			}
 			catch (StandardException se)

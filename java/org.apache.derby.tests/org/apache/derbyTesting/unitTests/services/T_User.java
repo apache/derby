@@ -156,8 +156,16 @@ class T_User implements Runnable {
 	}
 	private void T004() throws StandardException, T_Fail {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Integer g0 = 1;	// create an object for a lock group
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		// check we have no locks held
 		checkLockCount(cs, 0);
@@ -185,6 +193,7 @@ class T_User implements Runnable {
 			throw T_Fail.testFailMsg("value corrupted in multi-user test, exapected " + value + ", got " + item.value);
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 	void checkLockCount(CompatibilitySpace cs, int expected) throws T_Fail {
 		boolean expect = expected != 0;
 		boolean got = lf.areLocksHeld(cs);

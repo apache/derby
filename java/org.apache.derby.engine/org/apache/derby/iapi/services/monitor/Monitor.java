@@ -169,6 +169,7 @@ import org.apache.derby.shared.common.stream.HeaderPrintWriter;
 	<LI>The properties set of the service (i.e. that passed into Monitor.createPersistentService()
 	or Monitor.startService()).
 	<LI>The System (JVM) properties set (i.e. java.lang.System.getProperties()).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 	<LI>The application properties set (i.e. obtained from the derby.properties file).
 	<LI>The default implementation properties set (i.e. obtained from the
 	/org/apache/derby/modules.properties resource).
@@ -285,8 +286,11 @@ public class Monitor {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void startMonitor(Properties bootProperties, PrintWriter logging) {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
         try {
             new org.apache.derby.impl.services.monitor.FileMonitor(bootProperties, logging);
         } catch (AccessControlException e) {
@@ -301,6 +305,7 @@ public class Monitor {
 	public static boolean setMonitor(ModuleFactory theMonitor) {
 
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		synchronized (syncMe) {
@@ -315,6 +320,7 @@ public class Monitor {
 
 	public static void clearMonitor() {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		// the monitor reference needs to remain valid
@@ -330,6 +336,7 @@ public class Monitor {
 	*/
 	public static ModuleFactory getMonitor() {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		return monitor;
@@ -360,6 +367,7 @@ public class Monitor {
 	*/
 	public static String getServiceName(Object serviceModule) {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		return monitor.getServiceName(serviceModule);
@@ -383,6 +391,7 @@ public class Monitor {
 	*/
 	public static Object startSystemModule(String factoryInterface)
         throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         // Verify that we have permission to execute this method.
         SecurityUtil.checkDerbyInternalsPrivilege();
@@ -404,6 +413,7 @@ public class Monitor {
 	public static Object findSystemModule(String factoryInterface) throws StandardException
 	{
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		Object module = getMonitor().findModule((Object) null,
@@ -421,8 +431,10 @@ public class Monitor {
     public static Object getSystemModule(String factoryInterface)
     {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
         ModuleFactory monitor = getMonitor();
         if (monitor == null)
             return null;
@@ -455,6 +467,7 @@ public class Monitor {
 		throws StandardException {
 
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		Object module = monitor.startModule(create, serviceModule, factoryInterface,
@@ -490,6 +503,7 @@ public class Monitor {
 		throws StandardException {
 
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		Object module = monitor.startModule(create, serviceModule, factoryInterface, identifier, properties);
@@ -512,6 +526,7 @@ public class Monitor {
 	public static Object findServiceModule(Object serviceModule, String factoryInterface)
 		throws StandardException {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		Object module = getMonitor().findModule(serviceModule, factoryInterface, (String) null);
@@ -522,6 +537,7 @@ public class Monitor {
 	public static Object getServiceModule(Object serviceModule, String factoryInterface)
 	{
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		Object module = getMonitor().findModule(serviceModule, factoryInterface, (String) null);
@@ -549,6 +565,7 @@ public class Monitor {
 	*/
 	public static Object findService(String factoryInterface, String serviceName) {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		return monitor.findService(factoryInterface, serviceName);
@@ -571,6 +588,7 @@ public class Monitor {
 		If true is returned then findService should be used to see if the service
 		exists or not.
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 		<P> The poperty set passed in is for boot options for the modules
 		required to start the service. It does not support defining different
 		or new modules implementations.
@@ -640,6 +658,9 @@ public class Monitor {
 		throws StandardException {
 
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		if (SanityManager.DEBUG) {
@@ -653,13 +674,16 @@ public class Monitor {
         throws StandardException
     {
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
         // For now we only allow dropping in-memory databases.
         // This is mostly due to the fact that the current implementation for
         // the on-disk back end doesn't handle logDevice when dropping.
         // Security is another concern.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4590
         if (!name.startsWith(PersistentService.INMEMORY + ":")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
             throw StandardException.newException(
                     SQLState.SERVICE_DIRECTORY_REMOVE_ERROR, name);
         }
@@ -748,6 +772,7 @@ public class Monitor {
 	}
 
     public static void logTextMessage(String messageID, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         getStream().println(MessageService.getTextMessage(messageID, args));
 	}
 
@@ -768,6 +793,7 @@ public class Monitor {
 	public static boolean isFullUpgrade(Properties startParams, String oldVersionInfo) throws StandardException {
 
         // Verify that we have permission to execute this method.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         SecurityUtil.checkDerbyInternalsPrivilege();
         
 		boolean fullUpgrade = Boolean.valueOf(startParams.getProperty(Attribute.UPGRADE_ATTR)).booleanValue();
@@ -813,6 +839,7 @@ public class Monitor {
      * if the bit intersect of the two values is no zero.
      */
 	public static boolean isDesiredType(int engineType, int desiredType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
 		return (engineType & desiredType) != 0;
 	}
 	
@@ -847,6 +874,7 @@ public class Monitor {
 		boolean plainCreate = Boolean.valueOf(p.getProperty(Attribute.CREATE_ATTR)).booleanValue();
 
 		if (plainCreate) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
 			return (type & EngineType.STANDALONE_DB) != 0;
 		}
 
@@ -858,6 +886,7 @@ public class Monitor {
      * Logs the stack trace of the specified throwable object.
      */
     public static void logThrowable(Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
         t.printStackTrace(getStream().getPrintWriter());
     }
 }

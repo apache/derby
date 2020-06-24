@@ -55,6 +55,7 @@ public final class ClassFormatOutput extends DataOutputStream {
 	public void putU1(int i) throws IOException {
 		// ensure the format of the class file is not
 		// corrupted by writing an incorrect, truncated value.
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		if (i > 255)
 			ClassFormatOutput.limit("U1", 255, i);
 		write(i);
@@ -96,6 +97,7 @@ public final class ClassFormatOutput extends DataOutputStream {
 	 * @throws IOException Thrown when limit is exceeded.
 	 */
 	static void limit(String name, int limit, int value)
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		throws IOException
 	{
 		throw new IOException(name + "(" + value + " > " + limit + ")");

@@ -72,6 +72,8 @@ public class OptimizerFactoryImpl
         ** by default.  It is used mainly for testing - there are many tests
         ** that assume the join order is fixed.
         */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         String opt =
             PropertyUtil.getSystemProperty(Optimizer.JOIN_ORDER_OPTIMIZATION);
         if (opt != null)
@@ -185,6 +187,7 @@ public class OptimizerFactoryImpl
 	 */
 	public boolean supportsOptimizerTrace()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
 		return true;
 	}
 
@@ -199,6 +202,8 @@ public class OptimizerFactoryImpl
 								  DataDictionary dDictionary,
 								  RequiredRowOrdering requiredRowOrdering,
 								  int numTablesInQuery,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
 								  OptimizerPlan overridingPlan,
 								  LanguageConnectionContext lcc)
 				throws StandardException
@@ -215,7 +220,10 @@ public class OptimizerFactoryImpl
 							joinStrategySet,
 							lcc.getLockEscalationThreshold(),
 							requiredRowOrdering,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
 							numTablesInQuery,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
 							overridingPlan,
                             lcc);
 	}
@@ -231,6 +239,8 @@ public class OptimizerFactoryImpl
     @Override
     public boolean doJoinOrderOptimization()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return joinOrderOptimization;
     }
 }

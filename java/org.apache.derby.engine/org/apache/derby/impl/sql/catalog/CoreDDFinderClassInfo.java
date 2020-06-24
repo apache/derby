@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -51,9 +52,11 @@ public class CoreDDFinderClassInfo extends FormatableInstanceGetter {
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
 			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
 			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
 		    case StoredFormatIds.SEQUENCE_DESCRIPTOR_FINDER_V01_ID:
 		    case StoredFormatIds.PERM_DESCRIPTOR_FINDER_V01_ID:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3666
 		    case StoredFormatIds.ROLE_GRANT_FINDER_V01_ID:
 				return new DDdependableFinder(fmtId);
 			case StoredFormatIds.COLUMN_DESCRIPTOR_FINDER_V01_ID:

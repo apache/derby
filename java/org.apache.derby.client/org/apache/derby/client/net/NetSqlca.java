@@ -24,10 +24,12 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.Sqlca;
 import org.apache.derby.client.am.ClientConnection;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetSqlca extends Sqlca {
     // these are the same variables that are in the Sqlca except ccsids
     // are a little different
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     NetSqlca(ClientConnection connection,
              int sqlCode,
              String sqlState,
@@ -38,9 +40,11 @@ class NetSqlca extends Sqlca {
         sqlErrpBytes_ = sqlErrpBytes;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     NetSqlca(ClientConnection connection,
             int sqlCode,
             byte[] sqlState,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
             byte[] sqlErrpBytes) {
        super(connection);
        sqlCode_ = sqlCode;
@@ -48,6 +52,7 @@ class NetSqlca extends Sqlca {
        sqlErrpBytes_ = sqlErrpBytes;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void setSqlerrd(int[] sqlErrd) {
         sqlErrd_ = sqlErrd;
     }

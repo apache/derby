@@ -70,12 +70,14 @@ public class TableNameInfo {
 			return "?";
 
 		// see if we have already seen this conglomerate
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		TableDescriptor td = tableCache.get(conglomId);
 		if (td == null)
 		{
 			// first time we see this conglomerate, get it from the
 			// ddCache 
             ConglomerateDescriptor cd = ddCache.get(conglomId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             if (cd != null)
             {
@@ -143,6 +145,7 @@ public class TableNameInfo {
 
 		String type;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		TableDescriptor td = tableCache.get(conglomId);
 		if (td != null)
 		{
@@ -176,6 +179,7 @@ public class TableNameInfo {
 	public String getIndexName(Long conglomId) {
 		if (conglomId == null)
 			return "?";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return indexCache.get(conglomId);
 	}
 }

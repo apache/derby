@@ -36,6 +36,7 @@ public class DisconnectException extends SqlException {
     }
 
     public DisconnectException(Agent agent, ClientMessageId msgid,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
                                Throwable t, Object... args) {
         this(agent, msgid, args, SqlCode.disconnectError, (Throwable)t);
     }

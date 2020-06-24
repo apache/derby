@@ -26,5 +26,6 @@ import org.eclipse.jdt.launching.JavaLaunchDelegate;
 
 public class StopDerbyServerLaunchConfigurationDelegate extends
 		JavaLaunchDelegate {
+//IC see: https://issues.apache.org/jira/browse/DERBY-476
 
 }

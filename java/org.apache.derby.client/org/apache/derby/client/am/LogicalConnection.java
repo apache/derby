@@ -61,6 +61,7 @@ public class LogicalConnection implements Connection {
      * <p>
      * Set to {@code null} when this logical connection is closed.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClientConnection physicalConnection_;
     private ClientPooledConnection pooledConnection_ = null;
     /**
@@ -72,11 +73,13 @@ public class LogicalConnection implements Connection {
     private LogicalDatabaseMetaData logicalDatabaseMetaData = null;
 
     public LogicalConnection(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientConnection physicalConnection,
             ClientPooledConnection pooledConnection) throws SqlException {
 
         physicalConnection_ = physicalConnection;
         pooledConnection_ = pooledConnection;
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try {
             checkForNullPhysicalConnection();
         } catch ( SQLException se ) {
@@ -106,6 +109,7 @@ public class LogicalConnection implements Connection {
         //  there is no deadlock when calling back into the pooledConnection_.recycleConnection
         //  below, we first synchronize on the pooledConnection and then on this
         //  LogicalConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-5560
         synchronized (pooledConnection_) {
             synchronized (this) {
                 try {
@@ -119,11 +123,14 @@ public class LogicalConnection implements Connection {
 
                     if (physicalConnection_.isClosed()) // connection is closed or has become stale
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
                         pooledConnection_.informListeners(new SqlException(null,
                                 new ClientMessageId(
                                 SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
                     } else {
                         physicalConnection_.checkForTransactionInProgress();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
                         physicalConnection_.closeForReuse(
                                 pooledConnection_.isStatementPoolingEnabled());
                         if (!physicalConnection_.isGlobalPending_()) {
@@ -148,11 +155,14 @@ public class LogicalConnection implements Connection {
             if (physicalConnection_.isClosed()) // connection is closed or has become stale
             {
                 throw new SqlException(null, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
                     new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)); // no call to informListeners()
             } else {
                 ; // no call to recycleConnection()
             }
         } finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
             physicalConnection_.closeForReuse(
                     pooledConnection_.isStatementPoolingEnabled());  //poolfix
             physicalConnection_ = null;
@@ -178,6 +188,7 @@ public class LogicalConnection implements Connection {
      * @throws SQLException if this logical connection has been closed
      */
     protected final void checkForNullPhysicalConnection()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
             throws SQLException {
         if (physicalConnection_ == null) {
             SqlException se = new SqlException(null, 
@@ -196,14 +207,18 @@ public class LogicalConnection implements Connection {
      * 
      * @param sqle the cause of the notification
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     final void notifyException(SQLException sqle) {
         if (physicalConnection_ != null) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
             pooledConnection_.informListeners(new SqlException(sqle));
     }
 
     // ---------------------- wrapped public entry points ------------------------
     // All methods are forwarded to the physical connection in a standard way
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Statement createStatement() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -214,6 +229,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(String sql)
             throws SQLException {
         try {
@@ -225,8 +241,10 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public CallableStatement prepareCall(String sql)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareCall(sql);
@@ -236,6 +254,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public String nativeSQL(String sql) throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -256,6 +275,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public boolean getAutoCommit() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -296,6 +316,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public int getTransactionIsolation() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -306,6 +327,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public SQLWarning getWarnings() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -342,7 +364,9 @@ public class LogicalConnection implements Connection {
      * @throws SQLException if an error occurs
      */
     public synchronized DatabaseMetaData getMetaData()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3431
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         try {
             checkForNullPhysicalConnection();
             // Create metadata object on demand, then cache it for later use.
@@ -377,6 +401,7 @@ public class LogicalConnection implements Connection {
      * @return The metadata object from the underlying physical connection.
      * @throws SQLException if the logical connection has been closed
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final synchronized DatabaseMetaData getRealMetaDataObject()
             throws SQLException {
         // Check if the logical connection has been closed.
@@ -394,6 +419,7 @@ public class LogicalConnection implements Connection {
     }
 
     synchronized public void setReadOnly(boolean readOnly) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         try {
             checkForNullPhysicalConnection();
             physicalConnection_.setReadOnly(readOnly);
@@ -403,6 +429,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public boolean isReadOnly() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -423,6 +450,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public String getCatalog() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -433,6 +461,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Statement createStatement(int resultSetType,
                                                            int resultSetConcurrency) throws SQLException {
         try {
@@ -444,6 +473,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
                                                                     int resultSetConcurrency) throws SQLException {
@@ -456,6 +486,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public CallableStatement prepareCall(String sql,
                                                                int resultSetType,
                                                                int resultSetConcurrency) throws SQLException {
@@ -468,6 +499,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     synchronized public Map<String, Class<?>> getTypeMap() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -478,6 +510,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     synchronized public void setTypeMap(Map map) throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -488,6 +521,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Statement createStatement(
             int resultSetType,
             int resultSetConcurrency,
@@ -502,6 +536,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public CallableStatement prepareCall(
             String sql,
             int resultSetType,
@@ -517,6 +552,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(
             String sql,
             int resultSetType,
@@ -533,6 +569,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(
             String sql,
             int autoGeneratedKeys) throws SQLException {
@@ -546,6 +583,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(
             String sql,
             int columnIndexes[]) throws SQLException {
@@ -559,6 +597,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public PreparedStatement prepareStatement(
             String sql,
             String columnNames[]) throws SQLException {
@@ -572,6 +611,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public void setHoldability(int holdability) throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -582,6 +622,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public int getHoldability() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -592,6 +633,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Savepoint setSavepoint() throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -602,6 +644,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public Savepoint setSavepoint(String name)
             throws SQLException {
         try {
@@ -613,6 +656,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public void rollback(Savepoint savepoint) throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -623,6 +667,7 @@ public class LogicalConnection implements Connection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     synchronized public void releaseSavepoint(Savepoint savepoint)
             throws SQLException {
         try {
@@ -666,6 +711,7 @@ public class LogicalConnection implements Connection {
     //
     ////////////////////////////////////////////////////////////////////
     public Array createArrayOf(String typeName, Object[] elements)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throws SQLException {
         try
         {
@@ -904,8 +950,11 @@ public class LogicalConnection implements Connection {
     /**
      * Get the name of the current schema.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public String   getSchema() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.getSchema();
@@ -918,6 +967,7 @@ public class LogicalConnection implements Connection {
     /**
      * Set the default schema for the Connection.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5561
     synchronized public void   setSchema(  String schemaName ) throws SQLException
     {
         try {
@@ -931,6 +981,7 @@ public class LogicalConnection implements Connection {
 
     public  void    abort( Executor executor )  throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         try
         {
             if ( physicalConnection_ != null )

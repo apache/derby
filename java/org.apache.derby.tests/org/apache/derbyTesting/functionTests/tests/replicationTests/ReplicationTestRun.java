@@ -39,6 +39,7 @@ public class ReplicationTestRun extends BaseJDBCTestCase
     {
         System.out.println("*** ReplicationTestRun.suite()");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ReplicationTestRun");
         System.out.println("*** Done new BaseTestSuite()");
         
@@ -58,6 +59,7 @@ public class ReplicationTestRun extends BaseJDBCTestCase
         System.out.println("*** Done suite.addTest(StandardTests.createTableFromQueryTest())");
         
         /* Need decoration?
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
         suite.addTest(StandardTests.databaseClassLoadingTest(masterHostName, masterPortNo));
         System.out.println("*** Done suite.addTest(StandardTests.databaseClassLoadingTest())"); */
         

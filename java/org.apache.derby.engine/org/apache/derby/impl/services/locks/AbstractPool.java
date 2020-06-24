@@ -396,6 +396,7 @@ abstract class AbstractPool implements LockFactory
 
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5224
 			Serializable value = (Serializable) PropertyUtil.getPropertyFromSet(dbOnly, p, key);
 			if (value != null) {
 				validate(key, value, p);

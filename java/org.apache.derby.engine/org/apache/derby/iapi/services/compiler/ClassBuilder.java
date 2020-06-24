@@ -85,6 +85,7 @@ public interface ClassBuilder {
 	 * the default no-arg constructor will be defined.
 	 */
 	ByteArray getClassBytecode() throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 	/**
 	 * the class's unqualified name

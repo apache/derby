@@ -37,6 +37,7 @@ import org.apache.derby.client.ClientXADataSourceInterface;
  * i.e. it does not implement {@code javax.naming.Referenceable}.
  */
 public class BasicClientXADataSource40
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
     extends BasicClientDataSource40
     implements ClientXADataSourceInterface,
                XADataSource /* compile-time check of 41 extensions */ {
@@ -63,6 +64,9 @@ public class BasicClientXADataSource40
 
     /** Added by Java 9 */
     public ShardingKeyBuilder createShardingKeyBuilder()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
         throws SQLException
     {
         throw new java.sql.SQLFeatureNotSupportedException();

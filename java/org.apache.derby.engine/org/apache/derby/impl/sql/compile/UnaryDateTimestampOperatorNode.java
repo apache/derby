@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UnaryDateTimestampOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -46,6 +47,7 @@ class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
     private static final String DATE_METHOD_NAME = "getDate";
     
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_DATE = 0;
     final static int K_TIMESTAMP = 1;
 
@@ -93,6 +95,7 @@ class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -142,6 +145,8 @@ class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
         {
             DataValueFactory dvf = getLanguageConnectionContext().getDataValueFactory();
             DataValueDescriptor sourceValue = ((ConstantNode) operand).getValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             DataValueDescriptor destValue;
             if( sourceValue.isNull())
             {
@@ -155,6 +160,8 @@ class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
                   ? dvf.getTimestamp( sourceValue) : dvf.getDate( sourceValue);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             return new UserTypeConstantNode(destValue, getContextManager());
         }
 
@@ -190,6 +197,7 @@ class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
 
     @Override
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) &&
                 ((UnaryDateTimestampOperatorNode)o).kind == kind;
     }

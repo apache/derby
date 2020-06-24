@@ -58,6 +58,7 @@ class BasicHeaderPrintWriter
 	 * @see	PrintWriterGetHeader
 	 */
 	BasicHeaderPrintWriter(OutputStream writeTo,
+//IC see: https://issues.apache.org/jira/browse/DERBY-205
 			PrintWriterGetHeader headerGetter,  boolean canClose, String streamName){
 		super(writeTo, true);
 		this.headerGetter = headerGetter;
@@ -103,6 +104,7 @@ class BasicHeaderPrintWriter
 	}
 
 	public String getName(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-205
 		return name;
 	}
 

@@ -51,6 +51,7 @@ public class SQLWarningFactory {
     {
 		return new SQLWarning
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
              MessageService.getTextMessage( messageId, args ),
              StandardException.getSQLStateFromIdentifier(messageId),
              ExceptionSeverity.WARNING_SEVERITY

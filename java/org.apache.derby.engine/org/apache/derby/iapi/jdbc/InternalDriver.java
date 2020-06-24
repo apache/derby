@@ -121,6 +121,7 @@ public class InternalDriver implements ModuleControl, Driver {
 	}
 
 	public InternalDriver() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		contextServiceFactory = getContextService();
 	}
 
@@ -138,12 +139,14 @@ public class InternalDriver implements ModuleControl, Driver {
 		active = true;
         
         mbean = ((ManagementService)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
            getSystemModule(Module.JMX)).registerMBean(
                    new JDBC(this),
                    JDBCMBean.class,
                    "type=JDBC");
 
         // Register with the driver manager
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         AutoloadedDriver.registerDriverModule(this);
 	}
 
@@ -155,6 +158,7 @@ public class InternalDriver implements ModuleControl, Driver {
 		}
         
         ((ManagementService)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 getSystemModule(Module.JMX)).unregisterMBean(
                         mbean);
 
@@ -162,6 +166,7 @@ public class InternalDriver implements ModuleControl, Driver {
 
 		contextServiceFactory = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         AutoloadedDriver.unregisterDriverModule();
 	}
 
@@ -170,6 +175,7 @@ public class InternalDriver implements ModuleControl, Driver {
 	*/
 	public boolean acceptsURL(String url) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1459
 		return active && embeddedDriverAcceptsURL( url );
 	}
 
@@ -180,6 +186,7 @@ public class InternalDriver implements ModuleControl, Driver {
 	*/
 	public static	boolean embeddedDriverAcceptsURL(String url) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         if ( url == null )
         {
             throw Util.generateCsSQLException( SQLState.MALFORMED_URL, "null" );
@@ -187,6 +194,7 @@ public class InternalDriver implements ModuleControl, Driver {
         
 		return
 		//	need to reject network driver's URL's
+//IC see: https://issues.apache.org/jira/browse/DERBY-535
 		!url.startsWith(Attribute.JCC_PROTOCOL) && !url.startsWith(Attribute.DNC_PROTOCOL) &&
 		(url.startsWith(Attribute.PROTOCOL) || url.equals(Attribute.SQLJ_NESTED));
 				
@@ -201,6 +209,7 @@ public class InternalDriver implements ModuleControl, Driver {
          * If we are below the low memory watermark for obtaining
          * a connection, then don't even try. Just throw an exception.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
 		if (EmbedConnection.memoryState.isLowMemory())
 		{
 			throw EmbedConnection.NO_MEM;
@@ -233,6 +242,7 @@ public class InternalDriver implements ModuleControl, Driver {
 
 		// convert the ;name=value attributes in the URL into
 		// properties.
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
 		FormatableProperties finfo = null;
         
 		try {
@@ -280,6 +290,7 @@ public class InternalDriver implements ModuleControl, Driver {
                         boolean deregister = Boolean.valueOf(
                                 finfo.getProperty(Attribute.DEREGISTER_ATTR))
                                 .booleanValue();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
                         InternalDriver.setDeregister(deregister);
                     }
 
@@ -289,12 +300,14 @@ public class InternalDriver implements ModuleControl, Driver {
 					//checkShutdownPrivileges(user);
 
 					getMonitor().shutdown();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 					throw Util.generateCsSQLException(
                                          SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
 				}
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
             EmbedConnection conn;
 			
             if ( loginTimeoutSeconds <= 0 ) { conn = getNewEmbedConnection( url, finfo ); }
@@ -308,6 +321,7 @@ public class InternalDriver implements ModuleControl, Driver {
 
 			return conn;
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-444
 		catch (OutOfMemoryError noMemory)
 		{
 			EmbedConnection.memoryState.setLowMemory();
@@ -324,12 +338,14 @@ public class InternalDriver implements ModuleControl, Driver {
      * Enforce the login timeout.
      */
     private EmbedConnection timeLogin(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             String url, Properties info, int loginTimeoutSeconds)
         throws SQLException
     {
         try {
             LoginCallable callable = new LoginCallable(this, url, info);
             Future<EmbedConnection> task = _executorPool.submit(callable);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6167
             long now = System.currentTimeMillis();
             long giveUp = now + loginTimeoutSeconds * 1000L;
 
@@ -447,6 +463,7 @@ public class InternalDriver implements ModuleControl, Driver {
 
         // the check
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3491
             final Permission sp = new SystemPermission(
                 SystemPermission.ENGINE, SystemPermission.SHUTDOWN);
             checkSystemPrivileges(user, sp);
@@ -462,6 +479,7 @@ public class InternalDriver implements ModuleControl, Driver {
     }
 
 	public int getMajorVersion() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		return getMonitor().getEngineVersion().getMajorVersion();
 	}
 	
@@ -470,6 +488,8 @@ public class InternalDriver implements ModuleControl, Driver {
 	}
 
 	public boolean jdbcCompliant() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-561
+//IC see: https://issues.apache.org/jira/browse/DERBY-530
 		return true;
 	}
 
@@ -632,6 +652,7 @@ public class InternalDriver implements ModuleControl, Driver {
 		//
 		if (this.authenticationService == null) {
 			this.authenticationService = (AuthenticationService)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				findService(AuthenticationService.MODULE,
 									"authentication"
 								   );
@@ -644,6 +665,7 @@ public class InternalDriver implements ModuleControl, Driver {
 		Methods to be overloaded in sub-implementations such as
 		a tracing driver.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
     EmbedConnection getNewEmbedConnection( final String url, final Properties info)
         throws SQLException
     {
@@ -720,6 +742,7 @@ public class InternalDriver implements ModuleControl, Driver {
 	 *
 	 */
     public Connection getNewNestedConnection(EmbedConnection conn) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         return new EmbedConnection(conn);
     }
 
@@ -762,6 +785,7 @@ public class InternalDriver implements ModuleControl, Driver {
 				int autoGeneratedKeys,
 				int[] columnIndexes,
 				String[] columnNames)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         throws SQLException
     {
         return new EmbedPreparedStatement(conn,
@@ -815,6 +839,7 @@ public class InternalDriver implements ModuleControl, Driver {
 	 * @throws SQLException on error
 	 */
     public EmbedResultSet newEmbedResultSet(EmbedConnection conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             ResultSet results, boolean forMetaData, EmbedStatement statement,
             boolean isAtomic) throws SQLException {
         return new EmbedResultSet(conn, results, forMetaData, statement,
@@ -830,6 +855,7 @@ public class InternalDriver implements ModuleControl, Driver {
      */
     public EmbedResultSetMetaData newEmbedResultSetMetaData(
             ResultColumnDescriptor[] columnInfo) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-940
         return new EmbedResultSetMetaData(columnInfo);
     }
 
@@ -937,6 +963,7 @@ public class InternalDriver implements ModuleControl, Driver {
                 optionsNoDB[attrIndex].description = MessageService.getTextMessage(connStringAttributes[i][1]);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             optionsNoDB[0].choices = getMonitor().getServiceList(Property.DATABASE_MODULE);
             // since database name is not stored in FormatableProperties, we
             // assign here explicitly
@@ -987,6 +1014,7 @@ public class InternalDriver implements ModuleControl, Driver {
      * deregister itself
      */
     public static void setDeregister(boolean deregister) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         InternalDriver.deregister = deregister;
     }
 
@@ -1007,12 +1035,14 @@ public class InternalDriver implements ModuleControl, Driver {
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

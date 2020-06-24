@@ -39,6 +39,7 @@ public class _Suite extends BaseJDBCTestCase {
      */
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("largedata suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(Derby6317Test.suite());
         // DERBY-5624, currently this runs out of file descriptors on unix

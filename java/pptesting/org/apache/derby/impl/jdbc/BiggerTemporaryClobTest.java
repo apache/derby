@@ -48,6 +48,7 @@ public class BiggerTemporaryClobTest
     public void setUp()
             throws Exception {
         super.initialCharLength = CLOBLENGTH;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
         super.headerLength = 2 + 3;
        // All tamil letters. Also add the header bytes.
         super.initialByteLength = CLOBLENGTH *3 + headerLength;
@@ -71,6 +72,7 @@ public class BiggerTemporaryClobTest
     public static Test suite()
             throws Exception {
         Class<? extends TestCase> theClass = BiggerTemporaryClobTest.class;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(
             theClass, "BiggerTemporaryClobTest suite");
         suite.addTest(addModifyingTests(theClass));

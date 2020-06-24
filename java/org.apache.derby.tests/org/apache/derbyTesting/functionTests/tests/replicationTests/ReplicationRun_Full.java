@@ -37,10 +37,12 @@ public class ReplicationRun_Full extends ReplicationRun
     public static Test suite()
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Replication_Full Suite");
         
         suite.addTestSuite( ReplicationRun_Full.class );
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         return SecurityManagerSetup.noSecurityManager(suite);
     }
     
@@ -81,6 +83,7 @@ public class ReplicationRun_Full extends ReplicationRun
                     masterServerHost,
                     ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                     masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                     masterDbSubPath); // Distinguishing master/slave
             runTest(replicationTest,
                     jvmVersion,
@@ -100,10 +103,12 @@ public class ReplicationRun_Full extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb); // Prototype V2: copy orig (possibly empty) db to db_master.
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 masterDbSubPath); // Distinguishing master/slave
         ///////////////////////////////////////////////////////
         // State: PostStartedMasterServer, PreStartedSlaveServer
@@ -116,10 +121,12 @@ public class ReplicationRun_Full extends ReplicationRun
             if (state.testPreStartedSlaveServer()) return; // + stop master server!
         
         // Thread.sleep(5000L); // Just for testing....
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                 slaveDbSubPath); // Distinguishing master/slave
         ///////////////////////////////////////////////////////
         // State: PostStartedMasterServer, PostStartedSlaveServer
@@ -282,10 +289,12 @@ public class ReplicationRun_Full extends ReplicationRun
         if ( slavePid == -1 )
         {
             util.DEBUG("WARNING: slave server not available. Starting.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
             startServer(jvmVersion, derbyVersion,
                     slaveServerHost,
                     ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                     slaveServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                     slaveDbSubPath); // Distinguishing master/slave
         }
         /* BEGIN Failover do not yet clean replication mode on slave! Must restart the server!*/
@@ -307,6 +316,7 @@ public class ReplicationRun_Full extends ReplicationRun
                     slaveServerHost,
                     ALL_INTERFACES,
                     slaveServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                     slaveDbSubPath); // Distinguishing master/slave
             /* */
           }
@@ -321,10 +331,12 @@ public class ReplicationRun_Full extends ReplicationRun
         if ( masterPid == -1 )
         {
             util.DEBUG("WARNING: master server not available. Starting.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
             startServer(jvmVersion, derbyVersion,
                     masterServerHost,
                     ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                     masterServerPort,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
                     masterDbSubPath); // Distinguishing master/slave
         }
         verifyMaster(); // NB NB Hangs here with localhost/ReplicationTestRun!

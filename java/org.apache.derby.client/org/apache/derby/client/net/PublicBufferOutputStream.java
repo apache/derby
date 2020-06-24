@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
  * A ByteArrayOutputStream which gives a direct reference of the buffer array
  */
 class PublicBufferOutputStream extends ByteArrayOutputStream {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     PublicBufferOutputStream() {
         super();

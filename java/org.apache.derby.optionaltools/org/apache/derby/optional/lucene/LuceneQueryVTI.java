@@ -68,6 +68,7 @@ import org.apache.derby.optional.utils.ToolUtilities;
  * LuceneSupport.luceneQuery.
  * 
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6621
 class LuceneQueryVTI extends StringColumnVTI
 {
     /////////////////////////////////////////////////////////////////////
@@ -119,17 +120,21 @@ class LuceneQueryVTI extends StringColumnVTI
         (
          String queryText,
          int    windowSize,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          Float scoreCeiling
          )
         throws SQLException
     {
         super( null );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
         LuceneSupport.checkNotNull( "QUERY", queryText );
         
         _connection = LuceneSupport.getDefaultConnection();
         _queryText = queryText;
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         _windowSize = windowSize;
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         _scoreCeiling = scoreCeiling;
 	}
 
@@ -156,6 +161,7 @@ class LuceneQueryVTI extends StringColumnVTI
 			if ( isKeyID( columnid ) ) { return _searcher.doc( docID ).get( getColumnName( columnid ) ); }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
 	}
 
@@ -163,6 +169,7 @@ class LuceneQueryVTI extends StringColumnVTI
     public  boolean getBoolean( int columnid ) throws SQLException
     {
         String  stringValue = getRawColumn( columnid );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
 
         if ( stringValue == null )
         {
@@ -179,6 +186,7 @@ class LuceneQueryVTI extends StringColumnVTI
     public  float   getFloat( int columnid )    throws SQLException
     {
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             if ( columnid == _scoreColumnID ) { return getScoreDoc().score; }
 			else if ( isKeyID( columnid ) )
             {
@@ -189,6 +197,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
 
@@ -205,6 +214,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
 
@@ -235,6 +245,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
@@ -253,6 +264,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
@@ -271,6 +283,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
@@ -289,6 +302,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
@@ -310,12 +324,14 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     private Number getNumberValue( int columnid ) throws IOException
     {
         IndexableField  field = _searcher.doc( getScoreDoc().doc ).getField( getColumnName( columnid ) );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
         if ( field == null )
         {
             _wasNull = true;
@@ -323,6 +339,8 @@ class LuceneQueryVTI extends StringColumnVTI
         }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
             _wasNull = false;
             Number  number = field.numericValue();
 
@@ -349,11 +367,13 @@ class LuceneQueryVTI extends StringColumnVTI
                     if ( ref != null )  { return ref.bytes; }
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
                 _wasNull = true;
                 return null;
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
 
@@ -362,6 +382,7 @@ class LuceneQueryVTI extends StringColumnVTI
         return ToolUtilities.newSQLException
             (
              SQLState.LANG_INVALID_COLUMN_POSITION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              columnid,
              getColumnCount()
              );
@@ -375,6 +396,7 @@ class LuceneQueryVTI extends StringColumnVTI
 	public boolean next()
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
         _wasNull = false;
         if ( _schema == null ) { initScan(); }
         
@@ -398,6 +420,7 @@ class LuceneQueryVTI extends StringColumnVTI
 
     public  boolean wasNull() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
         return _wasNull;
     }
     
@@ -426,6 +449,7 @@ class LuceneQueryVTI extends StringColumnVTI
 		try {
 			_indexReader.close();
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException e) { throw ToolUtilities.wrap( e ); }
         finally
         {
@@ -456,6 +480,7 @@ class LuceneQueryVTI extends StringColumnVTI
             for ( int i = 0; i < returnColumns.length; i++ ) { columnNames[ i ] = returnColumns[ i ].columnName; }
             setColumnNames( columnNames );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             _scoreColumnID = getColumnCount();
             _docIDColumnID = _scoreColumnID - 1;
             _maxKeyID = _docIDColumnID - 1;
@@ -464,28 +489,35 @@ class LuceneQueryVTI extends StringColumnVTI
             // make sure the user has SELECT privilege on all relevant columns of the underlying table
             vetPrivileges();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
             String      delimitedColumnName = LuceneSupport.delimitID( _column );
             DerbyLuceneDir  derbyLuceneDir = LuceneSupport.getDerbyLuceneDir( _connection, _schema, _table, delimitedColumnName );
             StorageFile propertiesFile = LuceneSupport.getIndexPropertiesFile( derbyLuceneDir );
             Properties  indexProperties = readIndexProperties( propertiesFile );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             String          indexDescriptorMaker = indexProperties.getProperty( LuceneSupport.INDEX_DESCRIPTOR_MAKER );
             LuceneIndexDescriptor   indexDescriptor = getIndexDescriptor( indexDescriptorMaker );
             Analyzer    analyzer = indexDescriptor.getAnalyzer( );
             QueryParser qp = indexDescriptor.getQueryParser();
 
             vetLuceneVersion( indexProperties.getProperty( LuceneSupport.LUCENE_VERSION ) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
             _indexReader = getIndexReader( derbyLuceneDir );
             _searcher = new IndexSearcher( _indexReader );
 
             Query luceneQuery = qp.parse( _queryText );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             TopScoreDocCollector tsdc = TopScoreDocCollector.create( _windowSize, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             if ( _scoreCeiling != null ) {
                 tsdc = TopScoreDocCollector.create( _windowSize, new ScoreDoc( 0, _scoreCeiling ), true );
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             searchAndScore( luceneQuery, tsdc );
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
         catch (IOException ioe) { throw ToolUtilities.wrap( ioe ); }
         catch (ParseException pe) { throw ToolUtilities.wrap( pe ); }
         catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
@@ -498,6 +530,7 @@ class LuceneQueryVTI extends StringColumnVTI
      * </p>
      */
     private void    vetLuceneVersion( String indexVersionString )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         Version     currentVersion = LuceneUtils.currentVersion();
@@ -510,6 +543,7 @@ class LuceneQueryVTI extends StringColumnVTI
 
         if ( (indexVersion == null) || !currentVersion.onOrAfter( indexVersion ) )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             throw ToolUtilities.newSQLException
                 ( SQLState.LUCENE_BAD_VERSION, currentVersion.toString(), indexVersionString );
         }
@@ -530,6 +564,7 @@ class LuceneQueryVTI extends StringColumnVTI
         for ( int i = 0; i < _maxKeyID; i++ )
         {
             if ( i > 0 ) { buffer.append( ", " ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
             buffer.append( LuceneSupport.delimitID( getColumnName( i + 1 ) ) );
         }
         buffer.append( ", " + LuceneSupport.delimitID( _column ) );
@@ -553,6 +588,7 @@ class LuceneQueryVTI extends StringColumnVTI
 	private static IndexReader getIndexReader( final DerbyLuceneDir dir )
         throws IOException, PrivilegedActionException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         try {
             return AccessController.doPrivileged
             (
@@ -560,6 +596,7 @@ class LuceneQueryVTI extends StringColumnVTI
              {
                  public IndexReader run() throws IOException
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                      return DirectoryReader.open( dir );
                  }
              }
@@ -584,6 +621,7 @@ class LuceneQueryVTI extends StringColumnVTI
                 }
              }
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         } catch (PrivilegedActionException pae) {
             throw (IOException) pae.getCause();
         }
@@ -594,10 +632,12 @@ class LuceneQueryVTI extends StringColumnVTI
      * The method has no arguments.
 	 */
 	private static LuceneIndexDescriptor getIndexDescriptor( final String indexDescriptorMaker )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
         throws PrivilegedActionException, SQLException
     {
         return AccessController.doPrivileged
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              new PrivilegedExceptionAction<LuceneIndexDescriptor>()
              {
                  public LuceneIndexDescriptor run()
@@ -613,9 +653,11 @@ class LuceneQueryVTI extends StringColumnVTI
 	
     /** Read the index properties file */
     private void    searchAndScore( final Query luceneQuery, final TopScoreDocCollector tsdc )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws IOException
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Object>()
@@ -630,6 +672,7 @@ class LuceneQueryVTI extends StringColumnVTI
                 }
              }
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         } catch (PrivilegedActionException pae) {
             throw (IOException) pae.getCause();
         }

@@ -36,6 +36,7 @@ public abstract class PropertyUtil extends org.apache.derby.iapi.util.PropertyUt
 	public static Serializable getDatabasePropertyDefault(String k) throws Exception
 	{
         LanguageConnectionContext lcc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			(LanguageConnectionContext) getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 		if (lcc == null) throw new Exception("getPropertyDefault only works in a connection");
 		return lcc.getTransactionExecute().getPropertyDefault(k);

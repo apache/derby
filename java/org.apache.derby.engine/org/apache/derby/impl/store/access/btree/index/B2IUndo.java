@@ -132,6 +132,7 @@ public class B2IUndo implements LogicalUndo, Formatable
 
             // Need Conglomerate to create templates - get from the root page.
             root = ControlRow.get(container, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(root.getPage().isLatched());
@@ -143,6 +144,7 @@ public class B2IUndo implements LogicalUndo, Formatable
 
             // create a template for the logged index row from the conglomerate.
             logged_index_row_template = btree.createTemplate(rawtran);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
             // create a template for the page index row from the conglomerate.
             template                  = btree.createTemplate(rawtran);
@@ -190,6 +192,7 @@ public class B2IUndo implements LogicalUndo, Formatable
             // Get the page where the record was originally, before splits
             // could have possibly moved it.
             control_row = ControlRow.get(open_btree, rechandle.getPageNumber());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             // init compare_result, if record doesn't exist do the search 
             compare_result = 1;
@@ -216,6 +219,7 @@ public class B2IUndo implements LogicalUndo, Formatable
                 // compare the 2 rows, and if they are the same then the raw 
                 // store has the right page and record and there is no work to
                 // be done (this is usual case).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 compare_result = ControlRow.compareIndexRowToKey(
                     template, logged_index_row_template, 
                     logged_index_row_template.length, 1, 
@@ -241,6 +245,7 @@ public class B2IUndo implements LogicalUndo, Formatable
                 control_row = null;
                 control_row = 
                     ControlRow.get(open_btree, BTree.ROOTPAGEID).search(sp);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
                 if (!sp.resultExact)
                 {

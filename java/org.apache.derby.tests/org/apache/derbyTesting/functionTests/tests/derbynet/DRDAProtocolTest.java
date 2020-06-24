@@ -73,6 +73,7 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
      * @throws SQLException if database interaction fails
      */
     public void testMultipleConnections() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         Connection conn1 = openConnection("FIRSTDB1");
         conn1.setAutoCommit(false);
 
@@ -88,6 +89,7 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
         pSt1.close();
         st.close();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         Connection conn2 = openConnection("SECONDDB2");
         conn2.setAutoCommit(false);
         Statement st2 = conn2.createStatement();
@@ -114,6 +116,7 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
     public static Test suite() {
         Test test;
         test = TestConfiguration.clientServerSuite(DRDAProtocolTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         test = TestConfiguration.additionalDatabaseDecorator(test, "FIRSTDB1");
         test = TestConfiguration.additionalDatabaseDecorator(test, "SECONDDB2");
         return test;

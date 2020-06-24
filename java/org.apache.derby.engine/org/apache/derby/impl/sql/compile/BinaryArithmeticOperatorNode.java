@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BinaryArithmeticOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -38,6 +39,7 @@ import org.apache.derby.iapi.types.TypeId;
 public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 {
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_DIVIDE = 0;
     final static int K_MINUS = 1;
     final static int K_PLUS = 2;
@@ -72,6 +74,7 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
               ClassName.NumberDataValue,
               cm);
         this.kind = kind;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         final String op;
         final String mNam;
@@ -109,6 +112,8 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
                 op = null;
                 mNam = null;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         setOperator(op);
         setMethodName(mNam);
 	}
@@ -126,6 +131,7 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -158,6 +164,8 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 				maxWidth = precision + 3;
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             leftOperand = new CastNode(
 						leftOperand, 
 						new DataTypeDescriptor(rightType, precision,
@@ -187,6 +195,8 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 				maxWidth = precision + 3;
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             rightOperand = new CastNode(
 						rightOperand, 
 						new DataTypeDescriptor(leftType, precision,
@@ -214,6 +224,7 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 
     @Override
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) &&
                 ((BinaryArithmeticOperatorNode)o).kind == kind;
     }

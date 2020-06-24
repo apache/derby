@@ -76,6 +76,7 @@ public class XPLAINSortPropsDescriptor extends XPLAINTableDescriptor
     {
         ps.setString(1, sort_rs_id.toString());
         ps.setString(2, sort_type);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6318
         ps.setObject(3, no_input_rows, Types.INTEGER);
         ps.setObject(4, no_output_rows, Types.INTEGER);
         ps.setObject(5, no_merge_runs, Types.INTEGER);
@@ -126,6 +127,7 @@ public class XPLAINSortPropsDescriptor extends XPLAINTableDescriptor
             SystemColumnImpl.getColumn("NO_INPUT_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_OUTPUT_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_MERGE_RUNS", Types.INTEGER, true),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4772
             SystemColumnImpl.getColumn("MERGE_RUN_DETAILS", Types.VARCHAR, true,
                     TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("ELIMINATE_DUPLICATES", Types.CHAR, true, 1),

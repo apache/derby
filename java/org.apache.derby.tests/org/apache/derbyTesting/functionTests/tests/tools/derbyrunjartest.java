@@ -44,9 +44,11 @@ public class derbyrunjartest extends BaseTestCase {
         Class cl = derbyrunjartest.class;
 
         BaseTestSuite suite = new BaseTestSuite(cl);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // The server command can only be used on platforms that support
         // the network server.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5917
         if (Derby.hasServer()) {
             suite.addTest(new derbyrunjartest("xtestServer"));
         }
@@ -66,10 +68,12 @@ public class derbyrunjartest extends BaseTestCase {
      */
     private void runtool(String[] toolArgs, String[] output, int exitCode)
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         String runClassName = org.apache.derby.run.run.class.getName();
         URL result = SecurityManagerSetup.getURL(runClassName);
         String derbyrunloc = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1063
         if (result.toString().endsWith(".jar")) {
             derbyrunloc = result.toString().substring(5);
             if (System.getProperty("os.name").startsWith("Windows"))
@@ -77,6 +81,7 @@ public class derbyrunjartest extends BaseTestCase {
         }
 
         ArrayList<String> cmdArgs = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Invoke java -jar derbyrun.jar if we are running from jars, or
         // with fully qualified class name if we are running from classes.
@@ -89,6 +94,7 @@ public class derbyrunjartest extends BaseTestCase {
 
         cmdArgs.addAll(Arrays.asList(toolArgs));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         String[] cmd = cmdArgs.toArray(new String[cmdArgs.size()]);
         assertExecJavaCmdAsExpected(output, cmd, exitCode);
     }
@@ -104,6 +110,7 @@ public class derbyrunjartest extends BaseTestCase {
     public void testSysinfo() throws Exception {
         String[] cmd = { "sysinfo", "-cp", "help" };
         String[] output = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
             "Usage: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ tools ] [ anyClass.class ] ]"
         };
         runtool(cmd, output, 0);
@@ -112,6 +119,7 @@ public class derbyrunjartest extends BaseTestCase {
     public void testDblook() throws Exception {
         String[] cmd = { "dblook" };
         String[] output = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
             " Usage:",
             " java org.apache.derby.tools.dblook -d <source database url> [options]",
             " 	where the source URL is the full URL, including the connection protocol",
@@ -142,11 +150,13 @@ public class derbyrunjartest extends BaseTestCase {
         String[] output = {
             "Usage: NetworkServerControl <commands> ",
             "Commands:",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
             "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
             "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
             "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
             "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",

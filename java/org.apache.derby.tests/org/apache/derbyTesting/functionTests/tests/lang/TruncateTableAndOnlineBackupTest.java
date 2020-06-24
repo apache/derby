@@ -63,6 +63,7 @@ public class TruncateTableAndOnlineBackupTest  extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("TruncateTableAndOnlineBackupTest");
 
@@ -76,6 +77,7 @@ public class TruncateTableAndOnlineBackupTest  extends BaseJDBCTestCase {
     }
     
     protected static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(TruncateTableAndOnlineBackupTest.class);
         return new CleanDatabaseTestSetup(suite); 

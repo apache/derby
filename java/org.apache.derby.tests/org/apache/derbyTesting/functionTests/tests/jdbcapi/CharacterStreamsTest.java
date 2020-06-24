@@ -221,6 +221,7 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
                 "insert into charstream(c, vc, lvc, lob) " +
                 "values(?,?,?,?)");
         PreparedStatement psDel = prepareStatement("DELETE FROM charstream");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4040
         PreparedStatement psqSQLLength = prepareStatement(
                 "select length(c), length(vc), length(lvc), length(lob) " +
                 "from charstream");
@@ -567,6 +568,7 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
     }
 
     private Reader getSourceStream(int length, int bytesPerChar) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4040
         switch (bytesPerChar) {
             case 0:
                 return new c3Reader(length);
@@ -632,6 +634,7 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
 
         Reader r = rs.getCharacterStream(1);
         checkCharStream(r, cl, 25, bytesPerChar);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4040
 
         r = rs.getCharacterStream(2);
         checkCharStream(r, vcl, -1, bytesPerChar);
@@ -651,6 +654,7 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
         String suv = rs.getString(1);
         r = new StringReader(suv);
         checkCharStream(r, cl, 25, bytesPerChar);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4040
 
         suv = rs.getString(2);
         r = new StringReader(suv);
@@ -796,6 +800,8 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
     {
 
         Reader orig = getSourceStream(length, bytesPerChar);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4040
+//IC see: https://issues.apache.org/jira/browse/DERBY-4040
 
         int count = 0;
         for (;;) {

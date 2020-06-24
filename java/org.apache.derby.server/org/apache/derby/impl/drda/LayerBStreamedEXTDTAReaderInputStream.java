@@ -44,6 +44,7 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
      * @exception DRDAProtocolException if thrown while initializing current 
      *                                  buffer.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
     LayerBStreamedEXTDTAReaderInputStream(final DDMReader reader,
                                           boolean readStatusByte)
         throws DRDAProtocolException
@@ -67,6 +68,7 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
      * @see        java.io.InputStream#read()
      */
     public final int read() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws IOException {
         // Reuse the other read method for simplicity.
         byte[] b = new byte[1];
@@ -101,6 +103,7 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
                           int len) 
         throws IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         if (currentBuffer == null) {
             return -1;
         }
@@ -155,6 +158,7 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
      */
     public final int available() {
         int avail = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         if (currentBuffer != null) {
             avail = currentBuffer.available();
             if (readStatusByte && !reader.doingLayerBStreaming()) {

@@ -36,6 +36,7 @@ abstract class JDBCDriversPropertyTest extends TestCase {
     
     final static Test getSuite(String jdbcDrivers) throws Exception {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("jdbc.drivers="+jdbcDrivers);
         
         System.setProperty("jdbc.drivers", jdbcDrivers);
@@ -53,6 +54,7 @@ abstract class JDBCDriversPropertyTest extends TestCase {
     private static Test getAutoLoadSuite()
        throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Class<?> alt = Class.forName(
            "org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest");
 

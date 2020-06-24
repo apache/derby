@@ -54,6 +54,7 @@ public class ClientPooledConnection implements PooledConnection {
     /** List of {@code ConnectionEventListener}s. Never {@code null}. */
     private ArrayList<ConnectionEventListener> listeners_ =
             new ArrayList<ConnectionEventListener>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
     /**
      * The number of iterators going through the list of connection event
@@ -89,6 +90,7 @@ public class ClientPooledConnection implements PooledConnection {
      * the listeners fired in the same thread add or remove listeners.
      */
     private final CopyOnWriteArrayList<StatementEventListener>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             statementEventListeners =
                     new CopyOnWriteArrayList<StatementEventListener>();
 
@@ -106,6 +108,7 @@ public class ClientPooledConnection implements PooledConnection {
      *      in the database, or problems communicating with the database
      */
     public ClientPooledConnection(BasicClientDataSource ds,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   LogWriter logWriter,
                                   String user,
                                   String password) throws SQLException {
@@ -114,6 +117,7 @@ public class ClientPooledConnection implements PooledConnection {
         if (ds.maxStatementsToPool() <= 0) {
             this.statementCache = null;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3329
             this.statementCache =
                     new JDBCStatementCache(ds.maxStatementsToPool());
         }
@@ -126,14 +130,18 @@ public class ClientPooledConnection implements PooledConnection {
             //PooledConnection which will then raise the events
             //on the listeners
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             physicalConnection_ =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             ClientAutoloadedDriver.getFactory().newNetConnection(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
                     logWriter_,
                     user,
                     password,
                     ds,
                     -1,
                     false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     ClientPooledConnection.this);
         } catch (SqlException se) {
             throw se.getSQLException();
@@ -155,10 +163,12 @@ public class ClientPooledConnection implements PooledConnection {
      *      in the database, or problems communicating with the database
      */
     public ClientPooledConnection(BasicClientDataSource ds,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   LogWriter logWriter,
                                   String user,
                                   String password,
                                   int rmId) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3329
         logWriter_ = logWriter;
         rmId_ = rmId;
 
@@ -171,12 +181,15 @@ public class ClientPooledConnection implements PooledConnection {
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             netXAPhysicalConnection_ = new NetXAConnection(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
                     logWriter,
                     user,
                     password,
                     ds,
                     rmId,
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                     true,
                     this);
         } catch ( SqlException se ) {
@@ -204,6 +217,7 @@ public class ClientPooledConnection implements PooledConnection {
             logWriter_.traceEntry(this, "finalize");
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         try {
             close();
         } finally {
@@ -222,6 +236,7 @@ public class ClientPooledConnection implements PooledConnection {
      *      occurs.
      */
     public synchronized void close() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if (logWriter_ != null) {
@@ -270,6 +285,7 @@ public class ClientPooledConnection implements PooledConnection {
                 // to reset the connection state to the default on 
                 // PooledConnection.getConnection() otherwise the 
                 // isolation level and holdability was not correct and out of sync with the server.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3581
                 physicalConnection_.reset(logWriter_);
             }
             else {
@@ -282,6 +298,7 @@ public class ClientPooledConnection implements PooledConnection {
             }
             return logicalConnection_;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-796
         catch (SqlException se)
         {
             throw se.getSQLException();
@@ -324,8 +341,10 @@ public class ClientPooledConnection implements PooledConnection {
             logicalConnection_.closeWithoutRecyclingToPool();
         }
         if (this.statementCache == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             logicalConnection_ = ClientAutoloadedDriver.getFactory().newLogicalConnection(
                                                         physicalConnection_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                                                         this);
         } else {
             logicalConnection_ = ClientAutoloadedDriver.getFactory().
@@ -335,6 +354,7 @@ public class ClientPooledConnection implements PooledConnection {
     }
 
     public synchronized void addConnectionEventListener(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3309
                                             ConnectionEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addConnectionEventListener", listener);
@@ -351,6 +371,7 @@ public class ClientPooledConnection implements PooledConnection {
             // we were able to synchronize on this, that someone is us. Clone
             // the list of listeners in order to prevent invalidation of the
             // iterator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             listeners_ = new ArrayList<ConnectionEventListener>(listeners_);
         }
         listeners_.add(listener);
@@ -366,6 +387,7 @@ public class ClientPooledConnection implements PooledConnection {
             // we were able to synchronize on this, that someone is us. Clone
             // the list of listeners in order to prevent invalidation of the
             // iterator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             listeners_ = new ArrayList<ConnectionEventListener>(listeners_);
         }
         listeners_.remove(listener);
@@ -385,6 +407,7 @@ public class ClientPooledConnection implements PooledConnection {
         // Null out the reference to the logical connection that is currently
         // being closed.
         this.logicalConnection_ = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3379
 
         fireConnectionEventListeners(null);
     }
@@ -399,6 +422,7 @@ public class ClientPooledConnection implements PooledConnection {
      */
     public void informListeners(SqlException exception) {
         // only report fatal error  
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
             return;
 
@@ -421,6 +445,7 @@ public class ClientPooledConnection implements PooledConnection {
                 new ConnectionEvent(this) :
                 new ConnectionEvent(this, exception.getSQLException());
             eventIterators++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-796
             try {
                 for (Iterator it = listeners_.iterator(); it.hasNext(); ) {
                     final ConnectionEventListener listener =
@@ -459,6 +484,7 @@ public class ClientPooledConnection implements PooledConnection {
      * error occurred events
      */
     public void addStatementEventListener(StatementEventListener listener) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addStatementEventListener", listener);
         }

@@ -56,6 +56,7 @@ final class XAStatementControl implements BrokeredStatementControl {
 		this.applicationConnection = xaConnection.currentConnectionHandle;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1163
 	XAStatementControl(EmbedXAConnection xaConnection, 
                                 Statement realStatement) throws SQLException {
 		this(xaConnection);
@@ -65,6 +66,7 @@ final class XAStatementControl implements BrokeredStatementControl {
         ((EmbedStatement) realStatement).setApplicationStatement(
                 applicationStatement);
 	}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1163
 	XAStatementControl(EmbedXAConnection xaConnection, 
                 PreparedStatement realPreparedStatement, 
                 String sql, Object generatedKeys) throws SQLException {            
@@ -74,6 +76,7 @@ final class XAStatementControl implements BrokeredStatementControl {
         ((EmbedStatement) realPreparedStatement).setApplicationStatement(
                 applicationStatement);
 	}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1163
 	XAStatementControl(EmbedXAConnection xaConnection, 
                 CallableStatement realCallableStatement, 
                 String sql) throws SQLException {
@@ -88,6 +91,8 @@ final class XAStatementControl implements BrokeredStatementControl {
 	 * Close the realStatement within this control. 
 	 */
 	public void closeRealStatement() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4310
+//IC see: https://issues.apache.org/jira/browse/DERBY-4155
 		realStatement.close();
 	}
 	

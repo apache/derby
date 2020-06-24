@@ -52,6 +52,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     private static final String NON_ASCII_PASSWORD = "l\u00F8yndom";
 
     private static final String POLICY_FILE_NAME =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
             "org/apache/derbyTesting/functionTests/tests/derbynet/NetworkServerControlApiTest.policy";
     
     public NetworkServerControlApiTest(String name) {
@@ -70,6 +71,8 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      */
     public void test_01_WrongUsage() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3543
+//IC see: https://issues.apache.org/jira/browse/DERBY-3542
         final String nsc = "org.apache.derby.drda.NetworkServerControl";
         // we'll assume that we get the full message if we get 'Usage'
         // because sometimes, the message gets returned with carriage return,
@@ -107,6 +110,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      */
     public void test_02_TraceCommands() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3273
         NetworkServerControl nsctrl = NetworkServerTestSetup.getNetworkServerControl();
         String derbySystemHome = getSystemProperty("derby.system.home");
         nsctrl.setTraceDirectory(derbySystemHome);
@@ -146,6 +150,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         //access denied (java.io.FilePermission \\ read). I verified 
         // this manually when creating this fixture but do not know 
         // how to check in the test.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3701
         assertEquals(getSystemProperty("derby.drda.traceAll"),"true");
         assertEquals(getSystemProperty("derby.drda.traceDirectory"),"/");
         Connection conn = getConnection();
@@ -349,6 +354,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      * @return InetAddress of host
      */
     private InetAddress privInetAddressGetByName(final String host)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
             throws UnknownHostException {
         try {
             return AccessController.doPrivileged(
@@ -380,22 +386,26 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     private static Test decorateTest()
     {
         Test test = TestConfiguration.clientServerDecorator(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                 new BaseTestSuite(NetworkServerControlApiTest.class));
         //
         // Install a security manager using the initial policy file.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
         return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
     
     public static Test suite()
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("NetworkServerControlApiTest");
         
         // Need derbynet.jar in the classpath!
         if (!Derby.hasServer())
             return suite;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3701
         suite.addTest(decorateTest());
         
         suite = decorateSystemPropertyTests(suite);
@@ -409,6 +419,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
     private static BaseTestSuite decorateSystemPropertyTests(
         BaseTestSuite suite) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Properties traceProps = new Properties();
         traceProps.put("derby.drda.traceDirectory","/");
@@ -490,11 +501,13 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                 "Invalid value, -12, for maxthreads.",
                 "Usage: NetworkServerControl <commands>",
                 "Commands:",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                 "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
                 "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
                 "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
@@ -540,11 +553,13 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         assertExecJavaCmdAsExpected(new String[]{"Invalid value, a, for maxthreads.",
                 "Usage: NetworkServerControl <commands>",
                 "Commands:",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                 "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
                 "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
                 "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
@@ -629,11 +644,13 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         assertExecJavaCmdAsExpected(new String[]{"Invalid value, -12, for timeslice.",
                 "Usage: NetworkServerControl <commands> ",
                 "Commands:",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                 "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
                 "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
                 "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
@@ -676,11 +693,13 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         assertExecJavaCmdAsExpected(new String[]{"Invalid value, a, for timeslice.",
                 "Usage: NetworkServerControl <commands> ",
                 "Commands:",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                 "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
                 "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
                 "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",

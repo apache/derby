@@ -39,6 +39,7 @@ import org.apache.derby.iapi.types.TypeId;
     This node represents a like comparison operator (no escape)
 
     If the like pattern is a constant or a parameter then if possible
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     the like is modified to include a &gt;= and &lt; operator. In some cases
     the like can be eliminated.  By adding =, &gt;= or &lt; operators it may
     allow indexes to be used to greatly narrow the search range of the
@@ -49,6 +50,7 @@ import org.apache.derby.iapi.types.TypeId;
     card e.g. Derby%
 
     CHAR(n), VARCHAR(n) where n &lt; 255
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         &gt;=   prefix padded with '\u0000' to length n -- e.g. Derby\u0000\u0000
         &lt;=   prefix appended with '\uffff' -- e.g. Derby\uffff
@@ -83,6 +85,7 @@ import org.apache.derby.iapi.types.TypeId;
     Note that the Unicode value '\uffff' is defined as not a character value
     and can be used by a program for any purpose. We use it to set an upper
     bound on a character range with a less than predicate. We only need a single
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
     '\uffff' appended because the string 'Derby\uffff\uffff' is not a valid
     String because '\uffff' is not a valid character.
 
@@ -118,6 +121,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         super(receiver,
               leftOperand,
               rightOperand,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
               TernaryOperatorNode.K_LIKE,
               cm);
     }
@@ -134,6 +138,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
      */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
     {
@@ -152,6 +157,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
         // escape must be a string or a parameter
         if ((rightOperand != null) && 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
             !(rightOperand.requiresTypeFromContext()) && 
             !(rightOperand.getTypeId().isStringTypeId()))
         {
@@ -168,6 +174,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         *  a parameter on the right copies its length from
         *  the left, since it won't match if it is any longer than it.
         */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
         if (receiver.requiresTypeFromContext())
         {
             receiver.setType(
@@ -201,6 +208,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             */
             if (receiver.getTypeId().isStringTypeId())
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
                 leftOperand.setType(receiver.getTypeServices());
             }
             else
@@ -222,6 +230,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          *  both will be max length.  nullability is set to true.
          */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
         if (rightOperand != null && rightOperand.requiresTypeFromContext())
         {
             /*
@@ -230,6 +239,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
              */
             if (receiver.getTypeId().isStringTypeId())
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
                 rightOperand.setType(receiver.getTypeServices());
             }
             else
@@ -307,6 +317,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
         // The left and the pattern of the LIKE must be same collation type
         // and derivation.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2793
         if (!receiver.getTypeServices().compareCollationInfo(
         		leftOperand.getTypeServices()))
         {
@@ -378,7 +389,10 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     //     /   \
                     //  column  'Derby'
                     BinaryComparisonOperatorNode equals = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                             BinaryRelationalOperatorNode.K_EQUALS,
                             leftClone, 
                             new CharConstantNode(newPattern,
@@ -392,6 +406,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     equals = (BinaryComparisonOperatorNode) 
                         equals.bindExpression(
                             fromList, subqueryList, aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
                     // create new and node and hook in "equals" the new "=' node
                     //
@@ -401,6 +416,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     //           / \
                     //       column 'Derby'
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     AndNode newAnd =
                             new AndNode(this, equals, getContextManager());
 
@@ -494,6 +511,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     * @exception StandardException  Thrown on error
     */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     ValueNode preprocess(
     int             numTables,
     FromList        outerFromList,
@@ -531,6 +549,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          * then can't optimize, eg. column LIKE column
          */
         if (!(leftOperand instanceof CharConstantNode) && 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
                 !(leftOperand.requiresTypeFromContext()))
         {
             return this;
@@ -602,6 +621,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             greaterEqualString = 
                 Like.greaterEqualString(pattern, escape, maxWidth);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
             lessThanString          = 
                 Like.lessThanString(pattern, escape, maxWidth);
             eliminateLikeComparison = 
@@ -632,13 +653,19 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
         AndNode   newAnd   = null;
         ValueNode trueNode = new BooleanConstantNode(true, getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
         /* Create the AND <, if lessThanString is non-null or 
          * leftOperand is a parameter.
          */
         if (lessThanString != null || 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
             leftOperand.requiresTypeFromContext())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ValueNode likeLTopt;
             if (leftOperand.requiresTypeFromContext())
             {
@@ -655,11 +682,14 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             {
                 // pattern string is a constant
                 likeLTopt = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     new CharConstantNode(lessThanString, getContextManager());
             }
 
             BinaryComparisonOperatorNode lessThan = 
                 new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     BinaryRelationalOperatorNode.K_LESS_THAN,
                     receiver.getClone(), 
                     likeLTopt,
@@ -676,6 +706,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
             /* Create the AND */
             newAnd = new AndNode(lessThan, trueNode, getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
             newAnd.postBindFixup();
         }
@@ -685,6 +717,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          */
 
         ValueNode likeGEopt;
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
         if (leftOperand.requiresTypeFromContext()) 
         {
             // the pattern is a ?, eg. c1 LIKE ?
@@ -704,6 +737,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             // the pattern is a constant, eg. c1 LIKE 'Derby'
 
             likeGEopt = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 new CharConstantNode(greaterEqualString, getContextManager());
         }
 
@@ -712,7 +747,10 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         //      /   \
         //  reciever pattern
         BinaryComparisonOperatorNode greaterEqual = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_GREATER_EQUALS,
                 receiver.getClone(), 
                 likeGEopt,
@@ -731,6 +769,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         /* Create the AND */
         if (newAnd == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             newAnd = new AndNode(greaterEqual, trueNode, getContextManager());
         }
         else
@@ -744,6 +784,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          */
         if (!eliminateLikeComparison)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             newAnd = new AndNode(this, newAnd, getContextManager());
             newAnd.postBindFixup();
         }
@@ -839,6 +881,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             methodName += "WithEsc";
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         StaticMethodCallNode methodCall = new StaticMethodCallNode(
                 methodName,
                 "org.apache.derby.iapi.types.Like",
@@ -847,6 +891,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         // using a method call directly, thus need internal sql capability
         methodCall.internalCall = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         NumericConstantNode maxWidthNode = new NumericConstantNode(
             TypeId.getBuiltInTypeId(Types.INTEGER),
             Integer.valueOf(maxWidth),

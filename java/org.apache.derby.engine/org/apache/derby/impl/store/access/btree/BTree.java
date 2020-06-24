@@ -152,6 +152,7 @@ public abstract class BTree extends GenericConglomerate
 	boolean maintainParentLinks;
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 	Attribute to indicate the index allows duplicate only in
 	case of keys with no part null.  This attribute has no effect if unique
     is true. If unique is false and isUniqueWithDuplicateNulls is set 
@@ -188,6 +189,7 @@ public abstract class BTree extends GenericConglomerate
 	protected boolean[]	ascDescInfo;
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     The array of collation id's for each column in the template.
     **/
     protected int[]   collation_ids;
@@ -273,6 +275,7 @@ public abstract class BTree extends GenericConglomerate
 	 * @exception  StandardException  Standard exception policy.
      **/
     final DataValueDescriptor[] createBranchTemplate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Transaction         rawtran,
     DataValueDescriptor page_ptr)
         throws StandardException
@@ -301,6 +304,7 @@ public abstract class BTree extends GenericConglomerate
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     final public DataValueDescriptor[] createTemplate(
     Transaction rawtran)
         throws StandardException
@@ -330,6 +334,7 @@ public abstract class BTree extends GenericConglomerate
      */
     public void setUniqueWithDuplicateNulls (boolean uniqueWithDuplicateNulls) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
         this.uniqueWithDuplicateNulls = uniqueWithDuplicateNulls;
     }
 
@@ -362,6 +367,7 @@ public abstract class BTree extends GenericConglomerate
 	public void addColumn(
     TransactionManager  xact_manager,
     int                 column_id,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Storable            template_column,
     int                 collation_id)
         throws StandardException
@@ -447,6 +453,7 @@ public abstract class BTree extends GenericConglomerate
         }
 
         // Check input arguments
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
         allowDuplicates = 
             (Boolean.valueOf(properties.getProperty(
                 PROPERTY_ALLOWDUPLICATES, "false"))).booleanValue();
@@ -474,11 +481,13 @@ public abstract class BTree extends GenericConglomerate
             nUniqueColumns = Integer.parseInt(result_string);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
         result_string = 
             properties.getProperty(
                 PROPERTY_UNIQUE_WITH_DUPLICATE_NULLS, "false");
         uniqueWithDuplicateNulls = Boolean.parseBoolean(result_string);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         if (SanityManager.DEBUG)
         {
@@ -590,6 +599,7 @@ public abstract class BTree extends GenericConglomerate
     public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo()
 		throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         return(new OpenConglomerateScratchSpace(
                 format_ids, collation_ids, hasCollatedTypes));
     }

@@ -62,6 +62,7 @@ public class resultsetJdbc20 {
 			stmt = con.createStatement();
 			// first clean up
 			TestUtil.cleanUpTest(stmt, testObjects);
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 
       //create a table, insert a row, do a select from the table,
       //get the resultset meta data and go through each column in
@@ -98,6 +99,7 @@ public class resultsetJdbc20 {
 
 			rs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 			TestUtil.cleanUpTest(stmt, testObjects);
 			stmt.close();
 			con.close();

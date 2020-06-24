@@ -40,6 +40,7 @@ public interface IQualifyable {
 	*/
 	public void setQualifiers
       (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
        VTIEnvironment vtiEnvironment,
        org.apache.derby.iapi.store.access.Qualifier[][] qualifiers
        )

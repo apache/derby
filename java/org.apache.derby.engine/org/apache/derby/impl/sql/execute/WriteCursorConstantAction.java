@@ -177,6 +177,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	  *	@return	the list of foreign keys to enforce for this action
 	  *
 	  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 	final FKInfo[] getFKInfo()
 	{
 		return fkInfo;
@@ -188,6 +189,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 * @return	the triggers that should be fired
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 	TriggerInfo getTriggerInfo()
 	{
 		return triggerInfo;

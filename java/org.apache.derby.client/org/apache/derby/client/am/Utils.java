@@ -98,7 +98,9 @@ public final class Utils {
         byte[] bBytes = decimal.unscaledValue().abs().toByteArray();
 
         if (byteArrayCmp(bBytes, tenRadixArr[tenRadixArr.length - 1]) >= 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throw new IllegalArgumentException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
                 SqlException.getMessageUtil().
                     getTextMessage(MessageId.CONN_PRECISION_TOO_LARGE));
         }
@@ -213,12 +215,14 @@ public final class Utils {
         int count = (longs == null) ? 0 : longs.length;
         int[]   ints = new int[ count ];
         for ( int i = 0; i < count; i++ ) { ints[ i ] = (int) longs[ i ]; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
         return ints;
     }
 
     // latestException is assumed to be non-null, accumulatedExceptions can be null
     public static SQLException accumulateSQLException(SQLException latestException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                                       SQLException accumulatedExceptions) {
         if (accumulatedExceptions == null) {
             return latestException;

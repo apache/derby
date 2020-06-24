@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BaseTableNumbersVisitor
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -34,6 +35,8 @@ import org.apache.derby.iapi.util.JBitSet;
  * the bottom-most table number, which should correspond to a base
  * table.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class BaseTableNumbersVisitor implements Visitor
 {
 	// JBitSet to hold the table numbers that we find.
@@ -54,6 +57,8 @@ class BaseTableNumbersVisitor implements Visitor
 	 *
 	 * @param tableMap JBitSet into which we put the table numbers we find.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BaseTableNumbersVisitor(JBitSet tableMap)
 	{
 		this.tableMap = tableMap;
@@ -226,6 +231,7 @@ class BaseTableNumbersVisitor implements Visitor
 	 */
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 

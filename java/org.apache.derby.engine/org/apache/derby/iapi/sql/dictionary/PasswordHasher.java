@@ -108,6 +108,7 @@ public  class   PasswordHasher
          )
     {
         _messageDigestAlgorithm = messageDigestAlgorithm;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
         _salt = ArrayUtil.copy( salt );
         _iterations = iterations;
     }

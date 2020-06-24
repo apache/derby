@@ -243,9 +243,11 @@ public class XactXAResourceManager implements XAResourceManager
         if ((flags & XAResource.TMSTARTRSCAN) != 0)
         {
             final ArrayList<XAXactId> xid_list = new ArrayList<XAXactId>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
             // Create a visitor that adds each of the prepared transactions
             // to xid_list.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3092
             final TransactionTable.EntryVisitor visitor =
                     new TransactionTable.EntryVisitor() {
                 public boolean visit(TransactionTableEntry entry) {
@@ -253,6 +255,7 @@ public class XactXAResourceManager implements XAResourceManager
                     if (xact.isPrepared())
                     {
                         GlobalXactId xa_id = (GlobalXactId) xact.getGlobalId();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6184
 
                         xid_list.add(
                             new XAXactId(
@@ -260,6 +263,7 @@ public class XactXAResourceManager implements XAResourceManager
                                 xa_id.getGlobalTransactionId(), 
                                 xa_id.getBranchQualifier()));
                     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3092
                     return true; // scan the entire transaction table
                 }
             };

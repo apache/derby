@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
    <P>
    An ExecAggregator is the interface that execution uses
    to an aggregate.  System defined aggregates will implement

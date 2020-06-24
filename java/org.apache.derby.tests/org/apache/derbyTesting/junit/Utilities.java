@@ -246,6 +246,7 @@ public class Utilities {
     public static String formatTestClassNames(String test) {
         final String COMMON_FUNCTIONTEST_PREFIX = "org.apache.derbyTesting.functionTests.tests.";
         final String COMMON_TEST_PREFIX = "org.apache.derbyTesting.";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5300
         if (test.startsWith(COMMON_FUNCTIONTEST_PREFIX)) {
             return test.substring(COMMON_FUNCTIONTEST_PREFIX.length());
         } else if (test.startsWith(COMMON_TEST_PREFIX)) {

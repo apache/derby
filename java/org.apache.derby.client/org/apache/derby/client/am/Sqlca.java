@@ -37,7 +37,9 @@ public abstract class Sqlca {
     private  static  final   int LOW_ORDER_UPDATE_COUNT = 2;
     private  static  final   int HIGH_ORDER_UPDATE_COUNT = 3;
     public  static  final   int SQL_ERR_LENGTH = 6;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     transient private ClientConnection connection_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1061
     SqlException exceptionThrownOnStoredProcInvocation_;
     boolean messageTextRetrievedContainsTokensOnly_ = true;
 
@@ -86,6 +88,7 @@ public abstract class Sqlca {
      *
      * @return number of messages
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
     synchronized int numberOfMessages() {
         initSqlErrmcMessages();
         if (sqlErrmcMessages_ != null) {
@@ -148,6 +151,7 @@ public abstract class Sqlca {
         // sqlErrmc string is dependent on sqlErrmcMessages_ array having
         // been built
         initSqlErrmcMessages();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
 
         // sqlErrmc will be built only if sqlErrmcMessages_ has been built.
         // Otherwise, a null string will be returned.
@@ -164,8 +168,10 @@ public abstract class Sqlca {
         // concatenate tokens with sqlErrmcDelimiter delimiters into one String
         StringBuffer buffer = new StringBuffer();
         int indx;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         for (indx = 0; indx < sqlErrmcMessages_.length - 1; indx++) {
             buffer.append(sqlErrmcMessages_[indx]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6803
             buffer.append(MessageUtils.SQLERRMC_MESSAGE_DELIMITER);
             // all but the first message should be preceded by the SQL state
             // and a colon (see DRDAConnThread.buildTokenizedSqlerrmc() on the
@@ -201,6 +207,7 @@ public abstract class Sqlca {
             return null;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         sqlErrp_ = bytes2String(sqlErrpBytes_, 0, sqlErrpBytes_.length);
         return sqlErrp_;
     }
@@ -210,10 +217,12 @@ public abstract class Sqlca {
             return sqlErrd_;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         sqlErrd_ = new int[ SQL_ERR_LENGTH ]; // create an int array.
         return sqlErrd_;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     String formatSqlErrd() {
         return Utils.getStringFromInts(getSqlErrd());
     }
@@ -223,6 +232,7 @@ public abstract class Sqlca {
     synchronized public String getSqlWarn() {
         if (sqlWarn_ == null) {
             if (sqlWarnBytes_ != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                 sqlWarn_ = bytes2String(sqlWarnBytes_, 0, sqlWarnBytes_.length);
             } else {
                 sqlWarn_ = elevenBlanks;
@@ -241,6 +251,7 @@ public abstract class Sqlca {
      * @param messageNumber the error to retrieve SQL state for
      * @return SQL state for the error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
     synchronized String getSqlState(int messageNumber) {
         initSqlErrmcMessages();
         if (sqlStates_ != null) {
@@ -250,6 +261,7 @@ public abstract class Sqlca {
     }
 
     public Object [] getArgs(int messageNumber) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6803
         if (sqlErrmcMessages_ != null)
 	    return MessageUtils.getArgs(getSqlState(messageNumber),
                                         sqlErrmcMessages_[messageNumber] );
@@ -267,6 +279,7 @@ public abstract class Sqlca {
             return getUnformattedMessage(messageNumber);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientCallableStatement cs = null;
         synchronized (connection_) {
             try {
@@ -274,7 +287,9 @@ public abstract class Sqlca {
                 // Cannot let this statement commit the transaction. Otherwise, 
                 // calling getWarnings while navigating a ResultSet will 
                 // release and invalidate locators used by the cursor.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
                 cs.isAutoCommittableStatement_ = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
                 String errmc = null;
                 String sqlState = null;
 
@@ -299,12 +314,15 @@ public abstract class Sqlca {
                 cs.setIntX(9, getSqlErrd()[4]);
                 cs.setIntX(10, getSqlErrd()[5]);
                 // SQLWarn: SQL warning flags.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 cs.setStringX(11, getSqlWarn());
                 // SQLState: standard SQL state.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
                 cs.setStringX(12, sqlState);
                 // MessageFileName: Not used by our driver, so set to null.
                 cs.setStringX(13, null);
                 // Locale: language preference requested for the return error message.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 cs.setStringX(14, Locale.getDefault().toString());
                 // server could return a locale different from what we requested
                 cs.registerOutParameterX(14, Types.VARCHAR);
@@ -318,6 +336,7 @@ public abstract class Sqlca {
                     // Return the message text.
                     messageTextRetrievedContainsTokensOnly_ = false;
                     String message = cs.getStringX(15);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
                     if (cachedMessages == null) {
                         cachedMessages = new String[numberOfMessages()];
                     }
@@ -332,6 +351,7 @@ public abstract class Sqlca {
                 if (cs != null) {
                     try {
                         cs.closeX();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                     } catch (SqlException doNothing) {
                     }
                 }
@@ -340,6 +360,7 @@ public abstract class Sqlca {
     }
 
     // May or may not get the formatted message depending upon datasource directives.  cannot throw exeption.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
     synchronized String getJDBCMessage(int messageNumber) {
         // The transient connection_ member will only be null if the Sqlca has been deserialized
         if (connection_ != null && connection_.retrieveMessageText_) {
@@ -347,6 +368,7 @@ public abstract class Sqlca {
                 return getMessage(messageNumber);
             } catch (SqlException e) {
                 // Invocation of stored procedure fails, so we return error message tokens directly.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1061
                 exceptionThrownOnStoredProcInvocation_ = e;
                 chainDeferredExceptionsToAgentOrAsConnectionWarnings((SqlException) e);
                 return getUnformattedMessage(messageNumber);
@@ -369,6 +391,7 @@ public abstract class Sqlca {
         if (messageNumber == 0) {
             // if the first exception in the chain is requested, return all the
             // information we have
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
             errorCode = getErrorCode();
             sqlState = getSqlState();
             sqlErrmc = getSqlErrmc();
@@ -390,11 +413,13 @@ public abstract class Sqlca {
             if (current.getErrorCode() == -440) {
                 SqlWarning warningForStoredProcFailure = new SqlWarning(agent_.logWriter_,
                     new ClientMessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                 warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate440WarningForMessageProcFailure(warningForStoredProcFailure);
             } else if (current.getErrorCode() == -444) {
                 SqlWarning warningForStoredProcFailure = new SqlWarning(agent_.logWriter_,
                     new ClientMessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                 warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate444WarningForMessageProcFailure(warningForStoredProcFailure);
             } else {
@@ -413,6 +438,7 @@ public abstract class Sqlca {
     DataTruncation getDataTruncation() {
         // The network server has serialized all the parameters needed by
         // the constructor in the SQLERRMC field.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6803
         String[] tokens = getSqlErrmc().split(MessageUtils.SQLERRMC_TOKEN_DELIMITER);
         return new DataTruncation(
                 Integer.parseInt(tokens[0]),                // index
@@ -426,6 +452,7 @@ public abstract class Sqlca {
 
     private void processSqlErrmcTokens(byte[] tokenBytes) {
         if (tokenBytes == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
             return;
         }
 
@@ -437,6 +464,7 @@ public abstract class Sqlca {
         }
 
         // tokenize and convert tokenBytes
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         String fullString = bytes2String(tokenBytes, 0, length);
         String[] tokens = fullString.split("\\u0014{3}");
         String[] states = new String[tokens.length];
@@ -463,6 +491,7 @@ public abstract class Sqlca {
         if (sqlErrd_ == null) {
             return 0L;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         long    result = getSqlErrd()[ LOW_ORDER_UPDATE_COUNT ];
         result &= 0xFFFFFFFFL;
         result |= ((long) getSqlErrd()[ HIGH_ORDER_UPDATE_COUNT ] << 32);
@@ -484,6 +513,7 @@ public abstract class Sqlca {
 
     public void resetRowsetSqlca(ClientConnection connection,
                                  int sqlCode,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                  String sqlState) {
         connection_ = connection;
         sqlCode_ = sqlCode;

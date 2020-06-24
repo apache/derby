@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ResultColumn
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -61,6 +62,8 @@ import org.apache.derby.iapi.util.StringUtil;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class ResultColumn extends ValueNode
                 implements ResultColumnDescriptor, Comparable<ResultColumn>
 {
@@ -122,6 +125,8 @@ class ResultColumn extends ValueNode
 	/* virtualColumnId is the ResultColumn's position (1-based) within the ResultSet */
 	private int		virtualColumnId;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn(ContextManager cm) {
         super(cm);
     }
@@ -132,6 +137,7 @@ class ResultColumn extends ValueNode
      * @param cm context manager
      */
     ResultColumn(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             String underlyingName,
             ValueNode expression,
             ContextManager cm) throws StandardException {
@@ -153,11 +159,13 @@ class ResultColumn extends ValueNode
             ContextManager cm) throws StandardException {
         super(cm);
         setTypeExpressionAndDefault(expression);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         _underlyingName = cr.getColumnName();
         _derivedColumnName = cr.getColumnName();
 
         // When we bind, we'll want to make sure the reference has the right
         // table name.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         _reference = cr;
     }
 
@@ -173,10 +181,12 @@ class ResultColumn extends ValueNode
             ContextManager cm) throws StandardException {
         super(cm);
         setTypeExpressionAndDefault(expression);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         _underlyingName = cd.getColumnName();
         _derivedColumnName = _underlyingName;
         setType(cd.getType());
         _columnDescriptor = cd;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         _autoincrement = cd.isAutoincrement();
     }
 
@@ -194,7 +204,9 @@ class ResultColumn extends ValueNode
         setTypeExpressionAndDefault(expression);
         setType(dtd);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         if (_expression instanceof ColumnReference) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             _reference = (ColumnReference)expression;
         }
     }
@@ -203,6 +215,7 @@ class ResultColumn extends ValueNode
         setExpression(expression);
 
         if (expression != null &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 expression instanceof DefaultNode) {
             // This result column represents a <default> keyword in an insert or
             // update statement
@@ -241,6 +254,8 @@ class ResultColumn extends ValueNode
 	 *  
 	 * @param value True/False
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRightOuterJoinUsingClause(boolean value)
 	{
 		rightOuterJoinUsingClause = value;
@@ -258,6 +273,8 @@ class ResultColumn extends ValueNode
 	 * rightOuterJoinUsingClause will be used during the code generation 
 	 * time.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JoinNode getJoinResultSet() {
 		return joinResultSet;
 	}
@@ -271,6 +288,8 @@ class ResultColumn extends ValueNode
 	 *   This case is talking about column c as in "select c"
 	 * @param resultSet - The ResultColumn belongs to this JoinNode
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setJoinResultset(JoinNode resultSet)
 	{
 		joinResultSet = resultSet;
@@ -285,6 +304,8 @@ class ResultColumn extends ValueNode
 		return defaultColumn;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setDefaultColumn(boolean value)
 	{
 		defaultColumn = value;
@@ -296,9 +317,12 @@ class ResultColumn extends ValueNode
 	 */
     boolean wasDefaultColumn()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3950
 		return wasDefault;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setWasDefaultColumn(boolean value)
 	{
 		wasDefault = value;
@@ -319,6 +343,7 @@ class ResultColumn extends ValueNode
 	 */
 	boolean columnNameMatches(String columnName)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return columnName.equals(_derivedColumnName) ||
 			columnName.equals( _underlyingName ) ||
 			columnName.equals(getSourceColumnName());
@@ -349,6 +374,7 @@ class ResultColumn extends ValueNode
         {
 			return getSourceColumnName();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		else if ( _underlyingName != null )
         {
 			return _underlyingName;
@@ -384,6 +410,7 @@ class ResultColumn extends ValueNode
 	 */
 	String getSourceColumnName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_expression instanceof ColumnReference)
 			return ((ColumnReference)_expression).getColumnName();
 		return null;
@@ -395,10 +422,13 @@ class ResultColumn extends ValueNode
 
 	public String getName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _derivedColumnName;
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSchemaName() throws StandardException
 	{
 		if ((_columnDescriptor!=null) &&
@@ -415,8 +445,11 @@ class ResultColumn extends ValueNode
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getTableName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_unqualifiedTableName != null)
 		{
 			return _unqualifiedTableName;
@@ -437,6 +470,7 @@ class ResultColumn extends ValueNode
 	 */
 	public String getSourceTableName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _unqualifiedSourceTableName;
 	}
 
@@ -445,6 +479,7 @@ class ResultColumn extends ValueNode
 	 */
 	public String getSourceSchemaName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _sourceSchemaName;
 	}
 
@@ -452,8 +487,11 @@ class ResultColumn extends ValueNode
 	 * Clear the table name for the underlying ColumnReference.
 	 * See UpdateNode.scrubResultColumns() for full explaination.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void clearTableName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_expression instanceof ColumnReference)
 		{
 			((ColumnReference) _expression).setQualifiedTableName( (TableName) null );
@@ -467,6 +505,7 @@ class ResultColumn extends ValueNode
 
 	public int getColumnPosition()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_columnDescriptor!=null)
 			return _columnDescriptor.getPosition();
 		else
@@ -484,8 +523,11 @@ class ResultColumn extends ValueNode
 	 * @param expression	The expression to be set in this ResultColumn
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setExpression(ValueNode expression)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_expression = expression;
 	}
 
@@ -495,8 +537,11 @@ class ResultColumn extends ValueNode
 	 * @return ValueNode	this.expression
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getExpression()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _expression;
 	}
 
@@ -522,19 +567,24 @@ class ResultColumn extends ValueNode
 	 * @param name	The name to set in this ResultColumn
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setName(String name)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if ( _underlyingName == null )
 		{
 			_underlyingName = name;
 		}
 		else {
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			SanityManager.ASSERT(_reference == null || 
 				name.equals(_reference.getColumnName()), 
 				"don't change name from reference name");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_derivedColumnName = name;
 	}
 
@@ -543,14 +593,18 @@ class ResultColumn extends ValueNode
 	 */
     boolean isNameGenerated()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _isNameGenerated;
 	}
 
 	/**
 	 * Set that this result column name is generated.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setNameGenerated(boolean value)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_isNameGenerated = value;
 	}
 
@@ -562,6 +616,8 @@ class ResultColumn extends ValueNode
 	 *
 	 * @param resultSetNumber	The resultSetNumber.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setResultSetNumber(int resultSetNumber)
 	{
 		this.resultSetNumber = resultSetNumber;
@@ -583,6 +639,8 @@ class ResultColumn extends ValueNode
 	 * @param adjust	The adjustment for the virtualColumnId
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void adjustVirtualColumnId(int adjust)
 	{
 		virtualColumnId += adjust;
@@ -594,6 +652,8 @@ class ResultColumn extends ValueNode
 	 * @param id	The virtualColumnId for this ResultColumn
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setVirtualColumnId(int id)
 	{
 		virtualColumnId = id;
@@ -623,9 +683,13 @@ class ResultColumn extends ValueNode
 	 *
 	 * @param removedColumnId   id of the column being removed.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void collapseVirtualColumnIdGap(int removedColumnId)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_columnDescriptor == null && virtualColumnId > removedColumnId)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 			virtualColumnId--;
 	}
 
@@ -635,8 +699,11 @@ class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void guaranteeColumnName() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_derivedColumnName == null)
 		{
 			/* Unions may also need generated names, if both sides name don't match */
@@ -656,9 +723,11 @@ class ResultColumn extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			return "derivedColumnName: " + _derivedColumnName + "\n" +
 				"underlyingName: " + _underlyingName + "\n" +
 				"tableName: " + _unqualifiedTableName + "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3950
 				"isDefaultColumn: " + defaultColumn + "\n" +
 				"wasDefaultColumn: " + wasDefault + "\n" +
 				"isNameGenerated: " + _isNameGenerated + "\n" +
@@ -689,16 +758,20 @@ class ResultColumn extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			if (_expression != null)
 			{
 				printLabel(depth, "expression: ");
 				_expression.treePrint(depth + 1);
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			if (_reference != null)
 			{
 				printLabel(depth, "reference: ");
@@ -726,6 +799,7 @@ class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     ResultColumn bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -734,6 +808,7 @@ class ResultColumn extends ValueNode
 		** Don't do it if this result column doesn't have a type yet.
 		** This can happen if the parameter is part of a table constructor.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_expression.requiresTypeFromContext())
 		{
 			if (getTypeServices() != null)
@@ -758,9 +833,11 @@ class ResultColumn extends ValueNode
 
 		setExpression( _expression.bindExpression(fromList, subqueryList,
                                                  aggregates) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 		if (_expression instanceof ColumnReference)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			_autoincrement = ((ColumnReference)_expression).getSource().isAutoincrement();
 		}
 			
@@ -793,6 +870,8 @@ class ResultColumn extends ValueNode
 				throws StandardException
 	{
         ColumnDescriptor    colDesc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
         colDesc = tableDescriptor.getColumnDescriptor(columnId);
 
@@ -841,6 +920,7 @@ class ResultColumn extends ValueNode
         ColumnDescriptor    colDesc;
 
         colDesc = tableDescriptor.getColumnDescriptor(_derivedColumnName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
         if (colDesc == null)
 		{
@@ -853,9 +933,14 @@ class ResultColumn extends ValueNode
 				errorString += schemaName + ".";
 			errorString += tableDescriptor.getName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, _derivedColumnName, errorString);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         setColumnDescriptor(tableDescriptor, colDesc);
 		setVirtualColumnId(columnId);
 		if (isPrivilegeCollectionRequired())
@@ -867,6 +952,8 @@ class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void typeUntypedNullExpression( ResultColumn bindingRC)
 			throws StandardException
 	{
@@ -879,6 +966,7 @@ class ResultColumn extends ValueNode
 			throw StandardException.newException(SQLState.LANG_NULL_IN_VALUES_CLAUSE);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         if( _expression instanceof UntypedNullConstantNode)
         	//since we don't know the type of such a constant node, we just
         	//use the default values for collation type and derivation.
@@ -912,6 +1000,7 @@ class ResultColumn extends ValueNode
 	void setColumnDescriptor(TableDescriptor tableDescriptor,
 				ColumnDescriptor columnDescriptor) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if ( columnDescriptor != null ) { setType(columnDescriptor.getType()); }
 		_columnDescriptor = columnDescriptor;
 
@@ -925,6 +1014,7 @@ class ResultColumn extends ValueNode
             (_reference.getMergeTableID() == ColumnReference.MERGE_UNKNOWN)
             ) 
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			if ( (tableDescriptor != null) && ! tableDescriptor.getName().equals(
 					_reference.getTableName()) ) 
 			{
@@ -935,6 +1025,7 @@ class ResultColumn extends ValueNode
 				*/
 				String realName = tableDescriptor.getName();
 				String refName = _reference.getTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 				throw StandardException.newException(SQLState.LANG_TABLE_NAME_MISMATCH, 
 					realName, refName);
@@ -950,6 +1041,8 @@ class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumnToExpression()
 				throws StandardException
 	{
@@ -959,6 +1052,7 @@ class ResultColumn extends ValueNode
 		** necessary to clone the object here.
 		*/
 		setType(_expression.getTypeServices());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		if (_expression instanceof ColumnReference)
 		{
@@ -974,7 +1068,10 @@ class ResultColumn extends ValueNode
 	 * Set the column source's table name
 	 * @param t The source table name
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setSourceTableName(String t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_unqualifiedSourceTableName = t;
 	}
 
@@ -982,7 +1079,10 @@ class ResultColumn extends ValueNode
 	 * Set the column source's schema name
 	 * @param s The source schema name
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setSourceSchemaName(String s) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_sourceSchemaName = s;
 	}
 
@@ -1002,12 +1102,14 @@ class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     ResultColumn preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_expression == null)
 			return this;
 		setExpression( _expression.preprocess(numTables, outerFromList,
@@ -1027,6 +1129,8 @@ class ResultColumn extends ValueNode
 
 		@exception StandardException thrown if types not suitable.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void checkStorableExpression(ResultColumn toStore)
 					throws StandardException
 	{
@@ -1057,6 +1161,8 @@ class ResultColumn extends ValueNode
 
 		@exception StandardException thrown if types not suitable.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void checkStorableExpression()
 					throws StandardException
 	{
@@ -1077,6 +1183,7 @@ class ResultColumn extends ValueNode
     void generateExpression(ExpressionClassBuilder ecb, MethodBuilder mb)
 									throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         _expression.generateExpression(ecb, mb);
 	}
 
@@ -1092,6 +1199,8 @@ class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 /*PUSHCOMPILE
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void generateNulls(ExpressionClassBuilder acb,
 									MethodBuilder mb,
 									Expression getColumnExpress) 
@@ -1186,6 +1295,7 @@ class ResultColumn extends ValueNode
 		** case.
 		*/
 		if ((otherExpression != null) && (otherExpression.requiresTypeFromContext()) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			(_expression.requiresTypeFromContext()))
 		{
 			return false;
@@ -1309,6 +1419,7 @@ class ResultColumn extends ValueNode
 	 */
     boolean isGenerated()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return (_isGenerated == true);
 	}
 
@@ -1319,14 +1430,18 @@ class ResultColumn extends ValueNode
 	 */
     boolean isGeneratedForUnmatchedColumnInInsert()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return (_isGeneratedForUnmatchedColumnInInsert == true);
 	}
 
 	/**
 	 * Mark this a columm as a generated column
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markGenerated()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_isGenerated = true;
 		/* A generated column is a referenced column */
 		_isReferenced = true;
@@ -1335,8 +1450,11 @@ class ResultColumn extends ValueNode
 	/**
 	 * Mark this a columm as generated for an unmatched column in an insert
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markGeneratedForUnmatchedColumnInInsert()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_isGeneratedForUnmatchedColumnInInsert = true;
 		/* A generated column is a referenced column */
 		_isReferenced = true;
@@ -1349,14 +1467,18 @@ class ResultColumn extends ValueNode
 	 */
     boolean isReferenced()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _isReferenced;
 	}
 
 	/**
 	 * Mark this column as a referenced column.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setReferenced()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_isReferenced = true;
 	}
 
@@ -1369,6 +1491,7 @@ class ResultColumn extends ValueNode
         if( isReferenced())
             return;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for( ValueNode expr = _expression; expr != null && (expr instanceof VirtualColumnNode);)
         {
             VirtualColumnNode vcn = (VirtualColumnNode) expr;
@@ -1385,8 +1508,11 @@ class ResultColumn extends ValueNode
 	/**
 	 * Mark this column as an unreferenced column.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setUnreferenced()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_isReferenced = false;
 	}
 
@@ -1399,6 +1525,7 @@ class ResultColumn extends ValueNode
 		setReferenced();
 
 		ValueNode vn = _expression;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		while (vn instanceof VirtualColumnNode)
 		{
@@ -1416,22 +1543,29 @@ class ResultColumn extends ValueNode
 	 */
     boolean isRedundant()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _isRedundant;
 	}
 
 	/**
 	 * Mark this ResultColumn as redundant.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRedundant()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_isRedundant = true;
 	}
 
 	/**
 	 * Mark this ResultColumn as a grouping column in the SELECT list
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markAsGroupingColumn()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_isGroupingColumn = true;
 	}
 
@@ -1445,6 +1579,7 @@ class ResultColumn extends ValueNode
 
 	void rejectParameter() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if ((_expression != null) && (_expression.isParameterNode()))
 			throw StandardException.newException(SQLState.LANG_PARAM_IN_SELECT_LIST);
 	}
@@ -1455,6 +1590,8 @@ class ResultColumn extends ValueNode
     public int compareTo(ResultColumn other)
 	{
         ResultColumn otherResultColumn = other;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		return this.getColumnPosition() - otherResultColumn.getColumnPosition();
 	}
@@ -1464,6 +1601,7 @@ class ResultColumn extends ValueNode
 	 */
 	void markUpdated()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_updated = true;
 	}
 
@@ -1473,6 +1611,7 @@ class ResultColumn extends ValueNode
 	 */
 	void markUpdatableByCursor()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		_updatableByCursor = true;
 	}
 
@@ -1483,6 +1622,7 @@ class ResultColumn extends ValueNode
 	 */
 	boolean updated()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _updated;
 	}
 
@@ -1494,6 +1634,7 @@ class ResultColumn extends ValueNode
     @Override
 	public boolean updatableByCursor()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _updatableByCursor;
 	}
 
@@ -1516,6 +1657,7 @@ class ResultColumn extends ValueNode
 		 * The SELECT generated for the HAVING needs its own copy
 		 * of the ColumnReferences.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_expression instanceof ColumnReference)
 		{
 			cloneExpr = ((ColumnReference) _expression).getClone();
@@ -1549,6 +1691,7 @@ class ResultColumn extends ValueNode
 		// For OFFSET/FETCH we need the also clone table name to avoid failing
 		// check #2 in EmbedResultSet#checksBeforeUpdateXXX. Clone schema for
 		// good measure...
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
 		newResultColumn.setSourceTableName(getSourceTableName());
 		newResultColumn.setSourceSchemaName(getSourceSchemaName());
 
@@ -1590,6 +1733,7 @@ class ResultColumn extends ValueNode
   		}
 
         newResultColumn.copyTagsFrom( this );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
 
   		return newResultColumn;
 	}
@@ -1644,6 +1788,7 @@ class ResultColumn extends ValueNode
         int expType;
         if (isAutoincrementGenerated()) {
             expType = Qualifier.VARIANT;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         } else if (_expression != null) {
             expType = _expression.getOrderableVariantType();
         } else {
@@ -1672,11 +1817,13 @@ class ResultColumn extends ValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_expression != null)
 		{
 			setExpression( (ValueNode)_expression.accept(v) );
@@ -1710,6 +1857,7 @@ class ResultColumn extends ValueNode
 	  Otherwise return null.
 	  */
 	ColumnDescriptor getTableColumnDescriptor() {return _columnDescriptor;}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 	/**
 	 * Returns true if this result column is a placeholder for a generated
@@ -1717,9 +1865,12 @@ class ResultColumn extends ValueNode
 	 */
     boolean isAutoincrementGenerated()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _autoincrementGenerated;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setAutoincrementGenerated()
 	{
 		_autoincrementGenerated = true;
@@ -1735,6 +1886,8 @@ class ResultColumn extends ValueNode
 		return _autoincrement;
   	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setAutoincrement()
   	{
   		_autoincrement = true;
@@ -1742,6 +1895,7 @@ class ResultColumn extends ValueNode
         
     public boolean isGroupingColumn()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         return _isGroupingColumn;
     }
         
@@ -1774,6 +1928,8 @@ class ResultColumn extends ValueNode
 
 				if (sourceWidth <= maxWidth)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 					if(formatId == StoredFormatIds.VARCHAR_TYPE_ID)
 						return dvf.getVarcharDataValue(sourceValue);
 				}
@@ -1786,6 +1942,8 @@ class ResultColumn extends ValueNode
 					if (sourceValue.charAt(posn) != ' ')
 					{
 						String typeName = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 						if (formatId == StoredFormatIds.VARCHAR_TYPE_ID)
 								typeName = TypeId.VARCHAR_NAME;
 						throw StandardException.newException(SQLState.LANG_STRING_TRUNCATION, 
@@ -1795,6 +1953,8 @@ class ResultColumn extends ValueNode
 					}
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2720
+//IC see: https://issues.apache.org/jira/browse/DERBY-3315
 				if (formatId == StoredFormatIds.VARCHAR_TYPE_ID)
 					return dvf.getVarcharDataValue(sourceValue.substring(0, maxWidth));
 
@@ -1813,6 +1973,7 @@ class ResultColumn extends ValueNode
 	public	ColumnReference	getReference() { return _reference; }
 
     /** Get the column descriptor */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
     ColumnDescriptor    getColumnDescriptor() { return _columnDescriptor; }
 	
 	/**
@@ -1823,7 +1984,10 @@ class ResultColumn extends ValueNode
 	 * @return a BaseColumnNode,
 	 *   or null if a BaseColumnNode cannot be found
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BaseColumnNode getBaseColumnNode() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		ValueNode vn = _expression;
 		while (true) {
 			if (vn instanceof ResultColumn) {
@@ -1835,6 +1999,7 @@ class ResultColumn extends ValueNode
 			} else if (vn instanceof BaseColumnNode) {
 				return (BaseColumnNode) vn;
 			} else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
 				return null;
 			}
 		}
@@ -1861,6 +2026,7 @@ class ResultColumn extends ValueNode
     int getTableNumber()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_expression instanceof ColumnReference)
 			return ((ColumnReference)_expression).getTableNumber();
 		else if (_expression instanceof VirtualColumnNode)
@@ -1887,8 +2053,10 @@ class ResultColumn extends ValueNode
 	
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
         	ResultColumn other = (ResultColumn)o;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         	if (_expression != null) {
         		return _expression.isEquivalent(other._expression);
         	}
@@ -1903,6 +2071,7 @@ class ResultColumn extends ValueNode
 	 */
 	public boolean hasGenerationClause()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         if ( (_columnDescriptor != null) && _columnDescriptor.hasGenerationClause() ) { return true; }
         else { return false; }
 	}

@@ -28,6 +28,7 @@ package org.apache.derby.shared.common.reference;
         will be available in jdbc 4.0, it becomes possible to refer to
         these constants when compiling against older jdk versions.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         <p>
         This class also contains some constants shared by the network server and client.
         </p>

@@ -67,6 +67,7 @@ class ProtocolKey {
 			t = cnfe;
 		} catch (IllegalArgumentException iae) {
 			t = iae;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         } catch (LinkageError le) {
             t = le;
 		}

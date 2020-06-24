@@ -46,8 +46,10 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
     private NetXAConnection controlCon_ = null;
 
     public ClientXAConnection(BasicClientDataSource ds,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
                               LogWriter logWtr,
                               String userId,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                               String password) throws SQLException {
         super(ds, logWtr, userId, password, getUnigueRmId());
 
@@ -57,6 +59,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         // Note: conApp will be set after this call
         logicalCon_ = super.getConnection();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         netXares_ = new NetXAResource(this, netXAPhysicalConnection_);
         xares_ = netXares_;
     }
@@ -88,6 +91,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
             logWriter_.traceExit(this, "getXAResource", xares_);
         }
         // DERBY-2532
+//IC see: https://issues.apache.org/jira/browse/DERBY-2532
         if (super.physicalConnection_ == null) {
             throw new SqlException(logWriter_,
                     new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)

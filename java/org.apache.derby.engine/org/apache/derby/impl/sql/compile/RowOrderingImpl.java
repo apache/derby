@@ -98,6 +98,8 @@ class RowOrderingImpl implements RowOrdering {
 			return false;
 
         ColumnOrdering co = ordering.get(orderPosition);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/*
 		** Is the column in question ordered with the given direction at
@@ -119,6 +121,8 @@ class RowOrderingImpl implements RowOrdering {
 		/*
 		** Return true if the table is always ordered.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         if (alwaysOrdered(tableNumber))
 		{
 			return true;
@@ -135,6 +139,8 @@ class RowOrderingImpl implements RowOrdering {
 
 		for (int i = 0; i < ordering.size(); i++) {
             ColumnOrdering co = ordering.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/*
 			** Is the column in question ordered with the given direction at
@@ -158,11 +164,14 @@ class RowOrderingImpl implements RowOrdering {
 								int tableNumber,
 								int columnNumber)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         if (!unorderedOptimizables.isEmpty()) {
 			return;
         }
 
         ColumnOrdering currColOrder;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (ordering.isEmpty())
 		{
@@ -172,6 +181,7 @@ class RowOrderingImpl implements RowOrdering {
 		else
 		{
             currColOrder =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				ordering.get(ordering.size() - 1);
 		}
 
@@ -191,11 +201,13 @@ class RowOrderingImpl implements RowOrdering {
 	/** @see RowOrdering#nextOrderPosition */
 	public void nextOrderPosition(int direction)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         if (!unorderedOptimizables.isEmpty()) {
 			return;
         }
 
 		currentColumnOrdering = new ColumnOrdering(direction);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		ordering.add(currentColumnOrdering);
 	}
 
@@ -223,8 +235,11 @@ class RowOrderingImpl implements RowOrdering {
 		int tableNumber = (hasTableNumber ? optimizable.getTableNumber() : 0);
 		if (
 			(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 				(ordering.isEmpty()) ||
 				(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     hasTableNumber && ordering.get(0).hasTable(tableNumber)
 				)
 			)
@@ -238,6 +253,7 @@ class RowOrderingImpl implements RowOrdering {
 			if (optimizable.hasTableNumber())
 				removeOptimizable(optimizable.getTableNumber());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 			alwaysOrderedOptimizables.add(optimizable);
 		}
 	}
@@ -252,7 +268,9 @@ class RowOrderingImpl implements RowOrdering {
 	/** @see RowOrdering#alwaysOrdered */
 	public boolean alwaysOrdered(int tableNumber)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Iterator<Optimizable> it = alwaysOrderedOptimizables.iterator();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
         while (it.hasNext()) {
             Optimizable optTable = it.next();
 
@@ -280,6 +298,8 @@ class RowOrderingImpl implements RowOrdering {
 			/*
 			** First, remove the table from all the ColumnOrderings
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ColumnOrdering ord = ordering.get(i);
 			ord.removeColumns(tableNumber);
 			if (ord.empty())
@@ -303,6 +323,7 @@ class RowOrderingImpl implements RowOrdering {
     private void removeOptimizable(int tableNumber, ArrayList<Optimizable> list)
 	{
         ListIterator<Optimizable> it = list.listIterator();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         while (it.hasNext())
 		{
@@ -318,6 +339,7 @@ class RowOrderingImpl implements RowOrdering {
 	/** @see RowOrdering#addUnorderedOptimizable */
 	public void addUnorderedOptimizable(Optimizable optimizable)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		unorderedOptimizables.add(optimizable);
 	}
 
@@ -334,6 +356,7 @@ class RowOrderingImpl implements RowOrdering {
 		RowOrderingImpl dest = (RowOrderingImpl) copyTo;
 
 		/* Clear the ordering of what we're copying to */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		dest.ordering.clear();
 		dest.currentColumnOrdering = null;
 
@@ -351,6 +374,7 @@ class RowOrderingImpl implements RowOrdering {
 
 		for (int i = 0; i < ordering.size(); i++) {
 			ColumnOrdering co = ordering.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			dest.ordering.add(co.cloneMe());
 
@@ -364,6 +388,8 @@ class RowOrderingImpl implements RowOrdering {
 	}
 
 	private void rememberCurrentColumnOrdering(int posn) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         currentColumnOrdering = ordering.get(posn);
 	}
 
@@ -378,6 +404,8 @@ class RowOrderingImpl implements RowOrdering {
 
 			for (i = 0; i < unorderedOptimizables.size(); i++) 
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 Optimizable opt = unorderedOptimizables.get(i);
 				if (opt.getBaseTableName() != null)
 				{
@@ -395,6 +423,7 @@ class RowOrderingImpl implements RowOrdering {
 
 			for (i = 0; i < alwaysOrderedOptimizables.size(); i++) 
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				Optimizable opt = alwaysOrderedOptimizables.get(i);
 				if (opt.getBaseTableName() != null)
 				{
@@ -426,6 +455,7 @@ class RowOrderingImpl implements RowOrdering {
 		{
 			Optimizable thisOpt =
 				unorderedOptimizables.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			if (thisOpt != optimizable)
 				return true;

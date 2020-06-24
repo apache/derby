@@ -93,6 +93,7 @@ public abstract class OptimizerPlan
         (
          DataDictionary dataDictionary,
          LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
          CompilerContext cc
          )
         throws StandardException;
@@ -155,6 +156,7 @@ public abstract class OptimizerPlan
             (
              DataDictionary dataDictionary,
              LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
              CompilerContext cc
              )
             throws StandardException
@@ -225,6 +227,7 @@ public abstract class OptimizerPlan
 
         public DeadEnd( String name )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
             _name = name;
         }
 
@@ -272,6 +275,7 @@ public abstract class OptimizerPlan
             (
              DataDictionary dataDictionary,
              LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
              CompilerContext cc
              )
             throws StandardException
@@ -363,6 +367,8 @@ public abstract class OptimizerPlan
             (
              DataDictionary dataDictionary,
              LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
              CompilerContext cc
              )
             throws StandardException

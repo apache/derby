@@ -66,6 +66,7 @@ public class JDBCDataSource {
      * of the logical databases in the current configuration.
      */
     public static javax.sql.DataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
          getDataSourceLogical(String logicalDatabasename)
     {
         // default DataSource
@@ -104,6 +105,7 @@ public class JDBCDataSource {
         if (beanProperties == null)
              beanProperties = getDataSourceProperties(config);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         return getDataSourceObject(dsClassName,
             beanProperties);
     }
@@ -114,17 +116,21 @@ public class JDBCDataSource {
      */
     static HashMap<String, Object> getDataSourceProperties(TestConfiguration config)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<String, Object> beanProperties = new HashMap<String, Object>();
         
         if (!config.getJDBCClient().isEmbedded()) {
             beanProperties.put("serverName", config.getHostName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             beanProperties.put("portNumber", config.getPort());
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         beanProperties.put("databaseName", config.getDefaultDatabaseName());
         beanProperties.put("user", config.getUserName());
         beanProperties.put("password", config.getUserPassword());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
         String attributes = config.getConnectionAttributesString();
         if (attributes != null) {
             beanProperties.put("connectionAttributes", attributes);
@@ -144,6 +150,7 @@ public class JDBCDataSource {
      */
     static javax.sql.DataSource getDataSourceObject(String classname, HashMap beanProperties)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ClassLoader contextLoader = AccessController.doPrivileged(
                 new PrivilegedAction<ClassLoader>() {
             public ClassLoader run() {
@@ -156,6 +163,7 @@ public class JDBCDataSource {
             if (contextLoader != null)
             {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     Class<?> clazz = Class.forName(classname, true, contextLoader);
                     ds = (javax.sql.DataSource) clazz.getConstructor().newInstance();
                 } catch (Exception e) {
@@ -166,6 +174,7 @@ public class JDBCDataSource {
             
             if (ds == null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz = Class.forName(classname);
                 ds = (javax.sql.DataSource) clazz.getConstructor().newInstance();
             }
@@ -179,8 +188,10 @@ public class JDBCDataSource {
                 setBeanProperty(ds, property, value);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6108
             if ( !BaseTestCase.isJ9Platform() && !BaseTestCase.isCVM() )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
                 ds.setLoginTimeout( TestConfiguration.getCurrent().getLoginTimeout() );
             }
             
@@ -269,6 +280,7 @@ public class JDBCDataSource {
      */
     public static void shutdownDatabase(javax.sql.DataSource ds)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         setBeanProperty(ds, "shutdownDatabase", "shutdown");
         try {
             ds.getConnection();
@@ -285,6 +297,7 @@ public class JDBCDataSource {
      * The shutdownDatabase property is cleared by this method.
      */
     public static void shutEngine(javax.sql.DataSource ds) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4361
         setBeanProperty(ds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(ds, "databaseName", "");
         try {
@@ -293,6 +306,7 @@ public class JDBCDataSource {
         } catch (SQLException e) {
              BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);
         } finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
             clearStringBeanProperty(ds, "shutdownDatabase");
         }
     }

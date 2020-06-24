@@ -153,6 +153,7 @@ public class LimitInputStream extends FilterInputStream implements Limit {
      * @return {@code false}
      */
     public boolean markSupported() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4245
         return false;
     }
 }

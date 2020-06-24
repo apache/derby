@@ -59,6 +59,7 @@ public  class SumAggregator
 			/* NOTE: We need to call cloneValue since value gets
 			 * reused underneath us
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 			value = addend.cloneValue(false);
 		}
 		else

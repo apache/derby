@@ -48,6 +48,7 @@ public class EmbedXAConnection extends EmbedPooledConnection implements XAConnec
         private EmbedXAResource xaRes;
 
     public EmbedXAConnection(EmbeddedDataSourceInterface ds,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                       ResourceAdapter ra,
                       String u,
                       String p,
@@ -78,6 +79,7 @@ public class EmbedXAConnection extends EmbedPooledConnection implements XAConnec
 
 	public final synchronized XAResource getXAResource() throws SQLException {
 		checkActive();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1155
 		return xaRes;
 	}
 
@@ -104,6 +106,7 @@ public class EmbedXAConnection extends EmbedPooledConnection implements XAConnec
 	public int  checkHoldCursors(int holdability, boolean downgrade)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if (holdability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {		
 			if (isGlobal()) {
                 if (!downgrade)
@@ -199,6 +202,7 @@ public class EmbedXAConnection extends EmbedPooledConnection implements XAConnec
 		Wrap and control a PreparedStatement
 	*/
 	public PreparedStatement wrapStatement(PreparedStatement ps, String sql, Object generatedKeys) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                 ps = super.wrapStatement(ps,sql,generatedKeys);
 		XAStatementControl sc = new XAStatementControl(this, ps, sql, generatedKeys);
 		return (PreparedStatement) sc.applicationStatement;
@@ -207,6 +211,7 @@ public class EmbedXAConnection extends EmbedPooledConnection implements XAConnec
 		Wrap and control a PreparedStatement
 	*/
 	public CallableStatement wrapStatement(CallableStatement cs, String sql) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                 cs = super.wrapStatement(cs,sql);
 		XAStatementControl sc = new XAStatementControl(this, cs, sql);
 		return (CallableStatement) sc.applicationStatement;

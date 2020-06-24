@@ -45,12 +45,14 @@ public interface SlaveFactory {
     /** The name of the Slave Factory, used to boot the service.  */
     public static final String MODULE =
         "org.apache.derby.iapi.store.replication.slave.SlaveFactory";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3432
 
     /* Strings used as keys in the Properties objects*/
 
     /** Property key to specify the name of the database */
     public static final String SLAVE_DB =
         "replication.slave.dbname";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
 
     /** Property key to specify replication mode */
     public static final String REPLICATION_MODE =
@@ -64,6 +66,7 @@ public interface SlaveFactory {
      */
     public static final String SLAVE_MODE =
         "slavemode";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
 
     /**
      * Property value used to indicate that the service should be
@@ -112,6 +115,8 @@ public interface SlaveFactory {
      */
     public void stopSlave(boolean forcedStop) 
             throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
 
     /**
      * <p>

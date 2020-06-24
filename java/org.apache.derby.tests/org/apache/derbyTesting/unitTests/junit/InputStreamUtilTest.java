@@ -40,6 +40,7 @@ public class InputStreamUtilTest extends BaseTestCase {
 
     public void testNullStream() throws IOException{
         try{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
             InputStreamUtil.skipUntilEOF(null);
             fail("Null InputStream is accepted!");
         }catch (NullPointerException e) {
@@ -70,6 +71,8 @@ public class InputStreamUtilTest extends BaseTestCase {
         for(int i = 0; i < lengths.length; i++){
             int length = lengths[i];
             InputStream is = new ByteArrayInputStream(new byte[length]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
             assertEquals(length, InputStreamUtil.skipUntilEOF(is));
         }
     }
@@ -78,6 +81,7 @@ public class InputStreamUtilTest extends BaseTestCase {
         int length = 1024;
 
         InputStream is = new ByteArrayInputStream(new byte[length]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
         InputStreamUtil.skipFully(is, length);
         assertEquals(0, InputStreamUtil.skipUntilEOF(is));
 
@@ -99,6 +103,7 @@ public class InputStreamUtilTest extends BaseTestCase {
      * Returns a suite of tests.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
             InputStreamUtilTest.class, "InputStreamUtil tests");
     }

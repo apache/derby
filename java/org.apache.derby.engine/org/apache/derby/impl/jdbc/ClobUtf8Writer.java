@@ -42,6 +42,7 @@ final class ClobUtf8Writer extends Writer {
      * @param control worker object for the CLOB value
      * @param pos initial <b>byte</b> position in the CLOB value
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2827
     ClobUtf8Writer(TemporaryClob control, long pos) {
         this.control = control;
         this.pos = pos;
@@ -64,6 +65,7 @@ final class ClobUtf8Writer extends Writer {
     public void flush() throws IOException {
         if (closed)
             throw new IOException (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                 MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         // A no-op.
         // Flushing is currently the responsibility of the underlying stream(s).
@@ -92,6 +94,7 @@ final class ClobUtf8Writer extends Writer {
     public void write(char[] cbuf, int off, int len) throws IOException {
         if (closed)
             throw new IOException (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                 MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             long ret = control.insertString (String.copyValueOf (
@@ -101,6 +104,7 @@ final class ClobUtf8Writer extends Writer {
                 pos += ret;
         }
         catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throw Util.newIOException(e);
         }
     }

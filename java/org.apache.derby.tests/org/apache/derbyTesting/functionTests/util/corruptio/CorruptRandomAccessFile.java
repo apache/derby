@@ -59,6 +59,7 @@ public class CorruptRandomAccessFile implements StorageRandomAccessFile
 
     public  CorruptRandomAccessFile clone()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         return new CorruptRandomAccessFile( realRaf.clone(), realFile );
     }
 
@@ -108,6 +109,8 @@ public class CorruptRandomAccessFile implements StorageRandomAccessFile
      */
     public void sync() throws IOException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
         realRaf.sync();
 	}
 

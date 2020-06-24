@@ -67,6 +67,7 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
     private static DataValueDescriptor[] allocate_objects(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Transaction         rawtran,
     int                 num_cols_to_allocate,
     FormatableBitSet    column_list,
@@ -80,6 +81,7 @@ public final class TemplateRow
             (column_list == null ? format_ids.length : column_list.size());
 
         DataValueFactory dvf = rawtran.getDataValueFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
         for (int i = 0; i < num_cols; i++)
         {
@@ -94,6 +96,7 @@ public final class TemplateRow
 
                 // get empty instance of object identified by the format id.
                 ret_row[i] = dvf.getNull(format_ids[i], collation_ids[i]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
                 if (SanityManager.DEBUG)
                 {
@@ -102,6 +105,7 @@ public final class TemplateRow
                     if (o == null)
                     {
                         SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                         "obj from DataValueFactory.newNull(" +
                         format_ids[i] + ", " + collation_ids[i] + ") null." +
                         ";src column position = "  + i              +
@@ -165,6 +169,7 @@ public final class TemplateRow
         DataValueDescriptor[] columns = 
             new DataValueDescriptor[template.length];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         for (int i = template.length; i-- > 0 ;)
         {
             // get empty instance of object identified by the format id.
@@ -189,6 +194,7 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static DataValueDescriptor[] newRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Transaction          rawtran,
     FormatableBitSet     column_list,
     int[]                format_ids,
@@ -220,6 +226,7 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static DataValueDescriptor[] newBranchRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Transaction         rawtran,
     int[]               format_ids,
     int[]               collation_ids,
@@ -231,6 +238,7 @@ public final class TemplateRow
         // the page pointer in the branch row.
         DataValueDescriptor[] columns = 
             allocate_objects(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 rawtran,
                 format_ids.length + 1, 
                 (FormatableBitSet) null, format_ids, collation_ids);
@@ -254,6 +262,7 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
 	static public boolean checkColumnTypes(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     DataValueFactory        dvf,
     int[]                   format_ids, 
     int[]                   collation_ids,
@@ -295,6 +304,7 @@ public final class TemplateRow
                     column_template = 
                         dvf.getNull(format_ids[colid], collation_ids[colid]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
                     // is this the right check?
                     if (column.getClass() != column_template.getClass())
@@ -303,6 +313,7 @@ public final class TemplateRow
                             "check", "row = " +  RowUtil.toString(row));
 
                         SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                             "input column["+colid+"] (" + column.getClass() +
                             ") did not match expected template class (" +
                             column_template.getClass() + ")" +

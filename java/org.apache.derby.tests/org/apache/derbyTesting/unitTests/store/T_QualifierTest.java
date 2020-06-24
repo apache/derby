@@ -90,10 +90,12 @@ public class T_QualifierTest
 	int 	order)
     {
         HashSet<Long> set = new HashSet<Long>(10, 0.8f);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         int key_val = expect_key;
         for (int i = 0; i < expect_numrows; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
           set.add((long)key_val);
 			if (order == ORDER_DESC)
 				key_val--;
@@ -273,6 +275,7 @@ public class T_QualifierTest
             }
             else
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 if (!set.remove(key))
                 {
                     return(
@@ -651,6 +654,7 @@ public class T_QualifierTest
                 }
                 else
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     if (!set.remove(key))
                     {
                         return(fail(
@@ -868,6 +872,8 @@ public class T_QualifierTest
             }
             else
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 if (!set.remove(key))
                 {
                     return(
@@ -1035,6 +1041,7 @@ public class T_QualifierTest
                 row = (DataValueDescriptor[] ) obj;
                 key = ((SQLLongint)(row[2])).getLong();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 if (!set.remove(key))
                 {
                     return(
@@ -1044,6 +1051,7 @@ public class T_QualifierTest
                 }
                 numrows++;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
             else if (obj instanceof List)
             {
                 List row_vect = (List) obj;
@@ -1054,6 +1062,7 @@ public class T_QualifierTest
 
                     key = ((SQLLongint)(row[2])).getLong();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     if (!set.remove(key))
                     {
                         return(fail(
@@ -1164,6 +1173,7 @@ public class T_QualifierTest
         {
             base_conglomid = 
                 tc.createConglomerate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     "heap", base_row, null,  null, null, 
                     TransactionController.IS_DEFAULT);
 
@@ -1185,6 +1195,7 @@ public class T_QualifierTest
                 tc.createConglomerate(
                     init_conglomerate_type, index_row.getRow(), 
                     null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     null,
 					init_properties,
 					init_temporary ? TransactionController.IS_TEMPORARY : TransactionController.IS_DEFAULT);
@@ -1211,6 +1222,7 @@ public class T_QualifierTest
         else
         {
             base_conglomid = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 tc.createConglomerate(
                     init_conglomerate_type, 
                     base_row, 

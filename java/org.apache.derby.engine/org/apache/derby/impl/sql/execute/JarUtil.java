@@ -103,6 +103,7 @@ public class JarUtil
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize( Securable.INSTALL_JAR );
             
 		JarUtil jutil = new JarUtil(lcc, schemaName, sqlName);
@@ -144,6 +145,7 @@ public class JarUtil
         try {
             notifyLoader(false);
             dd.invalidateAllSPSPlans();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             UUID id = BaseActivation.getMonitor().getUUIDFactory().createUUID();
             final String jarExternalName = JarUtil.mkExternalName(
                 id, schemaName, sqlName, fr.getSeparatorChar());
@@ -176,6 +178,7 @@ public class JarUtil
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize( Securable.REMOVE_JAR );
             
 		JarUtil jutil = new JarUtil(lcc, schemaName,sqlName);
@@ -203,6 +206,7 @@ public class JarUtil
 		String dbcp_s = PropertyUtil.getServiceProperty(lcc.getTransactionExecute(),Property.DATABASE_CLASSPATH);
 		if (dbcp_s != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 			String[][]dbcp= IdUtil.parseDbClassPath(dbcp_s);
 			boolean found = false;
 			//
@@ -227,6 +231,7 @@ public class JarUtil
 			DependencyManager dm = dd.getDependencyManager();
 			dm.invalidateFor(fid, DependencyManager.DROP_JAR, lcc);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
             UUID id = fid.getUUID();
 			dd.dropFileInfoDescriptor(fid);
             fr.remove(
@@ -257,6 +262,7 @@ public class JarUtil
 	{
         // make sure that application code doesn't bypass security checks
         // by calling this public entry point
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         SecurityUtil.authorize( Securable.REPLACE_JAR );
             
 		JarUtil jutil = new JarUtil(lcc, schemaName,sqlName);
@@ -304,6 +310,7 @@ public class JarUtil
 			dd.invalidateAllSPSPlans();
 			dd.dropFileInfoDescriptor(fid);
             final String jarExternalName =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
                 JarUtil.mkExternalName(
                     fid.getUUID(), schemaName, sqlName, fr.getSeparatorChar());
 
@@ -361,6 +368,7 @@ public class JarUtil
         throws IOException
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             return AccessController.doPrivileged
             (new java.security.PrivilegedExceptionAction<InputStream>(){
                 
@@ -392,6 +400,7 @@ public class JarUtil
             final long currentGenerationId)
             throws StandardException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             return (AccessController
                     .doPrivileged(new java.security.PrivilegedExceptionAction<Long>() {
 
@@ -403,6 +412,7 @@ public class JarUtil
                             else
                                 generationId =  fr.replace(jarExternalName,
                                         currentGenerationId, contents);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                             return generationId;
                         }
                     })).longValue();
@@ -415,6 +425,7 @@ public class JarUtil
       Make an external name for a jar file stored in the database.
       */
     public static String mkExternalName(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
             UUID id, 
             String schemaName, 
             String sqlName, 
@@ -440,6 +451,7 @@ public class JarUtil
 
         if (!upgrading) {
             LanguageConnectionContext lcc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 (LanguageConnectionContext)getContextOrNull(
                     LanguageConnectionContext.CONTEXT_ID);
 
@@ -508,6 +520,7 @@ public class JarUtil
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

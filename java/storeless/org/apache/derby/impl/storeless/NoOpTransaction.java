@@ -87,6 +87,7 @@ class NoOpTransaction implements TransactionController {
 
     public long recreateAndLoadConglomerate(String implementation,
             boolean recreate_ifempty, DataValueDescriptor[] template,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             ColumnOrdering[] columnOrder, 
             int[] collation_ids,
             Properties properties,
@@ -98,6 +99,7 @@ class NoOpTransaction implements TransactionController {
     }
 
     public void addColumnToConglomerate(long conglomId, int column_id,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             Storable template_column, int collation_id) throws StandardException {
         // Auto-generated method stub
 

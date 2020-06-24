@@ -212,6 +212,7 @@ public class ConstraintDescriptorList extends ArrayList<ConstraintDescriptor>
 		{
 			ConstraintDescriptor cd = elementAt(index);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (cd.enforced() == enforced)
 			{
 				cdl.add(cd);
@@ -229,6 +230,7 @@ public class ConstraintDescriptorList extends ArrayList<ConstraintDescriptor>
 	 */
 	public ConstraintDescriptor elementAt(int n)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		return get(n);
 	}
 
@@ -249,6 +251,7 @@ public class ConstraintDescriptorList extends ArrayList<ConstraintDescriptor>
 		for (int index = 0; index < size; index++)
 		{
             ConstraintDescriptor cd = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (cd.getConstraintType() == type)
 			{

@@ -67,7 +67,9 @@ public class StalePlansTest extends BaseJDBCTestCase {
         // recompilation of statements at random times.
         props.setProperty("derby.storage.indexStats.auto", "false");
         Test suite = new DatabasePropertyTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(StalePlansTest.class), props, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2949
         return new CleanDatabaseTestSetup(suite);
     }
 
@@ -104,6 +106,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
      * all row count changes visible.
      */
     private void flushRowCount(Statement stmt) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2949
         stmt.execute("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
     }
 
@@ -237,6 +240,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
 
         // Change the row count a little bit. A recompile will only be
         // triggered if the row count changes by 10% or more.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2949
         for (int i = 1025; i <= 1250; i++) {
             insert.setInt(1, i);
             insert.setInt(2, i);
@@ -256,6 +260,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
 
         // Execute 11 more times, the plan should not change
         for (int i = 0; i < 11; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2949
             JDBC.assertSingleValueResultSet(ps.executeQuery(), "1250");
         }
 
@@ -277,6 +282,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
 
         // Execute 11 times, the plan should change
         for (int i = 0; i < 11; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2949
             JDBC.assertSingleValueResultSet(ps.executeQuery(), "2500");
         }
 

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BinaryListOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -47,6 +48,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	ValueNode		leftOperand;
 	ValueNodeList	rightOperandList;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     BinaryListOperatorNode(
             ValueNode leftOperand,
             ValueNodeList rightOperandList,
@@ -88,6 +91,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -122,7 +127,9 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -130,6 +137,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
         rightOperandList.bindExpression(fromList, subqueryList, aggregates);
 
 		/* Is there a ? parameter on the left? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if (leftOperand.requiresTypeFromContext())
 		{
 			/*
@@ -142,6 +150,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 			}
 
 			/* Set the left operand to the type of right parameter. */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			leftOperand.setType(rightOperandList.getTypeServices());
 		}
 
@@ -155,6 +164,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 		/* If the left operand is not a built-in type, then generate a conversion
 		 * tree to a built-in type.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (leftOperand.getTypeId().userType())
 		{
 			leftOperand = leftOperand.genSQLJavaSQLTree();
@@ -178,6 +188,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindComparisonOperator()
 			throws StandardException
 	{
@@ -215,6 +227,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -235,6 +249,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setLeftOperand(ValueNode newLeftOperand)
 	{
 		leftOperand = newLeftOperand;
@@ -245,6 +261,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @return The current leftOperand.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getLeftOperand()
 	{
 		return leftOperand;
@@ -256,6 +274,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @param newRightOperandList	The new rightOperandList
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRightOperandList(ValueNodeList newRightOperandList)
 	{
 		rightOperandList = newRightOperandList;
@@ -266,6 +286,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @return The current rightOperandList.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNodeList getRightOperandList()
 	{
 		return rightOperandList;
@@ -315,6 +337,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -374,11 +398,13 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (leftOperand != null)
 		{
 			leftOperand = (ValueNode)leftOperand.accept(v);
@@ -395,6 +421,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
          */
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (! isSameNodeKind(o)) {
 			return false;
 		}
@@ -406,6 +433,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 			return false;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4600
         if (!rightOperandList.isEquivalent(other.rightOperandList))
         {
             return false;

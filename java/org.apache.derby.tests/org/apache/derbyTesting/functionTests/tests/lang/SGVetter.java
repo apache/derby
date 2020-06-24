@@ -121,6 +121,7 @@ public class SGVetter
 
         advance();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         return retval.longValue();
     }
 

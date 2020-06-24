@@ -94,6 +94,8 @@ public abstract class IndexConstantAction extends DDLSingleTableConstantAction
      * @param constraintID The id of the constraint
      */
     public void setConstraintID(UUID constraintID) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         this.constraintID = constraintID;
     }
 

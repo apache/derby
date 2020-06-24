@@ -30,6 +30,7 @@ import java.sql.SQLWarning;
  */
 class ijVectorResult extends ijResultImpl {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	Vector<Object> vec;
 	SQLWarning warns;
 
@@ -42,6 +43,7 @@ class ijVectorResult extends ijResultImpl {
 	 * Initialize a new vector containing only one object.
 	 */
 	ijVectorResult(Object value, SQLWarning w) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		this(new Vector<Object>(1), w);
 		vec.add(value);
 	}

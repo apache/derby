@@ -51,7 +51,9 @@ public class DerbyNetNewServerTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         // Test does not run on J2ME
+//IC see: https://issues.apache.org/jira/browse/DERBY-5677
         if (JDBC.vmSupportsJDBC3() && Derby.hasServer()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(DerbyNetNewServerTest.class);
         } else {
             return new BaseTestSuite("DerbyNetNewServerTest.empty");
@@ -63,6 +65,7 @@ public class DerbyNetNewServerTest extends BaseJDBCTestCase {
         // the network server in the previous test case has shut down
         // completely and released the network port before attempting to start
         // a new server.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5547
         NetworkServerTestSetup.waitForAvailablePort();
     }
 

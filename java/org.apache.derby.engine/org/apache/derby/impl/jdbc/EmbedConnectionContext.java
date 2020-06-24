@@ -39,6 +39,7 @@ import java.util.Vector;
 import java.util.Enumeration;
 /**
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class EmbedConnectionContext extends ContextImpl 
 		implements ConnectionContext
 {
@@ -57,6 +58,7 @@ class EmbedConnectionContext extends ContextImpl
 	EmbedConnectionContext(ContextManager cm, EmbedConnection conn) {
 		super(cm, ConnectionContext.CONTEXT_ID);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		connRef = new java.lang.ref.SoftReference<EmbedConnection>(conn);
 	}
 
@@ -66,6 +68,7 @@ class EmbedConnectionContext extends ContextImpl
 			return;
 
 		EmbedConnection conn = connRef.get();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		if (error instanceof StandardException) {
 
@@ -106,11 +109,13 @@ class EmbedConnectionContext extends ContextImpl
 	public java.sql.Connection getNestedConnection(boolean internal) throws SQLException {
 
 		EmbedConnection conn = connRef.get();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		if ((conn == null) || conn.isClosed())
 			throw Util.noCurrentConnection();
 
 		if (!internal) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 			StatementContext sc = privilegedGetLCC( conn ).getStatementContext();
 			if ((sc == null) || (sc.getSQLAllowed() < org.apache.derby.catalog.types.RoutineAliasInfo.MODIFIES_SQL_DATA))
 				throw Util.noCurrentConnection();
@@ -128,9 +133,11 @@ class EmbedConnectionContext extends ContextImpl
 	public java.sql.ResultSet getResultSet
 	(
 		ResultSet 				executionResultSet
+//IC see: https://issues.apache.org/jira/browse/DERBY-98
 	) throws SQLException
 	{
 		EmbedConnection conn = connRef.get();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		EmbedResultSet rs = conn.getLocalDriver().newEmbedResultSet(conn, executionResultSet, 
 							false, (EmbedStatement) null, true);
@@ -149,7 +156,9 @@ class EmbedConnectionContext extends ContextImpl
      *   @see EmbedStatement#processDynamicResult(EmbedConnection, java.sql.ResultSet, EmbedStatement)
      */
     public boolean processInaccessibleDynamicResult(java.sql.ResultSet resultSet) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         EmbedConnection conn = connRef.get();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1585
         if (conn == null)
             return false;
         
@@ -163,6 +172,7 @@ class EmbedConnectionContext extends ContextImpl
      */
     private LanguageConnectionContext privilegedGetLCC( final EmbedConnection conn )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         return AccessController.doPrivileged
             (
              new PrivilegedAction<LanguageConnectionContext>()

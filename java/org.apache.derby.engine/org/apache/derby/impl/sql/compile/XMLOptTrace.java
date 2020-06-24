@@ -55,6 +55,7 @@ import org.w3c.dom.Element;
 /**
  * Optimizer tracer which produces output in an xml format.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 class   XMLOptTrace implements  OptTrace
 {
     ////////////////////////////////////////////////////////////////////////
@@ -160,6 +161,7 @@ class   XMLOptTrace implements  OptTrace
         "        'FILE_URL',\n" +
         "        'planCost',\n" +
         "        asList( '" + STMT_TEXT + "', '" + STMT_ID + "', '" + QBLOCK_ID + "' ),\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         "        asList( '" + PC_COMPLETE + "', '" + PC_SUMMARY + "', '" + PC_TYPE + "', '" +
         CE_ESTIMATED_COST + "', '" + CE_ROW_COUNT + "' )\n" +
         "     )\n" +
@@ -173,6 +175,7 @@ class   XMLOptTrace implements  OptTrace
 
     public  static  final   class   QueryBlock
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         final   int                 queryBlockID;
         final   OptimizableList optimizableList;
         final   Element         queryBlockElement;
@@ -244,6 +247,7 @@ class   XMLOptTrace implements  OptTrace
     public  void    traceStartStatement( String statementText )
     {
         _currentStatementID++;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         _maxQueryID = 0;
         _currentQueryBlock = null;
         _queryBlockStack = new Stack<QueryBlock>();
@@ -274,6 +278,7 @@ class   XMLOptTrace implements  OptTrace
 
                 if ( _cm == null )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                     _cm = ((QueryTreeNode) opt).getContextManager();
                     _lcc = (LanguageConnectionContext) _cm.getContext( LanguageConnectionContext.CONTEXT_ID );
                 }
@@ -331,10 +336,12 @@ class   XMLOptTrace implements  OptTrace
     public  void    traceSkippingJoinOrder( int nextOptimizable, int joinPosition, int[] proposedJoinOrder, JBitSet assignedTableMap )
     {
         Optimizable opt = _currentQueryBlock.optimizableList.getOptimizable( nextOptimizable );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
         Element skip = formatSkip
             (
              _currentQueryBlock.queryBlockElement, QBLOCK_SKIP,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
              "Useless join order. " + getOptimizableName( opt ).getFullSQLName() + " depends on tables after it in the join order"
              );
         formatJoinOrder( skip, proposedJoinOrder );
@@ -345,6 +352,7 @@ class   XMLOptTrace implements  OptTrace
     
     public  void    traceJoinOrderConsideration( int joinPosition, int[] proposedJoinOrder, JBitSet assignedTableMap )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         _currentQueryBlock.currentJoinsElement = createElement( _currentQueryBlock.queryBlockElement, JO, null );
         _currentQueryBlock.currentJoinOrder = proposedJoinOrder;
 
@@ -367,6 +375,7 @@ class   XMLOptTrace implements  OptTrace
     {
         formatPlanCost
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
              _currentQueryBlock.currentJoinsElement, "withSortAvoidance",
              _currentQueryBlock.currentJoinOrder, Optimizer.SORT_AVOIDANCE_PLAN, currentSortAvoidanceCost
              );
@@ -379,6 +388,7 @@ class   XMLOptTrace implements  OptTrace
     public  void    traceRememberingBestJoinOrder
         ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         if ( _currentQueryBlock.currentBestPlan != null )
         { _currentQueryBlock.queryBlockElement.removeChild( _currentQueryBlock.currentBestPlan ); }
         _currentQueryBlock.currentBestPlan = formatPlanCost
@@ -409,6 +419,7 @@ class   XMLOptTrace implements  OptTrace
     
     public  void    traceConsideringJoinStrategy( JoinStrategy js, int tableNumber )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         _currentQueryBlock.currentDecorationStrategy = js;
     }
     
@@ -420,6 +431,7 @@ class   XMLOptTrace implements  OptTrace
         Optimizable opt = getOptimizable( tableNumber );
         
         _currentQueryBlock.currentDecoration = createElement( _currentQueryBlock.currentJoinsElement, DECORATION, null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
         _currentQueryBlock.currentDecoration.setAttribute( DECORATION_CONGLOM_NAME, cd.getConglomerateName() );
         _currentQueryBlock.currentDecoration.setAttribute( DECORATION_TABLE_NAME, getOptimizableName( opt ).toString() );
@@ -434,6 +446,7 @@ class   XMLOptTrace implements  OptTrace
 
             for ( int i = 0; i < keyColumns.length; i++ )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 createElement( _currentQueryBlock.currentDecoration, DECORATION_KEY, columnNames[ keyColumns[ i ] - 1 ] );
             }
 		}
@@ -476,6 +489,7 @@ class   XMLOptTrace implements  OptTrace
          double    extraNonQualifierSelectivity
          )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         Element cost = createElement( _currentQueryBlock.currentDecoration, DECORATION_CONGLOM_COST, null );
         cost.setAttribute( "name", cd.getConglomerateName() );
 
@@ -520,6 +534,7 @@ class   XMLOptTrace implements  OptTrace
     /** Get the Optimizable with the given tableNumber */
     private Optimizable getOptimizable( int tableNumber )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         for ( int i = 0; i < _currentQueryBlock.optimizableList.size(); i++ )
         {
             Optimizable candidate = _currentQueryBlock.optimizableList.getOptimizable( i );
@@ -539,19 +554,23 @@ class   XMLOptTrace implements  OptTrace
                 ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
                 TableDescriptor td = 
                     ((FromBaseTable) prn.getChildResult()).getTableDescriptor();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 return makeTableName( td.getSchemaName(), td.getName(), _cm );
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
             else if ( OptimizerImpl.isTableFunction( optimizable ) )
             {
                 ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
                 AliasDescriptor ad =
                     ((StaticMethodCallNode) ((FromVTI) prn.getChildResult()).
                         getMethodCall() ).ad;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 return makeTableName( ad.getSchemaName(), ad.getName(), _cm );
             }
             else if ( isFromTable( optimizable ) )
             {
                 TableName   retval = ((FromTable) ((ProjectRestrictNode) optimizable).getChildResult()).getTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
                 if ( retval !=  null ) { return retval; }
             }
@@ -567,6 +586,7 @@ class   XMLOptTrace implements  OptTrace
         String  nodeClass = optimizable.getClass().getName();
         String  unqualifiedName = nodeClass.substring( nodeClass.lastIndexOf( "." ) + 1 );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         return makeTableName( null, unqualifiedName, _cm );
     }
 
@@ -592,6 +612,8 @@ class   XMLOptTrace implements  OptTrace
 
     /** Make a TableName */
     private TableName   makeTableName(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             String schemaName, String unqualifiedName, ContextManager cm )
     {
         TableName result = new TableName(schemaName, unqualifiedName, cm);
@@ -641,6 +663,7 @@ class   XMLOptTrace implements  OptTrace
         if ( isComplete( planOrder ) ) { cost.setAttribute( PC_COMPLETE, "true" ); }
         if ( planType == Optimizer.SORT_AVOIDANCE_PLAN ) { cost.setAttribute( PC_AVOID_SORT, "true" ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         createElement( cost, PC_SUMMARY, formatPlanSummary( planOrder, planType ) );
         formatCost( cost, raw );
 
@@ -652,6 +675,7 @@ class   XMLOptTrace implements  OptTrace
     {
         if ( joinOrder == null ) { return false; }
         if ( joinOrder.length < _currentQueryBlock.optimizableList.size() ) { return false; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
 
         for ( int i = 0; i < joinOrder.length; i++ )
         {
@@ -687,7 +711,9 @@ class   XMLOptTrace implements  OptTrace
                 int     optimizableNumber = proposedJoinOrder[ idx ];
                 if ( optimizableNumber >= 0 )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                     Optimizable optimizable = _currentQueryBlock.optimizableList.getOptimizable( optimizableNumber );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                     createElement( parent, JO_SLOT, getOptimizableName( optimizable ).getFullSQLName() );
                 }
             }
@@ -711,6 +737,7 @@ class   XMLOptTrace implements  OptTrace
      */
     private String  formatPlanSummary( int[] planOrder, int planType )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         try {
             OptimizerPlan   plan = null;
         
@@ -728,6 +755,7 @@ class   XMLOptTrace implements  OptTrace
             {
                 int     listIndex = planOrder[ i ];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 if ( listIndex >= _currentQueryBlock.optimizableList.size() )
                 {
                     // should never happen!
@@ -744,6 +772,7 @@ class   XMLOptTrace implements  OptTrace
                     ((StaticMethodCallNode) ((FromVTI) ((ProjectRestrictNode) optimizable).getChildResult()).getMethodCall()).ad :
                     ap.getConglomerateDescriptor();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
                 OptimizerPlan   current =   (utd == null) ?
                     new OptimizerPlan.DeadEnd( getOptimizableName( optimizable ).toString() ) :
                     OptimizerPlan.makeRowSource( utd, _lcc.getDataDictionary() );

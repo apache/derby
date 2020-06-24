@@ -142,6 +142,7 @@ public class BasicDependencyManager implements DependencyManager {
      * @throws StandardException if adding the dependency fails
      */
     private void addDependency(Dependent d, Provider p,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4928
                                ContextManager cm, TransactionController tc)
             throws StandardException {
         // Dependencies are either in-memory or stored, but not both.
@@ -173,6 +174,7 @@ public class BasicDependencyManager implements DependencyManager {
         boolean addedToProvs = false;
         boolean addedToDeps =
                 addDependencyToTable(dependents, d.getObjectID(), dy);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         if (addedToDeps) {
             addedToProvs = addDependencyToTable(providers, p.getObjectID(), dy);
@@ -193,6 +195,7 @@ public class BasicDependencyManager implements DependencyManager {
         // Add the dependency to the StatementContext, so that
         // it can be cleared on a pre-execution error.
         StatementContext sc = (StatementContext) cm.getContext(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 org.apache.derby.shared.common.reference.ContextId.LANG_STATEMENT);
         sc.addDependency(dy);
     }
@@ -218,6 +221,9 @@ public class BasicDependencyManager implements DependencyManager {
             throws StandardException {
         LanguageConnectionContext lcc = getLanguageConnectionContext(cm);
         // tc == null means do it in the user transaction
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
         TransactionController tcToUse =
                 (tc == null) ? lcc.getTransactionExecute() : tc;
 
@@ -313,7 +319,9 @@ public class BasicDependencyManager implements DependencyManager {
 		throws StandardException
 	{
 		List<Dependency> list = getDependents(p);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4947
         if (list.isEmpty()) {
 			return;
 		}
@@ -355,6 +363,7 @@ public class BasicDependencyManager implements DependencyManager {
 				if (ei >= list.size())
 					continue;
 				Dependency dependency = list.get(ei);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 				Dependent dep = dependency.getDependent();
 
@@ -386,6 +395,8 @@ public class BasicDependencyManager implements DependencyManager {
 					}	// if providingCols == null
 					else
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
                         subsetCols.copyFrom( affectedCols );
 						subsetCols.and(providingCols);
 						if (subsetCols.anySetBit() == -1)
@@ -399,6 +410,7 @@ public class BasicDependencyManager implements DependencyManager {
 					dep.prepareToInvalidate(p, action, lcc);
 				} catch (StandardException sqle) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 					if (noInvalidate == null) {
 						noInvalidate = sqle;
 					} else {
@@ -460,6 +472,7 @@ public class BasicDependencyManager implements DependencyManager {
 	public void clearDependencies(LanguageConnectionContext lcc, 
 									Dependent d, TransactionController tc) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4928
         UUID id = d.getObjectID();
         // Remove all the stored dependencies.
         if (d.isPersistent()) {
@@ -492,6 +505,7 @@ public class BasicDependencyManager implements DependencyManager {
 	 * StatementContext.)
 	 */
     public synchronized void clearInMemoryDependency(Dependency dy) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4928
         final UUID deptId = dy.getDependent().getObjectID();
         final UUID provId = dy.getProviderKey();
         List deps = (List) dependents.get(deptId);
@@ -568,12 +582,14 @@ public class BasicDependencyManager implements DependencyManager {
     public ProviderInfo[] getPersistentProviderInfos(Dependent dependent)
             throws StandardException {
         List<Provider> provs = getProviders(dependent);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         if (provs.isEmpty()) {
 			return EMPTY_PROVIDER_INFO;
 		}
 
         List<ProviderInfo> pih = new ArrayList<ProviderInfo>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         for (Provider p : provs) {
             if (p.isPersistent()) {
@@ -598,6 +614,7 @@ public class BasicDependencyManager implements DependencyManager {
 	public ProviderInfo[] getPersistentProviderInfos(ProviderList pl)
 							throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-73
 		Enumeration e = pl.elements();
 		int			numProviders = 0;
 		ProviderInfo[]	retval;
@@ -616,9 +633,11 @@ public class BasicDependencyManager implements DependencyManager {
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-73
 		e = pl.elements();
 		retval = new ProviderInfo[numProviders];
 		int piCtr = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-73
 		while (e != null && e.hasMoreElements())
 		{
 			Provider prov = (Provider) e.nextElement();
@@ -686,6 +705,7 @@ public class BasicDependencyManager implements DependencyManager {
 	{
 
 		List list = getProviders(copy_From);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4928
         Iterator depsIter = list.iterator();
         while (depsIter.hasNext()) {
             Provider provider = (Provider)depsIter.next();
@@ -800,6 +820,9 @@ public class BasicDependencyManager implements DependencyManager {
 			case DROP_COLUMN:
 				return "DROP COLUMN";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1489
+//IC see: https://issues.apache.org/jira/browse/DERBY-1909
+//IC see: https://issues.apache.org/jira/browse/DERBY-1926
 			case DROP_COLUMN_RESTRICT:
 				return "DROP COLUMN RESTRICT";
 
@@ -815,15 +838,19 @@ public class BasicDependencyManager implements DependencyManager {
 		    case DROP_SYNONYM:
 			    return "DROP SYNONYM";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1539
 		    case REVOKE_PRIVILEGE:
 			    return "REVOKE PRIVILEGE";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1643
 		    case REVOKE_PRIVILEGE_RESTRICT:
 			    return "REVOKE PRIVILEGE RESTRICT";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3666
 		    case REVOKE_ROLE:
 				return "REVOKE ROLE";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		    case RECHECK_PRIVILEGES:
 				return "RECHECK PRIVILEGES";
 
@@ -859,6 +886,7 @@ public class BasicDependencyManager implements DependencyManager {
 		throws StandardException
 	{
         // Add the stored dependencies.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         List<?> storedDeps = dd.getAllDependencyDescriptorsList();
         int numDependencies = storedDeps.size();
         synchronized(this) {
@@ -881,6 +909,7 @@ public class BasicDependencyManager implements DependencyManager {
 	// class interface
 	//
 	public BasicDependencyManager(DataDictionary dd) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
         this.dd = dd;
 	}
 
@@ -896,6 +925,7 @@ public class BasicDependencyManager implements DependencyManager {
 	 */
     private boolean addDependencyToTable(
             Map<UUID, List<Dependency>> table, UUID key, Dependency dy) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         List<Dependency> deps = table.get(key);
 
@@ -909,6 +939,7 @@ public class BasicDependencyManager implements DependencyManager {
 			UUID	provKey = dy.getProvider().getObjectID();
 			UUID	depKey = dy.getDependent().getObjectID();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			for (ListIterator<Dependency> depsIT = deps.listIterator();  depsIT.hasNext(); )
 			{
 				Dependency curDY = depsIT.next();
@@ -918,6 +949,7 @@ public class BasicDependencyManager implements DependencyManager {
                 // like builtin aggregates which implement
                 // org.apache.derby.agg.Aggregator. those objects have no UUID anyway
                 //
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
                 if ( curDY.getProvider().getObjectID() == null ) { continue; }
                 
                 if (curDY.getProvider().getObjectID().equals(provKey) &&
@@ -952,6 +984,7 @@ public class BasicDependencyManager implements DependencyManager {
     //@GuardedBy("this")
     private void clearProviderDependency(UUID p, Dependency d) {
         List<?> deps = providers.get(p);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		if (deps == null)
 			return;
@@ -976,6 +1009,7 @@ public class BasicDependencyManager implements DependencyManager {
 	 * @exception StandardException thrown if something goes wrong
 	 */
     private List<Dependency> getDependencyDescriptorList(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             List<DependencyDescriptor> storedList,
 			Provider providerForList)
 		throws StandardException
@@ -991,13 +1025,16 @@ public class BasicDependencyManager implements DependencyManager {
 			 * back into the same place in the List
 			 * so that the call gets an enumerations of Dependencys.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             for (DependencyDescriptor depDesc : storedList)
 			{
 				Dependent 			tempD;
 				Provider  			tempP;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 DependableFinder    finder = depDesc.getDependentFinder();
                 tempD = (Dependent) finder.getDependable(dd, depDesc.getUUID());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1581
                 if (providerForList != null)
                 {
                     // Use the provider being passed in.
@@ -1015,9 +1052,11 @@ public class BasicDependencyManager implements DependencyManager {
                 {
                     finder = depDesc.getProviderFinder();
                     tempP = (Provider) finder.getDependable(dd, depDesc.getProviderID() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
 
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				retval.add( new BasicDependency( tempD, tempP ) );
 			}
 		}
@@ -1047,6 +1086,7 @@ public class BasicDependencyManager implements DependencyManager {
      * @throws StandardException thrown if something goes wrong
      */
     private List<Provider> getProviders (Dependent d) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<Provider> provs = new ArrayList<Provider>();
         synchronized (this) {
             List deps = (List) dependents.get(d.getObjectID());
@@ -1061,6 +1101,7 @@ public class BasicDependencyManager implements DependencyManager {
         // If the dependent is persistent, we have to take stored dependencies
         // into consideration as well.
         if (d.isPersistent()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			List<Dependency> storedList = getDependencyDescriptorList
                 (
                  dd.getDependentsDescriptorList( d.getObjectID().toString() ),
@@ -1085,6 +1126,7 @@ public class BasicDependencyManager implements DependencyManager {
 	 */
 	private List<Dependency> getDependents (Provider p) 
 			throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         List<Dependency> deps = new ArrayList<Dependency>();
         synchronized (this) {
             List<Dependency> memDeps = providers.get(p.getObjectID());
@@ -1096,11 +1138,13 @@ public class BasicDependencyManager implements DependencyManager {
         // If the provider is persistent, then we have to add providers for
         // stored dependencies as well.
         if (p.isPersistent()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			List<Dependency> storedList = getDependencyDescriptorList
                 (
                  dd.getProvidersDescriptorList( p.getObjectID().toString() ),
                  p
                  );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4947
             deps.addAll(storedList);
         }
         return deps;

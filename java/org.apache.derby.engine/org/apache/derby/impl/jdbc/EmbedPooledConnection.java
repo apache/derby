@@ -84,6 +84,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
      * the listeners fired in the same thread add or remove listeners.
      */
     private final CopyOnWriteArrayList<StatementEventListener>
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             statementEventListeners =
                     new CopyOnWriteArrayList<StatementEventListener>();
 
@@ -102,6 +103,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 	BrokeredConnection currentConnectionHandle;
 
 	// set up once by the data source
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     final EmbeddedDataSourceInterface dataSource;
 	private final String username;
 	private final String password;
@@ -198,8 +200,10 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 			realConnection.setApplicationConnection(currentConnectionHandle);
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
 	final Connection getNewCurrentConnectionHandle() throws SQLException {
 		Connection applicationConnection = currentConnectionHandle =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             realConnection.getLocalDriver().newBrokeredConnection(this);
 		realConnection.setApplicationConnection(applicationConnection);
 		return applicationConnection;
@@ -212,6 +216,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 	private void closeCurrentConnectionHandle() throws SQLException {
 		if (currentConnectionHandle != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             ArrayList<ConnectionEventListener> tmpEventListener = eventListener;
 			eventListener = null;
 
@@ -246,10 +251,12 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 		if (realConnection.isReadOnly() != defaultReadOnly)
 			realConnection.setReadOnly(defaultReadOnly);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if (realConnection.getHoldability() != ResultSet.HOLD_CURSORS_OVER_COMMIT)
 			realConnection.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
 
 		// reset any remaining state of the connection
+//IC see: https://issues.apache.org/jira/browse/DERBY-130
 		realConnection.resetFromPool();
 		if (SanityManager.DEBUG)
 		{
@@ -293,6 +300,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 		if (listener == null)
 			return;
         if (eventListener == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             eventListener = new ArrayList<ConnectionEventListener>();
         } else if (eventIterators > 0) {
             // DERBY-3401: Someone is iterating over the ArrayList, and since
@@ -318,6 +326,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
             // we were able to synchronize on this, that someone is us. Clone
             // the list of listeners in order to prevent invalidation of the
             // iterator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             eventListener =
                 new ArrayList<ConnectionEventListener>(eventListener);
         }
@@ -342,6 +351,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
      * @return The underlying language connection.
      */
 	public synchronized LanguageConnectionContext getLanguageConnection()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2432
        throws SQLException
 	{
 		checkActive();
@@ -376,6 +386,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
             ConnectionEvent event = new ConnectionEvent(this, exception);
             eventIterators++;
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 for (ConnectionEventListener l : eventListener) {
                     if (exception == null) {
                         l.connectionClosed(event);
@@ -404,6 +415,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 	 */
 	public boolean isIsolationLevelSetUsingSQLorJDBC() throws SQLException {
 		if (realConnection != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 			return getLanguageConnectionContext( realConnection ).isIsolationLevelSetUsingSQLorJDBC();
 		else
 			return false;
@@ -416,6 +428,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 		and the end of a global transaction.
 	*/
 	public void resetIsolationLevelFlag() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
 		getLanguageConnectionContext( realConnection ).resetIsolationLevelFlagUsedForSQLandJDBC();
 	}
 
@@ -523,6 +536,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
                /*
                     
                 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                 EmbedPreparedStatement ps_ = (EmbedPreparedStatement)ps;
                 ps_.setBrokeredConnectionControl(this);
 		return (PreparedStatement)ps_;
@@ -562,6 +576,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
      */
     public String toString()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-412
         if ( connString == null )
         {
             String physicalConnString = isActive ?
@@ -589,6 +604,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
      * @param statement the {@code PreparedStatement} that was closed
      */
     public void onStatementClose(PreparedStatement statement) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this, statement);
             for (StatementEventListener l : statementEventListeners) {
@@ -654,6 +670,7 @@ public class EmbedPooledConnection implements javax.sql.PooledConnection, Broker
 	  */
 	private static LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         return AccessController.doPrivileged
             (
              new PrivilegedAction<LanguageConnectionContext>()

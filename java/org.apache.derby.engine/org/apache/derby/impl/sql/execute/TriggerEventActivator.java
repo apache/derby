@@ -74,6 +74,7 @@ public class TriggerEventActivator
 		TriggerInfo 				triggerInfo,
 		int							dmlType,
 		Activation					activation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Vector<AutoincrementCounter> aiCounters
 	) throws StandardException
 	{
@@ -126,6 +127,7 @@ public class TriggerEventActivator
 								statementText,
 								dmlType,
 								tableId,	
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                                 tableName,
                                 null);
 		setupExecutors(triggerInfo);
@@ -134,6 +136,7 @@ public class TriggerEventActivator
 	private void setupExecutors(TriggerInfo triggerInfo) throws StandardException
 	{
 		executors = new GenericTriggerExecutor[TriggerEvent.MAX_EVENTS][];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<List<TriggerDescriptor>> executorLists =
             new ArrayList<List<TriggerDescriptor>>(TriggerEvent.MAX_EVENTS);
 		for (int i = 0; i < TriggerEvent.MAX_EVENTS; i++)
@@ -149,6 +152,7 @@ public class TriggerEventActivator
 				case TriggerDescriptor.TRIGGER_EVENT_INSERT:
 					if (td.isBeforeTrigger())
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                         executorLists.get(TriggerEvent.BEFORE_INSERT).add(td);
 					}
 					else
@@ -161,6 +165,7 @@ public class TriggerEventActivator
 				case TriggerDescriptor.TRIGGER_EVENT_DELETE:
 					if (td.isBeforeTrigger())
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                         executorLists.get(TriggerEvent.BEFORE_DELETE).add(td);
 					}
 					else
@@ -187,6 +192,7 @@ public class TriggerEventActivator
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (int i = 0; i < executorLists.size(); i++)
 		{
             List<TriggerDescriptor> descriptors = executorLists.get(i);

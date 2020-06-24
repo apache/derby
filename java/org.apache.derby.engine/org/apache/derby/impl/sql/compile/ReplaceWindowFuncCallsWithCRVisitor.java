@@ -1,5 +1,7 @@
 /*
    Derby - Class org.apache.derby.impl.sql.compile.ReplaceWindowFuncCallsWithCRVisitor
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -44,8 +46,11 @@ class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 	 * @param tableNumber	The tableNumber for the new CRs
 	 * @param skipOverClass Don't go past this
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ReplaceWindowFuncCallsWithCRVisitor(ResultColumnList rcl,
 											int tableNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                                             Class<?> skipOverClass)
 	{
 		this.rcl = rcl;
@@ -100,6 +105,7 @@ class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 	 */
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 

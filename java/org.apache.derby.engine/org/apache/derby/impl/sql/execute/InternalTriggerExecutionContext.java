@@ -143,6 +143,7 @@ class InternalTriggerExecutionContext
 		int 						dmlType,
 		UUID						targetTableId,
 		String						targetTableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Vector<AutoincrementCounter> aiCounters
 	) throws StandardException
 	{
@@ -152,6 +153,7 @@ class InternalTriggerExecutionContext
 		this.lcc = lcc;
 		this.targetTableId = targetTableId;
 		this.targetTableName = targetTableName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		this.resultSetVector = new Vector<java.sql.ResultSet>();
 		this.aiCounters = aiCounters;
 
@@ -312,7 +314,9 @@ class InternalTriggerExecutionContext
 		// statements in a trigger's action statement is disallowed by the
 		// parser. However, this runtime check is needed to prevent execution
 		// of DDL statements by procedures within a trigger context. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-551
  		if (constantAction instanceof DDLConstantAction) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5885
 			throw StandardException.newException(SQLState.LANG_NO_DDL_IN_TRIGGER, triggerd.getName());
 		}
 		
@@ -505,6 +509,7 @@ class InternalTriggerExecutionContext
 		// by this trigger.
 		if (aiHT != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 Long value = aiHT.get(identity);
 				if (value != null)
 					return value;
@@ -515,6 +520,7 @@ class InternalTriggerExecutionContext
 		// represent values inherited by trigger from insert statements.
 		if (aiCounters != null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (AutoincrementCounter aic : aiCounters)
 			{
 				if (identity.equals(aic.getIdentity()))
@@ -538,6 +544,7 @@ class InternalTriggerExecutionContext
 			return;
 		if (aiHT == null)
 			aiHT = new Hashtable<String,Long>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		aiHT.putAll(from);
 	}
@@ -558,6 +565,7 @@ class InternalTriggerExecutionContext
 
 		afterRow = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (AutoincrementCounter aic : aiCounters)
 		{
 			aic.reset(begin);
@@ -573,6 +581,7 @@ class InternalTriggerExecutionContext
 		if (aiCounters == null)
 			return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (AutoincrementCounter aic : aiCounters)
 		{
 			DataValueDescriptor dvd = afterRow.getColumn(aic.getColumnPosition());

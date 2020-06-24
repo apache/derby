@@ -70,6 +70,7 @@ public interface Statement
 	 *	   execution-only version of the module (the prepare() method
 	 *	   relies on compilation).
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 	PreparedStatement	prepare(LanguageConnectionContext lcc, boolean allowInternalSyntax) throws StandardException;
 	
 	/**

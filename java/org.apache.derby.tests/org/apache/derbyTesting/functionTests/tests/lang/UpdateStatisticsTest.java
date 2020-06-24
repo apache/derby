@@ -56,6 +56,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //       With automatic generation enabled, testUpdateStatistics may
         //       fail intermittently due to timing, mostly when run
         //       with the client driver.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5025
         Test test = TestConfiguration.defaultSuite(UpdateStatisticsTest.class);
         Test statsDisabled = DatabasePropertyTestSetup.singleProperty
             ( test, "derby.storage.indexStats.auto", "false", true );
@@ -69,6 +70,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
      *  SYSCS_DROP_STATISTICS and SYSCS_UPDATE_STATISTICS
      */
     public void testIndexAndColumnNamedStatistics() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5681
         String tbl = "T1";
         // Helper object to obtain information about index statistics.
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
@@ -206,13 +208,16 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
      * Test for update statistics
      */
     public void testUpdateAndDropStatistics() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5774
         String tbl1 = "T1";
         // Helper object to obtain information about index statistics.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4837
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
 
         //Calls to update and drop statistics below should fail because 
         // table APP.T1 does not exist
+//IC see: https://issues.apache.org/jira/browse/DERBY-5681
         dropTable("T1");
         assertStatementError("42Y55", s, 
             "CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1',null)");
@@ -245,6 +250,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //So far the table t1 is empty and we have already created index I1 on 
         //it. Since three was no data in the table when index I1 was created,
         //there will be no row in sysstatistics table
+//IC see: https://issues.apache.org/jira/browse/DERBY-5774
         stats.assertNoStatsTable(tbl1);
         //Now insert some data into t1 and then create a new index on the 
         //table. This will cause sysstatistics table to have one row for this
@@ -331,6 +337,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //empty
         s.executeUpdate("CREATE INDEX t2i1 ON t2(c21)");
         s.executeUpdate("CREATE INDEX t2i2 ON t2(c22)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5774
         stats.assertNoStatsTable("T2");
         
         PreparedStatement ps = prepareStatement("INSERT INTO T2 VALUES(?,?,?)");
@@ -357,6 +364,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
 		//Running the update statistics below will create statistics for T2I2
 		s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T2','T2I2')");
         stats.assertIndexStats("T2I2", 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4837
 
         //Rerunning the query "SELECT * FROM t2 WHERE c21=? AND c22=?" and
         //looking at it's plan will show that this time it picked up more
@@ -465,6 +473,8 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         updateConn.close();
 
         // Clean-up
+//IC see: https://issues.apache.org/jira/browse/DERBY-5174
+//IC see: https://issues.apache.org/jira/browse/DERBY-5153
         dropTable("derby5153");
         commit();
     }
@@ -505,6 +515,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
                 "ADD CONSTRAINT TEST_TAB_1_PK_1 "+
         		"PRIMARY KEY (c11)");
         stats.assertNoStatsTable("TEST_TAB_1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
 
         //Test - unique key constraint
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
@@ -542,6 +553,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         stats.assertTableStats("TEST_TAB_1",2);
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "DROP CONSTRAINT TEST_TAB_1_UNQ_2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "DROP CONSTRAINT TEST_TAB_1_PK_1");
@@ -568,6 +580,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
                 "ADD CONSTRAINT TEST_TAB_2_PK_1 "+
         		"PRIMARY KEY (c21)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         stats.assertNoStatsTable("TEST_TAB_2");
         // DERBY-5702 Add a foreign key constraint and now we should find one
         // row of statistics for TEST_TAB_2 (for the foreign key constraint).
@@ -604,6 +617,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
      * useful statistics intact.
      */
     public void testDisposableStatsEagerness()
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
             throws SQLException {
         setAutoCommit(false);
         String tbl = "DISPOSABLE_STATS_EAGERNESS";
@@ -650,12 +664,14 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         IndexStatsUtil stats = new IndexStatsUtil(getConnection());
         // Expected FK table: 0
         // Expected main table: 2xPK, 1 non-unique, 1 FK = 4
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         stats.assertNoStatsTable(tbl_fk);
         stats.assertTableStats(tbl, 4);
         IndexStatsUtil.IdxStats[] tbl_stats_0 = stats.getStatsTable(tbl);
 
         // Run the update statistics procedure.
         // Sleep at least one tick to ensure the timestamps differ.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5797
         sleepAtLeastOneTick();
         ps = prepareStatement(
                 "call syscs_util.syscs_update_statistics('APP', ?, ?)");
@@ -666,6 +682,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         ps.execute();
 
         // Check the counts.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         stats.assertNoStatsTable(tbl_fk);
         stats.assertTableStats(tbl, 4);
         // Check the timestamps (i.e. were they actually updated?).
@@ -676,6 +693,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         }
 
         // Now make sure updating one index doesn't modify the others' stats.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5797
         sleepAtLeastOneTick();
         ps.setString(1, tbl);
         ps.setString(2, nuIdx);
@@ -684,10 +702,12 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         IndexStatsUtil.IdxStats nonUniqueIdx = stats.getStatsIndex(nuIdx)[0];
         assertTrue(nonUniqueIdx.after(tbl_stats_1[0]));
         // Check the counts again.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         stats.assertNoStatsTable(tbl_fk);
         stats.assertTableStats(tbl, 4);
 
         // Cleanup
+//IC see: https://issues.apache.org/jira/browse/DERBY-5774
         dropTable(tbl);
         dropTable(tbl_fk);
     }

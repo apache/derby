@@ -40,6 +40,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class SystemCatalogTest extends BaseJDBCTestCase {
 
     public SystemCatalogTest(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2484
 		super(name);
 	}
 	
@@ -55,6 +56,7 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
 	public void testNoUserDDLOnSystemTables() throws SQLException {
 	    Statement s = createStatement();
 	    
+//IC see: https://issues.apache.org/jira/browse/DERBY-2484
 	    assertStatementError("X0Y56", s, "drop table sys.systables");
 	    assertStatementError("42X62", s, "drop index sys.sysaliases_index2");
 	    assertStatementError("42X62", s, "create index trash on sys.systables(tableid)");
@@ -197,6 +199,11 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
 				{"SYSCOLPERMS", "GRANTOR", "3", "VARCHAR(128) NOT NULL"},
 				{"SYSCOLPERMS", "TABLEID", "4", "CHAR(36) NOT NULL"},
 				{"SYSCOLPERMS", "TYPE", "5", "CHAR(1) NOT NULL"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 				{"SYSCOLUMNS", "AUTOINCREMENTCYCLE", "10", "BOOLEAN"},
 				{"SYSCOLUMNS", "AUTOINCREMENTINC", "9", "BIGINT"},
 				{"SYSCOLUMNS", "AUTOINCREMENTSTART", "8", "BIGINT"},
@@ -245,6 +252,7 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
                 {"SYSPERMS", "OBJECTTYPE", "2", "VARCHAR(36) NOT NULL"},
                 {"SYSPERMS", "PERMISSION", "4", "CHAR(36) NOT NULL"},
                 {"SYSPERMS", "UUID", "1", "CHAR(36) NOT NULL"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                 {"SYSROLES", "GRANTEE", "3", "VARCHAR(128) NOT NULL"},
                 {"SYSROLES", "GRANTOR", "4", "VARCHAR(128) NOT NULL"},
 				{"SYSROLES", "ISDEF", "6", "CHAR(1) NOT NULL"},
@@ -380,7 +388,9 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
                 {"SYSPERMS", "SYSPERMS_INDEX3", "true"},
                 {"SYSPERMS", "SYSPERMS_INDEX2", "true"},
                 {"SYSPERMS", "SYSPERMS_INDEX1", "true"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
                 {"SYSROLES", "SYSROLES_HEAP", "false"},
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 				{"SYSROLES", "SYSROLES_INDEX3", "true"},
 				{"SYSROLES", "SYSROLES_INDEX2", "true"},
 				{"SYSROLES", "SYSROLES_INDEX1", "true"},

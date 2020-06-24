@@ -52,6 +52,7 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 		DaemonFactory df;
 		try {
 			cf = (CacheFactory) startSystemModule(getModuleToTestProtocolName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			df = (DaemonFactory) startSystemModule(org.apache.derby.shared.common.reference.Module.DaemonFactory);
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -60,6 +61,7 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 			throw T_Fail.testFailMsg(getModuleToTestProtocolName() + " module not started.");
 		}
 		if (df == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 			throw T_Fail.testFailMsg(org.apache.derby.shared.common.reference.Module.DaemonFactory + " module not started.");
 	
 
@@ -129,6 +131,7 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 
 	  */
 	protected String getModuleToTestProtocolName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		return org.apache.derby.shared.common.reference.Module.CacheFactory;
 	}
 
@@ -348,6 +351,7 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
      * can't call this entry point.
      */
     private  static  Object  startSystemModule( final String factoryInterface )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

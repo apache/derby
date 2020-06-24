@@ -47,6 +47,9 @@ import org.apache.derby.impl.sql.compile.TableName;
 class SetConstraintsConstantAction extends DDLConstantAction
 {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
     final private boolean   deferred;
     final private List<TableName> constraints;
 
@@ -88,6 +91,7 @@ class SetConstraintsConstantAction extends DDLConstantAction
 
         final DataDictionary dd = lcc.getDataDictionary();
         final List<String> boundConstraints = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         if (constraints != null) {
             for (TableName c : constraints) {
@@ -107,6 +111,7 @@ class SetConstraintsConstantAction extends DDLConstantAction
                             c.getFullSQLName());
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 final String bound =
                         IdUtil.normalToDelimited(sd.getSchemaName()) + "." +
                         IdUtil.normalToDelimited(cd.getConstraintName());
@@ -126,6 +131,8 @@ class SetConstraintsConstantAction extends DDLConstantAction
                             cd.getConstraintName());
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 lcc.setConstraintDeferred(
                     activation,
                     cd,

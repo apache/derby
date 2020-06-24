@@ -235,6 +235,7 @@ public class SqlXmlUtil
              */ 
             throw StandardException.newException(
                 SQLState.LANG_UNEXPECTED_XML_EXCEPTION, t, t.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1775
 
         }
 
@@ -263,6 +264,7 @@ public class SqlXmlUtil
              * is used).  In the future we may want to revisit this
              * to make it easier for users to query based on namespaces.
              */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
             XPath xpath = XPathFactory.newInstance().newXPath();
             xpath.setNamespaceContext(NullNamespaceContext.SINGLETON);
 
@@ -287,6 +289,7 @@ public class SqlXmlUtil
              */
             throw StandardException.newException(
                 SQLState.LANG_XML_QUERY_ERROR, te, opName, te.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1775
 
         }
     }
@@ -307,6 +310,7 @@ public class SqlXmlUtil
         throws Exception
     {
         Document doc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
 
         /* The call to dBuilder.parse() is a call to an external
          * (w.r.t. to Derby) JAXP parser.  If the received XML
@@ -317,9 +321,12 @@ public class SqlXmlUtil
          * reading the DTD file.
          */
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2131
 
             final InputSource is = new InputSource(new StringReader(xmlAsText));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
             doc = java.security.AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 new java.security.PrivilegedExceptionAction<Document>()
                 {
                     public Document run() throws IOException, SAXException
@@ -350,6 +357,7 @@ public class SqlXmlUtil
          * don't have a top-level attribute node in the list,
          * so we don't have to worry.  Hence the "null" here.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
         return serializeToString(Collections.singletonList(doc), null);
     }
 
@@ -384,6 +392,7 @@ public class SqlXmlUtil
         XMLDataValue xmlVal) throws TransformerException
     {
         // If we have an empty sequence, return an empty value immediately.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
         if (items.isEmpty()) {
             return "";
         }
@@ -405,8 +414,10 @@ public class SqlXmlUtil
         }
 
         // Iterate through the list and serialize each item.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         for (Object obj : items)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
             if (obj instanceof Attr)
             {
                 /* Step 7a: Attribute nodes.  If there is an Attribute node
@@ -436,7 +447,9 @@ public class SqlXmlUtil
                  * explicit call to serialize the sequence, we'll throw the
                  * appropriate error (see XML.XMLSerialize()).
                  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6634
                 xmlVal.markAsHavingTopLevelAttr();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
                 serializer.transform(
                         new DOMSource((Node) obj), new StreamResult(sWriter));
             }
@@ -471,6 +484,7 @@ public class SqlXmlUtil
                      * "serialized" as an atomic value, attribute, or
                      * text node.
                      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
                     serializer.transform(
                             new DOMSource(n), new StreamResult(sWriter));
                 }
@@ -524,6 +538,7 @@ public class SqlXmlUtil
         // Make sure we have a compiled query.
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
                 (query != null),
                 "Failed to locate compiled XML query expression.");
         }
@@ -543,6 +558,7 @@ public class SqlXmlUtil
                 (returnResults ? "XMLQUERY" : "XMLEXISTS"));
         } 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
         Document docNode = dBuilder.parse(
             new InputSource(
                 new StringReader(xmlContext.getString())));
@@ -607,6 +623,7 @@ public class SqlXmlUtil
 
         // If we know the return type, just evaluate the expression with
         // that type.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
         if (returnType != null) {
             return query.evaluate(doc, returnType);
         }
@@ -640,6 +657,7 @@ public class SqlXmlUtil
     {
         // Set serialization properties.
         Properties props = new Properties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
 
         // SQL/XML[2006] 10.15:General Rules:6 says method is "xml".
         props.setProperty(OutputKeys.METHOD, "xml");
@@ -713,6 +731,7 @@ public class SqlXmlUtil
 
         private final static NullNamespaceContext
                 SINGLETON = new NullNamespaceContext();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
 
         @Override
         public String getNamespaceURI(String prefix) {
@@ -726,6 +745,7 @@ public class SqlXmlUtil
 
         @Override
         public Iterator<String> getPrefixes(String namespaceURI) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
             List<String> emptylist = Collections.emptyList();
             return emptylist.iterator();
         }

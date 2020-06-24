@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SubqueryNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -71,6 +72,8 @@ import org.apache.derby.impl.sql.execute.OnceResultSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class SubqueryNode extends ValueNode
 {
 	/*
@@ -166,6 +169,8 @@ class SubqueryNode extends ValueNode
 	 * NotNode above the SubqueryNode in the tree.
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final static int NOTIMPLEMENTED_SUBQUERY        = -1;
     final static int FROM_SUBQUERY      = 0;
     final static int IN_SUBQUERY            = 1;
@@ -200,6 +205,8 @@ class SubqueryNode extends ValueNode
      * @param cm            Context Manager
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     SubqueryNode(ResultSetNode resultSet,
                  int subqueryType,
                  ValueNode leftOperand,
@@ -223,6 +230,8 @@ class SubqueryNode extends ValueNode
 		 * built-in functions, etc.
 		 */
 		underTopAndNode = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         this.leftOperand = leftOperand;
 	}
 
@@ -258,6 +267,8 @@ class SubqueryNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -276,12 +287,15 @@ class SubqueryNode extends ValueNode
 				leftOperand.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 			if (orderByList != null)
 			{
 				printLabel(depth, "orderByList: ");
 				orderByList.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
             if (offset != null)
             {
                 printLabel(depth, "offset: ");
@@ -301,6 +315,8 @@ class SubqueryNode extends ValueNode
 	 *
 	 * @return ResultSetNode underlying this SubqueryNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode getResultSet()
 	{
 		return resultSet;
@@ -321,6 +337,8 @@ class SubqueryNode extends ValueNode
 	 *
 	 * @param subqueryType of this subquery.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setSubqueryType(int subqueryType)
 	{
 		this.subqueryType = subqueryType;
@@ -333,6 +351,8 @@ class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setPointOfAttachment(int pointOfAttachment)
 		throws StandardException
 	{
@@ -409,6 +429,8 @@ class SubqueryNode extends ValueNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -448,6 +470,7 @@ class SubqueryNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -462,6 +485,7 @@ class SubqueryNode extends ValueNode
          * case of EXISTS; NOT EXISTS does not appear prior to preprocessing)
          * can only return a single column, so we must check here.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5501
         if (subqueryType != EXISTS_SUBQUERY && resultColumns.visibleSize() != 1)
 		{
 			throw StandardException.newException(SQLState.LANG_NON_SINGLE_COLUMN_SUBQUERY);
@@ -543,9 +567,12 @@ class SubqueryNode extends ValueNode
 		if (leftOperand != null)
 		{
 			leftOperand = leftOperand.bindExpression(fromList, subqueryList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                                        aggregates);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (orderByList != null) {
 			orderByList.pullUpOrderByColumns(resultSet);
 		}
@@ -560,6 +587,7 @@ class SubqueryNode extends ValueNode
 		}
 
         bindOffsetFetch(offset, fetchFirst);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
 
 		/* reject any untyped nulls in the subquery */
 		resultSet.bindUntypedNullsToResultColumns(null);
@@ -575,6 +603,7 @@ class SubqueryNode extends ValueNode
 		 */
 		if (leftOperand != null && leftOperand.requiresTypeFromContext())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             leftOperand.setType(resultColumns.elementAt(0).getTypeServices());
 		}
 
@@ -604,6 +633,8 @@ class SubqueryNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -623,8 +654,11 @@ class SubqueryNode extends ValueNode
 		ValueNode	topNode = this;
 
         final boolean haveOrderBy; // need to remember for flattening decision
+//IC see: https://issues.apache.org/jira/browse/DERBY-6688
 
         // Push the order by list down to the ResultSet
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
         if (orderByList != null) {
             haveOrderBy = true;
             // If we have more than 1 ORDERBY columns, we may be able to
@@ -707,6 +741,7 @@ class SubqueryNode extends ValueNode
                       fetchFirst == null &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
                       parentComparisonOperator != null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5077
 
 		if (flattenable)
 		{
@@ -719,6 +754,8 @@ class SubqueryNode extends ValueNode
 			// Flatten the subquery
 			RowResultSetNode rrsn = (RowResultSetNode) resultSet;
             FromList fl = new FromList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			// Remove ourselves from the outer subquery list
 			outerSubqueryList.removeElement(this);
@@ -773,11 +810,17 @@ class SubqueryNode extends ValueNode
 		boolean flattenableNotExists = (isNOT_EXISTS() || canAllBeFlattened());
 
 		flattenable = (resultSet instanceof SelectNode) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
  			          !((SelectNode)resultSet).hasWindows() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6688
+//IC see: https://issues.apache.org/jira/browse/DERBY-6688
                       !haveOrderBy &&
                       offset == null &&
                       fetchFirst == null &&
 					  underTopAndNode && !havingSubquery &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-3301
+//IC see: https://issues.apache.org/jira/browse/DERBY-3301
 					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  (isIN() || isANY() || isEXISTS() || flattenableNotExists ||
                        parentComparisonOperator != null);
@@ -785,6 +828,7 @@ class SubqueryNode extends ValueNode
 		if (flattenable)
 		{
 			SelectNode	select = (SelectNode) resultSet;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2442
 			if ((!select.hasAggregatesInSelectList()) &&
 			    (select.havingClause == null))
 			{
@@ -802,12 +846,14 @@ class SubqueryNode extends ValueNode
 				additionalEQ = additionalEQ &&
 								((leftOperand instanceof ConstantNode) ||
 								 (leftOperand instanceof ColumnReference) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 								 (leftOperand.requiresTypeFromContext()));
 				/* If we got this far and we are an expression subquery
 				 * then we want to set leftOperand to be the left side
 				 * of the comparison in case we pull the comparison into
 				 * the flattened subquery.
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5077
                 if (parentComparisonOperator != null)
 				{
 					leftOperand = parentComparisonOperator.getLeftOperand();
@@ -1115,6 +1161,8 @@ class SubqueryNode extends ValueNode
 		 */
 		if (leftOperand == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
            return new BooleanConstantNode(true, getContextManager());
 		}
 		else
@@ -1203,6 +1251,7 @@ class SubqueryNode extends ValueNode
      * @return the right operand
      */
     private ValueNode getRightOperand() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         ResultColumn firstRC = resultSet.getResultColumns().elementAt(0);
         return firstRC.getExpression();
     }
@@ -1270,6 +1319,8 @@ class SubqueryNode extends ValueNode
 			 */
 			if (oldRCL.size() > 1)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 ResultColumnList
                         newRCL = new ResultColumnList(getContextManager());
 				newRCL.addResultColumn(oldRCL.getResultColumn(1));
@@ -1339,6 +1390,8 @@ class SubqueryNode extends ValueNode
 		UnaryComparisonOperatorNode	ucoNode = null;
 		ValueNode					rightOperand;
         ContextManager              cm = getContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/* We have to ensure that the resultSet immediately under us has
 		 * a PredicateList, otherwise we can't push the predicate down.
@@ -1357,6 +1410,8 @@ class SubqueryNode extends ValueNode
 		*/
 		ResultColumnList newRCL = resultColumns.copyListAndObjects();
 		newRCL.genVirtualColumnNodes(resultSet, resultColumns);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         resultSet = new ProjectRestrictNode(
 										resultSet,	// child
 										newRCL,			// result columns
@@ -1365,9 +1420,12 @@ class SubqueryNode extends ValueNode
 										null,			// project subqueries
 										null,			// restrict subqueries	
 										null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                         cm);
 		resultColumns = newRCL;
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         firstRC = resultColumns.elementAt(0);
 		rightOperand = firstRC.getExpression();
 
@@ -1393,6 +1451,8 @@ class SubqueryNode extends ValueNode
 			{
 				/* Create a normalized structure.
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 BooleanConstantNode
                         falseNode = new BooleanConstantNode(false, cm);
                 OrNode newOr =
@@ -1428,6 +1488,8 @@ class SubqueryNode extends ValueNode
 
 		/* Place an AndNode above the <BinaryComparisonOperator> */
         andNode = new AndNode(andLeft, getTrueNode(), cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/* Build the referenced table map for the new predicate */
 		tableMap = new JBitSet(numTables);
@@ -1455,6 +1517,7 @@ class SubqueryNode extends ValueNode
 			case LT_ANY_SUBQUERY:
 			case GE_ANY_SUBQUERY:
 			case GT_ANY_SUBQUERY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ucoNode = new IsNullNode(this, true, cm);
 				break;
 
@@ -1465,8 +1528,11 @@ class SubqueryNode extends ValueNode
 			case LT_ALL_SUBQUERY:
 			case GE_ALL_SUBQUERY:
 			case GT_ALL_SUBQUERY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 ucoNode = new IsNullNode(this, false, cm);
 				break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             default:
                 if (SanityManager.DEBUG) {
                     SanityManager.NOTREACHED();
@@ -1550,6 +1616,7 @@ class SubqueryNode extends ValueNode
 			case EQ_ANY_SUBQUERY:
 			case NOT_IN_SUBQUERY:
 			case NE_ALL_SUBQUERY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 kind = BinaryRelationalOperatorNode.K_EQUALS;
 				break;
 
@@ -1584,7 +1651,10 @@ class SubqueryNode extends ValueNode
 					"subqueryType (" + subqueryType + ") is an unexpected type");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         BinaryComparisonOperatorNode bcoNode = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 kind,
                 leftOperand,
                 rightOperand,
@@ -1729,6 +1799,8 @@ class SubqueryNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
@@ -1829,6 +1901,8 @@ class SubqueryNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void optimize(DataDictionary dataDictionary, double outerRows)
 					throws StandardException
 	{
@@ -1845,6 +1919,8 @@ class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void modifyAccessPaths() throws StandardException
 	{
 		resultSet = resultSet.modifyAccessPaths();
@@ -1978,11 +2054,14 @@ class SubqueryNode extends ValueNode
 				mb.getField(subRS);
 				mb.conditionalIfNull();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 ResultSetNode materialSubNode =
                         new MaterializeSubqueryNode(subRS, getContextManager());
 
 				// Propagate the resultSet's cost estimate to the new node.
 				materialSubNode.setCostEstimate( resultSet.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 				((ProjectRestrictNode) resultSet).setChildResult(materialSubNode);
 
@@ -1995,6 +2074,7 @@ class SubqueryNode extends ValueNode
 				mb.completeConditional();
 		
 				mb.setField(subRS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
                 executeMB.pushNull( ClassName.NoPutResultSet);
                 executeMB.setField(subRS);
@@ -2080,6 +2160,7 @@ class SubqueryNode extends ValueNode
 		mb.push(subqResultSetNumber);
 		mb.push(subqueryNumber);
 		mb.push(pointOfAttachment);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push( costEstimate.rowCount() );
 		mb.push( costEstimate.getEstimatedCost() );
 
@@ -2137,6 +2218,7 @@ class SubqueryNode extends ValueNode
 		}
 		
 		mb.setField(rsFieldLF);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		/* rs.openCore() */
 		mb.getField(rsFieldLF);
@@ -2235,6 +2317,7 @@ class SubqueryNode extends ValueNode
 
 		// generate: field = value (value is on stack)
 		mb.setField(field);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		return field;
 	}
@@ -2245,6 +2328,8 @@ class SubqueryNode extends ValueNode
 	{
 		if (trueNode == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
            trueNode = new BooleanConstantNode(true, getContextManager());
 		}
 		return trueNode;
@@ -2258,6 +2343,7 @@ class SubqueryNode extends ValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -2271,6 +2357,7 @@ class SubqueryNode extends ValueNode
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (resultSet != null)
 		{
 			resultSet = (ResultSetNode)resultSet.accept(v);
@@ -2351,6 +2438,7 @@ class SubqueryNode extends ValueNode
   		{
   			case EQ_ANY_SUBQUERY:
   			case IN_SUBQUERY:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 nodeType = BinaryRelationalOperatorNode.K_EQUALS;
   				break;
 
@@ -2407,6 +2495,7 @@ class SubqueryNode extends ValueNode
 		 */
 		if (subqueryType == EXPRESSION_SUBQUERY)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             dts = resultColumns.elementAt(0).getTypeServices();
 		}
 		else
@@ -2449,6 +2538,7 @@ class SubqueryNode extends ValueNode
 	 * @return true if it is part of a where clause, otherwise false
 	 */
     boolean isWhereSubquery() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3301
 		return whereSubquery;
 	}
 
@@ -2456,6 +2546,8 @@ class SubqueryNode extends ValueNode
 	 * Mark this subquery as being part of a where clause.
 	 * @param whereSubquery
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setWhereSubquery(boolean whereSubquery) {
 		this.whereSubquery = whereSubquery;
 	}
@@ -2512,6 +2604,9 @@ class SubqueryNode extends ValueNode
      * @return order by list if specified, else null.
      */
     public OrderByList getOrderByList() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
         return orderByList;
     }
 

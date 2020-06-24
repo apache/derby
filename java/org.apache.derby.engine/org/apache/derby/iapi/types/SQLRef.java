@@ -76,6 +76,7 @@ public class SQLRef extends DataType implements RefDataValue
 
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (theValue.isNull())
 			setToNull();
 		else
@@ -182,6 +183,7 @@ public class SQLRef extends DataType implements RefDataValue
 		if (value == null)
 			return new SQLRef();
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
            return new SQLRef((RowLocation) value.cloneValue(false));
 	}
 

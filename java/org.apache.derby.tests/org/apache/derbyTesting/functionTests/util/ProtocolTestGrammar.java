@@ -87,6 +87,8 @@ public enum ProtocolTestGrammar {
     WRITE_ENCODED_LDSTRING,
     CHECK_SQLCARD,
     MORE_DATA,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
+//IC see: https://issues.apache.org/jira/browse/DERBY-2031
     READ_SECMEC_AND_SECCHKCD,
     SWITCH_TO_UTF8_CCSID_MANAGER,
     DELETE_DATABASE;

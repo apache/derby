@@ -59,6 +59,7 @@ public class JDBCBoot {
 	*/
 	public static void boot() {
         PrintWriter pw = DriverManager.getLogWriter();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         if (pw == null) {
             pw = new PrintWriter(System.err, true);
@@ -88,6 +89,7 @@ public class JDBCBoot {
         // on DERBY-4480. Moving the boot method out of EmbeddedDriver
         // somehow created a race condition during simultaneous getConnection() calls.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         synchronized(NETWORK_SERVER_AUTOSTART_CLASS_NAME)
         {
             if (InternalDriver.activeDriver() == null)
@@ -99,6 +101,7 @@ public class JDBCBoot {
                 addProperty("derby.service.jdbc", InternalDriver.class.getName());
                 addProperty("derby.service.authentication", AuthenticationService.MODULE);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 boot( bootProperties, logging);
             }
         }

@@ -57,6 +57,7 @@ public class PoolXADSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("PoolXADSCreateShutdownTest");
         Test test = TestConfiguration.defaultSuite(PoolXADSCreateShutdownDBTest.class);        
         //Test test = TestConfiguration.clientServerSuite(DSCreateShutdownDBTest.class);
@@ -79,6 +80,7 @@ public class PoolXADSCreateShutdownDBTest extends BaseJDBCTestCase {
         // attempt to get rid of any databases. 
         // only 5 dbs (in addition to the defaultdb) should actually get
         // created, but just in case...
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         TestConfiguration conf = TestConfiguration.getCurrent();
         for (int i = 0; i < ADDITIONAL_DBS.length; i++) {
             removeDirectory(conf.getDatabasePath("emb" + ADDITIONAL_DBS[i]));

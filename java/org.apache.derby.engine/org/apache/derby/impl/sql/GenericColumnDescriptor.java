@@ -95,6 +95,7 @@ public final class GenericColumnDescriptor
 	{
 		name = rcd.getName();
 		tableName = rcd.getSourceTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
  		schemaName = rcd.getSourceSchemaName();
 		columnPos = rcd.getColumnPosition();
 		type = rcd.getType();
@@ -174,6 +175,7 @@ public final class GenericColumnDescriptor
 
 	public boolean updatableByCursor()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		return updatableByCursor;
 	}
 
@@ -200,6 +202,7 @@ public final class GenericColumnDescriptor
 		fh.putInt("columnPos", columnPos);
 		fh.put("type", type);
 		fh.putBoolean("isAutoincrement", isAutoincrement);
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		fh.putBoolean("updatableByCursor", updatableByCursor);
 		out.writeObject(fh);
 		return;
@@ -223,6 +226,7 @@ public final class GenericColumnDescriptor
 		columnPos = fh.getInt("columnPos");
 		type = getStoredDataTypeDescriptor(fh.get("type"));
 		isAutoincrement = fh.getBoolean("isAutoincrement");
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		updatableByCursor = fh.getBoolean("updatableByCursor");
 	}
 	

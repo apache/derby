@@ -79,6 +79,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             GeneratedColumnsPermsTest.class);
 
@@ -161,6 +162,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select a from test_dbo.t_bp_1 order by a",
              new String[][]
              {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
                  { "2", },
              },
              false
@@ -197,6 +199,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_bp_1 order by a",
              new String[][]
              {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
                  { "3", "-3", },
              },
              false
@@ -216,6 +219,8 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              LACK_TABLE_PRIV,
              "insert into test_dbo.t_bp_1( a ) values ( 100 )"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         goodStatement
             (
              janetConnection,
@@ -263,6 +268,8 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_bp_1 order by a",
              new String[][]
              {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
                  { "4", "-4", },
                  { "100", "-100", },
              },
@@ -280,6 +287,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
         goodStatement
             (
              janetConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
              "delete from test_dbo.t_bp_1 where a = 4"
              );
         assertResults
@@ -400,6 +408,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              janetConnection,
              "update test_dbo.t_fp_1 set a = a + 1"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         goodStatement
             (
              janetConnection,
@@ -411,8 +420,11 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_fp_1 order by a",
              new String[][]
              {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
                  { "102", "-102", },
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
                  { "200", "-200", },
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
                  { "201", "-201", },
              },
              false
@@ -600,6 +612,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              new String[][]
              {
                  { "101", "-101", },
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
                  { "101", "-101", },
              },
              false

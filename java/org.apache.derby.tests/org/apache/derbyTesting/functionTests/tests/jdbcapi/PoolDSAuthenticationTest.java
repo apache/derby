@@ -44,6 +44,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         // This test uses ConnectionPoolDataSource and so is not suitable for 
         // JSR169
         if (JDBC.vmSupportsJSR169())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("ConnectionPoolDataSource not available" +
                 " with JSR169; empty test");
         else {
@@ -61,9 +62,11 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     // in AuthenticationTest
     public static Test baseSuite(String name) {
         BaseTestSuite suite = new BaseTestSuite("PoolDSAuthenticationTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Test test = new PoolDSAuthenticationTest(
             "testConnectShutdownAuthentication");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         setBaseProps(suite, test);
         
         test = new PoolDSAuthenticationTest("testUserFunctions");
@@ -144,6 +147,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String dbName, String user, String password)
     throws SQLException {
         ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         try {
@@ -191,6 +195,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     throws SQLException
     {
         ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         try {
@@ -206,6 +211,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     throws SQLException
     {
         ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2296
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(pds, "user", user);
         JDBCDataSource.setBeanProperty(pds, "password", password);
@@ -223,6 +229,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String dbName, String user, String password)
     throws SQLException {
         ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
@@ -241,6 +248,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
             String expectedError, String dbName, String user, String password)
     throws SQLException {
         ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");

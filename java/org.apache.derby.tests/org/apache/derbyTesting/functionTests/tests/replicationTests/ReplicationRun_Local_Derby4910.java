@@ -45,6 +45,7 @@ public class ReplicationRun_Local_Derby4910 extends ReplicationRun
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Replication test - DERBY-4910");
         
@@ -68,6 +69,7 @@ public class ReplicationRun_Local_Derby4910 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost, ALL_INTERFACES, masterServerPort,
                 masterDbSubPath);

@@ -143,6 +143,7 @@ public class ShutdownMaster extends BaseJDBCTestCase
                         String expectedState = (dbOnly)? "08006": "XJ015";
                         int expectedCode = dbOnly ? 45000 : 50000;
                         System.out.println("shutdown Got SQLException: " + errCode + " " + state + " " + msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
                         if ( (errCode == expectedCode)
                         && (state.equalsIgnoreCase(expectedState) ) )
                         {

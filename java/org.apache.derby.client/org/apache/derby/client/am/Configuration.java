@@ -47,6 +47,7 @@ public class Configuration {
 
 
     // for DatabaseMetaData.getDriverName()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final static String
         dncDriverName = "Apache Derby Network Client JDBC Driver";
 
@@ -58,6 +59,7 @@ public class Configuration {
             {0x53, 0x59, 0x53, 0x4c, 0x56, 0x4c, 0x30, 0x31};
 
     public static byte[] getDncPackageConsistencyToken() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return dncPackageConsistencyToken.clone();
     }
 
@@ -68,6 +70,7 @@ public class Configuration {
             {"1.5", "1.6", "1.7", "1.8"};
 
     static String[] getDncCompatibleJREVersions() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return dncCompatibleJREVersions.clone();
     }
 
@@ -91,6 +94,7 @@ public class Configuration {
 
     // This is the DERBY default and maps to DERBY's "Cursor Stability".
     final static int defaultIsolation = Connection.TRANSACTION_READ_COMMITTED;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     // ---------------------------- statement defaults----------------------------
 
@@ -122,6 +126,7 @@ public class Configuration {
     }
 
     public static SqlException getExceptionOnLoadResources() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return exceptionsOnLoadResources;
     }
     
@@ -131,11 +136,13 @@ public class Configuration {
     private static void loadProductVersionHolder() throws SqlException {
         try {
             dncProductVersionHolder__ = buildProductVersionHolder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         } catch (PrivilegedActionException e) {
             throw new SqlException(null, 
                     new ClientMessageId (SQLState.ERROR_PRIVILEGED_ACTION),
                     e.getException());                    
         } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
             throw SqlException.javaException(null, ioe);
         }
     }
@@ -143,12 +150,15 @@ public class Configuration {
 
     // Create ProductVersionHolder in security block for Java 2 security.
     private static ProductVersionHolder buildProductVersionHolder() throws
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             PrivilegedActionException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return AccessController.doPrivileged(
                 new PrivilegedExceptionAction<ProductVersionHolder>() {
 
                     public ProductVersionHolder run() throws IOException {
                         InputStream versionStream = getClass().getResourceAsStream("/" + ProductGenusNames.CLIENT_INFO);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
                         return ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
                     }
@@ -163,6 +173,7 @@ public class Configuration {
     
     public static boolean supportsJDBC42() {
         // use reflection to identify whether we support JDBC42
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try {
             Class.forName("java.sql.SQLType");
             return true;

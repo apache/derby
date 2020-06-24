@@ -30,6 +30,7 @@ import org.apache.derby.client.am.ClientMessageId;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetResultSetRequest extends NetStatementRequest
         implements ResultSetRequestInterface {
 
@@ -45,9 +46,11 @@ class NetResultSetRequest extends NetStatementRequest
         //   but qryrowset is sent on EXCSQLSTT for a stored procedure call.
         boolean sendQryrowset =
                 ((NetStatement) resultSet.statement_.getMaterialStatement()).qryrowsetSentOnOpnqry_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         boolean sendRtnextdta = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (sendQryrowset && resultSet.resultSetType_ ==
                 ResultSet.TYPE_FORWARD_ONLY &&
             ((NetCursor) resultSet.cursor_).hasLobs_) {
@@ -96,6 +99,7 @@ class NetResultSetRequest extends NetStatementRequest
         //     * qryrowset is optional.  it is ignored on opnqry.  if not sent on cntqry,
         //       then the fetch is going fetch next row as opposed to fetch next rowset.
         boolean sendQryrowset =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             resultSet.isRowsetCursor_ ||
             (((NetStatement)resultSet.statement_.getMaterialStatement()).
                  qryrowsetSentOnOpnqry_ &&
@@ -126,6 +130,8 @@ class NetResultSetRequest extends NetStatementRequest
         // do not send qryrowste if the cursor is a non-rowset, sensitive dynamic cursor
         boolean sendQryrowset =
                 resultSet.isRowsetCursor_ ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 (((NetStatement) resultSet.statement_.getMaterialStatement()).qryrowsetSentOnOpnqry_ &&
                 resultSet.sensitivity_ != resultSet.sensitivity_sensitive_dynamic__);
 
@@ -279,7 +285,9 @@ class NetResultSetRequest extends NetStatementRequest
                              ColumnMetaData resultSetMetaData,
                              boolean firstOutovrBuilt,
                              boolean hasLobs) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
         if (hasLobs) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2347
             if (!firstOutovrBuilt) {
                 buildOUTOVR(resultSet, resultSetMetaData);
                 resultSet.firstOutovrBuilt_ = true;
@@ -315,6 +323,7 @@ class NetResultSetRequest extends NetStatementRequest
     // Called by NetResultSetRequest.writeScrollableFetch()
     private int computePROTOCOLOrientation(int orientation) throws SqlException {
         switch (orientation) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         case ClientResultSet.scrollOrientation_absolute__:
             return CodePoint.QRYSCRABS;
 
@@ -328,6 +337,7 @@ class NetResultSetRequest extends NetStatementRequest
             return CodePoint.QRYSCRREL;
 
         default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.NET_INVALID_SCROLL_ORIENTATION));
         }

@@ -44,6 +44,7 @@ public class DB_Jar {
 	 ****/
 
 	public static void doJars(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         String dbName, Connection conn, boolean at10_9)
 		throws SQLException
 	{
@@ -148,6 +149,7 @@ public class DB_Jar {
                     // Create the DBJARS directory.
                     File jarDir = new File(
                         System.getProperty("user.dir") +
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
                         separator + "DBJARS" + separator + schemaWithoutQuotes);
                     absJarDir = jarDir.getAbsolutePath();
                     jarDir.mkdirs();
@@ -185,6 +187,7 @@ public class DB_Jar {
 	}
 
     private static void  doHeader(boolean firstTime) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         if (firstTime) {
             Logs.reportString(
                 "----------------------------------------------");

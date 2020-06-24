@@ -50,6 +50,7 @@ public class KillSlave extends BaseJDBCTestCase
         System.out.println("**** KillSlave.suite()");
         System.out.println("'KillSlave' can not be run outside the 'ReplicationRun' framework.");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("KillSlave");
         
         String masterHostName = System.getProperty("test.serverHost", "localhost");

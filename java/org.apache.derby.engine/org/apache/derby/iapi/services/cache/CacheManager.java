@@ -296,10 +296,12 @@ public interface CacheManager {
      * @throws StandardException if an error occurs when registering the MBean
      */
     void registerMBean(String dbName) throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
 
     /**
      * Deregister the MBean that monitors this cache. If there is no MBean
      * for this instance, this is a no-op.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6733
     void deregisterMBean();
 }

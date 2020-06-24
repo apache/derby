@@ -39,6 +39,7 @@ public class EmbedCallableStatement42 extends EmbedCallableStatement
         throws SQLException
     {
         checkStatus();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         registerOutParameter( parameterIndex, Util42.getTypeAsInt( sqlType ) );
     }
     
@@ -59,6 +60,7 @@ public class EmbedCallableStatement42 extends EmbedCallableStatement
     public  void registerOutParameter( String parameterName, SQLType sqlType )
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         checkStatus();
         registerOutParameter( parameterName, Util42.getTypeAsInt( sqlType ) );
     }
@@ -82,6 +84,7 @@ public class EmbedCallableStatement42 extends EmbedCallableStatement
         throws SQLException
     {
         checkStatus();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         setObject( parameterIndex, x, Util42.getTypeAsInt( targetSqlType ) );
     }
     
@@ -92,6 +95,7 @@ public class EmbedCallableStatement42 extends EmbedCallableStatement
          )  throws SQLException
     {
         checkStatus();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         setObject( parameterIndex, x, Util42.getTypeAsInt( targetSqlType ), scaleOrLength );
     }
 

@@ -76,11 +76,13 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * @param props Properties to use if starting with a module path
      */
     private SysinfoLocaleTest(Locale defaultLocale, boolean german,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                               String info, Properties props) {
         super("testSysinfoLocale");
         this.defaultLocale = defaultLocale;
         this.localizedToGerman = german;
         this._props = props;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3229
         this.name = super.getName() + ":" + info;
     }
 
@@ -119,6 +121,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      */
     public static Test suite() {
         if (!Derby.hasTools()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite("empty: no tools support");
         }
 
@@ -157,6 +160,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
         prop.setProperty("derby.ui.codeset", ENCODING);
 
         String info = "defaultLocale=" + loc + ",uiLocale=" + ui;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Test test = new SysinfoLocaleTest(loc, german, info, prop);
         return new SystemPropertyTestSetup(test, prop);
     }
@@ -167,6 +171,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * <code>derby.ui.locale</code> (happens when the class is loaded).
      */
     private static void runSysinfo() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         URL sysinfoURL = SecurityManagerSetup.getURL(SYSINFO_CLASS_NAME);
         URL emmaURL = getEmmaJar();
         URL[] urls = null;
@@ -180,9 +185,11 @@ public class SysinfoLocaleTest extends BaseTestCase {
         // Its parent (platformLoader) is a class loader that is able to
         // load the JDBC classes and other core classes needed by the Derby
         // classes.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6854
         ClassLoader platformLoader = java.sql.Connection.class.getClassLoader();
         URLClassLoader loader = new URLClassLoader(urls, platformLoader);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Class<?> copy = Class.forName(SYSINFO_CLASS_NAME, true, loader);
         Method main = copy.getMethod("main", new Class[] { String[].class });
         main.invoke(null, new Object[] { new String[0] });
@@ -215,6 +222,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      */
     private String getSysinfoOutputWithModules() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         String modulePath = JVMInfo.getSystemModulePath();
         ArrayList<String> args = new ArrayList<String>();
 
@@ -258,6 +266,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * localized to German.
      */
     private static final String[] GERMAN_STRINGS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
         "BS-Name",
         "Java-Benutzername",
         "Derby-Informationen",
@@ -272,6 +281,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
         "Nome SO",
         "Home utente Java",
         "Informazioni su Derby",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5832
         "Informazioni sulle impostazioni nazionali",
     };
 
@@ -283,6 +293,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * @param output the output from sysinfo
      */
     private void assertContains(String[] expectedSubstrings, String output) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3229
         for (int i = 0; i < expectedSubstrings.length; i++) {
             String s = expectedSubstrings[i];
             if (output.indexOf(s) == -1) {
@@ -296,6 +307,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * localized.
      */
     public void testSysinfoLocale() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         String output = JVMInfo.isModuleAware() ?
             getSysinfoOutputWithModules() : getSysinfoOutput();
         String[] expectedSubstrings =

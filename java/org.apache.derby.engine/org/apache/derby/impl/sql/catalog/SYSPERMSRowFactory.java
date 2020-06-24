@@ -324,6 +324,7 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
      * @return array of SystemColumn suitable for making this catalog.
      */
     public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
         return new SystemColumn[]{

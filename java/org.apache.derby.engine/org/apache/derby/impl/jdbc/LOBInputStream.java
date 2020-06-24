@@ -40,6 +40,7 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
  */
 
 public class LOBInputStream
+//IC see: https://issues.apache.org/jira/browse/DERBY-3935
     extends InputStream
     implements PositionedStream {
 
@@ -52,6 +53,7 @@ public class LOBInputStream
         closed = false;
         this.control = control;
         pos = position;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
         updateCount = control.getUpdateCount ();
     }
 
@@ -120,14 +122,17 @@ public class LOBInputStream
     public int read(byte[] b, int off, int len) throws IOException {
         if (closed)
             throw new IOException (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                    MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             int ret = control.read(b, off, len, pos);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
             if (ret != -1) {
                 pos += ret;
                 return ret;
             }
             return -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
         } catch (StandardException se) {
             String state = se.getSQLState();
             if (state.equals(ExceptionUtil.getSQLStateFromIdentifier(
@@ -172,6 +177,7 @@ public class LOBInputStream
     public int read() throws IOException {
         if (closed)
             throw new IOException (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                    MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             int ret = control.read(pos);
@@ -179,6 +185,8 @@ public class LOBInputStream
                 pos += 1;
             return ret;
         } catch (StandardException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throw Util.newIOException(se);
         }
     }
@@ -188,6 +196,7 @@ public class LOBInputStream
      * @return if stream is modified since created
      */
     boolean isObsolete () {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
         return updateCount != control.getUpdateCount();
     }
     
@@ -213,6 +222,7 @@ public class LOBInputStream
     //   - reposition
 
     public InputStream asInputStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3935
         return this;
     }
 

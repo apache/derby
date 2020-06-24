@@ -135,6 +135,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
         super(conglomId,
             scoci,
             activation,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
             resultRowTemplate,
             resultSetNumber,
             startKeyGetter,
@@ -205,6 +206,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
 
             for (int i = 0; i < pVals.length; i++)
                 pVals[i] = origProbeValues[i].cloneValue(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 
             if (sortRequired == RowOrdering.ASCENDING)
                 java.util.Arrays.sort(pVals);
@@ -416,6 +418,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      */
     public ExecRow getNextRowCore() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

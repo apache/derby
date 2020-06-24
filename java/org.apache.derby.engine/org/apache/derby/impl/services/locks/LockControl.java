@@ -670,6 +670,7 @@ final class LockControl implements Control {
 	 * @return	The removed lock request
 	 */
 	private Object popFrontWaiter(LockTable ls) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1704
 		return removeWaiter(0, ls);
 	}
 

@@ -53,6 +53,7 @@ public class NWServerThread extends Thread {
 			inetaddr = InetAddress.getByName(address);
 
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger
 					.println("Invalid host address passed, cannot start server");
 			if ( NsTest.justCountErrors() ) { NsTest.printException( NWServerThread.class.getName(), e ); }
@@ -68,6 +69,7 @@ public class NWServerThread extends Thread {
 	public void run() {
 		try {
 			NetworkServerControl nsw = new NetworkServerControl(inetaddr, port);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			nsw.start(new PrintWriter(NsTest.logger));
 			NsTest.logger.println("===> Derby Network Server on " + address + ":"
 					+ port + " <===");

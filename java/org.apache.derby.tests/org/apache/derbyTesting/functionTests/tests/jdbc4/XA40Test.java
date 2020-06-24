@@ -73,6 +73,8 @@ public class XA40Test extends BaseJDBCTestCase {
      */
     public void setUp() 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         xads = J2EEDataSource.getXADataSource();
         xac = xads.getXAConnection();
         xar = xac.getXAResource();
@@ -98,6 +100,8 @@ public class XA40Test extends BaseJDBCTestCase {
         if (xac != null) {
             xac.close();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         con = null;
         xads = null;
         xac = null;
@@ -116,6 +120,7 @@ public class XA40Test extends BaseJDBCTestCase {
     public void testStatementPoolable() throws SQLException {
         Statement s = con.createStatement();
         if (usingEmbedded()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
             assertTrue("s must be an instance of BrokeredStatement, " +
                        "but is " + s.getClass(), 
                        (s instanceof BrokeredStatement));
@@ -141,6 +146,7 @@ public class XA40Test extends BaseJDBCTestCase {
             con.prepareStatement("CREATE TABLE foo(i int)");
         if (usingEmbedded()) {
             assertTrue("ps must be an instance of " + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
                        "BrokeredPreparedStatement, " +
                        "but is " + ps.getClass(), 
                        (ps instanceof BrokeredPreparedStatement));
@@ -166,6 +172,7 @@ public class XA40Test extends BaseJDBCTestCase {
             con.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
         if (usingEmbedded()) {
             assertTrue("cs must be an instance of " + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
                        "BrokeredCallableStatement, " +
                        "but is " + cs.getClass(), 
                        (cs instanceof BrokeredCallableStatement));
@@ -186,6 +193,7 @@ public class XA40Test extends BaseJDBCTestCase {
      */
     public void testLargeUpdate_jdbc4_2() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         StatementTest.largeUpdate_jdbc4_2( con );
     }
 
@@ -196,8 +204,10 @@ public class XA40Test extends BaseJDBCTestCase {
      */
     public void test_registerOutParameter_jdbc4_2() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6614
         if (JDBC.vmSupportsJDBC42())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
             Class<?>   klass = Class.forName( "org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42" );
             Method  method = klass.getMethod( "registerObjectTest", new Class<?>[] { Connection.class } );
 
@@ -209,6 +219,8 @@ public class XA40Test extends BaseJDBCTestCase {
      * Create test suite for XA40Test.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         return TestConfiguration.defaultSuite(XA40Test.class);
     }
     

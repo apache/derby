@@ -70,8 +70,10 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 	
 	public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("LuceneSupportTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         Test    baseTest = TestConfiguration.embeddedSuite(LuceneSupportTest.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6544
         Test        singleUseTest = TestConfiguration.singleUseDatabaseDecorator( baseTest );
         Test        localizedTest = new LocaleTestSetup( singleUseTest, new Locale( "en", "US" ) );
 		
@@ -85,6 +87,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 		Statement s = createStatement();
 
         // verify that we are in an en Locale
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         getConnection().prepareStatement
             (
              "create function getDatabaseLocale() returns varchar( 20 )\n" +
@@ -105,6 +108,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
         getConnection().prepareStatement( "drop function getDatabaseLocale" ).executeUpdate();
 	    
 		cSt = prepareCall
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             ( "call LuceneSupport.createIndex('lucenetest','titles','title', null )" );
 	    assertUpdateCount(cSt, 0);
 	    
@@ -117,6 +121,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
               "select * from table ( lucenetest.titles__title( 'grapes', 1000, null ) ) luceneResults"
               ),
              expectedRows
@@ -130,6 +135,8 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
               "select * from table ( lucenetest.titles__title( 'grapes', 1000, .75 ) ) luceneResults"
               ),
              expectedRows
@@ -139,6 +146,8 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
               "select * from table ( lucenetest.titles__title( 'grapes',  1000, 0.5) ) luceneResults"
               )
              );
@@ -153,6 +162,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select title, author, publisher, documentID\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
               "from lucenetest.titles t, table ( lucenetest.titles__title( 'grapes', 1000, null ) ) l\n" +
               "where t.id = l.id\n" 
               ),
@@ -195,6 +205,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              );
 	    
 		cSt = prepareCall
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             ( "call LuceneSupport.updateIndex('lucenetest','titles','title', null)" );
 	    assertUpdateCount(cSt, 0);
 
@@ -207,6 +218,9 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
               "from table ( lucenetest.titles__title( 'mice', 1000, null ) ) luceneResults\n"
               ),
              expectedRows
@@ -223,6 +237,8 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 		Statement s = createStatement();
 
 	    cSt = prepareCall
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             ( "call LuceneSupport.createIndex('lucenetest','titles','title', null)" );
 	    assertUpdateCount(cSt, 0);
 	    
@@ -233,6 +249,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 	    // leave out lastmodified as the date will change
 	    String[][] expectedRows = new String[][]
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 { "LUCENETEST", "TITLES", "AUTHOR" },
 	    		{ "LUCENETEST", "TITLES", "TITLE" }
             };
@@ -251,6 +268,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 
 	    expectedRows = new String[][]
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 { "LUCENETEST", "TITLES", "AUTHOR" },
             };
 	    JDBC.assertFullResultSet
@@ -270,6 +288,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
               "select schemaname, tablename, columnname from table ( LuceneSupport.listIndexes() ) listindexes"
               )
              );
@@ -293,6 +312,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 	
     public void testMultipleFields() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         println( "Running multi-field test." );
         
         Statement s = createStatement();

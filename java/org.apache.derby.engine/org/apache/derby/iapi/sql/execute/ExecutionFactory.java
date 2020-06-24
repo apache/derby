@@ -99,6 +99,7 @@ public interface ExecutionFactory {
 	 * @exception StandardException     Thrown on error
 	 */
 	XPLAINFactoryIF getXPLAINFactory()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
                                 throws StandardException;
 	
 	

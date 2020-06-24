@@ -82,9 +82,11 @@ class SYSCHECKSRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 	SYSCHECKSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 		initInfo(SYSCHECKS_COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, uniqueness, uuids );
 	}
 
@@ -141,6 +143,7 @@ class SYSCHECKSRowFactory extends CatalogRowFactory
 		 */
 		row.setColumn(SYSCHECKS_REFERENCEDCOLUMNS,
 			new UserType(rcd));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		return row;
 	}
@@ -215,6 +218,7 @@ class SYSCHECKSRowFactory extends CatalogRowFactory
 	 */
 
     public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
         

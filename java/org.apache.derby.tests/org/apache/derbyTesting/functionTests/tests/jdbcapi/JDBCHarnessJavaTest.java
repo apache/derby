@@ -66,6 +66,7 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("jdbcapi: old harness java tests");
 
@@ -76,6 +77,7 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     }
    
     private static Test baseSuite(String which, String[] set) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("jdbcapi: " + which);
         for (int i = 0; i < set.length; i++)
         {

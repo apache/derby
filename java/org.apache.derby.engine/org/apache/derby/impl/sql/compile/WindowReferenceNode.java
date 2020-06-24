@@ -37,6 +37,8 @@ public final class WindowReferenceNode extends WindowNode
      *
      * @exception StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     WindowReferenceNode(String windowName, ContextManager cm)
         throws StandardException
     {

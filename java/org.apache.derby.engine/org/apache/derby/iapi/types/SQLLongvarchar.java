@@ -69,6 +69,7 @@ public class SQLLongvarchar
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", se);
 			return null;
 		}
@@ -86,6 +87,7 @@ public class SQLLongvarchar
 	/** @see StringDataValue#getValue(RuleBasedCollator) */
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2534
 		if (collatorForComparison == null)
 		{//null collatorForComparison means use UCS_BASIC for collation
 		    return this;			
@@ -146,6 +148,7 @@ public class SQLLongvarchar
 		throws StandardException
 	{
 		result = super.concatenate(leftOperand, rightOperand, result);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5246
 
 		//bug 5600 - according to db2 concatenation documentation, for compatibility with previous versions, there is no automatic
 		//escalation of results involving LONG data types to LOB data types. For eg, concatenation of a CHAR(200) value and a

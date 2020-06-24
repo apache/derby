@@ -39,10 +39,12 @@ import org.apache.derby.shared.common.reference.Property;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     This servlet can be used to start Derby Network Server from a remote location.
     <P>
     These servlet configuration parameters are understood by this servlet.
     <UL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5509
     <LI><PRE>portNumber</PRE> - Port number to use. The default is 1527.</LI>
     <LI><PRE>startNetworkServerOnInit</PRE> - Starts the Derby Network Server at servlet 
             initialization if 'true'.</LI>
@@ -75,6 +77,7 @@ public class NetServlet extends HttpServlet {
         Initialize the servlet.
         Configuration parameters:
         <UL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-5509
         <LI><PRE>portNumber</PRE> - Port number</LI>
         <LI><PRE>host</PRE> - Host name</LI>
         <LI><PRE>traceDirectory</PRE> - location of trace directory</LI>
@@ -91,10 +94,12 @@ public class NetServlet extends HttpServlet {
             if (p > 0)
                 portNumber = p;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1054
         String hostName = config.getInitParameter("host");
         if (hostName != null)
             host = hostName;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-117
         this.tracingDirectory = config.getInitParameter("tracingDirectory");
         
         if ( this.tracingDirectory == null ) {
@@ -122,7 +127,9 @@ public class NetServlet extends HttpServlet {
             boolean start = Boolean.valueOf(startup).booleanValue();
             if (start)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6680
                 LocalizedResource langUtil = new LocalizedResource(SERVLET_PROP_MESSAGES);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                 runServer(langUtil, null, null);
                 return;
             }
@@ -134,6 +141,7 @@ public class NetServlet extends HttpServlet {
         Network server.
     */
     public synchronized void doGet (HttpServletRequest request,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
                                     HttpServletResponse response)
             throws ServletException, IOException
     {
@@ -158,14 +166,17 @@ public class NetServlet extends HttpServlet {
         //prevent caching of the servlet since contents can change - beetle 4649
         response.setHeader("Cache-Control", "no-cache,no-store");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         String formTarget = request.getContextPath() + request.getServletPath();
         String formHeader = "<form enctype='multipart/form-data; charset=UTF-8'"
                 + " action='" + formTarget + "'>";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
         PrintWriter out = new PrintWriter
             ( new OutputStreamWriter(response.getOutputStream(), "UTF8"),true );
         
         //inialize messages
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         logOnMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_LogOn"));
         logOffMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_LogOff"));
         traceOnMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_TraceOn"));
@@ -211,6 +222,7 @@ public class NetServlet extends HttpServlet {
         else if (form.equals(startMessage))
         {
             if (!serverStatus)  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                 runServer(langUtil, returnMessage, out);
             }
         }
@@ -222,6 +234,7 @@ public class NetServlet extends HttpServlet {
             setDefaults();
                     
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         else if (form.equals(returnMessage))
         {
             // check if server is still running and use that to determine which form
@@ -240,12 +253,14 @@ public class NetServlet extends HttpServlet {
 
         form = escapeSingleQuotes(form);
         doAction = escapeSingleQuotes(doAction);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (form.equals(startMessage))
         {
             String logButton = getLogging(request);
             String traceButton = getTrace(request);
             if (logButton !=  null && logButton.equals(logOnMessage))
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                 if (logging(langUtil, true, returnMessage, out))
                     logStatus = true;
             }
@@ -298,6 +313,7 @@ public class NetServlet extends HttpServlet {
         else if (form.equals(stopMessage))
         {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
             printAsContentHeader(langUtil.getTextMessage("SRV_NotStarted"), out);
             String logButton = getLogging(request);
             String traceButton =  getTrace(request);
@@ -339,20 +355,24 @@ public class NetServlet extends HttpServlet {
                 if (doAction.equals(traceOnOffMessage))
                 {
                     String sessionid = request.getParameter("sessionid");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                     Integer session;
                     try {
                         session = Integer.valueOf(sessionid);
                     } catch (NumberFormatException nfe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                         printErrorForm(langUtil,
                             langUtil.getTextMessage("SRV_InvalidVal",
                             sessionid, langUtil.getTextMessage("SRV_SessionID")),
                                        returnMessage, out);
                         return;
                     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                     Properties p;
                     try {
                         p = server.getCurrentProperties();
                     } catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                         printErrorForm(langUtil, e, returnMessage, out);
                         return;
                     }
@@ -362,6 +382,7 @@ public class NetServlet extends HttpServlet {
                         val = false;
                     else
                         val = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                     if (traceSession(langUtil, val, session.intValue(),
                             returnMessage, out))
                     {
@@ -375,6 +396,7 @@ public class NetServlet extends HttpServlet {
                         
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
             printAsContentHeader(langUtil.getTextMessage("SRV_TraceSessButton"), out);
             out.println( "<h4>" + getHtmlLabelledMessageInstance(langUtil,
                 "SRV_SessionID", "sessionId") + "</h4>");
@@ -388,12 +410,14 @@ public class NetServlet extends HttpServlet {
         {
             boolean set = false;
             String traceDirectory = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
             printAsContentHeader(traceDirMessage, out);
             if (doAction != null)
             {
                 if (doAction.equals(traceDirMessage))
                 {
                     traceDirectory = getParam(request, "tracedirectory");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                     if (traceDirectory(langUtil, traceDirectory,
                                        returnMessage, out) )
                         set = true;
@@ -404,6 +428,7 @@ public class NetServlet extends HttpServlet {
             }
             if (set)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                 out.println("<h2>" + langUtil.getTextMessage("SRV_TraceDirDone",
                         escapeHTML(traceDirectory)) + "</h2>");
                 out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
@@ -413,6 +438,7 @@ public class NetServlet extends HttpServlet {
                 out.println( "<h4>" + getHtmlLabelledMessageInstance(langUtil,
                     "SRV_TraceDir", "tracedir") + "</h4>");
                 out.println( "<INPUT type=text name=tracedirectory size=60 maxlength=256 " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                     "id='tracedir' value='"+escapeHTML(tracingDirectory)+"'>");
                 out.println( "<h4> </h4>");
                 out.println( "<INPUT type=submit name=doaction value='"+traceDirMessage+ "'>" );
@@ -428,10 +454,13 @@ public class NetServlet extends HttpServlet {
             try {
                 Properties p = server.getCurrentProperties();
                 String val = p.getProperty(Property.DRDA_PROP_MAXTHREADS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 maxThreads= Integer.parseInt(val);
                 val = p.getProperty(Property.DRDA_PROP_TIMESLICE);
                 timeSlice= Integer.parseInt(val);
             } catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                 printErrorForm(langUtil, e, returnMessage, out);
                 return;
             }
@@ -450,7 +479,9 @@ public class NetServlet extends HttpServlet {
                         maxThreads = newMaxThreads;
                     if (newTimeSlice != NOT_GIVEN)
                         timeSlice = newTimeSlice;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                     if (!setNetParam(langUtil, maxThreads, timeSlice,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
                             returnMessage, out))
                         return;
                 }
@@ -458,6 +489,7 @@ public class NetServlet extends HttpServlet {
             
             out.println(formHeader);
             printAsContentHeader(netParamMessage, out);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             out.println( "<h4>"+langUtil.getTextMessage("SRV_MaxThreads", Integer.toString(maxThreads) +"</h4>"));
             out.println( "<h4>"+langUtil.getTextMessage("SRV_TimeSlice", Integer.toString(timeSlice) +"</h4>"));
             out.println( "<h4> </h4>");
@@ -474,6 +506,7 @@ public class NetServlet extends HttpServlet {
         else
         {
             System.out.println("Internal Error: Unknown form, "+ form);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
             out.println("Internal Error: Unknown form");
         }
 
@@ -516,6 +549,7 @@ public class NetServlet extends HttpServlet {
     java.io.IOException { 
                 
         String value = request.getParameter(paramName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         if (value != null) {
             return new String(value.getBytes("ISO-8859-1"),"UTF8");
         } else {
@@ -534,9 +568,11 @@ public class NetServlet extends HttpServlet {
      *      Network Server during initialization
      */
     private void runServer
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         ( LocalizedResource localUtil, String returnMessage, PrintWriter out )
         throws ServletException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         final Runnable service = new Runnable() {
             public void run() {
                 try {
@@ -553,6 +589,7 @@ public class NetServlet extends HttpServlet {
         };
         Thread servThread = null;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             servThread = AccessController.doPrivileged(
                                 new PrivilegedExceptionAction<Thread>() {
                                     public Thread run() throws Exception
@@ -587,6 +624,7 @@ public class NetServlet extends HttpServlet {
             }while (!connectWorked && t < MAX_CONNECT_TRYS);
             if (t >= MAX_CONNECT_TRYS)
                 throw new Exception(localUtil.getTextMessage("SRV_MaxTrys",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                      Integer.toString(MAX_CONNECT_TRYS)));
             // turn logging on if required
             if (logStatus)
@@ -596,6 +634,7 @@ public class NetServlet extends HttpServlet {
                 server.trace(true);
         }catch (Exception e) {
             if (out != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                 printErrorForm(localUtil, e, returnMessage, out);
             else
                 throw new ServletException(e.getMessage());
@@ -611,6 +650,7 @@ public class NetServlet extends HttpServlet {
      */
     private void printErrorForm
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
          LocalizedResource localUtil,
          Exception e,
          String returnMessage,
@@ -618,6 +658,7 @@ public class NetServlet extends HttpServlet {
          )
     {
         printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         out.println( "<h4>" +
                 localUtil.getTextMessage(
                     "SRV_Message", escapeHTML(e.getMessage())) + "</h4>" );
@@ -635,6 +676,7 @@ public class NetServlet extends HttpServlet {
      */
     private void printErrorForm
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
          LocalizedResource localUtil,
          String msg,
          String returnMessage,
@@ -642,12 +684,18 @@ public class NetServlet extends HttpServlet {
          )
     {
         printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         out.println(
                 "<h4>" +
                 localUtil.getTextMessage("SRV_Message", escapeHTML(msg)) +
                 "</h4>" );
         out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         out.println( "</body>" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         out.println( "</html>" ); 
     }
     /**
@@ -659,6 +707,7 @@ public class NetServlet extends HttpServlet {
      */
     private void displayCurrentStatus
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
          LocalizedResource localUtil,
          String returnMessage,
          PrintWriter out
@@ -686,6 +735,7 @@ public class NetServlet extends HttpServlet {
                 out.println( "<h4>"+localUtil.getTextMessage("SRV_StatusTraceOn")+"</h4>");
             else
                 out.println( "<h4>"+localUtil.getTextMessage("SRV_StatusTraceOff")+"</h4>");
+//IC see: https://issues.apache.org/jira/browse/DERBY-117
             val = p.getProperty(Property.DRDA_PROP_PORTNUMBER);
             out.println( "<h4>"+localUtil.getTextMessage("SRV_PortNumber", val)+"</h4>");
             
@@ -798,6 +848,9 @@ public class NetServlet extends HttpServlet {
      */
     private boolean traceSession
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
          LocalizedResource localUtil,
          boolean val,
          int session,
@@ -806,6 +859,7 @@ public class NetServlet extends HttpServlet {
          )
     {
         boolean retval = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         try {
             server.trace(session, val);
             retval = true;
@@ -827,6 +881,7 @@ public class NetServlet extends HttpServlet {
      */
     private boolean traceDirectory
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
          LocalizedResource localUtil,
          String traceDirectory,
          String returnMessage,
@@ -836,6 +891,7 @@ public class NetServlet extends HttpServlet {
         boolean retval = false;
 
         if ((traceDirectory == null) || traceDirectory.equals("")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
             printErrorForm(localUtil,
                 localUtil.getTextMessage("SRV_MissingParam",
                                          localUtil.getTextMessage("SRV_TraceDir")), returnMessage, out);
@@ -844,6 +900,7 @@ public class NetServlet extends HttpServlet {
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-117
             this.tracingDirectory = traceDirectory;
             server.setTraceDirectory(traceDirectory);
             retval = true;
@@ -866,6 +923,8 @@ public class NetServlet extends HttpServlet {
      */
     private boolean setNetParam
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
          LocalizedResource localUtil,
          int max,
          int slice,
@@ -875,12 +934,20 @@ public class NetServlet extends HttpServlet {
     {
         boolean retval = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         try {
             server.setMaxThreads(max);
             server.setTimeSlice(slice);
             retval = true;
         } catch (Exception e) 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
             printErrorForm(localUtil, e, returnMessage, out);
         }
         return retval;
@@ -907,6 +974,7 @@ public class NetServlet extends HttpServlet {
      */
     private int getIntParameter
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
          HttpServletRequest request,
          String name,
          String fieldKey,
@@ -915,14 +983,18 @@ public class NetServlet extends HttpServlet {
          PrintWriter out
          )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         String val = request.getParameter(name);
         int retval;
         if (val == null || val.equals(""))
             return NOT_GIVEN;
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             retval = Integer.parseInt(val);
         } catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
             printErrorForm(localUtil,localUtil.getTextMessage("SRV_InvalidVal",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
                 val, localUtil.getTextMessage(fieldKey)), returnMessage, out);
             return INVALID;
         }
@@ -939,6 +1011,7 @@ public class NetServlet extends HttpServlet {
      */
     private void printBanner(LocalizedResource localUtil, PrintWriter out)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         out.println("<!DOCTYPE html>");
         out.println("<html>");        
         out.println("<head>");
@@ -967,8 +1040,10 @@ public class NetServlet extends HttpServlet {
     {
         LocalizedResource localUtil;
         String acceptLanguage = request.getHeader("Accept-Language");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6680
         localUtil = new LocalizedResource(SERVLET_PROP_MESSAGES);
         // if no language specified use one set by derby.locale, derby.codeset
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
         locale[ 0 ] = null;
         if (acceptLanguage == null)
         {
@@ -987,6 +1062,7 @@ public class NetServlet extends HttpServlet {
             {
                 localUtil.init(null, lang, SERVLET_PROP_MESSAGES);
                 // locale will be passed to server, server routines will get set appropriately
+//IC see: https://issues.apache.org/jira/browse/DERBY-5328
                 locale[ 0 ] = lang;
                 return localUtil;
             }
@@ -1011,6 +1087,7 @@ public class NetServlet extends HttpServlet {
             lang = lang.substring(0, semi);
         }
         // trim any whitespace and fix the code, as some browsers might send a bad format
+//IC see: https://issues.apache.org/jira/browse/DERBY-117
         lang = fixLanguageCode(lang.trim());
         return lang;
     }
@@ -1026,6 +1103,7 @@ public class NetServlet extends HttpServlet {
         // assert lang == fixLanguageCode(lang)
         // we don't need to use toUpperCase() anymore, as the lang is already fixed
         for (int i = 0; i < knownLang.length; i++)
+//IC see: https://issues.apache.org/jira/browse/DERBY-117
             if (knownLang[i].equals(lang))
                 return i;
         return -1;
@@ -1061,6 +1139,7 @@ public class NetServlet extends HttpServlet {
      */
     private String getHtmlLabelledMessageInstance(LocalizedResource localUtil,
                                                   String key, String id) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
 
         if (id == null)
             id = "";
@@ -1098,6 +1177,7 @@ public class NetServlet extends HttpServlet {
         // character is a single quote, which means the
         // escaped string would need to be 5 times as long.
         char [] result = new char[5*cA.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
 
         int j = 0;
         for (int i = 0; i < cA.length; i++) {
@@ -1107,6 +1187,7 @@ public class NetServlet extends HttpServlet {
                 result[j++] = '#';
                 result[j++] = '3';
                 result[j++] = '9';
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
                 result[j++] = ';';
             }
             else
@@ -1128,6 +1209,7 @@ public class NetServlet extends HttpServlet {
      * @return A sanitized string.
      */
     private String escapeHTML(String str) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5639
         if (str == null || str.length() == 0) {
             return str;
         }
@@ -1204,6 +1286,7 @@ public class NetServlet extends HttpServlet {
 
     private static boolean isServerStarted(NetworkServerControl server, int ntries)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         for (int i = 1; i <= ntries; i ++)
         {
             try {

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.RenameNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -92,6 +93,8 @@ class RenameNode extends DDLStatementNode
 	 *
 	 * @exception StandardException Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     RenameNode(Object tableName,
                String oldObjectName,
                String newObjectName,
@@ -127,6 +130,8 @@ class RenameNode extends DDLStatementNode
 				initAndCheck(actingObjectName);
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 this.oldObjectName = oldObjectName;
                 this.newObjectName = newObjectName;
 				break;
@@ -182,6 +187,8 @@ class RenameNode extends DDLStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		if (usedAlterTable)
@@ -276,6 +283,8 @@ class RenameNode extends DDLStatementNode
 		{
 			case StatementType.RENAME_TABLE:
 				/* Verify that new table name does not exist in the database */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 TableDescriptor tabDesc = getTableDescriptor(newObjectName, sd);
                 if (tabDesc != null)
                     throw descriptorExistsException(tabDesc, sd);

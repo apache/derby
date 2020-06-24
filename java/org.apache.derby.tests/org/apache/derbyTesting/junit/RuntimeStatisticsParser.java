@@ -47,6 +47,8 @@ public class RuntimeStatisticsParser {
      * 
      */
     public RuntimeStatisticsParser(String rts) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2491
+//IC see: https://issues.apache.org/jira/browse/DERBY-47
     	statistics = rts;
         if (rts.indexOf(" at serializable isolation level ") != -1)
             isolationLevel = Connection.TRANSACTION_SERIALIZABLE;
@@ -57,6 +59,8 @@ public class RuntimeStatisticsParser {
         else if (rts.indexOf("at repeatable read isolation level") != -1)
             isolationLevel = Connection.TRANSACTION_REPEATABLE_READ;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2491
+//IC see: https://issues.apache.org/jira/browse/DERBY-47
         if (rts.indexOf("Distinct Scan ResultSet") > 0) {
         	distinctScan = true;
         }
@@ -65,6 +69,7 @@ public class RuntimeStatisticsParser {
         	tableScan = true;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2641
         indexScan = (rts.indexOf("Index Scan ResultSet") >= 0);
         indexRowToBaseRow =
             (rts.indexOf("Index Row to Base Row ResultSet") >= 0);
@@ -73,11 +78,14 @@ public class RuntimeStatisticsParser {
         if (rts.indexOf("Eliminate duplicates = true") > 0) {
         	eliminatedDuplicates = true;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2542
         if (rts.indexOf("Scroll Insensitive ResultSet:") > 0)
             scrollInsensitive = true;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2642
         qualifiers = findQualifiers();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4038
         startPosition = getStartPosition();
         stopPosition = getStopPosition();
     }
@@ -120,6 +128,7 @@ public class RuntimeStatisticsParser {
      * @return set of <code>Qualifier</code>s
      */
     private HashSet<Qualifier> findQualifiers() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashSet<Qualifier> set = new HashSet<Qualifier>();
         int startPos = statistics.indexOf("qualifiers:\n");
         if (startPos >= 0) {
@@ -130,6 +139,7 @@ public class RuntimeStatisticsParser {
             while (t.hasMoreTokens()) {
                 String s = t.nextToken();
                 StringTokenizer t2 = new StringTokenizer(s, "\t ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 
                 if (t2.nextToken().equals("Operator:")) {
                     String operator = t2.nextToken();
@@ -170,6 +180,8 @@ public class RuntimeStatisticsParser {
      * query.
      */
     public boolean usedDistinctScan() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2491
+//IC see: https://issues.apache.org/jira/browse/DERBY-47
     	return distinctScan;
     }
     
@@ -186,6 +198,7 @@ public class RuntimeStatisticsParser {
      * @return true if a Table Scan ResultSet was used for tableName
      */
     public boolean usedTableScan(String tableName){
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         return (statistics.indexOf("Table Scan ResultSet for " + 
                     tableName + " ")!= -1);
     }
@@ -199,6 +212,7 @@ public class RuntimeStatisticsParser {
     public boolean usedSpecificIndexForIndexScan(
     		String tableName, String indexName){
         return (statistics.indexOf("Index Scan ResultSet for " + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3831
                     tableName + " using index " + indexName + " ")!= -1);
     }
 
@@ -217,6 +231,7 @@ public class RuntimeStatisticsParser {
      *     for the passed tableName
      */
     public boolean usedConstraintForIndexScan(String tableName){
+//IC see: https://issues.apache.org/jira/browse/DERBY-4038
         return (statistics.indexOf("Index Scan ResultSet for " + 
                     tableName + " using constraint")!= -1);
     }
@@ -225,6 +240,7 @@ public class RuntimeStatisticsParser {
      * Return whether or not an index scan result set was used in the query.
      */
     public boolean usedIndexScan() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2641
         return indexScan;
     }
 
@@ -251,7 +267,9 @@ public class RuntimeStatisticsParser {
      */
     public boolean usedIndexRowToBaseRow(String tableName) {
        
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
             return (statistics.indexOf("Index Row to Base Row ResultSet for " + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3831
                         tableName + ":")!= -1);       
     }
         
@@ -262,6 +280,8 @@ public class RuntimeStatisticsParser {
     public boolean usedDistinctScan(String tableName) {
         return (statistics.indexOf("Distinct Scan ResultSet for " + 
                 tableName + " ")!= -1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3831
+//IC see: https://issues.apache.org/jira/browse/DERBY-3831
 
     }
    
@@ -276,6 +296,7 @@ public class RuntimeStatisticsParser {
     }
     
     public boolean isScrollInsensitive(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-2542
         return scrollInsensitive;
     }
 
@@ -284,6 +305,7 @@ public class RuntimeStatisticsParser {
      */
     public boolean hasGreaterThanOrEqualQualifier() {
         // < negated is equivalent to >=
+//IC see: https://issues.apache.org/jira/browse/DERBY-2642
         return qualifiers.contains(new Qualifier("<", true));
     }
 
@@ -298,6 +320,7 @@ public class RuntimeStatisticsParser {
      * Return whether or not the query used an equals scan qualifier.
      */
     public boolean hasEqualsQualifier() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4038
         return qualifiers.contains(new Qualifier("=", false));
     }
     
@@ -337,6 +360,7 @@ public class RuntimeStatisticsParser {
      */
     public boolean rowsQualifiedEquals(int qualRows)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2740
         return (statistics.indexOf("Number of rows qualified=" +
             qualRows + "\n") != -1);
     }
@@ -346,6 +370,7 @@ public class RuntimeStatisticsParser {
      */
     public boolean usedHashJoin()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3686
         return (statistics.indexOf("Hash Join ResultSet") != -1);
     }
 
@@ -354,6 +379,7 @@ public class RuntimeStatisticsParser {
      */
     public boolean usedNLLeftOuterJoin()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4405
         return (statistics.indexOf("Nested Loop Left Outer Join") != -1);
     }
 
@@ -399,6 +425,7 @@ public class RuntimeStatisticsParser {
     }
 
     public boolean usedExternalSort() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3842
         return (statistics.indexOf("Sort type=external") != -1 );
     }
 
@@ -414,6 +441,7 @@ public class RuntimeStatisticsParser {
     public String [] getStartPosition() {
         int startStartIndex = statistics.indexOf("start position:");
         int endStartIndex = statistics.indexOf("stop position:");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4038
         if (startStartIndex >= 0 && endStartIndex >= 0)
         {
             String positionLines = statistics.substring(startStartIndex, endStartIndex);
@@ -437,6 +465,8 @@ public class RuntimeStatisticsParser {
         {
             String positionLines = statistics.substring(startStopIndex, endStopIndex);
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5496
+//IC see: https://issues.apache.org/jira/browse/DERBY-5496
             return Utilities.split(positionLines, '\n');
         }
         else 
@@ -454,6 +484,7 @@ public class RuntimeStatisticsParser {
     public void assertSequence(String[] strings) {
 
         // Make strings ready for comparison:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4736
         for (int i=0; i < strings.length; i++) {
             StringBuffer sb = new StringBuffer();
 
@@ -464,6 +495,7 @@ public class RuntimeStatisticsParser {
                     // this would mess up if the string has an _ somewhere in
                     // the middle, e.g. if a table name has an _ in it. So, 
                     // only do this for the first 15 characters.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3808
                     if (j < 15)
                         sb.append('\t');
                     else
@@ -482,6 +514,7 @@ public class RuntimeStatisticsParser {
 
             if (pos == -1) {
                 throw new AssertionError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3808
                     "Sequence " + strings[i] + "not found in statistics");
             }
 

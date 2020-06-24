@@ -40,6 +40,7 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         if (Derby.hasTools()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite = new BaseTestSuite("IJRunScriptTest");
             suite.addTestSuite(IJRunScriptTest.class);
             return new CleanDatabaseTestSetup(suite);
@@ -85,6 +86,7 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
      * @throws UnsupportedEncodingException
      */
     public void testBracketedComment()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3242
         throws SQLException, UnsupportedEncodingException
     {
         runTestingScript("VALUES /* comment /* nested comment */ 5; */ 1;", 0);
@@ -111,6 +113,7 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
     public void testAutoCommitCommand()
         throws SQLException, UnsupportedEncodingException
     {      
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection conn = getConnection();
         assertTrue(conn.getAutoCommit());
         runTestingScript("AUTOCOMMIT OFF;", 0);

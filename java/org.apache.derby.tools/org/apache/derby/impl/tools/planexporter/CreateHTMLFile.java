@@ -50,6 +50,8 @@ public class CreateHTMLFile {
 	 */
     public void getHTML(String XMLFileName, String XSLSheetName,
             String HTMLFile, boolean def) throws Exception{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4587
+//IC see: https://issues.apache.org/jira/browse/DERBY-4758
 
         if(!(HTMLFile.toUpperCase()).endsWith(".HTML"))
             HTMLFile +=".html";

@@ -104,6 +104,7 @@ public class ReplicationMessageReceive {
      * @param dbname the name of the database.
      */
     public ReplicationMessageReceive(SlaveAddress slaveAddress, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3489
                                      String dbname) {
         this.slaveAddress = slaveAddress;
         Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_NETWORK_LISTEN,
@@ -150,14 +151,18 @@ public class ReplicationMessageReceive {
         // Create the ServerSocket object if this is the first
         // initConnection attempt. Otherwise, we reuse the existing
         // server socket
+//IC see: https://issues.apache.org/jira/browse/DERBY-3184
         if (serverSocket == null) {
             serverSocket = createServerSocket();
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
+//IC see: https://issues.apache.org/jira/browse/DERBY-3071
         serverSocket.setSoTimeout(timeout);
         Socket client = null;
         try {
             //Start listening on the socket and accepting the connection
             client =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 AccessController.doPrivileged(new PrivilegedExceptionAction<Socket>() {
                     public Socket run() throws IOException {
                         return serverSocket.accept();
@@ -176,6 +181,7 @@ public class ReplicationMessageReceive {
         // ...and have equal log files
         parseAndAckInstant(readMessage(), synchOnInstant, dbname);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         killPingThread = false;
         pingThread = new SlavePingThread(dbname);
         pingThread.setDaemon(true);
@@ -195,8 +201,10 @@ public class ReplicationMessageReceive {
     private ServerSocket createServerSocket() throws IOException {
         //create a ServerSocket at the specified host name and the
         //port number.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4812
         ServerSocket ss = null;
         try { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             ss = AccessController.doPrivileged
             (new PrivilegedExceptionAction<ServerSocket>() {
                 public ServerSocket run() throws IOException  {
@@ -219,6 +227,7 @@ public class ReplicationMessageReceive {
      *                     close the socket or the associated resources.
      */
     public void tearDown() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         synchronized (sendPingSemaphore) {
             killPingThread = true;
             sendPingSemaphore.notify();
@@ -278,6 +287,7 @@ public class ReplicationMessageReceive {
         if (masterVersion == ReplicationMessage.serialVersionUID) {
             ack = new ReplicationMessage
                 (ReplicationMessage.TYPE_ACK, "UID OK");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
             sendMessage(ack);
         } else {
             //If the UID's are not equal send an error message. The
@@ -287,6 +297,7 @@ public class ReplicationMessageReceive {
                  new String[]{SQLState.
                               REPLICATION_MASTER_SLAVE_VERSION_MISMATCH});
             sendMessage(ack);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
 
             //The UID's do not match.
             throw StandardException.newException
@@ -336,6 +347,7 @@ public class ReplicationMessageReceive {
             // Notify the master that the logs are in synch
             ack = new ReplicationMessage
                 (ReplicationMessage.TYPE_ACK, "Instant OK");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
             sendMessage(ack);
         } else {
             // Notify master that the logs are out of synch
@@ -354,6 +366,7 @@ public class ReplicationMessageReceive {
             ack = new ReplicationMessage(ReplicationMessage.TYPE_ERROR, 
                                          exception);
             sendMessage(ack);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
 
             throw StandardException.
                 newException(SQLState.REPLICATION_LOG_OUT_OF_SYNCH, exception);
@@ -387,6 +400,7 @@ public class ReplicationMessageReceive {
             new ReplicationMessage(ReplicationMessage.TYPE_ERROR, exception);
 
         sendMessage(ack);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
 
         throw StandardException.
             newException(SQLState.REPLICATION_UNEXPECTED_MESSAGEID, exception);
@@ -404,6 +418,7 @@ public class ReplicationMessageReceive {
      *                     2) if the connection handle is invalid.
      */
     public void sendMessage(ReplicationMessage message) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
         checkSocketConnection();
         socketConn.writeMessage(message);
     }
@@ -427,8 +442,10 @@ public class ReplicationMessageReceive {
      */
     public ReplicationMessage readMessage() throws
         ClassNotFoundException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
         checkSocketConnection();
         ReplicationMessage msg = (ReplicationMessage)socketConn.readMessage();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
 
         if (msg.getType() == ReplicationMessage.TYPE_PONG) {
             // If a pong is received, connection is confirmed to be working.
@@ -450,6 +467,7 @@ public class ReplicationMessageReceive {
      *                     valid (is null).
      */
     private void checkSocketConnection() throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3454
         if (socketConn == null) {
             throw new IOException
                     (MessageId.REPLICATION_INVALID_CONNECTION_HANDLE);
@@ -471,9 +489,11 @@ public class ReplicationMessageReceive {
         // guaraneed to get to receivePongSemaphore.wait before the pong
         // message is processed in readMessage
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3527
         synchronized (receivePongSemaphore) {
             connectionConfirmed = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
             long startWaitingatTime;
             long giveupWaitingAtTime;
             long nextWait = DEFAULT_PING_TIMEOUT;
@@ -529,6 +549,7 @@ public class ReplicationMessageReceive {
             try {
                 while (!killPingThread) {
                     synchronized (sendPingSemaphore) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                         while (!doSendPing) {
                             try {
                                 sendPingSemaphore.wait();

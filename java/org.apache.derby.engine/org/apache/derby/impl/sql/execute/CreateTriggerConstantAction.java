@@ -366,6 +366,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
         }
 
 		//store trigger's dependency on various privileges in the dependeny system
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		storeViewTriggerDependenciesOnPrivileges(activation, triggerd);		
 	}
 
@@ -424,6 +425,9 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 
 
 		dd.addSPSDescriptor(spsd, tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3850
+//IC see: https://issues.apache.org/jira/browse/DERBY-177
+//IC see: https://issues.apache.org/jira/browse/DERBY-3693
 
 		return spsd;
 	}

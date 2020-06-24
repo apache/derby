@@ -92,6 +92,7 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
      */
     final int getPhase()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return phase.get();
     }
     
@@ -100,6 +101,7 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
      *
      * @return A version object.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
     final DerbyVersion getOldVersion() {
         return new DerbyVersion(
                 getOldMajor(), getOldMinor(), getOldFixPack(), getOldPoint());
@@ -159,6 +161,8 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
         int[] old = (int[]) oldVersion.get();
         int[] version = new int[]{major, minor, fixpack, point};
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5105
+//IC see: https://issues.apache.org/jira/browse/DERBY-4835
         for (int i = 0; i < old.length; i++) {
             if (old[i] < version[i]) return true;
             if (old[i] > version[i]) return false;
@@ -187,6 +191,7 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
      */
     boolean oldIs(int requiredMajor, int requiredMinor) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2217
         return (getOldMajor() == requiredMajor)
           && (getOldMinor() == requiredMinor);
      }

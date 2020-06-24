@@ -73,7 +73,9 @@ public final class XMLMissingClassesTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("XML Missing Classes Suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
         if (!XML.classpathMeetsXMLReqs())
         {
             // Run this test in embedded and client modes.

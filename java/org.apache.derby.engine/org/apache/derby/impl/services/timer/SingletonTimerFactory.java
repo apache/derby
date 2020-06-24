@@ -205,6 +205,7 @@ public class SingletonTimerFactory
             // RuntimePermission("getClassLoader") has not been granted.
             // See the javadoc for Thread.getContextClassLoader() and
             // Class.getClassLoader() for details.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
             report(se, MessageId.CANNOT_GET_CLASSLOADER);
             return null;
         }
@@ -224,6 +225,7 @@ public class SingletonTimerFactory
             // the DERBY-3745 fix, did not require setContextClassLoader
             // permissions. We may leak class loaders if we are not able to
             // set this, but cannot just fail.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
             report(se, MessageId.CANNOT_SET_CLASSLOADER);
         }
     }

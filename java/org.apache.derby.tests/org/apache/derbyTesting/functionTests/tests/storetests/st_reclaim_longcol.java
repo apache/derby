@@ -49,6 +49,7 @@ as the long data is streamed onto other pages.  So the table can grow
 unexpectedly quite large before the default space reclamation kicks in.  The
 change queues space reclamation in the case of long columns (blob/clob),
 immediately post commit of the single delete.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
 The testing strategy is to loop doing insert, delete, commit of a blob for
 a number of iterations and check that the actual size of the table is 
@@ -63,6 +64,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
     static boolean verbose = false;
 
     public st_reclaim_longcol(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         super(name);
     }
 
@@ -84,6 +86,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         byte[]  long_byteVal    = new byte[blob_size];
         byte[]  short_byteVal   = new byte[10];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         println(
             "test1:insert/delete of " + num_rows + 
                 " rows with blob(" + blob_size + ")"); 
@@ -148,6 +151,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
             // commit the xact, post commit should kick in to reclaim the
             // blob space sometime after the commit.
             commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
             // after each commit give the background thread a chance to 
             // reclaim the deleted rows.
@@ -184,6 +188,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
             //         marked "half-filled" and can be used in future for
             //         short rows that don't fit on the last page inserted.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
             fail(
                 "Test 1 failed, expected less than " + 
                 total_expected_page_max + " pages - count is:\n" +
@@ -213,6 +218,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         byte[]  long_byteVal    = new byte[blob_size];
         byte[]  short_byteVal   = new byte[10];
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         println(
             "test2:queue of " + work_size + 
                 " rows with blob(" + blob_size + "), total_work = " + 
@@ -221,6 +227,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         Arrays.fill(long_byteVal,  (byte)'L');
         Arrays.fill(short_byteVal, (byte)'S');
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         Statement s = createStatement();
         dropTable("LONGCOL");
         s.execute(
@@ -243,6 +250,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         }
         commit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
         // for each subsequent work item, queue it to the end and delete
         // the oldest existing work item.
@@ -282,6 +290,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         // an expected max of allocated pages.  Expect 10 allocated pages per
         // item in work size and add 5 pages for misc overhead.
         wait_for_max_allocated("test2", (10 * work_size) + 5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
         ResultSet rs = getSpaceTable("LONGCOL");
         assertTrue("Space table was empty", rs.next());
@@ -310,6 +319,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
 
             // commit the xact, post commit should kick in to reclaim the
             // blob space sometime after the commit.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
             commit();
         }
 
@@ -319,6 +329,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         // an expected max of allocated pages.  Expect 10 allocated pages per
         // item in work size and add 5 pages for misc overhead.
         wait_for_max_allocated("test2_2", (10 * work_size) + 5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
         rs = getSpaceTable("LONGCOL");
         assertTrue("Space table was empty", rs.next());
@@ -331,6 +342,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         JDBC.assertEmpty(rs);
 
         commit();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
         // This could fail due to machine variability, leaving it for now
         // as I have not seen this failure reported.
@@ -389,6 +401,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
     {
         // an initial 1/10 of second which should work for most environments.
         sleep(100);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
 
         Integer save_total_alloc = null;
 
@@ -398,6 +411,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
         int max_wait_for_bg_thread = 10000;
         int ms_waited              = 100;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
         while (true)
         {
             ResultSet rs = getSpaceTable("LONGCOL");
@@ -448,6 +462,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
                 //         marked "half-filled" and can be used in future for
                 //         short rows that don't fit on the last page inserted.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6709
                 fail(
                     "Test " + test_name + 
                     " failed in wait_for_max_allocated(), expected less than " + 

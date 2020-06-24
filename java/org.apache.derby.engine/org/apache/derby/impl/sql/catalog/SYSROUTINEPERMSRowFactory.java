@@ -77,17 +77,21 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"185e801c-0103-0e39-b8e7-00000010f010"	// heap UUID
 		,"c065801d-0103-0e39-b8e7-00000010f010"	// index1
 		,"40f70088-010c-4c2f-c8de-0000000f43a0" // index2
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 		,"08264012-010c-bc85-060d-000000109ab8" // index3
     };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSROUTINEPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 		initInfo( COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexUniqueness, uuids);
 	}
 
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		UUID oid;
         String routinePermID = null;
         DataValueDescriptor grantee = null;
@@ -102,6 +106,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
         else
         {
             RoutinePermsDescriptor rpd = (RoutinePermsDescriptor) td;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
             oid = rpd.getUUID();
             if ( oid == null )
             {
@@ -133,7 +138,9 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSROUTINEPERMSRowFactory.buildDescriptor");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         String routinePermsUUIDString = row.getColumn(ROUTINEPERMSID_COL_NUM).getString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         UUID routinePermsUUID = getUUIDFactory().recreateUUID(routinePermsUUIDString);
         String aliasUUIDString = row.getColumn( ALIASID_COL_NUM).getString();
         UUID aliasUUID = getUUIDFactory().recreateUUID(aliasUUIDString);
@@ -149,6 +156,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 
 	/** builds a column list for the catalog */
 	public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
          return new SystemColumn[] {
@@ -188,11 +196,13 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
             String routineUUIDStr = ((RoutinePermsDescriptor) perm).getRoutineUUID().toString();
             row.setColumn(2, new SQLChar(routineUUIDStr));
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         case ROUTINEPERMSID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             String routinePermsUUIDStr = perm.getObjectID().toString();
             row.setColumn(1, new SQLChar(routinePermsUUIDStr));
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
         case ALIASID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             routineUUIDStr = ((RoutinePermsDescriptor) perm).getRoutineUUID().toString();
@@ -250,6 +260,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 	 * @see PermissionsCatalogRowFactory#setUUIDOfThePassedDescriptor
 	 */
     public void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
     throws StandardException
     {
         DataValueDescriptor existingPermDVD = row.getColumn(ROUTINEPERMSID_COL_NUM);

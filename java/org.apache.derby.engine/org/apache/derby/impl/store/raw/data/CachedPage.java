@@ -131,6 +131,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 	public final void setFactory(BaseDataFileFactory factory) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 		dataFactory     = factory;
 		pageCache       = factory.getPageCache();
 		containerCache  = factory.getContainerCache();
@@ -145,6 +146,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	protected void initialize()
 	{
 		super.initialize();
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 		isDirty             = false;
 		preDirty            = false;
 		initialRowCount     = 0;
@@ -182,6 +184,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 		FileContainer myContainer = 
             (FileContainer) containerCache.find(newIdentity.getContainerId());
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 
 		setContainerRowCount(myContainer.getEstimatedRowCount(0));
 
@@ -205,6 +208,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 			int onPageFormatId = FormatIdUtil.readFormatIdInteger(pageData);
 			if (fmtId != onPageFormatId)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 				return changeInstanceTo(
                             onPageFormatId, newIdentity).setIdentity(key);
 			}
@@ -245,6 +249,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
      * @see Cacheable#createIdentity
      **/
 	public Cacheable createIdentity(
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
     Object  key, 
     Object  createParameter) 
         throws StandardException 
@@ -259,12 +264,14 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 		PageKey newIdentity = (PageKey) key;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3589
 		PageCreationArgs createArgs = (PageCreationArgs) createParameter;
         int formatId = createArgs.formatId;
 
 		if (formatId == -1)
         {
 			throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3725
                     SQLState.DATA_UNKNOWN_PAGE_FORMAT_2, 
                     newIdentity,
                     org.apache.derby.iapi.util.StringUtil.hexDump(pageData));
@@ -273,6 +280,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		// createArgs[0] contains the integer form of the formatId 
 		// if it is not the same as this instance's formatId, instantiate the
 		// real page object
+//IC see: https://issues.apache.org/jira/browse/DERBY-3589
 		if (formatId != getTypeFormatId())
 		{
 			return(
@@ -303,6 +311,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		 * 0 means creating a page that has already been preallocated.
 		 */
         int syncFlag = createArgs.syncFlag;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3589
 		if ((syncFlag & WRITE_SYNC) != 0 ||
 			(syncFlag & WRITE_NO_SYNC) != 0)
 			writePage(newIdentity, (syncFlag & WRITE_SYNC) != 0);
@@ -315,6 +324,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
                     ((syncFlag & WRITE_SYNC) != 0)     ? "Write_Sync" :
 					(((syncFlag & WRITE_NO_SYNC) != 0) ? "Write_NO_Sync" :
 					                                          "No_write");
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 
 				SanityManager.DEBUG(
                     FileContainer.SPACE_TRACE,
@@ -362,6 +372,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
             else
             {
                 throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3725
                     SQLState.DATA_UNKNOWN_PAGE_FORMAT_2, 
                     newIdentity,
                     org.apache.derby.iapi.util.StringUtil.hexDump(pageData));
@@ -373,6 +384,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		// avoid creating the data buffer if possible, transfer it to the new 
         // page if this is the first time the page buffer is used, then 
         // createPage will create the page array with the correct page size
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 		if (this.pageData != null) 
         {
 			realPage.alreadyReadPage = true;
@@ -414,6 +426,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
      **/
 	public boolean isDirty() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 		synchronized (this) 
         {
 			return isDirty || preDirty;
@@ -552,6 +565,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
     {
 
 		// must wait for the page to be unlatched
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 		synchronized (this) 
         {
 			if (!isDirty())
@@ -583,12 +597,15 @@ public abstract class CachedPage extends BasePage implements Cacheable
             // (owner != null), and preLatch.
 			while ((owner != null) && !preLatch) 
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 				try 
                 { 
                     wait();
 				} 
                 catch (InterruptedException ie) 
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
 				}
 			}
@@ -596,6 +613,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 			// The page is now effectively latched by the cleaner.
 			// We only want to clean the page if the page is actually dirtied,
 			// not when it is just pre-dirtied.
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 			if (!isActuallyDirty()) 
             {
                 // the person who latched it gives up the
@@ -629,6 +647,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
             // do not leave it inClean state or it will block the next cleaner 
             // forever
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 			synchronized (this) 
             {
 				inClean = false;
@@ -698,8 +717,10 @@ public abstract class CachedPage extends BasePage implements Cacheable
 						StandardException.newException(
 								   SQLState.FILE_READ_PAGE_EXCEPTION, 
 								   ioe, newIdentity, pagesize);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 						
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 				    if (dataFactory.getLogFactory().inRFR())
                     {
                         //if in rollforward recovery, it is possible that this 
@@ -743,6 +764,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	 * @exception  StandardException  Standard exception policy.
      **/
 	private void writePage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
     PageKey identity, 
     boolean syncMe) 
 		 throws StandardException 
@@ -762,6 +784,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		LogInstant flushLogTo = getLastLogInstant();
 		dataFactory.flush(flushLogTo);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 		if (flushLogTo != null) 
         {					
 			clearLastLogInstant();
@@ -772,8 +795,10 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		FileContainer myContainer = 
             (FileContainer) containerCache.find(identity.getContainerId());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3215
 		if (myContainer == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 			StandardException nested =
 				StandardException.newException(
 					SQLState.DATA_CONTAINER_VANISHED,
@@ -781,6 +806,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 			throw dataFactory.markCorrupt(
 				StandardException.newException(
 					SQLState.FILE_WRITE_PAGE_EXCEPTION, nested,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3215
 					identity));
 		}
 
@@ -799,6 +825,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 				// let the container knows whether this page is a not
 				// filled, non-overflow page
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 				myContainer.trackUnfilledPage(
 					identity.getPageNumber(), unfilled());
 
@@ -814,6 +841,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 				if (currentRowCount != initialRowCount)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 					myContainer.updateEstimatedRowCount(
 						currentRowCount - initialRowCount);
 
@@ -830,6 +858,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 			// page cannot be written
 			throw StandardException.newException(
 				SQLState.FILE_WRITE_PAGE_EXCEPTION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3215
 				ioe, identity);
 		}
 		finally
@@ -857,6 +886,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	*/
 	protected void setPageArray(int pageSize)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 		if ((pageData == null) || (pageData.length != pageSize)) 
         {
             // Give a chance for garbage collection to free
@@ -889,6 +919,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	{
         // make subclass write the page format
 		writeFormatId(identity); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 
         // let subclass have a chance to write any cached
         // data to page data array
@@ -909,6 +940,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	protected abstract void initFromData(FileContainer container, PageKey id) 
         throws StandardException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-758
 
 	// create the page
 	protected abstract void createPage(PageKey id, PageCreationArgs args)

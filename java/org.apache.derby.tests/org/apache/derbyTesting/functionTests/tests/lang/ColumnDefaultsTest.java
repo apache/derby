@@ -41,6 +41,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ColumnDefaultsTest Test");
         suite.addTest(TestConfiguration.defaultSuite(ColumnDefaultsTest.class));
         return suite;
@@ -48,6 +49,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
 
     public void testNegativeTestsForColumnDefaults() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         Statement st = createStatement();
         
         //? in default
@@ -134,6 +136,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
 
 
         // DERBY-4426
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
         assertStatementError("42Y85", st,
             " insert into neg values (default) union values (default)");
 
@@ -157,6 +160,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
     {
         
         // positive 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         Statement st = createStatement();
         
         //create tables
@@ -171,6 +175,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         
         st.executeUpdate( " insert into t1 (c4) values 4");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         ResultSet rs = st.executeQuery("select c1, c2, c4 from t1");
         
         String[] expColNames = {"C1", "C2", "C4"};
@@ -403,6 +408,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
 
         // DERBY-4426: make sure we don't forbid inside a multi-value table
         // constructor since this is represented as a UnionNode
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
         st.executeUpdate( "delete from t7");
         st.executeUpdate( "insert into t7 values 1, default");
         rs = st.executeQuery( " select * from t7");
@@ -433,6 +439,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         throws SQLException
     {
         // JIRA issue Derby-331
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         Statement st = createStatement();
         
         st.executeUpdate(
@@ -444,6 +451,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         assertStatementError("23505", st,
             " insert into t_331 values (4, default)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         ResultSet rs = st.executeQuery( " select * from t_331");
         
         String[] expColNames = {"A", "B"};
@@ -465,6 +473,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         throws SQLException
     {
         // begin DERBY-3013
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         Statement st = createStatement();
         
         st.executeUpdate(
@@ -481,6 +490,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
             "insert into tabWithUserAndSchemaDefaults values "
             + "(default, default, default, default)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         ResultSet rs = st.executeQuery(
             " select * from tabWithUserAndSchemaDefaults");
         
@@ -509,12 +519,17 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " drop table tabWithUserAndSchemaDefaults");
                
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
+//IC see: https://issues.apache.org/jira/browse/DERBY-5714
         rollback();
         st.close();
     }
 
     public void testDerby118_and_5829 () throws SQLException {
         Statement st = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5829
 
         /*
          * Lift restriction that even VARCHAR can max have 254 chars in

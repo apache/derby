@@ -163,6 +163,7 @@ public class RealRowResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                              // the number of index updates 
            null,                           // lock mode

@@ -198,6 +198,7 @@ public class PoissonLoadGenerator implements LoadGenerator {
         out.println("Minimum response time (ms):\t" + min);
         out.println("Maximum response time (ms):\t" + max);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
         for (int i = 0; i < threads.length; i++)
         {
             threads[i].getClient().printReport( out );

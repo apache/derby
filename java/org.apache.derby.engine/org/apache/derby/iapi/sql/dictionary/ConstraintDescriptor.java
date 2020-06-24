@@ -48,6 +48,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
  */
 
 public abstract class ConstraintDescriptor 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	extends UniqueTupleDescriptor
 	implements Provider, Dependent
 {
@@ -60,6 +61,7 @@ public abstract class ConstraintDescriptor
 	// field that we want users to be able to know about
 	public static final int SYSCONSTRAINTS_STATE_FIELD = 6;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     TableDescriptor       table;
     final String          constraintName;
     private boolean deferrable;
@@ -101,6 +103,7 @@ public abstract class ConstraintDescriptor
 		this.table = table;
 		this.constraintName = constraintName;
 		this.deferrable = deferrable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.initiallyDeferred = initiallyDeferred;
 		this.referencedColumns = referencedColumns;
 		this.constraintId = constraintId;
@@ -172,6 +175,7 @@ public abstract class ConstraintDescriptor
 	}
 
     public void setDeferrable(boolean b) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         deferrable = b;
     }
 
@@ -208,6 +212,7 @@ public abstract class ConstraintDescriptor
 	 */
 	public int[]	getReferencedColumns()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return ArrayUtil.copy( referencedColumns );
 	}
 
@@ -250,6 +255,7 @@ public abstract class ConstraintDescriptor
 	 */
     public boolean enforced()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return enforced;
 	}
 
@@ -360,6 +366,7 @@ public abstract class ConstraintDescriptor
 		int index;
 		for (index = 0; index < mySize && index < otherSize; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             myColumn = myColDl.elementAt(index);
             otherColumn = otherColumns.elementAt(index);
 
@@ -448,7 +455,9 @@ public abstract class ConstraintDescriptor
 				"constraintName: " + constraintName + "\n" +
 				"constraintId: " + constraintId + "\n" +
 				"deferrable: " + deferrable + "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 "initiallyDeferred: " + initiallyDeferred + "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6148
                "referencedColumns: " +
                     Arrays.toString(referencedColumns) + "\n" +
 				"schemaDesc: " + schemaDesc + "\n"
@@ -547,6 +556,7 @@ public abstract class ConstraintDescriptor
 		    case DependencyManager.SET_CONSTRAINTS_DISABLE:
 		    case DependencyManager.SET_TRIGGERS_ENABLE:
 		    case DependencyManager.SET_TRIGGERS_DISABLE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6672
 		    case DependencyManager.RENAME:
 			//When REVOKE_PRIVILEGE gets sent (this happens for privilege 
 			//types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
@@ -554,9 +564,12 @@ public abstract class ConstraintDescriptor
 			//the ConstraintDescriptor drop itself. 
 			//Ditto for role grant conferring a privilege.
 		    case DependencyManager.REVOKE_PRIVILEGE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		    case DependencyManager.REVOKE_ROLE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 		    case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 				// Only used by Activations
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		    case DependencyManager.RECHECK_PRIVILEGES:
 				break;
 
@@ -601,6 +614,7 @@ public abstract class ConstraintDescriptor
 		*/
 
 		//Let's handle REVOKE_PRIVILEGE and REVOKE_ROLE first
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		if (action == DependencyManager.REVOKE_PRIVILEGE ||
 			action == DependencyManager.REVOKE_ROLE)
 		{
@@ -616,6 +630,7 @@ public abstract class ConstraintDescriptor
             // when the CHECK constraint is dropped explicitly.
             //
             getDataDictionary().getDependencyManager().invalidateFor( table, DependencyManager.ALTER_TABLE, lcc );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
 
 			lcc.getLastActivation().addWarning(
 				StandardException.newWarning(
@@ -652,6 +667,7 @@ public abstract class ConstraintDescriptor
 			(action != DependencyManager.SET_TRIGGERS_ENABLE) &&
 			(action != DependencyManager.SET_TRIGGERS_DISABLE) &&
 			(action != DependencyManager.INTERNAL_RECOMPILE_REQUEST) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6672
 			(action != DependencyManager.RECHECK_PRIVILEGES) &&
 			(action != DependencyManager.RENAME)
 		   )
@@ -700,6 +716,7 @@ public abstract class ConstraintDescriptor
 
         if (clearDependencies)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
             DependencyManager dm = dd.getDependencyManager();
             dm.clearDependencies(lcc, this);
         }
@@ -724,6 +741,9 @@ public abstract class ConstraintDescriptor
             // Bug 4307
             // We need to get the conglomerate descriptors from the 
             // dd in case we dropped other constraints in a cascade operation. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             ConglomerateDescriptor[]conglomDescs =
                     dd.getConglomerateDescriptors(getConglomerateId());
 

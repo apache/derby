@@ -56,6 +56,7 @@ class ReflectMethod implements GeneratedMethod {
 		} catch (InvocationTargetException ite) {
 
             t = ite;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6493
 
 		}
 		

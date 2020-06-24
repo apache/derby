@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ColumnReference
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -132,6 +133,7 @@ public class ColumnReference extends ValueNode
                     int            tokEndOffset,
                     ContextManager cm)  {
         super(cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         _columnName = columnName;
         _qualifiedTableName = tableName;
         this.setBeginOffset(tokBeginOffset);
@@ -151,6 +153,7 @@ public class ColumnReference extends ValueNode
                     TableName      tableName,
                     ContextManager cm) {
         super(cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         _columnName = columnName;
         _qualifiedTableName = tableName;
 		tableNumber = -1;
@@ -168,6 +171,7 @@ public class ColumnReference extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			return "columnName: " + _columnName + "\n" +
 				"tableNumber: " + tableNumber + "\n" +
 				"columnNumber: " + columnNumber + "\n" +
@@ -194,6 +198,8 @@ public class ColumnReference extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -218,6 +224,7 @@ public class ColumnReference extends ValueNode
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(nestingLevel != -1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				"nestingLevel on "+_columnName+" is not expected to be -1");
 			SanityManager.ASSERT(sourceLevel != -1,
 				"sourceLevel on "+_columnName+" is not expected to be -1");
@@ -283,6 +290,8 @@ public class ColumnReference extends ValueNode
 	 * column references to the matching aggregate in the 
 	 * user's SELECT.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markGeneratedToReplaceAggregate()
 	{
 		replacesAggregate = true;
@@ -292,8 +301,12 @@ public class ColumnReference extends ValueNode
 	/**
 	 * Mark this node as being generated to replace a window function call.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markGeneratedToReplaceWindowFunctionCall()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		replacesWindowFunctionCall = true;
 	}
 
@@ -319,6 +332,8 @@ public class ColumnReference extends ValueNode
 	 */
     boolean getGeneratedToReplaceWindowFunctionCall()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		return replacesWindowFunctionCall;
 	}
 
@@ -335,6 +350,7 @@ public class ColumnReference extends ValueNode
 	{
         ColumnReference newCR =
                 new ColumnReference(_columnName, _qualifiedTableName, getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		newCR.copyFields(this);
 		return newCR;
@@ -347,6 +363,8 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void copyFields(ColumnReference oldCR)
 		throws StandardException
 	{
@@ -359,9 +377,12 @@ public class ColumnReference extends ValueNode
 		nestingLevel = oldCR.getNestingLevel();
 		sourceLevel = oldCR.getSourceLevel();
 		replacesAggregate = oldCR.getGeneratedToReplaceAggregate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 		replacesWindowFunctionCall =
 			oldCR.getGeneratedToReplaceWindowFunctionCall();
 		scoped = oldCR.isScoped();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
         copyTagsFrom( oldCR );
         if ( oldCR._mergeTableID != MERGE_UNKNOWN )
         {
@@ -388,6 +409,8 @@ public class ColumnReference extends ValueNode
 	 */
     @Override
     ColumnReference bindExpression(FromList fromList,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates)
             throws StandardException
@@ -401,6 +424,7 @@ public class ColumnReference extends ValueNode
 
 		if (fromList.size() == 0)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			throw StandardException.newException(SQLState.LANG_ILLEGAL_COLUMN_REFERENCE, _columnName);
 		}
 
@@ -409,6 +433,7 @@ public class ColumnReference extends ValueNode
 		/* Error if no match found in fromList */
 		if (matchingRC == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-18
 			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND, getSQLColumnName());
 		}
 
@@ -424,8 +449,11 @@ public class ColumnReference extends ValueNode
 	 * @return	The  column name in the form [[schema.]table.]column
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSQLColumnName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_qualifiedTableName == null)
         {
 			return _columnName;
@@ -442,6 +470,7 @@ public class ColumnReference extends ValueNode
     @Override
 	public String getColumnName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _columnName;
 	}
 
@@ -462,6 +491,8 @@ public class ColumnReference extends ValueNode
 	 * @param tableNumber	The table number this ColumnReference will refer to
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setTableNumber(int tableNumber)
 	{
 		if (SanityManager.DEBUG)
@@ -482,8 +513,11 @@ public class ColumnReference extends ValueNode
 	 * 		supplied name.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getTableName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return ( ( _qualifiedTableName != null) ? _qualifiedTableName.getTableName() : null );
 	}
 
@@ -498,8 +532,11 @@ public class ColumnReference extends ValueNode
 	 *			Null if not a ColumnReference.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSourceTableName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		return ((source != null) ? source.getTableName() : null);
 	}
 
@@ -513,6 +550,8 @@ public class ColumnReference extends ValueNode
 	 * @return	The name of the schema for Column's base table. If the column
 	 *		is not in a schema (i.e. is a derived column), it returns NULL.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSourceSchemaName() throws StandardException
 	{
 		return ((source != null) ? source.getSchemaName() : null);
@@ -536,6 +575,7 @@ public class ColumnReference extends ValueNode
 	 */
 	public TableName getQualifiedTableName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return _qualifiedTableName;
 	}
 
@@ -562,6 +602,8 @@ public class ColumnReference extends ValueNode
 	 * @param colNum The new column number.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setColumnNumber(int colNum)
 	{
 		this.columnNumber = colNum;
@@ -573,6 +615,8 @@ public class ColumnReference extends ValueNode
 	 * @return	The source of this columnReference
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getSource()
 	{
 		return source;
@@ -584,6 +628,8 @@ public class ColumnReference extends ValueNode
 	 * @param source	The source of this columnReference
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setSource(ResultColumn source)
 	{
 		this.source = source;
@@ -599,6 +645,8 @@ public class ColumnReference extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode putAndsOnTop()
 					throws StandardException
 	{
@@ -607,6 +655,7 @@ public class ColumnReference extends ValueNode
 
         trueNode = new BooleanConstantNode(true, getContextManager());
         equalsNode = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 BinaryRelationalOperatorNode.K_EQUALS,
                 this,
                 trueNode,
@@ -664,6 +713,8 @@ public class ColumnReference extends ValueNode
 		referencedTabs.set(tableNumber);
 
 		return ( ! replacesAggregate ) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 			   ( ! replacesWindowFunctionCall ) &&
 			   ( (source.getExpression() instanceof ColumnReference) ||
 			     (source.getExpression() instanceof VirtualColumnNode) ||
@@ -679,6 +730,8 @@ public class ColumnReference extends ValueNode
 	 * RESOLVE: Once we start pushing join clauses, we will need to walk the
 	 * ResultColumn/VirtualColumnNode chain for them to remap the references.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void remapColumnReferences()
 	{
 		ValueNode expression = source.getExpression();
@@ -705,9 +758,11 @@ public class ColumnReference extends ValueNode
 		 * have to keep track of the "orig" info for every remap
 		 * operation, not just for the most recent one.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (scoped && (_origSource != null))
 		{
 			if (remaps == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				remaps = new java.util.ArrayList<RemapInfo>();
 			remaps.add(new RemapInfo(
 				columnNumber, tableNumber, _columnName, source));
@@ -745,8 +800,11 @@ public class ColumnReference extends ValueNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void unRemapColumnReferences()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (_origSource == null)
         {
 			return;
@@ -758,6 +816,8 @@ public class ColumnReference extends ValueNode
 			// 	"Trying to unremap a ColumnReference that was not remapped.");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if ((remaps == null) || (remaps.isEmpty()))
 		{
 			source = _origSource;
@@ -771,11 +831,15 @@ public class ColumnReference extends ValueNode
 		{
 			// This CR is multiply-remapped, so undo the most
 			// recent (and only the most recent) remap operation.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			RemapInfo rI = remaps.remove(remaps.size() - 1);
 			source = rI.getSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			_columnName = rI.getColumnName();
 			tableNumber = rI.getTableNumber();
 			columnNumber = rI.getColumnNumber();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if (remaps.isEmpty())
 				remaps = null;
 		}
@@ -789,6 +853,7 @@ public class ColumnReference extends ValueNode
 	 */
 	protected boolean hasBeenRemapped()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return (_origSource != null);
 	}
 
@@ -797,6 +862,8 @@ public class ColumnReference extends ValueNode
 	 * getting what the source will be after this ColumnReference is remapped.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getSourceResultColumn()
 	{
         /* RESOLVE - If expression is a ColumnReference, then we are hitting
@@ -821,6 +888,8 @@ public class ColumnReference extends ValueNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -854,6 +923,7 @@ public class ColumnReference extends ValueNode
 			{
 				SanityManager.THROWASSERT(
 					"sourceRC is expected to be non-null for " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 					_columnName);
 			}
 
@@ -892,6 +962,9 @@ public class ColumnReference extends ValueNode
 				 */
 
                 ResultColumnList rcl = ft.getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
+//IC see: https://issues.apache.org/jira/browse/DERBY-2526
+//IC see: https://issues.apache.org/jira/browse/DERBY-3023
 
                 // Need to save original (tn,cn) in case we have several
                 // flattenings so we can relocate the correct column many
@@ -906,10 +979,13 @@ public class ColumnReference extends ValueNode
                 // inside a join tree, which can have many columns in the rcl
                 // with the same name, so looking up via column name can give
                 // the wrong column. DERBY-4679.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 ResultColumn ftRC = rcl.getResultColumn(
                     tableNumberBeforeFlattening,
                     columnNumberBeforeFlattening,
                     _columnName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
                 if (ftRC == null) {
                     // The above lookup won't work for references to a base
@@ -1061,8 +1137,11 @@ public class ColumnReference extends ValueNode
 	 * 		supplied name.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getSchemaName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		return ( ( _qualifiedTableName != null) ? _qualifiedTableName.getSchemaName() : null );
 	}
 
@@ -1101,6 +1180,8 @@ public class ColumnReference extends ValueNode
      * the type that has been set on this node.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     DataTypeDescriptor getTypeServices()
 	{        
         if (source == null)
@@ -1144,6 +1225,8 @@ public class ColumnReference extends ValueNode
 		// Walk the ResultColumn->ColumnReference chain until we
 		// find a ResultColumn whose expression is a VirtualColumnNode.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ValueNode rcExpr = rc.getExpression();
 		colNum[0] = getColumnNumber();
 
@@ -1210,12 +1293,14 @@ public class ColumnReference extends ValueNode
 	
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (! isSameNodeKind(o)) {
 			return false;
 		}
 
 		ColumnReference other = (ColumnReference)o;
 		return (tableNumber == other.tableNumber 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 				&& _columnName.equals(other.getColumnName()));
 	}
 

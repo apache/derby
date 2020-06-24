@@ -194,6 +194,7 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
 
     public static Test baseSuite(String name) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(SetTransactionIsolationTest.class);
 
@@ -255,6 +256,7 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("SetTransactionIsolation");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(baseSuite("SetTransactionIsolation:embedded"));
 

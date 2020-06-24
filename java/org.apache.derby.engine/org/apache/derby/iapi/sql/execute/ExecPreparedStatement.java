@@ -71,6 +71,7 @@ public interface ExecPreparedStatement
      *  @return a list with all the saved objects
 	 */
     List<Object> getSavedObjects();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	/**
 	 *	Get the saved cursor info.  Used for stored prepared
@@ -175,6 +176,7 @@ public interface ExecPreparedStatement
 	 *         the database does not use SQL standard authorization
 	 */
     List<StatementPermission> getRequiredPermissionsList();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
     // Methods for stale plan checking.
 
@@ -193,6 +195,7 @@ public interface ExecPreparedStatement
      * @return the row count from the first execution of the result set
      */
     long getInitialRowCount(int rsNum, long currentRowCount);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
 
     /**
      * Set the stale plan check interval.

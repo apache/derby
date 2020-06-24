@@ -36,6 +36,7 @@ public class Browse extends Thread {
 	public Browse(String name) throws Exception{
 		//sets the name of the thread
 		setName(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3448
 		conn = DbTasks.getConnection("BROWSE", "Browse");
 	}
 
@@ -49,6 +50,7 @@ public class Browse extends Thread {
 				deleteMailByUser(conn, this.getName());
 				moveToFolders(conn, this.getName());
 				//Try to avoid deadlock situation with delete from Refresh thread
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 				Thread.sleep(100000);
 				//Checking whether Refresh thread is running after doing Browse work
 				//If Refresh is not running, interrupt the thread
@@ -71,6 +73,7 @@ public class Browse extends Thread {
 
 	public void readInbox(Connection conn, String thread_name) throws Exception{
 		dbtasks.readMail(conn, thread_name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4166
 		dbtasks.totals(thread_name);
 	}
 

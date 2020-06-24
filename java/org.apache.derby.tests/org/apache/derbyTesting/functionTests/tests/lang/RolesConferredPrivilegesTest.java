@@ -82,6 +82,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("RolesConferredPrivilegesTest");
 
@@ -105,6 +106,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
          * sqlAuthorization.
          */
         Test clean = new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(RolesConferredPrivilegesTest.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException {
@@ -156,6 +158,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                          "RolesConferredPrivilegesTest.s1f1' " +
                          "no sql called on null input");
                     s.execute
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                         ("create function s1.f2( ) returns int " +
                          "language java parameter style java external name " +
                          "'org.apache.derbyTesting.functionTests.tests.lang." +
@@ -167,6 +170,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                          "primary key (c1,c2,c3))");
                     // We made columns all unique so we can test references
                     // privilege for all columns.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
                     s.execute(
                         "create procedure s1.calledNested()" +
                         "  language java parameter style java" +
@@ -382,6 +386,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * should work).
      */
     public void testViewInvalidation() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         Connection dboConn = getConnection();
         Statement s = dboConn.createStatement();
 
@@ -1243,6 +1248,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                     setRole(c, "none");
                     assertPsWorks(false, ps);
                     // set it back:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                     setRole(c, "h");
                     assertPsWorks(true, ps);
 
@@ -1347,6 +1353,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * finish using the result set.
      */
     public void testOpenRs() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         Connection dboConn = getConnection();
         Statement s = dboConn.createStatement();
 
@@ -1479,6 +1486,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * See DERBY-3897.
      */
     public void testDefaultCurrentRole() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
         Connection dboConn = getConnection();
         Statement s = dboConn.createStatement();
         s.execute("grant h to DonaldDuck");
@@ -1511,6 +1519,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
         s.execute("grant execute on procedure s1.calledNested to DonaldDuck");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3917
         if (!JDBC.vmSupportsJSR169()) {
             // JSR169 cannot run with tests with stored procedures
             // that do database access - for they require a
@@ -1537,6 +1546,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * See DERBY-3897.
      */
     public void testCurrentRoleInWeirdContexts() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3917
         if (JDBC.vmSupportsJSR169()) {
             // JSR169 cannot run with tests with stored procedures
             // that do database access - for they require a
@@ -1640,6 +1650,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
 
     private void assertEverything(int hasPrivilege,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                   String user,
                                   String role) throws SQLException {
 
@@ -1671,6 +1682,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
             (hasPrivilege, c, schema, table, columns);
         assertUpdatePrivilege
             (hasPrivilege, c, schema, table, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         assertDeletePrivilege
             (hasPrivilege, c, schema, table);
         assertReferencesPrivilege
@@ -1694,6 +1706,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * @throws SQLException throws all exceptions
      */
     private void assertExecutePrivilege(int hasPrivilege,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                         String user,
                                         String role,
                                         String schema,
@@ -1723,6 +1736,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                         String schema,
                                         String function) throws SQLException {
         Statement stm = c.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 
         try {
             ResultSet rs =
@@ -1762,6 +1776,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * @throws SQLException throws all exceptions
      */
     private void assertTriggerPrivilege(int hasPrivilege,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                         String user,
                                         String role,
                                         String schema,
@@ -1838,6 +1853,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * @throws SQLException throws all exceptions
      */
     private void assertReferencesPrivilege(int hasPrivilege,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                            String user,
                                            String role,
                                            String schema,
@@ -1924,6 +1940,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * @throws SQLException throws all exceptions
      */
     private void assertUpdatePrivilege(int hasPrivilege,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                        String user,
                                        String role,
                                        String schema,
@@ -2033,6 +2050,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * @throws SQLException throws all exceptions
      */
     private void assertInsertPrivilege(int hasPrivilege,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                        String user,
                                        String role,
                                        String schema,
@@ -2105,6 +2123,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * @throws SQLException throws all exceptions
      */
     private void assertSelectPrivilege(int hasPrivilege,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                        String user,
                                        String role,
                                        String schema,
@@ -2292,6 +2311,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * this to work.
      */
     private void assertViewExists(boolean exists,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                   Connection c,
                                   String table) throws SQLException {
         Statement s = c.createStatement();
@@ -2397,6 +2417,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
             ResultSet rs = ps.getResultSet();
             if (rs != null) {
                 rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                 rs.close();
             }
             ps.getConnection().rollback();
@@ -2507,6 +2528,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                          String table,
                                          String[] columns) throws SQLException {
         ResultSet rs;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         Statement stm = c.createStatement();
         rs = stm.executeQuery("values current_user");
         rs.next();
@@ -2619,6 +2641,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
     private boolean isOwner(String schema, String user) throws SQLException {
         Connection c = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         Statement stm = c.createStatement();
         ResultSet rs = stm.executeQuery
             ("select schemaname, authorizationid from sys.sysschemas " +
@@ -2640,8 +2663,10 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     private String[] getAllColumns(String schema, String table)
             throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         Connection c = getConnection();
         DatabaseMetaData dbmd = c.getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> columnList = new ArrayList<String>();
         ResultSet rs =
             dbmd.getColumns( (String) null, schema, table, (String) null);
@@ -2651,6 +2676,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                 columnList.add(rs.getString(4));
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return columnList.toArray(new String[columnList.size()]);
     }
 
@@ -2698,6 +2724,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                      String dbObject)  throws SQLException {
 
         ResultSet rs;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         Statement stm =  c.createStatement();
         rs = stm.executeQuery("values current_user");
         rs.next();
@@ -2708,6 +2735,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         String role = rs.getString(1);
         rs.close();
         stm.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 
         return
             "User: " + user +
@@ -2722,6 +2750,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      */
     private void setRole(Connection c, String role) throws SQLException {
         PreparedStatement ps;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
         if (role.toUpperCase().equals("NONE")) {
             ps = c.prepareStatement("set role none");
@@ -2741,6 +2770,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                String grantor,
                                String[] actionStrings,
                                String grantee,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                                String[] warningExpected)
             throws SQLException {
         Connection c = openUserConnection(grantor);
@@ -2755,6 +2785,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                 (action == REVOKE && actionStrings[i].startsWith
                  ("execute") ? " restrict" : ""));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
             if (warningExpected[i] != null) {
                 assertSQLState(warningExpected[i], s.getWarnings());
             }
@@ -2773,6 +2804,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                String[] actionStrings,
                                String grantee)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         String[] warns = new String[actionStrings.length];
         doGrantRevoke(action, grantor, actionStrings, grantee, warns);
     }
@@ -2837,6 +2869,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     }
 
     public static void calledNested()
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
             throws SQLException
     {
         Connection c = null;

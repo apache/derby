@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.HasNodeVisitor
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -33,6 +34,8 @@ import org.apache.derby.iapi.sql.compile.Visitor;
  * parameter.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class HasNodeVisitor implements Visitor
 {
 	protected boolean hasNode;
@@ -44,6 +47,7 @@ class HasNodeVisitor implements Visitor
 	 * @param nodeClass the class of the node that 
 	 * 	we are looking for.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     HasNodeVisitor(Class<?> nodeClass)
 	{
 		this.nodeClass = nodeClass;
@@ -57,6 +61,7 @@ class HasNodeVisitor implements Visitor
 	 * @param skipOverClass do not go below this
 	 * node when searching for nodeClass.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     HasNodeVisitor(Class<?> nodeClass, Class<?> skipOverClass)
 	{
 		this.nodeClass = nodeClass;
@@ -113,6 +118,7 @@ class HasNodeVisitor implements Visitor
 	 */
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 
@@ -136,6 +142,8 @@ class HasNodeVisitor implements Visitor
 	 * Reset the status so it can be run again.
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void reset()
 	{
 		hasNode = false;

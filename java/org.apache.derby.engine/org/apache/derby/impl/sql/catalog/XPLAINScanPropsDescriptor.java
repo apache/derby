@@ -105,6 +105,7 @@ public class XPLAINScanPropsDescriptor extends XPLAINTableDescriptor
         ps.setString(3, scan_object_type);
         ps.setString(4, scan_type);
         ps.setString(5, isolation_level);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6318
         ps.setObject(6, no_visited_pages, Types.INTEGER);
         ps.setObject(7, no_visited_rows, Types.INTEGER);
         ps.setObject(8, no_qualified_rows, Types.INTEGER);
@@ -181,6 +182,7 @@ public class XPLAINScanPropsDescriptor extends XPLAINTableDescriptor
             SystemColumnImpl.getColumn("NO_QUALIFIED_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_VISITED_DELETED_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_FETCHED_COLUMNS", Types.INTEGER, true),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4772
             SystemColumnImpl.getColumn("BITSET_OF_FETCHED_COLUMNS",
                     Types.VARCHAR, true, TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("BTREE_HEIGHT", Types.INTEGER, true),

@@ -46,6 +46,7 @@ public class ByteArrayCombinerStreamTest
 
     public void testCombineNullRead()
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         combiner = new ByteArrayCombinerStream(null, 0);
         assertEquals(-1, combiner.read());
     }
@@ -65,9 +66,11 @@ public class ByteArrayCombinerStreamTest
     public void testCombineAvailable4bytes()
             throws IOException {
         byte[] array = {65,66,77,79};
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(array);
         combiner = new ByteArrayCombinerStream(list, 4);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         assertEquals(4, combiner.available());
     }
 
@@ -82,6 +85,7 @@ public class ByteArrayCombinerStreamTest
     public void testCombineWithExtraEmptyByteArray()
             throws IOException {
         byte[] array = {65,66,77,79};
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(2);
         list.add(array);
         list.add(new byte[4]);
@@ -94,6 +98,7 @@ public class ByteArrayCombinerStreamTest
 
     public void testCombineOneArray()
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(defaultArray);
         combiner = new ByteArrayCombinerStream(list, defaultArray.length);
@@ -108,6 +113,7 @@ public class ByteArrayCombinerStreamTest
             throws IOException {
         int arrays = 100;
         byte[] array = {65,66,77,79};
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(arrays);
         long length = 0;
         for (int i=0; i < arrays; i++) {
@@ -131,6 +137,7 @@ public class ByteArrayCombinerStreamTest
     public void testTruncateDataFromOneArray()
             throws IOException {
         int length = defaultArray.length -5;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(defaultArray);
         byte[] targetArray = new byte[length];
@@ -146,6 +153,7 @@ public class ByteArrayCombinerStreamTest
     public void testTruncateDataFromTwoArrays()
             throws IOException {
         int length = (defaultArray.length *2) -7;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(2);
         list.add(defaultArray);
         list.add(defaultArray);
@@ -153,6 +161,7 @@ public class ByteArrayCombinerStreamTest
         System.arraycopy(defaultArray, 0,
                          targetArray, 0, defaultArray.length);
         System.arraycopy(defaultArray, 0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
                          targetArray, defaultArray.length,
                          length - defaultArray.length);
         byte[] resArray = new byte[length];
@@ -167,7 +176,9 @@ public class ByteArrayCombinerStreamTest
      * the specified length.
      */
     public void testTooLittleDataNoCombine() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         list.add(new byte[5]);
         try {
             combiner = new ByteArrayCombinerStream(list, 10);
@@ -183,6 +194,7 @@ public class ByteArrayCombinerStreamTest
      * the specified length.
      */
     public void testTooLittleDataWithCombine() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(3);
         byte[] data = {65,66,67,68,69};
         list.add(data);
@@ -201,6 +213,7 @@ public class ByteArrayCombinerStreamTest
      * Make sure an exception is thrown if a negative length is specified.
      */
     public void testNegativeLengthArgument() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(new byte[1234]);
         try {
@@ -224,6 +237,7 @@ public class ByteArrayCombinerStreamTest
         byte[] data = {66,67,-123,68,69};
         byte[] targetData = {66,67,0,0,0};
         byte[] resData = new byte[5];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(data);
         combiner = new ByteArrayCombinerStream(list, data.length);
@@ -240,7 +254,9 @@ public class ByteArrayCombinerStreamTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(ByteArrayCombinerStreamTest.class,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2054
                              "ByteArrayCombinerStreamTest");
     }
 } // End class ByteArrayCombinerStreamTest

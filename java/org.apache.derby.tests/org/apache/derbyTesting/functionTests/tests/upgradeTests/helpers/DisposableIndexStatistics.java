@@ -62,6 +62,7 @@ public class DisposableIndexStatistics {
      * @param tableName base table name
      */
     public DisposableIndexStatistics(DerbyVersion oldVersion,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
                                      Connection con,
                                      String tableName) {
         this.oldVersion = oldVersion;
@@ -145,6 +146,7 @@ public class DisposableIndexStatistics {
         // DERBY-5681: Originally fixed in 10.9, but has now been backported
         //      all the way back to 10.3.
         int tableStatsCount = stats.getStatsTable(tbl).length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
         if (hasDerby5681Bug(oldVersion)) {
             Assert.assertEquals(preFkAddition +1, tableStatsCount);
         } else {
@@ -154,6 +156,8 @@ public class DisposableIndexStatistics {
         // Several valid states here, use a relaxed range check.
         int max = getNumTotalPossibleStats();
         int min = max - (getNumNotNeededDisposableStats() + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                          getNumOrphanedDisposableStats());
         int cur = getAllRelevantStats(null);
         Assert.assertTrue("cur=" + cur + ", min=" + min, cur >= min);
@@ -176,6 +180,7 @@ public class DisposableIndexStatistics {
         // Populate primary key table (has a multi-column primary key)
         ps = con.prepareStatement(
                 "insert into " + pktbl + " values (DEFAULT, ?)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
         for (int row = 0; row < ROW_COUNT; row++) {
             ps.setInt(1, row);
             ps.executeUpdate();
@@ -189,6 +194,7 @@ public class DisposableIndexStatistics {
         ps = con.prepareStatement(
                 "insert into " + tbl + " values (DEFAULT,?,?,?,?)");
         for (int row = 0; row < ROW_COUNT; row++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             ps.setInt(1, (row % ROW_COUNT) +1);
             ps.setInt(2, (row % 2000) +1);
             ps.setInt(3, (row % 19) +1);
@@ -221,6 +227,8 @@ public class DisposableIndexStatistics {
 
         int expected = getNumTotalPossibleStats();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
         if (!hasDerby5681Bug(oldVersion)) {
             // Here we correct for the orphaned statistics entry, but not for
             // entries that are considered extraneous by newer releases (for
@@ -238,6 +246,7 @@ public class DisposableIndexStatistics {
         }
 
         // used for reporting only
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<IndexStatsUtil.IdxStats> entries =
                 new ArrayList<IndexStatsUtil.IdxStats>();
         int found = getAllRelevantStats(entries);
@@ -252,6 +261,7 @@ public class DisposableIndexStatistics {
 
     /** Converts the list of statistics to an array. */
     private IndexStatsUtil.IdxStats[] getStatArray(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             List<IndexStatsUtil.IdxStats> list) {
         return list.toArray(new IndexStatsUtil.IdxStats[list.size()]);
     }
@@ -295,6 +305,8 @@ public class DisposableIndexStatistics {
 
     /** Number of disposable statistics entries. */
     public static int getNumNotNeededDisposableStats() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
         return 2;
     }
 
@@ -312,6 +324,7 @@ public class DisposableIndexStatistics {
      * @return {@code true} if the old version has the bug.
      */
     public static boolean hasDerby5681Bug(DerbyVersion oldVersion) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
         if (oldVersion.atLeast(DerbyVersion._10_9)) {
             return false;
         }

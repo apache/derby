@@ -85,6 +85,7 @@ public class Main {
 		String inputResourceName;
 		boolean gotProp;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1216
 		LocalizedResource langUtil = LocalizedResource.getInstance();
 		LocalizedOutput out = langUtil.getNewOutput(System.out);
 
@@ -99,6 +100,7 @@ public class Main {
 
 		// readjust output to derby.ui.locale and derby.ui.codeset if 
                 // they were loaded from a property file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1244
 		langUtil.init();
 		out = langUtil.getNewOutput(System.out);
                 main.initAppUI();
@@ -113,10 +115,12 @@ public class Main {
 			}
 		} else if (file == null) {
 			in = langUtil.getNewInput(System.in);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1216
                         out.flush();
     	        } else {
                     try {
                     	final String inFile1 = file;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     	in1 = AccessController.doPrivileged(new PrivilegedExceptionAction<FileInputStream>() {
             				public FileInputStream run() throws FileNotFoundException {
         						return new FileInputStream(inFile1);
@@ -137,9 +141,11 @@ public class Main {
                     }
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2505
 		final String outFile = util.getSystemProperty("ij.outfile");
 		if (outFile != null && outFile.length()>0) {
 			LocalizedOutput oldOut = out;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			FileOutputStream fos = AccessController.doPrivileged(new PrivilegedAction<FileOutputStream>() {
 				public FileOutputStream run() {
 					FileOutputStream out = null;
@@ -181,6 +187,7 @@ public class Main {
 		me = main.getMain(out);
 
 		/* Let the processing begin! */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3420
 		me.go(in, out);
 		in.close(); out.close();
 	}
@@ -216,6 +223,8 @@ public class Main {
 	 */
     public utilMain getutilMain(int numConnections, LocalizedOutput out, boolean loadSystemProperties)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4223
+//IC see: https://issues.apache.org/jira/browse/DERBY-4217
 		return new utilMain(numConnections, out, loadSystemProperties);
 	}
 
@@ -226,6 +235,7 @@ public class Main {
 	private void go(LocalizedInput in, LocalizedOutput out )
 	{
 		LocalizedInput[] inA = { in } ;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3420
 		utilInstance.go(inA, out);
 	}
 
@@ -241,6 +251,7 @@ public class Main {
 	        out = LocalizedResource.getInstance().getNewOutput(System.out);
 		}
 		utilInstance = getutilMain(1, out);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1609
 		utilInstance.initFromEnvironment();
 	}
 

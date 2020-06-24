@@ -67,6 +67,7 @@ public class StreamsTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test test = new BaseTestSuite(StreamsTest.class, "StreamsTest");
         
         test = DatabasePropertyTestSetup.singleProperty(test,

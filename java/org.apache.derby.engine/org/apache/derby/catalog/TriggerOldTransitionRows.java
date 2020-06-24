@@ -91,6 +91,7 @@ public class TriggerOldTransitionRows extends org.apache.derby.vti.UpdatableVTIT
        }
         
        public int getResultSetConcurrency() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
             return ResultSet.CONCUR_READ_ONLY;
        }
        public void close() throws SQLException {

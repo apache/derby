@@ -88,6 +88,7 @@ public class Utf8CcsidManagerTest extends BaseTestCase {
         assertEquals(ucs2String, convertedString);
         
         // Convert just the two characters as offset above and compare
+//IC see: https://issues.apache.org/jira/browse/DERBY-4746
         String convertedOffset = ccsidManager.convertToJavaString(utf8Bytes, 3, 6);
         assertEquals(offsetUcs2String, convertedOffset);
     }

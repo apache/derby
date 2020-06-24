@@ -46,6 +46,7 @@ public class HeapScan extends JDBCPerfTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("HeapScanTests");
         suite.addTest(baseSuite("HeapScan:CHAR", false));
         suite.addTest(baseSuite("HeapScan:BINARY", true));
@@ -64,6 +65,7 @@ public class HeapScan extends JDBCPerfTestCase {
     private static Test baseSuite(String name, boolean binaryData) {
         int iterations = 700, repeats = 4;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite heapScan = new BaseTestSuite(name);
         heapScan.addTest(new HeapScan("Scan100", binaryData,
                                       iterations, repeats));
@@ -107,6 +109,7 @@ public class HeapScan extends JDBCPerfTestCase {
     public void setUp() throws Exception {
 
         select = prepareStatement("SELECT * FROM " + tableName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4607
 
         // Create a SELECT statement that uses predicates. Also initialize
         // the predicates with some data of the correct type for this test
@@ -181,6 +184,7 @@ public class HeapScan extends JDBCPerfTestCase {
         }
         assertEquals(actualCount,rowcount);
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4607
         commit();
     }
 
@@ -193,6 +197,7 @@ public class HeapScan extends JDBCPerfTestCase {
         ResultSet rs = selectWithPred.executeQuery();
         assertFalse("should be empty", rs.next());
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4607
         commit();
     }
 
@@ -204,6 +209,7 @@ public class HeapScan extends JDBCPerfTestCase {
         // we need to set the fields to null to allow them to be garbage
         // collected.
         select = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4607
         selectWithPred = null;
         super.tearDown();
     }

@@ -162,6 +162,8 @@ final public class BLOBTest extends BaseJDBCTestCase
                               BLOBDataModelSetup.getBlobTableName());
         while (rs.next()) {
             println("Next");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1477
+//IC see: https://issues.apache.org/jira/browse/DERBY-1477
             final int val = rs.getInt(1);
             if (val == BLOBDataModelSetup.bigVal) break;
         }
@@ -312,6 +314,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         int val = rs.getInt("VAL");
         int size = rs.getInt("LENGTH");
         println("VerifyBlob");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1477
         verifyBlob(val, size, rs.getBlob("DATA"));
         
         println("UpdateBlob");
@@ -366,6 +369,7 @@ final public class BLOBTest extends BaseJDBCTestCase
      * @throws SQLException if something goes wrong
      */
     public void testBlobCastInValuesClause()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4102
             throws IOException, SQLException {
         // The length must be at least 32 KB.
         final int length = 38*1024;
@@ -396,6 +400,10 @@ final public class BLOBTest extends BaseJDBCTestCase
      * @see org.apache.derbyTesting.functionTests.tests.memory.ClobMemTest#testDerby4477_3645_3646_Repro_lowmem_clob
      */
     public void testDerby4477_3645_3646_Repro() throws SQLException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
         setAutoCommit(false);
         Statement s = createStatement();
 
@@ -557,6 +565,7 @@ final public class BLOBTest extends BaseJDBCTestCase
      * See DERBY-2992.
      */
     public void testDerby2992_Repro()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2992
             throws IOException, SQLException {
         // Autocommit doesn't seem to be enabled here in all cases.
         setAutoCommit(true);
@@ -734,6 +743,10 @@ final public class BLOBTest extends BaseJDBCTestCase
     {
         println("Verify new value in table: " + newVal);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
         final Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                                    ResultSet.CONCUR_READ_ONLY);
 
@@ -757,7 +770,16 @@ final public class BLOBTest extends BaseJDBCTestCase
         }
         assertTrue("No column with value= " + newVal + " found ", foundVal);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         stmt.close();
     }
 
@@ -772,6 +794,10 @@ final public class BLOBTest extends BaseJDBCTestCase
      * @exception IOException causes test to fail with error
      */
     private void verifyBlob(final int expectedVal,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
                             final int expectedSize,
                             final Blob blob)
         throws IOException, SQLException
@@ -798,6 +824,7 @@ final public class BLOBTest extends BaseJDBCTestCase
      */
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite =
             new BaseTestSuite(BLOBTest.class, "BLOBTest");
         return new BLOBDataModelSetup(mainSuite);
@@ -810,6 +837,7 @@ final public class BLOBTest extends BaseJDBCTestCase
     public final void setUp() 
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         getConnection().setAutoCommit(false);
     }
 }

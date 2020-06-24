@@ -65,6 +65,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	</PRE>
 
 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
 abstract class LogicalPageOperation
     extends PageBasicOperation implements LogicalUndoable
 {
@@ -82,6 +83,7 @@ abstract class LogicalPageOperation
 	// no-arg constructor, required by Formatable 
 	public LogicalPageOperation() { super(); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     LogicalPageOperation(BasePage page, LogicalUndo undo, int recordId)
 	{
 		super(page);

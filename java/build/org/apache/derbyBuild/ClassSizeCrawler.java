@@ -195,6 +195,7 @@ public class ClassSizeCrawler
             out.print( "package org.apache.derby.iapi.services.cache;\n" +
                        "class ClassSizeCatalogImpl extends ClassSizeCatalog\n" +
                        "{\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                        "    public ClassSizeCatalogImpl()\n" +
                        "    {\n");
             for( Enumeration e = classSizes.keys();
@@ -224,11 +225,13 @@ public class ClassSizeCrawler
 
     private ClassSizeCrawler( Class[] interfaceList,
                               int interfaceCount,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
                               Hashtable<String, int[]> classSizes)
     {
         this.interfaceList = interfaceList;
         this.classSizes = classSizes;
         this.interfaceCount = interfaceCount;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         verbose = Boolean.parseBoolean( System.getProperty( "verbose", "false"));
     }
 
@@ -262,6 +265,7 @@ public class ClassSizeCrawler
                 // Strip off the ".class" suffix
                 String s = filenames[fileIdx].substring( 0, filenames[fileIdx].length() - 6);
                 className.append( s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4893
                 Class<?> targetClass = null;
                 String targetClassName = className.toString();
                 try

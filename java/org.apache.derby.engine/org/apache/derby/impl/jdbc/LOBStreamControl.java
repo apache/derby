@@ -56,6 +56,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  * blob data irrespective of if its in memory or in file.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6161
 final class LOBStreamControl {
     private LOBFile tmpFile;
     private byte [] dataBytes = new byte [0];
@@ -83,8 +84,10 @@ final class LOBStreamControl {
      * @param data initial value
      */
     LOBStreamControl (EmbedConnection conn, byte [] data)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throws IOException, StandardException {
         this.conn = conn;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
         updateCount = 0;
         bufferSize =
             Math.min(Math.max(DEFAULT_BUF_SIZE, data.length), MAX_BUF_SIZE);
@@ -93,14 +96,18 @@ final class LOBStreamControl {
 
     private void init(byte [] b, long len)
             throws IOException, StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         Object monitor = findService(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6161
                 Property.DATABASE_MODULE, conn.getDBName());
         final DataFactory df = (DataFactory) findServiceModule(
                 monitor, DataFactory.MODULE);
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             AccessController.doPrivileged (new PrivilegedExceptionAction<Object>() {
                 public Object run() throws IOException {
                     //create a temporary file
+//IC see: https://issues.apache.org/jira/browse/DERBY-3889
                     StorageFile lobFile =
                         df.getStorageFactory().createTemporaryFile("lob", null);
                     if (df.databaseEncrypted()) {
@@ -121,10 +128,12 @@ final class LOBStreamControl {
         //now this call will write into the file
         if (len != 0)
             write(b, 0, (int) len, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2713
         dataBytes = null;
     }
 
     private long updateData(byte[] bytes, int offset, int len, long pos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throws StandardException {
         if (dataBytes == null) {
             if ((int) pos == 0) {
@@ -134,7 +143,9 @@ final class LOBStreamControl {
             }
             else {
                 //invalid postion
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
                 throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         SQLState.BLOB_POSITION_TOO_LARGE, pos);
             }
         }
@@ -160,9 +171,11 @@ final class LOBStreamControl {
     }
 
     private void isValidPostion(long pos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throws IOException, StandardException {
         if (pos < 0)
             throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 SQLState.BLOB_NONPOSITIVE_LENGTH, (pos + 1));
         if (pos > Integer.MAX_VALUE)
             throw StandardException.newException(
@@ -200,8 +213,10 @@ final class LOBStreamControl {
     synchronized long write(int b, long pos)
             throws IOException, StandardException {
         isValidPostion(pos);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
         updateCount++;
         if (isBytes) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2713
             if (pos < bufferSize) {
                 byte [] bytes = {(byte) b};
                 updateData(bytes, 0, 1, pos);
@@ -210,6 +225,7 @@ final class LOBStreamControl {
                 init(dataBytes, pos);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         tmpFile.seek(pos);
         tmpFile.write(b);
         return tmpFile.getFilePointer();
@@ -240,8 +256,10 @@ final class LOBStreamControl {
                     throw new ArrayIndexOutOfBoundsException (e.getMessage());
             throw e;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
         updateCount++;
         if (isBytes) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2713
             if (pos + len <= bufferSize)
                 return updateData(b, off, len, pos);
             else {
@@ -279,6 +297,7 @@ final class LOBStreamControl {
     }
 
     private int readBytes(byte [] b, int off, int len, long pos) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         if (pos >= dataBytes.length)
             return -1;
         int lengthFromPos = dataBytes.length - (int) pos;
@@ -305,6 +324,7 @@ final class LOBStreamControl {
         if (isBytes) {
             return readBytes(buff, off, len, pos);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
         tmpFile.seek(pos);
         return tmpFile.read (buff, off, len);
     }
@@ -344,20 +364,26 @@ final class LOBStreamControl {
      * @throws IOException
      */
     synchronized void truncate(long size)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throws IOException, StandardException {
         isValidPostion(size);
         if (isBytes) {
             byte [] tmpByte = new byte [(int) size];
             System.arraycopy(dataBytes, 0, tmpByte, 0, (int) size);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2345
             dataBytes = tmpByte;
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2713
             if (size < bufferSize) {
                 dataBytes = new byte [(int) size];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2247
                 read(dataBytes, 0, dataBytes.length, 0);
                 isBytes = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3889
                 releaseTempFile(tmpFile);
                 tmpFile = null;
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
                 tmpFile.setLength(size);
             }
         }
@@ -378,16 +404,19 @@ final class LOBStreamControl {
      */
     synchronized void copyData(InputStream inStream, long length)
             throws IOException, StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2713
         byte [] data = new byte [bufferSize];
         long sz = 0;
         while (sz < length) {
             int len = (int) Math.min (length - sz, bufferSize);
             len = inStream.read(data, 0, len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3793
             if (len == -1) {
                 if (length != Long.MAX_VALUE) {
                     // We reached EOF before all the requested bytes are read.
                     throw new EOFException(MessageService.getTextMessage(
                             MessageId.STREAM_PREMATURE_EOF,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                             length, sz));
                 } else {
                     // End of data, but no length checking.
@@ -399,6 +428,7 @@ final class LOBStreamControl {
         }
         // If we copied until EOF, and we read more data than the length of the
         // marker, see if we have a Derby end-of-stream marker.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
         long curLength = getLength();
         if (length == Long.MAX_VALUE && curLength > 2) {
             byte[] eos = new byte[3];
@@ -429,6 +459,7 @@ final class LOBStreamControl {
      *      {@code LOBStreamControl}-object fails
      * @throws UTFDataFormatException if an invalid UTF-8 encoding is detected
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
     synchronized long copyUtf8Data(final InputStream utf8Stream,
                                    final long charLength)
             throws IOException, StandardException {
@@ -484,6 +515,7 @@ final class LOBStreamControl {
         if (charLength != Long.MAX_VALUE && charCount != charLength) {
             throw new EOFException(MessageService.getTextMessage(
                     MessageId.STREAM_PREMATURE_EOF,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     charLength, charCount));
         }
         return charCount;
@@ -499,8 +531,10 @@ final class LOBStreamControl {
     }
 
     private void deleteFile(final StorageFile file) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         AccessController.doPrivileged(new PrivilegedAction<Object>() {
             public Object run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6161
                 file.delete();
                 return null;
             }
@@ -514,6 +548,7 @@ final class LOBStreamControl {
     void free() throws IOException {
         dataBytes = null;
         if (tmpFile != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3889
             releaseTempFile(tmpFile);
             tmpFile = null;
         }
@@ -561,12 +596,18 @@ final class LOBStreamControl {
      * @throws IOException if writing to the temporary file fails
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2346
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
     synchronized long replaceBytes (byte [] buf, long stPos, long endPos)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throws IOException, StandardException {
         long length = getLength();
         if (isBytes) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5062
             long finalLength = length - endPos + stPos + buf.length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2713
             if (finalLength > bufferSize) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2802
                 byte [] tmpBytes = dataBytes;
                 init (tmpBytes, stPos);
                 write (buf, 0, buf.length, getLength());
@@ -589,6 +630,7 @@ final class LOBStreamControl {
             //create new file with 0 size
             
             byte tmp [] = new byte [0];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
             LOBFile oldFile = tmpFile;
             init (tmp, 0);
             byte [] tmpByte = new byte [1024];
@@ -613,6 +655,7 @@ final class LOBStreamControl {
                     tmpFile.write (tmpByte, 0, rdLen);
                 }while (true);
             }            
+//IC see: https://issues.apache.org/jira/browse/DERBY-3889
             releaseTempFile(oldFile);
         }
         updateCount++;
@@ -633,6 +676,7 @@ final class LOBStreamControl {
      * can't call this entry point.
      */
     private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

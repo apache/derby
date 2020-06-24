@@ -124,6 +124,7 @@ class NetPackageRequest extends NetConnectionRequest {
                 // Mark the beginning of PKGNAMCSN bytes.
                 markForCachingPKGNAMCSN();
                 buildCommonPKGNAMinfo(section);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 writeScalarPaddedBytes(
                         Configuration.getDncPackageConsistencyToken(),
                         NetConfiguration.PKGCNSTKN_FIXED_LEN,
@@ -141,6 +142,7 @@ class NetPackageRequest extends NetConnectionRequest {
     private void storePKGNAMCBytes(Section section) {
         // Get the locaton where we started writing PKGNAMCSN
         int startPos = popMarkForCachingPKGNAMCSN();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         byte[] b = new byte[buffer.position() - startPos];
         buffer.position(startPos);
         buffer.get(b);
@@ -165,6 +167,7 @@ class NetPackageRequest extends NetConnectionRequest {
         if (length > maxIdentifierLength) {
             throw new SqlException(netAgent_.logWriter_,
                 new ClientMessageId(SQLState.LANG_IDENTIFIER_TOO_LONG),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 identifier, maxIdentifierLength);
         }
 
@@ -176,6 +179,7 @@ class NetPackageRequest extends NetConnectionRequest {
             write2Bytes(0xffff);
         } else {
             if (netAgent_.typdef_.isCcsidMbcSet()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                 byte[] sqlBytes =
                     string.getBytes(netAgent_.typdef_.getCcsidMbcEncoding());
                 write1Byte(0x00);
@@ -248,7 +252,9 @@ class NetPackageRequest extends NetConnectionRequest {
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void encryptDataStream(int lengthLocation) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         byte[] clearedBytes = new byte[buffer.position() - lengthLocation];
         buffer.position(lengthLocation);
         buffer.get(clearedBytes);
@@ -261,6 +267,7 @@ class NetPackageRequest extends NetConnectionRequest {
                         netAgent_.netConnection_.getTargetPublicKey(),
                         netAgent_.netConnection_.getTargetPublicKey());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5210
         buffer.position(lengthLocation);
         writeBytes(encryptedBytes);
 

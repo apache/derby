@@ -103,6 +103,7 @@ public abstract class JNDIAuthenticationSchemeBase implements UserAuthenticator
 		//
 		initDirContextEnv = new Properties();
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1174
 		if(dbProps != null) {
 			for (Enumeration keys = dbProps.propertyNames(); keys.hasMoreElements(); ) {
 

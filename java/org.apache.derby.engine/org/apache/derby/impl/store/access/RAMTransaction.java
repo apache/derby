@@ -157,6 +157,7 @@ public class RAMTransaction
 		this.rawtran            = theRawTran;
         this.parent_tran        = parent_tran;
 		accessmanager           = myaccessmanager;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		scanControllers         = new ArrayList<ScanManager>();
 		conglomerateControllers = new ArrayList<ConglomerateController>();
 
@@ -238,6 +239,7 @@ public class RAMTransaction
             for (int i = scanControllers.size() - 1; i >= 0; i--)
             {
                 ScanManager sc = scanControllers.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                 if (sc.closeForEndTransaction(closeHeldControllers))
                 {
@@ -254,6 +256,7 @@ public class RAMTransaction
                     SanityManager.ASSERT(scanControllers.isEmpty());
                 }
                 // just to make sure everything has been closed and removed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
                 scanControllers.clear();
             }
         }
@@ -264,6 +267,7 @@ public class RAMTransaction
             for (int i = conglomerateControllers.size() - 1; i >= 0; i--)
             {
                 ConglomerateController cc = conglomerateControllers.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                 if (cc.closeForEndTransaction(closeHeldControllers))
                 {
@@ -280,6 +284,7 @@ public class RAMTransaction
                     SanityManager.ASSERT(scanControllers.isEmpty());
                 }
                 // just to make sure everything has been closed and removed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
                 conglomerateControllers.clear();
             }
         }
@@ -290,9 +295,12 @@ public class RAMTransaction
             {
                 // Loop from the end since the call to close() will remove the
                 // element from the list.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
                 for (int i = sortControllers.size() - 1; i >= 0; i--)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     SortController sc = sortControllers.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
                     sc.completedInserts();
                 }
                 sortControllers.clear();
@@ -305,6 +313,7 @@ public class RAMTransaction
             {
                 // Loop from the end since the call to drop() will remove the
                 // element from the list.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
                 for (int i = sorts.size() - 1; i >= 0; i--)
                 {
                     Sort sort = sorts.get(i);
@@ -383,6 +392,7 @@ public class RAMTransaction
         {
 			throw StandardException.newException(
                 SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 conglomId);
         }
         else
@@ -403,6 +413,7 @@ public class RAMTransaction
         else
 		{
 			if (tempCongloms != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				conglom = (Conglomerate) tempCongloms.get(conglomId);
 		}
 
@@ -435,6 +446,7 @@ public class RAMTransaction
                       ContainerHandle.MODE_DROP_ON_COMMIT           |
                       ContainerHandle.MODE_OPEN_FOR_LOCK_ONLY       |
                       ContainerHandle.MODE_LOCK_NOWAIT              |
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                       ContainerHandle.MODE_LOCK_ROW_NOWAIT          |
                       ContainerHandle.MODE_TRUNCATE_ON_ROLLBACK     |
                       ContainerHandle.MODE_FLUSH_ON_COMMIT          |
@@ -469,6 +481,7 @@ public class RAMTransaction
 
 		// Keep track of it so we can release on close.
 		conglomerateControllers.add(cc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
 
 		return cc;
     }
@@ -496,6 +509,7 @@ public class RAMTransaction
                    TransactionController.OPENMODE_USE_UPDATE_LOCKS |
                    TransactionController.OPENMODE_FOR_LOCK_ONLY |
                    TransactionController.OPENMODE_LOCK_NOWAIT |
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                    TransactionController.OPENMODE_LOCK_ROW_NOWAIT |
                    TransactionController.OPENMODE_SECONDARY_LOCKED)) != 0)
             {
@@ -579,16 +593,19 @@ public class RAMTransaction
     public void addColumnToConglomerate(
     long        conglomId,
     int         column_id,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     Storable    template_column,
     int         collation_id)
 		throws StandardException
     {
         boolean is_temporary = (conglomId < 0);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5632
 		Conglomerate conglom = findConglomerate(conglomId);
 		if (conglom == null)
         {
 			throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 SQLState.AM_NO_SUCH_CONGLOMERATE_DROP, conglomId);
         }
 
@@ -603,11 +620,13 @@ public class RAMTransaction
                 (DynamicCompiledOpenConglomInfo) null);
 
 		conglom.addColumn(this, column_id, template_column, collation_id);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
         // Set an indication that ALTER TABLE has been called so that the
         // conglomerate will be invalidated if an error happens. Only needed
         // for non-temporary conglomerates, since they are the only ones that
         // live in the conglomerate cache.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5632
         if (!is_temporary)
 		{
             alterTableCallMade = true;
@@ -670,6 +689,7 @@ public class RAMTransaction
     {
         return(
             findExistingConglomerate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                 conglomId).getDynamicCompiledConglomInfo());
     }
 
@@ -681,6 +701,7 @@ public class RAMTransaction
         {
             for (int i = 0; i < sorts.size(); i++)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
                 if (sorts.get(i) != null)
                     ret_val++;
             }
@@ -803,6 +824,7 @@ public class RAMTransaction
             cfactory.createConglomerate(
                 this, segment, conglomid, template, 
                 columnOrder, collationIds, properties, temporaryFlag);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
 		long conglomId;
 		if ((temporaryFlag & TransactionController.IS_TEMPORARY)
@@ -810,7 +832,9 @@ public class RAMTransaction
 		{
 			conglomId = nextTempConglomId--;
 			if (tempCongloms == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				tempCongloms = new HashMap<Long,Conglomerate>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			tempCongloms.put(conglomId, conglom);
 		}
 		else
@@ -846,6 +870,7 @@ public class RAMTransaction
                 true,
                 template,
 				columnOrder,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 collationIds,
                 properties,
                 temporaryFlag,
@@ -878,6 +903,7 @@ public class RAMTransaction
 		// necessary although still correct.
 		long conglomId = 
 			createConglomerate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 implementation, template, columnOrder, collationIds, 
                 properties, temporaryFlag);
 
@@ -921,7 +947,9 @@ public class RAMTransaction
         {
 
             str = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             for (Iterator<ScanManager> it = scanControllers.iterator(); it.hasNext(); )
             {
                 ScanController sc = it.next();
@@ -949,6 +977,8 @@ public class RAMTransaction
                 for (int i = 0; i < sorts.size(); i++)
                 {
                     Sort sort = sorts.get(i);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                     if (sort != null)
                     {
@@ -961,6 +991,7 @@ public class RAMTransaction
 
 			if (tempCongloms != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                 for (Iterator<Long> it = tempCongloms.keySet().iterator();
                      it.hasNext(); )
                 {
@@ -994,6 +1025,7 @@ public class RAMTransaction
 		if (conglomId < 0)
 		{
 			if (tempCongloms != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				tempCongloms.remove(conglomId);
 		}
 		else
@@ -1425,9 +1457,11 @@ public class RAMTransaction
 	 * @exception  StandardException  Standard exception policy.
      **/
     public void purgeConglomerate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     long    conglomId)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
         findExistingConglomerate(conglomId).purgeConglomerate
             ( this, rawtran );
 
@@ -1534,6 +1568,9 @@ public class RAMTransaction
 
 		// Keep track of it so we can release on close.
 		scanControllers.add(sm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
 
 		return(sm);
 	}
@@ -1691,6 +1728,7 @@ public class RAMTransaction
 
 		// Add the sort to the sorts vector
 		if (sorts == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			sorts = new ArrayList<Sort>();
             freeSortIds = new ArrayList<Integer>();
         }
@@ -1699,9 +1737,11 @@ public class RAMTransaction
         if (freeSortIds.isEmpty()) {
             // no free identifiers, add sort at the end
             sortid = sorts.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
             sorts.add(sort);
         } else {
             // reuse a sort identifier
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             sortid = (freeSortIds.remove(freeSortIds.size() - 1))
                 .intValue();
             sorts.set(sortid, sort);
@@ -1728,11 +1768,13 @@ public class RAMTransaction
     {
         // should call close on the sort.
         Sort sort = sorts.get((int) sortid);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         if (sort != null)
         {
             sort.drop(this);
             sorts.set((int) sortid, null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
             freeSortIds.add((int) sortid);
         }
     }
@@ -1822,6 +1864,7 @@ public class RAMTransaction
 			|| (sort = (sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.AM_NO_SUCH_SORT, id);
 		}
 
@@ -1830,6 +1873,7 @@ public class RAMTransaction
 
 		// Keep track of it so we can release on close.
 		if (sortControllers == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			sortControllers = new ArrayList<SortController>();
 		sortControllers.add(sc);
 
@@ -1888,17 +1932,23 @@ public class RAMTransaction
 		// Find the sort in the sorts list, throw an error
 		// if it doesn't exist.
 		if (sorts == null || id >= sorts.size()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
 			|| (sort = ((Sort) sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.AM_NO_SUCH_SORT, id);
 		}
 
 		// Open a scan on it.
 		ScanManager sc = sort.openSortScan(this, hold);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		// Keep track of it so we can release on close.
 		scanControllers.add(sc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
 
 		return sc;
 	}
@@ -1915,9 +1965,12 @@ public class RAMTransaction
 		// Find the sort in the sorts list, throw an error
 		// if it doesn't exist.
 		if (sorts == null || id >= sorts.size()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			|| (sort = (sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     SQLState.AM_NO_SUCH_SORT, id);
 		}
 
@@ -1926,6 +1979,7 @@ public class RAMTransaction
 
 		// Keep track of it so we can release on close.
 		scanControllers.add( (ScanManager) sc );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		return sc;
 	}
@@ -1953,6 +2007,7 @@ public class RAMTransaction
 	public void abort()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5632
         invalidateConglomerateCache();
 		this.closeControllers(true /* close all controllers */ );
 		rawtran.abort();
@@ -2154,6 +2209,7 @@ public class RAMTransaction
 	public boolean checkVersion(
     int     requiredMajorVersion, 
     int     requiredMinorVersion, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
     String  feature) 
         throws StandardException
     {
@@ -2174,6 +2230,7 @@ public class RAMTransaction
      **/
     public void closeMe(ConglomerateController conglom_control)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
         conglomerateControllers.remove(conglom_control);
     }
 
@@ -2187,6 +2244,7 @@ public class RAMTransaction
      **/
     public void closeMe(SortController sort_control)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
         sortControllers.remove(sort_control);
     }
 
@@ -2200,6 +2258,7 @@ public class RAMTransaction
      **/
     public void closeMe(ScanManager scan)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2149
         scanControllers.remove(scan);
     }
 
@@ -2337,6 +2396,7 @@ public class RAMTransaction
         Transaction child_rawtran = 
             ((readOnly) ?
                 accessmanager.getRawStore().startNestedReadOnlyUserTransaction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                     rawtran, 
                     getLockSpace(), 
                     cm,

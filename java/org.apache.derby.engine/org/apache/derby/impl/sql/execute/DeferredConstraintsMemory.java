@@ -87,6 +87,8 @@ final public class DeferredConstraintsMemory
     public static BackingStoreHashtable rememberDuplicate(
             final LanguageConnectionContext lcc,
                   BackingStoreHashtable deferredRowsHashTable,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             UUID constraintId,
             final DataValueDescriptor[] insertRow) throws StandardException {
 
@@ -99,6 +101,8 @@ final public class DeferredConstraintsMemory
             // tables (one per index conglomerate).  Use it if it
             // exists, else make a new one.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             final HashMap<UUID, ValidationInfo> hashTables =
                 lcc.getDeferredHashTables();
             final ValidationInfo vi = hashTables.get(constraintId);
@@ -145,11 +149,14 @@ final public class DeferredConstraintsMemory
      */
     public static BackingStoreHashtable rememberCheckViolations(
             final LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             UUID  basetableId,
             final String schemaName,
             final String tableName,
                   BackingStoreHashtable deferredCheckViolations,
             final List<UUID> violatingCheckConstraints,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             final RowLocation offendingRow,
             CheckInfo[] result) throws StandardException {
 
@@ -163,6 +170,8 @@ final public class DeferredConstraintsMemory
             // tables (one per base table conglomerate).  Use it if it
             // exists, else make a new one.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             final HashMap<UUID, ValidationInfo> hashTables =
                     lcc.getDeferredHashTables();
             final CheckInfo vi = (CheckInfo) hashTables.get(basetableId);
@@ -172,10 +181,13 @@ final public class DeferredConstraintsMemory
                 // offending row
                 deferredCheckViolations =
                         makeDeferredHashTable(lcc.getTransactionExecute(), 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 CheckInfo ci = new CheckInfo(deferredCheckViolations,
                                    schemaName,
                                    tableName,
                                    violatingCheckConstraints);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 hashTables.put(basetableId, ci);
                 result[0] = ci;
             } else {
@@ -194,8 +206,11 @@ final public class DeferredConstraintsMemory
 
 
     public static Enumeration<Object> getDeferredCheckConstraintLocations(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             Activation activation,
             UUID validatingBaseTableUUID) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
 
         CheckInfo ci = (DeferredConstraintsMemory.CheckInfo)activation.
                 getLanguageConnectionContext().
@@ -231,6 +246,8 @@ final public class DeferredConstraintsMemory
             // tables (one per index conglomerate).  Use it if it
             // exists, else make a new one.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             final HashMap<UUID, ValidationInfo> hashTables =
                 lcc.getDeferredHashTables();
             final ValidationInfo vi = hashTables.get(fkId);
@@ -287,6 +304,8 @@ final public class DeferredConstraintsMemory
             UUID tableId,
             String tableName) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         final HashMap<UUID, DeferredConstraintsMemory.ValidationInfo> vis =
                 lcc.getDeferredHashTables();
         final TableDescriptor td =
@@ -322,6 +341,7 @@ final public class DeferredConstraintsMemory
         }
 
         public abstract void possiblyValidateOnReturn(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 LanguageConnectionContext lcc,
                 SQLSessionContext nested,
                 SQLSessionContext caller) throws StandardException;
@@ -340,6 +360,8 @@ final public class DeferredConstraintsMemory
 
         public UniquePkInfo(BackingStoreHashtable infoRows, UUID constraintId) {
             super(infoRows);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             this.constraintId = constraintId;
         }
 
@@ -428,6 +450,8 @@ final public class DeferredConstraintsMemory
                                     LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T :
                                 SQLState.
                                     LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_S,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                                 cd.getConstraintName(),
                                 cd.getTableDescriptor().getName());
                         } // else exactly one row contains key: OK
@@ -498,6 +522,7 @@ final public class DeferredConstraintsMemory
 
         @Override
         public void possiblyValidateOnReturn(
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 LanguageConnectionContext lcc,
                 SQLSessionContext nested,
                 SQLSessionContext caller) throws StandardException {
@@ -527,6 +552,8 @@ final public class DeferredConstraintsMemory
                 return;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             validateCheck(lcc, null, true);
         }
 
@@ -567,6 +594,8 @@ final public class DeferredConstraintsMemory
                 UUID constraintId,
                 boolean rollbackOnError) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             validateCheck(lcc, constraintId, rollbackOnError);
         }
 
@@ -582,6 +611,8 @@ final public class DeferredConstraintsMemory
 
             if (sd == null) {
                 // Schema dropped, nothing to do
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 return;
             }
 
@@ -617,6 +648,8 @@ final public class DeferredConstraintsMemory
                                " --DERBY-PROPERTIES joinStrategy=nestedLoop, " +
                                "                    index=null, " +
                                "                    validateCheckConstraint=");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                             checkStmt.append( baseTableUUIDString );
                             checkStmt.append('\n');
                         }
@@ -634,6 +667,7 @@ final public class DeferredConstraintsMemory
                                 true,
                                 true);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6666
                         StatementContext statementContext = null;
                         
                         try {
@@ -658,6 +692,7 @@ final public class DeferredConstraintsMemory
                                    cd.getConstraintText());
                             }
                         } finally {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6666
                             if (statementContext != null) {
                                 lcc.popStatementContext(statementContext, null);
                             }
@@ -710,6 +745,8 @@ final public class DeferredConstraintsMemory
                 return;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             validateForeignKey(lcc, true);
         }
 
@@ -734,6 +771,8 @@ final public class DeferredConstraintsMemory
             TransactionController tc = lcc.getTransactionExecute();
 
             DataDictionary dd = lcc.getDataDictionary();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
 
             ForeignKeyConstraintDescriptor cd =
                 (ForeignKeyConstraintDescriptor)

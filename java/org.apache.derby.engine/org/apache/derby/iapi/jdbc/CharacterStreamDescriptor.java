@@ -85,6 +85,7 @@ public class CharacterStreamDescriptor {
         byteLength = b.byteLength;
         charLength = b.charLength;
         maxCharLength = b.maxCharLength;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
         stream = b.stream;
     }
 
@@ -166,6 +167,7 @@ public class CharacterStreamDescriptor {
      * @return An {@code InputStream} reference.
      */
     public InputStream getStream() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
         return stream;
     }
 
@@ -193,6 +195,7 @@ public class CharacterStreamDescriptor {
                 bufferable + ":positionAware=" +
                 positionAware + ":byteLength=" + byteLength + ":charLength=" +
                 charLength + ":curBytePos=" + curBytePos + ":curCharPos=" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
                 curCharPos + ":dataOffset=" + dataOffset + ":stream=" +
                 stream.getClass());
     }
@@ -296,6 +299,7 @@ public class CharacterStreamDescriptor {
          * @return The builder.
          */
         public Builder copyState(CharacterStreamDescriptor csd) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
             this.bufferable = csd.bufferable;
             this.byteLength = csd.byteLength;
             this.charLength = csd.charLength;
@@ -354,6 +358,7 @@ public class CharacterStreamDescriptor {
          * @return The builder.
          */
         public Builder stream(InputStream stream) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(stream != null);
             }
@@ -375,6 +380,7 @@ public class CharacterStreamDescriptor {
         public CharacterStreamDescriptor build() {
             // Do validation only in sane builds.
             if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                 SanityManager.ASSERT(curBytePos >= 0, "Negative curBytePos");
                 SanityManager.ASSERT(curCharPos >= 1 ||
                         curCharPos == BEFORE_FIRST, "Invalid curCharPos " +
@@ -396,11 +402,13 @@ public class CharacterStreamDescriptor {
                 // If we're in the header section, the character position must
                 // be before the first character.
                 if (curBytePos < dataOffset) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
                     SanityManager.ASSERT(curCharPos == BEFORE_FIRST,
                             "curCharPos in header, " + toString());
                 }
                 // Byte length minus data offset must be equal to or greater
                 // then the character length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3936
                 if (byteLength > 0 && charLength > 0) {
                     SanityManager.ASSERT(byteLength - dataOffset >= charLength,
                             "Less than one byte per char, " + toString());
@@ -423,6 +431,7 @@ public class CharacterStreamDescriptor {
          * @return The textual representation of the builder.
          */
         public String toString() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3907
             String str = "CharacterStreamBuiler@"  + hashCode() +
                     ":bufferable=" + bufferable + ", isPositionAware=" +
                     positionAware + ", curBytePos=" + curBytePos +

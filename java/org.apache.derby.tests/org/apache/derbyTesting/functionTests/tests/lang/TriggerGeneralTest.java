@@ -861,6 +861,7 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
         // Check the locks, but retry the correctness of the result set for
         // a while since we have seen extraneous locks here on several system
         // tables, which should be released (DERBY-6628)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6628
         long millis = 60000;
         boolean ok = false;
         expColNames = new String [] {"TYPE", "MODE", "TABLENAME"};
@@ -873,6 +874,7 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
         };
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6628
         while (millis >= 0) {
             rs = st.executeQuery("select type, mode, tablename from " +
                     "syscs_diag.lock_table " +
@@ -2391,6 +2393,7 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
     private static void assertTriggerOutput(String expected) {
         // Windows: get rid of any carriage returns added by println in output 
         // before we compare since our expected output contains only newlines.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6529
         String got = outs.toString().replaceAll("\r", "");
         
         assertEquals(expected, got);

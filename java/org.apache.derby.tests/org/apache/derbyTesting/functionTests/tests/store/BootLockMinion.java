@@ -47,6 +47,7 @@ public class BootLockMinion {
                            "BootLockMinion.log");
         try
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6651
             DataSource ds = JDBCDataSource.getDataSource(dbName);
             JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
 
@@ -57,10 +58,12 @@ public class BootLockMinion {
             // Once we are finished creating the database and making the
             // connection, create the file minionComplete that BootLockTest
             //can check in order to proceed with its work.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4985
             File checkFile = new File(BootLockTest.minionCompleteFileName);
             checkFile.createNewFile();
             //infinite loop until we get killed by BootLockTest.java
             int wait = WAIT_FOR_DESTROY_MAX_MILLIS;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4987
             while(wait > 0)
             {
                 Thread.sleep(10000);

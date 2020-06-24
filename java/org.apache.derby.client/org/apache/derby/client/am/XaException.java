@@ -30,6 +30,9 @@ public class XaException extends XAException implements Diagnosable {
 
     public XaException(LogWriter logWriter, Throwable throwable, String s) {
         super(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
+//IC see: https://issues.apache.org/jira/browse/DERBY-2692
         initCause(throwable);
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);

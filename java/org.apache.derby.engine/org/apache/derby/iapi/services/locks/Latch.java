@@ -28,6 +28,7 @@ public interface Latch {
 
 	/**	
 		Get the compatibility space the latch is held in.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 
         @return the latch's compatibility space
 	*/
@@ -35,6 +36,7 @@ public interface Latch {
 
 	/**
 		Get the object the latch is held on.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         @return the object the latch is held on
 	*/

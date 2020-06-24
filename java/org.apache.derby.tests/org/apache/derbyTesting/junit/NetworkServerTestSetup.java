@@ -47,6 +47,7 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
  * 
  */
 final public class NetworkServerTestSetup extends BaseTestSetup {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2000
 
     /**
      * <p>
@@ -167,6 +168,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         super(test);
         this.asCommand = asCommand;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2196
         this.systemProperties = null;
         this.startupArgs = null;
         this.useSeparateProcess = false;
@@ -174,6 +176,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
         this.startServerAtSetup = startServerAtSetup;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         this.moduleOrClassPath = null;
         this.useModules = false;
         this.suppressServerDiagnostics = false;
@@ -203,6 +207,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
          boolean serverShouldComeUp
         )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         this(test, systemProperties, startupArgs, serverShouldComeUp, null, JVMInfo.isModuleAware(), false);
     }
   
@@ -241,7 +246,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.startupArgs = startupArgs;
         this.useSeparateProcess = true;
         this.serverShouldComeUp = serverShouldComeUp;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         this.startServerAtSetup = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         this.moduleOrClassPath = moduleOrClassPath;
         this.useModules = useModules;
         this.suppressServerDiagnostics = suppressServerDiagnostics;
@@ -255,6 +262,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         
         networkServerController = getNetworkServerControl();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         if (startServerAtSetup)
         {
             // DERBY-4201: A network server instance used in an earlier test
@@ -263,6 +271,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             waitForAvailablePort();
 
             if (useSeparateProcess)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3504
             { spawnedServer = startSeparateProcess(); }
             else if (asCommand)
             { startWithCommand(); }
@@ -272,16 +281,19 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             if (serverShouldComeUp)
             {
                 if (!pingForServerStart(networkServerController)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6012
                     String msg = getTimeoutErrorMsg("network server to start");
                     // Dump the output from the spawned process
                     // and destroy it.
                     if (spawnedServer != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
                         spawnedServer.complete(2000);
                         msg = spawnedServer.getFailMessage(msg);
                         spawnedServer = null;
                     }
                     //DERBY-6012 print thread dump and java core
                     JVMInfo.javaDump();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6012
                     fail(msg + Utilities.NL + ExceptionUtil.dumpThreads());
                 }
             }
@@ -301,6 +313,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      */
     public static void waitForAvailablePort()
             throws InterruptedException, UnknownHostException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6179
         waitForAvailablePort(TestConfiguration.getCurrent().getPort());
     }
 
@@ -319,7 +332,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      */
     public static void waitForAvailablePort(int port)
             throws InterruptedException, UnknownHostException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5547
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6179
         InetAddress serverAddress = InetAddress.getByName(
                 TestConfiguration.getCurrent().getHostName());
 
@@ -336,6 +351,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     Thread.sleep(SLEEP_TIME);
                 } else {
                     BaseTestCase.fail(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6179
                         getTimeoutErrorMsg("server port to become available",
                             port),
                         ioe);
@@ -354,6 +370,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private static void probeServerPort(final int port, final InetAddress addr)
             throws IOException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
                 public Void run() throws IOException {
                     new ServerSocket(port, 0, addr).close();
@@ -367,11 +384,14 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
     private void startWithAPI() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         BaseTestCase.println("Starting network server with NetworkServerControl api:");
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             serverOutput = AccessController.doPrivileged(
                     new PrivilegedAction<FileOutputStream>() {
                 public FileOutputStream run() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
                     File logs = new File("logs");
                     logs.mkdir();
                     File console = new File(logs, "serverConsoleOutput.log");
@@ -398,6 +418,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
                 String[]    args = getDefaultStartupArgs( false );
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 BaseTestCase.println("Starting network server with this command: " + Arrays.asList(args));
                 
                 org.apache.derby.drda.NetworkServerControl.main( args );
@@ -409,6 +430,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private SpawnedProcess startSeparateProcess() throws Exception
     {
         BaseTestCase.println("Starting network server as a separate process:");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> al = new ArrayList<String>();
         boolean         skipHostName = false;
 
@@ -417,10 +439,12 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         // running with Emma we don't run with the security manager, as the
         // default server policy doesn't contain needed permissions and,
         // additionally, Emma sources do not use doPrivileged blocks anyway.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6067
         if (!TestConfiguration.loadingFromJars() ||
                 BaseTestCase.runsWithEmma() || BaseTestCase.runsWithJaCoCo())
         {
             boolean setNoSecurityManager = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3504
             for (int i = 0; i < systemProperties.length; i++)
             {
                 if (systemProperties[i].startsWith("java.security."))
@@ -452,7 +476,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             al.add( "-D" + systemProperties[ i ] );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         String serverName = NetworkServerControl.class.getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (useModules)
         {
             al.add("-m");
@@ -477,6 +503,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         final   String[]  command = new String[ al.size() ];
         al.toArray(command);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Process serverProcess = BaseTestCase.execJavaCmd
           (null, moduleOrClassPath, command, null, true, useModules);
 
@@ -505,6 +532,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             } catch (Exception e) {
             }
       
+//IC see: https://issues.apache.org/jira/browse/DERBY-3544
             Throwable failedShutdown = null;
             if (running)
             {
@@ -512,6 +540,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     networkServerController.shutdown();
                 } catch (Throwable t)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                     String errorMessage = t.getMessage();
                     //
                     // The following error message is expected if we
@@ -526,6 +555,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             }
  
             if ( serverOutput != null ) { serverOutput.close(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1966
             networkServerController = null;
             serverOutput = null;
 
@@ -533,13 +563,16 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 // Destroy the process if a failed shutdown
                 // to avoid hangs running tests as the complete()
                 // waits for the process to complete.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 if (suppressServerDiagnostics) { spawnedServer.suppressOutputOnComplete(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5617
                 spawnedServer.complete(getWaitTime());
                 spawnedServer = null;
             }
 
             // Throw an error to record the fact that the
             // shutdown failed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3544
             if (failedShutdown != null)
             {
                 if (failedShutdown instanceof Exception)
@@ -568,6 +601,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     {
         TestConfiguration config = TestConfiguration.getCurrent();
         ArrayList<String> argsList = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         argsList.add( "start" );
 
@@ -638,6 +672,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * will decide what is the best port number to use.
      */
     public static NetworkServerControl getNetworkServerControl(int port)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         throws Exception
     {
         TestConfiguration config = TestConfiguration.getCurrent();
@@ -655,6 +690,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     public static NetworkServerControl getNetworkServerControlDefault()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         TestConfiguration config = TestConfiguration.getCurrent();
         final String user = config.getUserName();
         final String password = config.getUserPassword();
@@ -669,6 +705,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
        throws InterruptedException 
     {
         if (!pingForServerStart(networkServerController)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6012
              fail(getTimeoutErrorMsg("network server to start"));
         }
     }
@@ -680,6 +717,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      */
     public static void setWaitTime( long newWaitTime )
    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2196
         waitTime = newWaitTime;
     }
     
@@ -690,6 +728,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      */
     public static void setDefaultWaitTime()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         waitTime = WAIT_TIME;
     }
     
@@ -703,6 +742,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * @return true if server responds in time, false otherwise
      */
     public static boolean pingForServerUp(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         NetworkServerControl networkServerController, Process serverProcess,
         boolean expectServerUp)
         throws InterruptedException
@@ -734,6 +774,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         while (true) {
             try {
                 networkServerController.ping();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5643
                 long elapsed = System.currentTimeMillis() - startTime;
                 if (expectServerUp) {
                     if (elapsed > 60000L) {
@@ -760,6 +801,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
                     return false;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
                 if (expectServerUp){
                     if (System.currentTimeMillis() - startTime > waitTime) 
                         return false;
@@ -768,6 +810,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 else
                     return false;
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2714
             if (serverProcess != null) {
                 // if the server runs in a separate process, check whether the
                 // process is still alive
@@ -786,6 +829,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     return false;
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
             Thread.sleep(SLEEP_TIME);
         }
     }
@@ -795,6 +839,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     {
         if ( !t.getClass().getName().equals( "java.lang.Exception" ) ) { return false; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3834
         return ( t.getMessage().startsWith( "DRDA_NoIO.S:" ) );
     }
     
@@ -809,6 +854,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     public static boolean pingForServerStart(NetworkServerControl control)
         throws InterruptedException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3088
         return pingForServerUp(control, null, true);
     }
     
@@ -833,6 +879,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             try {
                 waitTime = (Long.parseLong(waitString)*1000);
             } catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5643
                 BaseTestCase.fail(
                         "trouble setting WAIT_TIME from passed in property " +
                         "derby.tests.networkServerStartTimeout", e);
@@ -850,6 +897,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     }
 
     private static String getTimeoutErrorMsg(String failedAction) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6179
         TestConfiguration conf = TestConfiguration.getCurrent();
         int port = conf.getPort();
         return getTimeoutErrorMsg(failedAction, port);

@@ -50,6 +50,7 @@ public class EmbedPreparedStatement42 extends EmbedPreparedStatement
         setObject
             (
              parameterIndex, x,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
              Util42.getTypeAsInt( targetSqlType )
              );
     }
@@ -64,6 +65,7 @@ public class EmbedPreparedStatement42 extends EmbedPreparedStatement
         setObject
             (
              parameterIndex, x,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
              Util42.getTypeAsInt( targetSqlType ),
              scaleOrLength
              );

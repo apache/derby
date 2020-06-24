@@ -62,6 +62,7 @@ public class Checks extends JDBCPerfTestCase {
 
     public void setUp() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         this.check = new OEChecks();
         check.initialize(new HandleCheckError() {
             public void handleCheckError(String error) {
@@ -76,6 +77,7 @@ public class Checks extends JDBCPerfTestCase {
      * @param scale
      */
     public static Test checkAllRowCounts(short scale) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Order Entry -Check Row Counts");
 
@@ -98,6 +100,7 @@ public class Checks extends JDBCPerfTestCase {
      */
     public static Test consistencyChecks()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Order Entry -Consistency checks");
 
@@ -114,6 +117,7 @@ public class Checks extends JDBCPerfTestCase {
      *         database
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("OrderEntry - checks");
         suite.addTest(checkAllRowCounts((short) 1));
         suite.addTest(consistencyChecks());
@@ -262,6 +266,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testWarehouseRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testWarehouseRows();
     }
 
@@ -271,6 +276,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testStockRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testStockRows();
     }
 
@@ -280,6 +286,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testOrdersRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testOrdersRows();
     }
 
@@ -289,6 +296,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testDistrictRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testDistrictRows();
     }
 
@@ -298,6 +306,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testCustomerRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testCustomerRows();
     }
 
@@ -307,6 +316,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testItemRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testItemRows();
     }
 
@@ -316,6 +326,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testNewOrdersRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testNewOrdersRows();
     }
 
@@ -325,6 +336,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testHistoryRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testHistoryRows();
     }
 
@@ -334,6 +346,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testOrderLineRows() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2278
         check.testOrderLineRows();
     }
 }

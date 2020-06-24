@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.InsertNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -109,6 +110,8 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
      *                           from JDBC limit/offset escape syntax
      * @param cm                 The context manager
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     InsertNode(
             QueryTreeNode    targetName,
             ResultColumnList insertColumns,
@@ -153,6 +156,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
                 return ( (targetTableName!=null) ? targetTableName : targetVTI.getTableName() ).toString() + "\n"
                     + targetProperties + "\n"
                     + super.toString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             } catch (org.apache.derby.shared.common.error.StandardException e) {
                 return "tableName: <not_known>\n"
                     + targetProperties + "\n"
@@ -166,6 +170,8 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 	}
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "INSERT";
@@ -196,11 +202,14 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 				targetColumnList.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 			if (orderByList != null) {
 				printLabel(depth, "orderByList: ");
 				orderByList.treePrint(depth + 1);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6008
             if (offset != null) {
                 printLabel(depth, "offset:");
                 offset.treePrint(depth + 1);
@@ -233,7 +242,10 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 	{
 		// We just need select privilege on the expressions
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         FromList fromList = new FromList(
                 getOptimizerFactory().doJoinOrderOptimization(),
                 getContextManager());
@@ -261,6 +273,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 		** table or VTI. We don't bother adding any permission checks here
         ** because they are assumed by INSERT permission on the table.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         IgnoreFilter    ignorePermissions = new IgnoreFilter();
         getCompilerContext().addPrivilegeFilter( ignorePermissions );
 		getResultColumnList();
@@ -273,16 +286,19 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 			/*
 			 * Normalize synonym qualifers for column references.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1784
 			if (synonymTableName != null)
 			{
 				normalizeSynonymColumns ( targetColumnList, targetTableName );
 			}
 			
 			/* Bind the target column list */
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 			getCompilerContext().pushCurrentPrivType( getPrivType());
 			if (targetTableDescriptor != null)
 			{
 				targetColumnList.bindResultColumnsByName(targetTableDescriptor,
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 														(DMLStatementNode) this);
 			}
 			else
@@ -290,10 +306,13 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 				targetColumnList.bindResultColumnsByName(targetVTI.getResultColumns(), targetVTI,
 														this);
 			}	
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 			getCompilerContext().popCurrentPrivType();
         }
 
         getCompilerContext().removePrivilegeFilter( ignorePermissions );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
+//IC see: https://issues.apache.org/jira/browse/DERBY-6433
 
 		/* Verify that all underlying ResultSets reclaimed their FromList */
 		if (SanityManager.DEBUG)
@@ -309,6 +328,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
          * checked for illegal DEFAULTs elsewhere.
          */
         boolean isTableConstructor =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
             (resultSet instanceof UnionNode &&
              ((UnionNode)resultSet).tableConstructor()) ||
             resultSet instanceof RowResultSetNode;
@@ -341,6 +361,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
         // At this point, we have added permissions checks for the driving query.
         // Now add a check for INSERT privilege on the target table.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         if (isPrivilegeCollectionRequired())
         {
             getCompilerContext().pushCurrentPrivType( getPrivType());
@@ -430,6 +451,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 			{
                 int position = targetColumnList.elementAt(index).
                     getColumnDescriptor().getPosition();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 				if (index != position-1)
 				{
@@ -456,6 +478,8 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 		}
 
 		// Bind the ORDER BY columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (orderByList != null)
 		{
 			orderByList.pullUpOrderByColumns(resultSet);
@@ -468,6 +492,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 		}
 
         bindOffsetFetch(offset, fetchFirst);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4398
 
 		resultSet = enhanceAndCheckForAutoincrement( resultSet, inOrder, colMap, defaultsWereReplaced );
 
@@ -479,6 +504,8 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 												resultSet.getResultColumns()))
 		{
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             resultSet = new NormalizeResultSetNode(
                 resultSet, resultColumnList, null, false, getContextManager());
 		}
@@ -495,8 +522,11 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 			/* Get and bind all constraints on the table */
             boolean[] hasDCC = new boolean[]{false /* a priori*/ };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             checkConstraints = bindConstraints(
                     dataDictionary,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     getOptimizerFactory(),
                     targetTableDescriptor,
                     null,
@@ -549,9 +579,13 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
                                                   resultSet);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6743
+//IC see: https://issues.apache.org/jira/browse/DERBY-6414
         identitySequenceUUIDString = getUUIDofSequenceGenerator();
         
         getCompilerContext().removePrivilegeFilter( ignorePermissions );
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getCompilerContext().popCurrentPrivType();
 	}
 
@@ -618,6 +652,10 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 		 */
 
 		resultSet = resultSet.enhanceRCLForInsert(this, inOrder, colMap);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
+//IC see: https://issues.apache.org/jira/browse/DERBY-3
+//IC see: https://issues.apache.org/jira/browse/DERBY-4433
+//IC see: https://issues.apache.org/jira/browse/DERBY-1644
 
 		// Forbid overrides for generated columns and identity columns that
 		// are defined as GENERATED ALWAYS.
@@ -797,6 +835,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 				  indexNames,
 				  deferred,
 				  false,
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                   hasDeferrableCheckConstraints,
 				  targetTableDescriptor.getUUID(),
 				  lockMode,
@@ -861,8 +900,11 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
     @Override
 	public void optimizeStatement() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6378
         resultSet.pushQueryExpressionSuffix();
 		// Push the order by list down to the ResultSet
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 		if (orderByList != null)
 		{
 			// If we have more than 1 ORDERBY columns, we may be able to
@@ -891,6 +933,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
         this.accept( tableFunctionVisitor );
         // DERBY-5614: See if the target is a global temporary table (GTT),
         // in which case we don't support bulk insert.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5614
         if ( tableFunctionVisitor.hasNode() &&
                 !isSessionSchema(targetTableDescriptor.getSchemaDescriptor())) {
             requestBulkInsert();
@@ -912,6 +955,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
         if ( targetProperties.getProperty( key ) == null )
         { targetProperties.put( key, value ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         bulkInsert = true;
     }
 
@@ -934,6 +978,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 		// DERBY-827 this must be done in execute() since
 		// createResultSet() will only be called once.
 		generateCodeForTemporaryTable(acb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
 
 		/* generate the parameters */
 		generateParameterValueSet(acb);
@@ -965,12 +1010,15 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 			generateCheckConstraints( checkConstraints, acb, mb );
 
             // arg 4 row template used by bulk insert
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
             if (bulkInsert) {
                 ColumnDescriptorList cdl =
                         targetTableDescriptor.getColumnDescriptorList();
                 ExecRowBuilder builder =
                         new ExecRowBuilder(cdl.size(), false);
                 for (int i = 0; i < cdl.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     ColumnDescriptor cd = cdl.get(i);
                     builder.setColumn(i + 1, cd.getType());
                 }
@@ -980,6 +1028,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
             }
 
             // arg 5, 6 table name
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (targetTableName.getSchemaName() == null) {
                 mb.pushNull("java.lang.String");
             } else {
@@ -1093,6 +1142,7 @@ public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-791
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

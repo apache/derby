@@ -39,6 +39,7 @@ import org.apache.derby.impl.jdbc.EmbedXAConnection;
  * @see EmbeddedXADataSource40
  */
 public class BasicEmbeddedXADataSource40
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
     extends BasicEmbeddedDataSource40
     implements
         EmbeddedXADataSourceInterface,
@@ -113,6 +114,7 @@ public class BasicEmbeddedXADataSource40
             boolean requestPassword) throws SQLException {
 
         // See comment for EmbeddedXADataSource#createXAConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         findDriver();
         return new EmbedXAConnection(this, ra, user, password, requestPassword);
     }

@@ -58,6 +58,7 @@ public class BTreeMaxScanTest extends BaseJDBCTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             for (String flag : traceFlags) {
                 SanityManager.DEBUG_PRINT(
                         flag, "Disable tracing for " + getName());

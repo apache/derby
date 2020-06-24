@@ -41,6 +41,7 @@ import java.io.PrintWriter;
  The program:
 
  1.	starts the Derby Network Server
+//IC see: https://issues.apache.org/jira/browse/DERBY-6459
  2. creates the database if not already created
  3. checks to see if the schema is already created, and if not,
  4. creates the schema which includes the table SAMPLETBL and corresponding indexes.
@@ -83,6 +84,7 @@ public class NsSample {
 	private static final String DERBY_CLIENT_URL= "jdbc:derby://localhost:"+NETWORKSERVER_PORT+"/NSSampledb;create=true;";
 
         // Default to using the Derby Client JDBC Driver for database connections
+//IC see: https://issues.apache.org/jira/browse/DERBY-247
         String url = DERBY_CLIENT_URL;
         String jdbcDriver = DERBY_CLIENT_DRIVER;
 
@@ -153,12 +155,14 @@ public class NsSample {
 		Properties properties = new java.util.Properties();
 
 		// The user and password properties are a must, required by JCC
+//IC see: https://issues.apache.org/jira/browse/DERBY-4276
 		properties.setProperty("user","derbyuser");
 		properties.setProperty("password","pass");
 
 		// Get database connection via DriverManager api
 		try	{
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-247
 			conn =  (Connection) DriverManager.getConnection(url, properties);
 		} catch(Exception e) {
 			pw.println("[NsSample] Connection request unsuccessful, exception thrown was: ");
@@ -191,6 +195,7 @@ public class NsSample {
 		   Please be aware of the database URL for obtaining a client connection
 		 */
 		for (int i=1; i<NUM_CLIENT_THREADS; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-247
 			clientThreads[i] = new NsSampleClientThread(i+1,url,properties,pw);
 			clientThreads[i].start();
 

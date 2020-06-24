@@ -46,6 +46,7 @@ final class StoreClassFactoryContext extends ClassFactoryContext {
 	public CompatibilitySpace getLockSpace() throws StandardException {
 		if (store == null)
 			return null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		return store.getTransaction(getContextManager()).getLockSpace();
 	}
 

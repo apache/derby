@@ -206,6 +206,8 @@ public abstract class FileUtil {
 
 				if (entry.isDirectory())
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-304
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
                     if(copySubDirs) {
                         if (!copyDirectory( storageFactory, entry, 
                                             new File(to,fileName), buffer, 
@@ -239,10 +241,15 @@ public abstract class FileUtil {
 		InputStream from_s = null;
 		FileOutputStream to_s = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
 		try {
 			from_s = from.getInputStream();
 			to_s = new FileOutputStream( to);
             limitAccessToOwner(to);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
 			if (buf == null)
 				buf = new byte[BUFFER_SIZE]; // reuse this buffer to copy files
@@ -311,7 +318,9 @@ public abstract class FileUtil {
 			return false;
 		}			
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             to.limitAccessToOwner();
         } catch (IOException ioe) {
             return false;
@@ -519,6 +528,7 @@ public abstract class FileUtil {
             Property.STORAGE_USE_DEFAULT_FILE_PERMISSIONS);
 
         if (value != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6865
             if (Boolean.parseBoolean(value.trim())) {
                 return;
             }
@@ -535,6 +545,7 @@ public abstract class FileUtil {
 
         // First attempt to limit access using the java.io.File class.
         // If it is successful, that's it and we're done.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6521
         if (limitAccessToOwnerViaFile(file)) {
             return;
         }
@@ -597,6 +608,7 @@ public abstract class FileUtil {
             throws IOException {
 
         Path fileP = file.toPath();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6865
 
         PosixFileAttributeView posixView = Files.getFileAttributeView(
                 fileP, PosixFileAttributeView.class);

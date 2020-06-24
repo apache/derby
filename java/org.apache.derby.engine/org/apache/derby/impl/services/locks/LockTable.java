@@ -154,5 +154,6 @@ interface LockTable {
      * @param waiters the map to add the waiters to
      * @see LockControl#addWaiters
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     void addWaiters(Map<Object,Object> waiters);
 }

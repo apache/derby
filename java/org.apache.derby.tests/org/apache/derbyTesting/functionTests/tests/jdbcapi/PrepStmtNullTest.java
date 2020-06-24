@@ -57,6 +57,7 @@ public class PrepStmtNullTest extends BaseJDBCTestCase {
      * all tests in this class
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("PrepStmtNullTest");
         suite.addTest(baseSuite("PrepStmtNullTest:embedded"));
         suite.addTest(
@@ -66,6 +67,7 @@ public class PrepStmtNullTest extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         
         suite.addTestSuite(PrepStmtNullTest.class);

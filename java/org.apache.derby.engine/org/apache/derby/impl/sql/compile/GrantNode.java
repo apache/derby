@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.GrantNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -33,6 +34,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 /**
  * This class represents a GRANT statement.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class GrantNode extends DDLStatementNode
 {
 	private PrivilegeNode privileges;
@@ -66,6 +69,8 @@ class GrantNode extends DDLStatementNode
 		if (SanityManager.DEBUG)
 		{
             StringBuilder sb = new StringBuilder();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
             for (String grantee : grantees)
 			{
@@ -83,6 +88,8 @@ class GrantNode extends DDLStatementNode
 		}
 	} // end of toString
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "GRANT";
@@ -98,6 +105,7 @@ class GrantNode extends DDLStatementNode
     @Override
 	public void bindStatement() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		privileges = (PrivilegeNode) privileges.bind( new HashMap<Provider,Provider>(), grantees, true);
 	} // end of bind
 

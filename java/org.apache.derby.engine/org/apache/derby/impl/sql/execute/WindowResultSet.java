@@ -87,6 +87,7 @@ class WindowResultSet extends NoPutResultSetImpl
         GeneratedMethod        restriction,
         double                 optimizerEstimatedRowCount,
         double                 optimizerEstimatedCost)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
       throws StandardException
     {
 
@@ -107,6 +108,7 @@ class WindowResultSet extends NoPutResultSetImpl
         this.rownumber = 0;
 
         ExecPreparedStatement ps = activation.getPreparedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
         this.allocatedRow = ((ExecRowBuilder) ps.getSavedObject(rowAllocator))
                 .build(activation.getExecutionFactory());
@@ -175,6 +177,7 @@ class WindowResultSet extends NoPutResultSetImpl
      */
     public ExecRow getNextRowCore() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

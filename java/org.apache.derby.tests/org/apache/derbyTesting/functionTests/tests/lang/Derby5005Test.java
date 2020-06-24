@@ -43,6 +43,7 @@ public class Derby5005Test extends BaseJDBCTestCase {
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("Derby5005Test");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(makeSuite());
         // suite.addTest(
@@ -59,6 +60,7 @@ public class Derby5005Test extends BaseJDBCTestCase {
     private static Test makeSuite()
     {
         return new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(Derby5005Test.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException {

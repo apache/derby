@@ -208,6 +208,7 @@ public class RealInsertResultSetStatistics
            getRSXplainType(),
            getRSXplainDetails(),
            null,                              // the number of opens
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.indexesUpdated,
            null,                           // lock mode
            this.tableLock?"T":"R",

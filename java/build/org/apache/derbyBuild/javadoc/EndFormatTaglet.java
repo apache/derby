@@ -63,6 +63,7 @@ public class EndFormatTaglet implements Taglet {
      */
     public String toString(List<? extends DocTree> tags, Element element)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
         if ((tags == null) || (tags.size() == 0)) { return null; }
         
         String result = "";

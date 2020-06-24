@@ -53,6 +53,8 @@ public class LogicalStatementEntityTest
         final String sql = "values 7";
         java.sql.PreparedStatement ps = prepareStatement(sql);
         JDBCStatementCache cache = new JDBCStatementCache(10);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
         insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
                 createLogicalStatementEntity(sql, false, cache);
@@ -82,6 +84,8 @@ public class LogicalStatementEntityTest
         final String sql = "values 3";
         java.sql.CallableStatement cs = prepareCall(sql);
         JDBCStatementCache cache = new JDBCStatementCache(10);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
         insertStatementIntoCache(cache, cs, sql);
         LogicalStatementEntity logic =
                 createLogicalStatementEntity(sql, true, cache);
@@ -112,6 +116,8 @@ public class LogicalStatementEntityTest
         final String sql = "values 7";
         java.sql.PreparedStatement ps = prepareStatement(sql);
         JDBCStatementCache cache = new JDBCStatementCache(10);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
         StatementKey stmtKey = insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
                 createLogicalStatementEntity(sql, false, cache);
@@ -160,6 +166,8 @@ public class LogicalStatementEntityTest
         final String sql = "values 9";
         java.sql.PreparedStatement ps = prepareStatement(sql);
         JDBCStatementCache cache = new JDBCStatementCache(10);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
         StatementKey stmtKey = insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
                 createLogicalStatementEntity(sql, false, cache);
@@ -189,6 +197,8 @@ public class LogicalStatementEntityTest
         final String sql = "values 19";
         java.sql.PreparedStatement ps = prepareStatement(sql);
         JDBCStatementCache cache = new JDBCStatementCache(10);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
         insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
                 createLogicalStatementEntity(sql, false, cache);
@@ -220,6 +230,8 @@ public class LogicalStatementEntityTest
             throws SQLException {
         // Initial setup.
         JDBCStatementCache cache = new JDBCStatementCache(2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
         final String sql1 = "values 1";
         final String sql2 = "values 2";
         final String sql3 = "values 3";
@@ -287,11 +299,14 @@ public class LogicalStatementEntityTest
      * @throws SQLException if creating the entity fails
      */
     private LogicalStatementEntity createLogicalStatementEntity(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
                                         String sql,
                                         boolean isCallable,
                                         JDBCStatementCache cache)
             throws SQLException {
         StatementCacheInteractor cacheInteractor =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             new StatementCacheInteractor(
                 cache,
                 ((org.apache.derby.client.am.ClientConnection)getConnection()));

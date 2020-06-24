@@ -466,6 +466,7 @@ public class TransactionTableEntry implements Formatable, TransactionInfo, Clone
 			SanityManager.ASSERT(isClone, "Should only call method on a clone");
 
 		getlcc();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         return (lcc == null) ? null : lcc.getSessionUserId();
 	}
 
@@ -551,6 +552,7 @@ public class TransactionTableEntry implements Formatable, TransactionInfo, Clone
 			if (SanityManager.DEBUG) 
             {
 				SanityManager.THROWASSERT(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                     "TransactionTableEntry cloneable but throws " +
 					"CloneNotSupportedException", e);
 			}

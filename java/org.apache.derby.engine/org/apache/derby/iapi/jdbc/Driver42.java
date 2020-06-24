@@ -74,6 +74,7 @@ public class Driver42 extends InternalDriver
     
     public EmbedResultSet newEmbedResultSet
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
          EmbedConnection conn, ResultSet results, boolean forMetaData,
          org.apache.derby.impl.jdbc.EmbedStatement statement,
          boolean isAtomic
@@ -83,6 +84,7 @@ public class Driver42 extends InternalDriver
     }
 
     public CallableStatement newEmbedCallableStatement(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         EmbedConnection conn,
         String stmt,
         int resultSetType,

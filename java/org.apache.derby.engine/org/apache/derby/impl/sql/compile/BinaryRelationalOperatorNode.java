@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.BinaryRelationalOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -42,11 +43,14 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class BinaryRelationalOperatorNode
 	extends BinaryComparisonOperatorNode
 	implements RelationalOperator
 {
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_EQUALS = 0;
     final static int K_GREATER_EQUALS = 1;
     final static int K_GREATER_THAN = 2;
@@ -148,6 +152,8 @@ class BinaryRelationalOperatorNode
     {
         super(leftOperand,
               rightOperand,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
               getOperatorName(kind),
               getMethodName(kind),
               forQueryRewrite,
@@ -192,6 +198,7 @@ class BinaryRelationalOperatorNode
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT(
                             "Constructor for BinaryRelationalOperatorNode" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                             " called with wrong nodeType = " + kind);
                 }
                 break;
@@ -230,6 +237,7 @@ class BinaryRelationalOperatorNode
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT(
                             "Constructor for BinaryRelationalOperatorNode " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                             "called with wrong nodeType = " + kind);
 				}
 			    break;
@@ -239,6 +247,7 @@ class BinaryRelationalOperatorNode
     }
 
     private int getRelOpType(int op) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (op) {
         case K_EQUALS:
                 return RelationalOperator.EQUALS_RELOP;
@@ -561,6 +570,7 @@ class BinaryRelationalOperatorNode
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT("Failed when trying to " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                     "find base table number for column reference check:", se);
             }
 		}
@@ -934,6 +944,8 @@ class BinaryRelationalOperatorNode
 		FromTable	ft;
 		ValueNode	otherSide = null;
 		JBitSet		tablesReferenced;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ColumnReference cr;
 		boolean	found = false;
 		boolean walkSubtree = true;
@@ -1012,10 +1024,13 @@ class BinaryRelationalOperatorNode
 	public boolean compareWithKnownConstant(Optimizable optTable, boolean considerParameters)
 	{
         ValueNode node = keyColumnOnLeft(optTable) ? rightOperand : leftOperand;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (considerParameters)
 		{
 			return (node instanceof ConstantNode) ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 						((node.requiresTypeFromContext()) &&
 						 (((ParameterNode)node).getDefaultValue() != null));
 		}
@@ -1037,11 +1052,14 @@ class BinaryRelationalOperatorNode
 		** the key column.
 		*/
         ValueNode node = keyColumnOnLeft(optTable) ? rightOperand : leftOperand;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (node instanceof ConstantNode) 
 		{
 			return ((ConstantNode)node).getValue();
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		else if (node.requiresTypeFromContext())
 		{
 			ParameterNode pn;
@@ -1063,6 +1081,7 @@ class BinaryRelationalOperatorNode
 	 * selectivity otherwise.
 	 */
 	protected double booleanSelectivity(Optimizable optTable)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 		TypeId	typeId = null;
@@ -1077,6 +1096,7 @@ class BinaryRelationalOperatorNode
 			typeId = rightOperand.getTypeId();
 
 		if (typeId != null && (typeId.getJDBCTypeId() == Types.BIT ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		typeId.getJDBCTypeId() == Types.BOOLEAN))
 			retval = 0.5d;
 
@@ -1089,6 +1109,8 @@ class BinaryRelationalOperatorNode
 	 * in BooleanOperatorNode for code generation purposes.
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getReceiverInterfaceName() {
 	    return ClassName.DataValueDescriptor;
 	}
@@ -1101,6 +1123,7 @@ class BinaryRelationalOperatorNode
      * operator is known; otherwise, this operator node
      */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4416
     ValueNode evaluateConstantExpressions() throws StandardException {
         if (leftOperand instanceof ConstantNode &&
                 rightOperand instanceof ConstantNode) {
@@ -1111,6 +1134,7 @@ class BinaryRelationalOperatorNode
 
             if (!leftVal.isNull() && !rightVal.isNull()) {
                 int comp = leftVal.compare(rightVal);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 switch (relOpType) {
                     case EQUALS_RELOP:
                         return newBool(comp == 0);
@@ -1138,6 +1162,8 @@ class BinaryRelationalOperatorNode
      * @return a node representing a Boolean constant
      */
     private ValueNode newBool(boolean b) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return new BooleanConstantNode(b, getContextManager());
     }
 	
@@ -1153,6 +1179,8 @@ class BinaryRelationalOperatorNode
 			SanityManager.ASSERT(getTypeServices() != null,
 								 "dataTypeServices is expected to be non-null");
 		/* xxxRESOLVE: look into doing this in place instead of allocating a new node */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         negation = new BinaryRelationalOperatorNode(getNegationNode(),
 									 leftOperand, rightOperand,
                                      false,
@@ -1164,6 +1192,7 @@ class BinaryRelationalOperatorNode
 	/* map current node to its negation */
     private int getNegationNode()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (this.kind)
 		{
             case K_EQUALS:
@@ -1200,7 +1229,10 @@ class BinaryRelationalOperatorNode
      * expression.
      */
     BinaryOperatorNode getSwappedEquivalent() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         BinaryOperatorNode newNode = new BinaryRelationalOperatorNode(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             getKindForSwap(),
             rightOperand,
             leftOperand,
@@ -1222,6 +1254,7 @@ class BinaryRelationalOperatorNode
      * the operands are swapped
      */
     private int getKindForSwap() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (this.kind) {
             case K_EQUALS:
                 return K_EQUALS;
@@ -1344,6 +1377,7 @@ class BinaryRelationalOperatorNode
 	public void generateOperator(MethodBuilder mb,
 								 Optimizable optTable)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
@@ -1370,6 +1404,7 @@ class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#generateNegate */
 	public void generateNegate(MethodBuilder mb, Optimizable optTable)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
@@ -1392,6 +1427,7 @@ class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#getOperator */
 	public int getOperator()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return relOpType;
 	}
 
@@ -1399,6 +1435,7 @@ class BinaryRelationalOperatorNode
 	 */
     @Override @SuppressWarnings("fallthrough")
 	public double selectivity(Optimizable optTable)
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 	throws StandardException
 	{
 		double retval = booleanSelectivity(optTable);
@@ -1406,6 +1443,11 @@ class BinaryRelationalOperatorNode
 		if (retval >= 0.0d)
 			return retval;
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
@@ -1429,7 +1471,10 @@ class BinaryRelationalOperatorNode
 	public RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return new BinaryRelationalOperatorNode(kind,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                                                 otherCR,
                                                 rightOperand,
                                                 false,
@@ -1438,6 +1483,7 @@ class BinaryRelationalOperatorNode
 	
 	public boolean equalsComparisonWithConstantExpression(Optimizable optTable)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (relOpType != EQUALS_RELOP)
 			return false;
 
@@ -1477,6 +1523,7 @@ class BinaryRelationalOperatorNode
 		 * operator.
 		 */
 		return !isInListProbeNode() &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             (relOpType == RelationalOperator.EQUALS_RELOP);
 	}
 
@@ -1501,6 +1548,7 @@ class BinaryRelationalOperatorNode
 										   boolean isNullOkay)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (relOpType != EQUALS_RELOP)
 			return false;
 
@@ -1555,8 +1603,11 @@ class BinaryRelationalOperatorNode
 	 * @see BinaryComparisonOperatorNode#genSQLJavaSQLTree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode genSQLJavaSQLTree() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (relOpType == EQUALS_RELOP)
 			return this;
 		
@@ -1614,6 +1665,8 @@ class BinaryRelationalOperatorNode
 	 *  instance of the column reference, they'll interfere with each other
 	 *  during optimization.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getScopedOperand(int whichSide,
 		JBitSet parentRSNsTables, ResultSetNode childRSN,
 		int [] whichRC) throws StandardException
@@ -1643,6 +1696,8 @@ class BinaryRelationalOperatorNode
 		 * is included in the list of table numbers from the parentRSN.
 		 */
 		JBitSet crTables = new JBitSet(parentRSNsTables.size());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         BaseTableNumbersVisitor btnVisitor =
 			new BaseTableNumbersVisitor(crTables);
         cr.accept(btnVisitor);
@@ -1860,6 +1915,7 @@ class BinaryRelationalOperatorNode
 			if (SanityManager.DEBUG)
 			{
 				SanityManager.THROWASSERT("Failed when trying to " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 					"find base table numbers for reference check:", se);
 			}
 		}
@@ -1947,6 +2003,7 @@ class BinaryRelationalOperatorNode
 
     @Override
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) &&
                 ((BinaryRelationalOperatorNode)o).kind == kind;
     }

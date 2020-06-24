@@ -155,6 +155,7 @@ public class GenericStorablePreparedStatement
 		throws StandardException
 	{
 		LanguageConnectionContext lcc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			(LanguageConnectionContext) getContext
 				                                  (LanguageConnectionContext.CONTEXT_ID);
 		ClassFactory classFactory = lcc.getLanguageConnectionFactory().getClassFactory();
@@ -288,6 +289,7 @@ public class GenericStorablePreparedStatement
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

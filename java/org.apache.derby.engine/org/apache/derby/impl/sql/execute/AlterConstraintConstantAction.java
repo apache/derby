@@ -156,9 +156,13 @@ public class AlterConstraintConstantAction extends ConstraintConstantAction
         }
 
         if (characteristics[2] != ConstraintDefinitionNode.ENFORCED_DEFAULT) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_11,
                             "DEFERRED CONSTRAINTS");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT ||
                 constraintType == DataDictionary.NOTNULL_CONSTRAINT ||
                 !characteristics[2] /* not enforced */) {

@@ -32,11 +32,13 @@ import java.sql.*;
  * and SURDataModelSetup.
  * 
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-993
 abstract public class SURBaseTest extends BaseJDBCTestCase {
     
     /** Creates a new instance of SURBaseTest */
     public SURBaseTest(String name) {
         super(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1070
         recordCount = SURDataModelSetup.recordCount;  
     }
 
@@ -52,6 +54,8 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
      * read as a starting point.
      */
     protected void initializeConnection(Connection conn) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         conn.setAutoCommit(false);
         conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);   
     }
@@ -66,6 +70,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         int b = rs.getInt(3);
         int sum = a + id + 17;
         println("Reading tuple:(" + id + "," + a  + "," + b + ",'" + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
                 rs.getString(4) + "', '"+rs.getString(5)+"'");
         assertEquals("Expecting b==id+a+17", sum, b);
     }
@@ -95,6 +100,8 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         int b = rs.getInt(3);        
         int newA = a*2 +id + 37;
         int newB = newA + id + 17;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = 
             prepareStatement("update T1 set a=?,b=? where current of " +
                              rs.getCursorName());
@@ -257,6 +264,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         }
     }
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-1070
     final int recordCount;
     
        
@@ -268,6 +276,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
     final static String RESULTSET_NOT_UPDATABLE_SQL_STATE = "XJ083";
     final static String LOCK_TIMEOUT_SQL_STATE = "40XL1";
     final static String LOCK_TIMEOUT_EXPRESSION_SQL_STATE = "38000";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1172
     final static String INVALID_CURSOR_STATE_NO_CURRENT_ROW = "24000";
     final static String CURSOR_OPERATION_CONFLICT = "01001";
     final static String QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET = "01J06";

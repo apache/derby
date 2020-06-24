@@ -121,6 +121,7 @@ class BTreePostCommit implements Serviceable
         // Get the root page back, and perform a split following the
         // to-be-inserted key.  The split releases the root page latch.
         root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
         root.shrinkFor(open_btree, shrink_row);
 
@@ -144,6 +145,7 @@ class BTreePostCommit implements Serviceable
      * @exception  StandardException  Standard exception policy.
      **/
     private final OpenBTree openIndex(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3216
     TransactionManager internal_xact,
     int                lock_level,
     int                lock_mode)
@@ -208,6 +210,8 @@ class BTreePostCommit implements Serviceable
                 contextMgr, AccessFactoryGlobals.SYS_TRANS_NAME);
 
         TransactionManager  internal_xact  = tc.getInternalTransaction();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
 
         if (SanityManager.DEBUG)
         {
@@ -216,6 +220,8 @@ class BTreePostCommit implements Serviceable
         }
 
         OpenBTree           open_btree = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
 
         try
         {
@@ -235,6 +241,7 @@ class BTreePostCommit implements Serviceable
             // 2) if all rows from page are reclaimed then a structure shrink
             //    which requires table level lock can be executed.
             //
+//IC see: https://issues.apache.org/jira/browse/DERBY-3216
             open_btree = 
                 openIndex(
                     internal_xact, 
@@ -263,6 +270,7 @@ class BTreePostCommit implements Serviceable
                 // reclaim of just the rows on this page.  No merge is 
                 // attempted.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3216
                 try
                 {
                     open_btree = 
@@ -288,6 +296,8 @@ class BTreePostCommit implements Serviceable
         }
         finally
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
             if (open_btree != null)
                 open_btree.close();
 
@@ -311,6 +321,7 @@ class BTreePostCommit implements Serviceable
         throws StandardException
     {
         DataValueDescriptor[] shrink_key = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             open_btree.getConglomerate().createTemplate(
                     open_btree.getRawTran());
 
@@ -355,6 +366,7 @@ class BTreePostCommit implements Serviceable
             // somehow the page requested no longer exists.  In either case
             // the post commit work will just skip it.
             control_row = ControlRow.getNoWait(open_btree, pageno);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
             if (control_row != null)
             {
@@ -468,10 +480,13 @@ class BTreePostCommit implements Serviceable
         throws StandardException
     {
         LeafControlRow leaf = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3362
 
         // The following can fail, returning null, either if it can't get
         // the latch or somehow the page requested no longer exists.  In 
         // either case the post commit work will just skip it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
         leaf = (LeafControlRow) 
             ControlRow.getNoWait(open_btree, page_number);
         if (leaf == null)

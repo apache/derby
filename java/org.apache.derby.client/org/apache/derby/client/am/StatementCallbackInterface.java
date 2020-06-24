@@ -33,6 +33,7 @@ public interface StatementCallbackInterface extends UnitOfWorkListener {
     // A query has been opened on the server.
     public void completeOpenQuery(Sqlca sqlca, ClientResultSet resultSet)
             throws DisconnectException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     public void completeExecuteCallOpenQuery(
         Sqlca sqlca,
@@ -55,6 +56,7 @@ public interface StatementCallbackInterface extends UnitOfWorkListener {
     public void completeExecute(Sqlca sqlca);
 
     public void completeExecuteCall(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Sqlca sqlca,
         Cursor params,
         ClientResultSet[] resultSets);

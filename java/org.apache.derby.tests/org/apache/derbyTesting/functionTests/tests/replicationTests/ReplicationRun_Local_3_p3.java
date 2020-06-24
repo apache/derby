@@ -39,6 +39,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
 {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4186
     final static String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE = "08004";
     final static String REPLICATION_NOT_IN_MASTER_MODE     = "XRE07";
     final static int MAX_TRIES = 20;
@@ -54,6 +55,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_3_p3 Suite");
         
@@ -88,6 +90,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
@@ -135,6 +138,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
                 slaveServerHost, // for slaveReplInterface
                 slaveReplPort);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3921
         replicationTest = null; // Used as a flag to verifyMaster and verifySlave!
         runTest(replicationTest, // Returns immediatly if replicationTest is null.
                 jvmVersion,
@@ -158,6 +162,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
         assertException(
             _stopMaster(masterServerHost, masterServerPort,
                 masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb),
+//IC see: https://issues.apache.org/jira/browse/DERBY-4186
             null); // Implies slave should shut down. // OK to continue.
         /* showCurrentState("Post stopMaster +1s", 1000L,
             masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb, 
@@ -185,6 +190,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
         // The final end state is successful connect (i.e. a reboot) after
         // stopped slave and db shutdown.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4186
         SQLException gotEx = null;
         int tries = MAX_TRIES;
 
@@ -196,6 +202,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
                     slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb;
                 ClientDataSourceInterface ds;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Class<?> clazz;
                 if (JDBC.vmSupportsJNDI()) {
                     clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");

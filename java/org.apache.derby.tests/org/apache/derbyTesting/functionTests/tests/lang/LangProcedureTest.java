@@ -63,7 +63,9 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      * Default suite for running this test (embedded and client).
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (JDBC.vmSupportsJSR169()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "Empty LangProcedureTest. " +
                 "JSR169 does not support jdbc:default:connection");
@@ -97,6 +99,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         // The procedure name exceeds the max length.
         assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             "42622",
             s,
             "create procedure a234567890123456789012345678901234567890123"
@@ -170,6 +173,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         // RETURNS NULL ON NULL INPUT isn't allowed in procedures.
         assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             "42X01",
             s,
             "create procedure nullinput2() returns null on null input "
@@ -221,6 +225,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Statement s = createStatement();
 
         // int doesn't match String
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create procedure SIGNATURE_BUG_DERBY_258_A(in A int) "
                 + "language java parameter style java "
                 + "external name 'java.lang.System.load(java.lang.String)'");
@@ -298,6 +303,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      */
     public static void DERBY_3304(ResultSet[] rs1) throws SQLException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         Connection conn =
             DriverManager.getConnection("jdbc:default:connection");
         Statement stm = conn.createStatement();
@@ -316,6 +322,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public void testDelayedClassChecking() throws SQLException {
         Statement s = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute(
             "create procedure noclass() language java " +
             "external name 'asdf.asdf' parameter style java");
@@ -355,6 +362,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         s.execute("create schema S1");
         s.execute("create schema S2");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create procedure    PROCDUP() language java " +
                   "external name 'okAPP.ok0' parameter style java");
 
@@ -398,11 +406,13 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 DBMetaDefinition, null);
 
         assertStatementError(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             "0A000",
             s,
             "create procedure S1.NOTYET() SPECIFIC fred language java " +
             "external name 'failAPP.fail0' parameter style java");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6039
         s.execute("drop procedure PROCDUP");
         s.execute("drop procedure s1.PROCDUP");
         s.execute("drop procedure s2.PROCDUP");
@@ -418,6 +428,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Statement s = createStatement();
 
         // ambiguous resolution - with result sets
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create procedure ambiguous01(p1 integer, p2 char(20)) " +
                   "dynamic result sets 1 language java parameter style java " +
                   "external name '" + thisClassName + ".ambiguous1'");
@@ -458,6 +469,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         boolean saveAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         PreparedStatement ps = conn.prepareStatement(
             "select schemaname, alias, " +
             "    cast (((javaclassname || '.' ) || " +
@@ -507,6 +519,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
 
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create procedure za() language java external name '" +
                   thisClassName + ".zeroArg' parameter style java");
 
@@ -524,6 +537,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps.close();
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             prepareStatement("call za(?)");
             fail("FAIL - prepareStatement call za(?)");
         } catch (SQLException sqle) {
@@ -540,6 +554,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertUpdateCountForProcedureWithNoResults(cs);
         cs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         String[] sysAliasDefinition = {
             "APP.ZA AS " + thisClassName + ".zeroArg() " +
             "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA"};
@@ -562,6 +577,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Statement s = createStatement();
 
         s.execute("create table t1(i int not null primary key, b char(15))");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute(
                 "create procedure ir(p1 int) " +
                 "modifies sql data dynamic result sets 0 language java " +
@@ -616,6 +632,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         ir1.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         ir1 = conn.prepareCall("call APP.IR(?)");
         ir1.setInt(1, 7);
         ir1.execute();
@@ -631,6 +648,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ir2.execute();
 
         ir2.setInt(1, 6);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         ir2.setString(2, "'012345678");
         ir2.execute();
 
@@ -647,6 +665,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ResultSet rs = s.executeQuery("select * from t1");
         JDBC.assertFullResultSet(rs, t1Results);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (!conn.getAutoCommit()) {
             conn.commit();
         }
@@ -674,6 +693,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertStatementError(
                 "42X01",
                 s,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                 "create procedure DRS(p1 int) " +
                 "parameter style java reads sql data dynamic result sets -1 " +
                 "language java external name '" +
@@ -686,6 +706,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         // Create a test table with some data that can be accessed by the
         // DRS procedure.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6039
         s.execute("create table t1(i int not null primary key, b char(15))");
         s.execute("insert into t1 values (1, 'int'), (2, 'int'), (3, 'int'), "
                 + "(7, 'int'), (4, '4'), (5, 'ir2'), (6, '''012345678')");
@@ -715,6 +736,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, drsResult);
         drs1.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create procedure DRS2(p1 int, p2 int) " +
                   "parameter style java reads sql data " +
                   "dynamic result sets 2 language java " +
@@ -796,6 +818,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
             lastResultSet = drs2.getResultSet();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             if ((pass == 1) || (pass == 2)) {
                 assertNotNull("expected resultset pass " + pass, lastResultSet);
             } else if (pass == 3) {
@@ -824,6 +847,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         // check that a procedure with dynamic result sets can not resolve to a
         // method with no ResultSet argument.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute(
             "create procedure irdrs(p1 int) dynamic result sets 1 " +
             "language java parameter style java external name '" +
@@ -897,6 +921,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         toomany.close();
         s.execute("drop procedure way.toomany");
         s.execute("drop schema way restrict");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6039
 
         // Run following test in embedded only until DERBY-3414 is fixed. As
         // identified in DERBY-3414, the rollback inside the java procedure
@@ -904,6 +929,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         if (usingEmbedded()) {
             boolean oldAutoCommit = conn.getAutoCommit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             s.execute(
                 "create table dellater1(i int not null primary key, " +
                 "                       b char(15))");
@@ -988,12 +1014,15 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             s.execute("drop table DELLATER2");
             s.execute("drop table DELLATER3");
             s.execute("drop procedure insertCausingRollback");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6039
 
             conn.setAutoCommit(oldAutoCommit);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6039
         s.execute("drop procedure drs");
         s.execute("drop procedure drs2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6039
         s.execute("drop table t1");
         commit();
 
@@ -1003,6 +1032,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
     public void testResultSetsWithLobs() throws SQLException {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
         // Create objects.
         Statement s = createStatement();
@@ -1078,6 +1108,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      -auto commit is false
      -lock count before execution 0
      -lock count after execution 1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
      -lock count after next on first rs 3 -&gt; 2 now FIXME: explain
      -lock count after first getMoreResults() 2
      -lock count after next on second rs 7
@@ -1086,6 +1118,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      -auto commit is true
      -lock count before execution 0
      -lock count after execution 1
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
      -lock count after next on first rs 3 -&gt; 2 now FIXME: explain
      -executing statement to force auto commit on open call statement
      -lock count after statement execution 0
@@ -1100,6 +1133,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = drs1.getConnection();
 
         // Do not run with client until DERBY-2510 is fixed
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (usingDerbyNetClient()) {
             return;
         }
@@ -1116,6 +1150,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         boolean oldAutoCommit = conn.getAutoCommit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (action.equals("noautocommit")) {
             conn.setAutoCommit(false);
         } else {
@@ -1148,6 +1183,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         lrs = psLocks.executeQuery();
 
         JDBC.assertFullResultSet(lrs, new String[][] { { "2" } });
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
         boolean expectClosed = false;
 
@@ -1163,6 +1199,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
             try {
                 rs.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                 if (action.equals("autocommit")) {
                     fail("FAIL - result set open in auto commit mode after " +
                          "another statement execution");
@@ -1176,6 +1213,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertTrue("is there a second result", anyMore);
         lrs = psLocks.executeQuery();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (action.equals("statement")) {
             JDBC.assertFullResultSet(lrs, new String[][] { { "0" } });
         } else {
@@ -1230,6 +1268,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             throws SQLException {
         // DERBY-211 Network Server returns no result sets for a procedure call
         // that returns no result
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (usingEmbedded()) {
             assertEquals(0, s.getUpdateCount());
         } else {
@@ -1445,6 +1484,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps.setInt(1, p2);
         data2[0] = ps.executeQuery();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (p2 == 99) {
             data2[0].close();
         }
@@ -1473,6 +1513,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = DriverManager
                 .getConnection("jdbc:default:connection");
         Statement stmt = conn.createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         rs[0] = stmt.executeQuery("select * FROM " + table);
         conn.close();
     }
@@ -1482,6 +1523,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Statement s = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create table PT1(A integer not null primary key, " +
                   "                 B char(10), C varchar(20))");
         s.execute(
@@ -1526,6 +1568,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         pt1.setInt(1, 40);
 
         // end blanks truncation of arguments
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         char[] c75 = new char[75]; Arrays.fill(c75, ' ');
         char[] c77 = new char[77]; Arrays.fill(c77, ' ');
         pt1.setString(2, "abc" + new String(c75));
@@ -1539,6 +1582,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         pt1.setString(2, "0123456789X");
         pt1.setString(3, "efgh  ");
         assertPreparedStatementError(LANG_STRING_TRUNCATION, pt1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
         pt1.setInt(1, 50);
         pt1.setString(2, "0123456789");
@@ -1610,6 +1654,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         pt2.close();
 
         s.execute("drop procedure PT2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
         s.execute(
             "create procedure PTSMALLINT2(" +
@@ -1638,6 +1683,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         checkMatchingProcedures(conn, "PT2", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         CallableStatement ptsi = conn.prepareCall("call PTSMALLINT2(?, ?, ?)");
         ptsi.registerOutParameter(2, Types.SMALLINT);
         ptsi.registerOutParameter(3, Types.SMALLINT);
@@ -1674,6 +1720,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertEquals("wrong value for p_out", "6", ptsi.getObject(3).toString());
 
         // with setObject . Beetle 5439
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         ptsi.setObject(1, 6);
         ptsi.setObject(2, 3);
 
@@ -1686,6 +1733,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         ptsi.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("drop procedure PTSMALLINT2");
         s.execute("drop table PT1");
 
@@ -1696,6 +1744,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Statement s = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create procedure OP1(out a int, in b int) " +
                 "parameter style java language java " +
                 "external name '" + thisClassName + ".outparams1'");
@@ -1750,6 +1799,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         op.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create procedure OP2(inout a int, in b int) " +
             "parameter style java language java " +
             "external name '" + thisClassName + ".inoutparams2'");
@@ -1770,6 +1820,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 dbMetadataDefinition, columnDefinition);
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             s.execute("call OP2(?,?)");
             fail("FAIL execute succeeded on inout param with Statement");
         } catch (SQLException sqle) {
@@ -1795,6 +1846,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         }
 
         op = prepareCall("call OP2(?, ?)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
         op.registerOutParameter(1, Types.INTEGER);
         op.setInt(1, 3);
@@ -1805,6 +1857,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         op.close();
 
         // inout & out procedures with variable length
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute(
             "create procedure OP3(inout a char(10), in b int) " +
             "parameter style java language java " +
@@ -1821,6 +1874,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         op.close();
 
         // inout & out DECIMAL procedures with variable length
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute(
             "create procedure OP4(out a DECIMAL(4,2), in b varchar(255)) " +
             "parameter style java language java " +
@@ -1885,6 +1939,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             // try to set an out param
             try {
                 op.setBigDecimal(1, new BigDecimal("22.32"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                 fail("FAIL - set out param to value");
             } catch (SQLException sqle) {
                 assertSQLState("XCL27", sqle);
@@ -1916,6 +1971,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             fail("FAIL OP4 GET 49.345 >" + op.getString(2) + "< null ? "
                     + op.wasNull());
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             if (usingDerbyNetClient()) {
                 assertSQLState("XJ091", sqle);
             } else {
@@ -1971,6 +2027,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         op.execute();
         assertEquals("32.50", op.getBigDecimal(1).toString());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         op.execute();
         assertEquals("56.00", op.getBigDecimal(1).toString());
         assertFalse(op.wasNull());
@@ -2025,6 +2082,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         op.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         op = conn.prepareCall("call OP4INOUT(?, ?)");
         op.setString(2, "14");
         try {
@@ -2053,6 +2111,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Statement s = createStatement();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create schema SQLC");
         s.execute("create table SQLC.SQLCONTROL_DML(I int)");
         s.execute("insert into SQLC.SQLCONTROL_DML values 4");
@@ -2240,6 +2299,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 sqlControl_3, sqlControl_4 };
         for (int i = 0; i < control.length; i++) {
             for (int k = 1; k <= 3; k++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                 CallableStatement cs = conn.prepareCall("call SQLC.SQLCONTROL"
                         + k + "_" + i + " (?, ?, ?, ?, ?, ?, ?)");
                 // System.out.println("{");
@@ -2263,6 +2323,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                  */
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             if (control[i].length() == 0) {
                 // This default case (see test above) succeeds in
                 // creating the SQLCONTROL_DDL table, so remove it to
@@ -2311,6 +2372,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                         "DROP SCHEMA SQL-UPDATE 0-EXECUTE OK" } };
 
         String[][] dmlSqlControl_1 = /* dmlSqlControl_1 */{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                 { "call SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38001", "null", "null", "null", "null", "null",
                         "null" },
@@ -2385,6 +2447,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-UPDATE 0-EXECUTE OK",
                         "DROP SCHEMA SQL-UPDATE 0-EXECUTE OK" },
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                 { "call SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38001", "DROP VIEW SQLCO-38001",
                         "LOCK TABLE SQLC-38001", "VALUES 1,2,3-38001",
@@ -2414,6 +2478,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         String[][][] dmlSqlControl = { dmlSqlControl_0, dmlSqlControl_1,
                 dmlSqlControl_2, dmlSqlControl_3, dmlSqlControl_4 };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         s.execute("create table SQLC.SQLCONTROL_DML(I int)");
         s.execute("insert into SQLC.SQLCONTROL_DML values 4");
         for (int i = 0; i < control.length; i++) {
@@ -2434,6 +2499,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                      * if (p < 9) System.out.println(","); else
                      * System.out.println("}");
                      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                     if (so == null) {
                         continue;
                     }
@@ -2452,6 +2518,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertCallError(
                 usingEmbedded() ? "07004" : "07000",
                 "call SQLC.SQLCONTROL3_0 (?, ?, ?, ?, ?, ?, ?)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
         s.execute("drop table SQLC.SQLCONTROL_DML");
 
@@ -2539,6 +2606,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps.setString(3, c);
         ps.executeUpdate();
         ps.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         ps = conn.prepareStatement(
             "select a,b, length(b), c, length(c) from PT1 where a = ?");
         ps.setInt(1, a);
@@ -2576,6 +2644,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
     public static void inoutparams3(String[] p1, int p2) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         if (p2 == 8) {
             p1[0] = "nad";
         } else if (p2 == 9) {
@@ -2653,6 +2722,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             String[] e4, String[] e5, String[] e6, String[] e7)
             throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         Connection conn =
             DriverManager.getConnection("jdbc:default:connection");
 
@@ -2679,6 +2749,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = DriverManager
                 .getConnection("jdbc:default:connection");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
         String sql = "call SQLC.SQLCONTROL2_" + sqlc
                 + " (?, ?, ?, ?, ?, ?, ?) ";
 
@@ -2699,6 +2770,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             e7[0] = cs1.getString(6);
             e8[0] = cs1.getString(7);
         } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
             StringBuilder sb = new StringBuilder(128);
             sb.append("STATE");
             do {
@@ -2726,6 +2798,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             String[] result) {
 
         StringBuilder sb = new StringBuilder(128);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
 
         int len = sql.length();
 
@@ -2758,6 +2831,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 sb.append("-");
                 String ss = sqle.getSQLState();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
                 if (ss == null) {
                     ss = "?????";
                 }

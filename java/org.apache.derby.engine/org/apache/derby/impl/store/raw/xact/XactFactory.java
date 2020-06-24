@@ -125,29 +125,36 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	{
 
 		uuidFactory = getMonitor().getUUIDFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         /*
         dataValueFactory =  (DataValueFactory)
             findServiceModule(
                 this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 org.apache.derby.shared.common.reference.ClassName.DataValueFactory);
         */
             // if datafactory has not been booted yet, try now.  This can
             // happen in the unit tests.  Usually it is booted before store
             // booting is called.
             dataValueFactory = (DataValueFactory) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 bootServiceModule(
                     create, 
                     this,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                     org.apache.derby.shared.common.reference.ClassName.DataValueFactory, 
                     properties);
 		
 
 		contextFactory = getContextService();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		lockFactory = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             (LockFactory) bootServiceModule(false, this,
 				org.apache.derby.shared.common.reference.Module.LockFactory, properties);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 		
         // adding entries to locking policy table which means we support that
@@ -268,6 +275,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      **/
     private Xact startCommonTransaction(
     RawStoreFactory     rsf, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     Xact                    parentTransaction, 
     ContextManager      cm,
     boolean             readOnly,
@@ -291,6 +299,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		Xact xact = 
             new Xact(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 this, parentTransaction, logFactory, dataFactory, dataValueFactory, 
                 readOnly, compatibilitySpace, flush_log_on_xact_end);
 
@@ -311,6 +320,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         return(
             startCommonTransaction(
                 rsf, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 null, 
                 cm, 
                 false,              // user xact always read/write 
@@ -323,7 +333,9 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	public RawTransaction startNestedReadOnlyUserTransaction(
     RawStoreFactory rsf,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     RawTransaction parentTransaction,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
     CompatibilitySpace compatibilitySpace,
     ContextManager  cm,
     String          transName)
@@ -332,6 +344,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         return(
             startCommonTransaction(
                 rsf, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 (Xact) parentTransaction, 
                 cm, 
                 true, 
@@ -345,6 +358,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	public RawTransaction startNestedUpdateUserTransaction(
     RawStoreFactory rsf,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     RawTransaction parentTransaction,
     ContextManager  cm,
     String          transName,
@@ -354,6 +368,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         return(
             startCommonTransaction(
                 rsf, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 (Xact) parentTransaction, 
                 cm, 
                 false, 
@@ -382,9 +397,11 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
             throw StandardException.newException(SQLState.STORE_XA_XAER_DUPID);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6184
         Xact xact =
             startCommonTransaction(
                 rsf, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 null, 
                 cm, 
                 false, 
@@ -439,6 +456,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		Xact xact = 
             new Xact(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
                 this, null, logFactory, dataFactory, dataValueFactory, 
                 false, null, false);
 
@@ -462,6 +480,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 		Xact xact = 
             new InternalXact(this, logFactory, dataFactory, dataValueFactory);
 
@@ -713,6 +732,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 			excludeMe = remove(oldxid);
 
         XactId xid = new XactId(tranId.getAndIncrement());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4478
 
 		t.setTransactionId(t.getGlobalId(), xid);
 
@@ -736,6 +756,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	public void resetTranId()
 	{
 		XactId xid = (XactId)ttab.largestUpdateXactId();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4478
         long highestId = (xid == null) ? 0L : xid.getId();
         tranId.set(highestId + 1);
 	}
@@ -866,6 +887,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		// now its ok to look for the log and data factory
 		// log factory is booted by the data factory
 		logFactory = (LogFactory) findServiceModule(this, rsf.getLogFactoryModule());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		// data factory is booted by the raw store implementation
 		dataFactory = (DataFactory) findServiceModule(this, rsf.getDataFactoryModule());
@@ -1047,6 +1069,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      */
 	protected boolean blockBackup(boolean wait)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		synchronized(backupSemaphore) {
             // do not allow backup blocking operations, if online backup is
             // is in progress.
@@ -1057,6 +1080,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
                         try {
                             backupSemaphore.wait();
                         } catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                             InterruptStatus.setInterrupted();
                         }
                     }
@@ -1124,6 +1148,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 							backupSemaphore.wait();
 						}
 						catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                             InterruptStatus.setInterrupted();
 						}
 					}
@@ -1144,6 +1169,8 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
             
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
         if (SanityManager.DEBUG) {
             if (inBackup) {
                 SanityManager.ASSERT(backupBlockingOperations == 0 ,
@@ -1173,12 +1200,14 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      */
     private static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
              {
                  public ContextService run()
                  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                      return ContextService.getFactory();
                  }
              }

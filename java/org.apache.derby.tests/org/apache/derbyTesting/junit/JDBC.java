@@ -50,6 +50,7 @@ public class JDBC {
     public static class GeneratedId {
         public boolean equals(Object o) {
             String tmpstr = (String)o;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6977
             if (!(o instanceof String)) { return false; }
             if (!(tmpstr.startsWith("SQL"))) { return false; }
             if (tmpstr.length() != GENERATED_NAME_LENGTH) { return false; }
@@ -82,6 +83,8 @@ public class JDBC {
      * just synonyms.
      */
     public static final String[] GET_TABLES_SYNONYM =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3000
+//IC see: https://issues.apache.org/jira/browse/DERBY-1790
         new String[] {"SYNONYM"};
     
     /**
@@ -112,6 +115,7 @@ public class JDBC {
     /** Is the Lucene core jar file on the classpath */
     public  static  final   boolean HAVE_LUCENE_CORE =
         haveClass( "org.apache.lucene.analysis.Analyzer" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
     /** Is the Lucene analyzer jar file on the classpath */
     public  static  final   boolean HAVE_LUCENE_ANALYZERS =
@@ -124,6 +128,7 @@ public class JDBC {
     /** Is the json-simple core jar file on the classpath */
     public  static  final   boolean HAVE_JSON_SIMPLE =
         haveClass( "org.json.simple.JSONArray" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
 
     /**
      * Does java.sql.ResultSet implement java.lang.AutoCloseable?
@@ -132,7 +137,9 @@ public class JDBC {
     private static final boolean HAVE_AUTO_CLOSEABLE_RESULT_SET;
     static {
         boolean autoCloseable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             Class<?> acClass = Class.forName("java.lang.AutoCloseable");
             autoCloseable = acClass.isAssignableFrom(ResultSet.class);
         } catch (Throwable t) {
@@ -144,6 +151,7 @@ public class JDBC {
     private static final boolean HAVE_REFERENCEABLE;
     static {
         boolean ok = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         try {
             Class.forName("javax.naming.Referenceable");
             ok = true;
@@ -155,6 +163,7 @@ public class JDBC {
     private static final boolean HAVE_SQLTYPE;
     static {
         boolean ok = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try {
             Class.forName("java.sql.SQLType");
             ok = true;
@@ -169,6 +178,7 @@ public class JDBC {
      */
     private static final boolean HAVE_MBEAN_SERVER =
             haveClass("javax.management.MBeanServer");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6097
 
     /**
      * Can we load a specific class, use this to determine JDBC level.
@@ -180,6 +190,7 @@ public class JDBC {
         try {
             Class.forName(className);
             return true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3966
         } catch (Throwable e) {
         	return false;
         }    	
@@ -190,6 +201,7 @@ public class JDBC {
      * later.
      */
     public static boolean vmSupportsJDBC42() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         return vmSupportsJDBC41() && HAVE_SQLTYPE;
     }
 
@@ -198,6 +210,7 @@ public class JDBC {
      * later. JDBC 4.1 is a superset of JDBC 4.0 and of JSR-169.
      */
     public static boolean vmSupportsJDBC41() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         return vmSupportsJDBC4() && HAVE_AUTO_CLOSEABLE_RESULT_SET;
     }
 
@@ -246,6 +259,7 @@ public class JDBC {
      * @return {@code true} if JNDI is available.
      */
     public static boolean vmSupportsJNDI() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         return HAVE_REFERENCEABLE;
     }
 
@@ -253,6 +267,7 @@ public class JDBC {
      * Return true if the JVM supports the Java Management Extensions (JMX).
      */
     public static boolean vmSupportsJMX() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6097
         return HAVE_MBEAN_SERVER;
     }
 
@@ -309,6 +324,7 @@ public class JDBC {
 	 */
 	public static void dropSchema(DatabaseMetaData dmd, String schema) throws SQLException
 	{		
+//IC see: https://issues.apache.org/jira/browse/DERBY-1556
 		Connection conn = dmd.getConnection();
 		Assert.assertFalse(conn.getAutoCommit());
 		Statement s = dmd.getConnection().createStatement();
@@ -361,6 +377,7 @@ public class JDBC {
         // foreign key constraints leading to a dependency loop.
         // Drop any constraints that remain and then drop the tables.
         // If there are no tables then this should be a quick no-op.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2595
         ResultSet table_rs = dmd.getTables((String) null, schema, (String) null,
                 GET_TABLES_TABLE);
 
@@ -368,6 +385,7 @@ public class JDBC {
             String tablename = table_rs.getString("TABLE_NAME");
             rs = dmd.getExportedKeys((String) null, schema, tablename);
             while (rs.next()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
                 short keyPosition = rs.getShort("KEY_SEQ");
                 if (keyPosition != 1)
                     continue;
@@ -430,6 +448,7 @@ public class JDBC {
 
 		// Finally drop the schema if it is not APP
 		if (!schema.equals("APP")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
 			s.executeUpdate("DROP SCHEMA " + JDBC.escape(schema) + " RESTRICT");
 		}
 		conn.commit();
@@ -484,6 +503,7 @@ public class JDBC {
 		String dropLeadIn = "DROP " + dropType + " ";
 		
         // First collect the set of DROP SQL statements.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> ddl = new ArrayList<String>();
 		while (rs.next())
 		{
@@ -502,6 +522,7 @@ public class JDBC {
             return;
                 
         // Execute them as a complete batch, hoping they will all succeed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
         s.clearBatch();
         int batchCount = 0;
         for (Iterator i = ddl.iterator(); i.hasNext(); )
@@ -534,6 +555,7 @@ public class JDBC {
 		for (int i = 0; i < results.length; i++)
 		{
 			int result = results[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-4313
 			if (result == Statement.EXECUTE_FAILED)
 				hadError = true;
 			else if (result == Statement.SUCCESS_NO_INFO || result >= 0) {
@@ -543,6 +565,7 @@ public class JDBC {
 			else
 				Assert.fail("Negative executeBatch status");
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
         s.clearBatch();
         if (didDrop) {
             // Commit any work we did do.
@@ -560,6 +583,7 @@ public class JDBC {
             do {
                 hadError = false;
                 didDrop = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 for (ListIterator<String> i = ddl.listIterator(); i.hasNext();) {
                     String sql = i.next();
                     if (sql != null) {
@@ -626,6 +650,7 @@ public class JDBC {
 
      */
     public static void assertEmpty(ResultSet rs)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
     throws SQLException
     {
         assertDrainResults(rs, 0);
@@ -637,6 +662,7 @@ public class JDBC {
      */
     public static void assertClosed(ResultSet rs)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2461
         try { 
             rs.next();
             Assert.fail("ResultSet not closed");
@@ -671,6 +697,9 @@ public class JDBC {
      */
     public static void assertNoMoreResults(Statement s) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3304
+//IC see: https://issues.apache.org/jira/browse/DERBY-3037
+//IC see: https://issues.apache.org/jira/browse/DERBY-1585
     	Assert.assertFalse(s.getMoreResults());
         Assert.assertTrue(s.getUpdateCount() == -1);
         Assert.assertNull(s.getResultSet());
@@ -738,8 +767,10 @@ public class JDBC {
 	 * @throws SQLException
 	 */
 	public static int assertDrainResults(ResultSet rs)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1976
 	    throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
 		return assertDrainResults(rs, -1);
 	}
 
@@ -761,6 +792,7 @@ public class JDBC {
 	    int expectedRows) throws SQLException
 	{
 		ResultSetMetaData rsmd = rs.getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
         List<List<String>> seen = new ArrayList<List<String>>();
         List<String> seenRow = new ArrayList<String>();
 		
@@ -782,6 +814,7 @@ public class JDBC {
 
         if (expectedRows >= 0) {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
                 Assert.assertEquals("Unexpected row count:", expectedRows, rows);
             } catch (AssertionFailedError e) {
                 throw addRsToReport(e, rsmd, seen, seenRow, rs);
@@ -804,6 +837,7 @@ public class JDBC {
      * @throws SQLException Error accessing meta data
      */
     private static void assertResultColumnNullable(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
             ResultSet rs,
             List<List<String>> seen,
             List<String> seenRow,
@@ -831,6 +865,7 @@ public class JDBC {
     public static void assertColumnNames(ResultSet rs,
         String... expectedColNames) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1976
         ResultSetMetaData rsmd = rs.getMetaData();
         int actualCols = rsmd.getColumnCount();
 
@@ -977,6 +1012,7 @@ public class JDBC {
     public static void assertColumnTypes(ResultSet rs,
         int[] expectedTypes) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         ResultSetMetaData rsmd = rs.getMetaData();
         int actualCols = rsmd.getColumnCount();
 
@@ -1001,6 +1037,7 @@ public class JDBC {
     public static void assertParameterTypes (PreparedStatement ps,
 	        int[] expectedTypes) throws Exception
 	    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5496
             if ( vmSupportsJSR169() )
             {
                 Assert.fail( "The assertParameterTypes() method only works on platforms which support ParameterMetaData." );
@@ -1019,6 +1056,7 @@ public class JDBC {
 	            Assert.assertEquals
                     ("Types do not match for parameter " + (i+1),
                      expectedTypes[i],
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                      ((Integer) getParameterType.invoke( pmd, new Object[] { i + 1 } )).intValue()
                      );
 	        }
@@ -1034,6 +1072,7 @@ public class JDBC {
     public static void assertNullability(ResultSet rs,
             boolean[] nullability) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         ResultSetMetaData rsmd = rs.getMetaData();
         int actualCols = rsmd.getColumnCount();
 
@@ -1056,6 +1095,7 @@ public class JDBC {
      *  As a side effect, this method closes the ResultSet.
      */
     public static void assertSingleValueResultSet(ResultSet rs,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2033
             String value) throws SQLException
     {
         String[] row = new String[] {value};
@@ -1114,9 +1154,11 @@ public class JDBC {
      *  more on how this parameter is used, see assertRowInResultSet().
      */
     public static void assertFullResultSet(ResultSet rs,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1976
         Object [][] expectedRows, boolean allAsTrimmedStrings)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2502
         assertFullResultSet( rs, expectedRows, allAsTrimmedStrings, true );
     }
 
@@ -1160,6 +1202,7 @@ public class JDBC {
         Object [][] expectedRows, boolean allAsTrimmedStrings, boolean closeResultSet)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
         assertFullResultSetMinion(rs, expectedRows, allAsTrimmedStrings,
                                   closeResultSet, null);
     }
@@ -1202,6 +1245,7 @@ public class JDBC {
         int rows;
         ResultSetMetaData rsmd = rs.getMetaData();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
         List<List<String>> seen = new ArrayList<List<String>>();
         List<String> seenRow = new ArrayList<String>();
 
@@ -1222,6 +1266,7 @@ public class JDBC {
 
             // Assert warnings on result set, but only for embedded, cf
             // DERBY-159.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
             if (TestConfiguration.getCurrent().getJDBCClient().isEmbedded() &&
                 warnings != null) {
 
@@ -1232,6 +1277,7 @@ public class JDBC {
                     wstr = w.getSQLState();
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
                 try {
                     Assert.assertEquals(
                             "Warning assertion error on row " + (rows+1),
@@ -1249,6 +1295,7 @@ public class JDBC {
             if (rows < expectedRows.length)
             {
                 // dumps itself in any assertion seem
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
                 assertRowInResultSet(rs, seen, seenRow, rows + 1,
                     expectedRows[rows], allAsTrimmedStrings);
             }
@@ -1258,6 +1305,7 @@ public class JDBC {
         }
 
         if ( closeResultSet ) { rs.close(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2502
 
         // And finally, assert the row count.
         try {
@@ -1303,6 +1351,7 @@ public class JDBC {
         throws SQLException
     {
         int rows;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
         final List<List<String>> seen = new ArrayList<List<String>>();
         final List<String> seenRow = new ArrayList<String>();
         final ResultSetMetaData rsmd = rs.getMetaData();
@@ -1323,6 +1372,7 @@ public class JDBC {
              */
             if (rows < expectedRows.length)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
                 assertRowInResultSet(rs, seen, seenRow, rows + 1,
                     expectedRows[rows], true, colsToCheck);
             }
@@ -1331,6 +1381,7 @@ public class JDBC {
         }
 
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2502
 
         // And finally, assert the row count.
         try {
@@ -1380,6 +1431,7 @@ public class JDBC {
      * @throws java.sql.SQLException
      */
     private static void assertRowInResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
             ResultSet rs,
             List<List<String>> seen,
             List<String> seenRow,
@@ -1409,6 +1461,7 @@ public class JDBC {
      *   where 0 &lt;= i &lt; expectedRow.length.
      */
     private static void assertRowInResultSet(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
             ResultSet rs,
             List<List<String>> seen,
             List<String> seenRow,
@@ -1418,6 +1471,7 @@ public class JDBC {
             BitSet colsToCheck) throws SQLException
     {
         int cPos = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1976
         ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 0; i < expectedRow.length; i++)
         {
@@ -1425,6 +1479,7 @@ public class JDBC {
                 ? (i+1)
                 : colsToCheck.nextSetBit(cPos) + 1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2052
             Object obj;
             if (asTrimmedStrings)
             {
@@ -1461,6 +1516,7 @@ public class JDBC {
                     obj = ((String)obj).trim();
 
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
             else {
                 obj = rs.getObject(cPos);
             }
@@ -1470,6 +1526,7 @@ public class JDBC {
             boolean ok = (rs.wasNull() && (expectedRow[i] == null))
                 || (!rs.wasNull()
                     && (expectedRow[i] != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2102
                     && (expectedRow[i].equals(obj)
                         || (obj instanceof byte[] // Assumes byte arrays
                             && Arrays.equals((byte[] )obj,
@@ -1483,6 +1540,7 @@ public class JDBC {
                     found = bytesToString((byte[] )obj);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
                 try {
                     Assert.fail("Column value mismatch @ column '" +
                             rsmd.getColumnName(cPos) + "', row " + rowNum +
@@ -1514,6 +1572,7 @@ public class JDBC {
      */
     public static void assertSameContents(ResultSet rs1, ResultSet rs2)
             throws SQLException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2242
         ResultSetMetaData rsmd = rs1.getMetaData();
         int columnCount = rsmd.getColumnCount();
         while (rs1.next()) {
@@ -1579,6 +1638,7 @@ public class JDBC {
     public static void assertUnorderedResultSet(
             ResultSet rs, Object[][] expectedRows, boolean asTrimmedStrings)
                 throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5764
         assertRSContains(rs, expectedRows, asTrimmedStrings, true);
     }
 
@@ -1623,6 +1683,7 @@ public class JDBC {
         }
 
         ResultSetMetaData rsmd = rs.getMetaData();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
         List<List<String>> seen = new ArrayList<List<String>>();
         List<String> seenRow = new ArrayList<String>();
 
@@ -1633,6 +1694,7 @@ public class JDBC {
             throw addRsToReport(e, rsmd, seen, seenRow, rs);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<List<String>> expected =
                 new ArrayList<List<String>>(expectedRows.length);
         for (int i = 0; i < expectedRows.length; i++) {
@@ -1640,6 +1702,7 @@ public class JDBC {
                                 expectedRows[0].length, expectedRows[i].length);
             List<String> row = new ArrayList<String>(expectedRows[i].length);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5305
             for (int j = 0; j < expectedRows[i].length; j++) {
                 String val = (String) expectedRows[i][j];
                 row.add(asTrimmedStrings ?
@@ -1649,6 +1712,7 @@ public class JDBC {
             expected.add(row);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<List<String>> actual =
                 new ArrayList<List<String>>(expectedRows.length);
         while (rs.next()) {
@@ -1656,6 +1720,7 @@ public class JDBC {
             for (int i = 1; i <= expectedRows[0].length; i++) {
                 String s = rs.getString(i);
                 seenRow.add(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
 
                 row.add(asTrimmedStrings ?
                         (s == null ? null : s.trim()) :
@@ -1673,6 +1738,7 @@ public class JDBC {
 
         try {
             if (rowCountsMustMatch) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
                 String message = "Unexpected row count, expected: " +
                         expectedRows.length + ", actual: " + actual.size() + "\n" +
                         "\t expected rows: \n\t\t" + expected +
@@ -1680,11 +1746,13 @@ public class JDBC {
                 Assert.assertEquals(message,
                         expectedRows.length, actual.size());
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5885
             if ( !actual.containsAll(expected) )
             {
                 expected.removeAll( actual );
                 BaseTestCase.println
                         ( "These expected rows don't appear in the actual result: " + expected );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5667
                 String message = "Missing rows in ResultSet; \n\t expected rows: \n\t\t"
                         + expected + "\n\t actual result: \n\t\t" + actual;
                 Assert.fail( message );
@@ -1702,6 +1770,7 @@ public class JDBC {
      * @throws SQLException if something goes wrong
      */
     public static void assertCurrentSchema(Connection con, String schema)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3690
             throws SQLException {
         Statement stmt = con.createStatement();
         try {
@@ -1721,6 +1790,7 @@ public class JDBC {
      * @throws SQLException if something goes wrong
      */
     public static void assertCurrentUser(Connection con, String user)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             throws SQLException {
         Statement stmt = con.createStatement();
         try {
@@ -1780,6 +1850,7 @@ public class JDBC {
      */
     private static String compressQuotes(String source, String quotes)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         String  result = source;
         int         index;
 
@@ -1892,6 +1963,7 @@ public class JDBC {
      */
     public static void checkPlan(Statement s, String[] sequence)
             throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
 
         ResultSet rs = s.executeQuery(
                 "values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()");
@@ -1905,12 +1977,14 @@ public class JDBC {
     }
 
     private static AssertionFailedError addRsToReport(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6642
             AssertionFailedError afe,
             ResultSetMetaData rsmd,
             List<List<String>> seen,
             List<String> seenRow,
             ResultSet rs) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6660
         try {
             if (rs == null) {
                 return BaseTestCase.newAssertionFailedError(

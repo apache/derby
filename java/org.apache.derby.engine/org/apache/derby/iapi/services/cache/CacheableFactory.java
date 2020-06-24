@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.services.cache;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	<P>
 	Any object that implements this interface can be cached using the services of
 	the CacheManager/CacheFactory. In addition to implementing this interface the

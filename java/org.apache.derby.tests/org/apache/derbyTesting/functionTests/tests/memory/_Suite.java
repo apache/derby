@@ -33,15 +33,20 @@ public class _Suite extends BaseJDBCTestCase {
     }
 
     public static Test suite() throws Exception{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Memory Suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4538
         suite.addTest(TriggerTests.suite());
         suite.addTest(BlobMemTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3741
         suite.addTest(ClobMemTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3741
         suite.addTest(MultiByteClobTest.suite());
         suite.addTest(RolesDependencyTest.suite());
         suite.addTest(Derby3009Test.suite());
         suite.addTest(Derby5730Test.suite());
         suite.addTest(MemoryLeakFixesTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4137
         suite.addTest(XAMemTest.suite());
         return suite;
     }

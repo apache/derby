@@ -46,6 +46,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     private final short w = 1;
     
     public OperationsTester(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         super(name);
         
     }
@@ -74,6 +75,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             int threshold = rand.threshold();
             
             HashMap<String, Number> inputData = new HashMap<String, Number>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             inputData.put("d", d);
             inputData.put("threshold", threshold);
             
@@ -101,7 +103,10 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             short d = rand.district();
             int c = rand.NURand1023();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             HashMap<String, Number> inputData = new HashMap<String, Number>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             inputData.put("d", d);
             inputData.put("c", c);
 
@@ -115,10 +120,13 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
                 w, rand.district(), rand.randomCLast());
         for (int i = 0; i < 50; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
             short d = rand.district();
             String customerLast = rand.randomCLast();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             HashMap<String, Object> inputData = new HashMap<String, Object>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             inputData.put("d", d);
             inputData.put("customerLast", customerLast);
 
@@ -151,6 +159,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     }
     public void testNewOrder() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         for (int x = 0; x < 50; x++)
         {
             int itemCount = rand.randomInt(5, 15);
@@ -178,6 +187,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     }
     public void testScheduleDelivery() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2094
         for (int i = 0; i < 50; i++)
             ops.scheduleDelivery(this, null, w, rand.carrier());
     }

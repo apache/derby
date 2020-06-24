@@ -121,6 +121,7 @@ class CreateSequenceConstantAction extends DDLConstantAction {
                 dd.getUUIDFactory().createUUID(),
                 _sequenceName,
                 _dataType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 _initialValue,   // current value
                 _initialValue,
                 _minValue,

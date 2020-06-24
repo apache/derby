@@ -81,6 +81,7 @@ public class IndexColumnOrder implements ColumnOrdering, Formatable
 	public IndexColumnOrder(int colNum) {
 		 this.colNum = colNum;
 		 this.ascending = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
                  this.nullsOrderedLow = false;
 	}
 
@@ -132,6 +133,7 @@ public class IndexColumnOrder implements ColumnOrdering, Formatable
          * @return whether nulls should sort low
          */
 	public boolean getIsNullsOrderedLow() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
 		return nullsOrderedLow;
 	}
 
@@ -176,6 +178,7 @@ public class IndexColumnOrder implements ColumnOrdering, Formatable
 	public	int	getTypeFormatId()	{ return StoredFormatIds.INDEX_COLUMN_ORDER_V01_ID; }
 
 	public String toString() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG) {
 			return
 				"IndexColumnOrder.colNum: " + colNum + "\n" +

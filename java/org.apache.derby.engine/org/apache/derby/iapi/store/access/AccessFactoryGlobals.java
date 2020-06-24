@@ -73,6 +73,7 @@ public interface AccessFactoryGlobals
 	public static final String SORT_INTERNAL = "sort internal";
     public static final String SORT_UNIQUEWITHDUPLICATENULLS_EXTERNAL 
                                     = "sort almost unique external";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 
 	public static final String NESTED_READONLY_USER_TRANS = "nestedReadOnlyUserTransaction";
 	public static final String NESTED_UPDATE_USER_TRANS = "nestedUpdateUserTransaction";

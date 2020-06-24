@@ -143,6 +143,7 @@ class NestedLoopJoinStrategy extends BaseJoinStrategy {
 							 CostEstimate costEstimate) {
 		costEstimate.multiply(outerCost.rowCount(), costEstimate);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6211
         if ( innerTable.optimizerTracingIsOn() )
         { innerTable.getOptimizerTracer().traceCostOfNScans( innerTable.getTableNumber(), outerCost.rowCount(), costEstimate ); }
 	}
@@ -151,6 +152,7 @@ class NestedLoopJoinStrategy extends BaseJoinStrategy {
 	public int maxCapacity( int userSpecifiedCapacity,
                             int maxMemoryPerTable,
                             double perRowUsage) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
 		return Integer.MAX_VALUE;
 	}
 
@@ -173,6 +175,7 @@ class NestedLoopJoinStrategy extends BaseJoinStrategy {
             boolean multiprobe,
             boolean validatingCheckConstraint) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (validatingCheckConstraint) {
             return "getValidateCheckConstraintResultSet";
         } else if (bulkFetch) {
@@ -258,6 +261,7 @@ class NestedLoopJoinStrategy extends BaseJoinStrategy {
 										storeRestrictionList,
 										acb,
 										resultRowTemplate);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
 		if (genInListVals)
 			((PredicateList)storeRestrictionList).generateInListValues(acb, mb);
@@ -272,6 +276,8 @@ class NestedLoopJoinStrategy extends BaseJoinStrategy {
 			{
 				for (int i = storeRestrictionList.size() - 1; i >= 0; i--)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                     Predicate pred =
                             (Predicate)storeRestrictionList.getOptPredicate(i);
 					if (pred.isInListProbePredicate())

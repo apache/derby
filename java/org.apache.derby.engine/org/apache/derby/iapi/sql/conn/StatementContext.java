@@ -56,6 +56,7 @@ public interface StatementContext extends Context {
 	 */
     public void setInUse(boolean inTrigger, boolean isAtomic, boolean isForReadOnly,
 			 String stmtText, ParameterValueSet pvs, long timeoutMillis);
+//IC see: https://issues.apache.org/jira/browse/DERBY-231
 
 	/**
 	 * Mark this context as not in use.  This is important because we

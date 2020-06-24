@@ -48,21 +48,36 @@ public class OldVersions
         {10, 3, 3, 0}, // 10.3.3.0 (May 12, 2008 / SVN 652961)
         {10, 4, 1, 3}, // 10.4.1.3 (April 24, 2008 / SVN 648739)
         {10, 4, 2, 0}, // 10.4.2.0 (September 05, 2008 / SVN 693552)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4108
         {10, 5, 1, 1}, // 10.5.1.1 (April 28, 2009 / SVN 764942)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4344
         {10, 5, 3, 0}, // 10.5.3.0 (August 21, 2009 / SVN 802917)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4593
         {10, 6, 1, 0}, // 10.6.1.0 (May 18, 2010/ SVN 938214)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
         {10, 6, 2, 1}, // 10.6.2.1 (Oct 6, 2010/ SVN 999685)
         {10, 7, 1, 1}, // 10.7.1.1 (December 14, 2010/ SVN 1040133)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5016
         {10, 8, 1, 2}, // 10.8.1.2 (April 29, 2011/ SVN 1095077)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5287
         {10, 8, 2, 2}, // 10.8.2.2 (October 24, 2011/ SVN 1181258)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5924
         {10, 8, 3, 0}, // 10.8.3.0 (November 16, 2012/ SVN 1405108)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5688
         {10, 9, 1, 0}, // 10.9.1.0 (June 25, 2012/ SVN 1344872)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6104
         {10, 10, 1, 1}, // 10.10.1.1 (April 15, 2013/ SVN 1458268)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6218
         {10, 10, 2, 0}, // 10.10.2.0 (April 15, 2014/ SVN 1582446)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6588
         {10, 11, 1, 1}, // 10.11.1.1 (August 26, 2014 / SVN 1616546)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6811
         {10, 12, 1, 1}, // 10.12.1.1 (October 11, 2015 / SVN 1704137)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6911
         {10, 13, 1, 1}, // 10.13.1.1 (October 25, 2015 / SVN 1765088)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6988
         {10, 14, 2, 0}, // 10.14.2.0 (May 3, 2018/ SVN 1828579)
+//IC see: https://issues.apache.org/jira/browse/DERBY-7010
         {10, 15, 1, 3}, // 10.15.1.3 (March 5, 2019 / SVN 1853019)
     };
 
@@ -98,6 +113,7 @@ public class OldVersions
      */
     private static int[][] getSupportedVersions( int[][] old )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<int[]> list = new ArrayList<int[]>();
         int count = old.length;
         
@@ -111,6 +127,7 @@ public class OldVersions
             }
             // Derby 10.3.1.4 does not boot on the phoneME advanced platform,
             // (see DERBY-3176) so don't run upgrade tests in this combination.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5646
             if ( BaseTestCase.isCVM()
                   && old[i][0]==10 && old[i][1]==3 
                   && old[i][2]==1 && old[i][3]==4 ) {
@@ -131,6 +148,7 @@ public class OldVersions
             list.add( old[ i ] );
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return list.toArray(new int[list.size()][]);
     }
     

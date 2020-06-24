@@ -187,6 +187,11 @@ class CreateViewConstantAction extends DDLConstantAction
 								   td,
 								   (UUID) null,
 								   columnInfo[ix].autoincStart,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 								   columnInfo[ix].autoincInc,
 								   columnInfo[ix].autoincCycle
 							   );
@@ -213,12 +218,14 @@ class CreateViewConstantAction extends DDLConstantAction
 			/* We should always be able to find the Provider */
 				Provider provider = (Provider) providerInfo[ix].
 										getDependableFinder().
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
 											getDependable(dd,
 												providerInfo[ix].getObjectId());
 				dm.addDependency(vd, provider, lcc.getContextManager());
 		}
 		//store view's dependency on various privileges in the dependeny system
 		storeViewTriggerDependenciesOnPrivileges(activation, vd);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 
 		dd.addDescriptor(vd, sd, DataDictionary.SYSVIEWS_CATALOG_NUM, true, tc);
 	}

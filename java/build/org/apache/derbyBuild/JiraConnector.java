@@ -71,6 +71,7 @@ public class JiraConnector {
 
 	public static void main(String[] args) {
 		try{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4014
 			if (args.length > 0 && args[0].equals("all"))
 				// don't use this too often it is hard on Apache infrastructure.
 				refreshJiraIssues(allJiraListFileName, jira_allBugsSource);

@@ -50,6 +50,7 @@ public class FormatableBitSetTest extends BaseTestCase {
      */
     private final static Method bitCount;
     static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         Method m = null;
         try {
             m = Integer.class.getMethod("bitCount", new Class[]{Integer.TYPE});
@@ -102,9 +103,11 @@ public class FormatableBitSetTest extends BaseTestCase {
      * @throws Exception
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite ts = new BaseTestSuite(FormatableBitSetTest.class,
                              "FormatableBitSetTest suite");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         if (bitCount != null) {
             ts.addTest(new FormatableBitSetTest("numBitsSetInOneByte"));
             ts.addTest(new FormatableBitSetTest("numBitsSetInTwoBytes"));
@@ -120,8 +123,11 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(0,empty.getLength());
         assertEquals(0,empty.getLengthInBytes());
         assertEquals(0,empty.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(empty.invariantHolds());
         assertEquals(0,empty.getByteArray().length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
 
         assertEquals(18,bitset18.getLength());
         assertEquals(3,bitset18.getLengthInBytes());
@@ -142,7 +148,9 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(0,zeroBits.getLength());
         assertEquals(0,zeroBits.getLengthInBytes());
         assertEquals(0,zeroBits.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(zeroBits.invariantHolds());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(0,zeroBits.getByteArray().length);
     }
     public void testIntCtor1() {
@@ -150,6 +158,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(1,oneBit.getLength());
         assertEquals(1,oneBit.getLengthInBytes());
         assertEquals(0,oneBit.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(oneBit.invariantHolds());
         assertEquals(1,oneBit.getByteArray().length);
     }
@@ -158,6 +167,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(8,eightBits.getLength());
         assertEquals(1,eightBits.getLengthInBytes());
         assertEquals(0,eightBits.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(eightBits.invariantHolds());
         assertEquals(1,eightBits.getByteArray().length);
     }
@@ -166,10 +176,12 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(9,nineBits.getLength());
         assertEquals(2,nineBits.getLengthInBytes());
         assertEquals(0,nineBits.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(nineBits.invariantHolds());
         assertEquals(2,nineBits.getByteArray().length);
     }
     public void testIntCtorNeg() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         try { FormatableBitSet negBits = new FormatableBitSet(-1); fail(); }
         catch(IllegalArgumentException iae) {}
     }
@@ -180,6 +192,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(0,emptyCpy.getLength());
         assertEquals(0,emptyCpy.getLengthInBytes());
         assertEquals(0,emptyCpy.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(emptyCpy.invariantHolds());
     }
     public void testCpyCtor() {
@@ -189,7 +202,9 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(9,cpy.getNumBitsSet());
         assertEquals(0,cpy.compare(bitset18));
         assertTrue(cpy.equals(bitset18));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(cpy.invariantHolds());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(3,cpy.getByteArray().length);
     }
 
@@ -199,7 +214,9 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(18,empty.getLength());
         assertEquals(3,empty.getLengthInBytes());
         assertEquals(0,empty.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(bitset18.invariantHolds());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(3,empty.getByteArray().length);
     }
     public void testGrow() {
@@ -207,6 +224,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(25,bitset18.getLength());
         assertEquals(4,bitset18.getLengthInBytes());
         assertEquals(9,bitset18.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(bitset18.invariantHolds());
         assertEquals(4,bitset18.getByteArray().length);
     }
@@ -228,6 +246,8 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(0,empty.getLengthInBytes());
         assertEquals(0,empty.getNumBitsSet());
         assertTrue(empty.invariantHolds());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(0,empty.getByteArray().length);
     }
     public void testGrow1() {
@@ -305,11 +325,14 @@ public class FormatableBitSetTest extends BaseTestCase {
 
     // Test cases for shrink(int)
     public void testShrinkEmpty() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         empty.shrink(0);
         assertEquals(0,empty.getLength());
         assertEquals(0,empty.getLengthInBytes());
         assertEquals(0,empty.getNumBitsSet());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(empty.invariantHolds());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(0,empty.getByteArray().length);
     }
     public void testShrink() {
@@ -328,9 +351,11 @@ public class FormatableBitSetTest extends BaseTestCase {
         try {
             bitset18.shrink(-9);
             fail();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         } catch (IllegalArgumentException iae) {}
     }
     public void testShrink0() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         bitset18.shrink(0);
         assertEquals(0,bitset18.getLength());
         assertEquals(0,bitset18.getLengthInBytes());
@@ -444,6 +469,7 @@ public class FormatableBitSetTest extends BaseTestCase {
     public void testCompareDifferentArray() {
         FormatableBitSet small = new FormatableBitSet(bitset18);
         small.shrink(9);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(small.invariantHolds());
         FormatableBitSet large = new FormatableBitSet(bitset18);
         large.grow(100);
@@ -455,6 +481,7 @@ public class FormatableBitSetTest extends BaseTestCase {
 
     // Test cases for isSet(int)
     public void testIsSetEmpty() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         try { empty.isSet(-8); fail(); } catch (IllegalArgumentException iae) {}
         try { empty.isSet(-1); fail(); } catch (IllegalArgumentException iae) {}
         try { empty.isSet(0); fail(); } catch (IllegalArgumentException iae) {}
@@ -484,6 +511,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertTrue(bitset18C.isSet(15));
         assertTrue(bitset18C.isSet(16));
         assertTrue(bitset18C.isSet(17));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         try { bitset18C.isSet(18); fail(); }
         catch (IllegalArgumentException iae) {}
     }
@@ -500,6 +528,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         try { bitset18.set(-1); fail(); }
         catch (IllegalArgumentException iae) {}
         bitset18.set(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(bitset18.invariantHolds());
         bitset18.set(1);
         assertTrue(bitset18.invariantHolds());
@@ -519,6 +548,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         try { bitset18.clear(-1); fail(); }
         catch (IllegalArgumentException iae) {}
         bitset18.clear(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(bitset18.invariantHolds());
         bitset18.clear(1);
         assertTrue(bitset18.invariantHolds());
@@ -528,6 +558,7 @@ public class FormatableBitSetTest extends BaseTestCase {
 
     // Test cases for anySetBit()
     public void testAnySetBitEmpty() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(empty.anySetBit(),-1);
     }
     public void testAnySetBit() {
@@ -543,6 +574,7 @@ public class FormatableBitSetTest extends BaseTestCase {
     public void testAnySetBitBeyondBitNeg() {
         assertEquals(1,bitset18.anySetBit(0));
         assertEquals(0,bitset18.anySetBit(-1));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         try { bitset18.anySetBit(-2); fail(); }
         catch (ArrayIndexOutOfBoundsException e) {}
         try { bitset18.anySetBit(-3); fail(); }
@@ -555,6 +587,7 @@ public class FormatableBitSetTest extends BaseTestCase {
     // Test cases for or(FormatableBitSet)
     public void testORWithNull() {
         FormatableBitSet cpy = new FormatableBitSet(bitset18);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(cpy.invariantHolds());
         bitset18.or(null);
         assertEquals(9,bitset18.getNumBitsSet());
@@ -565,6 +598,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         bitset18.or(empty);
         assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(cpy.equals(bitset18));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(bitset18.invariantHolds());
     }
     public void testORWithComplement() {
@@ -633,6 +667,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(cpy.equals(bitset18));
         assertTrue(bitset18.invariantHolds());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(3,bitset18.getByteArray().length);
     }
     public void testXORWithComplement() {
@@ -642,6 +677,8 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(16,bitset18.getNumBitsSet());
         assertFalse(bitset18.isSet(2));
         assertFalse(bitset18.isSet(3));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertTrue(bitset18.invariantHolds());
     }
     public void testXORWithSmaller() {
@@ -651,6 +688,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         assertEquals(3,bitset18.getLengthInBytes());
         assertEquals(13,bitset18.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         assertEquals(3,bitset18.getByteArray().length);
     }
     public void testXORWithLarger() {
@@ -662,7 +700,9 @@ public class FormatableBitSetTest extends BaseTestCase {
 
     // count one-bits in a byte with Integer.bitCount()
     private static int bitsInByte(byte b) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Integer arg = b & 0xff;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         Integer ret = (Integer) bitCount.invoke(null, new Object[] { arg });
         return ret.intValue();
     }
@@ -700,6 +740,7 @@ public class FormatableBitSetTest extends BaseTestCase {
         bitset18.writeExternal(oos);
         oos.flush();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2191
         empty.readExternal
             (new ObjectInputStream(new ByteArrayInputStream
                                    (buf.toByteArray())));

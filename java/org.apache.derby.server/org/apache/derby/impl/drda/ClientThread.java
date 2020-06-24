@@ -29,11 +29,14 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 
 final class ClientThread extends Thread {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     NetworkServerControlImpl parent;
     ServerSocket serverSocket;
     private int timeSlice;
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     ClientThread (NetworkServerControlImpl nsi, ServerSocket ss) {
         // Use a more meaningful name for this thread.
         super(NetworkServerControlImpl.getUniqueThreadName(
@@ -74,10 +77,12 @@ final class ClientThread extends Thread {
                         
                         // Set time out: Stops DDMReader.fill() from
                         // waiting indefinitely when timeSlice is set.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2748
                         if (timeSlice > 0)
                             clientSocket.setSoTimeout(timeSlice);
                         
                         //create a new Session for this socket
+//IC see: https://issues.apache.org/jira/browse/DERBY-1817
                         parent.addSession(clientSocket);
                         
                     } catch (PrivilegedActionException e) {
@@ -86,6 +91,7 @@ final class ClientThread extends Thread {
                     } // end inner try/catch block
                     
                 } catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4326
                     if (parent.getShutdown()) {
                         // This is a shutdown and we'll just exit the
                         // thread. NOTE: This is according to the logic
@@ -93,6 +99,7 @@ final class ClientThread extends Thread {
                         // is allways the case, but will not alter the
                         // behaviour since it is not within the scope of
                         // this change (DERBY-2108).
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         clientSocket.close();
                         return;
                     }
@@ -115,6 +122,7 @@ final class ClientThread extends Thread {
                     return; // Exit the thread
                     
                 } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4326
                     if (clientSocket != null)
                         clientSocket.close();
                     // IOException causes this thread to stop.  No
@@ -125,12 +133,14 @@ final class ClientThread extends Thread {
                             return; // Exit the thread
                         } 
                     }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3704
                     parent.consoleExceptionPrintTrace(ioe);
                 }
             } catch (Exception e) {
                 // Catch and log all other exceptions
                 
                 parent.consoleExceptionPrintTrace(e);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3704
                 try {
                     if (clientSocket != null)
                         clientSocket.close();
@@ -152,6 +162,7 @@ final class ClientThread extends Thread {
      * 
      */
     private Socket acceptClientWithRetry() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
                 new PrivilegedAction<Socket>() {
                     public Socket run() {
@@ -162,6 +173,7 @@ final class ClientThread extends Thread {
                                 // Cannot just aimlessly loop
                                 // writing errors
                                 return serverSocket.accept();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6112
                             } catch (Exception acceptE) {
                                 // If not a normal shutdown,
                                 // log and shutdown the server

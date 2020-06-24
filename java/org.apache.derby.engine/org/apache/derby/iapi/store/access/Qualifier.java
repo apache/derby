@@ -26,11 +26,13 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.shared.common.error.StandardException;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-1665
   <p>
   A structure which is used to "qualify" a column.  Specifies
   that the column value in a given column identified by column
   id is to be compared via a specific operator to a particular
   DataValueDescriptor value.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </p>
   <p>
   The implementation of this interface is provided by the client; 
@@ -59,7 +61,9 @@ import org.apache.derby.shared.common.error.StandardException;
           compare_result = !(compare_result);
       }
   }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </pre></blockquote>
+//IC see: https://issues.apache.org/jira/browse/DERBY-1665
   <p>
   Qualifiers are often passed through interfaces as a set of Qualifiers,
   rather than one at a time, for example see the qualifier argument in 
@@ -85,7 +89,9 @@ import org.apache.derby.shared.common.error.StandardException;
   of OR's.  Thus the 2 dimensional array qual[][] argument is to be treated as 
   the following, note if qual.length = 1 then only the first array is valid and
   it is and an array of AND clauses:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </p>
+//IC see: https://issues.apache.org/jira/browse/DERBY-1665
   <blockquote><pre>
   (qual[0][0] AND qual[0][0] ... AND qual[0][qual[0].length - 1])
   AND
@@ -94,6 +100,7 @@ import org.apache.derby.shared.common.error.StandardException;
   (qual[2][0] OR  qual[2][1] ... OR  qual[2][qual[2].length - 1])
   ...
   AND (qual[qual.length - 1][0] OR  qual[1][1] ... OR  qual[1][2])
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </pre></blockquote>
   <p>
   If any of the array's qual[0].length ... qual[qual.length -1] are 0 length
@@ -103,6 +110,7 @@ import org.apache.derby.shared.common.error.StandardException;
   <p>
   Note that any of the arrays qual[0].length ... qual[qual.length -1] may also
   be of length 1, thus no guarantee is made the presence of OR
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
   predicates if qual.length &lt; 1. See example 1a.
   </p>
   <p>
@@ -130,6 +138,7 @@ import org.apache.derby.shared.common.error.StandardException;
     qualifier[0][0] = a
     qualifier[1][0] = b
     qualifier[2][0] = c
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </pre></blockquote>
   <p>
   Example 2: "(f) AND (a OR b) AND (c OR d OR e)"
@@ -147,6 +156,7 @@ import org.apache.derby.shared.common.error.StandardException;
     qualifier[2][0] = c
     qualifier[2][1] = d
     qualifier[2][2] = e
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </pre></blockquote>
   <p>
   Example 3: "(a OR b) AND (c OR d) AND (e OR f)" 
@@ -166,6 +176,7 @@ import org.apache.derby.shared.common.error.StandardException;
     qualifier[2][1] = d
     qualifier[3][0] = e
     qualifier[3][1] = f
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   </pre></blockquote>
   <p>
   Example 4: "(a OR b)" 
@@ -178,6 +189,7 @@ import org.apache.derby.shared.common.error.StandardException;
     qualifier[1][0] = a
     qualifier[1][1] = b
   </pre></blockquote>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
   @see ScanController
   @see TransactionController#openScan 

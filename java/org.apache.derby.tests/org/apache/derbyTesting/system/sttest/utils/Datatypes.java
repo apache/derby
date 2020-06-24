@@ -97,6 +97,8 @@ public class Datatypes {
 					+ " t_float, t_int, t_longint, t_numeric_large,"
 					+ " t_real, t_smallint, t_time, t_timestamp,"
 					+ " t_varchar) values ("
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 					+ " ?,?, ?,?, ?, ?,?, ?, ?, ?,?, ?, ?, ?, ?, ?,?)" 
 					/* autoincrement feature added, so we need to specify the
 					 * column name for prepared statement, otherwise auto increment
@@ -120,6 +122,8 @@ public class Datatypes {
 			ps.setString(2, cs2.substring(0, i2));
 			//"t_blob"
 			int blobLength = Rn.nextInt(102400 - 0 + 1) + 0;//to create a stream of random length between 0 and 100K
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 			streamIn = new LoopingAlphabetStream(blobLength);
 			ps.setBinaryStream(3, streamIn, blobLength);
 			//"t_clob
@@ -228,6 +232,7 @@ public class Datatypes {
 		//pick the rows
 		try {
 			ps = conn
+//IC see: https://issues.apache.org/jira/browse/DERBY-4213
 			.prepareStatement(" select id from  Datatypes where id >= ?");
 		} catch (SQLException se) {
 			if (se.getNextException() == null)
@@ -240,6 +245,8 @@ public class Datatypes {
 		int list[] = new int[quantity];
 		int j = 0;
 		for (int i = 0; i < quantity; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 			ind = Rn.nextInt();
 			try {
 				ps.setInt(1, ind);
@@ -254,6 +261,7 @@ public class Datatypes {
 					list[i] = j;
 
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4213
 				else {
 					// the random number is higher than the
 					// highest id value in the database. 
@@ -289,6 +297,8 @@ public class Datatypes {
 		String column = null;
 		int ind = 0;
 		ResultSet rs = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 		ind = Math.abs(Rn.nextInt());
 		while (ind % NUMTYPES == TDECIMAL || ind % NUMTYPES == TVARCHAR
 				|| ind % NUMTYPES == TCHAR)
@@ -314,6 +324,8 @@ public class Datatypes {
 		BigDecimal bdec = null;
 		switch (ind % NUMTYPES) {
 		case TCHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 			ds = cs.substring(Math.abs(Rn.nextInt() % 100));
 			ps.setString(1, ds);
 			break;
@@ -441,6 +453,8 @@ public class Datatypes {
 								+ " SQLSTATE: " + m);
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 					if (rows < 0)
 						System.out.println("t" + thread_id + " delete failed.");
 				}
@@ -467,6 +481,8 @@ public class Datatypes {
 		long min = 0;
 		double x;
 		long id_to_update;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 		InputStream streamIn = null;
 		Reader streamReader = null;
 		rs = stmt.executeQuery("select max(serialkey) from Datatypes");
@@ -500,6 +516,8 @@ public class Datatypes {
 		int type = (ind % NUMTYPES);
 		switch (type) {
 		case TCHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 			ds2 = cs.substring(Math.abs(Rn.nextInt() % 100));
 			ps2.setString(1, ds2);
 			break;
@@ -573,6 +591,8 @@ public class Datatypes {
 			break;
 		case TTIME:
 			Time tt = new Time(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 			tt.setTime(Math.abs(Rn.nextInt()));
 			ps2.setTime(1, tt);
 			ds2 = tt.toString();
@@ -613,9 +633,12 @@ public class Datatypes {
 				System.out.println(se.getNextException().getMessage()
 						+ " SQLSTATE: " + m);
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2311
+//IC see: https://issues.apache.org/jira/browse/DERBY-2309
 			if (rows < 0)
 				System.out.println("t" + thread_id + " update failed.");
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4148
 		if (streamReader != null)
 			streamReader.close();
 		if (streamIn !=null)

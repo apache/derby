@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DropSchemaNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -76,11 +77,15 @@ class DropSchemaNode extends DDLStatementNode
         */
         if (isPrivilegeCollectionRequired())
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5062
             LanguageConnectionContext lcc = getLanguageConnectionContext();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             StatementContext stx = lcc.getStatementContext();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
             String currentUser = stx.getSQLSessionContext().getCurrentUser();
             getCompilerContext().addRequiredSchemaPriv(schemaName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 currentUser,
                 Authorizer.DROP_SCHEMA_PRIV);
         }
@@ -106,6 +111,8 @@ class DropSchemaNode extends DDLStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "DROP SCHEMA";

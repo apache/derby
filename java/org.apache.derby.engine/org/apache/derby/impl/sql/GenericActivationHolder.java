@@ -80,6 +80,7 @@ import org.apache.derby.impl.sql.execute.BaseActivation;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 final public class GenericActivationHolder implements Activation
 {
 	public BaseActivation			ac;
@@ -243,12 +244,14 @@ final public class GenericActivationHolder implements Activation
 		{
 			/* Has the activation class changed or has the activation been
 			 * invalidated? */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5406
             final boolean needNewClass =
                     gc == null || gc != ps.getActivationClass();
 			if (needNewClass || !ac.isValid())
 			{
 
                 GeneratedClass newGC;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4279
 
 				if (needNewClass) {
                     // The statement has been re-prepared since the last time
@@ -576,6 +579,7 @@ final public class GenericActivationHolder implements Activation
 	}
 
 	public SQLSessionContext getSQLSessionContextForChildren() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3897
 		return ac.getSQLSessionContextForChildren();
     }
 
@@ -601,6 +605,7 @@ final public class GenericActivationHolder implements Activation
 	{
 		// Vacuous implementation to make class concrete, only needed for
 		// BaseActivation
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		if (SanityManager.DEBUG) {
 			SanityManager.NOTREACHED();
 		}

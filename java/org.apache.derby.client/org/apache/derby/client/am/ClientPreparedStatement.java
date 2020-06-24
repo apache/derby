@@ -281,6 +281,7 @@ public class ClientPreparedStatement extends ClientStatement
             positionedUpdateCursorName_ = cursorName;
             // Get a new section from the same package as the query section
             setSection(agent_.sectionManager_.getPositionedUpdateSection(cursorName, false)); // false means get a regular section
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
 
             if (getSection() == null) {
                 throw new SqlException(agent_.logWriter_, 
@@ -295,6 +296,7 @@ public class ClientPreparedStatement extends ClientStatement
             // if the cursor name supplied in the sql string is different from the cursorName
             // set by setCursorName(), then server will return "cursor name not defined" error,
             // and no subsititution is made here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
             if (getSection().getClientCursorName() != null && // cursor name is user defined
                     cursorName.compareTo(getSection().getClientCursorName()) == 0)
             // client's cursor name is substituted with section's server cursor name
@@ -312,6 +314,7 @@ public class ClientPreparedStatement extends ClientStatement
     void prepare() throws SqlException {
         try {
             // flow prepare, no static initialization is needed
+//IC see: https://issues.apache.org/jira/browse/DERBY-3426
             flowPrepareDescribeInputOutput();
         } catch (SqlException e) {
             this.markClosed();
@@ -323,6 +326,7 @@ public class ClientPreparedStatement extends ClientStatement
     //------------------- Prohibited overrides from Statement --------------------
 
     public void addBatch(String sql) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "addBatch", sql);
         }
@@ -366,6 +370,7 @@ public class ClientPreparedStatement extends ClientStatement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "executeQuery");
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 ClientResultSet resultSet = executeQueryX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
@@ -380,6 +385,7 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     // also called by some DBMD methods
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClientResultSet executeQueryX() throws SqlException {
         flowExecute(executeQueryMethod__);
         return resultSet_;
@@ -387,6 +393,7 @@ public class ClientPreparedStatement extends ClientStatement
 
 
     public int executeUpdate() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -412,6 +419,8 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     public void setNull(int parameterIndex, int jdbcType) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -428,6 +437,7 @@ public class ClientPreparedStatement extends ClientStatement
                 agent_.checkForSupportedDataType(jdbcType);
                 
                 final int paramType = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
                     getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.getPossibleTypesForNull( paramType ).checkType( jdbcType )){
@@ -455,6 +465,7 @@ public class ClientPreparedStatement extends ClientStatement
         if (!parameterMetaData_.nullable_[parameterIndex - 1]) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_NULL_INTO_NON_NULL),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 parameterIndex);
         }
         setInput(parameterIndex, null);
@@ -480,10 +491,12 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 final int paramType = 
                     getColumnMetaDataX().getColumnType(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ) {
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.BOOLEAN,
                                                       paramType);
                     
@@ -514,6 +527,7 @@ public class ClientPreparedStatement extends ClientStatement
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.TINYINT,
                                                       paramType);
                     
@@ -521,6 +535,7 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.TINYINT;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 setInput(parameterIndex, Short.valueOf(x));
             }
         }
@@ -544,6 +559,7 @@ public class ClientPreparedStatement extends ClientStatement
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.SMALLINT,
                                                       paramType);
                                                   
@@ -561,6 +577,7 @@ public class ClientPreparedStatement extends ClientStatement
 
     // also used by DBMD methods
     void setShortX(int parameterIndex, short x) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
             Types.SMALLINT;
         setInput(parameterIndex, x);
@@ -568,6 +585,7 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     public void setInt(int parameterIndex, int x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -596,6 +614,7 @@ public class ClientPreparedStatement extends ClientStatement
 
     // also used by DBMD methods
     void setIntX(int parameterIndex, int x) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
             Types.INTEGER;
         setInput(parameterIndex, x);
@@ -616,9 +635,12 @@ public class ClientPreparedStatement extends ClientStatement
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.INTEGER,
                                                       paramType);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2495
                 setLongX(parameterIndex, x);
             }
         }
@@ -632,7 +654,9 @@ public class ClientPreparedStatement extends ClientStatement
     {
         // Column numbers starts at 1, clientParamtertype_[0] refers to column 1
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 = Types.BIGINT;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
         setInput(parameterIndex, x);
     }
 
@@ -650,6 +674,7 @@ public class ClientPreparedStatement extends ClientStatement
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.FLOAT,
                                                       paramType);
 
@@ -675,11 +700,17 @@ public class ClientPreparedStatement extends ClientStatement
                 }
                 
                 final int paramType = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
                     getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.DOUBLE,
                                                       paramType);
                     
@@ -687,6 +718,7 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.DOUBLE;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 Double d = x;
                 setInput(parameterIndex, d);
             }
@@ -708,10 +740,13 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 final int paramType = 
                     getColumnMetaDataX().getColumnType(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.BIGINT,
                                                       paramType);
                     
@@ -745,17 +780,22 @@ public class ClientPreparedStatement extends ClientStatement
                 }
                 
                 final int paramType = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
                     getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_DATE.checkType(paramType) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_ ,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.DATE,
                                                       paramType);
                     
                 }
                 
                 checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
 
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_,
@@ -763,6 +803,7 @@ public class ClientPreparedStatement extends ClientStatement
                         "null", "calendar", "setDate()");
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.DATE;
 
@@ -794,10 +835,12 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 final int paramType = 
                     getColumnMetaDataX().getColumnType(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIME.checkType( paramType ) ){
                     
                     PossibleTypes.throw22005Exception( agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                        Types.TIME,
                                                        paramType );
                 }
@@ -808,6 +851,7 @@ public class ClientPreparedStatement extends ClientStatement
                         "null", "calendar", "setTime()");
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.TIME;
 
@@ -840,10 +884,12 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 final int paramType = 
                     getColumnMetaDataX().getColumnType(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIMESTAMP.checkType( paramType ) ) {
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.TIMESTAMP,
                                                       paramType);
                     
@@ -855,6 +901,7 @@ public class ClientPreparedStatement extends ClientStatement
                         "null", "calendar", "setTimestamp()");
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.TIMESTAMP;
 
@@ -886,9 +933,11 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 final int paramType = 
                     getColumnMetaDataX().getColumnType(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_STRING.checkType( paramType ) ){
                     PossibleTypes.throw22005Exception(agent_.logWriter_ ,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.VARCHAR,
                                                       paramType);
                 }
@@ -904,6 +953,7 @@ public class ClientPreparedStatement extends ClientStatement
 
     // also used by DBMD methods
     void setStringX(int parameterIndex, String x) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
             Types.LONGVARCHAR;
 
@@ -915,6 +965,7 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     public void setBytes(int parameterIndex, byte[] x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -923,11 +974,13 @@ public class ClientPreparedStatement extends ClientStatement
                 }
                 
                 final int paramType = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1956
                     getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BYTES.checkType( paramType ) ){
                     
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                                       Types.VARBINARY,
                                                       paramType );
                 }
@@ -942,7 +995,9 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     // also used by CallableLocatorProcedures
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void setBytesX(int parameterIndex, byte[] x) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
             Types.LONGVARBINARY;
 
@@ -970,12 +1025,14 @@ public class ClientPreparedStatement extends ClientStatement
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     agent_.logWriter_.traceEntry(this, "setBinaryStream",
                         parameterIndex, "<input stream>", Long.valueOf(length));
                 }
                 
                 checkTypeForSetBinaryStream(parameterIndex);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3705
                 checkStreamLength(length);
                 setBinaryStreamX(parameterIndex, x, (int)length);
             }
@@ -996,8 +1053,10 @@ public class ClientPreparedStatement extends ClientStatement
      */
 
     public void setBinaryStream(int parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                 InputStream x,
                                 int length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
         setBinaryStream(parameterIndex,x,(long)length);
     }
 
@@ -1039,6 +1098,7 @@ public class ClientPreparedStatement extends ClientStatement
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setAsciiStream",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         parameterIndex, "<input stream>", Long.valueOf(length));
                 }
                 
@@ -1053,6 +1113,7 @@ public class ClientPreparedStatement extends ClientStatement
                 }
                 checkStreamLength(length);
                 setInput(parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                     new ClientClob(agent_, x, Cursor.ISO_8859_1, (int) length));
             }
         }
@@ -1072,8 +1133,10 @@ public class ClientPreparedStatement extends ClientStatement
      * @exception SQLException thrown on failure.
      */
     public void setAsciiStream(int parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                InputStream x,
                                int length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
         setAsciiStream(parameterIndex,x,(long)length);
     }
     
@@ -1085,11 +1148,13 @@ public class ClientPreparedStatement extends ClientStatement
      * @throws SQLException Thrown for a negative or too large length.
      */
     private void checkStreamLength(long length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3705
         if(length > Integer.MAX_VALUE) {
             throw new SqlException(
                         agent_.logWriter_,
                         new ClientMessageId(
                             SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         length,
                         Integer.MAX_VALUE
                     ).getSQLException();
@@ -1120,6 +1185,7 @@ public class ClientPreparedStatement extends ClientStatement
         if (!PossibleTypes.POSSIBLE_TYPES_IN_SET_BINARYSTREAM.
                 checkType(paramType)) {
             PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                               Types.VARBINARY,
                                               paramType);
         }
@@ -1131,6 +1197,8 @@ public class ClientPreparedStatement extends ClientStatement
         if (!PossibleTypes.POSSIBLE_TYPES_IN_SET_CHARACTERSTREAM.
                 checkType(paramType)) {
             PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                               Types.LONGVARCHAR,
                                               paramType);
         }
@@ -1142,6 +1210,7 @@ public class ClientPreparedStatement extends ClientStatement
         if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BLOB.checkType( paramType ) ){
             
             PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                               Types.BLOB,
                                               paramType);
         }
@@ -1154,6 +1223,7 @@ public class ClientPreparedStatement extends ClientStatement
         if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_CLOB.checkType( paramType ) ){
                     
             PossibleTypes.throw22005Exception(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                               Types.CLOB,
                                               paramType);
                     
@@ -1175,8 +1245,12 @@ public class ClientPreparedStatement extends ClientStatement
      * @deprecated
      */
     public void setUnicodeStream(int parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                  InputStream x,
                                  int length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-253
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceDeprecatedEntry(this, "setUnicodeStream",
                                                    parameterIndex,
@@ -1201,6 +1275,7 @@ public class ClientPreparedStatement extends ClientStatement
      *      called on a closed <code>PreparedStatement</code>
      */
     public void setCharacterStream(int parameterIndex, Reader x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -1210,6 +1285,7 @@ public class ClientPreparedStatement extends ClientStatement
             try {
                 checkTypeForSetCharacterStream(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex -1] =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     Types.CLOB;
                 if (x == null) {
                     setNull(parameterIndex, Types.LONGVARCHAR);
@@ -1235,16 +1311,22 @@ public class ClientPreparedStatement extends ClientStatement
      */
 
     public void setCharacterStream(int parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                    Reader x,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
                                    long length) throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     agent_.logWriter_.traceEntry(this, "setCharacterStream",
                             parameterIndex, x, Long.valueOf(length));
                 }
                 checkTypeForSetCharacterStream(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.CLOB;
 
@@ -1252,6 +1334,8 @@ public class ClientPreparedStatement extends ClientStatement
                     setNull(parameterIndex, Types.LONGVARCHAR);
                     return;
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3705
+//IC see: https://issues.apache.org/jira/browse/DERBY-3705
                 checkStreamLength(length);
                 setInput(parameterIndex,
                          new ClientClob(agent_, x, (int)length));
@@ -1276,8 +1360,10 @@ public class ClientPreparedStatement extends ClientStatement
      */
 
     public void setCharacterStream(int parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                    Reader x,
                                    int length) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
         setCharacterStream(parameterIndex,x,(long)length);
     }
 
@@ -1309,6 +1395,7 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     public void setClob(int parameterIndex, Clob x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1382,9 +1469,11 @@ public class ClientPreparedStatement extends ClientStatement
 
                 int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if ( paramType == Types.JAVA_OBJECT )
                 {
                     setUDTX( parameterIndex, x );
+//IC see: https://issues.apache.org/jira/browse/DERBY-1938
                 } else if (x == null) {
                     // DERBY-1938: Allow setting Java null also when the
                     //      column type isn't specified explicitly by the
@@ -1404,6 +1493,7 @@ public class ClientPreparedStatement extends ClientStatement
                     setLong(parameterIndex, ((Long) x).longValue());
                 } else if (x instanceof byte[]) {
                     setBytes(parameterIndex, (byte[]) x);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 } else if (x instanceof BigDecimal) {
                     setBigDecimal(parameterIndex, (BigDecimal) x);
                 } else if (x instanceof Date) {
@@ -1480,6 +1570,9 @@ public class ClientPreparedStatement extends ClientStatement
             Class targetClass = Class.forName( targetClassName );
             if ( targetClass.isInstance( x ) )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 setInput(parameterIndex, x);
                 return;
             }
@@ -1544,6 +1637,7 @@ public class ClientPreparedStatement extends ClientStatement
         agent_.checkForSupportedDataType(targetJdbcType);
 
         if (x == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             setNullX(parameterIndex, targetJdbcType);
             return;
         }
@@ -1552,6 +1646,7 @@ public class ClientPreparedStatement extends ClientStatement
         // the targetJdbcType is specified.
 
         int inputParameterType = CrossConverters.getInputJdbcType(targetJdbcType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-250
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = inputParameterType;
         x = agent_.crossConverters_.setObject(inputParameterType, x);
 
@@ -1559,6 +1654,7 @@ public class ClientPreparedStatement extends ClientStatement
         try {
             if (targetJdbcType == Types.DECIMAL ||
                 targetJdbcType == Types.NUMERIC) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 x = ((BigDecimal) x).setScale(scale, RoundingMode.DOWN);
             }
         } catch (ArithmeticException ae) {
@@ -1568,6 +1664,7 @@ public class ClientPreparedStatement extends ClientStatement
                 new ClientMessageId(SQLState.JAVA_EXCEPTION),
                 new Object[] {ae.getClass().getName(), ae.getMessage()}, ae);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try { 
             setObject(parameterIndex, x);
         } catch ( SQLException se ) {
@@ -1586,6 +1683,7 @@ public class ClientPreparedStatement extends ClientStatement
                 }
                 checkForClosedStatement();
                 if (parameterMetaData_ != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
                     Arrays.fill(parameters_, null);
                     Arrays.fill(parameterSet_, false);
                 }
@@ -1627,6 +1725,7 @@ public class ClientPreparedStatement extends ClientStatement
     //--------------------------JDBC 2.0-----------------------------
 
     public void addBatch() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1637,6 +1736,7 @@ public class ClientPreparedStatement extends ClientStatement
                 checkThatAllParametersAreSet();
                 
                 if (parameterTypeList == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     parameterTypeList = new ArrayList<int[]>();
                 }
 
@@ -1654,6 +1754,7 @@ public class ClientPreparedStatement extends ClientStatement
                     
                     // Get a copy of the parameter type data and save it in a list
                     // which will be used later on at the time of batch execution.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1292
                     parameterTypeList.add(parameterMetaData_.clientParamtertype_.clone());
                 } else {
                     batch_.add(null);
@@ -1676,6 +1777,7 @@ public class ClientPreparedStatement extends ClientStatement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "executeBatch");
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
                 long[] updateCounts = null;
                 updateCounts = executeBatchX(false);
 
@@ -1777,12 +1879,14 @@ public class ClientPreparedStatement extends ClientStatement
             agent_.logWriter_.traceEntry(this, "setURL", parameterIndex, x);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED)).
                 getSQLException();
     }
 
     public ParameterMetaData getParameterMetaData() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1793,6 +1897,7 @@ public class ClientPreparedStatement extends ClientStatement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getParameterMetaData", parameterMetaData);
                 }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 return (ParameterMetaData) parameterMetaData;
             }
         }
@@ -1803,8 +1908,10 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     private ClientParameterMetaData getParameterMetaDataX()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         ClientParameterMetaData pm =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             ClientAutoloadedDriver.getFactory().
             newParameterMetaData(getColumnMetaDataX());
         return pm;
@@ -1815,6 +1922,7 @@ public class ClientPreparedStatement extends ClientStatement
         return 
             parameterMetaData_ != null ?
             parameterMetaData_ : 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             ClientAutoloadedDriver.getFactory().newColumnMetaData(agent_.logWriter_, 0);
     }
 
@@ -1885,6 +1993,7 @@ public class ClientPreparedStatement extends ClientStatement
         // parse out extended describe, so again  no problem.
         if (sqlMode_ != isCall__ && parameterMetaData_ != null) {
             // 1 means IN parameter
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
             Arrays.fill(parameterMetaData_.sqlxParmmode_, (short)1);
         }
 
@@ -1906,6 +2015,7 @@ public class ClientPreparedStatement extends ClientStatement
 
     private void writePrepareDescribeInputOutput() throws SqlException {
         // Notice that sql_ is passed in since in general ad hoc sql must be passed in for unprepared statements
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
         writePrepareDescribeOutput(sql_, getSection());
         writeDescribeInput(getSection());
     }
@@ -1919,6 +2029,7 @@ public class ClientPreparedStatement extends ClientStatement
     private void writePrepareDescribeInput() throws SqlException {
         // performance will be better if we flow prepare with output enable vs. prepare then describe input for callable
         // Notice that sql_ is passed in since in general ad hoc sql must be passed in for unprepared statements
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
         writePrepare(sql_, getSection());
         writeDescribeInput(getSection());
     }
@@ -1980,7 +2091,9 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     private void flowExecute(int executeType) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkForClosedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
         checkAutoGeneratedKeysParameters();
         clearWarningsX();
         checkForAppropriateSqlMode(executeType, sqlMode_);
@@ -1997,6 +2110,9 @@ public class ClientPreparedStatement extends ClientStatement
         // statements can have the same cursor name as long as their result
         // sets are not simultaneously open.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1036
+//IC see: https://issues.apache.org/jira/browse/DERBY-1183
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
         if (sqlMode_ == isQuery__) {
             checkForDuplicateCursorName();
         }
@@ -2007,6 +2123,7 @@ public class ClientPreparedStatement extends ClientStatement
 
             int numInputColumns;
             boolean outputExpected;
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             try
             {
                 numInputColumns = (parameterMetaData_ != null) ? parameterMetaData_.getColumnCount() : 0;
@@ -2016,15 +2133,18 @@ public class ClientPreparedStatement extends ClientStatement
             {
                 // Generate a SqlException for this, we don't want to throw
                 // SQLException in this internal method
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
                 throw new SqlException(se);
             }
             boolean chainAutoCommit = false;
             boolean commitSubstituted = false;
             boolean repositionedCursor = false;
             boolean timeoutSent = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientResultSet scrollableRS = null;
             boolean prepareSentForAutoGeneratedKeys = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
             if (doWriteTimeout) {
                 timeoutArrayList.set(0, TIMEOUT_STATEMENT + timeout_);
                 writeSetSpecialRegister(timeoutArrayList);
@@ -2047,6 +2167,8 @@ public class ClientPreparedStatement extends ClientStatement
                 chainAutoCommit = connection_.willAutoCommitGenerateFlow() && isAutoCommittableStatement_;
 
                 boolean chainOpenQueryForAutoGeneratedKeys = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
                 		((sqlUpdateMode_ == isInsertSql__ || sqlUpdateMode_ == isUpdateSql__) 
                 				&& autoGeneratedKeys_ == RETURN_GENERATED_KEYS);
                 writeExecute(getSection(),
@@ -2058,6 +2180,7 @@ public class ClientPreparedStatement extends ClientStatement
                 ); // chain flag
 
                 if (chainOpenQueryForAutoGeneratedKeys) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                     if (preparedStatementForAutoGeneratedKeys_ == null) {
                         preparedStatementForAutoGeneratedKeys_ =
                                 prepareAutoGeneratedKeysStatement(connection_);
@@ -2086,6 +2209,7 @@ public class ClientPreparedStatement extends ClientStatement
                 break;
 
             case isQuery__:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                 writeOpenQuery(getSection(),
                         fetchSize_,
                         resultSetType_,
@@ -2096,6 +2220,7 @@ public class ClientPreparedStatement extends ClientStatement
 
             case isCall__:
                 writeExecuteCall(outputRegistered_, // if no out/inout parameter, outputExpected = false
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                         null, getSection(),
                         fetchSize_,
                         false, // do not suppress ResultSets for regular CALLs
@@ -2118,6 +2243,7 @@ public class ClientPreparedStatement extends ClientStatement
 
             markResultSetsClosed(true); // true means remove from list of commit and rollback listeners
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
             if (timeoutSent) {
                 readSetSpecialRegister(); // Read response to the EXCSQLSET
             }
@@ -2129,11 +2255,15 @@ public class ClientPreparedStatement extends ClientStatement
                     scrollableRS.readPositioningFetch_();
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3426
                 else {
                     readExecute();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6742
+//IC see: https://issues.apache.org/jira/browse/DERBY-6753
             		if ((sqlUpdateMode_ == isInsertSql__ || sqlUpdateMode_ == isUpdateSql__) 
             				&& autoGeneratedKeys_ == RETURN_GENERATED_KEYS) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                         if (prepareSentForAutoGeneratedKeys) {
                             preparedStatementForAutoGeneratedKeys_.materialPreparedStatement_.readPrepareDescribeOutput_();
                         }
@@ -2172,6 +2302,9 @@ public class ClientPreparedStatement extends ClientStatement
                     // result sets happening during readCloseResultSets above
                     // because ResultSet#markClosed calls
                     // Statement#removeClientCursorNameFromCache.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1036
+//IC see: https://issues.apache.org/jira/browse/DERBY-1183
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
                     setupCursorNameCacheAndMappings();
                 }
                 break;
@@ -2192,6 +2325,7 @@ public class ClientPreparedStatement extends ClientStatement
 
             if (sqlMode_ == isCall__) {
                 parseStorProcReturnedScrollableRowset();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
                 checkForStoredProcResultSetCount(executeType);
                 // When there are no result sets back, we will commit immediately when autocommit is true.
                 // make sure a commit is not performed when making the call to the sqlca message procedure
@@ -2202,6 +2336,7 @@ public class ClientPreparedStatement extends ClientStatement
 
             // The JDBC spec says that executeUpdate() should return 0
             // when no row count is returned.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1314
             if (executeType == executeUpdateMethod__ && updateCount_ < 0) {
                 updateCount_ = 0;
             }
@@ -2210,11 +2345,13 @@ public class ClientPreparedStatement extends ClientStatement
             if (resultSet_ != null && resultSet_.resultSetHoldability_ != resultSetHoldability_ && sqlMode_ != isCall__) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.UNABLE_TO_OPEN_RESULTSET_WITH_REQUESTED_HOLDABILTY),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         resultSetHoldability_);
             }
     }
 
     private long[] executeBatchX(boolean supportsQueryBatchRequest)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         throws SqlException, SQLException {
         synchronized (connection_) {
             checkForClosedStatement(); // Per jdbc spec (see Statement.close() javadoc)
@@ -2225,11 +2362,14 @@ public class ClientPreparedStatement extends ClientStatement
 
 
     private long[] executeBatchRequestX(boolean supportsQueryBatchRequest)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException, BatchUpdateException {
         SqlException chainBreaker = null;
         int batchSize = batch_.size();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         long[] updateCounts = new long[batchSize];
         int numInputColumns;
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try {
             numInputColumns = parameterMetaData_ == null ? 0 : parameterMetaData_.getColumnCount();
         } catch ( SQLException se ) {
@@ -2245,10 +2385,13 @@ public class ClientPreparedStatement extends ClientStatement
         // DRDA request. This is because DRDA uses a 2-byte correlation ID,
         // and the values 0 and 0xffff are reserved as special values. So
         // that imposes an upper limit on the batch size we can support:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (batchSize > 65534)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
                 new Object[] { 65534 }, updateCounts, null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
@@ -2258,6 +2401,7 @@ public class ClientPreparedStatement extends ClientStatement
         }
 
         if (!supportsQueryBatchRequest && sqlMode_ == isQuery__) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
             new ClientMessageId(SQLState.CANNOT_BATCH_QUERIES), (Object [])null, updateCounts, null);
         }
@@ -2271,7 +2415,9 @@ public class ClientPreparedStatement extends ClientStatement
 
 
         if (sqlMode_ == isQuery__) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             resetResultSetList();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             resultSetList_ = new ClientResultSet[batchSize];
         }
 
@@ -2282,6 +2428,7 @@ public class ClientPreparedStatement extends ClientStatement
         agent_.beginBatchedWriteChain(this);
         boolean chainAutoCommit = connection_.willAutoCommitGenerateFlow() && isAutoCommittableStatement_;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
         if (doWriteTimeout) {
             timeoutArrayList.set(0, TIMEOUT_STATEMENT + timeout_);
             writeSetSpecialRegister(timeoutArrayList);
@@ -2291,18 +2438,22 @@ public class ClientPreparedStatement extends ClientStatement
 
         for (int i = 0; i < batchSize; i++) {
             if (parameterMetaData_ != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 parameterMetaData_.clientParamtertype_ = parameterTypeList.get(i);
                 parameters_ = (Object[]) batch_.get(i);
             }
             
             if (sqlMode_ != isCall__) {
                 boolean outputExpected;
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                 try {
                     outputExpected = (resultSetMetaData_ != null && resultSetMetaData_.getColumnCount() > 0);
                 } catch ( SQLException se ) {
                     throw new SqlException(se);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                 writeExecute(getSection(),
                         parameterMetaData_,
                         parameters_,
@@ -2311,11 +2462,13 @@ public class ClientPreparedStatement extends ClientStatement
                         chainAutoCommit || (i != batchSize - 1));  // more statements to chain
             } else if (outputRegistered_) // make sure no output parameters are registered
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                 throw ClientAutoloadedDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.OUTPUT_PARAMS_NOT_ALLOWED),
                     (Object [])null, updateCounts, null );
             } else {
                 writeExecuteCall(false, // no output expected for batched CALLs
+//IC see: https://issues.apache.org/jira/browse/DERBY-6082
                         null, getSection(),
                         fetchSize_,
                         true, // suppress ResultSets for batch
@@ -2342,6 +2495,7 @@ public class ClientPreparedStatement extends ClientStatement
 
         agent_.flowBatch(this, batchSize);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-506
         if (timeoutSent) {
             readSetSpecialRegister(); // Read response to the EXCSQLSET
         }
@@ -2376,11 +2530,13 @@ public class ClientPreparedStatement extends ClientStatement
         catch (SqlException e) { // for chain-breaking exception only
             chainBreaker = e;
             chainBreaker.setNextException(new SqlException(agent_.logWriter_,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
                 new ClientMessageId(SQLState.BATCH_CHAIN_BREAKING_EXCEPTION)));
         }
         // We need to clear the batch before any exception is thrown from agent_.endBatchedReadChain().
         batch_.clear();
         parameterTypeList = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1292
 
         // restore the saved input set, setting it to "current"
         parameters_ = savedInputs;
@@ -2399,6 +2555,9 @@ public class ClientPreparedStatement extends ClientStatement
     public void listenToUnitOfWork() {
         if (!listenToUnitOfWork_) {
             listenToUnitOfWork_ = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
+//IC see: https://issues.apache.org/jira/browse/DERBY-557
+//IC see: https://issues.apache.org/jira/browse/DERBY-210
             connection_.CommitAndRollbackListeners_.put(this,null);
         }
     }
@@ -2422,17 +2581,20 @@ public class ClientPreparedStatement extends ClientStatement
      * @return name of java.sql interface
      */
     protected String getJdbcStatementInterfaceName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
         return "java.sql.PreparedStatement";
     }
 
     void checkForValidParameterIndex(int parameterIndex) throws SqlException {
         if (parameterMetaData_ == null) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.NO_INPUT_PARAMETERS));
 
         if (parameterIndex < 1 || parameterIndex > parameterMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_INVALID_PARAM_POSITION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 parameterIndex, parameterMetaData_.columns_);
         }
     }
@@ -2447,6 +2609,7 @@ public class ClientPreparedStatement extends ClientStatement
                 if (!parameterSet_[i] &&
                         (!parameterRegistered_[i] ||
                          parameterMetaData_.sqlxParmmode_[i] ==
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             ClientParameterMetaData.parameterModeInOut)) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.LANG_MISSING_PARMS));
@@ -2458,6 +2621,7 @@ public class ClientPreparedStatement extends ClientStatement
     void checkForValidScale(int scale) throws SqlException {
         if (scale < 0 || scale > 31) {
             throw new SqlException(agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 new ClientMessageId(SQLState.BAD_SCALE_VALUE), scale);
         }
     }
@@ -2466,8 +2630,10 @@ public class ClientPreparedStatement extends ClientStatement
      * @see org.apache.derby.client.am.Statement#markClosed(boolean)
      */
     protected void markClosed(boolean removeListener){
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
         if(pooledConnection_ != null)
             pooledConnection_.onStatementClose(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         super.markClosed(removeListener);
         
         if (parameterMetaData_ != null) {
@@ -2479,11 +2645,13 @@ public class ClientPreparedStatement extends ClientStatement
         // Apparently, the JVM is not smart enough to traverse parameters_[] and null
         // out its members when the entire array is set to null (parameters_=null;).
         if (parameters_ != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3441
             Arrays.fill(parameters_, null);
         }
         parameters_ = null;
 
         if(removeListener)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             connection_.CommitAndRollbackListeners_.remove(this);
     }
     
@@ -2503,6 +2671,7 @@ public class ClientPreparedStatement extends ClientStatement
      *      called on a closed <code>PreparedStatement</code>
      */
     public void setAsciiStream(int parameterIndex, InputStream x)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -2511,6 +2680,7 @@ public class ClientPreparedStatement extends ClientStatement
             }
             try {
                 checkTypeForSetAsciiStream(parameterIndex);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.CLOB;
 
@@ -2519,6 +2689,7 @@ public class ClientPreparedStatement extends ClientStatement
                     return;
                 }
                 setInput(parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                          new ClientClob(agent_, x, Cursor.ISO_8859_1));
             } catch (SqlException se) {
                 throw se.getSQLException();
@@ -2581,6 +2752,7 @@ public class ClientPreparedStatement extends ClientStatement
             } catch (SqlException se) {
                 throw se.getSQLException();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             setInput(parameterIndex, new ClientClob(agent_, reader));
         }
     }
@@ -2601,8 +2773,10 @@ public class ClientPreparedStatement extends ClientStatement
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "setClob",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         parameterIndex, reader, Long.valueOf(length));
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
             try {
                 checkForClosedStatement();
             } catch (SqlException se) {
@@ -2611,8 +2785,10 @@ public class ClientPreparedStatement extends ClientStatement
             if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     length, Integer.MAX_VALUE).getSQLException();
             else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 setInput(parameterIndex,
                          new ClientClob(agent_, reader, (int)length));
         }
@@ -2637,6 +2813,7 @@ public class ClientPreparedStatement extends ClientStatement
      *      marker in the SQL statement
      */
     public void setBlob(int parameterIndex, InputStream inputStream)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -2673,6 +2850,7 @@ public class ClientPreparedStatement extends ClientStatement
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         inputStream, Long.valueOf(length));
             }
             if(length > Integer.MAX_VALUE)
@@ -2717,6 +2895,7 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     public void setRowId(int parameterIndex, RowId x) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         throw SQLExceptionFactory.notImplemented("setRowId (int, RowId)");
     }
 
@@ -2725,6 +2904,7 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
     public void setSQLXML(int parameterIndex, SQLXML xmlObject)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SQLException {
         throw SQLExceptionFactory.notImplemented("setSQLXML (int, SQLXML)");
     }
@@ -2734,6 +2914,7 @@ public class ClientPreparedStatement extends ClientStatement
     // Beginning of JDBC 4.2 methods
 
     public long executeLargeUpdate() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try
         {
             synchronized (connection_) {
@@ -2747,6 +2928,9 @@ public class ClientPreparedStatement extends ClientStatement
                 return updateValue;
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
         catch ( SqlException se ) {
             checkStatementValidity(se);
             throw se.getSQLException();
@@ -2764,6 +2948,7 @@ public class ClientPreparedStatement extends ClientStatement
          */
         
         private void checkStatementValidity(SqlException sqle)  
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
                                             throws SQLException {
             //check if the statement is already closed 
             //This might be caused because the connection associated
@@ -2795,6 +2980,7 @@ public class ClientPreparedStatement extends ClientStatement
          */
         final public static PossibleTypes POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR = 
             new PossibleTypes( new int[] { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 Types.BIGINT,
                 Types.LONGVARCHAR ,
                 Types.CHAR,
@@ -3100,6 +3286,7 @@ public class ClientPreparedStatement extends ClientStatement
             throw new SqlException( logWriter,
                                     new ClientMessageId(SQLState.LANG_DATA_TYPE_GET_MISMATCH) ,
                                     new Object[]{ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                         ClientTypes.getTypeString(valType),
                                         ClientTypes.getTypeString(paramType)
                                     },
@@ -3114,6 +3301,7 @@ public class ClientPreparedStatement extends ClientStatement
             
             switch(typeOfVariable){
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.SMALLINT:
                 return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
                 
@@ -3185,6 +3373,7 @@ public class ClientPreparedStatement extends ClientStatement
      */
     protected void    checkStatus() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         try {
             checkForClosedStatement();
         }

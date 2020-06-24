@@ -26,6 +26,7 @@ import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
 
 class NetDatabaseMetaData extends ClientDatabaseMetaData {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse

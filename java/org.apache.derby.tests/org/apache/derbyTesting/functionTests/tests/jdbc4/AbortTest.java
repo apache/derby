@@ -83,6 +83,7 @@ public class AbortTest extends Wrapper41Test
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite( "AbortTest" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( baseSuite( true ) );
         suite.addTest( baseSuite( false ) );
@@ -145,6 +146,7 @@ public class AbortTest extends Wrapper41Test
         println( "AbortTest( " + _hasSecurityManager + " )" );
         assertEquals( _hasSecurityManager, (System.getSecurityManager() != null) );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         physical();
         pooled();
         xa();
@@ -221,6 +223,7 @@ public class AbortTest extends Wrapper41Test
         }
 
         if ( _hasSecurityManager ) { missingPermission( wrapper1 ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         else { noSecurityManager( wrapper1, conn2 ); }
     }
 

@@ -131,10 +131,12 @@ class SystemColumnImpl implements SystemColumn
      */
     static SystemColumn getJavaColumn(String name, String javaClassName,
             boolean nullability)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
 
         TypeId typeId = TypeId.getUserDefinedTypeId(javaClassName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
         DataTypeDescriptor dtd = new DataTypeDescriptor(typeId, nullability);
         return new SystemColumnImpl(name, dtd);
@@ -162,6 +164,7 @@ class SystemColumnImpl implements SystemColumn
      * Return the type of this column.
      */
     public DataTypeDescriptor getType() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1674
         return type;
     }
 }

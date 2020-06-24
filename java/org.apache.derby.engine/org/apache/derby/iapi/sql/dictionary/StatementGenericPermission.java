@@ -67,6 +67,7 @@ public final class StatementGenericPermission extends StatementPermission
 					   boolean forGrant,
 					   Activation activation) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         genericCheck( lcc, forGrant, activation, _privilege );
 	}
 

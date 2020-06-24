@@ -99,10 +99,12 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 		this.optimizeTime = optimizeTime;
 		this.generateTime = generateTime;
 		this.executeTime = executeTime;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		this.beginCompilationTimestamp = DataTypeUtilities.clone( beginCompilationTimestamp );
 		this.endCompilationTimestamp = DataTypeUtilities.clone( endCompilationTimestamp );
 		this.beginExecutionTimestamp = DataTypeUtilities.clone( beginExecutionTimestamp );
 		this.endExecutionTimestamp = DataTypeUtilities.clone( endExecutionTimestamp );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.subqueryTrackingArray = ArrayUtil.copy(subqueryTrackingArray);
 		this.topResultSetStatistics = topResultSetStatistics;
 	}
@@ -176,6 +178,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getBeginCompilationTimestamp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return DataTypeUtilities.clone( beginCompilationTimestamp );
 	}
 
@@ -186,6 +189,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getEndCompilationTimestamp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return DataTypeUtilities.clone( endCompilationTimestamp );
 	}
 
@@ -196,6 +200,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getBeginExecutionTimestamp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return DataTypeUtilities.clone( beginExecutionTimestamp );
 	}
 
@@ -206,6 +211,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getEndExecutionTimestamp()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
 		return DataTypeUtilities.clone( endExecutionTimestamp );
 	}
 
@@ -380,6 +386,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 * @return java.util.Vector	A vector of objects.
 	 */
   public Vector<ResultSetStatistics> getChildren(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     Vector<ResultSetStatistics> children = new Vector<ResultSetStatistics>();
     children.addElement(topResultSetStatistics);
     return children;

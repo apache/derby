@@ -52,6 +52,7 @@ public final class LangScripts extends ScriptTestCase {
         "bit",
         "bit2",
         "stringtypes",
+//IC see: https://issues.apache.org/jira/browse/DERBY-3801
         "holdCursorIJ"
         };
     
@@ -61,7 +62,9 @@ public final class LangScripts extends ScriptTestCase {
      * run in emebdded.
      */
     private static final String[] EMBEDDED_TESTS = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3762
         "aggregate",        
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         "cast",
         "comparisons",
         "delete",
@@ -82,6 +85,7 @@ public final class LangScripts extends ScriptTestCase {
         "orderby",
         "positionedDelUpd",
         "refActions1",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6072
         "reopenScan",
         "schemas",
         "select",
@@ -90,6 +94,7 @@ public final class LangScripts extends ScriptTestCase {
         "union",
         "update",
         "valuesclause",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
         "xplain",
         };
     
@@ -119,6 +124,7 @@ public final class LangScripts extends ScriptTestCase {
 	 */
 	public static Test suite() {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("LangScripts");
         suite.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         suite.addTest(getSuite(EMBEDDED_TESTS));
@@ -128,6 +134,7 @@ public final class LangScripts extends ScriptTestCase {
         // Set up the scripts run with the network client
         BaseTestSuite clientTests = new BaseTestSuite("LangScripts:client");
         clientTests.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         Test client = TestConfiguration.clientServerDecorator(clientTests);
         
         // add those client tests into the top-level suite.
@@ -150,6 +157,7 @@ public final class LangScripts extends ScriptTestCase {
       */
 	private static Test getSuite(String[] list)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("SQL scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(

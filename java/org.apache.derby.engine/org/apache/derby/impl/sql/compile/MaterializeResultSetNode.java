@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.MaterializeResultSetNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -35,6 +36,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class MaterializeResultSetNode extends SingleChildResultSetNode
 {
 	/**
@@ -51,6 +54,7 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
                              Properties tableProperties,
                              ContextManager cm) {
         super(childResult, tableProperties, cm);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( rcl );
 	}
 
@@ -61,6 +65,8 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -80,6 +86,7 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
 	{
 		if (SanityManager.DEBUG)
             SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -88,6 +95,7 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
 
 		// Get the cost estimate from the child if we don't have one yet
 		setCostEstimate( childResult.getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// build up the tree.
 
@@ -95,11 +103,13 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
 		acb.pushGetResultSetFactoryExpression(mb);
 
 		childResult.generate(acb, mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		mb.push(getResultSetNumber());
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getMaterializedResultSet",
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 						ClassName.NoPutResultSet, 4);
 	}
 }

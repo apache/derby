@@ -34,6 +34,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CreateRoleNode extends DDLStatementNode
 {
     private String name;

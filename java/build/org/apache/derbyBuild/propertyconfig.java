@@ -313,6 +313,7 @@ public class propertyconfig {
 		FileOutputStream os = new FileOutputStream(outputfile);
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3132
 			outputProp.store(os,
 							header.
 							concat("# config is ").concat(config).

@@ -44,6 +44,7 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
     private static  final   String      INDEX_POEMS =
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         "call LuceneSupport.createIndex( 'app', 'poems', 'poemText', '" + LuceneCoarseAuthorizationTest.ENGLISH_ANALYZER + "' )";
     private static  final   String      DROP_POEMS_INDEX = "call LuceneSupport.dropIndex( 'app', 'poems', 'poemText' )";
 
@@ -84,6 +85,7 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite( "LuceneInMemoryTest" );
         
         Test    baseTest = TestConfiguration.embeddedSuite( LuceneInMemoryTest.class );
@@ -127,6 +129,7 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
 
         String  readPoemsIndex =
             "select p.originalAuthor, i.score\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "from poems p, table ( poems__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
@@ -147,6 +150,7 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
              );
 
         String  listIndexes =
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "select schemaName, tableName, columnName, indexDescriptorMaker from table( LuceneSupport.listIndexes() ) l";
         String[][]  defaultIndexList =
             new String[][]

@@ -1488,6 +1488,8 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
             	// Also client inserts bad data.
             	// Remove special case when DERBY-4315
             	// is fixed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4312
+//IC see: https://issues.apache.org/jira/browse/DERBY-4224
                 assertSQLState("XN017", sqle);                
             } else {
                 assertSQLState("XJ001", sqle);
@@ -1556,6 +1558,7 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
             // a different implementation). With the client driver the source
             // stream is read twice, whereas the embedded driver will "cache"
             // the stream content and can thus use it for a second insert.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4531
             if (usingDerbyNetClient()) {
                 fail("Expected second executeUpdate with client driver to fail");
             }
@@ -1572,6 +1575,7 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
                 // DERBY-4531: Depending on whether the finalizer has been run
                 //             or not, the SQLState will differ.
                 //             Don't care about this here, accept both.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4531
                 String expectedState = "XN017";
                 if (sqle.getSQLState().equals("XN014")) {
                     expectedState = "XN014";
@@ -2075,6 +2079,7 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
         Properties strColProperties = new Properties();
         strColProperties.setProperty("derby.storage.sortBufferMax", "5");
         strColProperties.setProperty("derby.debug.true", "testSort");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("StreamingColumnTest");
         suite.addTest(baseSuite("StreamingColumnTest:embedded"));
         suite
@@ -2084,6 +2089,7 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
     }
 
     protected static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(StreamingColumnTest.class);
         Test test = new SupportFilesSetup(suite, new String[] {

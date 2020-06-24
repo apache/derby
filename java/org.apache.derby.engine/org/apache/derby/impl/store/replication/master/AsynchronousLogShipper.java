@@ -176,19 +176,23 @@ public class AsynchronousLogShipper extends Thread implements
      * the log file (typically derby.log)
      */
     public AsynchronousLogShipper(ReplicationLogBuffer logBuffer,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
                                   ReplicationMessageTransmit transmitter,
                                   MasterController masterController,
                                   ReplicationLogger repLogger) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3437
         super("derby.master.logger-" + masterController.getDbName());
         this.logBuffer = logBuffer;
         this.transmitter = transmitter;
         this.masterController = masterController;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3064
         this.stopShipping = false;
         this.repLogger = repLogger;
 
         getLogShipperProperties();
         shippingInterval = minShippingInterval;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3359
         lastShippingTime = System.currentTimeMillis();
     }
     
@@ -209,12 +213,14 @@ public class AsynchronousLogShipper extends Thread implements
         while (!stopShipping) {
             try {
                 synchronized (forceFlushSemaphore) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3719
                     shipALogChunk();
                     // Wake up a thread waiting for forceFlush, if any
                     forceFlushSemaphore.notify();
                 }
                 //calculate the shipping interval (wait time) based on the
                 //fill information obtained from the log buffer.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3526
                 shippingInterval = calculateSIfromFI();
                 if (shippingInterval != -1) {
                     synchronized(objLSTSync) {
@@ -222,10 +228,12 @@ public class AsynchronousLogShipper extends Thread implements
                     }
                 }
             } catch (InterruptedException ie) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 InterruptStatus.setInterrupted();
             } catch (IOException ioe) {
                 //The transmitter is recreated if the connection to the
                 //slave can be re-established.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3509
                 transmitter = masterController.handleExceptions(ioe);
                 //The transmitter cannot be recreated hence stop the log
                 //shipper thread.
@@ -254,6 +262,7 @@ public class AsynchronousLogShipper extends Thread implements
     private synchronized boolean shipALogChunk()
     throws IOException, StandardException {
         byte [] logRecords = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3064
         ReplicationMessage mesg = null;
         try {
             //Check to see if a previous log record exists that needs
@@ -275,7 +284,9 @@ public class AsynchronousLogShipper extends Thread implements
                 
                 transmitter.sendMessage(mesg);
                 highestShippedInstant = logBuffer.getLastInstant();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3359
                 lastShippingTime = System.currentTimeMillis();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3235
                 return true;
             } 
         } catch (NoSuchElementException nse) {
@@ -284,6 +295,7 @@ public class AsynchronousLogShipper extends Thread implements
             //buffer.
             masterController.handleExceptions(StandardException.newException
                 (SQLState.REPLICATION_UNEXPECTED_EXCEPTION, nse));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3064
         } catch (IOException ioe) {
             //An exception occurred while transmitting the log record.
             //Store the previous log record so that it can be re-transmitted
@@ -293,6 +305,7 @@ public class AsynchronousLogShipper extends Thread implements
             }
             throw ioe;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3235
         return false;
     }
     
@@ -323,6 +336,7 @@ public class AsynchronousLogShipper extends Thread implements
      */
     public void forceFlush() throws IOException, StandardException 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3567
         if (stopShipping) return;
         synchronized (forceFlushSemaphore) {
             synchronized (objLSTSync) {
@@ -334,6 +348,7 @@ public class AsynchronousLogShipper extends Thread implements
             try {
                 forceFlushSemaphore.wait(DEFAULT_FORCEFLUSH_TIMEOUT);
             } catch (InterruptedException ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 InterruptStatus.setInterrupted();
             }
         }
@@ -389,8 +404,10 @@ public class AsynchronousLogShipper extends Thread implements
         fi = logBuffer.getFillInformation();
         
         if (fi >= FI_HIGH || 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
                 (System.currentTimeMillis() - lastShippingTime) >
                  minShippingInterval) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3526
             synchronized (objLSTSync) {
                 objLSTSync.notify();
             }
@@ -420,6 +437,7 @@ public class AsynchronousLogShipper extends Thread implements
         if (fi >= FI_HIGH) {
             si = -1;
         } else if (fi > FI_LOW && fi < FI_HIGH) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3388
             si = minShippingInterval;
         } else {
             si = maxShippingInterval;

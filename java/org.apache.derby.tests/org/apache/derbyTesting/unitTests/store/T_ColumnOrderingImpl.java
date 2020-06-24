@@ -65,6 +65,7 @@ public class T_ColumnOrderingImpl implements ColumnOrdering
 	**/
 	public boolean getIsNullsOrderedLow()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
 		return false;
 	}
 }

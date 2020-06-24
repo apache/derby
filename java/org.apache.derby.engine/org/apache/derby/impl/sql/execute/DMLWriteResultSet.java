@@ -43,6 +43,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 /**
  * For INSERT/UPDATE/DELETE impls.  Used to tag them.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 {
 	protected WriteCursorConstantAction constantAction;
@@ -71,6 +72,7 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 	 *
  	 * @exception StandardException on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	DMLWriteResultSet(Activation activation)
 		throws StandardException
 	{
@@ -115,6 +117,7 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 		 * which case we do the objectifying in UpdateResultSet.  Beetle 4896.  Related bug entries:
 		 * 2432, 3383.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
         needToObjectifyStream = (this.constantAction.getTriggerInfo() != null);
 	}
 
@@ -174,6 +177,7 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 				DataValueDescriptor col = row.getColumn(readIx+1);
 				
 				// Derby-4779
+//IC see: https://issues.apache.org/jira/browse/DERBY-4779
 				if ( col != null ) {
 					InputStream stream = ((StreamStorable)col).returnStream();
 					((StreamStorable)col).loadStream();
@@ -193,6 +197,7 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 							DataValueDescriptor c = row.getColumn(i);
 							if (c instanceof StreamStorable)
 								if (((StreamStorable)c).returnStream() == stream)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 									row.setColumn(i, col.cloneValue(false));
 						}
 					}
@@ -274,6 +279,7 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
      */
     int decodeLockMode(int lockMode) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2597
         if (SanityManager.DEBUG) {
             // we want to decode lock mode when the result set is opened, not
             // in the constructor
@@ -290,6 +296,7 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 
         int isolationLevel = lcc.getCurrentIsolationLevel();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
         if (isolationLevel == TransactionControl.SERIALIZABLE_ISOLATION_LEVEL) {
             return lockMode >>> 16;
         }
@@ -370,6 +377,7 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
     }
 
     public void rememberConstraint(UUID cid) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (SanityManager.DEBUG) {
             // This method should be overriden by InsertResultSet and
             // UpdateResultSet, other shouldn't need it.

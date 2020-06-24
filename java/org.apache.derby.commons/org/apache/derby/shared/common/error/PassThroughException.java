@@ -35,6 +35,7 @@ public final class PassThroughException extends RuntimeException {
      * @param cause the {@code Throwable} to pass through
      */
     public PassThroughException(Throwable cause) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4010
         super(cause);
     }
 

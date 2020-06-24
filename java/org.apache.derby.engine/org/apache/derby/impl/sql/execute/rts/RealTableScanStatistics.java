@@ -83,6 +83,7 @@ public class RealTableScanStatistics
 									long closeTime,
 									int resultSetNumber,
 									String tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
@@ -111,6 +112,7 @@ public class RealTableScanStatistics
 			optimizerEstimatedCost
 			);
 		this.tableName = tableName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
 		this.isConstraint = isConstraint;
@@ -140,6 +142,7 @@ public class RealTableScanStatistics
 	 */
 	public String getStatementExecutionPlanText(int depth)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		String header = "";
 		String isolationString = null;
 
@@ -160,12 +163,14 @@ public class RealTableScanStatistics
 				indent + MessageService.getTextMessage(
 											SQLState.RTS_IS_RS_USING,
 											tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                                             isConstraint ? "constraint" : "index",
 											indexName);
 				
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 			header = header +
 				indent + MessageService.getTextMessage(
 											SQLState.RTS_TS_RS_FOR,
@@ -192,6 +197,7 @@ public class RealTableScanStatistics
 
 		String scanInfo =
 			indent + MessageService.getTextMessage(SQLState.RTS_SCAN_INFO) +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 						":\n" +
 						PropertyUtil.sortProperties(scanProperties, subIndent);
 
@@ -217,6 +223,7 @@ public class RealTableScanStatistics
 			scanInfo +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_START_POSITION) +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			":\n" + StringUtil.ensureIndent(startPosition, depth + 2) + "\n" +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_STOP_POSITION) +
@@ -347,6 +354,7 @@ public class RealTableScanStatistics
               null,             // the number of fetched columns
               null,             // the bitset of fetched columns
               null,             // the btree height
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
               this.fetchSize,
               this.startPosition,
               this.stopPosition,
@@ -370,6 +378,7 @@ public class RealTableScanStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                           // the number of index updates 
            lockMode,                       // lock mode

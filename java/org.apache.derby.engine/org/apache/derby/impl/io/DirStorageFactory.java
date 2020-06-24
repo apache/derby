@@ -152,6 +152,7 @@ public class DirStorageFactory extends BaseStorageFactory
      */
     public boolean supportsWriteSync()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return true;
     }
 
@@ -184,6 +185,7 @@ public class DirStorageFactory extends BaseStorageFactory
             else
             {
                 databaseRoot = new File( home, dataDirectory);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1618
                 if (home != null)
                     dataDirectory = home + getSeparator() +  dataDirectory;
             }

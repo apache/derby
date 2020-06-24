@@ -1483,7 +1483,9 @@ public class EmbedStatement extends ConnectionChild
      * 
      * @see #checkExecStatus()
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
     final void checkStatus() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1395
 		if (!active) {
             // 
             // Check the status of the connection first
@@ -1506,7 +1508,9 @@ public class EmbedStatement extends ConnectionChild
 		To avoid this heavier weight check on every method of [Prepared]Statement it is only used
 		on those methods that would end up using the database's connection to read or modify data.
 		E.g. execute*(), but not setXXX, etc.
+//IC see: https://issues.apache.org/jira/browse/DERBY-953
         <BR>
+//IC see: https://issues.apache.org/jira/browse/DERBY-953
         If this Statement's Connection is closed an exception will
         be thrown and the active field will be set to false,
         completely marking the Statement as closed.
@@ -1534,6 +1538,7 @@ public class EmbedStatement extends ConnectionChild
         
         // Now this connection is closed for all
         // future use.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
         active = false;
         	
 		throw Util.noCurrentConnection();
@@ -1543,6 +1548,7 @@ public class EmbedStatement extends ConnectionChild
 		Close and clear all result sets associated with this statement
 		from the last execution.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 	void clearResultSets() throws SQLException
     {
         //
@@ -1593,6 +1599,7 @@ public class EmbedStatement extends ConnectionChild
 					continue;
 
 				try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1095
 					lrs.close();
 				} catch (SQLException sdynamic) {
 					if (sqle == null)
@@ -1611,6 +1618,7 @@ public class EmbedStatement extends ConnectionChild
 		*/
 
 		updateCount = -1L; // reset field
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 
 		if (sqle != null)
 			throw sqle;
@@ -1669,6 +1677,9 @@ public class EmbedStatement extends ConnectionChild
      */
     private int processDynamicResults(java.sql.ResultSet[][] holder,
                                       int maxDynamicResultSets)
+//IC see: https://issues.apache.org/jira/browse/DERBY-501
+//IC see: https://issues.apache.org/jira/browse/DERBY-1314
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
         throws SQLException
     {
 
@@ -1690,6 +1701,7 @@ public class EmbedStatement extends ConnectionChild
             
             // ignore non-Derby result sets or results sets from another connection
             // and closed result sets.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1585
             EmbedResultSet lrs = EmbedStatement.processDynamicResult(
                     getEmbedConnection(), rs, this);
             
@@ -1722,6 +1734,7 @@ public class EmbedStatement extends ConnectionChild
 			}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 			updateCount = -1L;
 			results = sorted[0];
 			currentDynamicResultSet = 0;
@@ -1731,6 +1744,9 @@ public class EmbedStatement extends ConnectionChild
 		}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-501
+//IC see: https://issues.apache.org/jira/browse/DERBY-1314
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
 		return actualCount;
 	}
     
@@ -1753,6 +1769,7 @@ public class EmbedStatement extends ConnectionChild
      * dynamic result.
      */
     static EmbedResultSet processDynamicResult(EmbedConnection conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1585
             java.sql.ResultSet resultSet,
             EmbedStatement callStatement)
     {
@@ -1831,6 +1848,7 @@ public class EmbedStatement extends ConnectionChild
      */
     private boolean getExecuteHoldable() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         if (resultSetHoldability  == java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT)
             return false;
         
@@ -1839,6 +1857,7 @@ public class EmbedStatement extends ConnectionChild
             return true;
         
         return applicationStatement.getResultSetHoldability() ==
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
             java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
     }
 
@@ -1853,6 +1872,7 @@ public class EmbedStatement extends ConnectionChild
 	public boolean isPoolable() throws SQLException {
 		// Assert the statement is still active (not closed)
 		checkStatus();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1235
 
 		return isPoolable;
 	}                
@@ -1882,6 +1902,7 @@ public class EmbedStatement extends ConnectionChild
      * whether this is a wrapper for an object with the given interface.
      */
     public final boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         checkStatus();
         return interfaces.isInstance(this);
     }
@@ -1912,6 +1933,7 @@ public class EmbedStatement extends ConnectionChild
     public  void    closeOnCompletion() throws SQLException
     {
 		// Assert the statement is still active (not closed)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         checkStatus();
         
         closeOnCompletion = true;
@@ -1920,6 +1942,7 @@ public class EmbedStatement extends ConnectionChild
     public  boolean isCloseOnCompletion() throws SQLException
     {
 		// Assert the statement is still active (not closed)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1234
         checkStatus();
         
         return closeOnCompletion;

@@ -52,6 +52,7 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
      */
     public void setUp()
     throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con = getConnection();
         con.setAutoCommit(false);
         
@@ -64,6 +65,8 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
         s.execute("insert into t1 values(2)");
         s.execute("insert into t1 values(3)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
         
         con.commit();

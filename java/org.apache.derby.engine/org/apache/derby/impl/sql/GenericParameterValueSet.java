@@ -97,6 +97,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 	 */
 	public void initialize(DataTypeDescriptor[] types) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-738
 		for (int i = 0; i < parms.length; i++)
 		{
 			DataTypeDescriptor dtd = types[i];
@@ -154,6 +155,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 		try {
 
 			GenericParameter gp = parms[position];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             if (gp.parameterMode == (ParameterMetaData.parameterModeOut))
 				throw StandardException.newException(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET);
 
@@ -174,6 +176,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 			GenericParameter gp = parms[position];
 
 			switch (gp.parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             case (ParameterMetaData.parameterModeIn):
             case (ParameterMetaData.parameterModeUnknown):
 				throw StandardException.newException(SQLState.LANG_NOT_OUTPUT_PARAMETER, Integer.toString(position + 1));
@@ -189,9 +192,11 @@ final class GenericParameterValueSet implements ParameterValueSet
 	public void setParameterAsObject(int position, Object value) throws StandardException {
 
 		UserDataValue dvd = (UserDataValue) getParameterForSet(position);
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 		GenericParameter gp = parms[position];
 		if (value != null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 			{
 
@@ -226,6 +231,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 			if (!gp.isSet)
 			{
 				switch (gp.parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 case (ParameterMetaData.parameterModeOut):
 					break;
                 case (ParameterMetaData.parameterModeInOut):
@@ -262,6 +268,7 @@ final class GenericParameterValueSet implements ParameterValueSet
                 DataValueDescriptor dvd = oldp.getValue();
                 InputStream is = null;
                 // See if the value type can hold a stream.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
                 if (dvd.hasStream()) {
                     // DERBY-4455: Don't materialize the stream when
                     // transferring it. If the stream has been drained already,
@@ -347,6 +354,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 	public void registerOutParameter(int parameterIndex, int jdbcType, int scale)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
 		checkPosition( parameterIndex );
         Util.checkSupportedRaiseStandard( jdbcType );
 		parms[ parameterIndex ].setOutParameter( jdbcType, scale );
@@ -394,6 +402,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 	/**
 		Check that there are not output parameters defined
 		by the parameter set. If there are unknown parameter
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		types they are forced to input types. i.e. Derby static method
 		calls with parameters that are array.
 
@@ -407,6 +416,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 			GenericParameter gp = parms[i];
 
 			switch (gp.parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             case (ParameterMetaData.parameterModeIn):
 				break;
             case (ParameterMetaData.parameterModeInOut):
@@ -459,6 +469,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 				
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			if (!hasReturnOutputParam)
 				SanityManager.THROWASSERT("getReturnValueForSet called on non-return parameter");
 		}

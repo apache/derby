@@ -32,6 +32,7 @@ import org.apache.derby.iapi.sql.Activation;
  * a row trigger.  It is instantiated at execution time.
  * There is one per row trigger.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 class RowTriggerExecutor extends GenericTriggerExecutor
 {
 	/**

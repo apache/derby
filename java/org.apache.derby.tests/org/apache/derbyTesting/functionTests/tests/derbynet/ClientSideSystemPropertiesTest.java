@@ -86,6 +86,7 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
         //made in the privilege block below by looking inside the 
         //trace Directory and making sure the file count is greater than 0.
         AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		    (new java.security.PrivilegedAction<Void>(){
 		    	public Void run(){
 		    		File dir = new File(getSystemProperty("derby.client.traceDirectory"));
@@ -106,6 +107,7 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
     protected void setUp() throws Exception
     {
     	AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     			new java.security.PrivilegedAction<Void>(){
     				public Void run(){
     					File dir = new File(getSystemProperty("derby.client.traceDirectory"));

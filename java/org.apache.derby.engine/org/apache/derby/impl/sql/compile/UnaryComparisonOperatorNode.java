@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.UnaryComparisonOperatorNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -42,6 +43,8 @@ import org.apache.derby.iapi.util.JBitSet;
 
 public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     UnaryComparisonOperatorNode(ValueNode operator, ContextManager cm)
             throws StandardException {
         super(operator, cm);
@@ -62,6 +65,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -80,6 +84,8 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindComparisonOperator()
 			throws StandardException
 	{
@@ -129,6 +135,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4412
 	abstract UnaryOperatorNode getNegation(ValueNode operand)
 				throws StandardException;
 
@@ -222,6 +229,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
             	if (SanityManager.DEBUG)
             	{
             	    SanityManager.THROWASSERT("Failed when trying to " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
             	        "find base table number for column reference check:",
 						se);
             	}
@@ -283,6 +291,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 						throws StandardException
 	{
         ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateNull(mb, operand.getTypeCompiler(), 
 				operand.getTypeServices().getCollationType());
 	}
@@ -333,6 +342,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 		MethodBuilder qualMethod = acb.newUserExprFun();
 
 		/* Generate a method that returns that expression */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateNull(qualMethod, operand.getTypeCompiler(),
 				operand.getTypeServices().getCollationType());
 		qualMethod.methodReturn();

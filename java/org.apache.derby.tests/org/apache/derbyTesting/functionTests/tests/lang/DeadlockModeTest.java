@@ -84,6 +84,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
     private void createThreads(Thread [] t) throws SQLException {
         for (int i = 0; i < THREAD_COUNT; i++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
             final Connection c = openDefaultConnection();
             t[i] = new Thread(new Runnable() {
                 public void run() {threadWorker(c); }});
@@ -143,6 +144,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
                 threadConnection.commit();
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
             threadConnection.close();
         } catch (Exception e) {
             synchronized(syncObject){
@@ -152,6 +154,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
     }
     
     protected static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(DeadlockModeTest.class);
         return new CleanDatabaseTestSetup(
@@ -175,6 +178,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
     } 
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DeadlockModeTest ");
         suite.addTest(
                 baseSuite("DeadlockModeTest:embedded")
@@ -182,6 +186,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
         
         /* JSR169 does not have encryption support */
         if ( JDBC.vmSupportsJDBC3() ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4884
             suite.addTest(Decorator.encryptedDatabase(
                     baseSuite("DeadlockModeTest:encrypted")));
         }

@@ -36,6 +36,7 @@ import java.io.InputStream;
  * streams.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
     //The ClobLocatorInputStream or
     //BlobLocatorInputStream instance
@@ -85,6 +86,7 @@ abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      *           appropriate locator stream instance.
      */
     protected UpdateSensitiveLOBLocatorInputStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientConnection con,
             Lob lob,
             InputStream is) throws SqlException {
@@ -124,6 +126,7 @@ abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      *
      */
     protected UpdateSensitiveLOBLocatorInputStream(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientConnection con,
             Lob lob,
             InputStream is,

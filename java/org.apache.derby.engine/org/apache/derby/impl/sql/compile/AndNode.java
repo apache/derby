@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.AndNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -26,6 +27,8 @@ import org.apache.derby.shared.common.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class AndNode extends BinaryLogicalOperatorNode
 {
     /**
@@ -49,6 +52,7 @@ class AndNode extends BinaryLogicalOperatorNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     AndNode(ValueNode leftOperand,
             ValueNode rightOperand,
             String  methodName,
@@ -72,6 +76,7 @@ class AndNode extends BinaryLogicalOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -98,6 +103,8 @@ class AndNode extends BinaryLogicalOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -159,6 +166,8 @@ class AndNode extends BinaryLogicalOperatorNode
 		/* Convert the AndNode to an OrNode */
 		ValueNode	orNode;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         orNode = new OrNode(leftOperand, rightOperand, getContextManager());
 		orNode.setType(getTypeServices());
 		return orNode;
@@ -174,6 +183,8 @@ class AndNode extends BinaryLogicalOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode putAndsOnTop()
 					throws StandardException
 	{
@@ -239,6 +250,8 @@ class AndNode extends BinaryLogicalOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
@@ -254,6 +267,8 @@ class AndNode extends BinaryLogicalOperatorNode
 		if (!(rightOperand instanceof AndNode) &&
 			!(rightOperand.isBooleanTrue()))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
            BooleanConstantNode trueNode =
                     new BooleanConstantNode(true, getContextManager());
             AndNode newRightOperand = new AndNode(

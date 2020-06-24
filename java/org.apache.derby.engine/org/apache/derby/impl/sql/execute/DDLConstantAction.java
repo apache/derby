@@ -113,6 +113,7 @@ abstract class DDLConstantAction implements ConstantAction
 						String schemaName)
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-48
 		TransactionController tc = activation.
 			getLanguageConnectionContext().getTransactionExecute();
 
@@ -121,6 +122,7 @@ abstract class DDLConstantAction implements ConstantAction
 		if (sd == null || sd.getUUID() == null) {
 			CreateSchemaConstantAction csca
 				= new CreateSchemaConstantAction(schemaName, (String) null);
+//IC see: https://issues.apache.org/jira/browse/DERBY-230
 
 			if (activation.getLanguageConnectionContext().
 					isInitialDefaultSchema(schemaName)) {
@@ -159,6 +161,7 @@ abstract class DDLConstantAction implements ConstantAction
 		 TransactionController tc,
 		 Activation activation) throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         TransactionController useTc;
 		TransactionController nestedTc = null;
 
@@ -317,6 +320,7 @@ abstract class DDLConstantAction implements ConstantAction
 	 * @exception StandardException		Thrown on failure
 	 */
 	protected void storeConstraintDependenciesOnPrivileges(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 		Activation activation,
 		Dependent dependent,
 		UUID refTableUUID,
@@ -326,6 +330,7 @@ abstract class DDLConstantAction implements ConstantAction
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         String currentUser = lcc.getCurrentUserId(activation);
 		SettableBoolean roleDepAdded = new SettableBoolean();
 
@@ -340,6 +345,7 @@ abstract class DDLConstantAction implements ConstantAction
 			// CHECK constraint, any EXECUTE or USAGE privileges. If the REFERENCES is
 			// revoked from the constraint owner, the constraint will get
 			// dropped automatically.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             List<StatementPermission> requiredPermissionsList =
                 activation.getPreparedStatement().getRequiredPermissionsList();
 
@@ -369,6 +375,7 @@ abstract class DDLConstantAction implements ConstantAction
 						    || statPerm instanceof StatementRolePermission
                                || statPerm instanceof StatementGenericPermission ) {
 						continue;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 					} else {
 						if (SanityManager.DEBUG) {
 							SanityManager.ASSERT(
@@ -395,6 +402,7 @@ abstract class DDLConstantAction implements ConstantAction
 					// REFERENCES privilege could be available at the user
 					// level, PUBLIC or role level.  EXECUTE and USAGE privileges could be
 					// available at the user level, PUBLIC or role level.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                     permDesc = statPerm.getPermissionDescriptor(
                         currentUser, dd);
 
@@ -411,8 +419,10 @@ abstract class DDLConstantAction implements ConstantAction
 						// allColumnsCoveredByUserOrPUBLIC.
 						boolean roleUsed = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 						if (permDesc == null ||
 							((permDesc instanceof ColPermsDescriptor) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                                  ! ((StatementColumnPermission)statPerm).
                                    allColumnsCoveredByUserOrPUBLIC(
                                        currentUser, dd))) {
@@ -424,6 +434,7 @@ abstract class DDLConstantAction implements ConstantAction
 						// that object, then no privilege tracking is needed
 						// for the owner.
                         if (! permDesc.checkOwner(currentUser) ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
                             dm.addDependency(dependent, permDesc,
 											 lcc.getContextManager());
@@ -439,6 +450,7 @@ abstract class DDLConstantAction implements ConstantAction
 						//if the object on which permission is required is owned by the
 						//same user as the current user, then no need to keep that
 						//object's privilege dependency in the dependency system
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                     if (! permDesc.checkOwner(currentUser))
 					{
 						dm.addDependency(dependent, permDesc, lcc.getContextManager());
@@ -451,10 +463,12 @@ abstract class DDLConstantAction implements ConstantAction
 							// REFERENCES for the remaining columns at PUBLIC
 							// level or at role level.  Get that permission
 							// descriptor and save it in dependency system
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 							StatementColumnPermission
 								statementColumnPermission = (
 									StatementColumnPermission)statPerm;
 							permDesc = statementColumnPermission.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                                 getPUBLIClevelColPermsDescriptor(
                                     currentUser, dd);
 							//Following if checks if some column level privileges
@@ -472,6 +486,7 @@ abstract class DDLConstantAction implements ConstantAction
 							// Possibly, the current role has also been relied
 							// upon.
 							if (!statementColumnPermission.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                                     allColumnsCoveredByUserOrPUBLIC(
                                         currentUser, dd)) {
 								// Role has been relied upon, so register a
@@ -631,6 +646,8 @@ abstract class DDLConstantAction implements ConstantAction
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
 		String dbo = dd.getAuthorizationDatabaseOwner();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         String currentUser = lcc.getCurrentUserId(activation);
 		SettableBoolean roleDepAdded = new SettableBoolean();
 
@@ -640,6 +657,7 @@ abstract class DDLConstantAction implements ConstantAction
         if (! currentUser.equals(dbo))
 		{
 			PermissionsDescriptor permDesc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             List<StatementPermission> requiredPermissionsList =
                 activation.getPreparedStatement().getRequiredPermissionsList();
 
@@ -655,6 +673,7 @@ abstract class DDLConstantAction implements ConstantAction
 					//permissions that the object is dependent on once it is 
 					//created.
 					//Also, StatementRolePermission should not occur here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 					if (statPerm instanceof StatementSchemaPermission ||
 						statPerm instanceof StatementRolePermission) {
 
@@ -669,6 +688,7 @@ abstract class DDLConstantAction implements ConstantAction
 					}
 
 					//See if we can find the required privilege for given authorizer?
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                     permDesc = statPerm.
                         getPermissionDescriptor(currentUser, dd);
 					if (permDesc == null)//privilege not found for given authorizer 
@@ -684,6 +704,7 @@ abstract class DDLConstantAction implements ConstantAction
 						// .. or at role level
 						if (permDesc == null ||
 								((permDesc instanceof ColPermsDescriptor) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                                  ! ((StatementColumnPermission)statPerm).
                                      allColumnsCoveredByUserOrPUBLIC(
                                          currentUser, dd)) ) {
@@ -695,6 +716,7 @@ abstract class DDLConstantAction implements ConstantAction
 						//object, then no privilege tracking is needed for the
 						//owner.
                         if (! permDesc.checkOwner(currentUser) ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
 							dm.addDependency(dependent, permDesc, lcc.getContextManager());
 
@@ -710,6 +732,7 @@ abstract class DDLConstantAction implements ConstantAction
 					//if the object on which permission is required is owned by the
 					//same user as the current user, then no need to keep that
 					//object's privilege dependency in the dependency system
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                     if (! permDesc.checkOwner(currentUser) )
 					{
 						dm.addDependency(dependent, permDesc, lcc.getContextManager());	           							
@@ -735,6 +758,7 @@ abstract class DDLConstantAction implements ConstantAction
 							//depencies, one for column c11 which exists directly
 							//for user2 and one for column c12 which exists at PUBLIC level.
 							StatementColumnPermission statementColumnPermission = (StatementColumnPermission) statPerm;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                             permDesc = statementColumnPermission.
                                 getPUBLIClevelColPermsDescriptor(
                                     currentUser, dd);
@@ -743,6 +767,7 @@ abstract class DDLConstantAction implements ConstantAction
 							//level column privilege, if any, dependency of
 							//view is added into dependency system.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 							if (permDesc != null &&
 									permDesc.getObjectID() != null) {
 								// User did not have all required column
@@ -755,6 +780,7 @@ abstract class DDLConstantAction implements ConstantAction
 							// Has the the current role has also been relied
 							// upon?
 							if (!statementColumnPermission.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                                     allColumnsCoveredByUserOrPUBLIC(
                                         currentUser, dd)) {
 								trackRoleDependency
@@ -768,6 +794,7 @@ abstract class DDLConstantAction implements ConstantAction
 	}
 
 	private boolean inProviderSet(ProviderInfo[] providers, UUID routineId) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 		if (providers == null) {
 			return false;
 		}
@@ -835,6 +862,7 @@ abstract class DDLConstantAction implements ConstantAction
 		TransactionController tc = lcc.getTransactionExecute();
 
         int changedColumnCount = columnInfos == null ? 0 : columnInfos.length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         HashMap<String,AliasDescriptor> addUdtMap = new HashMap<String,AliasDescriptor>();
         HashMap<String,AliasDescriptor> dropUdtMap = new HashMap<String,AliasDescriptor>();
         HashSet<String> addColumnNames = new HashSet<String>();
@@ -870,6 +898,7 @@ abstract class DDLConstantAction implements ConstantAction
 
         // nothing to do if there are no changed columns of udt type
         // and this is not a DROP TABLE command
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if ( !dropWholeTable && addUdtMap.isEmpty() && dropUdtMap.isEmpty() ) {
             return;
         }
@@ -926,6 +955,7 @@ abstract class DDLConstantAction implements ConstantAction
          LanguageConnectionContext  lcc,
          DataDictionary             dd,
          Dependent                  dependent,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
          HashMap<String, AliasDescriptor> addUdtMap,
          HashMap<String, AliasDescriptor> dropUdtMap
          )
@@ -984,12 +1014,14 @@ abstract class DDLConstantAction implements ConstantAction
 		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
             routineInfo = (RoutineAliasInfo) ad.getAliasInfo();
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3743
 
         default: return;
         }
         
 		TransactionController tc = lcc.getTransactionExecute();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         HashMap<String,AliasDescriptor> addUdtMap =
                 new HashMap<String,AliasDescriptor>();
 
@@ -1048,6 +1080,7 @@ abstract class DDLConstantAction implements ConstantAction
     private static class SettableBoolean {
 		boolean value;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		SettableBoolean() {
 			value = false;
 		}

@@ -62,6 +62,7 @@ interface InternalClob {
      *      currently unknown (not cached).
      */
     long getCharLengthIfKnown();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4241
 
     /**
      * Returns a stream serving the raw bytes of the Clob.
@@ -121,6 +122,7 @@ interface InternalClob {
      * @throws IOException if accessing underlying I/O resources fail
      * @throws SQLException if accessing underlying resources fail
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3825
     Reader getInternalReader(long characterPosition)
             throws IOException, SQLException;
 
@@ -133,6 +135,7 @@ interface InternalClob {
      * @return Update count, starting at zero.
      */
     long getUpdateCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3934
 
     /**
      * Returns a writer to write data into the Clob.
@@ -148,6 +151,7 @@ interface InternalClob {
      *      read-only
      */
     Writer getWriter(long charPos) throws IOException, SQLException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2646
 
     /**
      * Inserts the given string at the specified character position.

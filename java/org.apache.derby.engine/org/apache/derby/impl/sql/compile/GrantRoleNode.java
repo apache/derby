@@ -74,6 +74,8 @@ class GrantRoleNode extends DDLStatementNode
     public String toString()
     {
         if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 StringBuilder sb1 = new StringBuilder();
                 for(String role : roles) {
 					if( sb1.length() > 0) {

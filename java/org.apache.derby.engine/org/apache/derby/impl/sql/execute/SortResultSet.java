@@ -98,6 +98,7 @@ import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
  * anyway.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class SortResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 
 {
@@ -176,10 +177,12 @@ class SortResultSet extends NoPutResultSetImpl
 		this.maxRowSize = maxRowSize;
 
         ExecPreparedStatement ps = a.getPreparedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
 		sortTemplateRow = ((ExecRowBuilder) ps.getSavedObject(ra))
                                 .build(a.getExecutionFactory());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
         order = ((FormatableArrayHolder) ps.getSavedObject(orderingItem))
                 .getArray(ColumnOrdering[].class);
 
@@ -215,6 +218,7 @@ class SortResultSet extends NoPutResultSetImpl
      */
 	public void	openCore() throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-466
 		nextCalled = false;
 		beginTime = getCurrentTimeMillis();
 		// REVISIT: through the direct DB API, this needs to be an
@@ -235,6 +239,7 @@ class SortResultSet extends NoPutResultSetImpl
 
         source.openCore();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4330
 		try {
 			/* If this is an in-order distinct then we do not need the sorter.
 			 * (We filter out the duplicate rows ourselves.)  We save a clone
@@ -316,6 +321,7 @@ class SortResultSet extends NoPutResultSetImpl
 		source.close();
 		sortProperties = sorter.getSortInfo().getAllSortInfo(sortProperties);
 		sorter.completedInserts();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 
 		return tc.openSortScan(sortId, activation.getResultSetHoldability());
 	}
@@ -331,6 +337,7 @@ class SortResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 

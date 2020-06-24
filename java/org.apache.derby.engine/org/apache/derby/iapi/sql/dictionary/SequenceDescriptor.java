@@ -42,6 +42,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
  * can be generated from it.
  */
 public class SequenceDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     extends PrivilegedSQLObject
     implements Provider, Dependent
 {
@@ -272,6 +273,7 @@ public class SequenceDescriptor
      * @see Dependable#getDependableFinder
      */
     public DependableFinder getDependableFinder() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return getDependableFinder(
                 StoredFormatIds.SEQUENCE_DESCRIPTOR_FINDER_V01_ID);
     }

@@ -70,6 +70,7 @@ public class StringUtil
      | 08 BS | 09 HT | 0A NL | 0B VT | 0C NP | 0D CR | 0E SO | 0F SI |
      | 10 DLE| 11 DC1| 12 DC2| 13 DC3| 14 DC4| 15 NAK| 16 SYN| 17 ETB|
      | 18 CAN| 19 EM | 1A SUB| 1B ESC| 1C FS | 1D GS | 1E RS | 1F US |
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
      | 20 SP | 21  ! | 22  " | 23  # | 24  $ | 25  % | 26  &amp; | 27  ' |
      | 28  ( | 29  ) | 2A  * | 2B  + | 2C  , | 2D  - | 2E  . | 2F  / |
      | 30  0 | 31  1 | 32  2 | 33  3 | 34  4 | 35  5 | 36  6 | 37  7 |
@@ -146,6 +147,7 @@ public class StringUtil
 			int beginOffset, int endOffset,
 			boolean trim)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-731
 		String retval = value.substring(beginOffset, endOffset + 1);
 		
 		if (trim)
@@ -156,6 +158,7 @@ public class StringUtil
 
 
 	private static char[] hex_table = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3531
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
         'a', 'b', 'c', 'd', 'e', 'f'
     };
@@ -167,6 +170,7 @@ public class StringUtil
 		<BR>
 		For each byte (b) two characaters are generated, the first character
 		represents the high nibble (4 bits) in hexidecimal (<code>b &amp; 0xf0</code>), the second character
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		represents the low nibble (<code>b &amp; 0x0f</code>).
 		<BR>
 		The byte at <code>data[offset]</code> is represented by the first two characters in the returned String.
@@ -328,6 +332,7 @@ public class StringUtil
 			return  false;
 		else
 			return SQLToUpperCase(s1).equals(SQLToUpperCase(s2));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
 
 	}
 
@@ -340,6 +345,7 @@ public class StringUtil
 	 * @param id syntacically correct SQL identifier
 	 */
 	public static String normalizeSQLIdentifier(String id) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3673
 		if (id.length() == 0) {
 			return id;
 		}
@@ -442,6 +448,7 @@ public class StringUtil
 	 */
 	public static String ensureIndent(String formatted, int depth) {
 		StringBuffer indent = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 
 		while (depth-- > 0) {
 			indent.append("\t");
@@ -557,6 +564,7 @@ public class StringUtil
      */
     public  static  String  shortDBName
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
          String canonicalDBName,
          char   separatorChar
          )

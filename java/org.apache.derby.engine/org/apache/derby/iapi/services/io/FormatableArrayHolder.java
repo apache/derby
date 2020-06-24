@@ -75,6 +75,7 @@ public class FormatableArrayHolder implements Formatable
 					"array input to constructor is null, code can't handle this.");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
 		setArray( array );
 	}
 
@@ -91,6 +92,7 @@ public class FormatableArrayHolder implements Formatable
 					"array input to setArray() is null, code can't handle this.");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
 		this.array = ArrayUtil.copy( array );
 	}
 
@@ -105,6 +107,7 @@ public class FormatableArrayHolder implements Formatable
 	 */
     public <E> E[] getArray(Class<E[]> arrayClass)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
         return Arrays.copyOf(array, array.length, arrayClass);
 	}
 

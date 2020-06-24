@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class BlobOutputStream extends OutputStream {
     private ClientBlob blob_;
     private long offset_;
@@ -35,6 +36,7 @@ class BlobOutputStream extends OutputStream {
         offset_ = offset;
         
         /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-796
             offset_=1 while blob_.binaryString_.length - blob_.dataOffset_ = 0
             for a empty Blob hence check for offset_-1
          */
@@ -58,6 +60,7 @@ class BlobOutputStream extends OutputStream {
         } else if (len == 0) {
             return;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         writeX(b, off, len);
     }
 
@@ -72,6 +75,7 @@ class BlobOutputStream extends OutputStream {
                 = b[off + i];
         }
         blob_.binaryStream_ 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             = new ByteArrayInputStream(blob_.binaryString_);
         blob_.setSqlLength(blob_.binaryString_.length - blob_.dataOffset_);
     }

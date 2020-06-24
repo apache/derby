@@ -243,6 +243,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 		** If the other type is user-defined, use the java types to determine
 		** assignability.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (otherType.userType())
 		{
 			return cf.getClassInspector().assignableTo(
@@ -264,6 +265,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 									 boolean forDataTypeFunction)
 	{
         if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
 
 		// Can't convert numbers to long types
 		if (otherType.isLongConcatableTypeId())
@@ -303,6 +305,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 									ClassFactory cf)
 	{
         if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
 
 		/*
 		** Numbers can be stored into from other number types.

@@ -44,6 +44,8 @@ import org.apache.derby.iapi.services.context.ContextService;
   information about the streams format and capabilites.
   */
 public final class FormatIdInputStream extends DataInputStream
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
     implements ErrorObjectInput, Resetable, CloneableStream
 {
 	protected ClassFactory cf;
@@ -204,6 +206,7 @@ public final class FormatIdInputStream extends DataInputStream
 		if (cf == null) {
 
 			ClassFactoryContext cfc =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				(ClassFactoryContext) getContextOrNull
 				                                  (ClassFactoryContext.CONTEXT_ID);
 
@@ -265,6 +268,7 @@ public final class FormatIdInputStream extends DataInputStream
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

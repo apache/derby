@@ -112,6 +112,7 @@ public class LoopingAlphabetReader
         this.trailingBlanks = trailingBlanks;
         this.remainingNonBlanks = length - trailingBlanks;
         this.remainingBlanks = trailingBlanks;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4060
         this.alphabet = alphabet.getClone();
         fillBuffer(alphabet.charCount());
     }

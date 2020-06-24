@@ -78,6 +78,7 @@ public class XPLAINResultSetTimingsDescriptor extends XPLAINTableDescriptor
         throws SQLException
     {
         ps.setString(1, timing_id.toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6318
         ps.setObject(2, constructor_time, Types.BIGINT);
         ps.setObject(3, open_time, Types.BIGINT);
         ps.setObject(4, next_time, Types.BIGINT);

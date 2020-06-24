@@ -121,6 +121,7 @@ public final class InputStreamUtil {
      *      if the param 'is' equals null.
      */
     public static long skipUntilEOF(InputStream is) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3770
         if(is == null)
             throw new NullPointerException();
 

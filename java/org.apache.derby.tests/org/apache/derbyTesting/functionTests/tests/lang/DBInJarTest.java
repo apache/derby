@@ -234,6 +234,7 @@ public class DBInJarTest extends BaseJDBCTestCase {
     }
     
     protected static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(DBInJarTest.class);
         // Don't run with security manager, we need access to user.dir to archive
@@ -258,6 +259,7 @@ public class DBInJarTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DBInJarTest");
         suite.addTest(baseSuite("DBInJarTest:embedded"));
         return suite;

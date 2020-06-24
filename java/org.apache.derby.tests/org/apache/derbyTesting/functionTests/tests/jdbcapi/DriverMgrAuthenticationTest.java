@@ -43,6 +43,7 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
     public static Test suite() {
         // This test uses driverManager and so is not suitable for JSR169
         if (JDBC.vmSupportsJSR169())
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             return new BaseTestSuite(
                 "DriverManager not available with JSR169;" +
                 "empty DriverMgrAuthenticationTest");
@@ -60,11 +61,13 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
     // baseSuite takes advantage of setting system properties as defined
     // in AuthenticationTest
     public static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("DriverMgrAuthenticationTest");
         
         Test test = new DriverMgrAuthenticationTest(
             "testConnectShutdownAuthentication");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         setBaseProps(suite, test);
         
         test = new DriverMgrAuthenticationTest("testUserFunctions");
@@ -223,6 +226,7 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
         String url = TestConfiguration.getCurrent().getJDBCUrl(dbName);
         if (usingDerbyNetClient() && dbName=="")
             // The junit test harness that kicked off the test will hang when 
@@ -234,6 +238,7 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
             url + ";user=" + user + ";password=" + password + ";shutdown=true";
         try {
             //DriverManager.getConnection(url2, user, password);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1496
             DriverManager.getConnection(url2);
             fail("expected failed shutdown");
         } catch (SQLException e) {

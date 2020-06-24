@@ -162,6 +162,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         Test    unauthorizedRun = TestConfiguration.embeddedSuite( NoAuthorization.class );
         unauthorizedRun = new SupportFilesSetup( unauthorizedRun, testFiles );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite();
         suite.addTest( authorizedRun );
         suite.addTest( unauthorizedRun );
@@ -229,6 +230,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "create view v2 as select username, hashingscheme, lastmodified from sys.sysusers" );
         if ( authorizationIsOn() ) { goodStatement( dboConnection, "grant select on v2 to public" ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6221
         goodStatement( dboConnection, "create view v3 as select username, hashingscheme, lastmodified from sys.sysusers where password is null" );
         if ( authorizationIsOn() ) { goodStatement( dboConnection, "grant select on v3 to public" ); }
 
@@ -246,6 +248,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         vetUserProbes( conn, shouldSucceed, "select count(*) from sys.sysusers", ONLY_DBO );
         vetUserProbes( conn, shouldSucceed, "select username, hashingscheme, lastmodified from sys.sysusers", ONLY_DBO );
         vetUserProbes( conn, shouldSucceed, "select username from sys.sysusers", ONLY_DBO );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6221
         vetUserProbes( conn, shouldSucceed, "select username, lastmodified from sys.sysusers", ONLY_DBO );
         vetUserProbes( conn, shouldSucceed, "select username, lastmodified from sys.sysusers where username = 'FRED'", ONLY_DBO );
 
@@ -264,6 +267,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         vetUserProbes( conn, shouldSucceed, "select password from sys.sysusers", expectedSQLState );
         vetUserProbes( conn, shouldSucceed, "select username, password from sys.sysusers", expectedSQLState );
         vetUserProbes( conn, shouldSucceed, "select username from sys.sysusers where password = 'foo'", expectedSQLState );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6221
         vetUserProbes( conn, shouldSucceed, "select username, lastmodified from sys.sysusers where password is not null", expectedSQLState );
         vetUserProbes( conn, shouldSucceed, "select * from test_dbo.v3", expectedSQLState );
     }
@@ -286,6 +290,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
      */
     public  void    test_6616() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6616
         Connection  dboConnection = openUserConnection( TEST_DBO );
         Connection  janetConnection = openUserConnection( JANET );
 
@@ -379,6 +384,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         }
         catch (SQLException se)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
             if ( shouldSucceed )
             {
                 fail( routineName + " should have succeeded", se );
@@ -451,6 +457,10 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT( null, (short) 0 );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
                 fail();
             }
             catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
@@ -466,6 +476,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         else if (INSTALL_JAR.equals( routineName ) )
         {
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
                 SystemProcedures.INSTALL_JAR( SupportFilesSetup.getReadOnlyFileName("foo"), "bar", 1 );
                 fail();
             }
@@ -535,6 +546,9 @@ public class DBOAccessTest extends GeneratedColumnsHelper
             try {
                 SystemProcedures.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE
                     ( "TEST_DBO", "BAR", null, "1,3,4", "WIBBLE", null, null, null, (short) 1 );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
                 fail();
             }
             catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
@@ -544,6 +558,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
             try {
                 SystemProcedures.SYSCS_BULK_INSERT
                     ( "TEST_DBO", "BAR", "WIBBLE", "wombat" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
                 fail();
             }
             catch (SQLException se) { vetError( SYNTAX_ERROR, se ); }
@@ -588,6 +603,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_CREATE_USER( "foo", "bar" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
                 fail();
             }
             catch (SQLException se) { vetError( FIRST_CREDENTIALS, se ); }
@@ -604,6 +620,8 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_DROP_USER( "foo" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
+//IC see: https://issues.apache.org/jira/browse/DERBY-6697
                 fail();
             }
             catch (SQLException se) { vetError( UNKNOWN_USER, se ); }

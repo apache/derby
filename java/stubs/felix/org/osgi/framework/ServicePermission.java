@@ -378,6 +378,7 @@ final class ServicePermissionCollection extends PermissionCollection {
 	 */
 
 	public ServicePermissionCollection() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		permissions = new Hashtable<String,Permission>();
 		all_allowed = false;
 	}

@@ -24,6 +24,7 @@ package org.apache.derby.jdbc;
 import javax.sql.ConnectionPoolDataSource;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    <P>
    This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
    separate datasources for Java 5 and Java 6.
@@ -34,6 +35,7 @@ import javax.sql.ConnectionPoolDataSource;
  */
 public class ClientConnectionPoolDataSource40
     extends ClientConnectionPoolDataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     implements ConnectionPoolDataSource /* compile-time
                                          * check for 4.1
                                          * extension */

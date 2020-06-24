@@ -112,6 +112,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     
     private static  final   String[][]  BOOLEAN_ROWS =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
         { "tRuE", "true" },
         { "fAlSe", "false" },
     };
@@ -137,6 +138,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     
     private static  final   String[][]  WARNING_VTI_ROWS =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6151
         { "1", "red" },
         { "2", "blue" },
     };
@@ -165,6 +167,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             null,   // TIMESTAMP
             null,   // VARCHAR
             null,   // VARCHAR FOR BIT DATA
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
             null,   // BOOLEAN
         },
     };
@@ -190,10 +193,12 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "getTime " +            // TIME
         "getTimestamp " +       // TIMESTAMP
         "getString " +          // VARCHAR
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
         "getBytes " +           // VARCHAR FOR BIT DATA
         "getBoolean ";            // BOOLEAN
 
     private static  final   String  EXPECTED_GET_XXX_CALLS_JSR169 =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3135
         "getLong " +            // BIGINT
         "getBlob " +            // BLOB
         "getString " +          // CHAR
@@ -214,6 +219,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "getTime " +            // TIME
         "getTimestamp " +       // TIMESTAMP
         "getString " +          // VARCHAR
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
         "getBytes " +           // VARCHAR FOR BIT DATA
         "getBoolean ";            // BOOLEAN
 
@@ -334,6 +340,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             1 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
@@ -348,6 +355,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_VARCHAR,
             "VARCHAR",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              10 ,               // PRECISION
              20 ,              // LENGTH
             SCALE_UNDEFINED,
@@ -399,6 +407,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_COLUMN_IN,
             JDBC_TYPE_VARCHAR,
             "VARCHAR",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              10 ,               // PRECISION
              20 ,              // LENGTH
             SCALE_UNDEFINED,
@@ -428,6 +437,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              1 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
@@ -449,6 +459,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              2 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
@@ -463,6 +474,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_CHAR,
             "CHAR",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              10  ,     // PRECISION
              20 ,         // LENGTH
             SCALE_UNDEFINED,
@@ -484,6 +496,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_BINARY,
             "CHAR () FOR BIT DATA",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              10  ,     // PRECISION
              10 ,         // LENGTH
             SCALE_UNDEFINED,
@@ -512,6 +525,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              5 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
@@ -526,6 +540,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DATE,
             "DATE",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              10  ,     // PRECISION
              6 ,         // LENGTH
              0 ,       // SCALE
@@ -547,6 +562,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DECIMAL,
             "DECIMAL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              5  ,     // PRECISION
              14 ,         // LENGTH
              0 ,       // SCALE
@@ -568,6 +584,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DOUBLE,
             "DOUBLE",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              52  ,     // PRECISION
              8 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -589,6 +606,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DOUBLE,
             "DOUBLE",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              52  ,     // PRECISION
              8 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -610,6 +628,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_REAL,
             "REAL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              23  ,     // PRECISION
              4 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -631,6 +650,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DOUBLE,
             "DOUBLE",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              52  ,     // PRECISION
              8 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -659,6 +679,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              12 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
@@ -673,6 +694,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_LONGVARCHAR,
             "LONG VARCHAR",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              32700 ,     // PRECISION
              65400 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -694,6 +716,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_LONGVARBINARY,
             "LONG VARCHAR FOR BIT DATA",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              32700 ,     // PRECISION
              32700 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -715,6 +738,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_NUMERIC,
             "NUMERIC",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              5 ,     // PRECISION
              14 ,         // LENGTH
              0 ,       // SCALE
@@ -736,6 +760,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_REAL,
             "REAL",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              23 ,     // PRECISION
              4 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -757,6 +782,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_SMALLINT,
             "SMALLINT",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              5 ,     // PRECISION
              2 ,         // LENGTH
             SCALE_INTEGER,       // SCALE
@@ -778,6 +804,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_TIME,
             "TIME",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              8 ,     // PRECISION
              6 ,         // LENGTH
             SCALE_INTEGER,       // SCALE
@@ -799,6 +826,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_TIMESTAMP,
             "TIMESTAMP",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              29 ,     // PRECISION
              16 ,         // LENGTH
              9 ,       // SCALE
@@ -820,6 +848,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_VARCHAR,
             "VARCHAR",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              10 ,     // PRECISION
              20 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -841,6 +870,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_VARBINARY,
             "VARCHAR () FOR BIT DATA",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              10 ,     // PRECISION
              10 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -855,6 +885,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
              22 
         },
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
             NO_CATALOG,
             "APP",
             "RETURNSALLLEGALDATATYPES",
@@ -862,6 +893,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_BOOLEAN,
             "BOOLEAN",
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
              1 ,     // PRECISION
              1 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
@@ -921,6 +953,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite      suite = new BaseTestSuite( "TableFunctionTest" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( new TableFunctionTest( "noSpecialCollation" ) );
         suite.addTest( collatedSuite( "en", "specialCollation" ) );
@@ -938,6 +971,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
      */
     private static Test collatedSuite(String locale, String baseFixture)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite( "TableFunctionTest:territory=" + locale );
 
@@ -962,6 +996,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         dropSchema();
 
         _databaseMetaData = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5717
 
         super.tearDown();
     }
@@ -1014,6 +1049,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         bulkInsert();
         
         miscBugs();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4092
 
 	classpathError();
     }
@@ -1255,6 +1291,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
          CHAR_ROWS,
          new int[] { Types.CHAR, Types.CHAR }
          );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
 
         // boolean valued columns
         goodStatement
@@ -1521,6 +1558,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
              "column17 TIME,\n" +
              "column18 TIMESTAMP,\n" +
              "column19 VARCHAR( 10 ),\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
              "column20 VARCHAR( 10 ) FOR BIT DATA,\n" +
              "column21 BOOLEAN\n" +
              "  )\n" +
@@ -1616,6 +1654,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
                     Types.TIMESTAMP,
                     Types.VARCHAR,
                     Types.VARBINARY,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
                     Types.BOOLEAN,
                 }
              );
@@ -1631,6 +1671,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         ps.close();
         
         println( actualGetXXXCalls );
+//IC see: https://issues.apache.org/jira/browse/DERBY-3135
 
         String  expectedGetXXXCalls;
         if ( JDBC.vmSupportsJSR169() )
@@ -1982,11 +2023,13 @@ public class TableFunctionTest extends BaseJDBCTestCase
      * </p>
      */
     private void  miscBugs()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4092
         throws Exception
     {
         derby_4092();
         derby_5779();
         derby_6040();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6151
         derby_6151();
     }
     
@@ -2390,6 +2433,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         // this test uses varargs routines, which aren't available unless the VM
         // is at least at level 5
+//IC see: https://issues.apache.org/jira/browse/DERBY-6058
         if ( JDBC.vmSupportsJSR169() ) { return; }
         
         goodStatement
@@ -2464,6 +2508,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
      * </p>
      */
     private void  derby_6151()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6151
         throws Exception
     {
         goodStatement
@@ -2571,6 +2616,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
      */
     public  static  ResultSet returnsBooleans()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
         return makeVTI( BOOLEAN_ROWS );
     }
 
@@ -2729,6 +2775,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         throws Exception
     {
         println( "\nExpecting correct function metadata from " + functionName );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ResultSet rs =
             _databaseMetaData.getFunctions( null, "APP", functionName );
         JDBC.assertFullResultSet( rs, expectedGetFunctionsResult, false );
@@ -2802,6 +2849,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
                 switch( actualJdbcType )
                 {
                 case Types.BOOLEAN:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     actualValue = Boolean.toString( rs.getBoolean( column ) );
                     actualValueByName = Boolean.toString( rs.getBoolean( columnName ) );
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
@@ -2843,6 +2891,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
                 case Types.DECIMAL:
                 case Types.NUMERIC:
                     // with JSR169, we cannot execute resultSet.getBigDecimal...
+//IC see: https://issues.apache.org/jira/browse/DERBY-3057
                     if (JDBC.vmSupportsJDBC3()) {
                         actualValue = squeezeString(  rs.getBigDecimal( column ) );
                         actualValueByName = squeezeString(  rs.getBigDecimal( columnName ) );
@@ -2867,6 +2916,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
                     break;
 
                 case Types.BLOB:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3844
                     Blob blob = rs.getBlob(column);
                     actualValue = squeezeString(blob);
                     actualValueByName = squeezeString(blob);
@@ -3141,6 +3191,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         
         public  WarningVTI()
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6151
             super( makeColumnNames( 2, "mycol" ), WARNING_VTI_ROWS );
         }
 

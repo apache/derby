@@ -96,6 +96,7 @@ public class DbUtil {
 					+ " t_date, t_decimal, t_decimal_nn, t_double, "
 					+ " t_float, t_int, t_longint, t_numeric_large,"
 					+ " t_real, t_smallint, t_time, t_timestamp,"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 					+ " t_varchar,t_clob,t_blob,sequenceColumn) values ("
 					+ " ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,cast('00000000000000000000000000000000031' as clob(1K)),cast(X'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000031' as blob(10K)), next value for nstesttab_seq)");
 			
@@ -195,6 +196,7 @@ public class DbUtil {
 			try {
 				rowsAdded = ps.executeUpdate();
 			} catch (SQLException sqe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                 if ( NsTest.justCountErrors() )
                 {
                     NsTest.addError( sqe );
@@ -202,7 +204,9 @@ public class DbUtil {
                 else
                 {
                     if (sqe.getSQLState().equalsIgnoreCase("40XL1")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
                         NsTest.logger
+//IC see: https://issues.apache.org/jira/browse/DERBY-5454
                             .println("LOCK TIMEOUT obtained during insert - add_one_row() "
                                      + sqe.getSQLState());
                     }
@@ -218,6 +222,7 @@ public class DbUtil {
 				
 			}
 			if (rowsAdded == 1) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println(thread_id + " inserted 1 row with id "
 						//+ id_ind + NsTest.SUCCESS);
                         + id_ind);
@@ -251,6 +256,7 @@ public class DbUtil {
 		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 		long skey = pick_one(conn, thread_id);
 		if (skey == 0) { // means we did not find a row
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println(thread_id
 					+ " could not find a row to update or there was an error.");
 			return rowsUpdated;
@@ -295,6 +301,7 @@ public class DbUtil {
 			break;
 			
 		case TDECIMAL:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 			d = rand.nextDouble() * Math.pow(10, Math.abs(rand.nextInt() % 6));
 			ps2.setDouble(1, d);
 			ds2 = String.valueOf(d);
@@ -375,6 +382,7 @@ public class DbUtil {
 		try {
 			rowsUpdated = ps2.executeUpdate();
 		} catch (SQLException sqe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println(sqe.getSQLState() + " " + sqe.getErrorCode()
 					+ " " + sqe.getMessage());
 			if ( NsTest.justCountErrors() ) { NsTest.printException( DbUtil.class.getName(), sqe ); }
@@ -416,6 +424,7 @@ public class DbUtil {
 			ps = conn
 			.prepareStatement(" delete from nstesttab where serialkey = ?");
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger
 			.println("Unexpected error preparing the statement in delete_one()");
 			printException("delete_one_row prepare ", e);
@@ -435,6 +444,7 @@ public class DbUtil {
 			ps.setLong(1, skey);
 			rowsDeleted = ps.executeUpdate();
 		} catch (Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger
 			.println("Error in delete_one(): either with setLong() or executeUpdate");
 			printException("failure to execute delete stmt", e);
@@ -445,6 +455,7 @@ public class DbUtil {
 		}
 		
 		if (rowsDeleted > 0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 			NsTest.logger.println(thread_id + " deleted row with serialkey "
 					+ skey + NsTest.SUCCESS);
 		else
@@ -464,6 +475,7 @@ public class DbUtil {
 				
 		Random rand = new Random();
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5454
 		long minVal = NsTest.NUM_UNTOUCHED_ROWS + 1;//the max we start with
 		long maxVal = NsTest.numInserts;// this is an almost accurate count of
 		// the max serialkey since it keeps a count of the num of inserts made
@@ -477,6 +489,7 @@ public class DbUtil {
 		long rowToReturn = minVal + (long)(rand.nextDouble() * (maxVal - minVal));
 		return rowToReturn;
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5421
 	}//of method pick_one(...)
 	
 	// ** This method abstracts exception message printing for all exception
@@ -486,6 +499,7 @@ public class DbUtil {
 	// stack traces that are not
 	// ****mixed but rather one exception printed at a time
 	public synchronized void printException(String where, Exception e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         if ( NsTest.justCountErrors() )
         {
             NsTest.addError( e );
@@ -514,6 +528,7 @@ public class DbUtil {
 						+ " " + se.getErrorCode());
 			}
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-5465
 		if (e.getMessage() == null) {
 			NsTest.logger.println(getThreadName()
 					+ " dbUtil --> NULL error message detected");

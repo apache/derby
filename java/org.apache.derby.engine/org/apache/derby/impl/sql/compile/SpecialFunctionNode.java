@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.SpecialFunctionNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -49,6 +50,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 	 <UL>
 	 <LI> USER
 	 <LI> CURRENT_USER
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 	 <LI> CURRENT_ROLE
 	 <LI> SESSION_USER
 	 <LI> SYSTEM_USER
@@ -63,6 +65,8 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 	 This node is used rather than some use of MethodCallNode for
 	 runtime performance. MethodCallNode does not provide a fast access
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
      to the current language connection or activation, since it is geared
 	 towards user defined routines.
 
@@ -76,6 +80,7 @@ class SpecialFunctionNode extends ValueNode
 	String sqlName;
 
     // Allowed kinds
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     final static int K_IDENTITY_VAL = 0;
     final static int K_CURRENT_ISOLATION = 1;
     final static int K_CURRENT_SCHEMA = 2;
@@ -102,6 +107,7 @@ class SpecialFunctionNode extends ValueNode
 	*/
 	private String methodType;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     SpecialFunctionNode(int kind, ContextManager cm) {
         super(cm);
         this.kind = kind;
@@ -128,6 +134,8 @@ class SpecialFunctionNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates)
@@ -135,6 +143,7 @@ class SpecialFunctionNode extends ValueNode
     {
         DataTypeDescriptor dtd;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         switch (kind) {
         case K_USER:
         case K_CURRENT_USER:
@@ -150,6 +159,7 @@ class SpecialFunctionNode extends ValueNode
                     sqlName = "SYSTEM_USER";
                     break;
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             methodName = "getCurrentUserId";
 			methodType = "java.lang.String";
             
@@ -162,6 +172,7 @@ class SpecialFunctionNode extends ValueNode
 			break;
 
         case K_SESSION_USER:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             methodName = "getSessionUserId";
             methodType = "java.lang.String";
             sqlName = "SESSION_USER";
@@ -180,13 +191,16 @@ class SpecialFunctionNode extends ValueNode
             dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
 			break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         case K_CURRENT_ROLE:
 			sqlName = "CURRENT_ROLE";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 			methodName = "getCurrentRoleIdDelimited";
 			methodType = "java.lang.String";
 			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				// size: 2+(2*128) start and end text quote plus max # of
 				// escapes
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 				Types.VARCHAR, true, 2+(2*128)); 
 			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type
 			//of these functions will be the collation of character set
@@ -195,6 +209,7 @@ class SpecialFunctionNode extends ValueNode
 			//be implicit. (set by default)
 			break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         case K_IDENTITY_VAL:
 			sqlName = "IDENTITY_VAL_LOCAL";
 			methodName = "getIdentityValue";
@@ -213,6 +228,7 @@ class SpecialFunctionNode extends ValueNode
 			//derivation will be implicit. (set by default).
 			break;
 		default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT(
                         "Invalid type for SpecialFunctionNode " + kind);
@@ -259,7 +275,9 @@ class SpecialFunctionNode extends ValueNode
 											 ClassName.LanguageConnectionContext, 0);
 		int argCount = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 		if (methodName.equals("getCurrentRoleIdDelimited") ||
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 methodName.equals("getCurrentSchemaName") ||
                 methodName.equals("getCurrentUserId")) {
 
@@ -273,6 +291,7 @@ class SpecialFunctionNode extends ValueNode
 		String fieldType = getTypeCompiler().interfaceName();
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, fieldType);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateDataValue(mb, getTypeCompiler(), 
 				getTypeServices().getCollationType(), field);
 	}
@@ -284,6 +303,7 @@ class SpecialFunctionNode extends ValueNode
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 			return "sqlName: " + sqlName + "\n" +
 				super.toString();
 		}
@@ -295,6 +315,7 @@ class SpecialFunctionNode extends ValueNode
 
     @Override
     boolean isSameNodeKind(ValueNode o) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         return super.isSameNodeKind(o) &&
                 ((SpecialFunctionNode)o).kind == this.kind;
     }

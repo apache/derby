@@ -73,6 +73,7 @@ public class dblook_test {
 		new dblook_test().doTest();
 		System.out.println("\n[ Done. ]\n");
 		renameDbLookLog("dblook_test");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3458
 
 	}
 
@@ -87,6 +88,7 @@ public class dblook_test {
 
 			// Test full dblook functionality.
 			System.out.println("\n-= Start dblook Functional Tests. =-");
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			createTestDatabase(dbCreationScript_1);
 			runDBLook(testDBName);
 
@@ -136,6 +138,7 @@ public class dblook_test {
 	{
 
 		// Delete existing database, if it exists.
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 		try {
 			deleteDB(testDBName);
 		} catch (Exception e) {
@@ -143,12 +146,14 @@ public class dblook_test {
 				"old test db before creating a new one...");
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
         clazz.getConstructor().newInstance();
 		jdbcProtocol = "jdbc:derby:";
 		createDBFromDDL(testDBName, scriptName);
 
 		// Figure out where our database directory is (abs path).
+//IC see: https://issues.apache.org/jira/browse/DERBY-577
 		String systemhome = System.getProperty("derby.system.home");
 		dbPath = systemhome + File.separatorChar;
 		return;
@@ -292,6 +297,7 @@ public class dblook_test {
 		} catch (SQLException e) {
 
 			System.out.println("FAILED: Test # : " + whichTest);
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			e.printStackTrace(System.out);
 			for (e = e.getNextException(); e != null;
 				e = e.getNextException())
@@ -386,12 +392,15 @@ public class dblook_test {
 
 		printAsHeader("\nDumping DDL for all objects, " +
 			"using\nNetwork Server:\n");
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 		String hostName = TestUtil.getHostName();
 		jdbcProtocol = TestUtil.getJdbcUrlPrefix(hostName,SERVER_PORT);
 
 		String sourceDBUrl;
 		if (TestUtil.isJCCFramework())
 			sourceDBUrl = jdbcProtocol + "\"" + dbPath +
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 				separator + dbName + "\":user=app;password=apppw;";
 		else
 			sourceDBUrl = jdbcProtocol + dbPath +
@@ -409,6 +418,7 @@ public class dblook_test {
 		// Run the test.
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			new dblook(new String[] {
 				"-d", sourceDBUrl,
 				"-o", dbName + ".sql",
@@ -507,6 +517,7 @@ public class dblook_test {
 			"writing\nerror to the log:\n");
  
 		// Url is intentionally incorrect; it will cause an error.
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 		new dblook(new String[] {
 			"-o", dbName + ".sql",
 			"-d", dbName }
@@ -558,7 +569,10 @@ public class dblook_test {
 		jdbcProtocol = "jdbc:derby:";
 		String sourceDBUrl = jdbcProtocol + dbPath +
 			separator + dbName + ";user=app;password=apppw";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 		String [] fullArgs = new String[args.length+2];
 		fullArgs[0] = "-d";
 		fullArgs[1] = sourceDBUrl;
@@ -660,6 +674,8 @@ public class dblook_test {
 		try {
 			Connection conn =
 				DriverManager.getConnection("jdbc:derby:" + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 					jarPath + ";shutdown=true,user=app;password=apppw");
 			conn.close();
 		} catch (SQLException se) {
@@ -717,12 +733,15 @@ public class dblook_test {
 
 		// Connect to the database.
 		Connection conn = DriverManager.getConnection(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 				"jdbc:derby:" + dbName + ";user=app;password=apppw");
 		conn.setAutoCommit(false);
 
 		// Set the system schema to ensure that UCS_BASIC collation is used.
 		Statement stmt = conn.createStatement();
 		stmt.executeUpdate("SET SCHEMA SYS");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3458
 
 		// Ensure that the database has the expected collation type. 
 		ResultSet rs = null;
@@ -746,12 +765,14 @@ public class dblook_test {
 		// Load any id-to-name mappings that will be useful
 		// when dumping the catalogs.
 		HashMap<String, String> idToNameMap = loadIdMappings(stmt);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		// Go through and dump all system catalog information,
 		// filtering out database-dependent id's so that they
 		// won't cause diffs.
 
 		writeOut("\n========== SYSALIASES ==========\n");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3458
 		rs =
 			stmt.executeQuery("select schemaid, sys.sysaliases.* from sys.sysaliases");
 		dumpResultSet(rs, idToNameMap, null);
@@ -824,6 +845,8 @@ public class dblook_test {
 		rs = stmt.executeQuery("select compilationschemaid, sys.sysviews.* from sys.sysviews");
 		dumpResultSet(rs, idToNameMap, null);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 		writeOut("\n========== SYSROLES ==========\n");
 		rs = stmt.executeQuery
 			("select 'dummyFirstCol', " +
@@ -897,6 +920,7 @@ public class dblook_test {
 	 ****/
 
 	private void dumpResultSet (ResultSet rs,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		HashMap<String, String> idToNameMap, Connection conn)
 		throws Exception
 	{
@@ -916,6 +940,7 @@ public class dblook_test {
 		// which is why we use object names.
 		StringBuffer uniqueName = new StringBuffer();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		TreeMap<String, ArrayList<String>> orderedRows =
                 new TreeMap<String, ArrayList<String>>();
 		ArrayList<String> rowValues = new ArrayList<String>();
@@ -929,6 +954,7 @@ public class dblook_test {
 				String colName = rsmd.getColumnName(i);
 				String value = rs.getString(i);
 				String mappedName = idToNameMap.get(value);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 				if ((colName.indexOf("SCHEMAID") != -1) &&
 					(mappedName != null) &&
@@ -944,6 +970,7 @@ public class dblook_test {
 					rowValues = null;
 					break;
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 				else if (colName.equals("JAVACLASSNAME") && (value != null) &&
 					(value.indexOf("org.apache.derby") != -1) &&
 					(value.indexOf(".util.") == -1)) {
@@ -963,6 +990,8 @@ public class dblook_test {
 
 
 				String uniquePiece;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 
 				if (colName.equals("RGD")) {
 					// Role Grant Descriptor: synthetic unique column, see query
@@ -1018,6 +1047,7 @@ public class dblook_test {
 				// id.
 					handleDuplicateRow(rowValues, null, orderedRows);
 				else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 					ArrayList<String> oldRow = orderedRows.put(
 						uniqueName.toString(), rowValues);
 					if (oldRow != null) {
@@ -1032,6 +1062,7 @@ public class dblook_test {
 
 			uniqueName = new StringBuffer();
 			rowValues = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		}
 
@@ -1074,6 +1105,7 @@ public class dblook_test {
 	 ****/
 
 	private String dumpColumnData(String colName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		String value, String mappedName, ArrayList<String> rowVals)
 	{
 
@@ -1166,6 +1198,7 @@ public class dblook_test {
 	 ****/
 
 	private void handleDuplicateRow(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		ArrayList<String> newRow, ArrayList<String> oldRow,
 		TreeMap<String, ArrayList<String>> orderedRows)
 	{
@@ -1177,6 +1210,7 @@ public class dblook_test {
 		for (int i = 0; i < newRow.size(); i++)
 			newRowId.append((String)newRow.get(i));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		ArrayList<String> obj = orderedRows.put(newRowId.toString(), newRow);
 		if (obj != null)
 		// entire row is a duplicate.
@@ -1189,6 +1223,7 @@ public class dblook_test {
 			for (int i = 0; i < oldRow.size(); i++)
 				oldRowId.append((String)oldRow.get(i));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 			obj = orderedRows.put(oldRowId.toString(), oldRow);
 			if (obj != null)
 			// entire row is a duplicate.
@@ -1220,10 +1255,13 @@ public class dblook_test {
 			"' from ddl script '" + scriptName + "'");
 
 		Connection conn = DriverManager.getConnection(
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 				"jdbc:derby:" + newDBName +
 				";create=true;user=app;password=apppw" + territoryBased);
 
         runDDL( conn, scriptName );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
 
 		conn.close();
 
@@ -1303,6 +1341,7 @@ public class dblook_test {
 
     private HashMap<String, String> loadIdMappings(Statement stmt)
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		HashMap<String, String> idToNameMap = new HashMap<String, String>();
 
@@ -1479,6 +1518,8 @@ public class dblook_test {
 		try {
 			Connection conn =
 				DriverManager.getConnection("jdbc:derby:" + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 					deletePath + ";shutdown=true;user=app;password=apppw");
 			conn.close();
 		} catch (SQLException se) {
@@ -1567,6 +1608,7 @@ public class dblook_test {
 
 	protected static void renameDbLookLog(String nameOfTest)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3458
 		File dbLookTestLog = new File("dblook.log");
 		if (dbLookTestLog.exists()) {
 			int i = 0;
@@ -1597,6 +1639,7 @@ public class dblook_test {
 
 		try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			BufferedReader dumpFile =
 				new BufferedReader(new FileReader(fName));
 

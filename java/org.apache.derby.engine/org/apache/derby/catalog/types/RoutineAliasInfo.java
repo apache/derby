@@ -99,6 +99,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
         bits 0-3    sqlAllowed = MODIFIES_SQL_DATA, READS_SQL_DATA,CONTAINS_SQL, or NO_SQL
 
         bit 4         on if function is DETERMINISTIC, off otherwise
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         bit 5         on if running with definer's right, off otherwise
     */
 	private short	sqlOptions;
@@ -137,6 +138,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
          boolean hasVarargs
          )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         this(methodName,
              parameterCount,
              parameterNames,
@@ -172,6 +174,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 
 		super(methodName);
 		this.parameterCount = parameterCount;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
 		this.parameterNames = ArrayUtil.copy( parameterNames );
 		setParameterTypes( parameterTypes );
 		this.parameterModes = ArrayUtil.copy( parameterModes );
@@ -181,6 +184,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
         if ( isDeterministic ) { this.sqlOptions = (short) (sqlOptions | DETERMINISTIC_MASK); }
         if ( hasVarargs ) { this.sqlOptions = (short) (sqlOptions | VARARGS_MASK); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         if (definersRights) {
             this.sqlOptions = (short) (sqlOptions | SECURITY_DEFINER_MASK);
         }
@@ -234,6 +238,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
      */
 	public TypeDescriptor[] getParameterTypes()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
         return TypeDescriptorImpl.copyTypeDescriptors( parameterTypes );
 	}
 
@@ -276,6 +281,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 
     public boolean hasDefinersRights()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         return ( (sqlOptions & SECURITY_DEFINER_MASK) != 0 );
     }
 
@@ -403,14 +409,17 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			if (i != 0)
 				sb.append(',');
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-475
 			if (returnType == null) {
 			// This is a PROCEDURE.  We only want to print the
 			// parameter mode (ex. "IN", "OUT", "INOUT") for procedures--
 			// we don't do it for functions since use of the "IN" keyword
 			// is not part of the FUNCTION syntax.
+//IC see: https://issues.apache.org/jira/browse/DERBY-337
 				sb.append(RoutineAliasInfo.parameterMode(parameterModes[i]));
 				sb.append(' ');
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-1963
 			sb.append(IdUtil.normalToDelimited(parameterNames[i]));
 			sb.append(' ');
 			sb.append(parameterTypes[i].getSQLstring());
@@ -418,6 +427,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
         if ( hasVarargs() ) { sb.append( " ... " ); }
 		sb.append(')');
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-475
 		if (returnType != null) {
 		// this a FUNCTION, so syntax requires us to append the return type.
 			sb.append(" RETURNS " + returnType.getSQLstring());
@@ -432,9 +442,11 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		    case PS_DERBY:    sb.append( "DERBY " ); break;
 		}
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-3570
         if ( isDeterministic() )
         { sb.append( " DETERMINISTIC " ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         if ( hasDefinersRights())
         { sb.append( " EXTERNAL SECURITY DEFINER " ); }
 
@@ -447,6 +459,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			sb.append(dynamicResultSets);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-475
 		if (returnType != null) {
 		// this a FUNCTION, so append the syntax telling what to
 		// do with a null parameter.
@@ -459,6 +472,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 
 	public static String parameterMode(int parameterMode) {
 		switch (parameterMode) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         case (ParameterMetaData.parameterModeIn):
 			return "IN";
         case (ParameterMetaData.parameterModeOut):

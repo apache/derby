@@ -54,6 +54,7 @@ public final class EncodedInputStream extends InputStream {
      */
     public static EncodedInputStream createUTF8Stream(Reader reader) {
         return new EncodedInputStream(reader, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                                       UTF_8,
                                       BUFFERED_CHAR_LEN,
                                       BUFFERED_CHAR_LEN*3);
@@ -67,6 +68,7 @@ public final class EncodedInputStream extends InputStream {
      */
     static EncodedInputStream createUTF16BEStream(Reader reader) {
         return new EncodedInputStream(reader,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                                       UTF_16BE,
                                       BUFFERED_CHAR_LEN,
                                       BUFFERED_CHAR_LEN*2);
@@ -94,16 +96,19 @@ public final class EncodedInputStream extends InputStream {
      *      holding the encoded bytes
      */
     private EncodedInputStream(Reader reader,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                                Charset encoding,
                                int charBufferSize,
                                int initialByteBufferSize) {
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         reader_ = reader;
         decodedBuffer_ = new char[charBufferSize];
 
         encodedOutputStream_ = new PublicBufferOutputStream(
                 initialByteBufferSize);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
         encodedStreamWriter_ =
                 new OutputStreamWriter(encodedOutputStream_, encoding);
 

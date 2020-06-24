@@ -49,6 +49,7 @@ public class _Suite extends BaseTestCase  {
 	public static Test suite() {
 
         BaseTestSuite suite = new BaseTestSuite("i18n");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         // Also, none of these tests will run with JSR169.
         if (JDBC.vmSupportsJSR169())
@@ -56,8 +57,11 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LocalizedAttributeScriptTest.suite());
         suite.addTest(LocalizedDisplayScriptTest.suite());
         suite.addTest(JapanCodeConversionTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6244
         suite.addTest(CaseI_tr_TRTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6246
         suite.addTest(UrlLocaleTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4035
         suite.addTest(I18NImportExport.suite());
         suite.addTest(ImportExportProcedureESTest.suite());
         return suite;

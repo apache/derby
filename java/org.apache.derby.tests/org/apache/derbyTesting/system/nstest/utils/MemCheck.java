@@ -54,12 +54,14 @@ public class MemCheck extends Thread {
 				// first check if there are still active tester threads, so 
 				// we do not make backups on an unchanged db every 10 mins for
 				// the remainder of MAX_ITERATIONS.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5649
 				if (NsTest.numActiveTestThreads() != 0 && NsTest.numActiveTestThreads() > 1)
 				{
 					continue;
 				}
 				else
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 					NsTest.logger.println("no more test threads, finishing memcheck thread also");
 					showmem();
 					stopNow=true;
@@ -77,6 +79,7 @@ public class MemCheck extends Thread {
 		Runtime rt = null;
 		Date d = null;
 		rt = Runtime.getRuntime();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
         long    totalMemory = rt.totalMemory();
         long    freeMemory = rt.freeMemory();
 		d = new Date();

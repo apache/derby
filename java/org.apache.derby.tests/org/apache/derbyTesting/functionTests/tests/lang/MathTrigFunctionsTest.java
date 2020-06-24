@@ -33,6 +33,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
    private static final double
             PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE = -1.79769E+308;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
 
    private static final double
             SMALL_NEG_DOUBLE = -1.79768E+308;
@@ -54,7 +55,9 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 			0.25, -0.25, 0.5, 0.0, -0.0, 1.0, -1.0 };
 
 	private static final double[] logValues = { 0.000000001, 0.25, 0.5, 1.0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
            45.0, 90.0, 135.0, 180.0, 270, PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6447
            PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE, 10, 100, 1000, 10000,
            100000, 1000000, 10000000, 100000000, 1000000000};
 
@@ -96,6 +99,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("ACOS");
 		debug();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES ACOS(?)");
         PreparedStatement psFN =
@@ -125,6 +129,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 		/* test the case where the input value is out of range */
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(ps, 2.0);
 			fail("ACOS: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
@@ -137,6 +142,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 		/* test the case where the input value is out of range */
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(psFN, 2.0);
 			fail("ACOS: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
@@ -173,6 +179,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullValues("ASIN");
 		executeNullFn("ASIN");
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES ASIN(?)");
         PreparedStatement psFN =
@@ -201,6 +208,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(ps, 2.0);
 			fail("ASIN: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
@@ -211,6 +219,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(psFN, 2.0);
 			fail("ASIN: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
@@ -242,6 +251,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("ATAN");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES ATAN(?)");
         PreparedStatement psFN =
@@ -284,6 +294,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullValues("COS");
 		executeNullFn("COS");
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES COS(?)");
         PreparedStatement psFN =
@@ -330,6 +341,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("SIN");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES SIN(?)");
         PreparedStatement psFN =
@@ -377,6 +389,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 		debug();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES TAN(?)");
         PreparedStatement psFN =
@@ -408,6 +421,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 	}
 
     public void testCot() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6447
         executeNullValues("COT");
         executeNullFn("COT");
         debug();
@@ -566,6 +580,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("DEGREES");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES DEGREES(?)");
         PreparedStatement psFN =
@@ -597,6 +612,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 		try {
             // Yields -Infinity, so thould throw.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             getValue(ps, PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
 			fail("DEGREES: Out of range test failed, input value is: "
                    + PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
@@ -609,6 +625,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 		try {
             // Yields -Infinity, so thould throw.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             getValue(psFN, PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
 			fail("DEGREES: Out of range test failed, input value is: "
                    + PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
@@ -626,6 +643,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
     // 2.2250738585072014E-308 remove when we move to compile with source level
     // Java 6. Cf Double.MIN_NORMAL.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
     final static double DOUBLE_MIN_NORMAL = 2.2250738585072014E-308; 
     
 	/**
@@ -646,6 +664,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("RADIANS");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES RADIANS(?)");
         PreparedStatement psFN =
@@ -678,11 +697,13 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
         // outside Derby context. First number: argument to ps and psFN, second
         // number: expected result. Actual results vary by JVM level. See DERBY-6755.
         double[][] inOut = new double[][] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             {180.0d, java.lang.StrictMath.PI},
             {PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE, -3.1375609430176863E306},
             {DOUBLE_MIN_NORMAL, 3.8834864931005E-310},
             {Double.MIN_VALUE, 0.0d},
             {Double.MAX_VALUE, 3.1375664143845866E306},
+//IC see: https://issues.apache.org/jira/browse/DERBY-6755
             {PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE, vmAtLeast( 1, 9 ) ? 3.883357585687384E-309 : 3.88335758568738E-309},
             {PRE_DERBY_3398_LARGEST_NEG_DERBY_DOUBLE, vmAtLeast( 1, 9 ) ? -3.883357585687384E-309 : -3.88335758568738E-309},
         };
@@ -713,6 +734,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("EXP");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES EXP(?)");
         PreparedStatement psFN =
@@ -740,6 +762,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             getValue(ps, PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
 			fail("EXP: Out of range test failed, input value is: "
                    + PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
@@ -751,6 +774,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
             getValue(psFN, PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
 			fail("EXP: Out of range test failed, input value is: "
                    + PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
@@ -783,6 +807,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("LOG10");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES LOG10(?)");
         PreparedStatement psFN =
@@ -809,6 +834,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(ps, 0.0);
 			fail("LOG10: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
@@ -819,6 +845,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(ps, -1.0);
 			fail("LOG10: Out of range test failed, input value is: " + -1.0);
 		} catch (SQLException sqlE) {
@@ -830,6 +857,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(psFN, 0.0);
 			fail("LOG10: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
@@ -840,6 +868,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(psFN, -1.0);
 			fail("LOG10: Out of range test failed, input value is: " + -1.0);
 		} catch (SQLException sqlE) {
@@ -869,6 +898,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("LOG");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES LOG(?)");
         PreparedStatement psFN =
@@ -906,6 +936,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(psFN, 0.0);
 			fail("LOG: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
@@ -937,6 +968,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
         // because it is not defined by JDBC.
 		// Object fnVal = executeNullFn("LN");
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES LN(?)");
 		for (int i = 0; i < logValues.length; i++) {
@@ -956,6 +988,8 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
 			getValue(ps, 0.0);
 			fail("LOG: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
@@ -997,6 +1031,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES CEIL(?)");
         
@@ -1042,6 +1077,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 		executeNullFn("CEILING");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES CEILING(?)");
         PreparedStatement psFN =
@@ -1098,6 +1134,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("FLOOR");
 
 		debug();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         PreparedStatement ps =
             prepareStatement("VALUES FLOOR(?)");
         PreparedStatement psFN =
@@ -1123,6 +1160,21 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 			assertEquals(expect, fVal, 0.0);
 
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         ps.close();
         psFN.close();
 	}
@@ -1158,6 +1210,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
      * and return the double value from the single row returned.
      */
     private double getValue(PreparedStatement ps, double value)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
             throws SQLException {
         ps.setDouble(1, value);
         ResultSet rs = ps.executeQuery();
@@ -1207,6 +1260,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		Statement stmt = createStatement();
 		ResultSet rs = stmt.executeQuery("values {fn  " + functionName
 				+ "(null)}");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2032
         rs.next(); // we know a single value will be returned.
         assertNull(rs.getObject(1));
         assertTrue(rs.wasNull());
@@ -1215,6 +1269,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 	}
 
 	private void debug(String message) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6447
         println(message);
 	}
 
@@ -1231,6 +1286,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
      * as the JDBC escape function testing is relevant for both drivers.
      */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         return TestConfiguration.defaultSuite(MathTrigFunctionsTest.class);
 	}
 

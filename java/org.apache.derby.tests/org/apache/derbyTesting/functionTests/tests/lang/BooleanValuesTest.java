@@ -81,6 +81,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     {
         super(name);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
         _supportsXML = XML.classpathMeetsXMLReqs();
     }
 
@@ -96,6 +97,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         Test result = (BaseTestSuite)TestConfiguration.defaultSuite(
             BooleanValuesTest.class);
 
@@ -122,6 +124,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         if ( !tableExists( conn, "ALL_TYPES" ) )
         {
             StringBuffer buffer;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
 
             //
             // create table
@@ -149,10 +152,12 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time_col  TIME,\n" +
                  "    timestamp_col  TIMESTAMP,\n" +
                  "    varchar_col  VARCHAR(10),\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
                 "    varchar_for_bit_data_col  VARCHAR (10) FOR BIT DATA\n"
                  );
             if ( _supportsXML )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4658
                 buffer.append( "    ,xml_col  XML\n" );
             }
             buffer.append( ")\n" );
@@ -184,6 +189,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time_col,\n" +
                  "    timestamp_col,\n" +
                  "    varchar_col,\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
                  "    varchar_for_bit_data_col\n"
                  );
             if ( _supportsXML )
@@ -213,6 +219,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    '0',\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
                  "    X'DE'\n"
                  );
             if ( _supportsXML )
@@ -241,6 +248,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    '1',\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
                  "    X'DE'\n"
                  );
             if ( _supportsXML )
@@ -269,6 +277,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    '2',\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
                  "    X'DE'\n"
                   );
             if ( _supportsXML )
@@ -297,6 +306,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    'baffle',\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
                  "    X'DE'\n"
                  );
             if ( _supportsXML )
@@ -310,6 +320,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
             goodStatement( conn, buffer.toString() );
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4658
         if ( !tableExists( conn, "BOOLEANSTRING" ) )
         {
             //
@@ -396,6 +407,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  );
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         if ( !routineExists( conn, "BOOLEANVALUE" ) )
         {
             //
@@ -410,6 +422,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  );
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
         if ( !tableExists( conn, "BOOLEAN_TABLE" ) )
         {
             //
@@ -473,6 +486,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         while ( rs.next() ) { actualTypeCount++; }
         rs.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         assertEquals( 22, actualTypeCount );
     }
 
@@ -543,6 +557,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         // We don't test the XML datatype on JDK 1.4 because the Xalan
         // packages are in the wrong location there.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-4674
         if ( _supportsXML )
         {
             expectCompilationError
@@ -697,6 +712,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_07_booleanLiterals() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4583
 
         assertResults
             (
@@ -728,6 +744,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_08_stringCasts() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4658
 
         assertResults( conn, "values ( cast( 'true' as boolean ) )", new String[][] { { "true" } }, false );
         assertResults( conn, "values ( cast( 'false' as boolean ) )", new String[][] { { "false" } }, false );
@@ -830,6 +847,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
              false
              );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4730
         assertResults
             (
              conn,
@@ -901,6 +919,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
 
     public void test_10_nullabilityOfCastFromLiteral() throws SQLException {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4658
 
         ResultSet rs = s.executeQuery("values cast('true' as boolean)");
         JDBC.assertNullability(rs, new boolean[] { false });
@@ -939,6 +958,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_11_booleanFunctionParameters() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
 
         assertResults
             (
@@ -981,6 +1001,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_12_booleanColumns() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
 
         goodStatement( conn, "insert into boolean_table( key_col, boolean_col ) values ( 0, true ), ( 1, false ), ( 2, null )" );
         assertResults
@@ -1073,6 +1094,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_13_sortOrder() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
 
         goodStatement( conn, "create table booleanUnindexed( a boolean )" );
         goodStatement( conn, "create table booleanIndexed( a boolean )" );
@@ -1115,6 +1137,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_14_defaults() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
 
         goodStatement( conn, "create table booleanDefaults( a int, b boolean default true, c boolean default false, d boolean default null )" );
         goodStatement( conn, "insert into booleanDefaults( a ) values ( 0 )" );
@@ -1158,6 +1181,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_15_selectList() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4720
 
         assertResults
             (
@@ -1190,6 +1214,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_16_alterTable() throws Exception
     {
         Connection conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4716
 
         goodStatement( conn, "create table booleanAlter( a int )" );
         goodStatement( conn, "insert into booleanAlter( a ) values ( 0 ), ( 1 ), ( 2 )" );
@@ -1531,6 +1556,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      */
     public void test_22_binary_operators() throws SQLException {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5971
 
         // Create a table with two columns containing all combinations of
         // legal boolean values.
@@ -1675,6 +1701,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      */
     public void test_23_select_distinct() throws SQLException {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5971
 
         Statement s = createStatement();
         assertUpdateCount(s, 6, "insert into boolean_table(boolean_col) "
@@ -1778,6 +1805,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
 
         ps.setInt( 1, 5 );
         ps.setString( 2, "setObject( Byte )" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         ps.setObject( 3, (byte) value );
         ps.execute();
 
@@ -2059,6 +2087,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public void test_5918() throws Exception
     {
         setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5918
 
         Statement s = createStatement();
         s.execute("create table derby5918_1(b boolean)");
@@ -2189,11 +2218,13 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
 
     public static Blob makeSimpleBlob() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
         return new HarmonySerialBlob( new byte[] { 1 } );
     }
     
     public static String booleanValue( Boolean b )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4659
         if ( b == null ) { return "Null value"; }
         else if ( b.booleanValue() ) { return "True value"; }
         else { return "False value"; }

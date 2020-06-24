@@ -83,17 +83,21 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"004b0019-0103-0e39-b8e7-00000010f010"	// heap UUID
 		,"c851401a-0103-0e39-b8e7-00000010f010"	// index1
 		,"80220011-010c-426e-c599-0000000f1120"	// index2
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 		,"f81e0010-010c-bc85-060d-000000109ab8"	// index3
     };
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSTABLEPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 		initInfo(COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexUniqueness, uuids);
 	}
 
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		UUID						oid;
         DataValueDescriptor grantee = null;
         DataValueDescriptor grantor = null;
@@ -114,6 +118,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
         else
         {
             TablePermsDescriptor tpd = (TablePermsDescriptor) td;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
             oid = tpd.getUUID();
             if ( oid == null )
             {
@@ -157,6 +162,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSTABLEPERMSRowFactory.buildDescriptor");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         String tablePermsUUIDString = row.getColumn(TABLEPERMSID_COL_NUM).getString();
         UUID tablePermsUUID = getUUIDFactory().recreateUUID(tablePermsUUIDString);
         String tableUUIDString = row.getColumn( TABLEID_COL_NUM).getString();
@@ -183,6 +189,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
                                   "Invalid SYSTABLEPERMS.triggerPriv column value: " + triggerPriv);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		TablePermsDescriptor tabPermsDesc =
         new TablePermsDescriptor( dataDictionary,
                                          getAuthorizationID( row, GRANTEE_COL_NUM),
@@ -196,6 +203,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 
 	/** builds a column list for the catalog */
 	public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
         return new SystemColumn[] {
@@ -238,11 +246,13 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             String tableUUIDStr = ((TablePermsDescriptor) perm).getTableUUID().toString();
             row.setColumn(2, new SQLChar(tableUUIDStr));
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         case TABLEPERMSID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             String tablePermsUUIDStr = perm.getObjectID().toString();
             row.setColumn(1, new SQLChar(tablePermsUUIDStr));
             break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
         case TABLEID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             tableUUIDStr = ((TablePermsDescriptor) perm).getTableUUID().toString();
@@ -359,6 +369,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 	 * @see PermissionsCatalogRowFactory#setUUIDOfThePassedDescriptor
 	 */
     public void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
     throws StandardException
     {
         DataValueDescriptor existingPermDVD = row.getColumn(TABLEPERMSID_COL_NUM);

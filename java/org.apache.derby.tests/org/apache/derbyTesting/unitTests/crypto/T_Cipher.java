@@ -86,6 +86,7 @@ public class T_Cipher extends T_Generic
 	*/
 
 	public String getModuleToTestProtocolName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		return org.apache.derby.shared.common.reference.Module.CipherFactoryBuilder;
 	}
 
@@ -99,6 +100,7 @@ public class T_Cipher extends T_Generic
 	// allow for alternate providers
 	String testProvider = 
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedAction<String>() {
             public String run() {
 		    	return System.getProperty("testEncryptionProvider");
@@ -116,6 +118,7 @@ public class T_Cipher extends T_Generic
 
 		File testFile = new File("extinout/T_Cipher.data");
 		deleteFile(testFile);
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
 
 		String bootPassword = "a secret, don't tell anyone";
 
@@ -208,8 +211,10 @@ public class T_Cipher extends T_Generic
         REPORT("encryption algorithm used : " + getAlgorithm());
         REPORT("encryption provider used : " + provider);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
         CipherFactoryBuilder cb =  (CipherFactoryBuilder)
             startSystemModule(org.apache.derby.shared.common.reference.Module.CipherFactoryBuilder);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         factory = cb.createCipherFactory(true, props, false);
 
@@ -613,8 +618,10 @@ public class T_Cipher extends T_Generic
 	 */
 	private void deleteFile(final File f)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run()  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-615
 		    	if (f.exists())
 		    	    f.delete();
 		    	return null;
@@ -627,6 +634,7 @@ public class T_Cipher extends T_Generic
      * can't call this entry point.
      */
     private  static  Object  startSystemModule( final String factoryInterface )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         throws StandardException
     {
         try {

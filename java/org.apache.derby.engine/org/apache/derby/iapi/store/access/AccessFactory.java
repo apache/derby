@@ -36,6 +36,7 @@ import java.io.File;
 
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
   <p>
   Module interface for an access manager.  An access manager provides
   transactional access via access methods to data in a single storage
@@ -238,6 +239,7 @@ public interface AccessFactory
      * thrown on error.
      */
     public void startReplicationMaster(String dbmaster, String host, int port,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
                                        String replicationMode)
         throws StandardException;
 
@@ -337,6 +339,8 @@ public interface AccessFactory
 	public void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)
 		throws StandardException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
 
 	/**
 	 * Checkpoints the database, that is, flushes all dirty data to disk.

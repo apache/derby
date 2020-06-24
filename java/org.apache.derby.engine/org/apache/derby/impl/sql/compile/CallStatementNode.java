@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CallStatementNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -50,6 +51,8 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  * A procedure is always represented by a MethodCallNode.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class CallStatementNode extends DMLStatementNode
 {	
 	/**
@@ -67,6 +70,8 @@ class CallStatementNode extends DMLStatementNode
      * @param cm                The context manager
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CallStatementNode(JavaToSQLValueNode methodCall, ContextManager cm)
 	{
         super(null, cm);
@@ -87,6 +92,8 @@ class CallStatementNode extends DMLStatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -120,8 +127,11 @@ class CallStatementNode extends DMLStatementNode
 
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT((dd != null), "Failed to get data dictionary");
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
         SubqueryList subqueries = new SubqueryList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		getCompilerContext().pushCurrentPrivType(getPrivType());
 		methodCall = (JavaToSQLValueNode) methodCall.bindExpression(
@@ -140,7 +150,9 @@ class CallStatementNode extends DMLStatementNode
 		// Disallow creation of BEFORE triggers which contain calls to 
 		// procedures that modify SQL data. 
   		checkReliability();
+//IC see: https://issues.apache.org/jira/browse/DERBY-551
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		getCompilerContext().popCurrentPrivType();
 	}
 
@@ -168,6 +180,8 @@ class CallStatementNode extends DMLStatementNode
 		SanityManager.ASSERT((dd != null), "Failed to get data dictionary");
 
 		/* Preprocess the method call tree */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         methodCall =
             (JavaToSQLValueNode) methodCall.preprocess(
                 getCompilerContext().getNumTables(),
@@ -253,11 +267,13 @@ class CallStatementNode extends DMLStatementNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (methodCall != null)
 		{
 			methodCall = (JavaToSQLValueNode) methodCall.accept(v);
@@ -270,6 +286,7 @@ class CallStatementNode extends DMLStatementNode
     @Override
 	int getPrivType()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		return Authorizer.EXECUTE_PRIV;
 	}
 	
@@ -284,6 +301,7 @@ class CallStatementNode extends DMLStatementNode
 	 * @throws StandardException
 	 */
 	private void checkReliability() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-551
 		if(getSQLAllowedInProcedure() == RoutineAliasInfo.MODIFIES_SQL_DATA &&
 				getCompilerContext().getReliability() == CompilerContext.MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL) 
 			throw StandardException.newException(SQLState.LANG_UNSUPPORTED_TRIGGER_PROC);

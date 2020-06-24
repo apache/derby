@@ -540,7 +540,9 @@ final class JCECipherFactory implements CipherFactory
 				// provider package should be set by property
 				if (Security.getProvider(cryptoProviderShort) == null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     Class<?> cryptoClass = Class.forName(cryptoProvider);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
                     if (!Provider.class.isAssignableFrom(cryptoClass)) {
                         throw StandardException.newException(
                                 SQLState.ENCRYPTION_NOT_A_PROVIDER,
@@ -568,6 +570,7 @@ final class JCECipherFactory implements CipherFactory
 			if (externalKey != null) {
 
 				// incorrect to specify external key and boot password
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 				if (properties.getProperty((newAttrs ? 
                                             Attribute.NEW_BOOT_PASSWORD :
                                             Attribute.BOOT_PASSWORD)) != null)
@@ -577,6 +580,7 @@ final class JCECipherFactory implements CipherFactory
                     org.apache.derby.iapi.util.StringUtil.fromHexString(externalKey, 
                                                                         0, 
                                                                         externalKey.length());
+//IC see: https://issues.apache.org/jira/browse/DERBY-746
                 if (generatedKey == null) {
                     throw StandardException.newException(
                         // If length is even, we assume invalid character(s),
@@ -588,8 +592,10 @@ final class JCECipherFactory implements CipherFactory
 
 			} else {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 				generatedKey = handleBootPassword(create, properties, newAttrs);
 				if(create || newAttrs)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 				   persistentProperties.put(Attribute.CRYPTO_KEY_LENGTH,
                                             keyLengthBits+"-"+generatedKey.length);
 			}
@@ -601,6 +607,7 @@ final class JCECipherFactory implements CipherFactory
 			if (create)
 			{
 				persistentProperties.put(Attribute.DATA_ENCRYPTION, "true");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 
 				// Set two new properties to allow for future changes to the log and data encryption
 				// schemes. This property is introduced in version 10 , value starts at 1.
@@ -612,6 +619,7 @@ final class JCECipherFactory implements CipherFactory
 
 			return;
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
         catch (ClassNotFoundException cnfe)
         {
             t = StandardException.newException(
@@ -627,6 +635,7 @@ final class JCECipherFactory implements CipherFactory
         {
             t = iae;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         catch (NoSuchMethodException nsme)
         {
             t = nsme;
@@ -653,6 +662,7 @@ final class JCECipherFactory implements CipherFactory
 
 
 	private byte[] handleBootPassword(boolean create, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
                                       Properties properties, 
                                       boolean newPasswd)
 		throws StandardException {
@@ -689,11 +699,13 @@ final class JCECipherFactory implements CipherFactory
 
 		byte[] generatedKey;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 		if (create || newPasswd)
 		{
 			//
 			generatedKey = generateUniqueBytes();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
 			persistentProperties.put(RawStoreFactory.ENCRYPTED_KEY, 
                                            saveSecretKey(generatedKey, bootPassword));
 
@@ -716,6 +728,7 @@ final class JCECipherFactory implements CipherFactory
     {
         // put the cipher properties to be persistent into the 
         // system perisistent properties. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
         for (Enumeration e = persistentProperties.keys(); 
              e.hasMoreElements(); ) 
         {
@@ -808,6 +821,7 @@ final class JCECipherFactory implements CipherFactory
 		if (newBPAscii == null || newBPAscii.length < CipherFactory.MIN_BOOTPASS_LENGTH)
 			throw StandardException.newException(SQLState.ILLEGAL_BP_LENGTH,
                 CipherFactory.MIN_BOOTPASS_LENGTH);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		// verify old key
 
@@ -900,6 +914,7 @@ final class JCECipherFactory implements CipherFactory
 	    Please note, this process of verifying the key  does not provide any added security but only is 
 	    intended to allow to fail gracefully if a wrong encryption key is used
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-862
 	    StandardException is thrown if there are any problems during the process of verification
 	    		of the encryption key or if there is any mismatch of the encryption key.
 
@@ -937,6 +952,8 @@ final class JCECipherFactory implements CipherFactory
 				verifyKeyFile.writeInt(checksum.length);
 				verifyKeyFile.write(checksum);
 				verifyKeyFile.write(data);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
+//IC see: https://issues.apache.org/jira/browse/DERBY-4963
                 verifyKeyFile.sync();
 			}
 			else
@@ -1023,6 +1040,7 @@ final class JCECipherFactory implements CipherFactory
 		@exception IOException Any exception during accessing the file for read/write
 	 */
     private StorageRandomAccessFile privAccessFile(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
             StorageFactory storageFactory,
             String fileName,
             final String filePerms)
@@ -1056,6 +1074,7 @@ final class JCECipherFactory implements CipherFactory
 	private InputStream privAccessGetInputStream(StorageFactory storageFactory,String fileName)
 	throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
         final StorageFile verifyKeyFile
                 = storageFactory.newStorageFile("", fileName);
 	    try

@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ExecSPSNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -50,6 +51,8 @@ import org.apache.derby.iapi.util.ByteArray;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class ExecSPSNode extends StatementNode
 {
 	private TableName			name;
@@ -101,6 +104,8 @@ class ExecSPSNode extends StatementNode
 			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "STATEMENT", name);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if (spsd.getType() == SPSDescriptor.SPS_TYPE_TRIGGER)
 		{
 			throw StandardException.newException(SQLState.LANG_TRIGGER_SPS_CANNOT_BE_EXECED, name);
@@ -308,6 +313,8 @@ class ExecSPSNode extends StatementNode
 	// MISC
 	//
 	/////////////////////////////////////////////////////////////////////
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "EXECUTE STATEMENT";

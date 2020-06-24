@@ -75,10 +75,12 @@ public abstract class HarnessJavaTest extends CanonTestCase {
 
         
         PrintStream out = System.out;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2434
         PrintStream testOut = new PrintStream(getOutputStream(),
                 false, outputEncoding);
         setSystemOut(testOut);
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Class<?> test = Class.forName(testClassName);
         
         Method main = test.getDeclaredMethod("main", MAIN_ARG_TYPE);

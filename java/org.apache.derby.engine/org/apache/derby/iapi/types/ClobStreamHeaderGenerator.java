@@ -98,6 +98,7 @@ public final class ClobStreamHeaderGenerator
         // Do not try to determine the version through the cottext service, use
         // the specified value instead.
         this.callbackDVD = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
         this.isPreDerbyTenFive = Boolean.valueOf(isPreDerbyTenFive);
     }
 
@@ -129,6 +130,7 @@ public final class ClobStreamHeaderGenerator
      * @return The number of bytes written into the buffer.
      */
     public int generateInto(byte[] buf, int offset, long valueLength) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
         if (callbackDVD != null && isPreDerbyTenFive == null) {
             determineHeaderFormat();
         }
@@ -165,6 +167,7 @@ public final class ClobStreamHeaderGenerator
      */
     public int generateInto(ObjectOutput out, long valueLength)
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
         if (callbackDVD != null && isPreDerbyTenFive == null) {
             determineHeaderFormat();
         }
@@ -206,6 +209,7 @@ public final class ClobStreamHeaderGenerator
         }
         if (!isPreDerbyTenFive.booleanValue()) {
             if (valueLength < 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6200
                 return CharStreamHeaderGenerator.writeEOFMarker( buffer, offset );
             } else {
                 return 0;
@@ -225,11 +229,14 @@ public final class ClobStreamHeaderGenerator
      */
     public int writeEOF(ObjectOutput out, long valueLength)
             throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
         if (callbackDVD != null && isPreDerbyTenFive == null) {
             determineHeaderFormat();
         }
         if (!isPreDerbyTenFive.booleanValue()) {
             if (valueLength < 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6200
                 return CharStreamHeaderGenerator.writeEOFMarker( out );
             } else {
                 return 0;
@@ -245,6 +252,7 @@ public final class ClobStreamHeaderGenerator
      * @return Maximum header length in bytes.
      */
     public int getMaxHeaderLength() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4661
         return 5;
     }
 
@@ -259,6 +267,7 @@ public final class ClobStreamHeaderGenerator
      */
     private void determineHeaderFormat() {
         DatabaseContext dbCtx = (DatabaseContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 getContext(DatabaseContext.CONTEXT_ID);
         if (dbCtx == null) {
             throw new IllegalStateException("No context, unable to determine " +
@@ -266,6 +275,7 @@ public final class ClobStreamHeaderGenerator
         } else {
             DataDictionary dd = dbCtx.getDatabase().getDataDictionary();
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
                 isPreDerbyTenFive = Boolean.valueOf(!dd.checkVersion(
                         DataDictionary.DD_VERSION_DERBY_10_5, null));
             } catch (StandardException se) {
@@ -280,6 +290,7 @@ public final class ClobStreamHeaderGenerator
             // being accessed in. It is assumed that a DVD is only shared
             // within a single database, i.e. the mode doesn't change during
             // the lifetime of the DVD.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4543
             callbackDVD.setStreamHeaderFormat(isPreDerbyTenFive);
         }
     }
@@ -290,6 +301,7 @@ public final class ClobStreamHeaderGenerator
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

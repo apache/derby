@@ -46,6 +46,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
      * Create a suite of tests.
      */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("CurrentOfTest");
 		suite.addTestSuite(CurrentOfTest.class);
 		//To run the test in both embedded and client/server mode
@@ -139,6 +140,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
     */
 	public void testDelete() throws SQLException {
 		PreparedStatement select, delete;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		Statement delete1,delete2;
 		ResultSet cursor;
 		String tableRows = "select i, c from t for read only";
@@ -160,6 +162,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		// TEST: cursor and target table mismatch
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		assertCompileError("42X28","delete from s where current of " + cursor.getCursorName()); 
 		
 		// TEST: find the cursor during compilation
@@ -168,6 +171,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// TEST: delete before the cursor is on a row
 		assertStatementError("24000", delete);
 		cursor.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		assertEquals(1956, cursor.getInt(1));
 		
 		// TEST: find the cursor during execution and it is on a row
@@ -188,6 +192,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		if (usingEmbedded())
 			assertStatementError("24000", delete);
 		else
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
 			assertStatementError("42X30", delete);
 		
 		
@@ -201,7 +206,9 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		
 		// TEST: no cursor with that name exists
 		delete2 = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4777
 		assertStatementError("42X30", delete2,"delete from t where current of myCursor" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		expectedRows = new Object[][]{{new String("456"),new String("hi yourself")},                                       
 				   					  {new String("3"),new String("you are the one")}}; 
 		JDBC.assertFullResultSet(delete1.executeQuery(tableRows), expectedRows, true);
@@ -219,6 +226,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
         assertUpdateCount(delete, 1);
         
         delete.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
         delete1.close();        
         cursor.close();
         select.close();
@@ -237,6 +245,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 	public void testUpdate() throws SQLException {
 		PreparedStatement select;
 		PreparedStatement update;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		Statement select1,update2;
 		ResultSet cursor;
 		String tableRows = "select i, c from t for read only";
@@ -253,11 +262,13 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		select = prepareStatement("select I, C from t for update of I");
 		cursor = select.executeQuery(); // cursor is now open
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		assertCompileError("42X31", "update t set C = 'abcde' where current of "+ cursor.getCursorName());
 		cursor.close();
 		select.close();
 
 		//Making sure we have the correct rows in the table to begin with
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		select1 = createStatement();
 		Object[][] expectedRows = new Object[][]{{new String("1956"),new String("hello world")},                                       
 				 {new String("456"),new String("hi yourself")},                                       
@@ -276,6 +287,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// TEST: cursor and target table mismatch
 
 		assertCompileError("42X29","update s set i=1 where current of " + cursor.getCursorName());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 
 		// TEST: find the cursor during compilation
 		update = prepareStatement("update t set i=i+10, c='Gumby was here' where current of "
@@ -286,6 +298,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		// TEST: find the cursor during execution and it is on a row
 		cursor.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		assertEquals(1956,cursor.getInt(1));
 		assertUpdateCount(update, 1);
 
@@ -295,6 +308,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// skip a row and update another row so that two rows will
 		// have been removed from the table when we are done.
 		cursor.next(); // skip this row
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		assertEquals(456,cursor.getInt(1));
 		cursor.next();
 		assertEquals(180,cursor.getInt(1));
@@ -309,6 +323,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// TEST: update off a closed cursor
 		cursor.close();
 		select.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2380
 		assertStatementError("42X30", update);
 		update.close();
 
@@ -318,6 +333,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		update2.close();
 		
 		//Verifyin we have the correct updated rows in the table at the end
+//IC see: https://issues.apache.org/jira/browse/DERBY-2283
 		expectedRows = new Object[][]{{new String("1976"),new String("Gumby was here")},                                       
 				 {new String("456"),new String("hi yourself")},                                       
 				 {new String("190"),new String("Gumby was here")},                                      

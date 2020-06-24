@@ -180,9 +180,13 @@ public class DssTrace
             // We don't try making the directory first because it would require
             // extra permissions if the directory already exists. DERBY-4128
             for (int attempt=0; attempt <2; attempt++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 try {
                     // The writer will be buffered for effeciency.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
                     comBufferWriter =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                         (AccessController.doPrivileged(
                             new PrivilegedExceptionAction<PrintWriter>() {
                                 public PrintWriter run()
@@ -209,9 +213,11 @@ public class DssTrace
                     // it is likely that the directory did not exist. 
                     //We will try to make it.
                     if (attempt == 0 && (e instanceof FileNotFoundException)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2556
                         final File traceDirectory = new File(fileName).getParentFile();
                         if (traceDirectory != null) {
                             AccessController.doPrivileged(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
                                     new PrivilegedExceptionAction<Void>() {
                                         public Void run() throws IOException {
                                             // DERBY-4128: First try to create the
@@ -226,6 +232,7 @@ public class DssTrace
                                             // has been granted.
                                             boolean created = traceDirectory.mkdir();
                                             if (!created) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
                                                 created =
                                                         traceDirectory.mkdirs();
                                             }

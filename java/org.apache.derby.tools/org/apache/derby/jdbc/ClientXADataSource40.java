@@ -27,6 +27,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import javax.sql.XADataSource;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    <P>
    This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
    separate datasources for Java 5 and Java 6.
@@ -36,12 +37,16 @@ import javax.sql.XADataSource;
    @deprecated Use {@link ClientXADataSource} instead.
  */
 public class ClientXADataSource40 extends ClientXADataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     implements XADataSource /* compile-time check for 4.1 extension */
 {
     private static final long serialVersionUID = -3463444509507830926L;
 
     /** Added by Java 9 */
     public ShardingKeyBuilder createShardingKeyBuilder()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6974
         throws SQLException
     {
         throw new java.sql.SQLFeatureNotSupportedException();

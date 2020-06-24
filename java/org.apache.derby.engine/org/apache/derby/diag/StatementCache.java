@@ -56,6 +56,7 @@ import org.apache.derby.vti.VTITemplate;
 	<LI> ID CHAR(36) - not nullable.  Internal identifier of the compiled statement.
 	<LI> SCHEMANAME VARCHAR(128) - nullable.  Schema the statement was compiled in.
 	<LI> SQL_TEXT VARCHAR(32672) - not nullable.  Text of the statement
+//IC see: https://issues.apache.org/jira/browse/DERBY-6065
 	<LI> UNICODE BIT/BOOLEAN - not nullable.  Always true.
 	<LI> VALID BIT/BOOLEAN - not nullable.  True if the statement is currently valid, false otherwise
 	<LI> COMPILED_AT TIMESTAMP nullable - time statement was compiled, requires STATISTICS TIMING to be enabled.
@@ -64,6 +65,7 @@ import org.apache.derby.vti.VTITemplate;
 	</UL>
 	<P>
 	The internal identifier of a cached statement matches the toString() method of a PreparedStatement object for a Derby database.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 
 	<P>
 	This class also provides a static method to empty the statement cache, StatementCache.emptyCache()
@@ -82,17 +84,21 @@ public final class StatementCache extends VTITemplate {
         
         LanguageConnectionContext lcc = (LanguageConnectionContext)
             getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2772
         CacheManager statementCache =
             lcc.getLanguageConnectionFactory().getStatementCache();
 
 		if (statementCache != null) {
 			final Collection values = statementCache.values();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			data = new Vector<GenericPreparedStatement>(values.size());
 			for (Iterator i = values.iterator(); i.hasNext(); ) {
 				final CachedStatement cs = (CachedStatement) i.next();
 				final GenericPreparedStatement ps =
 					(GenericPreparedStatement) cs.getPreparedStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				data.add(ps);
 			}
 		}
@@ -106,6 +112,7 @@ public final class StatementCache extends VTITemplate {
 		position++;
 
 		for (; position < data.size(); position++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 			currentPs = (GenericPreparedStatement) data.get(position);
 	
 			if (currentPs != null)
@@ -131,6 +138,7 @@ public final class StatementCache extends VTITemplate {
 			return ((GenericStatement) currentPs.statement).getCompilationSchema();
 		case 3:
 			String sql = currentPs.getSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 			sql = StringUtil.truncate(sql, Limits.DB2_VARCHAR_MAXWIDTH);
 			return sql;
 		default:
@@ -144,6 +152,7 @@ public final class StatementCache extends VTITemplate {
 		case 4:
 			// was/is UniCode column, but since Derby 10.0 all
 			// statements are compiled and submitted as UniCode.
+//IC see: https://issues.apache.org/jira/browse/DERBY-571
 			return true;
 		case 5:
 			return currentPs.isValid();
@@ -170,6 +179,7 @@ public final class StatementCache extends VTITemplate {
 
 		EmbedResultSetMetaData.getResultColumnDescriptor("ID",		  Types.CHAR, false, 36),
 		EmbedResultSetMetaData.getResultColumnDescriptor("SCHEMANAME",    Types.VARCHAR, true, 128),
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_TEXT",  Types.VARCHAR, false, Limits.DB2_VARCHAR_MAXWIDTH),
 		EmbedResultSetMetaData.getResultColumnDescriptor("UNICODE",   Types.BIT, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("VALID",  Types.BIT, false),
@@ -179,6 +189,7 @@ public final class StatementCache extends VTITemplate {
 	
     private static final ResultSetMetaData metadata =
         new EmbedResultSetMetaData(columnInfo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
 	public ResultSetMetaData getMetaData() {
 
@@ -191,6 +202,7 @@ public final class StatementCache extends VTITemplate {
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContextOrNull( contextID );

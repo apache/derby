@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.LockTableNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -39,6 +40,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class LockTableNode extends MiscellaneousStatementNode
 {
 	private TableName	tableName;
@@ -82,6 +85,8 @@ class LockTableNode extends MiscellaneousStatementNode
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "LOCK TABLE";
@@ -116,6 +121,7 @@ class LockTableNode extends MiscellaneousStatementNode
 		if (lockTableDescriptor == null)
 		{
 			// Check if the reference is for a synonym.
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			TableName synonymTab = resolveTableToSynonym(tableName);
 			if (synonymTab == null)
 				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);

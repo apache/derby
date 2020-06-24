@@ -97,6 +97,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             SequenceGeneratorTest.class);
 
@@ -180,6 +181,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
         updater = new T_SequenceUpdater
           ( (long)Integer.MIN_VALUE, true, 1L, (long) Integer.MAX_VALUE, (long) Integer.MIN_VALUE, (long) Integer.MIN_VALUE );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         assertEquals( -2147483648L, updater.getValueOnDisk().longValue() );
 
@@ -292,6 +294,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         if ( _fullDebug) { println( "stepSize = " + stepSize + " and firstValue = " + firstValue + " and canCycle = " + canCycle ); }
         
         SGVetter vetter = new SGVetter
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             ( firstValue, canCycle, stepSize, maxValue, minValue, restartValue, ALLOCATION_COUNT );           
         T_SequenceUpdater updater = new T_SequenceUpdater
             ( firstValue, canCycle, stepSize, maxValue, minValue, restartValue );
@@ -393,6 +396,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         }
 
         SGVetter vetter = new SGVetter
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             ( firstValue, false, stepSize, maxValue, minValue, restartValue, ALLOCATION_COUNT );           
         T_SequenceUpdater updater = new T_SequenceUpdater
             ( firstValue, false, stepSize, maxValue, minValue, restartValue );
@@ -485,6 +489,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
         updater = new T_SequenceUpdater
             ( Long.MIN_VALUE, true, stepSize, (long) Long.MAX_VALUE, (long) Long.MIN_VALUE, (long) Long.MIN_VALUE );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         long nextValue = updater.getCurrentValueAndAdvance();
         long currentValueOnDisk = updater.getValueOnDisk().longValue();
@@ -502,6 +507,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     private void vetBigStep( long maxValue, long minValue )
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Long firstValue = minValue;
         long restartValue = minValue;
         long stepSize = maxValue - 1;
@@ -823,6 +829,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     public void test_14_6553() throws Exception
     {
         Connection  dboConn = openUserConnection( TEST_DBO );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6553
 
         //
         // The original DERBY-6553 test case.

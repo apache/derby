@@ -50,6 +50,7 @@ public class TestPreStartedMaster extends ClientRunner
         // String masterHostName = System.getProperty("test.serverHost", "localhost");
         // int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("TestPreStartedMaster");
                 
         suite.addTest(TestPreStartedMaster.suite(masterServerHost, masterServerPort));
@@ -111,6 +112,7 @@ public class TestPreStartedMaster extends ClientRunner
         System.out.println("2. startMaster attempt should fail on: " + connectionURL);
         System.out.println("********************'' 2. CURRENTLY HANGS!!!! Skipping.");
         // if (false)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3162
         { // FIXME! PRELIM Hangs!!
         // A 2. StartMaster connect should fail:
         try

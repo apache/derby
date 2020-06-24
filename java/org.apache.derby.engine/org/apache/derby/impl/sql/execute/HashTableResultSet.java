@@ -58,6 +58,7 @@ import java.util.Properties;
  * Builds a hash table on the underlying result set tree.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class HashTableResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 
 {
@@ -101,6 +102,7 @@ class HashTableResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     HashTableResultSet(NoPutResultSet s,
 					Activation a,
 					GeneratedMethod str,
@@ -133,6 +135,7 @@ class HashTableResultSet extends NoPutResultSetImpl
         projection = p;
 		projectMapping = ((ReferencedColumnsDescriptorImpl) a.getPreparedStatement().getSavedObject(mapRefItem)).getReferencedColumnPositions();
 		FormatableArrayHolder fah = (FormatableArrayHolder) a.getPreparedStatement().getSavedObject(keyColItem);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
         FormatableIntHolder[] fihArray = fah.getArray(FormatableIntHolder[].class);
 		keyColumns = new int[fihArray.length];
 		for (int index = 0; index < fihArray.length; index++)
@@ -211,6 +214,7 @@ class HashTableResultSet extends NoPutResultSetImpl
 										   maxInMemoryRowCount,
 										   (int) initialCapacity,
 										   loadFactor,
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
 										   skipNullKeyColumns,
                                            false /* Not kept after a commit */);
 
@@ -298,6 +302,7 @@ class HashTableResultSet extends NoPutResultSetImpl
 	 * @return the next row in the result
 	 */
 	public ExecRow	getNextRowCore() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -342,6 +347,7 @@ class HashTableResultSet extends NoPutResultSetImpl
 						hashEntry = ht.get(mh);
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
 					if (hashEntry instanceof List)
 					{
 						entryVector = (List) hashEntry;
@@ -360,6 +366,7 @@ class HashTableResultSet extends NoPutResultSetImpl
 				{
 					// We are walking a list and there are more rows left.
 					columns = (DataValueDescriptor[]) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
                         entryVector.get(numFetchedOnNext);
 				}
 
@@ -370,6 +377,7 @@ class HashTableResultSet extends NoPutResultSetImpl
 						// Columns is really a Storable[]
 						for (int i = 0; i < columns.length; i++)
 						{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6133
                            if (! (columns[i] instanceof Storable))
 							{
 								SanityManager.THROWASSERT(

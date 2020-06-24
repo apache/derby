@@ -23,6 +23,7 @@ package org.apache.derby.iapi.store.access;
 
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 <p>
 Manage the result information from a single call to
 ConglomerateController.getSpaceInfo().

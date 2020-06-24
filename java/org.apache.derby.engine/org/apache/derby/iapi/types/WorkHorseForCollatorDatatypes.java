@@ -65,6 +65,7 @@ final class WorkHorseForCollatorDatatypes
 	
 	/** @see SQLChar#stringCompare(SQLChar, SQLChar) */
 	int stringCompare(SQLChar str1, SQLChar str2)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
 	throws StandardException
 	{
 		CollationKey ckey1 = str1.getCollationKey();
@@ -157,6 +158,7 @@ final class WorkHorseForCollatorDatatypes
                 !escapeCharacter.hasSingleCollationElement())
 		{
 			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 					escapeCharacter.toString());
 		}
 		likeResult = Like.like(stringData.getCharArray(), 
@@ -187,6 +189,7 @@ final class WorkHorseForCollatorDatatypes
      * @see CollationElementsInterface#hasSingleCollationElement()
      */
     boolean hasSingleCollationElement() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2699
         if (stringData.isNull()) {
             return false;
         }

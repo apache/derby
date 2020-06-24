@@ -145,6 +145,7 @@ public class CheckConstraintDescriptor extends ConstraintDescriptor
 		/*
 		** If we are disabled, we never fire
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (!enforced())
 		{
 			return false;

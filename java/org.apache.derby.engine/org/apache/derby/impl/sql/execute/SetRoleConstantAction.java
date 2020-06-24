@@ -101,6 +101,7 @@ class SetRoleConstantAction implements ConstantAction
         dd = lcc.getDataDictionary();
         String thisRoleName = roleName;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         final String currentAuthId = lcc.getCurrentUserId(activation);
         final String dbo = lcc.getDataDictionary().
             getAuthorizationDatabaseOwner();
@@ -120,6 +121,7 @@ class SetRoleConstantAction implements ConstantAction
             // interpret as identifier, then we convert it to case normal form
             // here.
             String roleId = dvs.getString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
             if (roleId == null) {
                 throw StandardException.newException(SQLState.ID_PARSE_ERROR);
@@ -129,7 +131,9 @@ class SetRoleConstantAction implements ConstantAction
         }
 
         RoleGrantDescriptor rdDef = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         try {
             String oldRole = lcc.getCurrentRoleId(activation);
 
@@ -139,6 +143,7 @@ class SetRoleConstantAction implements ConstantAction
                 if (rdDef != null) {
                     dd.getDependencyManager().invalidateFor(
                         rdDef,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
                         DependencyManager.RECHECK_PRIVILEGES,
                         lcc);
                 } // else: old role else no longer exists, so ignore.
@@ -153,17 +158,20 @@ class SetRoleConstantAction implements ConstantAction
                         (SQLState.ROLE_INVALID_SPECIFICATION, thisRoleName);
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 if (!lcc.roleIsSettable(activation, thisRoleName)) {
                     throw StandardException.newException
                               (SQLState. ROLE_INVALID_SPECIFICATION_NOT_GRANTED,
                                thisRoleName);
                 }
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
         } finally {
             // reading above changes idle state, so reestablish it
             lcc.userCommit();
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
         lcc.setCurrentRole(activation, rdDef != null ? thisRoleName : null);
     }
 }

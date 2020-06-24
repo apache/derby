@@ -68,6 +68,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     private boolean metaDataInfoIsCached_ = false;
 
     ProductLevel productLevel_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /** The JDBC major version supported by the server. */
     private final int serverJdbcMajorVersion;
@@ -119,6 +120,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //---------------------constructors/finalizer---------------------------------
 
     protected ClientDatabaseMetaData(Agent agent,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                      ClientConnection connection,
                                      ProductLevel productLevel) {
         agent_ = agent;
@@ -128,6 +130,9 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         if (connection.isXAConnection()) {
             connection.xaHostVersion_ = productLevel_.versionLevel_;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
+//IC see: https://issues.apache.org/jira/browse/DERBY-970
         if (productLevel_.lessThan(10, 2, 0)) {
             serverJdbcMajorVersion = 3;
             serverJdbcMinorVersion = 0;
@@ -939,6 +944,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     abstract public String getURL_() throws SqlException;
 
     public String getURL() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             checkForClosedConnection();
@@ -1073,6 +1079,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //
     public ResultSet getProcedures(String catalog,
                                             String schemaPattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                             String procedureNamePattern) throws SQLException {
         try
         {
@@ -1095,6 +1102,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                      String procedureNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs =
             prepareMetaDataQuery("SYSIBM.SQLPROCEDURES(?,?,?,?)");
 
@@ -1117,6 +1125,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getProcedureColumns(String catalog,
                                                   String schemaPattern,
                                                   String procedureNamePattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                                   String columnNamePattern) throws SQLException {
         try
         {
@@ -1140,6 +1149,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                            String columnNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs =
             prepareMetaDataQuery("SYSIBM.SQLPROCEDURECOLS(?,?,?,?,?)");
 
@@ -1218,6 +1228,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         checkForClosedConnectionX();
         checkServerJdbcVersionX("getFunctions(String,String,String)", 4, 0); 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs =
             prepareMetaDataQuery("SYSIBM.SQLFUNCTIONS(?,?,?,?)");
 
@@ -1258,6 +1269,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * @see #getFunctionColumnsX(String, String, String,String)
      */
     public ResultSet
+//IC see: https://issues.apache.org/jira/browse/DERBY-1530
         getFunctionColumns(String catalog,
                               String schemaPattern,
                               String functionNamePattern,
@@ -1269,6 +1281,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.
                         traceEntry(this, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1530
                                    "getFunctionColumns", 
                                    catalog, schemaPattern, 
                                    functionNamePattern, parameterNamePattern);
@@ -1306,6 +1319,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         checkServerJdbcVersionX("getFunctionColumns"+
                                 "(String,String,String,String)", 4, 0);
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs =
             prepareMetaDataQuery("SYSIBM.SQLFUNCTIONPARAMS(?,?,?,?,?)");
 
@@ -1328,6 +1342,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getTables(String catalog,
                                         String schemaPattern,
                                         String tableNamePattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                         String types[]) throws SQLException {
         try
         {
@@ -1354,6 +1369,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
             throw new SqlException(se);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs =
             prepareMetaDataQuery("SYSIBM.SQLTABLES(?,?,?,?,?)");
 
@@ -1375,9 +1391,11 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
             cs.setStringX(3, tableNamePattern);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
         String tableTypes = "";
         int i = 0;
         if (types == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             cs.setNullX(4, Types.VARCHAR);
         } else if (types.length == 1 && (types[0].trim()).equals("%")) {
             cs.setStringX(4, types[0]);
@@ -1392,6 +1410,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
             cs.setStringX(4, tableTypes);
         }
         cs.setStringX(5, getOptions());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
         return executeCatalogQuery(cs);
     }
 
@@ -1404,6 +1423,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //              Options     varchar(4000))
     //
     public ResultSet getSchemas() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1426,6 +1446,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
             throw new SqlException(se);
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLTABLES('', '', '', '', 'GETSCHEMAS=1')");
         return (ClientResultSet) cs.executeQueryX();
@@ -1434,6 +1455,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     // DERBY does not have the notion of a catalog, so we return a result set with no rows.
     public ResultSet getCatalogs() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1452,6 +1474,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     private ClientResultSet getCatalogsX() throws SqlException {
         checkForClosedConnectionX();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLTABLES('', '', '', '', 'GETCATALOGS=1')");
         return (ClientResultSet) cs.executeQueryX();
@@ -1465,6 +1488,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //              TableType   varchar(4000),
     //              Options     varchar(4000))
     public ResultSet getTableTypes() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1483,6 +1507,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     private ClientResultSet getTableTypesX() throws SqlException {
         checkForClosedConnectionX();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = null;
         cs = prepareMetaDataQuery("SYSIBM.SQLTABLES(?,?,?,?,?)");
 
@@ -1512,6 +1537,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getColumns(String catalog,
                                          String schemaPattern,
                                          String tableNamePattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                          String columnNamePattern) throws SQLException {
         try
         {
@@ -1535,6 +1561,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                   String columnNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLCOLUMNS(?,?,?,?,?)");
 
@@ -1558,6 +1585,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getColumnPrivileges(String catalog,
                                                   String schema,
                                                   String table,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                                   String columnNamePattern) throws SQLException {
         try
         {
@@ -1578,6 +1606,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                            String schema,
                                            String table,
                                            String columnNamePattern) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         checkForClosedConnectionX();
         // check input params, table and columnNamePattern cannot be null
         if (table == null) {
@@ -1586,6 +1615,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLCOLPRIVILEGES(?,?,?,?,?)");
 
@@ -1607,6 +1637,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //
     public ResultSet getTablePrivileges(String catalog,
                                                  String schemaPattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                                  String tableNamePattern) throws SQLException {
         try
         {
@@ -1628,6 +1659,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                           String tableNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLTABLEPRIVILEGES(?,?,?,?)");
 
@@ -1653,6 +1685,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                                    String table,
                                                    int scope,
                                                    boolean nullable) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1683,6 +1716,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
 
@@ -1703,6 +1737,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     public ResultSet getVersionColumns(String catalog,
                                                 String schema,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                                 String table) throws SQLException {
         try
         {
@@ -1730,6 +1765,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
 
@@ -1741,6 +1777,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         cs.setShortX(6, (short) 0);
         cs.setStringX(7, getOptions());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
         return executeCatalogQuery(cs);
     }
 
@@ -1753,6 +1790,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //
     public ResultSet getPrimaryKeys(String catalog,
                                              String schema,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                              String table) throws SQLException {
         try
         {
@@ -1780,6 +1818,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLPRIMARYKEYS(?,?,?,?)");
 
@@ -1803,6 +1842,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //
     public ResultSet getImportedKeys(String catalog,
                                               String schema,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                               String table) throws SQLException {
         try
         {
@@ -1825,10 +1865,12 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         checkForClosedConnectionX();
 
         // validate the table name       
+//IC see: https://issues.apache.org/jira/browse/DERBY-2607
         if (table == null) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
 
@@ -1840,6 +1882,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         cs.setStringX(6, table);
         // We're passing the keyword EXPORTEDKEY, but this support may not be in the GA version of SPs.
         // As a workaround in getCrossReference(), we'll just "select * where 0=1" when primaryTable==""
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         if (connection_.holdability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             cs.setStringX(7, "DATATYPE='JDBC';IMPORTEDKEY=1; CURSORHOLD=1");
         } else {
@@ -1860,6 +1903,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //
     public ResultSet getExportedKeys(String catalog,
                                               String schema,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                               String table) throws SQLException {
         try
         {
@@ -1897,11 +1941,14 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         cs.setStringX(6, "");
         // We're passing the keyword EXPORTEDKEY, but this support may not be in the GA version of SPs.
         // As a workaround in getCrossReference(), we'll just "select * where 0=1" when foreignTable==""
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         if (connection_.holdability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             cs.setStringX(7, "DATATYPE='JDBC';EXPORTEDKEY=1; CURSORHOLD=1");
         } else {
             cs.setStringX(7, "DATATYPE='JDBC';EXPORTEDKEY=1; CURSORHOLD=0");
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
         return executeCatalogQuery(cs);
     }
 
@@ -1920,6 +1967,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                                 String primaryTable,
                                                 String foreignCatalog,
                                                 String foreignSchema,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                                 String foreignTable) throws SQLException {
         try
         {
@@ -1959,6 +2007,8 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
 
@@ -1969,6 +2019,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         cs.setStringX(5, foreignSchema);
         cs.setStringX(6, foreignTable);
         cs.setStringX(7, getOptions());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
         return executeCatalogQuery(cs);
     }
 
@@ -1978,6 +2029,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //
     //
     public ResultSet getTypeInfo() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -1997,6 +2049,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         checkForClosedConnectionX();
 
         // check if the last call's resultset is closed or not.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLGETTYPEINFO(?,?)");
 
@@ -2020,6 +2073,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                            String table,
                                            boolean unique,
                                            boolean approximate) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2041,12 +2095,15 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                     boolean unique,
                                     boolean approximate) throws SqlException {
         checkForClosedConnectionX();
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
 
         // validate the input table name
+//IC see: https://issues.apache.org/jira/browse/DERBY-2607
         if (table == null) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLSTATISTICS(?,?,?,?,?,?)");
 
@@ -2077,6 +2134,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                       String schemaPattern,
                                       String typeNamePattern,
                                       int[] types) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             synchronized (connection_) {
@@ -2098,6 +2156,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                                int[] types) throws SqlException {
         checkForClosedConnectionX();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(
             "SYSIBM.SQLUDTS(?,?,?,?,?)");
 
@@ -2105,6 +2164,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         cs.setStringX(2, schemaPattern);
         cs.setStringX(3, typeNamePattern);
         int i = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
         String udtTypes = "";
         while (types != null && i < types.length) {
             if (i > 0) {
@@ -2115,6 +2175,18 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         }
         cs.setStringX(4, udtTypes);
         cs.setStringX(5, getOptions());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
         return executeCatalogQuery(cs);
     }
 
@@ -2122,6 +2194,8 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     // helper method for the catalog queries only
     private String getOptions() {
         int cursorHold;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
         if (connection_.holdability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             cursorHold = 1;
         } else {
@@ -2134,6 +2208,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     // Derby uses a PreparedStatement argument rather than a callable statement
     private ClientResultSet executeCatalogQuery(ClientPreparedStatement cs)
         throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try {
             return cs.executeQueryX();
         } catch (SqlException e) {
@@ -2177,6 +2252,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     public ResultSet getSuperTypes(String catalog,
                                             String schemaPattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                             String typeNamePattern) throws SQLException {
         try
         {
@@ -2202,6 +2278,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 "CAST(NULL AS VARCHAR(128)) AS SUPERTYPE_SCHEM," +
                 "VARCHAR('', 128) AS SUPERTYPE_NAME " +
                 "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR ";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement ps =
             connection_.prepareDynamicCatalogQuery(sql);
         return ps.executeQueryX();
@@ -2209,6 +2286,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     public ResultSet getSuperTables(String catalog,
                                              String schemaPattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                              String tableNamePattern) throws SQLException {
         try
         {
@@ -2227,6 +2305,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     private ClientResultSet getSuperTablesX() throws SqlException {
         checkForClosedConnectionX();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         String sql = "SELECT CAST(NULL AS VARCHAR(128)) AS TABLE_CAT," +
                 "CAST(NULL AS VARCHAR(128)) AS TABLE_SCHEM," +
                 "VARCHAR('', 128) AS TABLE_NAME," +
@@ -2241,6 +2320,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getAttributes(String catalog,
                                             String schemaPattern,
                                             String typeNamePattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
                                             String attributeNamePattern) throws SQLException {
         try
         {
@@ -2259,10 +2339,12 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     private ClientResultSet getAttributesX() throws SqlException {
         checkForClosedConnectionX();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         String sql = "SELECT CAST(NULL AS VARCHAR(128)) AS TYPE_CAT," +
                 "CAST(NULL AS VARCHAR(128)) AS TYPE_SCHEM," +
                 "VARCHAR('', 128) AS TYPE_NAME," +
                 "VARCHAR('',128) AS ATTR_NAME," +
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
                 "0 AS DATA_TYPE," +
                 "VARCHAR('',129) AS ATTR_TYPE_NAME," +
                 "0 AS ATTR_SIZE," +
@@ -2283,6 +2365,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR";
         ClientPreparedStatement ps =
             connection_.prepareDynamicCatalogQuery(sql);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
         return ps.executeQueryX();
     }
 
@@ -2293,6 +2376,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     public int getResultSetHoldability() throws SQLException {
         checkForClosedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         return ResultSet.HOLD_CURSORS_OVER_COMMIT;
     }
 
@@ -2313,6 +2397,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     public int getJDBCMinorVersion() throws SQLException {
         checkForClosedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6324
         return JVMInfo.jdbcMinorVersion();
     }
 
@@ -2323,6 +2408,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     public boolean locatorsUpdateCopy() throws SQLException {
         checkForClosedConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2789
         return true;
     }
 
@@ -2456,9 +2542,11 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
 
     private boolean getMetaDataInfoBoolean(int infoCallIndex) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             if ( !metaDataInfoIsCached_) { metaDataInfoCall(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
             if ( serverSupportsBooleanValues() )
             {
@@ -2594,6 +2682,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         // Stored Procedure will return a String containing a
         // comma seperated list of all the supported result Set types
         // not throwing any exception right now even if the the type is wrong as per the spec
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             String returnedFromSP = null;
@@ -2603,8 +2692,10 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 metaDataInfoCall();
                 returnedFromSP = (String) metaDataInfoCache_[infoCallIndex];
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             StringTokenizer st = new StringTokenizer(returnedFromSP, ",");
             while (st.hasMoreTokens()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5093
                 if ((Integer.parseInt(st.nextToken())) == type) {
                     return true;
                 }
@@ -2641,10 +2732,12 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 metaDataInfoCall();
                 returnedFromSP = (String) metaDataInfoCache_[infoCallIndex];
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             StringTokenizer st = new StringTokenizer(returnedFromSP, ";");
             while (st.hasMoreTokens()) {
                 StringTokenizer stForConc =
             new StringTokenizer(st.nextToken(), ",");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5093
                 if ((Integer.parseInt(stForConc.nextToken())) == type) {
                     while (stForConc.hasMoreTokens()) {
                         if ((Integer.parseInt(stForConc.nextToken())) == concurrency) {
@@ -2677,11 +2770,13 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 metaDataInfoCall();
                 returnedFromSP = (String) metaDataInfoCache_[infoCallIndex];
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             StringTokenizer st = new StringTokenizer(returnedFromSP, ";");
             while (st.hasMoreTokens()) {
                 StringTokenizer stForType =
                     new StringTokenizer(st.nextToken(), ",");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5093
                 if ((Integer.parseInt(stForType.nextToken())) == fromType) {
                     while (st.hasMoreTokens()) {
                         if ((Integer.parseInt(st.nextToken())) == toType) {
@@ -2705,6 +2800,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     private void metaDataInfoCall() throws SqlException {
         synchronized (connection_) {
             ClientResultSet rs;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
             // These remote calls return a result set containing a single row.
             // Each column in the row corresponds to a particular get meta data info
@@ -2714,6 +2810,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
             rs = (ClientResultSet) ps.executeQueryX();
             rs.nextX();
             int ColumnCount;
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             try {
                 ColumnCount = ((ColumnMetaData) rs.getMetaDataX()).getColumnCount();
             } catch ( SQLException se ) {
@@ -2739,6 +2836,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * @exception SQLException if a database access error occurs
      */
     public final boolean supportsStoredFunctionsUsingCallSyntax()
+//IC see: https://issues.apache.org/jira/browse/DERBY-970
         throws SQLException
     {
         checkForClosedConnection();
@@ -2818,6 +2916,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
         checkServerJdbcVersionX("getSchemas(String, String)", 4, 0);
 
         String call = "SYSIBM.SQLTABLES(?, ?, '', '', 'GETSCHEMAS=2')";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement cs = prepareMetaDataQuery(call);
         if (catalog == null) {
             cs.setNullX(1, Types.VARCHAR);
@@ -2897,6 +2996,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * @exception SQLException if a database access error occurs
      */
     public RowIdLifetime getRowIdLifetime() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         checkForClosedConnection();
         return RowIdLifetime.ROWID_UNSUPPORTED;
     }
@@ -2941,6 +3041,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     public  boolean generatedKeyAlwaysReturned() { return true; }
 
     public ResultSet getPseudoColumns
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
         throws SQLException
     {
@@ -2962,6 +3063,9 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     private ClientResultSet getPseudoColumnsX() throws SqlException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         checkForClosedConnectionX();
         String sql =
             "SELECT \n" +
@@ -2979,8 +3083,13 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
             "        VARCHAR('NO',128) AS IS_NULLABLE \n" +
             "    FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR"
             ;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         ClientPreparedStatement ps =
             connection_.prepareDynamicCatalogQuery(sql);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
+//IC see: https://issues.apache.org/jira/browse/DERBY-1224
         return ps.executeQueryX();
     }
 
@@ -2997,6 +3106,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
 
     private ClientPreparedStatement prepareMetaDataQuery(String cmd)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         ClientPreparedStatement ps;
 
@@ -3004,8 +3114,11 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
                 connection_.prepareStatementX("CALL " + cmd,
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
+//IC see: https://issues.apache.org/jira/browse/DERBY-966
+//IC see: https://issues.apache.org/jira/browse/DERBY-1005
                         connection_.holdability(),
                         ClientStatement.NO_GENERATED_KEYS,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
                         null, null);
         return ps;
     }
@@ -3019,7 +3132,10 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      */
     protected void checkForClosedConnection() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
             checkForClosedConnectionX();
         } catch ( SqlException se ) {
             throw se.getSQLException();
@@ -3050,6 +3166,9 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * specified JDBC version
      */
     private void checkServerJdbcVersionX(String method, int major, int minor)
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
+//IC see: https://issues.apache.org/jira/browse/DERBY-970
         throws SqlException
     {
         if (serverJdbcMajorVersion < major ||

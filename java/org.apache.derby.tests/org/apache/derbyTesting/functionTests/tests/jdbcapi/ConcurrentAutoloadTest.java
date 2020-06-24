@@ -59,6 +59,7 @@ public class ConcurrentAutoloadTest extends BaseJDBCTestCase {
         final String user = tc.getUserName();
         final String pw = tc.getUserPassword();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         final List<Throwable> errors =
                 Collections.synchronizedList(new ArrayList<Throwable>());
 
@@ -66,6 +67,7 @@ public class ConcurrentAutoloadTest extends BaseJDBCTestCase {
             public void run() {
                 try {
                     DriverManager.getConnection(url, user, pw);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                     println("Successfully connected!");
                 } catch (Throwable t) {
                     println("Failed to connect!");

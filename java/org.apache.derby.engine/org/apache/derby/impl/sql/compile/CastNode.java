@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CastNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -107,6 +108,8 @@ class CastNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     CastNode(ValueNode castOperand,
              DataTypeDescriptor castTarget,
              ContextManager cm) throws StandardException {
@@ -176,6 +179,8 @@ class CastNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -208,6 +213,7 @@ class CastNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override @SuppressWarnings("fallthrough")
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -226,6 +232,8 @@ class CastNode extends ValueNode
 			int length = -1;
 			TypeId srcTypeId = opndType.getTypeId();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             if (srcTypeId.isNumericTypeId())
             {
                 length = opndType.getPrecision() + 1; // 1 for the sign
@@ -239,6 +247,7 @@ class CastNode extends ValueNode
              * adding the check for Char & Varchar and calculating the
              * length based on the operand type.
              */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1132
             else if(srcTypeId.isStringTypeId())
             {
                 length = opndType.getMaximumWidth();
@@ -309,6 +318,7 @@ class CastNode extends ValueNode
 			switch (sourceJDBCTypeId)
 			{
 				case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 				case Types.BOOLEAN:
 					// (BIT is boolean)
 					if (destJDBCTypeId == Types.BIT || destJDBCTypeId == Types.BOOLEAN)
@@ -319,6 +329,8 @@ class CastNode extends ValueNode
 					{
 						BooleanConstantNode bcn = (BooleanConstantNode) castOperand;
 						String booleanString = bcn.getValueAsString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                        retNode = new CharConstantNode(
                                 booleanString,
                                 getTypeServices().getMaximumWidth(),
@@ -339,6 +351,8 @@ class CastNode extends ValueNode
 								((UserTypeConstantNode) castOperand).
 											getObjectValue().
 												toString();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                            retNode = new CharConstantNode(
                                castValue,
                                getTypeServices().getMaximumWidth(),
@@ -380,6 +394,8 @@ class CastNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindCastNodeOnly()
 		throws StandardException
 	{
@@ -406,6 +422,7 @@ class CastNode extends ValueNode
 		*/
 		if (getTypeId().userType())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
             setType( bindUserType( getTypeServices() ) );
             
 			String className = getTypeId().getCorrespondingJavaTypeName();
@@ -422,6 +439,7 @@ class CastNode extends ValueNode
         // Obviously the type of a parameter that
         // requires its type from context (a parameter)
         // gets its type from the type of the CAST.
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		if (castOperand.requiresTypeFromContext())
 		{
             castOperand.setType(getTypeServices());
@@ -459,6 +477,7 @@ class CastNode extends ValueNode
         { setNullability( true ); }
 		else { setNullability(castOperand.getTypeServices().isNullable()); }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6434
         if (targetUDT != null)
         {
             addUDTUsagePriv( this );
@@ -492,9 +511,12 @@ class CastNode extends ValueNode
 		switch (destJDBCTypeId)
 		{
 			case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN:
 				if (cleanCharValue.equals("TRUE"))
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                    return new BooleanConstantNode(true, getContextManager());
 				}
 				else if (cleanCharValue.equals("FALSE"))
@@ -511,6 +533,8 @@ class CastNode extends ValueNode
 				}
 
 			case Types.DATE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                return new UserTypeConstantNode(
 										getDataValueFactory().getDateValue(cleanCharValue, false),
 										getContextManager());
@@ -532,6 +556,7 @@ class CastNode extends ValueNode
 				try 
 				{
 					// #3756 - Truncate decimal portion for casts to integer
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                   return getCastFromIntegralType((long) Double.parseDouble(cleanCharValue),
 												   destJDBCTypeId);
 				}
@@ -550,6 +575,8 @@ class CastNode extends ValueNode
 				{
 					throw StandardException.newException(SQLState.LANG_FORMAT_EXCEPTION, "float");
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                return new NumericConstantNode(
                        TypeId.getBuiltInTypeId(Types.REAL),
                        floatValue,
@@ -564,6 +591,8 @@ class CastNode extends ValueNode
 				{
 					throw StandardException.newException(SQLState.LANG_FORMAT_EXCEPTION, "double");
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                return new NumericConstantNode(
                        TypeId.getBuiltInTypeId(Types.DOUBLE),
                        doubleValue,
@@ -601,6 +630,8 @@ class CastNode extends ValueNode
 		switch (destJDBCTypeId)
 		{
 			case Types.CHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                return new CharConstantNode(
                         Long.toString(longValue),
                         getTypeServices().getMaximumWidth(),
@@ -613,6 +644,7 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                        TypeId.getBuiltInTypeId(Types.TINYINT),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                        (byte) longValue,
                        getContextManager());
 
@@ -624,6 +656,7 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                    (short) longValue,
                    getContextManager());
 
@@ -635,6 +668,7 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                    (int) longValue,
                    getContextManager());
 
@@ -651,6 +685,7 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    (float) longValue,
                    getContextManager());
 
@@ -689,6 +724,8 @@ class CastNode extends ValueNode
 		switch (destJDBCTypeId)
 		{
 			case Types.CHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                return new CharConstantNode(
                         constantValue.getString(),
                         getTypeServices().getMaximumWidth(),
@@ -752,6 +789,8 @@ class CastNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -806,6 +845,8 @@ class CastNode extends ValueNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -894,6 +935,7 @@ class CastNode extends ValueNode
 		 * They'll get an exception, as expected, if the
 		 * conversion cannot be performed.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 		else if (castOperand.requiresTypeFromContext())
 		{
 			sourceCTI = getTypeId();
@@ -923,12 +965,14 @@ class CastNode extends ValueNode
                 getTypeServices().getCollationType());
 		acbConstructor.setField(field);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		/*
 			For most types generate
 
 			targetDVD.setValue(sourceDVD);
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			For source or destination java types generate
 			
 			Object o = sourceDVD.getObject();
@@ -972,6 +1016,7 @@ class CastNode extends ValueNode
 			mb.dup();
 			mb.isInstanceOf(destinationType);
 			mb.push(destinationType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor,
 					"setObjectForCast", "void", 3);
 
@@ -990,6 +1035,7 @@ class CastNode extends ValueNode
 			
 			// to leave the DataValueDescriptor value on the stack, since setWidth is void
 			mb.dup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 
 			/* setWidth() is on VSDV - upcast since
 			 * decimal implements subinterface
@@ -998,6 +1044,7 @@ class CastNode extends ValueNode
 			
 			mb.push(isNumber ? getTypeServices().getPrecision() : getTypeServices().getMaximumWidth());
 			mb.push(getTypeServices().getScale());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
             mb.push(!sourceCTI.variableLength() ||
                     isNumber ||
                     assignmentSemantics);
@@ -1015,11 +1062,13 @@ class CastNode extends ValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (castOperand != null)
 		{
 			castOperand = (ValueNode)castOperand.accept(v);
@@ -1057,6 +1106,7 @@ class CastNode extends ValueNode
      * Set assignmentSemantics to true. Used by method calls for casting actual
      * arguments
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
     void setAssignmentSemantics()
     {
         assignmentSemantics = true;
@@ -1069,6 +1119,7 @@ class CastNode extends ValueNode
 	 */
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         if (isSameNodeKind(o)) {
 			CastNode other = (CastNode)o;
 			return getTypeServices().equals(other.getTypeServices())

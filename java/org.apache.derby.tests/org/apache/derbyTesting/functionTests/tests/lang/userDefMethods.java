@@ -36,14 +36,17 @@ public class userDefMethods
         PreparedStatement statement = null;
         Statement s = con.createStatement();
         ResultSet rs = s.executeQuery("SELECT c1 from new org.apache.derby.catalog.TriggerOldTransitionRows() AS EQ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<Long> keys = new Vector<Long>();
         while(rs.next()){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             keys.addElement(rs.getLong(1));
         }
         rs.close();
 
         statement = 
         con.prepareStatement("delete from t1  where c1  = ?");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (long key : keys) {
            statement.setLong(1, key);
            statement.executeUpdate();

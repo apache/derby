@@ -86,6 +86,7 @@ public class DMDBugsTest extends BaseJDBCTestCase {
 	/* Default suite for running this test.
 	 */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DMDBugsTest");
 		suite.addTest(
 				TestConfiguration.defaultSuite(DMDBugsTest.class));

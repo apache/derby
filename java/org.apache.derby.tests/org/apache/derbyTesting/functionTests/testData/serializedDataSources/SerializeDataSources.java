@@ -67,6 +67,7 @@ public class SerializeDataSources {
             "org.apache.derby.jdbc.EmbeddedDataSource40",
             "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40",
             "org.apache.derby.jdbc.EmbeddedXADataSource40",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             "org.apache.derby.jdbc.BasicEmbeddedDataSource40",
             "org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40",
             "org.apache.derby.jdbc.BasicEmbeddedXADataSource40"
@@ -80,6 +81,7 @@ public class SerializeDataSources {
             "org.apache.derby.jdbc.ClientDataSource40",
             "org.apache.derby.jdbc.ClientConnectionPoolDataSource40",
             "org.apache.derby.jdbc.ClientXADataSource40",
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             "org.apache.derby.jdbc.BasicClientDataSource40",
             "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40",
             "org.apache.derby.jdbc.BasicClientXADataSource40"
@@ -104,6 +106,7 @@ public class SerializeDataSources {
                                             String buildNumber,
                                             String[] dataSourceClasses)
             throws ClassNotFoundException, InstantiationException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
                    IllegalAccessException, IOException, NamingException,
                    NoSuchMethodException, InvocationTargetException {
         String modifiedVersionString = versionString.replaceAll(
@@ -114,6 +117,7 @@ public class SerializeDataSources {
                 "_0_0", "_1_0");
         int dsCount = 0;
         for (String dsClassName : dataSourceClasses) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> dsClass;
             // Try to load the class.
             try {
@@ -124,6 +128,7 @@ public class SerializeDataSources {
                 continue;
             }
             // Create new instance.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             DataSource ds = (DataSource)dsClass.getConstructor().newInstance();
             // Generate file name.
             File serialized = new File(dsClass.getSimpleName() + "-" +
@@ -137,6 +142,7 @@ public class SerializeDataSources {
             oos.writeUTF(versionString);
             oos.writeUTF(buildNumber);
             oos.writeObject(ds);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             if (!(dsClassName.contains("Basic"))) {
                 Method getRef = Class.forName("javax.naming.Referenceable").
                         getMethod("getReference");
@@ -180,6 +186,7 @@ public class SerializeDataSources {
             System.out.println("\tbuild  : " + buildNr);
             Object obj = ois.readObject();
             System.out.println("\tobject : " + obj);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
             if (!(obj.getClass().getName().indexOf("Basic") > 0)) {
                 obj = ois.readObject();
                 System.out.println("\tobject : " + obj);

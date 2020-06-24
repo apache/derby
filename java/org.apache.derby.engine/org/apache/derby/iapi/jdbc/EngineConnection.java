@@ -134,6 +134,7 @@ public interface EngineConnection extends Connection {
     public void   setSchema(  String schemaName ) throws SQLException;
 
     void abort(Executor executor) throws SQLException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
     void setNetworkTimeout(Executor executor, int millis) throws SQLException;
 

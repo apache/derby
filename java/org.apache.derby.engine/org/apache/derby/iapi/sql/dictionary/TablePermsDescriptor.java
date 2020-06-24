@@ -52,6 +52,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
                                  String insertPriv,
                                  String updatePriv,
                                  String referencesPriv,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
                                  String triggerPriv) throws StandardException
 	{
 		super (dd, grantee, grantor);
@@ -64,7 +65,9 @@ public class TablePermsDescriptor extends PermissionsDescriptor
         this.triggerPriv = triggerPriv;
         //tableUUID can be null only if the constructor with tablePermsUUID
         //has been invoked.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         if (tableUUID != null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         	tableName = dd.getTableDescriptor(tableUUID).getName();
 	}
 
@@ -74,6 +77,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
     public TablePermsDescriptor( DataDictionary dd,
                                  String grantee,
                                  String grantor,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
                                  UUID tableUUID) throws StandardException
     {
         this( dd, grantee, grantor, tableUUID,
@@ -81,6 +85,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
     }
     
     public TablePermsDescriptor( DataDictionary dd,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
             UUID tablePermsUUID) throws StandardException
             {
         this( dd, null, null, null,
@@ -104,6 +109,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
 
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		return "tablePerms: grantee=" + getGrantee() +
 		",tablePermsUUID=" + getUUID() +
 			",grantor=" + getGrantor() +
@@ -133,6 +139,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
      */
     public int hashCode()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
     	return super.keyHashCode() + tableUUID.hashCode();
     }
 	
@@ -141,6 +148,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
 	 */
 	public boolean checkOwner(String authorizationId) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		TableDescriptor td = getDataDictionary().getTableDescriptor(tableUUID);
 		if (td.getSchemaDescriptor().getAuthorizationId().equals(authorizationId))
 			return true;
@@ -181,6 +189,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
 	 */
 	public DependableFinder getDependableFinder() 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return getDependableFinder(
                 StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID);
 	}

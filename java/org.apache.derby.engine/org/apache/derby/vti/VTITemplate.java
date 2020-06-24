@@ -54,6 +54,7 @@ import java.util.Map;
 
 /**
 	An abstract implementation of ResultSet that is useful
+//IC see: https://issues.apache.org/jira/browse/DERBY-4932
 	when writing table functions, read-only VTIs (virtual table interface), and
 	the ResultSets returned by executeQuery in read-write VTI classes.
 	
@@ -308,6 +309,7 @@ public abstract class VTITemplate   implements ResultSet, AwareVTI
      */
     protected SQLException    notImplemented( String methodName )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return new SQLFeatureNotSupportedException( "Unimplemented method: " + methodName );
     }
     
@@ -323,6 +325,7 @@ public abstract class VTITemplate   implements ResultSet, AwareVTI
      * @throws SQLException on error
      */
     public  ColumnDescriptor[]  getReturnTableSignature( Connection currentConnection )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         ArrayList<ColumnDescriptor> columns = new ArrayList<ColumnDescriptor>();

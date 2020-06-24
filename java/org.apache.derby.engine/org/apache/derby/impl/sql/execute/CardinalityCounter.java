@@ -57,6 +57,7 @@ class CardinalityCounter implements RowLocationRetRowSource
 
     public boolean needsRowLocationForDeferredCheckConstraints()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return rowSource.needsRowLocationForDeferredCheckConstraints();
     }
 
@@ -112,6 +113,7 @@ class CardinalityCounter implements RowLocationRetRowSource
 		cloned = new DataValueDescriptor[clonee.length];
 		for (int i = 0; i < clonee.length - 1; i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
 			cloned[i] = clonee[i].cloneValue(false);
 		}
 		return cloned;
@@ -133,6 +135,7 @@ class CardinalityCounter implements RowLocationRetRowSource
 		int i;
 		for (i = 0; i < numKeys; i++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (prevKey[i].isNull()) {
 				break;
             }

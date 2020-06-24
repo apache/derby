@@ -87,6 +87,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("SecurityPolicyReloadingTest");
 
@@ -95,6 +96,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
         // jar file but is not easy to do with all of the testing and server
         // classes jumbled together in the same class tree.
         if ( !TestConfiguration.loadingFromJars() ) { return suite; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
 
         suite.addTest( decorateTest() );
 
@@ -122,6 +124,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     private static Test decorateTest()
     {
         Test test = new SecurityPolicyReloadingTest();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
 
         //
         // Install a security manager using the initial policy file.
@@ -145,6 +148,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
             (
              test,
              null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
              new String[] { getSourcePolicy() },
              null,
              new String[] { makeTargetPolicyStub() }
@@ -199,6 +203,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
         throws Exception
     {
         Connection  conn = openUserConnection( DerbyConstants.TEST_DBO );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
 
         assertTrue( "Initially, should be able to read property.", canReadProperty() );
 
@@ -219,6 +224,8 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     private void nonDbaTest()
         throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
         String          reservedToDBO = "42504";
         Connection  conn = openUserConnection( NON_DBO_USER );
 
@@ -250,6 +257,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     {
         String          insufficientPrivilege = "XK000";
         Connection  conn = openUserConnection( DerbyConstants.TEST_DBO );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2419
 
         // First change to a policy which does not permit policy reloading
         changePolicyFile( conn, UNRELOADABLE_SOURCE_POLICY, true, null );
@@ -289,6 +297,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
         throws Exception
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             getSystemProperty("SecurityPolicyReloadingTest.property");
             return true;
         }
@@ -343,6 +352,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
             String  userDir = getSystemProperty( "user.dir" );
             String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + makeTargetPolicyStub();
             File      file = new File( fileName );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6162
             return file.toURI().toURL().toExternalForm();
         }
         catch (Exception e)

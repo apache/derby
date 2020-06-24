@@ -61,6 +61,7 @@ class StatementHelper {
      */
     private Map<String, PreparedStatement> statements =
             new IdentityHashMap<String, PreparedStatement>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
     /**
      * Prepare a statement, looking in the map first.
@@ -68,6 +69,7 @@ class StatementHelper {
      * it is prepared and put into the map for future use.
      */
     protected PreparedStatement prepareStatement(String sql) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         PreparedStatement ps = statements.get(sql);
         if (ps != null)
             return ps;
@@ -82,6 +84,7 @@ class StatementHelper {
     }
 
     public void close() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (PreparedStatement ps : statements.values()) {
             ps.close();
         }

@@ -1,6 +1,7 @@
 /*
    Derby - Class org.apache.derby.impl.sql.compile.ResultColumnList
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -64,6 +65,7 @@ import org.apache.derby.iapi.util.JBitSet;
  * @see ResultColumn
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 {
 	/* Is this the ResultColumnList for an index row? */
@@ -106,6 +108,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	private int initialListSize = 0;
 
     ResultColumnList(ContextManager cm) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         super(ResultColumn.class, cm);
 	}
 
@@ -116,6 +119,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @param resultColumn	The ResultColumn to add to the list
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addResultColumn(ResultColumn resultColumn)
 	{
 		/* Vectors are 0-based, ResultColumns are 1-based */
@@ -131,6 +136,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @param destructiveCopy	Whether or not this is a descructive copy
 	 *							from resultColumns
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void appendResultColumns(ResultColumnList resultColumns,
 									boolean destructiveCopy)
 	{
@@ -143,6 +150,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		** so the new virtual column ids start at the original size
 		** of this list, plus one.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : resultColumns)
 		{
 			/* ResultColumns are 1-based */
@@ -168,6 +176,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @return	the column at that position.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getResultColumn(int position)
 	{
 		/*
@@ -178,6 +188,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		{
 			// this wraps the cast needed, 
 			// and the 0-based nature of the Vectors.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(position-1);
 			if (rc.getColumnPosition() == position)
 			{
@@ -191,6 +202,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(index);
 			if (rc.getColumnPosition() == position)
 			{
@@ -223,6 +235,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		for (int index = size() - 1; index >= 0; index--)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(index);
 			if (!(rc.getExpression() instanceof ColumnReference))
 			{
@@ -231,6 +244,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				continue;
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             ColumnReference colRef = (ColumnReference)rc.getExpression();
 			if ((rsn == colRef.getSourceResultSet(crColNum)) &&
 				(crColNum[0] == colNum))
@@ -252,6 +267,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @return	the column at that position, null if out of range
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getOrderByColumn(int position)
 	{
 		// this wraps the cast needed, and the 0-based nature of the Vectors.
@@ -270,6 +287,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @return	the column that matches that name.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getResultColumn(String columnName)
 	{
         return getResultColumn( columnName, true );
@@ -285,8 +304,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @return	the column that matches that name.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getResultColumn(String columnName, boolean markIfReferenced )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn resultColumn : this)
 		{
 			if (columnName.equals( resultColumn.getName()) )
@@ -322,12 +344,18 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
      */
     public ResultColumn getResultColumn(int tableNumber,
                                         int columnNumber,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
+//IC see: https://issues.apache.org/jira/browse/DERBY-4595
                                         String columnName)
     {
         int size = size();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
+//IC see: https://issues.apache.org/jira/browse/DERBY-2526
+//IC see: https://issues.apache.org/jira/browse/DERBY-3023
         for (int index = 0; index < size; index++)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn resultColumn = elementAt(index);
             ResultColumn rc = resultColumn;
 
@@ -341,6 +369,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                     if (rsn instanceof FromTable) {
                         FromTable ft = (FromTable)rsn;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
                         if (ft.getTableNumber() == tableNumber) {
                             // We have the right table, now try to match the
                             // column number. Looking at a join, for a base
@@ -378,6 +407,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                                 // resultColumn. Now do sanity check that column
                                 // name is correct. Remove when DERBY-4695 is
                                 // fixed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
+//IC see: https://issues.apache.org/jira/browse/DERBY-4595
                                 if (columnName.equals(
                                             vcn.getSourceColumn().getName())) {
                                     resultColumn.setReferenced();
@@ -411,6 +442,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                     if (cr.getTableNumber() == tableNumber &&
                             cr.getColumnNumber() == columnNumber) {
                         // Found matching (t,c) within this top resultColumn
+//IC see: https://issues.apache.org/jira/browse/DERBY-4679
                         resultColumn.setReferenced();
                         return resultColumn;
                     } else {
@@ -442,12 +474,15 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @return	the column that matches that name.
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getResultColumn(String columnsTableName, String columnName)
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
             ResultColumn resultColumn = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			/* If the column's table name is non-null, then we have found a match
 			 * only if the RC's table name is non-null and the same as the
@@ -493,6 +528,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @exception StandardException	Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getAtMostOneResultColumn(
 								ColumnReference cr,
 								String exposedTableName,
@@ -502,6 +539,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		ResultColumn	retRC = null;
 		String			columnName = cr.getColumnName();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn resultColumn : this)
 		{
 			if (columnName.equals( resultColumn.getName()))
@@ -575,6 +613,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @return	the column that matches that name.
 	 * @exception StandardException thrown on ambiguity
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getOrderByColumnToBind(
             String columnName,
             TableName tableName,
@@ -588,6 +628,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             resultColumn = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			/* The order by column is qualified, then it is okay to consider
 			 * this RC if:
@@ -597,6 +638,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			 *	   from the same table (as determined by the tableNumbers).
 			 */
             boolean columnNameMatches;
+//IC see: https://issues.apache.org/jira/browse/DERBY-127
 			if (tableName != null)
 			{
                 ValueNode rcExpr = resultColumn.getExpression();
@@ -604,6 +646,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 						continue;
 
                 ColumnReference cr = (ColumnReference) rcExpr;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 if( (! tableName.equals( cr.getQualifiedTableName())) && tableNumber != cr.getTableNumber())
                 {
                     continue;
@@ -641,6 +684,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				{
 					retVal = resultColumn;
 				}
+//IC see: https://issues.apache.org/jira/browse/DERBY-147
+//IC see: https://issues.apache.org/jira/browse/DERBY-147
 				else if (! retVal.isEquivalent(resultColumn))
 				{
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_FOR_ORDER_BY, columnName);
@@ -649,6 +694,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				{// remove the column due to pullup of orderby item
 					removeElement(resultColumn);
 					decOrderBySelect();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 					obc.clearAddedColumnOffset();
 					collapseVirtualColumnIdGap(
 							resultColumn.getColumnPosition());
@@ -671,6 +717,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 */
 	private void collapseVirtualColumnIdGap(int gap)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this) {
             rc.collapseVirtualColumnIdGap(gap);
         }
@@ -710,6 +757,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @return	the column that matches that name, or NULL if pull-up needed
 	 * @exception StandardException thrown on ambiguity
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn findResultColumnForOrderBy(
                             String columnName, TableName tableName)
 		throws StandardException
@@ -720,12 +769,14 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             resultColumn = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			// We may be checking on "ORDER BY T.A" against "SELECT *".
 			// exposedName will not be null and "*" will not have an expression
 			// or tablename.
 			// We may be checking on "ORDER BY T.A" against "SELECT T.B, T.A".
                         boolean columnNameMatches;
+//IC see: https://issues.apache.org/jira/browse/DERBY-127
 			if (tableName != null)
 			{
 				ValueNode rcExpr = resultColumn.getExpression();
@@ -734,6 +785,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                     continue;
                 }
 				ColumnReference cr = (ColumnReference) rcExpr;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 if( ! tableName.equals( cr.getQualifiedTableName()))
                 {
                     continue;
@@ -760,7 +812,9 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				}
 				else if (index >= size - orderBySelect)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 					if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1861
 						SanityManager.THROWASSERT(
 							"Unexpectedly found ORDER BY column '" +
 							columnName + "' pulled up at position " +index);
@@ -804,6 +858,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn thisResultColumn = elementAt(index);
             ResultColumn nameListResultColumn = nameList.elementAt(index);
 
@@ -825,6 +880,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @exception StandardException		Thrown on error
 	 */
     void bindExpressions(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -835,6 +891,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int size = size();
  		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn vn = elementAt(index);
             vn = vn.bindExpression(fromList, subqueryList, aggregates);
 			setElementAt(vn, index);
@@ -849,9 +906,12 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumnsToExpressions()
 					throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.bindResultColumnToExpression();
@@ -867,6 +927,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumnsByName(TableDescriptor targetTableDescriptor)
 					throws StandardException
 	{
@@ -874,7 +936,9 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             elementAt(index).bindResultColumnByName(
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 						targetTableDescriptor,
 						index + 1
 					);
@@ -907,6 +971,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             ResultColumn rc = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			rc.bindResultColumnByName(
 						targetTableDescriptor,
@@ -931,6 +996,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_NAME_INSERT, colName);
 				}
 			}
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
             columnBitSet.set( colIdx);
 		}
 		return columnBitSet;
@@ -956,6 +1022,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	{
 		int			size = size();
         HashSet<String>     seenNames = new HashSet<String>(size + 2, 0.999f);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		for (int index = 0; index < size; index++)
 		{
@@ -1003,6 +1070,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 											null,
 											(TableDescriptor) null,
 											null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
 											0, 0, false);
 			rc.setColumnDescriptor(null, cd);
 			rc.setVirtualColumnId(index + 1);
@@ -1019,6 +1091,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindResultColumnsByPosition(TableDescriptor targetTableDescriptor)
 					throws StandardException
 	{
@@ -1030,6 +1104,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			** Add one to the iterator index, because iterator indexes start at zero,
 			** and column numbers start at one.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             elementAt(index).bindResultColumnByPosition(
 						targetTableDescriptor,
 						index + 1);
@@ -1050,6 +1125,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
@@ -1060,6 +1137,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn resultColumn = elementAt(index);
 			setElementAt(resultColumn.preprocess(numTables,
 												 outerFromList,
@@ -1083,6 +1161,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             ResultColumn    otherRC = toStore.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             elementAt(index).checkStorableExpression(otherRC);
 		}
@@ -1107,6 +1186,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int ssCount = 0;
 		boolean[] isSS = new boolean[heapColCount];//Should be table length.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if (rc.getTypeId().streamStorable())
@@ -1142,6 +1222,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	void checkStorableExpressions()
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.checkStorableExpression();
@@ -1261,6 +1342,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			// fieldX.setColumn(columnNumber, (DataValueDescriptor) columnExpr);
 			// and add them to exprFun.
             rc = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			/* If we are not generating nulls, then we can skip this RC if
 			 * it is simply propagating a column from the source result set.
@@ -1299,6 +1381,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 					int virtualColumnIdRightTable = -1;
 					int virtualColumnIdLeftTable = -1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     for (ResultColumn joinColumn : jnRCL) {
 						if (joinColumn.getName().equals(rc.getUnderlyingOrAliasName())) {
 							if (joinColumn.isRightOuterJoinUsingClause())
@@ -1398,6 +1481,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
             //
 			if ( rc.hasGenerationClause() )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6346
                 ValueNode   expr = rc.getExpression();
                 if ( (expr != null) && !(expr instanceof VirtualColumnNode) )
                 {
@@ -1465,6 +1549,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				userExprFun.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Row, "getColumn",
 					ClassName.DataValueDescriptor, 1); // the express
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 				acb.generateNullWithExpress(userExprFun, rc.getTypeCompiler(),
 						rc.getTypeServices().getCollationType());
 			}
@@ -1498,6 +1583,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		ExecRow				row = getExecutionFactory().getValueRow( columnCount );
 		int					position = 1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			DataTypeDescriptor dataType = rc.getTypeServices();
@@ -1565,8 +1651,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
      * @return an instance that produces rows of the same shape as this
      * result column list
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
     ExecRowBuilder buildRowTemplate(FormatableBitSet referencedCols,
                                     boolean skipPropagatedCols)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
             throws StandardException
     {
         int columns = (referencedCols == null) ?
@@ -1577,8 +1665,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
         // Get the index of the first column to set in the row template.
         int colNum = (referencedCols == null) ? 0 : referencedCols.anySetBit();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this) {
             ValueNode sourceExpr = rc.getExpression();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
             if (sourceExpr instanceof CurrentRowLocationNode) {
                 builder.setColumn(colNum + 1, newRowLocationTemplate());
@@ -1607,6 +1697,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
     /**
      * Shorthand for {@code buildRowTemplate(null, false)}.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
     ExecRowBuilder buildRowTemplate() throws StandardException {
         return buildRowTemplate(null, false);
     }
@@ -1638,6 +1729,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		cb.push(numCols);
 		cb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 							rowAllocatorMethod, rowAllocatorType, 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		cb.setField(field);
 		/* Increase the statement counter in constructor.  Code size in
 		 * constructor can become too big (more than 64K) for Java compiler
@@ -1652,6 +1744,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
      * conglomerate.
      */
     private RowLocation newRowLocationTemplate() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4279
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         LanguageConnectionContext lcc = getLanguageConnectionContext();
         DataDictionary dd = lcc.getDataDictionary();
 
@@ -1681,6 +1775,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @return	A ResultDescription for this ResultSetNode.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnDescriptor[] makeResultDescriptors()
 	{
 	    ResultColumnDescriptor colDescs[] = new ResultColumnDescriptor[size()];
@@ -1689,6 +1785,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
 		    // the ResultColumn nodes are descriptors, so take 'em...
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
             colDescs[index] = getExecutionFactory().getResultColumnDescriptor(((ResultColumnDescriptor) elementAt(index)));
 		}
 
@@ -1704,22 +1801,28 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @exception StandardException		Thrown on error
 	 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void expandAllsAndNameColumns(FromList fromList)
 					throws StandardException
 	{
 		boolean			expanded = false;
 		ResultColumnList allExpansion;
 		TableName			fullTableName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
 
 		/* First walk result column list looking for *'s to expand */
 		for (int index = 0; index < size(); index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(index);
 			if (rc instanceof AllResultColumn)
 			{
 				expanded = true;
 
 				//fullTableName = ((AllResultColumn) rc).getFullTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
                 TableName temp = rc.getTableNameObject();
                 if(temp != null) {
                    String sName = temp.getSchemaName();
@@ -1783,9 +1886,12 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void nameAllResultColumns()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.guaranteeColumnName();
@@ -1810,9 +1916,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	boolean columnTypesAndLengthsMatch()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn resultColumn : this)
 		{
 			/* Skip over generated columns */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4442
+//IC see: https://issues.apache.org/jira/browse/DERBY-4419
+//IC see: https://issues.apache.org/jira/browse/DERBY-4425
 			if (resultColumn.isGenerated())
 			{
 				continue;
@@ -1838,6 +1948,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             ResultColumn resultColumn = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             ResultColumn otherResultColumn = otherRCL.elementAt(index);
 
@@ -1886,8 +1997,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn thisColumn = elementAt(index);
             ResultColumn referencedColumn;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			/*
 			** A No-Op projection can point to a VirtualColumnNode or a
@@ -1911,6 +2025,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			}
 
             ResultColumn childColumn = childRCL.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (referencedColumn != childColumn)
 			{
@@ -1930,10 +2045,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList copyListAndObjects()
 					throws StandardException
 	{
         ResultColumnList newList = new ResultColumnList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		/* Walk the current list - for each ResultColumn in the list, make a copy
 		 * and add it to the new list.
@@ -1954,6 +2072,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * to be removed. 
 	 *
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void removeOrderByColumns()
 	{
 		int idx = size() - 1;
@@ -1973,6 +2093,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void genVirtualColumnNodes(ResultSetNode sourceResultSet,
 									  ResultColumnList sourceResultColumnList)
 				throws StandardException
@@ -1993,6 +2115,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void genVirtualColumnNodes(ResultSetNode sourceResultSet,
 									  ResultColumnList sourceResultColumnList,
 									  boolean markReferenced)
@@ -2003,8 +2127,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             ResultColumn resultColumn = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			/* Vectors are 0-based, VirtualColumnIds are 1-based */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             resultColumn.setExpression
                 (
                  new VirtualColumnNode
@@ -2031,8 +2157,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @param adjust		The size of the increment.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void adjustVirtualColumnIds(int adjust)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn resultColumn : this)
 		{
 			resultColumn.adjustVirtualColumnId(adjust);
@@ -2065,6 +2194,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int				numDeleted = 0;
         ResultColumnList deletedRCL = new ResultColumnList(getContextManager());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn resultColumn : this)
         {
 			/* RC's for FromBaseTables are marked as referenced during binding.
@@ -2100,6 +2230,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		// Go back and delete the RCs to be delete from the list
 		for (int index = 0; index < deletedRCL.size(); index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             removeElement(deletedRCL.elementAt(index));
 		}
 	}
@@ -2111,10 +2242,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @return String	The first duplicate column name, if any.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String verifyUniqueNames(boolean errForGenCols)
 					throws StandardException
 	{
         HashSet<String> seenNames = new HashSet<String>(size() + 2, 0.999f);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
         for (ResultColumn rc : this)
 		{
@@ -2124,6 +2258,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
             String colName = rc.getName();
             boolean alreadySeen = !seenNames.add(colName);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 			if (alreadySeen)
 			{
 				return colName;
@@ -2143,6 +2279,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void propagateDCLInfo(ResultColumnList derivedRCL, String tableName)
 					throws StandardException
 	{
@@ -2178,6 +2316,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 	void rejectParameters() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			rc.rejectParameter();
@@ -2230,6 +2369,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int sz = size();
 
         for (int i = 1; i <= sz; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			if (i > initialListSize)
 			// this RC was generated internally and will not
@@ -2252,8 +2393,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @param resultSetNumber	The resultSetNumber
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setResultSetNumber(int resultSetNumber)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.setResultSetNumber(resultSetNumber);
@@ -2265,8 +2409,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * Useful when chopping a ResultSetNode out of a tree when there are
 	 * still references to its RCL.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setRedundant()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.setRedundant();
@@ -2286,6 +2433,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
             ExecPreparedStatement cursorStmt, String cursorName)
 			throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn resultColumn : this)
 		{
 			if (resultColumn.updated() &&
@@ -2316,6 +2464,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void    setUnionResultExpression(ResultColumnList otherRCL,
                                          int tableNumber,
                                          int level,
@@ -2345,11 +2495,14 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		/* Make a dummy TableName to be shared by all new CRs */
         dummyTN = new TableName(null, null, getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		int size = visibleSize();
 		for (int index = 0; index < size; index++)
 		{
 			ColumnReference newCR;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn thisRC = elementAt(index);
             ResultColumn otherRC = otherRCL.elementAt(index);
 			ValueNode	 thisExpr = thisRC.getExpression();
@@ -2394,6 +2547,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 												otherExpr.getTypeServices(),
 												cf);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             newCR = new ColumnReference(
                     thisRC.getName(), dummyTN, getContextManager());
 			newCR.setType(resultType);
@@ -2494,6 +2649,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int size = visibleSize();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn thisRC = elementAt(index);
             ResultColumn otherRC = otherRCL.elementAt(index);
 
@@ -2517,6 +2673,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 */
 	public	boolean updateOverlaps(int[] columns)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if ( ! rc.updated())
@@ -2555,6 +2712,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		*/
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             result[index] = elementAt(index);
 		}
 
@@ -2596,6 +2754,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList expandToAll(TableDescriptor td,
 								TableName tableName)
 						throws StandardException
@@ -2607,6 +2767,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int							posn;
 
 		/* Get a new ResultColumnList */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         retval = new ResultColumnList(getContextManager());
 		/*
 		** Form a sorted array of the ResultColumns
@@ -2622,6 +2784,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < cdlSize; index++)
 		{
             cd = cdl.elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			if ((posn < originalRCS.length) &&
 				(cd.getPosition() == originalRCS[posn].getColumnPosition()))
@@ -2661,6 +2825,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
@@ -2676,6 +2842,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn    bindingRC = bindingRCL.elementAt(index);
             ResultColumn    thisRC = elementAt(index);
 
@@ -2688,6 +2855,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 */
 	void markUpdated()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.markUpdated();
@@ -2725,8 +2893,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * 
 	 * @return String	The 1st column name, if any, that is not in the list.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String verifyCreateConstraintColumnList(TableElementList tel)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             String colName = rc.getName();
@@ -2744,6 +2915,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @param columnNames	String[] to hold the column names.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void exportNames(String[] columnNames)
 	{
 		if (SanityManager.DEBUG)
@@ -2763,6 +2936,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             columnNames[index] = elementAt(index).getName();
 		}
 	}
@@ -2775,10 +2949,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @return ResultColumn	The parent ResultColumn
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn findParentResultColumn(ResultColumn childRC)
 	{
 		ResultColumn	parentRC = null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if (rc.getExpression() instanceof ColumnReference)
@@ -2816,6 +2993,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 */
 	void markUpdated(ResultColumnList updateColumns)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn updateColumn : updateColumns)
 		{
             ResultColumn resultColumn = getResultColumn(updateColumn.getName());
@@ -2845,8 +3023,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
      * @param updateColumns     A list representing the columns
 	 *							to be updated.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markColumnsInSelectListUpdatableByCursor(List<String> updateColumns)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 		commonCodeForUpdatableByCursor(updateColumns, true);
 	}
 
@@ -2862,6 +3043,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * list but we will not find updatable column c12 in the select column list
 	 */
     private void commonCodeForUpdatableByCursor(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             List<String> updateColumns,
             boolean dealingWithSelectResultColumnList)
 	{
@@ -2882,10 +3065,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			for (int index = 0; index < ucSize; index++)
 			{
                 columnName = updateColumns.get(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 				resultColumn = getResultColumn(columnName);
 				if (SanityManager.DEBUG)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-189
 					if (resultColumn == null && !dealingWithSelectResultColumnList)
 					{
 						SanityManager.THROWASSERT("No result column found with name " +
@@ -2908,6 +3094,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
      * @param updateColumns     A list representing the columns
 	 *							to be updated.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markUpdatableByCursor(List<String> updateColumns)
 	{
 		commonCodeForUpdatableByCursor(updateColumns, false);
@@ -2936,6 +3124,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
     boolean isCloneable()
 	{
 		boolean retcode = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if (! rc.getExpression().isCloneable())
@@ -2954,8 +3143,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void remapColumnReferencesToExpressions() throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			// The expression may be null if this column is an identity
@@ -2963,6 +3155,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			// is a ColumnReference; we call through to the ColumnReference
 			// to give it a chance to remap itself from the outer query
 			// node to this one.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1089
+//IC see: https://issues.apache.org/jira/browse/DERBY-2015
 			if (rc.getExpression() != null)
 				rc.setExpression(
 					rc.getExpression().remapColumnReferencesToExpressions());
@@ -2997,6 +3191,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             for (ResultColumn rc : this)
 			{
 				ValueNode	 	expr = rc.getExpression();
@@ -3055,6 +3250,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	{
 		int numReferenced = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if (rc.isReferenced())
@@ -3071,6 +3267,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @param idArray	int[] for column ids
 	 * @param basis		0 (for 0-based ids) or 1 (for 1-based ids)
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void recordColumnReferences(int[] idArray, int basis)
 	{
 		int currArrayElement = 0;
@@ -3098,6 +3296,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             ResultColumn rc = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if ( name.equals( rc.getName() ) )
 			{
@@ -3120,9 +3320,12 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @param tableColMap	JBitSet[] for tables
 	 * @param tableNumber	Table number of column references
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void recordColumnReferences(boolean[] colArray1, JBitSet[] tableColMap,
 			int tableNumber)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			int columnNumber;
@@ -3153,6 +3356,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	{
 		int tableNumber = -1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			ValueNode vn = rc.getExpression();
@@ -3179,6 +3383,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * Clear the column references from the RCL. (Restore RCL back to a state
 	 * where none of the RCs are marked as referenced.)
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void clearColumnReferences()
 	{
         for (ResultColumn rc : this)
@@ -3195,8 +3401,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @param targetList	The list to copy to
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void copyReferencedColumnsToNewList(ResultColumnList targetList)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if (rc.isReferenced())
@@ -3212,9 +3421,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @param targetList	The list to copy to,
 	 * @param copyList      1 based bitMap we copy columns associated with set bits.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void copyColumnsToNewList(
         ResultColumnList targetList, FormatableBitSet copyList)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if (copyList.isSet(rc.getColumnPosition())) 
@@ -3230,12 +3443,15 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @return the FormatableBitSet
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FormatableBitSet getColumnReferenceMap()
 	{
 		FormatableBitSet colMap = new FormatableBitSet(size());
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(index);
 			if (rc.isReferenced())
 			{
@@ -3252,12 +3468,15 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
      */
     void pullVirtualIsReferenced()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
         {
             rc.pullVirtualIsReferenced();
         }
     } // end of pullVirtualIsReferenced
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void clearTableNames()
 	{
         for (ResultColumn rc : this)
@@ -3306,6 +3525,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	{
 		int colSize = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             colSize += rc.getMaximumColumnSize();
@@ -3323,6 +3543,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void createListFromResultSetMetaData(ResultSetMetaData rsmd,
 												TableName tableName,
 												String javaClassName)
@@ -3350,9 +3572,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				int jdbcColumnType = rsmd.getColumnType(index);
 
 				switch (jdbcColumnType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 				case Types.JAVA_OBJECT:
 				case Types.OTHER:
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
                     cti = TypeId.getUserDefinedTypeId(
                             rsmd.getColumnTypeName(index));
 					break;
@@ -3422,6 +3646,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
     public ResultColumn addColumn( TableName tableName, String columnName, DataTypeDescriptor dts )
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ValueNode bcn = new BaseColumnNode(columnName,
                                            tableName,
                                            dts,
@@ -3443,6 +3669,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void addRCForRID()
 		throws StandardException
 	{
@@ -3467,9 +3695,12 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void markAllUnreferenced()
 				throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.setUnreferenced();
@@ -3487,6 +3718,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 */
 	boolean allExpressionsAreColumns(ResultSetNode sourceRS)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			//DERBY-4631
@@ -3499,6 +3731,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			// By returning false here, we allow Derby to generate
 			// code for functionality equivalent to COALESCE to
 			// determine join column's value. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (rc.isRightOuterJoinUsingClause())
 				return false;
 			
@@ -3551,6 +3784,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @return	Array representiong mapping of RCs to source RCs.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
     ColumnMapping mapSourceColumns()
 	{
         int[] mapArray = new int[size()];
@@ -3560,11 +3797,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
         // key: virtual column number, value: index
         Map<Integer,Integer> seenMap = new HashMap<Integer,Integer>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		int size = size();
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             resultColumn = elementAt(index);
 			if (resultColumn.getExpression() instanceof VirtualColumnNode)
 			{
@@ -3578,6 +3817,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				else
 				{
 					// Virtual column #s are 1-based
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
                     ResultColumn rc = vcn.getSourceColumn();
                     updateArrays(mapArray, cloneMap, seenMap, rc, index);
 
@@ -3600,6 +3843,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				{
 					// Virtual column #s are 1-based
                     ResultColumn rc = cr.getSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
 
                     updateArrays(mapArray, cloneMap, seenMap, rc, index);
 				}
@@ -3610,14 +3857,21 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
         ColumnMapping result = new ColumnMapping(mapArray, cloneMap);
         return result;
 	}
 
 	/** Set the nullability of every ResultColumn in this list 
 	 * @throws StandardException */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setNullability(boolean nullability) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
             rc.setNullability(nullability);
@@ -3670,6 +3924,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	
 		for (index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn oldCol = elementAt(index);
 			if (oldCol.isReferenced())
 			{
@@ -3738,10 +3993,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		}
 	
         ResultColumnList newCols = new ResultColumnList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		int size = size();
 		for (index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn oldCol = elementAt(index);
 			if (oldCol.isReferenced())
 			{
@@ -3806,10 +4064,14 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
             throws StandardException
 	{
         ResultColumnList    newRCL = new ResultColumnList(getContextManager());
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		/* Find all of the join columns and put them 1st on the
 		 * new RCL.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn joinRC : joinColumns)
 		{
 			String columnName = joinRC.getName();
@@ -3845,6 +4107,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
 			/* ResultColumns are 1-based */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             elementAt(index).setVirtualColumnId(index + 1);
 		}
 	}
@@ -3859,6 +4123,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 */
 	boolean reusableResult()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if ((rc.getExpression() instanceof ConstantNode) ||
@@ -3890,6 +4155,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		for ( int index = 0; index < size; index++ )
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn resultColumn = elementAt( index );
 			columnName = resultColumn.getName();
 			cd = td.getColumnDescriptor( columnName );
@@ -3912,6 +4178,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @return the array of strings
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String[] getColumnNames()
 	{
 		String strings[] = new String[size()];
@@ -3920,6 +4188,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn resultColumn = elementAt(index);
 			strings[index] = resultColumn.getName();
 		}
@@ -3936,6 +4205,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
 	void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)
@@ -3946,9 +4216,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		for (int index = 0; index < size; index++)
 		{
             ResultColumn rc = elementAt(index);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 			if (rc.isDefaultColumn())
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4426
                 if (!allowDefaults) {
                     throw StandardException.newException(
                         SQLState.LANG_INVALID_USE_OF_DEFAULT);
@@ -3963,6 +4235,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				}
 				else if (index < tcl.size())
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     ResultColumn trc = tcl.elementAt(index);
 					cd = ttd.getColumnDescriptor(trc.getName());
 				}
@@ -3997,7 +4270,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				else
 				{
 					rc.setExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             new UntypedNullConstantNode(getContextManager()));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3950
                     rc.setWasDefaultColumn( true );
 				}
                 rc.setDefaultColumn(false);
@@ -4036,6 +4312,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	void checkForInvalidDefaults()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			if (rc.isAutoincrementGenerated())
@@ -4056,6 +4333,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	void verifyAllOrderable() 
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ResultColumn rc : this)
 		{
 			rc.verifyOrderable();
@@ -4100,6 +4378,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	private	ResultColumn	makeColumnFromName( String columnName )
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
        return new ResultColumn(columnName, null, getContextManager());
 	}
 
@@ -4112,6 +4392,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	{
 		ContextManager	cm = getContextManager();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ResultColumn rc = new ResultColumn(
 				columnName,
                 new ColumnReference(columnName, tableName, cm),
@@ -4128,6 +4410,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 *
 	 * @exception StandardException		If the column is an ai column
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void forbidOverrides(ResultColumnList sourceRSRCL)
 		throws StandardException
 	{
@@ -4142,17 +4426,21 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	 * @exception StandardException		If the column is an ai column
 	 */
     void forbidOverrides(ResultColumnList sourceRSRCL, boolean defaultsWereReplaced )
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 		throws StandardException
 	{
 		int size = size();
 
 		for (int index = 0; index < size; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(index);
 			ResultColumn sourceRC = 
                 (sourceRSRCL == null) ? null : sourceRSRCL.elementAt(index);
 			ColumnDescriptor cd = rc.getTableColumnDescriptor();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3950
             if ( (cd != null) && cd.hasGenerationClause() )
             {
                 if ( !defaultsWereReplaced && (sourceRC != null) && !sourceRC.hasGenerationClause() && !sourceRC.wasDefaultColumn() )
@@ -4160,6 +4448,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                     throw StandardException.newException(SQLState.LANG_CANT_OVERRIDE_GENERATION_CLAUSE, rc.getName());
                 }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4146
                 if ( sourceRC != null ) { sourceRC.setColumnDescriptor(cd.getTableDescriptor(), cd); }
             }
 			
@@ -4172,6 +4461,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				{
 					sourceRC.setColumnDescriptor(cd.getTableDescriptor(), cd);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-167
 				}else{
 					if(cd.isAutoincAlways())
 						throw StandardException.newException(SQLState.LANG_AI_CANNOT_MODIFY_AI,
@@ -4181,6 +4471,8 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		}
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void incOrderBySelect()
 	{
 		orderBySelect++;
@@ -4198,6 +4490,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
     public void copyOrderBySelect( ResultColumnList src)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-127
         orderBySelect = src.orderBySelect;
     }
 
@@ -4219,6 +4512,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		boolean inVisibleRange = false;
 		for (int i = sz - 1; i >= 0; i--) 
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(i);
 			if (rc.isGenerated()) 
 			{
@@ -4244,6 +4538,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int numGenerated = 0;
 		int sz = size();
 		for (int i = sz - 1; i >= 0; i--) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(i);
 			if (rc.isGenerated() && rc.isGroupingColumn())
 			{
@@ -4261,6 +4556,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		int sz = size();
 		for (int i = sz - 1; i >= 0; i--) 
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ResultColumn rc = elementAt(i);
 			if (rc.isGenerated() && rc.isGroupingColumn()) 
 			{
@@ -4288,8 +4584,11 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
     @Override
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 		if (SanityManager.DEBUG) {
 			return "indexRow: " + indexRow + "\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4397
+//IC see: https://issues.apache.org/jira/browse/DERBY-4
 				 "orderBySelect: " + orderBySelect + "\n" +
 				(indexRow ? "conglomerateId: " + conglomerateId + "\n"
 				 : "") +
@@ -4301,6 +4600,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 
     private static boolean streamableType(ResultColumn rc) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4477
+//IC see: https://issues.apache.org/jira/browse/DERBY-3645
+//IC see: https://issues.apache.org/jira/browse/DERBY-3646
+//IC see: https://issues.apache.org/jira/browse/DERBY-2349
         DataTypeDescriptor dtd = rc.getType();
         TypeId s = TypeId.getBuiltInTypeId(dtd.getTypeName());
 
@@ -4314,6 +4617,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
     private static void updateArrays(int[] mapArray,
                              boolean[] cloneMap,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                              Map<Integer,Integer> seenMap,
                              ResultColumn rc,
                              int index) {
@@ -4324,12 +4628,15 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
         if (streamableType(rc)) {
             Integer seenIndex = seenMap.get(Integer.valueOf(vcId));
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
             if (seenIndex != null) {
                 // We have already mapped this column at index
                 // seenIndex, so mark occurence 2..n  for cloning.
                 cloneMap[index] = true;
             } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 seenMap.put(vcId, index);
             }
         }

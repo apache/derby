@@ -36,6 +36,7 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class Reply {
     protected Agent agent_;
     protected NetAgent netAgent_; //cheat-link to (NetAgent) agent_
@@ -67,6 +68,7 @@ class Reply {
     private int peekedNumOfExtendedLenBytes_ = 0;
     private int currentPos_ = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     final static int END_OF_COLLECTION = -1;
     final static int END_OF_SAME_ID_CHAIN = -2;
 
@@ -81,6 +83,7 @@ class Reply {
         pos_ = 0;
         count_ = 0;
         topDdmCollectionStack_ = Reply.EMPTY_STACK;
+//IC see: https://issues.apache.org/jira/browse/DERBY-823
         Arrays.fill(ddmCollectionLenStack_, 0);
         ddmScalarLen_ = 0;
         dssLength_ = 0;
@@ -170,7 +173,9 @@ class Reply {
             try {
                 // oops, we shouldn't expose the agent's input stream here, collapse this into a read method on the agent
                 actualBytesRead = netAgent_.getInputStream().read(buffer_, count_, buffer_.length - count_);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             } catch (IOException ioe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
                 netAgent_.throwCommunicationsFailure(ioe);
             } finally {
                 if (agent_.loggingEnabled()) {
@@ -196,6 +201,7 @@ class Reply {
                 netAgent_.accumulateChainBreakingReadExceptionAndThrow(
                     new DisconnectException(netAgent_,
                         new ClientMessageId(SQLState.NET_INSUFFICIENT_DATA),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         minimumBytesNeeded, totalBytesRead));
             }
         }
@@ -206,6 +212,7 @@ class Reply {
     // The data will be in the buffer after this method is called.
     // Now returns the total bytes read for decryption, use to return void.
     private int ensureALayerDataInBuffer(int desiredDataSize)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         int totalBytesRead = 0;
         // calulate the the number of bytes in the buffer.
@@ -237,6 +244,7 @@ class Reply {
     // copying out the data into some other storage.  any extended dss header
     // info will be removed in the copying process.
     private void compressBLayerData(int continueDssHeaderCount)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         int tempPos = 0;
 
@@ -305,6 +313,7 @@ class Reply {
                 bytesToShift = dssLength_;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-823
             tempPos -= (bytesToShift - 2);
             System.arraycopy(buffer_, tempPos - shiftSize, buffer_, tempPos , bytesToShift);
         }
@@ -399,6 +408,7 @@ class Reply {
 
 
     private void decryptData(int gdsFormatter, int oldDssLength)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws DisconnectException {
         boolean readHeader;
 
@@ -511,6 +521,7 @@ class Reply {
                 }
                 if (flag) {
                     int firstLobLength = ((clearedByte[0] & 0xFF) << 8) +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
                         ((clearedByte[1] & 0xFF) << 0);
                     if (oldCount - oldDssLength < 6) {
                         int totalBytesRead = fill(6); //sometimes the 2nd EXTDTA doesn't come back, need to fetch again to get it
@@ -574,6 +585,7 @@ class Reply {
     }
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final int readUnsignedShort() throws DisconnectException {
         // should we be checking dss lengths and ddmScalarLengths here
         // if yes, i am not sure this is the correct place if we should be checking
@@ -583,6 +595,7 @@ class Reply {
                 ((buffer_[pos_++] & 0xff) << 0);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final short readShort() throws DisconnectException {
         // should we be checking dss lengths and ddmScalarLengths here
         ensureBLayerDataInBuffer(2);
@@ -594,6 +607,7 @@ class Reply {
         return s;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final int readInt() throws DisconnectException {
         // should we be checking dss lengths and ddmScalarLengths here
         ensureBLayerDataInBuffer(4);
@@ -604,6 +618,7 @@ class Reply {
         return i;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final int[] readUnsignedShortList() throws DisconnectException {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
@@ -632,6 +647,7 @@ class Reply {
         return (byte) (buffer_[pos_++] & 0xff);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     final String readString(int length, Charset encoding)
             throws DisconnectException {
         ensureBLayerDataInBuffer(length);
@@ -645,12 +661,15 @@ class Reply {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
         adjustLengths(len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         String result = netAgent_.getCurrentCcsidManager()
                             .convertToJavaString(buffer_, pos_, len);
         pos_ += len;
         return result;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final byte[] readBytes(int length) throws DisconnectException {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
@@ -661,6 +680,7 @@ class Reply {
         return b;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final byte[] readBytes() throws DisconnectException {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
@@ -672,6 +692,7 @@ class Reply {
         return b;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final void skipBytes(int length) throws DisconnectException {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
@@ -687,6 +708,7 @@ class Reply {
 
     // This will be the new and improved getData that handles all QRYDTA/EXTDTA
     // Returns the stream so that the caller can cache it
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final ByteArrayOutputStream getData(ByteArrayOutputStream existingBuffer) throws DisconnectException {
         boolean readHeader;
         int copySize;
@@ -886,6 +908,7 @@ class Reply {
                 new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
                 SqlException.getMessageUtil().getTextMessage(
                     MessageId.CONN_DRDA_DATASTREAM_SYNTAX_ERROR,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     syntaxErrorCode));
             
         // if we are communicating to an older server, we may get a SYNTAXRM on
@@ -1091,6 +1114,7 @@ class Reply {
         netAgent_.targetSqlam_ = netAgent_.orignalTargetSqlam_;
 
         if (this.topDdmCollectionStack_ != Reply.EMPTY_STACK) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
             agent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(agent_, 
                 new ClientMessageId(SQLState.NET_COLLECTION_STACK_NOT_EMPTY)));
@@ -1178,6 +1202,10 @@ class Reply {
     }
 
     final String readFastString(int length) throws DisconnectException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
         String result = netAgent_.getCurrentCcsidManager()
                             .convertToJavaString(buffer_, pos_, length);
         pos_ += length;
@@ -1207,6 +1235,7 @@ class Reply {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
     final String readFastString(int length, Charset encoding) {
         String s = new String(buffer_, pos_, length, encoding);
         pos_ += length;
@@ -1225,6 +1254,7 @@ class Reply {
         return b;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final long readFastLong() throws DisconnectException {
         long l = SignedBinary.getLong(buffer_, pos_);
         pos_ += 8;
@@ -1250,6 +1280,7 @@ class Reply {
 
     // The only difference between this method and the original getData() method is this method
     // is not doing an ensureALayerDataInBuffer
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     final ByteArrayOutputStream getFastData(ByteArrayOutputStream existingBuffer) throws DisconnectException {
         boolean readHeader;
         int copySize;
@@ -1307,6 +1338,8 @@ class Reply {
             agent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(agent_, 
                     new ClientMessageId(SQLState.NET_NOT_EXPECTED_CODEPOINT), 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     actualCodePoint, expectedCodePoint));
         }
     }

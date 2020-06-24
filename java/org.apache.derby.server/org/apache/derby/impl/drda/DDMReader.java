@@ -29,10 +29,12 @@ import java.math.BigDecimal;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     The DDMReader is used to read DRDA protocol.   DRDA Protocol is divided into
     three layers corresponding to the DDM three-tier architecture. For each layer,
     their is a DSS (Data Stream Structure) defined.
         Layer A     Communications management services
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         Layer B     Agent services
         Layer C     Data management services
     <P>
@@ -53,6 +55,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
     <P>
     At layer B are object mapping, object validation and command routing.
     Layer B objects with data 5 bytes less than 32K bytes consist of
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         2 bytes     Length
         2 bytes     Type of the object (code point)
         Object data
@@ -61,7 +64,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
     Collections consist of a set of objects in which the entries in the collection
     are nested within the length/ code point of the collection.
     <P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
     Layer B objects with data &gt;=32763 bytes long format is 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         2 bytes     Length - length of class, length, and extended total length fields
                     (high order bit set, indicating &gt;=32763)
         2 bytes     Type of the object (code point)
@@ -164,8 +169,11 @@ class DDMReader
     // since this is just statistics.
     
     volatile long totalByteCount = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
 
     // constructor
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     DDMReader (DRDAConnThread agent, DssTrace dssTrace)
     {
         buffer = new byte[DEFAULT_BUFFER_SIZE];
@@ -177,6 +185,7 @@ class DDMReader
     * It is used by ProtocolTestAdapter to read the protocol returned by the
      * server 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
     DDMReader(InputStream inputStream)
     {
         buffer = new byte[DEFAULT_BUFFER_SIZE];
@@ -193,6 +202,7 @@ class DDMReader
     protected void initialize(DRDAConnThread agent, DssTrace dssTrace)
     {
         this.agent = agent;
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         this.utf8CcsidManager = new Utf8CcsidManager();
         this.ebcdicCcsidManager = new EbcdicCcsidManager();
         this.ccsidManager = ebcdicCcsidManager;
@@ -209,12 +219,14 @@ class DDMReader
         prevCorrelationID = DssConstants.CORRELATION_ID_UNKNOWN;
         dssCorrelationID = DssConstants.CORRELATION_ID_UNKNOWN;
         this.dssTrace = dssTrace;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1425
         dssIsChainedWithDiffID = false;
         dssIsChainedWithSameID = false;
     }
 
     // Switch the ccsidManager to the UTF-8 instance
     protected void setUtf8Ccsid() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         ccsidManager = utf8CcsidManager;
     }
     
@@ -225,6 +237,7 @@ class DDMReader
     
     protected boolean terminateChainOnErr()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return terminateChainOnErr;
     }
 
@@ -393,6 +406,7 @@ class DDMReader
         {
             // chaining bit not b'1', make sure DSSFMT same id not b'1'
             if ((gdsFormatter & DssConstants.DSSCHAIN_SAME_ID) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     == DssConstants.DSSCHAIN_SAME_ID)
             {  // Next DSS can not have same correlator
                 agent.throwSyntaxrm(CodePoint.SYNERRCD_CHAIN_OFF_SAME_NEXT_CORRELATOR,
@@ -478,6 +492,8 @@ class DDMReader
         // Determine if the current DSS is chained with the
         // next DSS, with the same or different request ID.
         if ((gdsFormatter & DssConstants.DSSCHAIN) == DssConstants.DSSCHAIN) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         {   // on indicates structure chained to next structure
             if ((gdsFormatter & DssConstants.DSSCHAIN_SAME_ID) 
                     == DssConstants.DSSCHAIN_SAME_ID) 
@@ -521,6 +537,7 @@ class DDMReader
     {
         ensureBLayerDataInBuffer (4, NO_ADJUST_LENGTHS);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-706
         ddmScalarLen = readCodePoint();
         int codePoint = readCodePoint();
         
@@ -541,6 +558,7 @@ class DDMReader
             switch (numberOfExtendedLenBytes) {
             case 8:
                  ddmScalarLen =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2935
                     ((buffer[pos++] & 0xFFL) << 56) +
                     ((buffer[pos++] & 0xFFL) << 48) +
                     ((buffer[pos++] & 0xFFL) << 40) +
@@ -586,6 +604,7 @@ class DDMReader
                 
                 break;
                 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             default:
                 agent.throwSyntaxrm(CodePoint.SYNERRCD_INCORRECT_EXTENDED_LEN,
                                DRDAProtocolException.NO_CODPNT_ARG);
@@ -870,6 +889,7 @@ class DDMReader
       else
         signum =  1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
       if (precision <= 18) {
         // can be handled by long without overflow.
         long value = packedNybblesToLong(buffer, pos, 0, length*2-1);
@@ -906,6 +926,7 @@ class DDMReader
         magnitude[10] = (byte)(value[2] >>> 8);
         magnitude[11] = (byte)(value[2]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         pos += length;
         return new java.math.BigDecimal (new java.math.BigInteger(signum, magnitude), scale);
       }
@@ -941,6 +962,9 @@ class DDMReader
         magnitude[14] = (byte)(value[3] >>> 8);
         magnitude[15] = (byte)(value[3]);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         pos += length;
         return new java.math.BigDecimal (new java.math.BigInteger(signum, magnitude), scale);
       }
@@ -961,6 +985,7 @@ class DDMReader
      *         statement as a binary stream.
      * @exception DRDAProtocolException standard DRDA protocol exception
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1559
     EXTDTAReaderInputStream getEXTDTAReaderInputStream
         (final boolean checkNullability)
         throws DRDAProtocolException
@@ -971,6 +996,7 @@ class DDMReader
 
         // Check if we must read the status byte sent by the client.
         boolean readEXTDTAStatusByte =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
                 agent.getSession().appRequester.supportsEXTDTAAbort();
             
         if (doingLayerBStreaming) {
@@ -990,6 +1016,7 @@ class DDMReader
      *
      * @exception DRDAProtocolException standard DRDA protocol exception
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     ByteArrayInputStream readLOBInitStream() 
         throws DRDAProtocolException
     {
@@ -1052,6 +1079,7 @@ class DDMReader
         try {
             return readLOBChunk(true, desiredLength);
         } catch (DRDAProtocolException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
             e.printStackTrace(agent.getServer().logWriter());
             throw new IOException(e.getMessage());
         }
@@ -1072,6 +1100,7 @@ class DDMReader
         (final boolean readHeader, final long desiredLength)
         throws DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (readHeader) {
             readDSSContinuationHeader();
         }
@@ -1093,6 +1122,7 @@ class DDMReader
         
         // Create ByteArrayInputStream on top of buffer. 
         // This will not make a copy of the buffer.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(buffer, pos, copySize);
         pos += copySize;
@@ -1113,10 +1143,14 @@ class DDMReader
 
     boolean readHeader;
     int copySize;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1513
+//IC see: https://issues.apache.org/jira/browse/DERBY-1535
+//IC see: https://issues.apache.org/jira/browse/DERBY-1610
     ByteArrayOutputStream baos;
     boolean isLengthAndNullabilityUnknown = false;
 
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     if (desiredLength != -1) {
         // allocate a stream based on a known amount of data
         baos = new ByteArrayOutputStream ((int) desiredLength);
@@ -1138,6 +1172,7 @@ class DDMReader
     // set the amount to read for the first segment
     copySize = (int) Math.min(dssLength,desiredLength); //note: has already been adjusted for headers
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
     //if (checkNullability)  // don't count the null byte we've already read
     //copySize--;
@@ -1155,6 +1190,7 @@ class DDMReader
       baos.write (buffer, pos, copySize);
       pos += copySize;
       desiredLength -= copySize;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
       // read the continuation header, if necessary
       if (readHeader)
@@ -1192,6 +1228,7 @@ class DDMReader
     // it is a syntax error if the dss continuation header length
     // is less than or equal to two
     if (dssLength <= 2) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         agent.throwSyntaxrm(CodePoint.SYNERRCD_DSS_CONT_LESS_OR_EQUAL_2,
                                DRDAProtocolException.NO_CODPNT_ARG);
     }
@@ -1288,6 +1325,7 @@ class DDMReader
         value = value*10 + ((buffer[offset+i] & 0xF0) >>> 4);
       }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
       return value;
     }
 
@@ -1331,6 +1369,7 @@ class DDMReader
      * @exception java.sql.SQLException wrapping any exception in decryption
      */
     protected String readEncryptedString (DecryptionManager decryptM, int securityMechanism,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                                          byte[] initVector, byte[] sourcePublicKey)
             throws DRDAProtocolException, java.sql.SQLException
     {
@@ -1341,6 +1380,7 @@ class DDMReader
         if (plainText == null)
             return null;
         else
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
             return ccsidManager.convertToJavaString(plainText);
     }
 
@@ -1357,6 +1397,7 @@ class DDMReader
     {
         ensureBLayerDataInBuffer (length, ADJUST_LENGTHS);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         String result = ccsidManager.convertToJavaString(buffer, pos, length);
         pos += length;
         return result;
@@ -1372,6 +1413,7 @@ class DDMReader
      * @exception DRDAProtocolException
      */
     protected void readString(DRDAString dst, int size, boolean unpad)
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
         throws DRDAProtocolException
     {
         ensureBLayerDataInBuffer(size, ADJUST_LENGTHS);
@@ -1405,6 +1447,7 @@ class DDMReader
         catch (java.io.UnsupportedEncodingException e) {
             agent.agentError("UnsupportedEncodingException in readString, encoding = " 
                     + encoding);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
             e.printStackTrace(agent.getServer().logWriter());
         }
         
@@ -1459,6 +1502,12 @@ class DDMReader
     {
         byte[] b;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1533
+//IC see: https://issues.apache.org/jira/browse/DERBY-170
+//IC see: https://issues.apache.org/jira/browse/DERBY-428
+//IC see: https://issues.apache.org/jira/browse/DERBY-491
+//IC see: https://issues.apache.org/jira/browse/DERBY-492
+//IC see: https://issues.apache.org/jira/browse/DERBY-614
         if (length < DssConstants.MAX_DSS_LENGTH)
         {
             ensureBLayerDataInBuffer (length, ADJUST_LENGTHS);
@@ -1511,6 +1560,7 @@ class DDMReader
      */
     protected void skipDss() throws DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-170
         while (dssIsContinued)
         {
             skipBytes((int)dssLength);
@@ -1538,6 +1588,7 @@ class DDMReader
      */
     protected String convertBytes(byte[] buf)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         return ccsidManager.convertToJavaString (buf, 0, buf.length);
     }
 
@@ -1638,6 +1689,7 @@ class DDMReader
             ensureALayerDataInBuffer(desiredDataSize);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (adjustLen)
             adjustLengths(desiredDataSize);
     }
@@ -1736,6 +1788,12 @@ class DDMReader
             }
 
             newdssLength += (continueHeaderLength-2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1533
+//IC see: https://issues.apache.org/jira/browse/DERBY-170
+//IC see: https://issues.apache.org/jira/browse/DERBY-428
+//IC see: https://issues.apache.org/jira/browse/DERBY-491
+//IC see: https://issues.apache.org/jira/browse/DERBY-492
+//IC see: https://issues.apache.org/jira/browse/DERBY-614
 
             // calculate the number of bytes to shift
             if (i != (continueDssHeaderCount - 1))
@@ -1862,6 +1920,7 @@ class DDMReader
                 actualBytesRead = inputStream.read (
                   buffer, count, buffer.length - count);
             } catch (java.net.SocketTimeoutException ste) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2166
 
                 // Transport the timeout out through the layers. This
                 // exception is caught in DRDAConnThread.run();
@@ -1880,6 +1939,7 @@ class DDMReader
                                                "fill",
                                                5);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-170
             if (actualBytesRead != -1)
             {
                 count += actualBytesRead;
@@ -1887,6 +1947,7 @@ class DDMReader
             }
 
         } while ((totalBytesRead < minimumBytesNeeded) && (actualBytesRead != -1));
+//IC see: https://issues.apache.org/jira/browse/DERBY-2166
 
         if (actualBytesRead == -1) 
         {
@@ -1896,6 +1957,7 @@ class DDMReader
                   "InputStream.read()", "insufficient data", "*");
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         totalByteCount += totalBytesRead;
     }
 

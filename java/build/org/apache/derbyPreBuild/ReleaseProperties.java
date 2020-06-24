@@ -60,6 +60,7 @@ public class ReleaseProperties extends Task
     /////////////////////////////////////////////////////////////////////////
     private static final String LS = System.getProperty("line.separator");
     private static final String APACHE_LICENSE_HEADER =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5979
         "# Licensed to the Apache Software Foundation (ASF) under one or more" + LS +
         "# contributor license agreements.  See the NOTICE file distributed with" + LS +
         "# this work for additional information regarding copyright ownership." + LS +
@@ -146,6 +147,7 @@ public class ReleaseProperties extends Task
             int     drdaMaintID = readDRDAMaintID( target );
             
             VersionID versionID = new VersionID( _releaseID );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2573
             if ( _bump ) { versionID.bump(); }
             
             int major = versionID.getMajor();
@@ -157,10 +159,12 @@ public class ReleaseProperties extends Task
 
             propertiesPW.println( APACHE_LICENSE_HEADER );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5463
             propertiesPW.println( DRDA_MAINT + "=" + drdaMaintID );
             propertiesPW.println( "maint=" + encodeFixpackAndPoint( versionID ) );
             propertiesPW.println( "major=" + major );
             propertiesPW.println( "minor=" + minor );
+//IC see: https://issues.apache.org/jira/browse/DERBY-2573
             propertiesPW.println( "eversion=" + versionID.getBranchName() );
             propertiesPW.println( "beta=" + versionID.isBeta() );
             propertiesPW.println( "copyright.comment=Copyright 1997, " + currentYear + " The Apache Software Foundation or its licensors, as applicable." );
@@ -247,6 +251,7 @@ public class ReleaseProperties extends Task
      * </p>
      */
     private int readDRDAMaintID( File inputFile )
+//IC see: https://issues.apache.org/jira/browse/DERBY-5463
         throws Exception
     {
         if ( !inputFile.exists() ) { return DRDA_MAINT_ID_DEFAULT; }
@@ -308,6 +313,7 @@ public class ReleaseProperties extends Task
         public String toString()
         {
             StringBuffer buffer = new StringBuffer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2573
 
             buffer.append( _major ); buffer.append( '.' );
             buffer.append( _minor ); buffer.append( '.' );

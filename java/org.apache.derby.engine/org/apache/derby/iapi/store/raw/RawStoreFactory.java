@@ -152,6 +152,7 @@ public interface RawStoreFactory extends Corruptable {
 
     /** Property name for the number of open files to maintain associated with
         the page cache.  Internally this is referred to as the "ContainerCache".
+//IC see: https://issues.apache.org/jira/browse/DERBY-3734
 
         Each object in this cache maps to a java level "open" file on a file
         in the database directory.  Although actual implementation depends on
@@ -289,6 +290,7 @@ public interface RawStoreFactory extends Corruptable {
         if this property is set, it will attempt to allocate
         CONTAINER_INITIAL_PAGES, but with no guarentee.
         CONTAIENR_INITIAL_PAGES legally ranges from 1 to
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         MAX_CONTAINER_INITIAL_PAGES.  Values &lt; 1 will
         be set to 1 and values &gt; MAX_CONTAINER_INITIAL_PAGES will be set to
         MAX_CONTAINER_INITIAL_PAGES
@@ -469,6 +471,7 @@ public interface RawStoreFactory extends Corruptable {
         <LI>
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         no action is taken.</li>
         <LI>
         If error is an instance of StandardException that
@@ -514,6 +517,7 @@ public interface RawStoreFactory extends Corruptable {
         <P>
         Starting a transaction always performs the following steps.
         <OL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         <LI>Create an raw store transaction context</LI>
         <LI>Create a new idle transaction and then link it to the context.</LI>
         </OL>
@@ -527,6 +531,7 @@ public interface RawStoreFactory extends Corruptable {
         <LI>
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         no action is taken.</LI>
         <LI>
         If error is an instance of StandardException that
@@ -591,6 +596,7 @@ public interface RawStoreFactory extends Corruptable {
         <P>
         Starting an internal transaction always performs the following steps.
         <OL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         <LI>Create an raw store internal transaction context</LI>
         <LI>Create a new idle internal transaction and then link it to the 
             context.</LI>
@@ -618,6 +624,7 @@ public interface RawStoreFactory extends Corruptable {
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then
         the internal transaction is aborted, the internal transaction is closed,        the context is popped off the stack, and an exception of severity 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         Transaction exception is re-thrown.</LI>
         <LI>
         If error is an instance of StandardException that has a severity 
@@ -647,6 +654,7 @@ public interface RawStoreFactory extends Corruptable {
         the transaction.
         Starting a transaction always performs the following steps.
         <OL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         <LI>Create an raw store transaction context</LI>
         <LI>Create a new idle transaction and then link it to the context.</LI>
         </OL>
@@ -694,7 +702,9 @@ public interface RawStoreFactory extends Corruptable {
     */
 
     public Transaction startNestedReadOnlyUserTransaction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     Transaction parentTransaction,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
     CompatibilitySpace compatibilitySpace,
     ContextManager contextMgr,
     String         transName)
@@ -709,8 +719,10 @@ public interface RawStoreFactory extends Corruptable {
         the transaction.
         Starting a transaction always performs the following steps.
         <OL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         <LI>Create an raw store transaction context.</LI>
         <LI>Create a new idle transaction and then link it to the context.</LI>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         </OL>
         Only one user transaction and one nested user transaction can be active
         in a context at any one time.
@@ -723,6 +735,8 @@ public interface RawStoreFactory extends Corruptable {
         <LI>
         If error is an instance of StandardException that
         has a severity less than ExceptionSeverity.TRANSACTION_SEVERITY then
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         no action is taken.</LI>
         <LI>
         If error is an instance of StandardException that
@@ -759,6 +773,7 @@ public interface RawStoreFactory extends Corruptable {
     */
 
     public Transaction startNestedUpdateUserTransaction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
     Transaction parentTransaction,
     ContextManager contextMgr,
     String         transName,
@@ -783,6 +798,7 @@ public interface RawStoreFactory extends Corruptable {
      * thrown on error.
      */
     public void startReplicationMaster(String dbmaster, String host, int port,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
                                        String replicationMode)
         throws StandardException;
     
@@ -836,6 +852,8 @@ public interface RawStoreFactory extends Corruptable {
       * @exception StandardException Thrown on error
       */
     public void backup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-523
     String backupDir, 
     boolean wait) throws StandardException;
 
@@ -885,6 +903,7 @@ public interface RawStoreFactory extends Corruptable {
 
     /**
         Checkpoint the database.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
 
         The raw store will wait for any current checkpoints to complete.  It
         will start a new checkpoint and not return until that checkpoint 
@@ -982,6 +1001,7 @@ public interface RawStoreFactory extends Corruptable {
         @exception StandardException Standard Derby Error Policy
      */
     public int encrypt(byte[] cleartext, int offset, int length, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1156
                        byte[] ciphertext, int outputOffset,
                        boolean newEngine) 
          throws StandardException ;
@@ -1034,6 +1054,7 @@ public interface RawStoreFactory extends Corruptable {
 
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         Get the Transaction Factory to use with this store.
     */
     public TransactionFactory getXactFactory();

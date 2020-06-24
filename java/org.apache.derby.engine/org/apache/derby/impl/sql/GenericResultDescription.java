@@ -95,6 +95,7 @@ public final class GenericResultDescription
 	public GenericResultDescription(ResultColumnDescriptor[] columns, 
 					String statementType) 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.columns = ArrayUtil.copy(columns);
 		this.statementType = statementType;
 	}
@@ -107,6 +108,8 @@ public final class GenericResultDescription
 	 */
 	public GenericResultDescription
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		ResultDescription	rd, 
 		int[]				theCols
 	) 
@@ -143,6 +146,7 @@ public final class GenericResultDescription
 	}
 
 	public ResultColumnDescriptor[] getColumnInfo() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return ArrayUtil.copy(columns);
 	}
 
@@ -170,6 +174,8 @@ public final class GenericResultDescription
 	 */
 	public ResultDescription truncateColumns(int truncateFrom)	
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		if (SanityManager.DEBUG) 
 		{
 			if (!(truncateFrom > 0 && columns != null))
@@ -281,6 +287,8 @@ public final class GenericResultDescription
      * Set the meta data if it has not already been set.
      */
     public synchronized void setMetaData(ResultSetMetaData rsmd) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1879
+//IC see: https://issues.apache.org/jira/browse/DERBY-1876
         if (metaData == null)
             metaData = rsmd;
     }
@@ -300,6 +308,7 @@ public final class GenericResultDescription
      */
     public int findColumnInsenstive(String columnName) {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         final Map<String,Integer> workMap; 
         
         synchronized (this) {
@@ -314,6 +323,7 @@ public final class GenericResultDescription
                         SQLToUpperCase(
                             getColumnDescriptor(i).getName());
                     
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
                     final Integer value = i;
                     
                     map.put(key, value);

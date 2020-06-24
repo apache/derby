@@ -124,6 +124,7 @@ public class HeapController
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected final boolean purgeCommittedDeletes(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     Page                page)
         throws StandardException
     {
@@ -352,6 +353,7 @@ public class HeapController
                 (ContainerHandle) null,
                 heap,
                 heap.format_ids,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                 heap.collation_ids,
                 xact_manager,
                 xact_manager.getRawStoreXact(),
@@ -365,6 +367,7 @@ public class HeapController
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     heap.getId().getContainerId());
         }
 
@@ -384,6 +387,7 @@ public class HeapController
 		RecordHandle rh;
 		HeapRowLocation rowlocation;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (callbackWithRowLocation ||
             rowSource.needsRowLocationForDeferredCheckConstraints())
 			rowlocation = new HeapRowLocation();
@@ -413,6 +417,8 @@ public class HeapController
                     {
                         throw(StandardException.newException(
                                 SQLState.HEAP_TEMPLATE_MISMATCH,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                                 invalidColumn, 
                                 heap.format_ids.length));
                     }
@@ -453,6 +459,7 @@ public class HeapController
 					rowSource.rowLocation(rowlocation);
 				}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 if (rowSource.needsRowLocationForDeferredCheckConstraints()) {
                     rowlocation.setFrom(rh);
                     rowSource.offendingRowLocation(rowlocation,
@@ -548,6 +555,7 @@ public class HeapController
     protected boolean lockRowAtSlotNoWaitExclusive(RecordHandle rh)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
         try {
             return(
                    open_conglom.getContainer().getLockingPolicy().
@@ -754,6 +762,7 @@ public class HeapController
      **************************************************************************
      */
     public OpenConglomerate getOpenConglomerate() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return open_conglom;
     }
 }

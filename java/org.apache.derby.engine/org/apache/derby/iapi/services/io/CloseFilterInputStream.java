@@ -36,6 +36,7 @@ public class CloseFilterInputStream
 
     /** Message, modeled after CloseFilterInputStream in the client. */
     private static final String MESSAGE =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
             MessageService.getTextMessage(MessageId.OBJECT_CLOSED); 
     
     /** Tells if this stream has been closed. */

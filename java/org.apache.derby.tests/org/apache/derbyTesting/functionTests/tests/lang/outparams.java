@@ -38,6 +38,7 @@ public class outparams
 	//Get the class name to be used for the procedures
 	//outparams - J2ME; outparams30 - non-J2ME
 	static{
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 		if(BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
 			HAVE_BIG_DECIMAL = false;
 		else
@@ -182,6 +183,7 @@ public class outparams
 	static String returnMethods[];
 	//Get the array to be used based on HAVE_BIG_DECIMAL
 	static{
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 		if(HAVE_BIG_DECIMAL){
 			returnMethods = new String[] 	{
 									"returnsNothing",
@@ -299,6 +301,7 @@ public class outparams
 	static int[] paramJDBCType =
 	{
 		Types.NULL, // "returnsNothing",
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 
 		Types.NULL, // "returnsBytePrimitive",
 		Types.NULL, // "returnsByte",
@@ -336,6 +339,7 @@ public class outparams
 	static final int types[] =
 	{
 		Types.BIT,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		Types.BOOLEAN,
 		Types.TINYINT,
 		Types.SMALLINT,
@@ -405,6 +409,7 @@ public class outparams
 		testOtherOutputType(conn);
 		testManyOut(conn);
 		//Uses a procedure with nested connection - Cannot be tested with JSR169
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 		if(HAVE_DRIVER_CLASS)
 			test5116(conn);
 	}
@@ -418,6 +423,7 @@ public class outparams
 		Statement scp = conn.createStatement();
 
 		scp.execute("CREATE PROCEDURE takesString(OUT P1 VARCHAR(40), IN P2 INT) " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 						"EXTERNAL NAME '" + CLASS_NAME + "takesString'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
@@ -519,6 +525,7 @@ public class outparams
 		cs.close();
 		scp.execute("DROP PROCEDURE takesString");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 		scp.execute("CREATE FUNCTION returnsString(P2 INT) RETURNS VARCHAR(40) " +
 						"EXTERNAL NAME '" + CLASS_NAME + "returnsString'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
@@ -564,6 +571,7 @@ public class outparams
 		Statement scp = conn.createStatement();
 
 		scp.execute("CREATE PROCEDURE testNullBug4317(IN P1 VARCHAR(10)) " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 						"EXTERNAL NAME '" + CLASS_NAME + "testNullBug4317'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
@@ -605,6 +613,7 @@ public class outparams
 		Statement scp = conn.createStatement();
 
 		scp.execute("CREATE FUNCTION returnsIntegerP(P1 INT) RETURNS INTEGER " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 						"EXTERNAL NAME '" + CLASS_NAME + "returnsIntegerP'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
@@ -800,6 +809,8 @@ public class outparams
 			{
 
 				scp.execute("CREATE PROCEDURE " + methodName + "(INOUT P1 " + outputProcParam[method] + ", IN P2 INT) " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 					"EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 					"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
@@ -872,6 +883,7 @@ public class outparams
 					StringBuffer getbuf = new StringBuffer();
 					try
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 						callGetMethod(cs, 1, types[getType], Types.OTHER , getbuf);
 					}
 					catch (SQLException se)
@@ -923,6 +935,8 @@ public class outparams
 			{
 
 				scf.execute("CREATE FUNCTION " + methodName + "(P1 INT) RETURNS " + returnMethodType[method] +
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 					" EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 					"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 				dropRoutine = "DROP FUNCTION " + methodName;
@@ -988,6 +1002,8 @@ public class outparams
 					StringBuffer getbuf = new StringBuffer();
 					try
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 						callGetMethod(cs, 1, types[getType], paramJDBCType[method], getbuf);
 					}
 					catch (SQLException se)
@@ -1014,8 +1030,10 @@ public class outparams
 		switch (type)	
 		{
 			case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN:
 				strbuf.append("setObject("+arg+", true)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				cs.setObject(arg, true);
 				break;
 
@@ -1053,6 +1071,7 @@ public class outparams
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 				strbuf.append("setObject("+arg+", 666.666)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 				BigDecimalHandler.setObjectString(cs,arg,"666.666");
 				break;
 
@@ -1101,6 +1120,7 @@ public class outparams
 		switch (type)	
 		{
 			case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN:
 				strbuf.append("setBoolean("+arg+", true)");
 				cs.setBoolean(arg, true);
@@ -1140,6 +1160,7 @@ public class outparams
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 				strbuf.append("setBigDecimal("+arg+", 666.666)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 				BigDecimalHandler.setBigDecimalString(cs,arg,"666.666");
 				break;
 
@@ -1189,6 +1210,7 @@ public class outparams
 		switch (type)	
 		{
 			case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN:
 				strbuf.append("getBoolean("+arg+") = ");
 				strbuf.append(cs.getBoolean(arg));
@@ -1228,6 +1250,7 @@ public class outparams
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 				strbuf.append("getBigDecimal("+arg+") = ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 				strbuf.append(BigDecimalHandler.getBigDecimalString(cs,arg,paramType));
 				break;
 
@@ -1341,6 +1364,7 @@ public class outparams
 				return "00680065006c006c006f";
 
 			case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN:
 				return "true";
 
@@ -1364,6 +1388,7 @@ public class outparams
 			}
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		retval[0] = (setToNull.booleanValue()) ? null : 66;
 	}
 
@@ -1380,6 +1405,7 @@ public class outparams
 	}
 	public static void takesByte(Byte[] outparam, int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		outparam[0] = ((byte)(outparam[0] == null ? 33 : outparam[0].byteValue()*2));
 	}
 
@@ -1389,6 +1415,7 @@ public class outparams
 	}
 	public static void takesShort(Short[] outparam, int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       outparam[0] = (short) ((byte)(outparam[0] == null ? 33 : outparam[0].shortValue()*2));
 	}
 
@@ -1398,6 +1425,7 @@ public class outparams
 	}
 	public static void takesInteger(Integer[] outparam, int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		outparam[0] = outparam[0] == null ? 33 : outparam[0].intValue()*2;
 	}
 
@@ -1407,6 +1435,7 @@ public class outparams
 	}
 	public static void takesLong(Long[] outparam, int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       outparam[0] = (long)(outparam[0] == null ? 33 : outparam[0].longValue()*2);
 	}
 
@@ -1416,6 +1445,7 @@ public class outparams
 	}
 	public static void takesDouble(Double[] outparam, int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       outparam[0] = (double) (outparam[0] == null ? 33 : outparam[0].doubleValue()*2);
 	}
 
@@ -1425,6 +1455,7 @@ public class outparams
 	}
 	public static void takesFloat(Float[] outparam, int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       outparam[0] = (float) (outparam[0] == null ? 33 : outparam[0].floatValue()*2);
 	}
 
@@ -1434,6 +1465,7 @@ public class outparams
 	}
 	public static void takesBoolean(Boolean[] outparam, int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		outparam[0] = true;
 	}
 
@@ -1485,6 +1517,7 @@ public class outparams
 	}
 	public static Byte returnsByte(int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return (byte)66;
 	}
 
@@ -1494,6 +1527,7 @@ public class outparams
 	}
 	public static Short returnsShort(int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return (short)666;
 	}
 
@@ -1503,6 +1537,7 @@ public class outparams
 	}
 	public static Integer returnsInteger(int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 666;
 	}
 
@@ -1512,6 +1547,7 @@ public class outparams
 	}
 	public static Long returnsLong(int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 666L;
 	}
 
@@ -1521,6 +1557,7 @@ public class outparams
 	}
 	public static Float returnsFloat(int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 666f;
 	}
 
@@ -1530,6 +1567,7 @@ public class outparams
 	}
 	public static Double returnsDouble(int type)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		return 666.0;
 	}
 
@@ -1579,6 +1617,7 @@ public class outparams
 
 			"EXTERNAL NAME '" + CLASS_NAME + "output' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 
 		scp.execute("CREATE PROCEDURE OP_INOUT " +
 			"(INOUT I1 INT, INOUT I2 INT, INOUT I3 INT, INOUT I4 INT, INOUT I5 INT, " +
@@ -1719,6 +1758,7 @@ public class outparams
     "PRIMARY KEY ( AIID ) )");
 
 		stmt.execute("CREATE PROCEDURE doInsertion(IN P1 VARCHAR(2) FOR BIT DATA) " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-453
 						"EXTERNAL NAME '" + CLASS_NAME + "doInsertion'" +
 						" MODIFIES SQL DATA LANGUAGE JAVA PARAMETER STYLE JAVA");
 

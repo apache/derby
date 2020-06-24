@@ -116,6 +116,7 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 	/*
 	 *	CONSTRUCTORS
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSSTATISTICSRowFactory(UUIDFactory uuidf, 
 									ExecutionFactory ef, 
 									DataValueFactory dvf)
@@ -123,6 +124,7 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 		super(uuidf,ef,dvf);
 		
 		initInfo(SYSSTATISTICS_COLUMN_COUNT, TABLENAME_STRING, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 				 indexColumnPositions, uniqueness, uuids);
 	}
 
@@ -165,6 +167,7 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 		row.setColumn(3, new SQLChar(tableID));
 		row.setColumn(4, new SQLTimestamp(updateTime));
 		row.setColumn(5, new SQLChar(statType));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
   		row.setColumn(6, new SQLBoolean(validStat));
 		row.setColumn(7, new SQLInteger(columnCount));
 		row.setColumn(8, new UserType(statisticsObject));
@@ -238,6 +241,7 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
             return new SystemColumn[] {

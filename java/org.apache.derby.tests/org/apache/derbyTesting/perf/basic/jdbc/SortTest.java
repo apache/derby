@@ -46,6 +46,7 @@ public class SortTest extends JDBCPerfTestCase {
     {
         int iterations = 350, repeats = 4;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("SortTests");
         suite.addTest(new SortTest("SortDesc100",iterations,repeats));
         suite.addTest(new SortTest("SortDesc100GetData",iterations,repeats));

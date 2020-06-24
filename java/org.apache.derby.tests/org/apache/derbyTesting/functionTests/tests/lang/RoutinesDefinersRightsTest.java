@@ -80,6 +80,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("RoutinesDefinersRightsTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         if (!JDBC.vmSupportsJSR169()) {
             // JSR169 cannot run with tests with stored procedures
@@ -88,6 +89,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
             // DriverManager is not supported with JSR169.
             suite.addTest(makeSuite());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             suite.addTest(
                 TestConfiguration.clientServerDecorator(makeSuite()));
         }
@@ -108,6 +110,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
          * sqlAuthorization.
          */
         Test clean = new CleanDatabaseTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new BaseTestSuite(RoutinesDefinersRightsTest.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException {
@@ -140,6 +143,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
                          "reads sql data called on null input");
 
                     s.execute
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                         ("create procedure s1.updateWage() " +
                          "language java parameter style java " +
                          "modifies sql data " +
@@ -288,6 +292,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
 
         // Try as PHB to update, delete and insert on a result set
         stm.executeUpdate("call s1.updateWage()");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
 
         stm.close();
         c.close();
@@ -464,6 +469,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
      * for more detail.
      */
     public static void updateWage()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
             throws SQLException
     {
         Connection c = null;

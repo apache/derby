@@ -79,6 +79,7 @@ public class AutomaticIndexStatisticsMultiTest
         int totalError = 0;
         List<SQLException> errors = new ArrayList<SQLException>();
         for (int i=0; i < threadCount; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5468
             MTCompileThread ct = compileThreads[i];
             int count = ct.getCount();
             int errorCount = ct.getErrorCount();
@@ -138,8 +139,11 @@ public class AutomaticIndexStatisticsMultiTest
 
         int total = 0;
         int totalError = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<SQLException> errors = new ArrayList<SQLException>();
         for (int i=0; i < threadCount; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5468
             MTCompileThread ct = compileThreads[i];
             int count = ct.getCount();
             int errorCount = ct.getErrorCount();
@@ -161,6 +165,8 @@ public class AutomaticIndexStatisticsMultiTest
                 createThread.getError().printStackTrace(out);
             }
             out.println("select/compile errors:");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             for (SQLException sqle : errors) {
                 out.println("------");
                 sqle.printStackTrace(out);
@@ -180,6 +186,7 @@ public class AutomaticIndexStatisticsMultiTest
         // by the test threads may cause the index statistics daemon worker
         // thread to be "starved". Add a timeout to give it a chance to do
         // what it has been told to do.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5097
         IndexStatsUtil stats = new IndexStatsUtil(getConnection(), 5000);
         IdxStats[] myStats = stats.getStatsTable(TAB, 2);
         for (int i=0; i < myStats.length; i++) {
@@ -241,6 +248,7 @@ public class AutomaticIndexStatisticsMultiTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(AutomaticIndexStatisticsMultiTest.class);
     }
 
@@ -251,6 +259,7 @@ public class AutomaticIndexStatisticsMultiTest
         private final Connection con;
         private final long runTime;
         private final ArrayList<SQLException> errors =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 new ArrayList<SQLException>();
         private volatile int count;
 
@@ -269,6 +278,7 @@ public class AutomaticIndexStatisticsMultiTest
                                 (++counter) + " = " + counter + " AND val2 = " +
                                 (1 + rand.nextInt(10)));
                 } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5468
                     synchronized (this) {
                         errors.add(sqle);
                     }
@@ -286,6 +296,7 @@ public class AutomaticIndexStatisticsMultiTest
         }
 
         public synchronized List<SQLException> getErrors() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             return new ArrayList<SQLException>(errors);
         }
     }
@@ -325,6 +336,7 @@ public class AutomaticIndexStatisticsMultiTest
                     lastWasCreate = !lastWasCreate;
                 }
             } catch (SQLException sqle) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5468
                 error = sqle;
                 println("create/drop thread failed: " + sqle.getMessage());
             }

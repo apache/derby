@@ -60,6 +60,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class DataSourceReferenceTest
         extends BaseJDBCTestCase {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3369
 
     /** Lookup constant for the descriptor array. */
     private static final int BASE_DS = 0;
@@ -117,6 +118,8 @@ public class DataSourceReferenceTest
 
     /** Descriptor for the client connection pool data source. */
     private static final DataSourceDescriptor POOL_CLIENT_DS =
+//IC see: https://issues.apache.org/jira/browse/DERBY-3325
+//IC see: https://issues.apache.org/jira/browse/DERBY-3329
             new DataSourceDescriptor("Connection pool client data source",
                                      BASE_CLIENT_DS);
 
@@ -142,6 +145,7 @@ public class DataSourceReferenceTest
        Test suite;
        if (JDBC.vmSupportsJSR169() || !JDBC.vmSupportsJNDI()) {
             // Referenceable is not supported with JSR169 or without JNDI
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             suite = new BaseTestSuite(
                     "DatasourceReferenceTest cannot run with JSR169");
         } else {
@@ -177,6 +181,8 @@ public class DataSourceReferenceTest
             // Specify client data source descriptors.
             descriptors = new DataSourceDescriptor[] {
                 BASE_CLIENT_DS, // Base
+//IC see: https://issues.apache.org/jira/browse/DERBY-3325
+//IC see: https://issues.apache.org/jira/browse/DERBY-3329
                 POOL_CLIENT_DS, // Pool
                 BASE_CLIENT_DS  // XA
             };
@@ -220,6 +226,7 @@ public class DataSourceReferenceTest
                                         String className)
         throws Exception {
         // Instantiate a new data source object and get all its properties.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(className);
         Object dsObj = clazz.getConstructor().newInstance();
         String[] properties = getPropertyBeanList(dsObj);
@@ -291,6 +298,7 @@ public class DataSourceReferenceTest
             throws Exception {
         println("Testing recreated empty data source.");
         // Create an empty data source.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(className);
         Object ds = clazz.getConstructor().newInstance();
         Referenceable refDs = (Referenceable)ds;
@@ -336,6 +344,7 @@ public class DataSourceReferenceTest
                                                 String className)
             throws Exception {
         println("Testing recreated populated data source.");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz = Class.forName(className);
         Object ds = clazz.getConstructor().newInstance();
         // Populate the data source.
@@ -365,6 +374,7 @@ public class DataSourceReferenceTest
         Referenceable refDs = (Referenceable)ds;
         Reference dsAsReference = refDs.getReference();
         String factoryClassName = dsAsReference.getFactoryClassName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         clazz = Class.forName(factoryClassName);
         ObjectFactory factory =
             (ObjectFactory) clazz.getConstructor().newInstance();
@@ -450,6 +460,7 @@ public class DataSourceReferenceTest
     private static String[] getPropertyBeanList(Object ds) {
         Method[] allMethods = ds.getClass().getMethods();
         ArrayList<String> properties = new ArrayList<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         for (int i = 0; i < allMethods.length; i++) {
             Method method = allMethods[i];
@@ -479,6 +490,7 @@ public class DataSourceReferenceTest
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return properties.toArray(new String[properties.size()]);
     }
 
@@ -509,6 +521,7 @@ public class DataSourceReferenceTest
      *
      * @throws NoSuchMethodException if the method does not exist
      */private static Method getSet(Method getMethod, Object ds)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3369
             throws NoSuchMethodException {
         String methodName = "s" + getMethod.getName().substring(1);
         Method m = ds.getClass().getMethod(

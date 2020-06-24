@@ -62,15 +62,19 @@ public class StatementSchemaPermission extends StatementPermission
 	 */
 	public void check( LanguageConnectionContext lcc,
 					   boolean forGrant,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 					   Activation activation) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		DataDictionary dd =	lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
         String currentUserId = lcc.getCurrentUserId(activation);
 		switch ( privType )
 		{
 			case Authorizer.MODIFY_SCHEMA_PRIV:
 			case Authorizer.DROP_SCHEMA_PRIV:
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 				SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);
 				// If schema hasn't been created already, no need to check
 				// for drop schema, an exception will be thrown if the schema 
@@ -78,6 +82,7 @@ public class StatementSchemaPermission extends StatementPermission
 				if (sd == null)
 					return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4551
                 if (!currentUserId.equals(sd.getAuthorizationId()))
 					throw StandardException.newException(
                         SQLState.AUTH_NO_ACCESS_NOT_OWNER,
@@ -117,6 +122,7 @@ public class StatementSchemaPermission extends StatementPermission
 	 * @see StatementPermission#check
 	 */
 	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 	throws StandardException
 	{
 		return null;
@@ -124,6 +130,7 @@ public class StatementSchemaPermission extends StatementPermission
 
     private String getPrivName( )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3223
 		switch(privType) {
 		case Authorizer.CREATE_SCHEMA_PRIV:
 			return "CREATE_SCHEMA";

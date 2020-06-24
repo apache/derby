@@ -298,6 +298,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 aux_leaf = null;
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
             if ((((HeapController)base_cc).getOpenConglomerate().getOpenMode() &
                     TransactionManager.OPENMODE_LOCK_ROW_NOWAIT) != 0) {
                 throw StandardException.newException(SQLState.LOCK_TIMEOUT);
@@ -466,6 +467,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                 // error going left.  Release current page latch and 
                 // original page latch continue the search.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3244
                 if (current_leaf != null)
                 {
                     // current_leaf may have already been released as part of
@@ -483,6 +485,8 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 // wait on the left page, which we could not get before. 
                 prev_leaf = (LeafControlRow) 
                     ControlRow.get(open_btree, previous_pageno);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
                 latches_released = true;
             }
@@ -803,6 +807,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 // caller must research, get new locks if this routine 
                 // releases latches.
                 ret_status = this.searchLeftAndLockPreviousKey(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6041
                     current_leaf,
                     lock_fetch_desc, lock_template, lock_row_loc,
                     open_btree, lock_operation, lock_duration);

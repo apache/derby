@@ -80,6 +80,7 @@ class ColumnOrdering {
 	boolean contains(int tableNumber, int columnNumber)
 	{
 		for (int i = 0; i < columns.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Integer col = columns.get(i);
 			Integer tab = tables.get(i);
 
@@ -109,6 +110,7 @@ class ColumnOrdering {
 	 */
 	void addColumn(int tableNumber, int columnNumber)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
         tables.add(tableNumber);
         columns.add(columnNumber);
 	}
@@ -124,6 +126,7 @@ class ColumnOrdering {
 		*/
 		for (int i = tables.size() - 1; i >= 0; i--)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Integer tab = tables.get(i);
 			if (tab.intValue() == tableNumber)
 			{
@@ -138,6 +141,7 @@ class ColumnOrdering {
 	 */
 	boolean empty()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 		return tables.isEmpty();
 	}
 
@@ -147,6 +151,7 @@ class ColumnOrdering {
 
 		for (int i = 0; i < columns.size(); i++) {
 			/* Integers are immutable, so just copy the pointers */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 			retval.columns.add(columns.get(i));
 			retval.tables.add(tables.get(i));
 		}
@@ -156,6 +161,7 @@ class ColumnOrdering {
 
 	/** Is the given table number in this ColumnOrdering? */
 	boolean hasTable(int tableNumber) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6885
         return tables.contains(tableNumber);
 	}
 
@@ -163,6 +169,7 @@ class ColumnOrdering {
 	boolean hasAnyOtherTable(int tableNumber) {
 
 		for (int i = 0; i < tables.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			Integer tab = tables.get(i);
 			
 			if (tab.intValue() != tableNumber)
@@ -180,6 +187,7 @@ class ColumnOrdering {
 			retval += "Direction: " + myDirection;
 
 			for (int i = 0; i < columns.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				retval += " Table " + tables.get(i) +
 							", Column " + columns.get(i);
 			}

@@ -55,6 +55,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
      */
     public static Test setLockTimeouts(Test test, int deadlockTime, int waitTime)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2003
         final Properties properties = new Properties();
         if (deadlockTime >= 0)
         {
@@ -70,6 +71,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         if (properties.isEmpty())
             return test;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
         return new DatabasePropertyTestSetup(test, properties, true);
     }
     
@@ -201,6 +203,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
                     // We don't want to reset the properties, but we should
                     // still clear the reference to the default connection to
                     // allow it to be garbage collected.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5705
                     clearConnection();
                 }
             };
@@ -225,6 +228,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
     public static Test singleProperty(Test test, String property, String value,
             boolean reboot)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2300
         final Properties properties = new Properties();
         properties.setProperty(property, value);
 
@@ -241,6 +245,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
 	public DatabasePropertyTestSetup(Test test,
 			Properties newValues)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2007
         this(test, newValues, false);
     }
     
@@ -337,6 +342,8 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         newValues = null;
         oldValues = null;
         if (staticProperties) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
             TestConfiguration.getCurrent().shutdownDatabase();
         }
     }
@@ -349,6 +356,9 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         // Clear all the system properties set by the new set
         // that will not be reset by the old set. Ignore any 
         // invalid property values.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1522
+//IC see: https://issues.apache.org/jira/browse/DERBY-1827
+//IC see: https://issues.apache.org/jira/browse/DERBY-1826
         for (Enumeration e = newValues.propertyNames(); e.hasMoreElements();)
         {
             String key = (String) e.nextElement();

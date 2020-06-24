@@ -53,7 +53,11 @@ public class VersionMBeanTest extends MBeanTest {
          * derbynet.jar. This means that it is assumed that the Network Server
          * is running and that JMX is enabled. This is being handled by the
          * super class. */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         return MBeanTest.suite(VersionMBeanTest.class, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
                                         "VersionMBeanTest");
     }
     
@@ -99,6 +103,7 @@ public class VersionMBeanTest extends MBeanTest {
      * @throws MalformedObjectNameException if the object name is not valid
      */
     private ObjectName getDerbynetJarObjectName() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
             throws Exception {
         
         // get a reference to the VersionMBean instance for derbynet.jar
@@ -121,6 +126,7 @@ public class VersionMBeanTest extends MBeanTest {
     }
     
     public void testDerbynetJarAttributeAlpha() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
         checkBooleanAttributeValue(getDerbynetJarObjectName(), "Alpha");
     }
     

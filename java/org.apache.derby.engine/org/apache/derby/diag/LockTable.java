@@ -53,6 +53,8 @@ import org.apache.derby.vti.VTIEnvironment;
 	the database.
 	
 	This virtual table can be invoked by calling it directly
+//IC see: https://issues.apache.org/jira/browse/DERBY-714
+//IC see: https://issues.apache.org/jira/browse/DERBY-571
 	<PRE> select * from SYSCS_DIAG.LOCK_TABLE </PRE>
 	
 	<P>The LockTable virtual table takes a snap shot of the lock table while
@@ -78,6 +80,7 @@ import org.apache.derby.vti.VTIEnvironment;
 	<LI>TABLETYPE varchar(9) - not nullable.  'T' for user table, 'S' for system table </LI>
 	<LI>LOCKCOUNT varchar(5) - not nullable.  Internal lock count.</LI>
 	<LI>INDEXNAME varchar(128) - normally null.  If non-null, a lock is held on 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2592
 	the index.</LI>
 	</UL>
 
@@ -106,8 +109,10 @@ public class LockTable extends VTITemplate implements VTICosting  {
 
 	/**
 		The normal way of instantiating a LockTable, equivalent to
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		LockTable(org.apache.derby.diag.LockTable-&gt;TABLE_AND_ROWLOCK).
 		Only shows row and table lock and not latches.  Latches are generally
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		held for very short duration and are not of interest to Derby 
 		users.  Only under abnormal circumstances will one be interested in
 		looking at latches.
@@ -138,6 +143,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 	/**
 		@see java.sql.ResultSet#next
 		@exception SQLException if no transaction context can be found, or other
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 		Derby internal errors are encountered.
 	 */
 	public boolean next() throws SQLException
@@ -149,6 +155,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 				LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
 				tc = lcc.getTransactionExecute();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
 				LockFactory lf = tc.getAccessManager().getLockFactory();
 				lockTable = lf.makeVirtualLockTable();
 				initialized = true;
@@ -236,6 +243,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
     Latch                   lock)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Hashtable<String,Object>	attributes = new Hashtable<String,Object>(17);
         Object      lock_type =  lock.getQualifier();
 
@@ -295,11 +303,13 @@ public class LockTable extends VTITemplate implements VTICosting  {
 				return null; // can't deal with this for now
 
 			Long value = (Long)attributes.get(VirtualLockTable.CONTAINERID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			conglomId = tc.findConglomid(value.longValue());
 			attributes.put(VirtualLockTable.CONGLOMID, conglomId);
 		}
 
 		attributes.put(VirtualLockTable.LOCKOBJ, lock);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2328
 		Object owner = lock.getCompatabilitySpace().getOwner();
 		attributes.put(VirtualLockTable.XACTID,
 					   (owner == null) ? "<null>" : owner.toString());
@@ -341,6 +351,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 	};
 	
     private static final ResultSetMetaData metadata =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         new EmbedResultSetMetaData(columnInfo);
 }
 

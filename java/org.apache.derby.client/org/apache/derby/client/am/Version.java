@@ -34,6 +34,7 @@ public abstract class Version {
     
     // for DatabaseMetaData.getDriverVersion()
     public static String getDriverVersion() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4293
         return Configuration.getProductVersionHolder().getVersionBuildString(true);
     }
 
@@ -54,6 +55,7 @@ public abstract class Version {
     // Not an external, just a helper method
     private static String getDriverNameAndVersion() {
         return Configuration.dncDriverName + " " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4293
                 Configuration.getProductVersionHolder().getVersionBuildString(true);
     }
 
@@ -66,6 +68,7 @@ public abstract class Version {
             printWriter.println(header + "Driver: " + getDriverNameAndVersion());
 
             printWriter.print(header + "Compatible JRE versions: { ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             String [] cv = Configuration.getDncCompatibleJREVersions();
             for (int i = 0; i < cv.length; i++) {
                 printWriter.print(cv[i]);
@@ -80,6 +83,7 @@ public abstract class Version {
             printWriter.println(header + "Default fetch size: " + Configuration.defaultFetchSize);
             printWriter.println(header + "Default isolation: " + Configuration.defaultIsolation);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             SecurityManager security = System.getSecurityManager();
             if (security == null) {
                 printWriter.println(header + "No security manager detected.");
@@ -124,6 +128,7 @@ public abstract class Version {
     private static void printSystemProperty(SecurityManager security,
                                             String prefix,
                                             String property,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                             PrintWriter printWriter) {
         String header = "[derby] ";
         synchronized (printWriter) {
@@ -136,6 +141,7 @@ public abstract class Version {
                 printWriter.flush();
             } catch (SecurityException e) {
                 printWriter.println(header + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3902
                     msgutil.getTextMessage(MessageId.SECURITY_MANAGER_NO_ACCESS_ID, property));
                 printWriter.flush();
             }
@@ -144,6 +150,7 @@ public abstract class Version {
 
     // printWriter synchronized by caller
     private static void detectLocalHost(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             SecurityManager security,
             PrintWriter printWriter) {
 
@@ -156,6 +163,7 @@ public abstract class Version {
                 printWriter.flush();
             } catch (UnknownHostException e) {
                 printWriter.println(header + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3902
                     msgutil.getTextMessage(MessageId.UNKNOWN_HOST_ID, e.getMessage()));
                 printWriter.flush();
             }

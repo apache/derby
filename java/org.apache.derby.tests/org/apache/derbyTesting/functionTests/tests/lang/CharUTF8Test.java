@@ -59,6 +59,7 @@ public class CharUTF8Test extends BaseJDBCTestCase {
 	 *         run.
 	 */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new CleanDatabaseTestSetup(
             new BaseTestSuite(CharUTF8Test.class)) {
 
@@ -77,6 +78,7 @@ public class CharUTF8Test extends BaseJDBCTestCase {
 	protected void tearDown() throws Exception {
         // Forget the statements to allow them to be gc'ed. They will be
         // closed in super.tearDown().
+//IC see: https://issues.apache.org/jira/browse/DERBY-5707
         psSet = null;
         psGet = null;
 		super.tearDown();

@@ -44,6 +44,7 @@ public final class CharTypeCompiler extends BaseTypeCompiler
          */
         public boolean convertible(TypeId otherType, boolean forDataTypeFunction)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
             if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
             
 			// LONGVARCHAR can only be converted from  character types
@@ -90,6 +91,8 @@ public final class CharTypeCompiler extends BaseTypeCompiler
     public boolean storable(TypeId otherType, ClassFactory cf)
     {
         // Same rules as cast except we can't assign from numbers
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         if (convertible(otherType,false) &&
                 !otherType.isBlobTypeId() &&
                 !otherType.isNumericTypeId())

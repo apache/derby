@@ -565,6 +565,8 @@ public class BTreeCostController extends OpenBTree
 
                 control_row =
                     ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
                 control_row.release();
                 control_row = null;
@@ -588,6 +590,7 @@ public class BTreeCostController extends OpenBTree
             // Never return estimate of more rows than exist, sometimes 
             // the recursive estimation through the btree may return a number
             // like 1.00001.
+//IC see: https://issues.apache.org/jira/browse/DERBY-741
             if (ret_fraction > 1)
                 ret_fraction = 1;
 

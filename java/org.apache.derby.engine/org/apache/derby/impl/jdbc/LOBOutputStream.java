@@ -64,6 +64,7 @@ public class LOBOutputStream extends OutputStream {
     public void write(int b) throws IOException {
         if (closed)
             throw new IOException (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                     MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             pos = control.write(b, pos);
@@ -103,15 +104,19 @@ public class LOBOutputStream extends OutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
         if (closed)
             throw new IOException (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5090
                     MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             pos = control.write(b, off, len, pos);
         } catch (StandardException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             if (se.getSQLState().equals(
                     ExceptionUtil.getSQLStateFromIdentifier(
                                             SQLState.BLOB_INVALID_OFFSET))) {
                 throw new ArrayIndexOutOfBoundsException(se.getMessage());
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
+//IC see: https://issues.apache.org/jira/browse/DERBY-3783
             throw Util.newIOException(se);
         }
     }

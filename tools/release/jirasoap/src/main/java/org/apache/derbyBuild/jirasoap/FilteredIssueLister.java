@@ -82,6 +82,7 @@ public class FilteredIssueLister {
 "  o VERSION\n" +
 "      Derby version string, i.e. 10.6.2.1\n" +
 "  o FILTERID\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-5080
 "      JIRA id, only digits allowed.\n" +
 "      If '0' (zero), a JQL query will be generated instead of using an\n" +
 "      existing (manually created) JIRA filter.\n" +
@@ -171,6 +172,7 @@ public class FilteredIssueLister {
         reportDisqualifiedIssues =
                 Boolean.getBoolean(REPORT_DISQUALIFICATIONS_PROP);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6941
         printReleases();
     }
 
@@ -198,12 +200,14 @@ public class FilteredIssueLister {
         // Expected format: release version, release date (YYYY-MM-DD, or null)
         for (int i=0; i < versions.length; i++) {
             allVersions[i] = new DerbyVersion(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
                     versions[i][0], versions[i][1] == null
                                             ? DerbyVersion.NOT_RELEASED
                                             : parseDate(versions[i][1]));
         }
         // Give a better error message if user-specified cutoff value is bad.
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
             ancestorCutoff = getVersion(System.getProperty(
                 ANCESTOR_CUTOFF_PROP, DEFAULT_ANCESTOR_CUTOFF));
         } catch (IllegalArgumentException iae) {
@@ -266,6 +270,7 @@ public class FilteredIssueLister {
      */
     public void printAncestors(String parentVersion) {
         DerbyVersion parent = getVersion(parentVersion);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         if (parent.compareTo(ancestorCutoff) < 0) {
             throw new IllegalArgumentException(
                     "specified version " + parentVersion +
@@ -295,6 +300,7 @@ public class FilteredIssueLister {
             if (dv.isReleased()) {
                 releases.add(dv);
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6941
             else
             {
                 System.out.println(dv.toString() + " was NOT released.");
@@ -369,7 +375,9 @@ public class FilteredIssueLister {
             out.newLine();
         }
         RemoteIssue[] issues = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5080
         if (filterId == GENERATE_JQL) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6588
             issues = execJiraJQLQuery( out, auth, targetVersion, excludeFixVersions );
         } else {
             issues = execJiraFilterQuery(out, auth, filterId);
@@ -458,6 +466,7 @@ public class FilteredIssueLister {
         log("wrote " + count + " issues, " + issuesWithReleaseNote +
                 " with release notes, " + (issues.length - count) +
                 " issues disqualified");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         log("dump file: " + new File(destFile).getCanonicalPath());
         return count;
     }
@@ -492,6 +501,7 @@ public class FilteredIssueLister {
     private DerbyVersion[] getAncestors(DerbyVersion parent) {
         ArrayList ancestors = new ArrayList();
         DerbyVersion[] dv = getSortedAndFilteredReleases(parent);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
         while (dv.length > 1 && dv[0].compareTo(ancestorCutoff) >= 0) {
             dv = getSortedAndFilteredReleases(dv[1]);
             ancestors.add(dv[0]);
@@ -525,6 +535,7 @@ public class FilteredIssueLister {
         for (int i=0; i < allVersions.length; i++) {
             DerbyVersion dv = allVersions[i];
             // Skip versions that haven't been released.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4857
             if (!dv.isReleased() && !dv.equals(target)) {
                 continue;
             }
@@ -560,6 +571,7 @@ public class FilteredIssueLister {
      * @throws IOException if something goes wrong
      */
     private RemoteIssue[] execJiraFilterQuery(BufferedWriter out, String auth,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5080
                                               long filterId)
             throws IOException {
         out.write("// Filter id: " + filterId + ", user id " + user);
@@ -587,6 +599,7 @@ public class FilteredIssueLister {
      */
     private RemoteIssue[] execJiraJQLQuery
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6588
          BufferedWriter out,
          String auth,
          DerbyVersion targetVersion,
@@ -615,6 +628,7 @@ public class FilteredIssueLister {
         Iterator rcIter = rcs.iterator();
 
         // Build JQL query.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6588
         String jql = "project = DERBY AND resolution = fixed AND component not in ( Test ) AND fixversion ";
         StringBuffer sb = new StringBuffer("in (");
         while (rcIter.hasNext()) {
@@ -626,6 +640,7 @@ public class FilteredIssueLister {
         sb.append(')');
         jql += sb.toString();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6588
         StringBuilder   notIn = new StringBuilder();
         notIn.append( " and fixversion not in ( " );
         for ( int i = 0; i < excludeFixVersions.length; i++ )

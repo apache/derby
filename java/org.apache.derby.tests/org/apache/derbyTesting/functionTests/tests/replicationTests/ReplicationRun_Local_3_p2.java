@@ -56,6 +56,7 @@ public class ReplicationRun_Local_3_p2 extends ReplicationRun_Local_3
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_3_p2 Suite");
         
@@ -87,6 +88,7 @@ public class ReplicationRun_Local_3_p2 extends ReplicationRun_Local_3
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,

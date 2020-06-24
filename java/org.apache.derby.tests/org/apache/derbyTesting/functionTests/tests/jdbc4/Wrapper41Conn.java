@@ -56,8 +56,10 @@ public  class   Wrapper41Conn
 
     public Wrapper41Conn( Object wrapped ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         if ( wrapped instanceof EmbedConnection ) { _embedded = (EmbedConnection) wrapped; }
         else if ( wrapped instanceof BrokeredConnection ) { _brokeredConnection = (BrokeredConnection) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         else if ( wrapped instanceof NetConnection) { _netclient = (NetConnection) wrapped; }
         else if ( wrapped instanceof LogicalConnection ) { _logicalConnection = (LogicalConnection) wrapped; }
         else { throw nothingWrapped(); }
@@ -80,6 +82,7 @@ public  class   Wrapper41Conn
 
     public  String    getSchema() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if ( _embedded != null ) { return _embedded.getSchema(); }
         else if ( _netclient != null ) { return _netclient.getSchema(); }
         else if ( _brokeredConnection != null ) { return _brokeredConnection.getSchema(); }
@@ -98,6 +101,7 @@ public  class   Wrapper41Conn
 
     public  int    getNetworkTimeout() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         if ( _embedded != null ) { return _embedded.getNetworkTimeout(); }
         else if ( _netclient != null ) { return _netclient.getNetworkTimeout(); }
         else if ( _brokeredConnection != null ) { return _brokeredConnection.getNetworkTimeout(); }
@@ -124,6 +128,7 @@ public  class   Wrapper41Conn
     {
         if ( _embedded != null ) { return _embedded; }
         else if ( _netclient != null ) { return _netclient; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         else if ( _brokeredConnection != null ) { return _brokeredConnection; }
         else if ( _logicalConnection != null ) { return _logicalConnection; }
         else { throw nothingWrapped(); }

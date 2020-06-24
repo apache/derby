@@ -38,6 +38,7 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
     }
     
     public void testPingWithoutArgs() throws InterruptedException, IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4260
         if (!hasDefaultDerbyPortUsing()) {
             /* If the port isn't the default one, we make sure that the test passes.
              * The -p parameter isn't specified here.
@@ -104,6 +105,7 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
     
     public void testPingWithWrongHost() throws InterruptedException, IOException {
         String[] pingWithoutArgsCmd = new String[] {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5942
                 "org.apache.derby.drda.NetworkServerControl",
                 "ping", "-h", "nothere.invalid"};
                 
@@ -114,6 +116,7 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
     
     public void testPingWithBogusPort() throws InterruptedException, IOException {
         String currentHost = TestConfiguration.getCurrent().getHostName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4700
         String bogusPort = Integer.toString(
                 TestConfiguration.getCurrent().getBogusPort());
         String[] pingWithoutArgsCmd = new String[] {
@@ -150,11 +153,13 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
 
     public static Test suite() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("NetworkServerControlClientCommandTest");
 
         // need network server so we can compare command output 
         // and we don't run on J2ME because java command is different.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4260
         if (!Derby.hasServer() ||
                 JDBC.vmSupportsJSR169())
             return suite;

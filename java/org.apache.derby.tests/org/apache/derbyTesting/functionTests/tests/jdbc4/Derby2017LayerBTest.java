@@ -288,6 +288,7 @@ public class Derby2017LayerBTest
     }
 
     public void testFailedStreamInsertBinary()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws IOException, SQLException {
         byte[][] INSERT = generateDefaultInsert();
         String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
@@ -421,6 +422,7 @@ public class Derby2017LayerBTest
      */
     private void doInsertTest(byte[][] INSERT, String[][] MASTER,
                               boolean autoCommit, boolean rollbackOnError)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws IOException, SQLException {
         // A few sanity checks.
         assertEquals("Expects 7 rows", 7, INSERT.length);
@@ -490,6 +492,8 @@ public class Derby2017LayerBTest
 
         // Select data in the table, compare to MASTER
         ResultSet rs = stmt.executeQuery("select * from t2017_binary");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4912
+//IC see: https://issues.apache.org/jira/browse/DERBY-4912
         JDBC.assertUnorderedResultSet(rs, MASTER);
     }
 

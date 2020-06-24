@@ -51,6 +51,8 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     WindowFunctionNode(
             ValueNode op, String functionName, WindowNode w, ContextManager cm)
             throws StandardException {
@@ -87,6 +89,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
     /**
      * @return window associated with this window function
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     WindowNode getWindow() {
         return window;
     }
@@ -96,6 +99,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * Set window associated with this window function call.
      * @param wdn window definition
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     void setWindow(WindowDefinitionNode wdn) {
         this.window = wdn;
     }
@@ -107,6 +111,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
     {
@@ -134,6 +139,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      */
     private WindowDefinitionNode definedWindow(WindowList windows,
                                                String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (WindowDefinitionNode wdn : windows) {
             if (wdn.getName().equals(name)) {
                 return wdn;
@@ -172,6 +178,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      *
      * @exception StandardException         Thrown on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     ValueNode replaceCallsWithColumnReferences(ResultColumnList rcl,
                                                       int tableNumber)
         throws StandardException
@@ -185,6 +192,8 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
             String                  generatedColName;
             CompilerContext         cc = getCompilerContext();
             generatedColName ="SQLCol" + cc.getNextColumnNumber();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             generatedRC = new ResultColumn(
                     generatedColName, this, getContextManager());
             generatedRC.markGenerated();
@@ -239,6 +248,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      *
      * @return the column reference
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     ColumnReference getGeneratedRef()
     {
         return generatedRef;
@@ -252,6 +262,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      *
      * @exception StandardException on error
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     ValueNode getNewNullResultExpression()
         throws StandardException
     {

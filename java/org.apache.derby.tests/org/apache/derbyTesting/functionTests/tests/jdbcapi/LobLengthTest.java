@@ -51,6 +51,7 @@ public class LobLengthTest extends BaseJDBCTestCase {
     
     public static Test suite() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         return TestConfiguration.defaultSuite(LobLengthTest.class);
     }
 
@@ -62,6 +63,7 @@ public class LobLengthTest extends BaseJDBCTestCase {
     public void setUp() throws Exception
     {
         getConnection().setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
 
         // Create a test table.
         Statement st = createStatement();
@@ -75,6 +77,7 @@ public class LobLengthTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         Statement st = createStatement();
         st.execute("drop table lobTable100M");
         st.close();
@@ -93,6 +96,7 @@ public class LobLengthTest extends BaseJDBCTestCase {
      */
     public void testLongLobLengths() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         PreparedStatement pSt = prepareStatement(
             "insert into lobTable100M(bl) values (?)");
 
@@ -108,6 +112,7 @@ public class LobLengthTest extends BaseJDBCTestCase {
         int lobSize = 16800000;
         pSt.setBinaryStream(1,
             new LoopingAlphabetStream(lobSize), lobSize);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2027
 
         // Now try the insert; this is where the server processes
         // the lob length.

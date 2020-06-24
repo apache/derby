@@ -37,9 +37,11 @@ public class PackagePrivateTestSuite
     public static Test suite() throws Exception {
 
         BaseTestSuite suite = new BaseTestSuite("Package-private tests");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(org.apache.derby.impl.jdbc._Suite.suite());
         suite.addTest(org.apache.derby.client.am._Suite.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
 
         return suite;
     }

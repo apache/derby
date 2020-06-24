@@ -39,6 +39,7 @@ import java.io.ObjectOutput;
 	hence the getValueAsLong() method. Outside the LogFactory the instant
 	is passed around as a LogCounter (through its LogInstant interface).
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	The way the long is encoded is such that &lt; == &gt; correctly tells if
 	one log instant is lessThan, equals or greater than another.
 

@@ -74,6 +74,7 @@ public final class TriggerInfo implements Formatable
 	 */
 	public TriggerInfo
 	(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         TriggerDescriptorList   triggers
 	)
 	{
@@ -86,6 +87,7 @@ public final class TriggerInfo implements Formatable
 		/*
 		** Copy the trigger descriptors into an array of the right type
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         triggerArray = triggers.toArray(new TriggerDescriptor[triggers.size()]);
 	}
 
@@ -171,6 +173,7 @@ public final class TriggerInfo implements Formatable
 	{
 		if (SanityManager.DEBUG)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             StringBuilder str = new StringBuilder();
 			str.append("\nTriggers:");
 			for (int i = 0; i < triggerArray.length; i++)

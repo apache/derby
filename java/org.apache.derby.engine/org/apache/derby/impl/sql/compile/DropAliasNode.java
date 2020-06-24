@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DropAliasNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -70,6 +71,7 @@ class DropAliasNode extends DDLStatementNode
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR;
 				break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR;
 				break;
@@ -88,6 +90,8 @@ class DropAliasNode extends DDLStatementNode
 
 	public	char	getAliasType() { return aliasType; }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String statementToString()
 	{
 		return "DROP ".concat(aliasTypeName(aliasType));
@@ -124,6 +128,8 @@ class DropAliasNode extends DDLStatementNode
 		}
 
 		// Statement is dependent on the AliasDescriptor
+//IC see: https://issues.apache.org/jira/browse/DERBY-2202
+//IC see: https://issues.apache.org/jira/browse/DERBY-1304
 		getCompilerContext().createDependency(ad);
 	}
 
@@ -157,6 +163,7 @@ class DropAliasNode extends DDLStatementNode
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 				typeName = "FUNCTION";
 				break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				typeName = "SYNONYM";
 				break;

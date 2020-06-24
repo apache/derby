@@ -162,6 +162,7 @@ public class GeneratorBase extends Task {
      * Ant mutator to set the id of the release
      */
     public void setReleaseId(String releaseID) throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
         this.releaseID = releaseID;
     }
 
@@ -178,6 +179,7 @@ public class GeneratorBase extends Task {
     protected void buildDelta(Element parent)
             throws Exception {
         String deltaStatement =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4864
                 "These notes describe the difference between Apache Derby release " +
                 releaseID + " and the preceding release " +
                 previousReleaseID + ".";
@@ -289,6 +291,7 @@ public class GeneratorBase extends Task {
         Element header = doc.createElement(makeHeaderTag(headerLevel));
         Element anchor = doc.createElement(ANCHOR);
         Element block = doc.createElement(DIVISION);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5181
 
         parent.appendChild(header);
         anchor.setAttribute(NAME, text);
@@ -307,6 +310,7 @@ public class GeneratorBase extends Task {
      * @throws DOMException 
      */
     private static Element wrapTextContentInDiv(Element node)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6044
             throws DOMException {
         Document doc = node.getOwnerDocument();
         Element div = doc.createElement(DIVISION);
@@ -555,6 +559,7 @@ public class GeneratorBase extends Task {
         parent.appendChild(table);
         table.setAttribute(BORDER, Integer.toString(borderWidth));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6044
         for (String headerText : columnHeadings) {
             Element headingColumn = insertColumnHeader(headingRow);
             headingColumn.setTextContent(headerText);
@@ -587,6 +592,7 @@ public class GeneratorBase extends Task {
      */
     public static Element insertRow(Element table)
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6044
         return insertTableElement(table, ROW);
     }
 
@@ -598,6 +604,7 @@ public class GeneratorBase extends Task {
      */
     public static Element insertColumn(Element row)
             throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6044
         return insertTableElement(row, COLUMN);
     }
 

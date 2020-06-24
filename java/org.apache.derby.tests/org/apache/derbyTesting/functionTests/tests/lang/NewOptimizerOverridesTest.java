@@ -98,6 +98,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("NewOptimizerOverridesTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest( TestConfiguration.embeddedSuite( NewOptimizerOverridesTest.class ) );
 
@@ -184,6 +185,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
             ( WRONG_ROW_SOURCE_COUNT,
               "select tablename from v, sys.syscolumns\n" +
               "where tablename = columnname\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
               "--derbyplan sys.syscolumns_heap\n"
               );
         expectCompilationError
@@ -317,6 +319,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
         //
         // Union query with a separate override clause per branch.
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         assertPlanShape
             (
              conn,
@@ -365,6 +368,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
         //
         // EXISTS subquery (flattened into outer query block).
         //
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         expectCompilationError
             ( UNSUPPORTED_PLAN_SHAPE,
               "select tableid\n" +
@@ -428,6 +432,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
      */
     public void test_03_offsetFetch() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         Connection conn = getConnection();
         
         // with an override the join order is syssequences, syscolumns, sysaliases, systables
@@ -513,6 +518,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
 
         // we need to drain the result set and close it in order to fill in all
         // of the structures needed by the toXML() machinery. i don't know why.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         while ( rs.next() ) {}
         rs.close();
 
@@ -527,6 +533,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
     /** Get an xml-based picture of the plan chosen for the last query. The query is identified by its JDBC ResultSet */
     public  static  Document    getLastQueryPlan( Connection conn, ResultSet rs ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6741
         LanguageConnectionContext   lcc = ConstraintCharacteristicsTest.getLCC( conn );
         org.apache.derby.iapi.sql.ResultSet derbyRS = lcc.getLastActivation().getResultSet();
 
@@ -555,8 +562,11 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
 
         if ( "HashJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "#" ); }
         else if ( "NestedLoopJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "*" ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         else if ( "ProjectRestrictResultSet".equals( type ) ) { summarizeProjectRestrict( buffer, element ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         else if ( "RowCountResultSet".equals( type ) ) { summarizeProjectRestrict( buffer, getFirstElement( element, "source" ) ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         else if ( "UnionResultSet".equals( type ) ) { summarizeUnion( buffer, element ); }
         else
         {
@@ -572,6 +582,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
     }
 
     private static  void    summarizeProjectRestrict( StringBuilder buffer, Element projectRestrict )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         throws Exception
     {
         // look for subqueries attached to this ProjectRestrict node
@@ -611,6 +622,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
     }
 
     private static  void    summarizeUnion( StringBuilder buffer, Element union )
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
         throws Exception
     {
         NodeList    list = union.getChildNodes();

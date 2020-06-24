@@ -52,7 +52,9 @@ public class AssertFailureTest extends BaseTestCase {
 
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("AssertFailureTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3618
         try {
             //Only add the tests if this is a sane build.
             Class.forName("org.apache.derby.shared.common.sanity." +
@@ -85,6 +87,7 @@ public class AssertFailureTest extends BaseTestCase {
 
         // Assert that the string is correct, by checking that
         // it starts the right way.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         String expected = "---------------\n" +
             		"Stack traces for all live threads:\nThread name=";
 
@@ -106,6 +109,7 @@ public class AssertFailureTest extends BaseTestCase {
 
         // Assert that the string is correct, by checking that is starts
         // the right way.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         String expected = "(Skipping thread dump because of insufficient " +
             		"permissions:\njava.security.AccessControlException:";
 

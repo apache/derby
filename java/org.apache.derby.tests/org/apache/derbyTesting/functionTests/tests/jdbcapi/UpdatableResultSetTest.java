@@ -42,6 +42,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class UpdatableResultSetTest extends BaseJDBCTestCase {
     
     private static final byte[] BYTES1 = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
             0x65, 0x66, 0x67, 0x68, 0x69,
             0x69, 0x68, 0x67, 0x66, 0x65
         };
@@ -75,6 +76,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
         conn.setAutoCommit(false);
         Statement stmt = conn.createStatement();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
         stmt.execute("create table UpdateTestTableResultSet (" +
                             "sno int not null unique," +
                             "dBlob BLOB," +
@@ -402,6 +404,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     public void testUpdateBlob()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
     throws Exception {
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -721,6 +724,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
     }
 
     public void testDerby6981()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6981
         throws SQLException
     {
         Statement stmt = createStatement();

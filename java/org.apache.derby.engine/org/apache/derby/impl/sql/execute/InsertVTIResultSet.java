@@ -49,6 +49,7 @@ import java.util.Properties;
  * and triggers to be executed based on the c's and t's
  * compiled into the insert plan.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class InsertVTIResultSet extends DMLVTIResultSet
 {
 
@@ -97,6 +98,7 @@ class InsertVTIResultSet extends DMLVTIResultSet
         }
 
 		ExecRow row = getNextRowCore(sourceResultSet);
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 		try
 		{
@@ -125,7 +127,10 @@ class InsertVTIResultSet extends DMLVTIResultSet
 			/*
 			** If deferred we save a copy of the entire row.
 			*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1112
 			rowHolder =
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 				new TemporaryRowHolderImpl(activation, properties,
 										   resultDescription);
 		}
@@ -143,6 +148,7 @@ class InsertVTIResultSet extends DMLVTIResultSet
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 				insertIntoVTI(rs, row);
 			}
 
@@ -169,6 +175,7 @@ class InsertVTIResultSet extends DMLVTIResultSet
 			try
 			{
 				tempRS.open();
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 				while ((row = tempRS.getNextRow()) != null)
 				{
 					insertIntoVTI(rs, row);

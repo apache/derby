@@ -53,6 +53,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
     private static URL embeddedDataSourceClassLocation; 
 	static {
         // find the location of derby jar file and derbytools jar file
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         derbyClassLocation = getClassLocation("org.apache.derby.database.Database");
         embeddedDataSourceClassLocation = getClassLocation("org.apache.derby.jdbc.EmbeddedDataSource");
 	}
@@ -86,6 +87,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(ClassLoaderBootTest.class);
         Test test = suite;
         TestSetup setup = 
@@ -114,6 +116,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
      */
     protected void setUp() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         URL[] urls = new URL[]{derbyClassLocation, embeddedDataSourceClassLocation};
         mainLoader = getThreadLoader();
 
@@ -138,6 +141,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
     private DerbyURLClassLoader createDerbyClassLoader(final URL[] urls) 
         throws Exception 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return AccessController.doPrivileged(
             new PrivilegedAction<DerbyURLClassLoader>(){
                  public DerbyURLClassLoader run()
@@ -176,6 +180,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         Connection conn1 = ds_1.getConnection();
         // now attemp to boot using another class loader.
         setThreadLoader(loader_2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4361
         DataSource ds_2 = JDBCDataSource.getDataSource();
         assertEquals(loader_2, getThreadLoader());
         assertEquals(loader_2, ds_2.getClass().getClassLoader());
@@ -215,11 +220,13 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         assertEquals(loader_2, ds_2.getClass().getClassLoader());
         ds_2.getConnection();
         // shutdown the engine for both the class loaders.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4361
         JDBCDataSource.shutEngine(ds_2);
         JDBCDataSource.shutEngine(ds_1);
 }
 
     private void setThreadLoader(final ClassLoader which) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         AccessController.doPrivileged(new PrivilegedAction<Void>(){
             public Void run()  {
                 java.lang.Thread.currentThread().setContextClassLoader(which);

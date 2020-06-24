@@ -149,6 +149,7 @@ public class DecryptDatabaseTest
         }
         
         // Bad setting for decryptDatabase
+//IC see: https://issues.apache.org/jira/browse/DERBY-5970
         try {
             connect( false, BOOTPW, "decryptDatabase=fred" );
             fail( "bad decryptDatabase setting not detected" );
@@ -376,6 +377,7 @@ public class DecryptDatabaseTest
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DecryptDatabaseTest suite");
         suite.addTest(wrapTest());
         suite.addTest(wrapTest("AES/OFB/NoPadding"));

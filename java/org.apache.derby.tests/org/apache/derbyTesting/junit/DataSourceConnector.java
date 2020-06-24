@@ -71,6 +71,7 @@ public class DataSourceConnector implements Connector {
     }
 
     public Connection openConnection(String databaseName) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
         try {
             return ds.getConnection();
@@ -117,6 +118,7 @@ public class DataSourceConnector implements Connector {
         (String databaseName, String user, String password, Properties connectionProperties)
          throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2087
         JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
         try {
             return ds.getConnection(user, password);
@@ -126,6 +128,7 @@ public class DataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             HashMap<String, Object> hm = makeCreateDBAttributes( config );
             copyProperties(connectionProperties, hm);
             DataSource tmpDs = singleUseDS( hm );
@@ -141,6 +144,7 @@ public class DataSourceConnector implements Connector {
     }
 
     public void shutEngine(boolean deregisterDriver) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         if (SanityManager.DEBUG) {
              // "false" only used with driver manager
             SanityManager.ASSERT(deregisterDriver);
@@ -153,6 +157,7 @@ public class DataSourceConnector implements Connector {
     
     public void setLoginTimeout( int seconds ) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
         ds.setLoginTimeout( seconds );
     }
     
@@ -173,6 +178,7 @@ public class DataSourceConnector implements Connector {
 
     static HashMap<String, Object> makeCreateDBAttributes( TestConfiguration configuration )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         HashMap<String, Object> hm = JDBCDataSource.getDataSourceProperties( configuration );
         hm.put( "createDatabase", "create" );
 
@@ -202,6 +208,7 @@ public class DataSourceConnector implements Connector {
      * Copy attributes from a {@code Properties} object to a {@code Map}.
      */
     static void copyProperties(Properties src, Map<String, Object> dest) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         if (src != null) {
             for (String key : src.stringPropertyNames()) {
                 dest.put(key, src.getProperty(key));

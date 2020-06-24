@@ -95,6 +95,8 @@ extends BasicNoPutResultSetImpl
 						double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 		super(null,
 				activation,
 				optimizerEstimatedRowCount,
@@ -113,6 +115,8 @@ extends BasicNoPutResultSetImpl
      * Returns the description of the table's rows
 	 */
 	public ResultDescription getResultDescription() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4610
+//IC see: https://issues.apache.org/jira/browse/DERBY-3049
 	    return activation.getResultDescription();
 	}
 
@@ -160,6 +164,7 @@ extends BasicNoPutResultSetImpl
 			LanguageConnectionContext lcc = getLanguageConnectionContext();
 			
                 // only if statistics is switched on, collect & derive them
+//IC see: https://issues.apache.org/jira/browse/DERBY-4849
                 if (lcc.getRunTimeStatisticsMode() &&
                     !lcc.getStatementContext().getStatementWasInvalidated())
 				{   
@@ -216,6 +221,7 @@ extends BasicNoPutResultSetImpl
 	}
 
     public void setHasDeferrableChecks() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         this.needsRowLocationForDeferredCheckConstraints = true;
     }
 
@@ -283,6 +289,7 @@ extends BasicNoPutResultSetImpl
 
     public boolean needsRowLocationForDeferredCheckConstraints()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         return needsRowLocationForDeferredCheckConstraints;
     }
 
@@ -298,6 +305,7 @@ extends BasicNoPutResultSetImpl
 
     public void offendingRowLocation(
             RowLocation rl, long containdId) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         targetResultSet.offendingRowLocation(rl, containdId);
     }
@@ -341,6 +349,7 @@ extends BasicNoPutResultSetImpl
 	public final void setCurrentRow(ExecRow row)
 	{
 		activation.setCurrentRow(row, resultSetNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 		currentRow = row;
 	}
 
@@ -350,6 +359,7 @@ extends BasicNoPutResultSetImpl
 	 */
 	public void clearCurrentRow()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1361
 		currentRow = null;
 		activation.clearCurrentRow(resultSetNumber);
 	}
@@ -538,6 +548,7 @@ extends BasicNoPutResultSetImpl
 	 * result sets for other result set it is a no-op.
 	 */
 	public void updateRow(ExecRow row, RowChanger rowChanger)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 			throws StandardException {
 		// Only ResultSets of type Scroll Insensitive implement
 		// detectability, so for other result sets this method

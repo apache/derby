@@ -34,6 +34,7 @@ import org.apache.derby.impl.sql.compile.DefaultOptTrace;
 /**
   <P>
   This  class provides static methods for controlling the
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
   optimizer tracing in a Derby database.
   
   */

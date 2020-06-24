@@ -38,6 +38,7 @@ implements ByteHolder
 
 	boolean writing = true;
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	Vector<byte[]> bufV;
 	int curBufVEleAt;
 
@@ -69,6 +70,7 @@ implements ByteHolder
 		this.curBuf = new byte[bufSize];
 		this.curBufPos = 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		this.bufV = new Vector<byte[]>(128);
 		bufV.addElement(curBuf);
 		this.curBufVEleAt = 0;
@@ -194,6 +196,8 @@ implements ByteHolder
 		//
 		//Reposition so reads start from the first
 		//byte.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		curBuf = bufV.elementAt(0);
 		this.curBufVEleAt = 0;
 		this.curBufPos = 0;
@@ -421,6 +425,8 @@ implements ByteHolder
      * @see ByteHolder#cloneEmpty
      */
     public ByteHolder cloneEmpty() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
+//IC see: https://issues.apache.org/jira/browse/DERBY-3650
         return(new MemByteHolder(bufSize));
     }
 
@@ -444,6 +450,7 @@ implements ByteHolder
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			curBuf = bufV.elementAt(curBufVEleAt);
 		}
 		
@@ -489,6 +496,7 @@ implements ByteHolder
 			SanityManager.ASSERT(writing == false,
 								 "Reading should be true 5");
 		if (curBufVEleAt >= lastBufVEleAt) return true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		curBuf = bufV.elementAt(++curBufVEleAt);
 		curBufPos = 0;
 		if (curBufVEleAt == lastBufVEleAt)
@@ -506,6 +514,7 @@ implements ByteHolder
 	{
 		StringBuffer sb = new StringBuffer(100);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		byte[] buf = bufV.elementAt(bufVEleAt);
 		sb.append("(");
 		for (int ix = 0;ix<buf.length;ix++)

@@ -90,6 +90,7 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
         } catch (SQLFeatureNotSupportedException e) {
             // expected exception
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1476
         ps.close();
     }
 
@@ -167,9 +168,12 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
      * Create a suite with all tests.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("SetObjectUnsupportedTest suite");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         suite.addTest(baseSuite(false, "SetObjectUnsupportedTest:prepared"));
         suite.addTest(baseSuite(true, "SetObjectUnsupportedTest:callable"));
 
@@ -193,10 +197,12 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
      * @return a test suite
      */
     static Test baseSuite(boolean callable, String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         for (TypeInfo typeInfo : TYPES) {
             suite.addTest(new SetObjectUnsupportedTest
                           ("testUnsupportedSetObject", typeInfo, callable));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1476
             suite.addTest(new SetObjectUnsupportedTest
                           ("testUnsupportedSetObjectWithScale",
                            typeInfo, callable));

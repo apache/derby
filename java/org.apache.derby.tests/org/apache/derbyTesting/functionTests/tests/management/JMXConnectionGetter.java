@@ -40,8 +40,10 @@ interface JMXConnectionGetter {
     /**
      * Get a connection to the platform MBean Server.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
     MBeanServerConnection getMBeanServerConnection(String user,
             String password) throws Exception;
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3385
     void close(MBeanServerConnection jmxConnection) throws Exception;
 }

@@ -36,6 +36,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  * statement.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class SetRoleNode extends MiscellaneousStatementNode
 {
     private String      name;
@@ -133,6 +135,8 @@ class SetRoleNode extends MiscellaneousStatementNode
     private void generateParameterValueSet(ActivationClassBuilder acb)
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         List<ParameterNode>
             parameterList = getCompilerContext().getParameterList();
         // parameter list size should be 1

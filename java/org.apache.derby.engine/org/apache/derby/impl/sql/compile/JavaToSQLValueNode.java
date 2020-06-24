@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.JavaToSQLValueNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -73,6 +74,8 @@ class JavaToSQLValueNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
@@ -136,6 +139,7 @@ class JavaToSQLValueNode extends ValueNode
 
 			mb.conditionalIfNull();
 			mb.getField(nullValueField);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 			acb.generateNullWithExpress(mb, getTypeCompiler(), 
 					getTypeServices().getCollationType());
 
@@ -160,6 +164,7 @@ class JavaToSQLValueNode extends ValueNode
 		javaNode.generateExpression(acb, mb);
 
 		/* Generate the SQL value, which is always nullable */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2583
 		acb.generateDataValue(mb, tc, 
 				getTypeServices().getCollationType(), field);
 
@@ -180,6 +185,8 @@ class JavaToSQLValueNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -218,6 +225,7 @@ class JavaToSQLValueNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -227,6 +235,7 @@ class JavaToSQLValueNode extends ValueNode
 
 		/* Bind the expression under us */
         javaNode = javaNode.bindExpression(fromList, subqueryList, aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
         if ( javaNode instanceof StaticMethodCallNode )
         {
@@ -234,10 +243,12 @@ class JavaToSQLValueNode extends ValueNode
 
             if ( agg != null )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 return agg.bindExpression( fromList, subqueryList, aggregates );
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
 		DataTypeDescriptor dts = javaNode.getDataType();
 		if (dts == null)
 		{
@@ -246,7 +257,9 @@ class JavaToSQLValueNode extends ValueNode
 		}
 
         TypeDescriptor catalogType = dts.getCatalogType();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4092
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
         if ( catalogType.isRowMultiSet() || (catalogType.getTypeName().equals( "java.sql.ResultSet" )) )
         {
 			throw StandardException.newException(SQLState.LANG_TABLE_FUNCTION_NOT_ALLOWED);
@@ -274,6 +287,8 @@ class JavaToSQLValueNode extends ValueNode
 	 * @exception StandardException			Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -340,11 +355,13 @@ class JavaToSQLValueNode extends ValueNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (javaNode != null)
 		{
 			javaNode = (JavaValueNode)javaNode.accept(v);

@@ -76,6 +76,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
     	 */
     	public void boot(boolean create, Properties properties) throws StandardException {
     		
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
     		ModuleFactory monitor = getMonitor();
     		//The Locale on monitor has already been set by the boot code in
     		//BasicDatabase so we can simply do a get here.
@@ -86,6 +87,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
     		//Locale object will be used to construct the Collator object which
     		//will be used if user has requested territory based collation.
     		databaseLocale = monitor.getLocale(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
 
     		//If we are here for database create time, verify that there is 
     		//Collator support for the database's locale. If not, then we 
@@ -116,6 +118,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
 	    		//If the user has requested for territory based database, then 
 	    		//verify that JVM has Collator support for the database locale.
 	    		String userDefinedCollation = 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
 	    			properties.getProperty(Attribute.COLLATION);
 	    		if (userDefinedCollation != null) {//Invalid value handling
 					int collationType = DataTypeDescriptor.getCollationType(userDefinedCollation);
@@ -184,6 +187,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                         throws StandardException
         {
                 if (previous == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLSmallint(value);
                 previous.setValue(value);
                 return previous;
@@ -202,6 +206,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                                 throws StandardException
         {
                 if (previous == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLTinyint(value);
                 previous.setValue(value);
                 return previous;
@@ -221,6 +226,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                         throws StandardException
         {
                 if (previous == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLLongint(value);
                 previous.setValue(value);
                 return previous;
@@ -239,6 +245,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                         throws StandardException
         {
                 if (previous == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLReal(value);
                 previous.setValue(value);
                 return previous;
@@ -257,6 +264,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                         throws StandardException
         {
                 if (previous == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLDouble(value);
                 previous.setValue(value);
                 return previous;
@@ -265,6 +273,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
         public final NumberDataValue getDecimalDataValue(Number value, NumberDataValue previous)
                         throws StandardException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             NumberDataValue retValue =
                     (previous == null) ? getNullDecimal(null) : previous;
             retValue.setValue(value);
@@ -287,6 +296,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                         throws StandardException
         {
                 if (previous == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLBoolean(value);
                 previous.setValue(value);
                 return previous;
@@ -467,6 +477,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
         }
 
         public StringDataValue getClobDataValue(Clob value,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
                 StringDataValue previous, int collationType)
             throws StandardException
         {
@@ -658,6 +669,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
 
         public final NumberDataValue getNullDecimal(NumberDataValue dataValue)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             if (dataValue == null) {
                 return new SQLDecimal();
             }
@@ -850,6 +862,10 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
          */
         public StringDataValue         getNullClob(StringDataValue previous,
                 int collationType)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
         throws StandardException
         {
             if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
@@ -866,6 +882,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
         {
                 if (dataValue == null)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new UserType((Object) null);
                 }
                 else
@@ -894,6 +911,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                 {
                     try
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLDate((Date) null);
                     }
                     catch( StandardException se)
@@ -918,6 +936,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                 {
                     try
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLTime((Time) null);
                     }
                     catch( StandardException se)
@@ -942,6 +961,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
                 {
                     try
                     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
                         return new SQLTimestamp((Timestamp) null);
                     }
                     catch( StandardException se)
@@ -1017,6 +1037,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
 
     /** @see DataValueFactory#getCharacterCollator(int) */
     public RuleBasedCollator getCharacterCollator(int collationType) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
     throws StandardException {
     	if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
     		return (RuleBasedCollator)null;
@@ -1026,6 +1047,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
     		//the Collator for the database locale.
 			//	Calculate the collator strength. COLLATION_TYPE_TERRITORY_BASED use strength -1, i e unspecified.
 			int strength = collationType - StringDataValue.COLLATION_TYPE_TERRITORY_BASED_PRIMARY;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
     		collatorForCharacterTypes = verifyCollatorSupport(strength);
     		return collatorForCharacterTypes;    	    		
     	} else
@@ -1057,6 +1079,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
 					databaseLocale.toString());
     	
     	RuleBasedCollator collator = (RuleBasedCollator)Collator.getInstance(databaseLocale);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
 
 		if (strength != -1)
 			collator.setStrength(strength);
@@ -1069,6 +1092,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
     public DataValueDescriptor getNull(int formatId, int collationType) 
     throws StandardException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         DataValueDescriptor returnDVD =
             DataValueFactoryImpl.getNullDVDWithUCS_BASICcollation(formatId);
 
@@ -1112,6 +1136,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
         case StoredFormatIds.SQL_BOOLEAN_ID: return new SQLBoolean();
         case StoredFormatIds.SQL_CHAR_ID: return new SQLChar();
         case StoredFormatIds.SQL_DATE_ID: return new SQLDate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         case StoredFormatIds.SQL_DECIMAL_ID: return new SQLDecimal();
         case StoredFormatIds.SQL_DOUBLE_ID: return new SQLDouble();
         case StoredFormatIds.SQL_INTEGER_ID: return new SQLInteger();
@@ -1130,6 +1155,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
         case StoredFormatIds.SQL_BLOB_ID: return new SQLBlob();
         case StoredFormatIds.SQL_CLOB_ID: return new SQLClob();
         case StoredFormatIds.XML_ID: return new XML();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         case StoredFormatIds.ACCESS_HEAP_ROW_LOCATION_V1_ID: 
         // This is an specific implementation of RowLocation, known to be
         // a DTD.  
@@ -1161,6 +1187,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
      */
     static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<Context>()

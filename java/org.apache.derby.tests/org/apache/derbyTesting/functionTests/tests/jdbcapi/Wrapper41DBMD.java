@@ -51,6 +51,7 @@ public  class   Wrapper41DBMD
     public Wrapper41DBMD( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EmbedDatabaseMetaData ) { _embedded = (EmbedDatabaseMetaData) wrapped; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         else if ( wrapped instanceof ClientDatabaseMetaData ) { _netclient = (ClientDatabaseMetaData) wrapped; }
         else { throw nothingWrapped(); }
     }

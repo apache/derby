@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.FromVTI
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -76,6 +77,8 @@ import org.apache.derby.vti.VTIEnvironment;
  * A FromVTI represents a VTI in the FROM list of a DML statement.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class FromVTI extends FromTable implements VTIEnvironment
 {
 
@@ -146,6 +149,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     FromVTI(MethodCallNode invocation,
             String correlationName,
             ResultColumnList derivedRCL,
@@ -182,6 +187,7 @@ class FromVTI extends FromTable implements VTIEnvironment
             TableName exposedTableName) {
 
         this.methodCall = invocation;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         setResultColumns( derivedRCL );
         this.subqueryList = new SubqueryList(getContextManager());
 
@@ -208,6 +214,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 			throws StandardException
 	{
 		setCostEstimate( getCostEstimate(optimizer) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Cost the VTI if it implements VTICosting.
 		 * Otherwise we use the defaults.
@@ -239,6 +246,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		}
 
 		getCostEstimate().setCost(estimatedCost, estimatedRowCount, estimatedRowCount);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** Let the join strategy decide whether the cost of the base
@@ -256,6 +264,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 				getJoinStrategy().
 					multiplyBaseCostByOuterRows())
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			getCostEstimate().multiply(outerCost.rowCount(), getCostEstimate());
 		}
 
@@ -282,6 +291,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 		 * outer tables that we are correlated with, contains
 		 * our dependency map.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         JBitSet tempBitSet = assignedTableMap;
 		tempBitSet.or(correlationMap);
 
@@ -316,6 +327,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 * @see ResultSetNode#adjustForSortElimination()
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void adjustForSortElimination()
 	{
 		/* It's possible that we have an ORDER BY on the columns for this
@@ -381,6 +394,8 @@ class FromVTI extends FromTable implements VTIEnvironment
             return false;
         
 		if (restrictionList == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             restrictionList = new PredicateList(getContextManager());
 		}
 
@@ -418,6 +433,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG) {
@@ -467,6 +484,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getExposedName()
 	{
 		return correlationName;
@@ -504,6 +523,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 							FromList fromListParam) 
 					throws StandardException
@@ -534,10 +555,13 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode bindVTITables(FromList fromListParam)
 							throws StandardException
 	{
 		ResultColumnList	derivedRCL = getResultColumns();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		LanguageConnectionContext lcc = getLanguageConnectionContext();
 
@@ -550,6 +574,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		 * Correlated subqueries are not allowed as parameters to
 		 * a VTI, so pass an empty FromList.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<AggregateNode> aggregates = new ArrayList<AggregateNode>();
         methodCall.bindExpression(fromListParam, subqueryList, aggregates);
 
@@ -631,6 +656,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		{
 			TableDescriptor td = getDataDictionary().getTableDescriptor(triggerTableId);
 			setResultColumns( genResultColList(td) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			// costing info
 			vtiCosted = true;
@@ -641,6 +667,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		else
 		{	
             setResultColumns( new ResultColumnList((getContextManager())) );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 			// if this is a Derby-style Table Function, then build the result
 			// column list from the RowMultiSetImpl return datatype
@@ -672,6 +699,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 				numVTICols = 0;
 			    }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			    getResultColumns().createListFromResultSetMetaData(rsmd, exposedName, 
 														  getVTIName() );
 			}
@@ -697,6 +725,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetMetaData getResultSetMetaData()
 		throws StandardException
 	{
@@ -709,6 +739,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 			{
 				ps = (PreparedStatement) getNewInstance();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 				if (ps.getResultSetConcurrency() != ResultSet.CONCUR_UPDATABLE)
 				{
 					throw StandardException.newException(SQLState.LANG_UPDATABLE_VTI_NON_UPDATABLE_RS, 
@@ -763,8 +794,11 @@ class FromVTI extends FromTable implements VTIEnvironment
         throws StandardException
     {
 		NewInvocationNode   constructor = (NewInvocationNode) methodCall;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Class<?>[]  paramTypeClasses = constructor.getMethodParameterClasses();
         Object[] paramObjects;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 		if (paramTypeClasses != null)
 		{
@@ -773,6 +807,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 			for (int index = 0; index < paramTypeClasses.length; index++)
 			{
                 Class<?> paramClass = paramTypeClasses[index];
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 				paramObjects[index] = methodParms[index].getConstantValueAsObject();
 
@@ -784,6 +819,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 
 					if (paramClass.equals(Short.TYPE)) {
 						paramObjects[index] =
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                             Short.valueOf(
                                 ((Integer) paramObjects[index]).shortValue());
 					} else if (paramClass.equals(Byte.TYPE)) {
@@ -799,6 +836,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 				{
 					if (paramClass.equals(Integer.TYPE))
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                         paramObjects[index] = Integer.valueOf(0);
 					}
 					else if (paramClass.equals(Short.TYPE))
@@ -811,10 +849,13 @@ class FromVTI extends FromTable implements VTIEnvironment
 					}
 					else if (paramClass.equals(Long.TYPE))
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         paramObjects[index] = Long.valueOf((long) 0);
 					}
 					else if (paramClass.equals(Float.TYPE))
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 						paramObjects[index] = (float) 0;
 					}
 					else if (paramClass.equals(Double.TYPE))
@@ -827,6 +868,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 					}
 					else if (paramClass.equals(Character.TYPE))
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         paramObjects[index] =
                                 Character.valueOf(Character.MIN_VALUE);
 					}
@@ -835,6 +878,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             paramTypeClasses = new Class<?>[0];
 			paramObjects = new Object[0];
 		}
@@ -844,6 +888,7 @@ class FromVTI extends FromTable implements VTIEnvironment
             ClassInspector classInspector = getClassFactory().getClassInspector();
             String javaClassName = methodCall.getJavaClassName();
             Constructor<?> constr = classInspector.getClass(javaClassName).getConstructor(paramTypeClasses);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             return constr.newInstance(paramObjects);
         }
@@ -892,6 +937,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
@@ -905,7 +952,9 @@ class FromVTI extends FromTable implements VTIEnvironment
 		 * from other VTIs that appear after this one in the FROM list.
 		 * These CRs will have uninitialized column and table numbers.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         ArrayList<AggregateNode> aggregates = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (ColumnReference ref : getNodesFromParameters(ColumnReference.class))
 		{
             //
@@ -931,6 +980,7 @@ class FromVTI extends FromTable implements VTIEnvironment
                 for ( int i = 0; i < outerFromLists.size(); i++ )
                 {
                     FromTable   fromTable = columnInFromList( outerFromLists.get( i ), ref );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
                     if ( fromTable != null )
                     {
@@ -965,6 +1015,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 				// we need a fake agg list
                 if (aggregates == null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     aggregates = new ArrayList<AggregateNode>();
 				}
 				ref.bindExpression(fromListParam,
@@ -991,6 +1042,8 @@ class FromVTI extends FromTable implements VTIEnvironment
             {
                 // remember this FromTable so that we can code generate the arg
                 // from actual result columns later on.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 argSources.put(Integer.valueOf(fromTable.getTableNumber()),
                                fromTable );
 
@@ -1011,6 +1064,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
     <T extends Visitable> List<T> getNodesFromParameters(Class<T> nodeClass)
 		throws StandardException
 	{
@@ -1025,10 +1079,13 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
         TableName        toCompare;
+//IC see: https://issues.apache.org/jira/browse/DERBY-13
 
 		if(allTableName != null)
              toCompare = makeTableName(allTableName.getSchemaName(),correlationName);
@@ -1041,6 +1098,7 @@ class FromVTI extends FromTable implements VTIEnvironment
             return null;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         final ContextManager cm = getContextManager();
         final ResultColumnList rcList = new ResultColumnList(cm);
 
@@ -1048,6 +1106,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		 * NOTE: This method will capture any column renaming due to 
 		 * a derived column list.
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
         for (ResultColumn rc : getResultColumns())
 		{
             if (!rc.isGenerated()) {
@@ -1079,12 +1138,15 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getMatchingColumn(ColumnReference columnReference)
             throws StandardException
 	{
 		/* We could get called before our RCL is built.  That's okay, we'll
 		 * just say that we don't match. 
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		if (getResultColumns() == null)
 		{
 			return null;
@@ -1094,6 +1156,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		TableName		columnsTableName;
 
 		columnsTableName = columnReference.getQualifiedTableName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/*
 		** If the column did not specify a name, or the specified name
@@ -1102,11 +1165,13 @@ class FromVTI extends FromTable implements VTIEnvironment
 		*/
 		if (columnsTableName == null || columnsTableName.equals(exposedName))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			resultColumn = getResultColumns().getResultColumn(columnReference.getColumnName());
 			/* Did we find a match? */
 			if (resultColumn != null)
 			{
 				columnReference.setTableNumber(tableNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4695
                 columnReference.setColumnNumber(
                     resultColumn.getColumnPosition());
 			}
@@ -1135,6 +1200,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 */
 
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -1149,6 +1216,7 @@ class FromVTI extends FromTable implements VTIEnvironment
             new PredicateList(getContextManager()));
 
 		/* Generate the referenced table map */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		setReferencedTableMap( new JBitSet(numTables) );
 		getReferencedTableMap().set(tableNumber);
 
@@ -1210,6 +1278,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 		prRCList = getResultColumns();
 		setResultColumns( getResultColumns().copyListAndObjects() );
 
@@ -1220,6 +1289,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		 * we won't be able to project out any of them.
 		 */
 		prRCList.genVirtualColumnNodes(this, getResultColumns(), false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		/* Project out any unreferenced columns.  If there are no referenced 
 		 * columns, generate and bind a single ResultColumn whose expression is 1.
@@ -1227,6 +1297,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 		prRCList.doProjection();
 
 		/* Finally, we create the new ProjectRestrictNode */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return new ProjectRestrictNode(
 								this,
 								prRCList,
@@ -1292,6 +1364,7 @@ class FromVTI extends FromTable implements VTIEnvironment
     private HashMap<String,String> computeProjection( ) throws StandardException
     {
         HashMap<String,String>  nameMap = new HashMap<String,String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         ResultColumnList allVTIColumns = getResultColumns();
         int              totalColumnCount = allVTIColumns.size();
@@ -1302,6 +1375,8 @@ class FromVTI extends FromTable implements VTIEnvironment
         {
             ResultColumn column = allVTIColumns.getResultColumn( i + 1 );
             String       exposedNam = column.getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
             if ( column.isReferenced() )
             {
@@ -1309,6 +1384,8 @@ class FromVTI extends FromTable implements VTIEnvironment
                 
                 projectedColumnNames[ i ] = baseName;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 nameMap.put( exposedNam, baseName );
             }
         }
@@ -1328,6 +1405,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
         // walk the list, looking for qualifiers, that is, WHERE clause
         // fragments (conjuncts)  which can be pushed into the table function
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (Predicate pp : parentPredicates)
         {
             if ( canBePushedDown( pp ) )
@@ -1374,6 +1452,7 @@ class FromVTI extends FromTable implements VTIEnvironment
      * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
      */
     private Restriction makeRestriction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             ValueNode clause,
             HashMap<String, String> columnNameMap )
         throws StandardException
@@ -1422,6 +1501,7 @@ class FromVTI extends FromTable implements VTIEnvironment
      * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
      */
     private Restriction makeLeafRestriction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             BinaryRelationalOperatorNode clause,
             HashMap<String, String> columnNameMap) throws StandardException
     {
@@ -1445,6 +1525,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         int comparisonOperator = mapOperator( rawOperator );
         if ( comparisonOperator < 0 ) { return iAmConfused( clause ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         String columnName = columnNameMap.get( rawColumn.getColumnName() );
         Object constantOperand = squeezeConstantValue( rawValue );
         if ( (columnName == null) || (constantOperand == null) ) { return iAmConfused( clause ); }
@@ -1459,6 +1540,7 @@ class FromVTI extends FromTable implements VTIEnvironment
      * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
      */
     private Restriction makeIsNullRestriction(
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             IsNullNode clause,
             HashMap<String, String> columnNameMap) throws StandardException
     {
@@ -1471,6 +1553,7 @@ class FromVTI extends FromTable implements VTIEnvironment
             (comparisonOperator != Restriction.ColumnQualifier.ORDER_OP_ISNOTNULL)
             ) { return iAmConfused( clause ); }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         String columnName = columnNameMap.get( rawColumn.getColumnName() );
         if ( columnName == null ) { return iAmConfused( clause ); }
 
@@ -1582,6 +1665,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
 		acb.pushGetResultSetFactoryExpression(mb);
 		int nargs = getScanArguments(acb, mb);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getVTIResultSet",ClassName.NoPutResultSet, nargs);
 	}
 
@@ -1595,8 +1679,11 @@ class FromVTI extends FromTable implements VTIEnvironment
      */
     private void remapBaseTableColumns() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (ColumnReference ref : getNodesFromParameters(ColumnReference.class))
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             FromTable fromTable = argSources.get(
                 Integer.valueOf(ref.getTableNumber()));
 
@@ -1625,6 +1712,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
 		// Get our final cost estimate.
 		setCostEstimate( getFinalCostEstimate() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		for (int index = 0; index < rclSize; index++)
 		{
@@ -1655,6 +1743,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
         // Get a row builder to allocate scan rows of the right shape and size.
         mb.push(acb.addItem(getResultColumns().buildRowTemplate())); // arg 2
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// For a Version 2 VTI we never maintain the java.sql.PreparedStatement
 		// from compile time to execute time. This would rquire the PreparedStatement
@@ -1668,12 +1757,14 @@ class FromVTI extends FromTable implements VTIEnvironment
 		// o  No ? or ColumnReferences in parameters
 
 		boolean reuseablePs = version2 &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 			(getNodesFromParameters(ParameterNode.class).isEmpty()) &&
 			(getNodesFromParameters(ColumnReference.class).isEmpty());
 
 
 
 		mb.push(getResultSetNumber()); // arg 3
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// The generated method for the constructor
 		generateConstructor(acb, mb, reuseablePs); // arg 4
@@ -1705,6 +1796,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
 		// estimated row count
 		mb.push(getCostEstimate().rowCount());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 
 		// estimated cost
 		mb.push(getCostEstimate().getEstimatedCost());
@@ -1716,6 +1808,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         int rtNum = -1;
         if ( isDerbyStyleTableFunction  )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3616
             rtNum = acb.addItem(methodCall.getRoutineInfo().getReturnType());
         }
         mb.push(rtNum);
@@ -1725,6 +1818,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         mb.push( storeObjectInPS( acb, vtiRestriction ) );        
 
         // push the schema name and unqualified name of the table function
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
         TableName   fullName = methodCall.getFullName();
 		mb.push( (fullName == null) ? "" : fullName.getSchemaName() );
 		mb.push( (fullName == null) ? "" : fullName.getTableName() );
@@ -1845,11 +1939,13 @@ class FromVTI extends FromTable implements VTIEnvironment
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (methodCall != null)
 		{
 			methodCall = (MethodCallNode) methodCall.accept(v);
@@ -1896,6 +1992,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 			throws StandardException
 	{
 		/* Add all of the columns in the table */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         ResultColumnList rcList = new ResultColumnList((getContextManager()));
 		ColumnDescriptorList cdl = td.getColumnDescriptorList();
 		int					 cdlSize = cdl.size();
@@ -1931,6 +2029,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 	/*
 	** VTIEnvironment
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final public boolean isCompileTime() {
 		return true;
 	}
@@ -1939,7 +2039,10 @@ class FromVTI extends FromTable implements VTIEnvironment
 		return getCompilerContext().getParser().getSQLtext();
 	}
 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final public int getStatementIsolationLevel() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 		return TransactionControl.jdbcIsolationLevel( getCompilerContext().getScanIsolationLevel() );
 	}
 
@@ -1972,6 +2075,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         {
             String          columnName = columnNames[ i ];
             DataTypeDescriptor  dtd = DataTypeDescriptor.getType(types[i]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
             ResultColumn    rc = getResultColumns().addColumn
                 ( exposedName, columnName, dtd );
 
@@ -1987,6 +2091,11 @@ class FromVTI extends FromTable implements VTIEnvironment
                 (
                  columnName, i+1, dtd,
                  (DataValueDescriptor) null, (DefaultInfo) null, (UUID) null, (UUID) null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6903
+//IC see: https://issues.apache.org/jira/browse/DERBY-6904
+//IC see: https://issues.apache.org/jira/browse/DERBY-6905
+//IC see: https://issues.apache.org/jira/browse/DERBY-6906
+//IC see: https://issues.apache.org/jira/browse/DERBY-534
                  0L, 0L, 0L, false
                  );
             rc.setColumnDescriptor( null, coldesc );
@@ -2005,7 +2114,9 @@ class FromVTI extends FromTable implements VTIEnvironment
     private boolean implementsDerbyStyleVTICosting( String className )
         throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Constructor<?>     constructor = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Class<?>           vtiClass = lookupClass( className );
         Class<?>           vtiCostingClass = lookupClass( VTICosting.class.getName() );
 
@@ -2018,6 +2129,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         }
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             constructor = vtiClass.getConstructor( new Class<?>[] {} );
         }
         catch (Throwable t)
@@ -2043,11 +2155,15 @@ class FromVTI extends FromTable implements VTIEnvironment
         if ( !isDerbyStyleTableFunction ) { return (version2) ? (VTICosting) ps : (VTICosting) rs; }
         
         String              className = methodCall.getJavaClassName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Class<?>               vtiClass = lookupClass( className );
         
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Constructor<?> constructor =
                     vtiClass.getConstructor( new Class<?>[] {} );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             VTICosting          result =
                     (VTICosting) constructor.newInstance( (Object[])null );
 
@@ -2063,6 +2179,7 @@ class FromVTI extends FromTable implements VTIEnvironment
      * Lookup the class that holds the VTI.
      */
     private Class<?> lookupClass( String className )
+//IC see: https://issues.apache.org/jira/browse/DERBY-4126
         throws StandardException
     {
         try {

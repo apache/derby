@@ -39,11 +39,13 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 
     <P>This class is called from a Query constructed in 
     java/org.apache.derby.impl.jdbc/metadata.properties:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     The VTI will return columns 3-14, an extra column to the specification
     METHOD_ID is returned to distinguish between overloaded methods.
     </P>
     
   <OL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         <LI><B>PROCEDURE_CAT</B> String =&gt; procedure catalog (may be null)
         <LI><B>PROCEDURE_SCHEM</B> String =&gt; procedure schema (may be null)
         <LI><B>PROCEDURE_NAME</B> String =&gt; procedure name
@@ -57,6 +59,7 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
       <LI> procedureColumnReturn - procedure return value
       <LI> procedureColumnResult - result column in ResultSet
       </UL>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
   <LI><B>DATA_TYPE</B> int =&gt; SQL type from java.sql.Types
         <LI><B>TYPE_NAME</B> String =&gt; SQL type name, for a UDT type the
   type name is fully qualified
@@ -83,6 +86,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 		if (!isFunction) { return val; }
 		switch (val) {
 		case DatabaseMetaData.procedureColumnUnknown:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             return DatabaseMetaData.functionColumnUnknown;
 		case DatabaseMetaData.procedureColumnIn:
             return DatabaseMetaData.functionColumnIn;
@@ -132,6 +136,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 		// compile time aliasInfo will be null.
 		if (aliasInfo != null) {
 			isProcedure = aliasType.equals("P");
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
 			isFunction = aliasType.equals("F");
 			procedure = (RoutineAliasInfo) aliasInfo;
 			method_count = (short) procedure.getParameterCount();
@@ -150,6 +155,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 		}
 
 		if (isFunction) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             nullable = (short) DatabaseMetaData.functionNullable;
 			sqlType = procedure.getReturnType();
 			columnName = "";  // COLUMN_NAME is VARCHAR NOT NULL
@@ -171,6 +177,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
             
 			sqlType      = tableFunctionReturnType.getRowTypes()[ idx ];
 			columnName   = tableFunctionReturnType.getRowColumnNames()[ idx ];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             columnType   = (short) DatabaseMetaData.functionColumnResult;
 		}
 		else if (paramCursor > -1) {
@@ -197,6 +204,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
         {
 		case 1: // COLUMN_NAME:
 			return columnName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
 
 		case 4: //_TYPE_NAME: 
                return sqlType.getTypeName();
@@ -219,6 +227,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
     {
         switch (column) 
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
         case 3: // DATA_TYPE:
             if (sqlType != null) {
                 return sqlType.getJDBCTypeId();
@@ -241,6 +250,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
                 // No corresponding SQL type
                 return 0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-319
 		case 6: // LENGTH (in bytes):
                 if (sqlType != null)
                     return sqlType.getMaximumWidthInBytes();
@@ -265,6 +275,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
         {
 		case 2: // COLUMN_TYPE:
 			return columnType;
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
 
 		case 7: // SCALE:
                 if (sqlType != null)
@@ -292,6 +303,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 		//FIXME
 		case 9: // NULLABLE:
 			return nullable;
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
 
 		case 11: // METHOD_ID: 
                 return method_count;
@@ -315,6 +327,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 
 		EmbedResultSetMetaData.getResultColumnDescriptor("COLUMN_NAME",				 Types.VARCHAR, false, 128),
 		EmbedResultSetMetaData.getResultColumnDescriptor("COLUMN_TYPE",				 Types.SMALLINT, false),
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
 		EmbedResultSetMetaData.getResultColumnDescriptor("DATA_TYPE",				 Types.INTEGER, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("TYPE_NAME",				 Types.VARCHAR, false, 22),
 		EmbedResultSetMetaData.getResultColumnDescriptor("PRECISION",				 Types.INTEGER, false),
@@ -329,5 +342,6 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 	};
 
     private static final ResultSetMetaData metadata =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         new EmbedResultSetMetaData(columnInfo);
 }

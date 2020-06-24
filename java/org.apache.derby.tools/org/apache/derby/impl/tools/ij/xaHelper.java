@@ -65,6 +65,8 @@ class xaHelper implements xaAbstractHelper
 	  
 	public void setFramework(String fm)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-578
+//IC see: https://issues.apache.org/jira/browse/DERBY-1464
                 if (fm == null) {
                     return;
                 }
@@ -79,6 +81,7 @@ class xaHelper implements xaAbstractHelper
 		
 	private Xid makeXid(int xid)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-576
 		try {
 			return new ijXid(xid, databaseName.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
@@ -100,6 +103,7 @@ class xaHelper implements xaAbstractHelper
 			  
 			  if (isJCC || isNetClient)
 			  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 			  	String hostName = System.getProperty("hostName");
 			  	if ((hostName != null ) && (!hostName.equals("localhost")))
 				{			
@@ -226,6 +230,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
             throw handleException(t);
 		}
 	}
@@ -293,6 +298,7 @@ class xaHelper implements xaAbstractHelper
             throw handleException(t);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Vector<String> v = new Vector<String>();
 		v.addElement("");
 		v.addElement(LocalizedResource.getMessage("IJ_Reco0InDoubT", LocalizedResource.getNumber(val.length)));
@@ -312,6 +318,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
             throw handleException(t);
 		}
 	}
@@ -324,6 +331,14 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
+//IC see: https://issues.apache.org/jira/browse/DERBY-5803
             throw handleException(t);
 		}
 	}
@@ -412,6 +427,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		else // StandardException or run time exception, log it first
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-427
 			String info = LocalizedResource.getMessage("IJ_01SeeLog", t.toString(), t.getMessage());
 			//		t.printStackTrace(System.out);
 			throw new ijException(info);
@@ -426,6 +442,7 @@ class xaHelper implements xaAbstractHelper
 	{
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDataSource");
 			currentDataSource = (DataSource) (clazz.getConstructor().newInstance());
 		} catch (Exception e) {
@@ -460,6 +477,7 @@ class xaHelper implements xaAbstractHelper
 		 throws SQLException
 	{
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
           Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource");
           currentCPDataSource = (ConnectionPoolDataSource) (clazz.getConstructor().newInstance());
 		} catch (Exception e) {
@@ -500,6 +518,7 @@ class xaHelper implements xaAbstractHelper
 	public void CPDisconnectStatement(ij parser, String n) throws SQLException
 	{
 		if (currentPooledConnection == null)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
 			throw ijException.noSuchConnection(LocalizedResource.getMessage("PooledConnection"));
 		currentPooledConnection.close();
 		currentPooledConnection = null;
@@ -518,6 +537,7 @@ class xaHelper implements xaAbstractHelper
 		// if we new it directly, then it will the tools.jar file to bloat.
 		try
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             Class<?> clazz;
             if (isJCC)
             {
@@ -540,6 +560,7 @@ class xaHelper implements xaAbstractHelper
                         // ClientXADataSource
                     }
                     
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     clazz = Class.forName("org.apache.derby.jdbc.ClientXADataSource");
                                                          
                     return (XADataSource) clazz.getConstructor().newInstance();
@@ -562,6 +583,7 @@ class xaHelper implements xaAbstractHelper
                         // EmbeddedXADataSource
                     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     clazz = Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource");
                     return (XADataSource) clazz.getConstructor().newInstance();
                 } else {
@@ -591,6 +613,7 @@ class xaHelper implements xaAbstractHelper
 			"set" + Character.toUpperCase(property.charAt(0)) + property.substring(1);
 		try {
 			java.lang.reflect.Method m = ds.getClass().getMethod(methodName, INT_P);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			m.invoke(ds, new Object[] {value});
 		}
 		catch (Exception e)
@@ -623,6 +646,7 @@ private static void setDataSourceProperty(Object ds, String property, boolean va
 
 		try {
 			java.lang.reflect.Method m = ds.getClass().getMethod(methodName, BOOLEAN_P);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			m.invoke(ds, new Object[] {value});
 			return;
 		} catch (Exception nsme) {

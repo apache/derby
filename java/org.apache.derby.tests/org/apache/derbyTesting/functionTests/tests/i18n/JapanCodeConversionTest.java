@@ -51,6 +51,7 @@ public class JapanCodeConversionTest extends BaseJDBCTestCase {
                 (String[]) null);
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
             "JapanCodeConversionTest - skipped because of " +
             "missing support for EUC_JP and SJIS");

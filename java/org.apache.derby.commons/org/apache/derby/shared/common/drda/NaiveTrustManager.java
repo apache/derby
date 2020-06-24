@@ -71,6 +71,7 @@ public class NaiveTrustManager
      **/
     public static SocketFactory getSocketFactory(Properties sslProperties)
         throws java.security.NoSuchAlgorithmException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3096
                java.security.KeyManagementException,
                java.security.NoSuchProviderException,
                java.security.KeyStoreException,
@@ -85,6 +86,7 @@ public class NaiveTrustManager
         SSLContext ctx = SSLContext.getInstance("TLS");
         
         if (ctx.getProvider().getName().equals("SunJSSE") &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             (sslProperties.getProperty(SSL_KEYSTORE) != null) &&
             (sslProperties.getProperty(SSL_KEYSTORE_PASSWORD) != null)) {
             
@@ -94,6 +96,7 @@ public class NaiveTrustManager
             // peerAuthentication, we have to provide one working the
             // same way as the default one.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             String keyStore = sslProperties.getProperty(SSL_KEYSTORE);
             String keyStorePassword = sslProperties.getProperty(SSL_KEYSTORE_PASSWORD);
             

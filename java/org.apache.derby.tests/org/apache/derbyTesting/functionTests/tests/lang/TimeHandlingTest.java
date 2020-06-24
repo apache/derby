@@ -43,6 +43,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * a TIME value with the same value as CURRENT_TIME.
      */
     private static final String[] CURRENT_TIME_FUNCTIONS =
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     {"CURRENT TIME", "CURRENT_TIME"};
     
     /**
@@ -69,8 +70,10 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(TimeHandlingTest.class);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1952
         suite.addTest(TestConfiguration.clientServerSuite(TimeHandlingTest.class));
         
         return new CleanDatabaseTestSetup(suite) {
@@ -85,6 +88,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
                 s.execute("CREATE TABLE TIME_ALL (ID INT," +
                         " C_T TIME," +
                         " C_D DATE," +
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
                         " C_TS TIMESTAMP)");
                 
                 for (int f = 0; f < CURRENT_TIME_FUNCTIONS.length; f++)
@@ -126,6 +130,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     protected void setUp() throws SQLException
     {
         cal = Calendar.getInstance();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2213
         Statement s  = createStatement();
         s.executeUpdate("DELETE FROM TIME_ALL");
         s.close();
@@ -245,6 +250,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      */
     public void testCurrentTime() throws SQLException, InterruptedException
     {      
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         currentFunctionTests(Types.TIME, CURRENT_TIME_FUNCTIONS);      
     }
     
@@ -543,6 +549,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         
         assertEquals(expectedCount, count);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         return base;
     }
     /**
@@ -611,6 +618,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         Time tv = rs.getTime(column);
         assertEquals(tv == null, rs.wasNull());
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         Object ov = rs.getObject(column);
         assertEquals(ov == null, rs.wasNull());
         
@@ -640,6 +648,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         // Check if the timestamp is as expected. Skip the check if the test
         // runs around midnight, since we don't know which date to expect in
         // that case.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3519
         if (isDateEqual(now, new Timestamp(now2))) {
             // When reading a TIME value with getTimestamp(), the date
             // component of the timestamp will be based on the current date.
@@ -693,6 +702,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      */
     private Timestamp checkTimestampValue(ResultSet rs, int column) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         assertEquals(java.sql.Types.TIMESTAMP,
                 rs.getMetaData().getColumnType(column));
         
@@ -719,6 +729,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         assertTime1970(tv);
 
         // Check the TIME portion is set to the same as tv
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         assertTimeEqual(tv, tsv);
                
         String sv = rs.getString(column);
@@ -789,6 +800,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     private Timestamp checkCurrentTimestampValue(long start, long end,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
             ResultSet rs, int column) throws SQLException
     {       
         Timestamp tsv = checkTimestampValue(rs, column);
@@ -836,6 +848,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     private Time getTime19700101(int hour, int min, int sec)
     {
         cal.clear();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3519
         cal.set(1970, Calendar.JANUARY, 1, hour, min, sec);
         cal.set(Calendar.MILLISECOND, 0);
 
@@ -857,11 +870,14 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     private Time getTime19700101(long t, Calendar cal)
     {
         cal.clear();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3519
         cal.setTimeInMillis(t);
         cal.set(1970, Calendar.JANUARY, 1);
         cal.set(Calendar.MILLISECOND, 0);
 
         Time to = new Time(cal.getTimeInMillis());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
         assertTime1970(to);
         return to;
     }
@@ -878,6 +894,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      */
     private Time getTime19700101(String s, Calendar cal)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3519
         return getTime19700101(Time.valueOf(s).getTime(), cal);
     }
     
@@ -939,6 +956,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     private boolean isDateEqual(long d, Timestamp tsv)
     {
         cal.clear();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3519
         cal.setTimeInMillis(d);
         int day = cal.get(Calendar.DAY_OF_MONTH);
         int month = cal.get(Calendar.MONTH);

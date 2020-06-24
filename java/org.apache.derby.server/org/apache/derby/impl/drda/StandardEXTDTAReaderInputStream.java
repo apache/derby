@@ -40,6 +40,7 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
      * @exception DRDAProtocolException if thrown while initializing current 
      *                                  buffer.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
     StandardEXTDTAReaderInputStream(final DDMReader reader,
                                     boolean readStatusByte)
         throws DRDAProtocolException
@@ -72,6 +73,7 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
      * @see        java.io.InputStream#read()
      */
     public final int read() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws IOException {
         // Reuse the other read method for simplicity.
         byte[] b = new byte[1];
@@ -110,6 +112,7 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
             return -1;
         }
         // Adjust length to avoid reading the trailing status byte.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         len = (int)Math.min(remainingBytes, (long)len);
         int val = currentBuffer.read(b, off, len);
         if (val < 0) {
@@ -151,6 +154,7 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
         }
         int inBuffer = currentBuffer.available();
         // Adjust for the status byte if required.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
         if (readStatusByte && inBuffer > remainingBytes) {
             inBuffer--;
         }
@@ -177,6 +181,7 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
      * @throws IOException if fetching the buffer fails
      */
     private void nextBuffer()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2017
             throws IOException {
         // Make sure we read the status byte off the wire if it was sent.
         long wireBytes = readStatusByte ? remainingBytes +1 : remainingBytes;

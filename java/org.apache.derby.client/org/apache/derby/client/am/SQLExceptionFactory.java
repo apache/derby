@@ -82,6 +82,7 @@ public class SQLExceptionFactory {
                 ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
                     errCode, args[1], args[0]);
             else
+//IC see: https://issues.apache.org/jira/browse/DERBY-6803
                 ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
                     errCode, args[0], args[1]);
         } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {

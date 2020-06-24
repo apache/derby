@@ -41,6 +41,7 @@ import org.apache.derby.shared.common.error.StandardException;
  */
 abstract class ImportAbstract extends VTITemplate {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
   ControlInfo controlFileReader;
   ImportReadData importReadData;
 
@@ -51,11 +52,13 @@ abstract class ImportAbstract extends VTITemplate {
   int lineNumber = 0;
   String[] nextRow;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
   ImportResultSetMetaData importResultSetMetaData;
   int noOfColumnsExpected;
 
   protected boolean lobsInExtFile = false;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
   String tableColumnTypesStr;
   int[] tableColumnTypes;
   String columnTypeNamesString;
@@ -90,6 +93,7 @@ abstract class ImportAbstract extends VTITemplate {
     nextRow = new String[numberOfColumns];
     tableColumnTypes = ColumnInfo.getExpectedVtiColumnTypes(tableColumnTypesStr,
                                                             numberOfColumns);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
     columnTypeNames =  ColumnInfo.getExpectedColumnTypeNames( columnTypeNamesString, numberOfColumns );
     udtClasses = ColumnInfo.getExpectedUDTClasses( udtClassNamesString );
 	// get the ResultSetMetaData now as we know it's needed
@@ -102,6 +106,7 @@ abstract class ImportAbstract extends VTITemplate {
 //    while (next()) ;
   }
   //the column names will be Column#
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
   void loadColumnNames() {
     for (int i=1; i<=numberOfColumns; i++)
       columnNames[i-1] = COLUMNNAMEPREFIX + i;
@@ -129,9 +134,11 @@ abstract class ImportAbstract extends VTITemplate {
     
   public boolean next() throws SQLException {
     try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2193
       lineNumber++;
       return (importReadData.readNextRow(nextRow));
     } catch (Exception ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3068
 		throw importError(ex);
 	}
   }
@@ -157,8 +164,11 @@ abstract class ImportAbstract extends VTITemplate {
 	*/
   public String getString(int columnIndex) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
     if (columnIndex <= numberOfColumns) {
 		String val = nextRow[columnIndex-1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
         if (isColumnInExtFile(columnIndex)) {
             // a clob column data is stored in an external 
             // file, the reference to it is in the main file. 
@@ -184,6 +194,8 @@ abstract class ImportAbstract extends VTITemplate {
      */
 	public java.sql.Clob getClob(int columnIndex) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
         java.sql.Clob clob = null;
 		if (lobsInExtFile) 
         {
@@ -211,11 +223,14 @@ abstract class ImportAbstract extends VTITemplate {
      */
 	public java.sql.Blob getBlob(int columnIndex) throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         java.sql.Blob blob = null;
 		if (lobsInExtFile) 
         {
             // lob data is in another file, read from the external file.
             blob = importReadData.getBlobColumnFromExtFile(
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
+//IC see: https://issues.apache.org/jira/browse/DERBY-2465
                                          nextRow[columnIndex-1], columnIndex);
         } else {
             // data is in the main export file, stored in hex format.
@@ -263,6 +278,7 @@ abstract class ImportAbstract extends VTITemplate {
 	public Object getObject(int columnIndex) throws SQLException
     {
         byte[] bytes = getBytes( columnIndex );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
 
         try {
             Class udtClass = importResultSetMetaData.getUDTClass( columnIndex );
@@ -322,6 +338,7 @@ abstract class ImportAbstract extends VTITemplate {
         // if hex data is null, then column value is SQL NULL
         wasNull = (hexData == null);
         byte[] data = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         if (hexData != null) {
             // Derby export calls Resultset.getString() method
             // to write binary data types.  Derby getString() 
@@ -375,6 +392,7 @@ abstract class ImportAbstract extends VTITemplate {
          * @throws SQLException
          */
         public  SQLException importError(Exception ex) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3068
             Exception closeException = null;
             if (importReadData != null)
                 try {

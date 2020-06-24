@@ -66,6 +66,7 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("Encrpytion Suite");
         
         // Encryption only supported for Derby in J2SE/J2EE environments.
@@ -94,6 +95,7 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
      */
     private static Test baseSuite(String algorithm)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("Encryption Algorithm: " + algorithm);
         
@@ -101,6 +103,7 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
         // no tests that were previously run under encryption converted.
         suite.addTestSuite(EncryptionSuite.class);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4038
         Properties sysProps = new Properties();
         sysProps.put("derby.optimizer.optimizeJoinOrder", "false");
         sysProps.put("derby.optimizer.ruleBasedOptimization", "true");

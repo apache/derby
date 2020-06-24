@@ -98,6 +98,7 @@ public class MessageVetter {
         // needs quoting.
         LONE_QUOTE_ALLOWED.add("DRDA_Usage8.I");
         LONE_QUOTE_ALLOWED.add("DRDA_Usage11.I");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5944
         LONE_QUOTE_ALLOWED.add("PE_HelpText");
     }
 
@@ -116,6 +117,7 @@ public class MessageVetter {
     private MessageVetter(File file) throws IOException {
         this.file = file;
         properties = new Properties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5480
         FileInputStream in = new FileInputStream(file);
         try {
             properties.load(in);

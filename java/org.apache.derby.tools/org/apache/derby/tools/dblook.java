@@ -94,6 +94,7 @@ public final class dblook {
 	public static void main(String[] args) {
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			new dblook(args);
 		} catch (Exception e) {
 		// All "normal" errors are logged and printed to
@@ -124,6 +125,7 @@ public final class dblook {
 		// Parse the command line.
 		if (!parseArgs(args)) {
 			System.out.println(lookupMessage("DBLOOK_Usage"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			return;
 		}
 
@@ -132,15 +134,18 @@ public final class dblook {
 		if (!loadDriver()) {
 		// Failed when loading the driver.  We already logged
 		// the exception, so just return.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
             Logs.cleanup();    // Make sure the error log is flushed to disk.
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		schemaMap = new HashMap<String,String>();
 		tableIdToNameMap = new HashMap<String,String>();
 
 		// Now run the utility.
 		go();
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 
 	}
 
@@ -269,6 +274,7 @@ public final class dblook {
 			case 'o':
 				if (!haveVal)
 					return -1;
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 				if ((args[start].length() == 2) && (args[start+1].length() > 0)) {
 					ddlFileName = args[++start];
 					return start;
@@ -312,6 +318,7 @@ public final class dblook {
 
 	private boolean loadDriver() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-59
 		String derbyDriver = System.getProperty("driver");
 		if (derbyDriver == null) {
 			if (sourceDBUrl.indexOf(":net://") != -1)
@@ -323,8 +330,10 @@ public final class dblook {
 	    }
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
             Class<?> klass = Class.forName(derbyDriver);
             if (Driver.class.isAssignableFrom(klass)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 klass.getConstructor().newInstance();
             } else {
                 Logs.debug(
@@ -441,6 +450,7 @@ public final class dblook {
 
 		int argIndex = start;
 		int count = 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		tableList = new ArrayList<String>();
 		while (argIndex < args.length) {
 
@@ -523,6 +533,7 @@ public final class dblook {
 		{
 			// Connect to the database, prepare statements,
 			// and load id-to-name mappings.
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			this.conn = DriverManager.getConnection(sourceDBUrl);
 			prepForDump();
 
@@ -538,9 +549,11 @@ public final class dblook {
 				(tableList != null) && (targetSchema == null));
 
             if ( at10_6 ) { DB_Sequence.doSequences( conn ); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4580
 
 			if (tableList == null) {
 			// Don't do these if user just wants table-related objects.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
                 DB_Jar.doJars(sourceDBName, this.conn, at10_9);
 				DB_Alias.doPFAU(this.conn, at10_6 );
 			}
@@ -556,6 +569,8 @@ public final class dblook {
 
             DB_Trigger.doTriggers(this.conn, at10_11);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3877
+//IC see: https://issues.apache.org/jira/browse/DERBY-3884
 			DB_Roles.doRoles(this.conn);
 			DB_GrantRevoke.doAuthorizations(this.conn, at10_6);
 
@@ -570,6 +585,7 @@ public final class dblook {
 			Logs.debug(sqlE);
 			Logs.debug(Logs.unRollExceptions(sqlE), (String)null);
 			Logs.cleanup();
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 			return;
 		}
 		catch (Exception e)
@@ -603,6 +619,7 @@ public final class dblook {
 		this.conn.setAutoCommit(false);
 
 		// Set the system schema to ensure that UCS_BASIC collation is used.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3458
 		Statement stmt = conn.createStatement();
 		stmt.executeUpdate("SET SCHEMA SYS");
 
@@ -633,6 +650,7 @@ public final class dblook {
 
 		// Check if sqlAuthorization mode is on. If so, need to generate
 		// authorization statements.
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		rs = stmt.executeQuery("VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY" +
 						"('derby.database.sqlAuthorization')");
 		if (rs.next())
@@ -687,6 +705,7 @@ public final class dblook {
 			}
 			try {
 				String colName = getColNameFromNumber(tableId,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5053
 					(Integer.parseInt(tok)));
 				if (!firstCol)
 					sb.append(", ");
@@ -767,6 +786,7 @@ public final class dblook {
 
 	public static String addSingleQuotes(String name) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 		if (name == null)
 			return null;
 
@@ -790,6 +810,7 @@ public final class dblook {
 		if (quotedName == null)
 			return null;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-90
 		if (!(quotedName.startsWith("'") || quotedName.startsWith("\"")))
 		// name doesn't _start_ with a quote, so we do nothing.
 			return quotedName;
@@ -905,6 +926,7 @@ public final class dblook {
 		int strLen = str.length();
 		for (int i = 0; i < tableList.size(); i++) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			String tableName = tableList.get(i);
 			tableName = expandDoubleQuotes(stripQuotes(tableName));
 			int nameLen = tableName.length();
@@ -1030,6 +1052,7 @@ public final class dblook {
      */
     public static String unExpandDoubleQuotes(String name) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         if ((name == null) || (name.indexOf("\"") < 0))
         // nothing to do.
             return name;
@@ -1066,6 +1089,7 @@ public final class dblook {
 	public static String lookupSchemaId(String schemaId) {
 
 		return schemaMap.get(schemaId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	}
 
@@ -1080,6 +1104,7 @@ public final class dblook {
 	public static String lookupTableId(String tableId) {
 
 		return tableIdToNameMap.get(tableId);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	}
 

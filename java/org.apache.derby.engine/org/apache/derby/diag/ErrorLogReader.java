@@ -56,6 +56,7 @@ import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 	<PRE>SELECT vti.ts, threadid, cast(xid as int) as xid_int, cast(lccid as int) as lccid_int, logtext 
 		 FROM new org.apache.derby.diag.ErrorLogReader() vti, 
 			(VALUES timestampConstant) t(ts)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		 WHERE vti.ts &lt;= t.ts AND 
 				vti.ts &gt;
 					(SELECT MAX(ts) IS NULL ? '2000-01-01 00:00:00.1' : MAX(ts)
@@ -122,6 +123,7 @@ public class ErrorLogReader extends VTITemplate
 	{
         DiagUtil.checkAccess();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         final String home = AccessController.doPrivileged
             (
              new PrivilegedAction<String>()
@@ -267,6 +269,7 @@ public class ErrorLogReader extends VTITemplate
 				/* Executing prepared statement is a special case as
 				 * it could span multiple lines
 				 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 				StringBuffer output = new StringBuffer(64);
 				if (line.indexOf(BEGIN_EXECUTING_STRING) == -1)
 				{
@@ -279,6 +282,7 @@ public class ErrorLogReader extends VTITemplate
 				int endIndex = line.indexOf(END_EXECUTING_STRING, drdaidIndex);
 				if (endIndex == -1)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 					output.append(line.substring(line.indexOf(END_DRDAID_STRING, drdaidIndex) + 3));
 				}
 				else
@@ -300,6 +304,7 @@ public class ErrorLogReader extends VTITemplate
 					endIndex = line.indexOf(END_EXECUTING_STRING);
 					if (endIndex == -1)
 					{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5071
 						output.append(line);
 					}
 					else
@@ -342,11 +347,13 @@ public class ErrorLogReader extends VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("LCCID", Types.VARCHAR, false, 15),
 		EmbedResultSetMetaData.getResultColumnDescriptor("DATABASE", Types.VARCHAR, false, 128),
 		EmbedResultSetMetaData.getResultColumnDescriptor("DRDAID", Types.VARCHAR, true, 50),
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
 		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",Types.VARCHAR, false, Limits.DB2_VARCHAR_MAXWIDTH)
 	};
 
     private static final ResultSetMetaData metadata =
         new EmbedResultSetMetaData(columnInfo);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
 
 }
 

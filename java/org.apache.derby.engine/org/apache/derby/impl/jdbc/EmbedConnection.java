@@ -3994,6 +3994,7 @@ public class EmbedConnection implements EngineConnection
      */
     static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()
@@ -4105,6 +4106,7 @@ public class EmbedConnection implements EngineConnection
      */
     private LanguageConnectionContext privilegedGetLCC()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         return AccessController.doPrivileged
             (
              new PrivilegedAction<LanguageConnectionContext>()

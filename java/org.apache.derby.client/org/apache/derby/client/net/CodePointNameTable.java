@@ -30,8 +30,10 @@ import java.util.Hashtable;
 // This data type may be modified for performance to adapt to any sort of lookup implementation,
 // such as binary search on an underlying sorted array.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class CodePointNameTable extends Hashtable<Integer, String> {
     CodePointNameTable() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
         put(CodePoint.ACCSECRD, "ACCSECRD");
         put(CodePoint.TYPDEFNAM, "TYPDEFNAM");
         put(CodePoint.TYPDEFOVR, "TYPDEFOVR");
@@ -94,6 +96,7 @@ class CodePointNameTable extends Hashtable<Integer, String> {
     }
 
     String lookup(int codePoint) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return get(codePoint);
     }
 }

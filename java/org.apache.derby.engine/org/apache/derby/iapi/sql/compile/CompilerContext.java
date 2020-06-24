@@ -161,6 +161,8 @@ public interface CompilerContext extends Context
 	 */
 
     OptimizerFactory getOptimizerFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 	/**
 	 * Get the TypeCompilerFactory from this CompilerContext.
@@ -317,6 +319,7 @@ public interface CompilerContext extends Context
 	 *
 	 */
     void createDependency(Dependent d, Provider p) throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Add an object to the pool that is created at compile time
@@ -346,6 +349,7 @@ public interface CompilerContext extends Context
      * @throws NullPointerException if {@code objs} is null
 	 */
     void setSavedObjects(List<Object> objs);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 	/**
 	 * Set the in use state for the compiler context.
@@ -353,6 +357,7 @@ public interface CompilerContext extends Context
 	 * @param inUse	 The new inUse state for the compiler context.
 	 */
     void setInUse(boolean inUse);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Return the in use state for the compiler context.
@@ -382,6 +387,7 @@ public interface CompilerContext extends Context
 	 *
 	 */
     void    setReliability(int reliability);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Return the reliability requirements of this clause. See setReliability()
@@ -399,6 +405,7 @@ public interface CompilerContext extends Context
 	 * @return the compilation schema descirptor
 	 */
     SchemaDescriptor getCompilationSchema();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Set the compilation schema descriptor for this compilation context.
@@ -408,6 +415,7 @@ public interface CompilerContext extends Context
 	 * @return the previous compilation schema descirptor
 	 */
     SchemaDescriptor setCompilationSchema(SchemaDescriptor newDefault);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Push a default schema to use when compiling.
@@ -422,6 +430,7 @@ public interface CompilerContext extends Context
 	 */
     void pushCompilationSchema(SchemaDescriptor sd);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Pop the default schema to use when compiling.
@@ -438,6 +447,7 @@ public interface CompilerContext extends Context
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     StoreCostController getStoreCostController(long conglomerateNumber)
 			throws StandardException;
 
@@ -447,6 +457,7 @@ public interface CompilerContext extends Context
 	 * @exception StandardException		Thrown on error
 	 */
     SortCostController getSortCostController() throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Set the parameter list.
@@ -528,6 +539,7 @@ public interface CompilerContext extends Context
 	 * @param privType One of the privilege types in 
 	 *						org.apache.derby.iapi.sql.conn.Authorizer.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     void pushCurrentPrivType( int privType);
 	
     void popCurrentPrivType();
@@ -554,6 +566,7 @@ public interface CompilerContext extends Context
 	 * @param privType	CREATE_SCHEMA_PRIV, MODIFY_SCHEMA_PRIV or DROP_SCHEMA_PRIV
 	 */
     void addRequiredSchemaPriv(String schema, String aid, int privType);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 	/**
 	 * Add a routine execute privilege to the list of used routine privileges.
@@ -579,6 +592,7 @@ public interface CompilerContext extends Context
 	/**
 	 * @return The list of required privileges.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     List<StatementPermission> getRequiredPermissionsList();
     
 	/**
@@ -610,6 +624,7 @@ public interface CompilerContext extends Context
      */
     public  boolean passesPrivilegeFilters( Visitable visitable )
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6429
 
     /**
      * Record that the compiler is entering a named scope. Increment the

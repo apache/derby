@@ -160,6 +160,7 @@ public final class Timeout
 
         // need language here to print out tablenames
         LanguageConnectionContext lcc = (LanguageConnectionContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
             Deadlock.getContext(LanguageConnectionContext.CONTEXT_ID);
         if( lcc != null )
             tc = lcc.getTransactionExecute();
@@ -262,6 +263,7 @@ public final class Timeout
      */
     private void dumpLock() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         Hashtable<String,Object> attributes = new Hashtable<String,Object>(17);
         Object lock_type = currentLock.getQualifier();
 
@@ -293,6 +295,7 @@ public final class Timeout
             if( attributes.get(VirtualLockTable.CONTAINERID) != null && tc != null )
             {   
                 Long value = (Long)attributes.get(VirtualLockTable.CONTAINERID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 conglomId = tc.findConglomid( value.longValue() );
                 attributes.put( VirtualLockTable.CONGLOMID, conglomId );
             }
@@ -306,6 +309,7 @@ public final class Timeout
             {
                 try
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     containerId = tc.findContainerid( conglomId.longValue() );
                     attributes.put( VirtualLockTable.CONTAINERID, containerId );
                 }

@@ -65,6 +65,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
         }
         
         // empty suite, no holdability supported.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
                 "Empty ScrollResultSetTest suite, no support for holdability");
     }
@@ -73,6 +74,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      * Set up the connection to the database.
      */
     public void setUp() throws  Exception {       
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con = getConnection();
         con.setAutoCommit(true);
 
@@ -85,6 +87,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
         stmt.execute(createTableWithPK);
         
         stmt.execute(insertData);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         stmt.close();
     }
     
@@ -93,6 +96,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception {
         println("TearDown");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Statement s = getConnection().createStatement();
         try { 
             
@@ -102,6 +106,8 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
         }    
         s.close();
         super.tearDown();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
 
     }
     
@@ -141,6 +147,8 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      */
     public void testNextOnLastRowScrollable()  throws SQLException{
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         Connection con = getConnection();
         con.setAutoCommit(true);
         con.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);

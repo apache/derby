@@ -60,6 +60,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class ResultSetTest  extends Wrapper41Test
 {
     private static final byte[] BYTES1 = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             0x65, 0x66, 0x67, 0x68, 0x69,
             0x69, 0x68, 0x67, 0x66, 0x65
         };
@@ -71,6 +72,7 @@ public class ResultSetTest  extends Wrapper41Test
 
     private static final String str1 =
         "I am the main Input string and I will be Updated";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
 
     private static final String str2 = "I am the string used to update";
 
@@ -98,9 +100,11 @@ public class ResultSetTest  extends Wrapper41Test
 
     protected void setUp()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         key = requestKey();
         stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
 
         rs = stmt.executeQuery("SELECT * FROM SYS.SYSTABLES");
 
@@ -111,6 +115,7 @@ public class ResultSetTest  extends Wrapper41Test
     protected void tearDown()
         throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2707
         rs.close(); 
         stmt.close();
 
@@ -254,6 +259,7 @@ public class ResultSetTest  extends Wrapper41Test
     public void testUpdateNClobIntNotImplemented()
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             rs.updateNClob(1, (NClob)null);
             fail("ResultSet.updateNClob(int, NClob) " +
                  "should not be implemented");
@@ -276,6 +282,7 @@ public class ResultSetTest  extends Wrapper41Test
     public void testUpdateNClobStringNotImplemented()
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             rs.updateNClob("some-column-name", (NClob)null);
             fail("ResultSet.updateNClob(String, NClob) " +
                  "should not be implemented");
@@ -405,6 +412,16 @@ public class ResultSetTest  extends Wrapper41Test
      */
 
     public void testUpdateAsciiStream()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
     throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
@@ -420,6 +437,8 @@ public class ResultSetTest  extends Wrapper41Test
 
         //Input Stream inserted initially
         InputStream is = new java.io.ByteArrayInputStream(BYTES1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
 
         //InputStream that is used for update
         InputStream is_for_update = new
@@ -440,6 +459,7 @@ public class ResultSetTest  extends Wrapper41Test
         ResultSet rs1 = stmt.executeQuery
                 ("select * from UpdateTestTable_ResultSet for update");
         rs1.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         rs1.updateAsciiStream(2,is_for_update,(int)BYTES2.length);
         rs1.updateRow();
         rs1.close();
@@ -456,6 +476,7 @@ public class ResultSetTest  extends Wrapper41Test
         is_ret.read(bytes_ret);
         is_ret.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         for(int i=0;i<BYTES2.length;i++) {
             assertEquals("Error in updateAsciiStream",BYTES2[i],bytes_ret[i]);
         }
@@ -537,6 +558,7 @@ public class ResultSetTest  extends Wrapper41Test
 
         //Input Stream inserted initially
         InputStream is = new java.io.ByteArrayInputStream(BYTES1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
 
         //InputStream that is used for update
         InputStream is_for_update = new
@@ -616,6 +638,7 @@ public class ResultSetTest  extends Wrapper41Test
      * specifying length of inputstream.
      */
     public void testUpdateBinaryStreamLengthlessBlob()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             throws IOException, SQLException {
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
         // InputStream used for update.
@@ -694,6 +717,7 @@ public class ResultSetTest  extends Wrapper41Test
 
         //Input Stream inserted initially
         InputStream is = new java.io.ByteArrayInputStream(BYTES1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
 
         //InputStream that is used for update
         InputStream is_for_update = new
@@ -724,6 +748,14 @@ public class ResultSetTest  extends Wrapper41Test
         rs1.next();
         InputStream is_ret = rs1.getAsciiStream(1);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
         is_ret.read(bytes_ret);
         is_ret.close();
 
@@ -857,6 +889,8 @@ public class ResultSetTest  extends Wrapper41Test
         char [] c_ret = new char[str_for_update.length()];
 
         r_ret.read(c_ret);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
 
         String str_ret = new String(c_ret);
 
@@ -952,6 +986,7 @@ public class ResultSetTest  extends Wrapper41Test
 
         //1 Input Stream for insertion
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
 
         //2 Input Stream for insertion
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
@@ -1040,6 +1075,7 @@ public class ResultSetTest  extends Wrapper41Test
      * @throws Exception
      */
     public void testUpdateClobwithLengthofIS()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
             throws Exception {
         Reader r1 = new java.io.StringReader(str1);
         // InputStream for insertion.
@@ -1172,6 +1208,7 @@ public class ResultSetTest  extends Wrapper41Test
      * @throws an Exception
      */
     public void testUpdateBlobWithLengthofIS()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
             throws Exception {
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
         // InputStream for insertion.
@@ -1242,6 +1279,7 @@ public class ResultSetTest  extends Wrapper41Test
         // Life span of Clob objects are limited by the transaction.  Need
         // autocommit off so Clob objects survive execution of next statement.
         getConnection().setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
 
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -1253,6 +1291,7 @@ public class ResultSetTest  extends Wrapper41Test
 
         //1 Input Stream for insertion
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
 
         //2 Input Stream for insertion
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
@@ -1337,6 +1376,7 @@ public class ResultSetTest  extends Wrapper41Test
      * @throws an Exception
      */
     public void testUpdateClobStringParameterNameWithLengthofIS()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
             throws Exception {
         Reader r1 = new java.io.StringReader(str1);
         // InputStream for insertion.
@@ -1375,6 +1415,10 @@ public class ResultSetTest  extends Wrapper41Test
         // Life span of Blob objects are limited by the transaction.  Need
         // autocommit off so Blob objects survive execution of next statement.
         getConnection().setAutoCommit(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
+//IC see: https://issues.apache.org/jira/browse/DERBY-2496
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
 
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -1386,6 +1430,8 @@ public class ResultSetTest  extends Wrapper41Test
 
         //1 Input Stream for insertion
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
 
         //2 Input Stream for insertion
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
@@ -1431,6 +1477,7 @@ public class ResultSetTest  extends Wrapper41Test
 
         rs1 = fetch("dBlob", key2);
         rs1.next();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
         assertEquals(blob, rs1.getBlob(1)); 
         rs1.close();
     }
@@ -1471,6 +1518,7 @@ public class ResultSetTest  extends Wrapper41Test
      */
     public void testGetHoldability() throws SQLException, Exception {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2854
         Connection conn = getConnection();
         
         conn.setAutoCommit(false);
@@ -1522,6 +1570,7 @@ public class ResultSetTest  extends Wrapper41Test
                 cs.setInt(1, holdabilities[procHoldability]);
                 cs.execute();
                 rs = cs.getResultSet();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3305
                 assertSame(cs, rs.getStatement());
                 int holdability = rs.getHoldability();
                 assertEquals("holdability of ResultSet from stored proc: " + holdabilityString(holdability), holdabilities[procHoldability], holdability);
@@ -1744,7 +1793,9 @@ public class ResultSetTest  extends Wrapper41Test
      ************************************************************************/
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite rsSuite = new BaseTestSuite("ResultSetTest suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2443
         rsSuite.addTest(decorateTestSuite(TestConfiguration.defaultSuite
             (ResultSetTest.class,false)));
         return rsSuite;
@@ -1843,6 +1894,7 @@ public class ResultSetTest  extends Wrapper41Test
      *
      */
     private static String holdabilityString(int holdability) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2854
         switch (holdability) {
         case ResultSet.HOLD_CURSORS_OVER_COMMIT:
             return "HOLD_CURSORS_OVER_COMMIT";
@@ -1906,6 +1958,7 @@ public class ResultSetTest  extends Wrapper41Test
      */
     public void testDerby1368() throws SQLException, IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1368
         testDerby1368(true);
         testDerby1368(false);
     }
@@ -1976,6 +2029,7 @@ public class ResultSetTest  extends Wrapper41Test
         PreparedStatement   ps = prepareStatement
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-4951
              "create function makeBlob( ) returns blob\n" +
              "language java parameter style java no sql deterministic\n" +
              "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.ResultSetTest.makeBlob'\n"
@@ -2042,6 +2096,7 @@ public class ResultSetTest  extends Wrapper41Test
              "values\n" +
              "(\n" +
              "    1,\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4951
              "    makeBlob(  ),\n" +
              "    true,\n" +
              "    'a',\n" +
@@ -2056,6 +2111,7 @@ public class ResultSetTest  extends Wrapper41Test
              "    1.0,\n" +
              "    1.0,\n" +
              "    1,\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
              "    ?,\n" +
              "    ?,\n" +
              "    'a',\n" +
@@ -2067,6 +2123,7 @@ public class ResultSetTest  extends Wrapper41Test
         ps.executeUpdate();
         ps.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         ps = prepareStatement
             (
              conn,
@@ -2114,6 +2171,7 @@ public class ResultSetTest  extends Wrapper41Test
      */
     public  static  final   Blob    makeBlob()  throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4951
         return new HarmonySerialBlob( BINARY_VALUE );
     }
     

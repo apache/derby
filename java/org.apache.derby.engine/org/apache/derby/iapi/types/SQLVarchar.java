@@ -65,6 +65,7 @@ public class SQLVarchar
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unexpected exception", se);
 			return null;
 		}
@@ -82,6 +83,7 @@ public class SQLVarchar
 	/** @see StringDataValue#getValue(RuleBasedCollator) */
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2534
 		if (collatorForComparison == null)
 		{//null collatorForComparison means use UCS_BASIC for collation
 		    return this;			
@@ -211,6 +213,7 @@ public class SQLVarchar
      */
     protected final int growBy()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-302
         return RETURN_SPACE_THRESHOLD;  //seems reasonable for a varchar or clob 
     }
 }

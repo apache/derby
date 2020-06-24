@@ -21,6 +21,7 @@
 package org.apache.derby.client.am;
 
 public class ProductLevel {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     String databaseProductName_;
     int versionLevel_;
     int releaseLevel_;

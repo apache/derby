@@ -122,6 +122,7 @@ public   class DerbyPropertiesPage extends PropertyPage {
 		portText.setText(Integer.toString(dsProps.getPort()));
 		hostText.setText(dsProps.getHost());
 		systemHomeText.setText(dsProps.getSystemHome());
+//IC see: https://issues.apache.org/jira/browse/DERBY-314
 		isServerRunning = checkServer();
 		// if the server is running do not allow
 		// editing of the settings
@@ -157,6 +158,7 @@ public   class DerbyPropertiesPage extends PropertyPage {
 		
 		// if the server is running inform the user
 		// to stop the server before changing the settings
+//IC see: https://issues.apache.org/jira/browse/DERBY-314
 		if (isServerRunning) {
 		    Shell shell = new Shell();
 			MessageDialog.openInformation(

@@ -46,6 +46,7 @@ public interface Attribute
 {
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		Not an attribute but the root for the JDBC URL that Derby supports.
 	*/
 	String PROTOCOL = "jdbc:derby:";
@@ -112,6 +113,8 @@ public interface Attribute
      * If used, REPLICATION_SLAVE_HOST is a required attribute.
      */
     String REPLICATION_START_MASTER = "startMaster";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
+//IC see: https://issues.apache.org/jira/browse/DERBY-2954
 
     /**
      * Attribute name to stop replication master mode for a database.
@@ -154,7 +157,9 @@ public interface Attribute
     String REPLICATION_SLAVE_PORT = "slavePort";
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		The attribute that is used for the database name, from
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		the JDBC notion of jdbc:$subprotocol:$subname
 	*/
 	String DBNAME_ATTR = "databaseName";
@@ -355,6 +360,7 @@ public interface Attribute
      * traceLevel.
      * Client driver attribute.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-446
     String CLIENT_TRACE_LEVEL = "traceLevel";
     
     /**

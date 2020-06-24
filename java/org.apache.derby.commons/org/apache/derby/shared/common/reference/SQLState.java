@@ -41,6 +41,7 @@ package org.apache.derby.shared.common.reference;
 	<PRE>
 		if (se.getMessageId().equals(SQLState.DEADLOCK))
 	</PRE>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     <P>
 	A utility static method StandardException.getSQLState(String messageId)
 	exists to convert an field from this class into a five character SQLState.
@@ -53,6 +54,7 @@ package org.apache.derby.shared.common.reference;
 	is expected to be 7 characters long and the last character determines
 	the state. If the state is seven characters long then only the first
 	five will be seen by the error reporting code and exception.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 	</P>
 	<P>
 	If the state is 9 characters long, the last two characters encode
@@ -110,6 +112,7 @@ package org.apache.derby.shared.common.reference;
 	  <LI> XBCM ClassManager
 	  <LI> XBCX	Cryptography
 	  <LI> XBM0	Monitor
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
 	  <LI> XBDA Communications
 	  <LI> XCY0 Properties
 	  </UL>
@@ -130,6 +133,8 @@ package org.apache.derby.shared.common.reference;
 		<LI> 46000  for SQLJ errors (for now, leave this range empty) </LI>
 		<LI> 38000  SQL3 ranges  </LI>
 		<LI> XD00x  Dependency mgr </LI>
+//IC see: https://issues.apache.org/jira/browse/DERBY-1772
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
 		<LI> XMLxx  Misc XML errors not covered by SQL standard </LI>
 	  <LI> 
 	  </UL>
@@ -140,11 +145,13 @@ package org.apache.derby.shared.common.reference;
 	  <LI> XSCH0 Heap
 	  </UL>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
 	<LI>Security
 	  <UL>
 	  <LI> XK...
 	  </UL>
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3016
     <LI>Replication
       <UL>
       <LI> XRExx
@@ -167,6 +174,7 @@ public interface SQLState {
 	String SERVICE_MISSING_IMPLEMENTATION		= "XBM02.D";
 	String MISSING_PRODUCT_VERSION				= "XBM05.D";
 	String SERVICE_WRONG_BOOT_PASSWORD			= "XBM06.D";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5283
     String SERVICE_PROPERTIES_MISSING			= "XBM0A.D";
     String SERVICE_PROPERTIES_EDIT_FAILED       = "XBM0B.D";
     String MISSING_FILE_PRIVILEGE               = "XBM0C.D";
@@ -189,7 +197,9 @@ public interface SQLState {
 	String REGISTERED_CLASS_LINAKGE_ERROR		= "XBM0V.S";
 	String REGISTERED_CLASS_INSTANCE_ERROR		= "XBM0W.S";
 	String INVALID_LOCALE_DESCRIPTION			= "XBM0X.D";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
 	String INVALID_COLLATION			        = "XBM03.D";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3320
 	String COLLATOR_NOT_FOUND_FOR_LOCALE        = "XBM04.D";
 	String SERVICE_DIRECTORY_NOT_IN_BACKUP      = "XBM0Y.D";
 	String UNABLE_TO_COPY_FILE_FROM_BACKUP      = "XBM0Z.D";
@@ -201,6 +211,7 @@ public interface SQLState {
 	** Communications
 	*/
     String LOGIN_TIMEOUT                        = "XBDA0.C.1";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6094
 
 	/*
 	** Upgrade
@@ -221,6 +232,7 @@ public interface SQLState {
 	String GENERATED_CLASS_INSTANCE_ERROR	= "XBCM2.S";
 	String GENERATED_CLASS_NO_SUCH_METHOD	= "XBCM3.S";
 	String GENERATED_CLASS_LIMIT_EXCEEDED	= "XBCM4.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 	/*
 	** Cryptography
@@ -239,6 +251,7 @@ public interface SQLState {
     String ENCRYPTION_NOCHANGE_ALGORITHM     = "XBCXD.S";
     String ENCRYPTION_NOCHANGE_PROVIDER = "XBCXE.S";
     String ENCRYPTION_NO_PROVIDER_CLASS = "XBCXF.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
     String ENCRYPTION_NOT_A_PROVIDER    = "XBCXF.S.1";
     String ENCRYPTION_BAD_PROVIDER      = "XBCXG.S";
     String ENCRYPTION_BAD_ALG_FORMAT    = "XBCXH.S";
@@ -246,6 +259,7 @@ public interface SQLState {
     String ENCRYPTION_BAD_JCE           = "XBCXJ.S";
     String ENCRYPTION_BAD_EXTERNAL_KEY  = "XBCXK.S";
     String ENCRYPTION_UNABLE_KEY_VERIFICATION  = "XBCXL.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-746
     String ENCRYPTION_INVALID_EXKEY_LENGTH          = "XBCXM.S";
     String ENCRYPTION_ILLEGAL_EXKEY_CHARS           = "XBCXN.S";
     String ENCRYPTION_PREPARED_XACT_EXIST             = "XBCXO.S";
@@ -265,6 +279,7 @@ public interface SQLState {
 	String PROPERTY_INVALID_VALUE		= "XCY00.S";
 	String PROPERTY_UNSUPPORTED_CHANGE  = "XCY02.S";
 	String PROPERTY_MISSING				= "XCY03.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 	String PROPERTY_SYNTAX_INVALID		= "XCY04.S";
 	String PROPERTY_CANT_UNDO_NATIVE  = "XCY05.S.2";
 	String PROPERTY_DBO_LACKS_CREDENTIALS  = "XCY05.S.3";
@@ -276,6 +291,7 @@ public interface SQLState {
 	String LOCK_TIMEOUT = "40XL1";
     String LOCK_TIMEOUT_LOG = "40XL1.T.1";
     String SELF_DEADLOCK = "40XL2";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6554
 
 	/*
 	** Store - access.protocol.Interface statement exceptions
@@ -388,8 +404,11 @@ public interface SQLState {
     String RAWSTORE_CANNOT_CHANGE_LOGDEVICE                     = "XSRS8.S";
     String RAWSTORE_RECORD_VANISHED                             = "XSRS9.S";
     String BACKUP_BLOCKING_OPERATIONS_IN_PROGRESS               = "XSRSA.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
     String BACKUP_OPERATIONS_NOT_ALLOWED                        = "XSRSB.S";
     String RAWSTORE_CANNOT_BACKUP_INTO_DATABASE_DIRECTORY       = "XSRSC.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-304
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 
 	/*
 	** RawStore - Log.Generic statement exceptions
@@ -449,6 +468,7 @@ public interface SQLState {
 	** RawStore - Transactions.Basic transaction exceptions
 	*/
 	String TRANSACTION_PREFIX="40";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1140
 
 	String XACT_PROTOCOL_VIOLATION                              = "40XT0";
 	String XACT_COMMIT_EXCEPTION                                = "40XT1";
@@ -458,6 +478,7 @@ public interface SQLState {
 	String XACT_CANNOT_ACTIVATE_TRANSACTION                     = "40XT6";
 	String XACT_NOT_SUPPORTED_IN_INTERNAL_XACT                  = "40XT7";
 	String XACT_PROTOCOL_VIOLATION_DETAILED                     = "40XT8";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4729
 
 	/*
 	** RawStore - Transactions.Basic system exceptions
@@ -494,8 +515,11 @@ public interface SQLState {
 	String DATA_UNEXPECTED_OVERFLOW_PAGE                        = "XSDAL.S";
     String DATA_SQLDATA_READ_INSTANTIATION_EXCEPTION            = "XSDAM.S";
     String DATA_SQLDATA_READ_ILLEGAL_ACCESS_EXCEPTION           = "XSDAN.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4982
     String DATA_DOUBLE_LATCH_INTERNAL_ERROR                     = "XSDAO.S";
     String DATA_UNEXPECTED_NO_SPACE_ON_PAGE                     = "XSDAP.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6320
+//IC see: https://issues.apache.org/jira/browse/DERBY-4923
 
 	/*
 	** RawStore - Data.Generic transaction exceptions
@@ -511,8 +535,10 @@ public interface SQLState {
 	String DATA_MULTIPLE_JBMS_FORCE_LOCK                        = "XSDB8.D";
 	String DATA_CORRUPT_STREAM_CONTAINER                        = "XSDB9.D";
 	String DATA_OBJECT_ALLOCATION_FAILED                        = "XSDBA.D";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3725
 	String DATA_UNKNOWN_PAGE_FORMAT_2                           = "XSDBB.D";
 	String DATA_BAD_CONTAINERINFO_WRITE                         = "XSDBC.D";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3727
 
 	/*
 	** RawStore - Data.Filesystem statement exceptions
@@ -528,8 +554,10 @@ public interface SQLState {
 	String FILE_READ_ONLY                                       = "XSDFB.S";
 	String FILE_IO_GARBLED                                      = "XSDFD.S";
 	String FILE_UNEXPECTED_EXCEPTION                            = "XSDFF.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
     String BACKUP_FILE_IO_ERROR                                 = "XSDFH.S";
 	String FILE_NEW_PAGE_DURING_RECOVERY                        = "XSDFI.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5886
 	String FILE_CANNOT_REMOVE_ENCRYPT_FILE                      = "XSDFJ.S";
 	String FILE_CANNOT_REMOVE_JAR_FILE                          = "XSDFK.S";
 
@@ -544,6 +572,7 @@ public interface SQLState {
 	String FILE_WRITE_PAGE_EXCEPTION                            = "XSDG1.D";
 	String FILE_BAD_CHECKSUM                                    = "XSDG2.D";
 	String FILE_CONTAINER_EXCEPTION                             = "XSDG3.D";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6504
     String UNABLE_TO_ARRAYCOPY                                  = "XSDG4.D";
 	String FILE_DATABASE_NOT_IN_CREATE                          = "XSDG5.D";
 	String DATA_DIRECTORY_NOT_FOUND_IN_BACKUP                   = "XSDG6.D";
@@ -593,6 +622,7 @@ public interface SQLState {
 	*/
 	String CONNECTIVITY_PREFIX="08";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1140
 
     /*
 	** Language
@@ -671,9 +701,12 @@ public interface SQLState {
 	String LANG_COL_NOT_NULL									   	   = "01503";
 	String LANG_INDEX_DUPLICATE									   	   = "01504";
 	String LANG_VALUE_TRUNCATED                                        = "01505";
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 	String LANG_SYNONYM_UNDEFINED                                      = "01522";
 	String LANG_NULL_ELIMINATED_IN_SET_FUNCTION						   = "01003";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1582
 	String LANG_PRIVILEGE_NOT_REVOKED						   		   = "01006";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 	String LANG_ROLE_NOT_REVOKED                                       = "01007";
 	String LANG_WITH_ADMIN_OPTION_NOT_REVOKED                          = "01008";
 	String LANG_GEN_COL_DROPPED                                         = "01009";
@@ -696,6 +729,7 @@ public interface SQLState {
 	/*
 	** SQL Data exceptions
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1140
 	String SQL_DATA_PREFIX="22";
 	
 	String LANG_MISSING_PARMS                                          = "07000";
@@ -704,25 +738,33 @@ public interface SQLState {
 	String LANG_STRING_TRUNCATION                                      = "22001";
 	String LANG_CONCAT_STRING_OVERFLOW                                      = "54006";
 	String LANG_OUTSIDE_RANGE_FOR_DATATYPE                             = "22003";
+//IC see: https://issues.apache.org/jira/browse/DERBY-843
+//IC see: https://issues.apache.org/jira/browse/DERBY-1198
     String YEAR_EXCEEDS_MAXIMUM                                        = "22003.S.1";
     String DECIMAL_TOO_MANY_DIGITS                                     = "22003.S.2";
     String NUMERIC_OVERFLOW                                            = "22003.S.3";
     String CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE                    = "22003.S.4";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
 
 	String LANG_DATA_TYPE_GET_MISMATCH                                 = "22005"; // same 22005 error
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
     String UNSUPPORTED_ENCODING                                        = "22005.S.1";
     String CHARACTER_CONVERTER_NOT_AVAILABLE                           = "22005.S.2";
+//IC see: https://issues.apache.org/jira/browse/DERBY-845
     String CANT_CONVERT_UNICODE_TO_EBCDIC                              = "22005.S.3";
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
     String NET_UNRECOGNIZED_JDBC_TYPE                                  = "22005.S.4";
     String NET_INVALID_JDBC_TYPE_FOR_PARAM                             = "22005.S.5";
     String UNRECOGNIZED_JAVA_SQL_TYPE                                  = "22005.S.6";
     String CANT_CONVERT_UNICODE_TO_UTF8                                = "22005.S.7";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
 
 	String LANG_DATE_RANGE_EXCEPTION                                   = "22007.S.180";
 	String LANG_DATE_SYNTAX_EXCEPTION                                  = "22007.S.181";
     String LANG_INVALID_FUNCTION_ARGUMENT                              = "22008.S";
     String LANG_SEQUENCE_GENERATOR_EXHAUSTED                              = "2200H.S";
 	String LANG_SUBSTR_START_OR_LEN_OUT_OF_RANGE                        = "22011";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2769
 	String LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE                        = "22011.S.1";
 	String LANG_DIVIDE_BY_ZERO                                         = "22012";
     String LANG_SQRT_OF_NEG_NUMBER                                     = "22013";
@@ -733,26 +775,34 @@ public interface SQLState {
 	String LANG_INVALID_TRIM_CHARACTER                                 = "22020";
 	String LANG_INVALID_ESCAPE_SEQUENCE                                = "22025";
 	String LANG_INVALID_TRIM_SET                                       = "22027";
+//IC see: https://issues.apache.org/jira/browse/DERBY-849
     String LANG_STRING_TOO_LONG                                        = "22028";
 	String LANG_ESCAPE_IS_NULL                                  	   = "22501";
 	String LANG_INVALID_ROW_COUNT_FIRST                                = "2201W";
 	String LANG_INVALID_ROW_COUNT_OFFSET                               = "2201X";
 	String LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL                         = "2201Z";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4208
 
 	/*
 	** Integrity violations.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1140
 	String INTEGRITY_VIOLATION_PREFIX="23";
 	
 	String LANG_NULL_INTO_NON_NULL                                     = "23502";
 	String LANG_DUPLICATE_KEY_CONSTRAINT                               = "23505";
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
     String LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T                    = "23506.T.1";
     String LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_S                    = "23507.S.1";
 	String LANG_FK_VIOLATION                                           = "23503";
 	String LANG_CHECK_CONSTRAINT_VIOLATED                              = "23513";
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String LANG_DEFERRED_CHECK_CONSTRAINT_T                            = "23514.T.1";
     String LANG_DEFERRED_CHECK_CONSTRAINT_S                            = "23515.S.1";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String LANG_DEFERRED_FK_CONSTRAINT_T                               = "23516.T.1";
     String LANG_DEFERRED_FK_CONSTRAINT_S                               = "23517.S.1";
 	// From SQL/XML[2006] spec; there are others, but
@@ -764,9 +814,11 @@ public interface SQLState {
 	String LANG_INVALID_XML_CONTEXT_ITEM                               = "2200V";
 	String LANG_XQUERY_SERIALIZATION_ERROR                             = "2200W";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1149
     String CANNOT_CLOSE_ACTIVE_CONNECTION                              = "25001";
     String INVALID_TRANSACTION_STATE_ACTIVE_CONNECTION                 = "25001.S.1";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
 
 	String LANG_UNEXPECTED_USER_EXCEPTION                              = "38000";
 	String EXTERNAL_ROUTINE_NO_SQL									   = "38001";
@@ -777,6 +829,8 @@ public interface SQLState {
 	String LANG_SYNTAX_OR_ACCESS_VIOLATION                             = "42000";
 
 	// Fix for Derby-1828 - access rule violations should use SQL state 42
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
 	String AUTH_NO_TABLE_PERMISSION                                    = "42500";
 	String AUTH_NO_TABLE_PERMISSION_FOR_GRANT                          = "42501";
 	String AUTH_NO_COLUMN_PERMISSION                                   = "42502";
@@ -792,8 +846,11 @@ public interface SQLState {
 	String AUTH_USER_IN_READ_AND_WRITE_LISTS                           = "4250C";
 	String AUTH_DUPLICATE_USERS                                        = "4250D";
 	String AUTH_INTERNAL_BAD_UUID                                      = "4250E";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3137
     String AUTH_ROLE_DBO_ONLY                                          = "4251A";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3333
 	String AUTH_PUBLIC_ILLEGAL_AUTHORIZATION_ID                        = "4251B";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3722
 	String AUTH_ROLE_GRANT_CIRCULARITY                                 = "4251C";
 	String DBO_ONLY                                                         = "4251D";
 	String HIDDEN_COLUMN                                                         = "4251E";
@@ -817,6 +874,7 @@ public interface SQLState {
 	String LANG_DB2_INVALID_COLS_SPECIFIED                             = "42802";
         String LANG_DB2_INVALID_SELECT_COL_FOR_HAVING = "42803";
 	String LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS			   = "42831";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
 	String LANG_ADD_PRIMARY_KEY_ON_NULL_COLS                           = "42831.S.1";
 	String LANG_DB2_REPLACEMENT_ERROR								   = "42815.S.713";
 	String LANG_DB2_COALESCE_DATATYPE_MISMATCH								   = "42815.S.171";
@@ -832,8 +890,10 @@ public interface SQLState {
 
 	String LANG_NO_AGGREGATES_IN_WHERE_CLAUSE                          = "42903";
 	String LANG_DB2_VIEW_REQUIRES_COLUMN_NAMES                         = "42908";
+//IC see: https://issues.apache.org/jira/browse/DERBY-64
 	String LANG_TABLE_REQUIRES_COLUMN_NAMES                            = "42909";
 	String LANG_DELETE_RULE_VIOLATION		   					       = "42915";
+//IC see: https://issues.apache.org/jira/browse/DERBY-335
 	String LANG_SYNONYM_CIRCULAR   		   					           = "42916";
 	String LANG_SYNTAX_ERROR                                           = "42X01";
 	String LANG_LEXICAL_ERROR                                          = "42X02";
@@ -855,8 +915,10 @@ public interface SQLState {
 	String LANG_DUPLICATE_COLUMN_NAME_UPDATE                           = "42X16";
 	String LANG_INVALID_JOIN_ORDER_SPEC                                = "42X17";
 	String LANG_NOT_COMPARABLE                                         = "42818";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5885
 	String LANG_NON_BOOLEAN_WHERE_CLAUSE                               = "42X19.S.1";
 	String LANG_UNTYPED_PARAMETER_IN_WHERE_CLAUSE        = "42X19.S.2";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
 	String LANG_INTEGER_LITERAL_EXPECTED                               = "42X20";
 	String LANG_CURSOR_NOT_UPDATABLE                                   = "42X23";
 	String LANG_INVALID_COL_HAVING_CLAUSE                              = "42X24";
@@ -880,7 +942,9 @@ public interface SQLState {
 	String LANG_NOT_STORABLE                                           = "42821";
 	String LANG_NULL_RESULT_SET_META_DATA                              = "42X43";
 	String LANG_INVALID_COLUMN_LENGTH                                  = "42X44";
+//IC see: https://issues.apache.org/jira/browse/DERBY-81
 	String LANG_INVALID_FUNCTION_ARG_TYPE                              = "42X45";
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 	String LANG_AMBIGUOUS_FUNCTION_NAME                                = "42X46";
 	String LANG_AMBIGUOUS_PROCEDURE_NAME                               = "42X47";
 	String LANG_INVALID_PRECISION                                      = "42X48";
@@ -905,6 +969,7 @@ public interface SQLState {
 	//42X67
 	String LANG_NO_FIELD_FOUND                                         = "42X68";
 	String LANG_PRIMITIVE_REFERENCING_EXPRESSION                       = "42X69";
+//IC see: https://issues.apache.org/jira/browse/DERBY-64
 	String LANG_TABLE_DEFINITION_R_C_L_MISMATCH                        = "42X70";
 	String LANG_INVALID_COLUMN_TYPE_CREATE_TABLE                       = "42X71";
 	String LANG_NO_STATIC_FIELD_FOUND                                  = "42X72";
@@ -916,15 +981,19 @@ public interface SQLState {
 	String LANG_ORDER_BY_COLUMN_NOT_FOUND                              = "42X78";
 	String LANG_DUPLICATE_COLUMN_FOR_ORDER_BY                          = "42X79";
 	String LANG_QUALIFIED_COLUMN_NAME_NOT_ALLOWED                      = "42877";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2459
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String LANG_UNION_ORDER_BY                                         = "42878";
 	String LANG_DISTINCT_ORDER_BY                                      = "42879";
 	String LANG_DISTINCT_ORDER_BY_EXPRESSION                           = "4287A";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6009
     String LANG_TABLE_VALUE_CTOR_RESTRICTION                           = "4287B";
 	String LANG_EMPTY_VALUES_CLAUSE                                    = "42X80";
 	String LANG_EMPTY_COLUMN_LIST                                      = "42X81";
 	String LANG_USING_CARDINALITY_VIOLATION                            = "42X82";
 	String LANG_CANT_DROP_BACKING_INDEX                                = "42X84";
 	String LANG_CONSTRAINT_SCHEMA_MISMATCH                             = "42X85";
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT                  = "42X86";
     String LANG_ALL_RESULT_EXPRESSIONS_UNTYPED                         = "42X87";
 	String LANG_CONDITIONAL_NON_BOOLEAN                                = "42X88";
@@ -935,8 +1004,10 @@ public interface SQLState {
 	String LANG_INVALID_CREATE_CONSTRAINT_COLUMN_LIST                  = "42X93";
 	String LANG_OBJECT_NOT_FOUND                                       = "42X94";
 	String LANG_DB_CLASS_PATH_HAS_MISSING_JAR                          = "42X96";
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String LANG_INCONSISTENT_CONSTRAINT_CHARACTERISTICS                = "42X97";
 	String LANG_NO_PARAMS_IN_VIEWS                                     = "42X98";
+//IC see: https://issues.apache.org/jira/browse/DERBY-64
 	String LANG_NO_PARAMS_IN_TABLES                                    = "42X99";
     String LANG_UNASSIGNABLE_GENERATION_CLAUSE                         = "42XA0";
     String LANG_AGGREGATE_IN_GENERATION_CLAUSE                         = "42XA1";
@@ -956,25 +1027,33 @@ public interface SQLState {
     String LANG_SEQ_INVALID_START                                      = "42XAG";    
     String LANG_NEXT_VALUE_FOR_ILLEGAL                                      = "42XAH";    
     String LANG_SEQUENCE_REFERENCED_TWICE                                      = "42XAI";    
+//IC see: https://issues.apache.org/jira/browse/DERBY-4539
     String LANG_DUPLICATE_CS_CLAUSE                                      = "42XAJ";    
     String LANG_TARGET_NOT_BASE_TABLE                                  = "42XAK";    
+//IC see: https://issues.apache.org/jira/browse/DERBY-6652
     String LANG_SOURCE_NOT_BASE_OR_VTI                        = "42XAL";    
     String LANG_SAME_EXPOSED_NAME                                       = "42XAM";    
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     String LANG_NOT_NULL_CHARACTERISTICS                               = "42XAN";
     String LANG_NO_SUBQUERIES_IN_MATCHED_CLAUSE         = "42XAO";
     String LANG_NO_SYNONYMS_IN_MERGE                            = "42XAP";
     String LANG_NO_DCL_IN_MERGE                                         = "42XAQ";
     String LANG_SYSTEM_SEQUENCE                                         = "42XAR";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
     String LANG_BAD_DISTINCT_AGG                                         = "42XAS";
     String LANG_INVALID_ROWID_SCOPE                                      = "42XAT";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
     String LANG_INVALID_INPUT_COLUMN_NAME                                = "42XAU";
     String LANG_INVALID_NUMBEROF_HEADER_LINES                            = "42XAV";
     String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
     // String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE             = "42Y02";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3610
 	String LANG_NO_SUCH_METHOD_ALIAS                                   = "42Y03.S.0";
 	String LANG_NO_SUCH_PROCEDURE                                      = "42Y03.S.1";
 	String LANG_NO_SUCH_FUNCTION                                       = "42Y03.S.2";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5945
     String LANG_PROC_USED_AS_FUNCTION                                  = "42Y03.S.3";
     String LANG_FUNCTION_USED_AS_PROC                                  = "42Y03.S.4";
 	String LANG_INVALID_FULL_STATIC_METHOD_NAME                        = "42Y04";
@@ -1059,10 +1138,12 @@ public interface SQLState {
 	String LANG_NO_AGGREGATES_IN_ON_CLAUSE                             = "42Z07";
 	String LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER                    = "42Z08";
     String LANG_NO_AGGREGATES_IN_MERGE_MATCHING_CLAUSE                 = "42Z09";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6693
 
 	// MORE GENERIC LANGUAGE STUFF
 	String LANG_UDT_BUILTIN_CONFLICT										   = "42Z10";
     String LANG_STREAM_INVALID_ACCESS                                  = "42Z12.U";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4563
 
 	// String LANG_UPDATABLE_VTI_BAD_GETMETADATA						   = "42Z14";
 
@@ -1072,8 +1153,10 @@ public interface SQLState {
 	String LANG_MODIFY_COLUMN_INVALID_LENGTH						   = "42Z17";
 	String LANG_MODIFY_COLUMN_FKEY_CONSTRAINT						   = "42Z18";
 	String LANG_MODIFY_COLUMN_REFERENCED							   = "42Z19";
+//IC see: https://issues.apache.org/jira/browse/DERBY-119
 	String LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT					   = "42Z20";
 	String LANG_MODIFY_COLUMN_EXISTING_PRIMARY_KEY					   = "42Z20.S.1";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
 
 	String LANG_AI_INVALID_INCREMENT								   = "42Z21";
 	String LANG_AI_INVALID_TYPE										   = "42Z22";
@@ -1106,6 +1189,7 @@ public interface SQLState {
 	String LANG_COLUMN_ID_ARRAY										   = "42Z48.U";
 
 	String LANG_GRANT_REVOKE_WITH_LEGACY_ACCESS                        = "42Z60";
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
 	// 42Z70 - 42Z7Z: For Derby-specific XML compilation errors
 	// (not defined by SQL/XML standard).
@@ -1131,6 +1215,7 @@ public interface SQLState {
 
     // MORE GENERIC LANGUAGE STUFF
     // String LANG_UPDATABLE_VTI_BAD_GETRESULTSETCONCURRENCY          = "42Z89";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2717
     String LANG_UPDATABLE_VTI_NON_UPDATABLE_RS                        = "42Z90";
     String LANG_SUBQUERY                                              = "42Z91";
     String LANG_REPEATABLE_READ                                       = "42Z92";
@@ -1154,9 +1239,12 @@ public interface SQLState {
     String LANG_XML_NOT_ALLOWED_DJRS                                = "42ZB3";
     String LANG_NOT_TABLE_FUNCTION                                  = "42ZB4";
     String LANG_NO_COSTING_CONSTRUCTOR                              = "42ZB5";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4092
     String LANG_TABLE_FUNCTION_NOT_ALLOWED                   = "42ZB6";
     String LANG_BAD_TABLE_FUNCTION_PARAM_REF                 = "42ZB7";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 	String LANG_NO_SUCH_WINDOW                                         = "42ZC0";
 	String LANG_WINDOW_LIMIT_EXCEEDED                                  = "42ZC1";
 	String LANG_WINDOW_FUNCTION_CONTEXT_ERROR                          = "42ZC2";
@@ -1172,6 +1260,7 @@ public interface SQLState {
 	String LANG_VARARGS_RETURN_RESULT_SETS                  = "42ZCB";
 
     // bad optimizer overrides
+//IC see: https://issues.apache.org/jira/browse/DERBY-6267
     String LANG_BAD_ROW_SOURCE_COUNT                  = "42ZCC";
     String LANG_NOT_LEFT_DEEP                                 = "42ZCD";
     String LANG_UNRESOLVED_ROW_SOURCE                    = "42ZCE";
@@ -1187,8 +1276,10 @@ public interface SQLState {
 
 	//following 1 does not match the DB2 sql state, it is a Derby specific behavior which is not compatible with DB2
 	String LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES = "XCL51.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-180
 
     // error messages for the Lucene plugin
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
     String LUCENE_NOT_A_STRING_TYPE                                  = "42XBA";
     String LUCENE_NO_PRIMARY_KEY                                  = "42XBB";
     String LUCENE_UNSUPPORTED_TYPE                                  = "42XBC";
@@ -1198,10 +1289,15 @@ public interface SQLState {
     String LUCENE_ALREADY_LOADED                                  = "42XBG";
     String LUCENE_ALREADY_UNLOADED                                  = "42XBH";
     String LUCENE_BAD_INDEX                                               = "42XBI";
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
     String LUCENE_BAD_COLUMN_NAME                                   = "42XBJ";
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
     String LUCENE_BAD_VERSION                                           = "42XBK";
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
     String LUCENE_ENCRYPTED_DB                                           = "42XBL";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
     String ARGUMENT_MAY_NOT_BE_NULL                                = "42XBM";
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
     String LUCENE_FIELD_KEY_CONFLICT                                = "42XBN";
     String LUCENE_DUPLICATE_FIELD_NAME                                = "42XBO";
     
@@ -1303,9 +1399,12 @@ public interface SQLState {
 	String RTS_PROJECTION_TIME										   = "43X97.U";
 	String RTS_PR													   = "43X98.U";
 	String RTS_ROW_RS												   = "43X99.U";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4079
 	String RTS_RC                                                      = "43X9A.U";
 	String RTS_RC_RS                                                   = "43X9B.U";
 	String RTS_WINDOW_RS                                               = "43X9C.U";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 
 	String RTS_SCALAR_AGG_RS										   = "43Y00.U";
 	String RTS_INDEX_KEY_OPT										   = "43Y01.U";
@@ -1350,6 +1449,7 @@ public interface SQLState {
 	String RTS_REFACTION_DEPENDENT									   = "43Y53.U";
 	String RTS_BEGIN_DEPENDENT_NUMBER								   = "43Y54.U";	
 	String RTS_END_DEPENDENT_NUMBER									   = "43Y55.U";	
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 	String RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_TABLE			   = "43Y56.U";	
 	String RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_JOIN			   = "43Y57.U";
 
@@ -1388,7 +1488,9 @@ public interface SQLState {
 	String LANG_CANT_INVALIDATE_OPEN_RESULT_SET                        = "X0X95.S";
 	String LANG_CANT_CHANGE_ISOLATION_HOLD_CURSOR                      = "X0X03.S";
 	//following three for auto-generated keys feature in JDBC3.0
+//IC see: https://issues.apache.org/jira/browse/DERBY-2653
     String INVALID_COLUMN_ARRAY_LENGTH                                 = "X0X0D.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2631
 	String LANG_INVALID_AUTOGEN_COLUMN_POSITION                        = "X0X0E.S";
 	String LANG_INVALID_AUTOGEN_COLUMN_NAME                            = "X0X0F.S";
 
@@ -1412,6 +1514,7 @@ public interface SQLState {
 	String LANG_INVALID_FK_NO_REF_KEY                                  = "X0Y44.S";
 	String LANG_ADD_FK_CONSTRAINT_VIOLATION                            = "X0Y45.S";
 	String LANG_INVALID_FK_NO_REF_TAB                                  = "X0Y46.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
     String LANG_INVALID_FK_REF_KEY                                     = "X0Y47.S";
 	String LANG_SCHEMA_NOT_EMPTY                                       = "X0Y54.S";
 	String LANG_INDEX_ROW_COUNT_MISMATCH                               = "X0Y55.S";
@@ -1419,6 +1522,7 @@ public interface SQLState {
 	String LANG_ADDING_NON_NULL_COLUMN_TO_NON_EMPTY_TABLE              = "X0Y57.S";
 	String LANG_ADD_PRIMARY_KEY_FAILED1                                = "X0Y58.S";
 	String LANG_ADD_CHECK_CONSTRAINT_FAILED                            = "X0Y59.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3523
 	String LANG_NULL_DATA_IN_PRIMARY_KEY_OR_UNIQUE_CONSTRAINT      	   = "X0Y63.S";
 	String LANG_NULL_DATA_IN_PRIMARY_KEY                               = "X0Y63.S.1";
 	String LANG_NO_COMMIT_IN_NESTED_CONNECTION                         = "X0Y66.S";
@@ -1430,6 +1534,7 @@ public interface SQLState {
 	String LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER_DURING_EXECUTION   = "X0Y72.S";
 	String LANG_NO_SET_TRAN_ISO_IN_GLOBAL_CONNECTION                   = "X0Y77.S";
 	String LANG_INVALID_CALL_TO_EXECUTE_QUERY		                   = "X0Y78.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1364
     String MULTIPLE_RESULTS_ON_EXECUTE_QUERY = "X0Y78.S.1";
     String USE_EXECUTE_UPDATE_WITH_NO_RESULTS = "X0Y78.S.2";
 	String LANG_INVALID_CALL_TO_EXECUTE_UPDATE		                   = "X0Y79.S";
@@ -1437,15 +1542,21 @@ public interface SQLState {
     String LANG_IGNORE_MISSING_INDEX_ROW_DURING_DELETE                 = "X0Y83.S";
     String LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE                 = "X0Y84.T";
 	String LANG_UNKNOWN_SEQUENCE_PREALLOCATOR                                = "X0Y85.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
     String LANG_NOT_A_SEQUENCE_PREALLOCATOR                            = "X0Y85.S.1";
 	String LANG_CANT_FLUSH_PREALLOCATOR                                = "X0Y86.S";
 	String LANG_BAD_UDA_OR_FUNCTION_NAME                                = "X0Y87.S";
 	String LANG_UNKNOWN_TOOL_NAME                                = "X0Y88.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
     String LANG_UNKNOWN_CUSTOM_TOOL_NAME                              = "X0Y88.S.1";
 	String LANG_BAD_OPTIONAL_TOOL_ARGS                                = "X0Y89.S";
 	String LANG_CANT_INSTANTIATE_CLASS                                = "X0Y90.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
     String LANG_SET_CONSTRAINT_NOT_DEFERRABLE                         = "X0Y91.S";
     String LANG_CANNOT_CHANGE_COLUMN_NAMES                         = "X0Y92.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
 
 	// TEMPORARY EXECUTION RESTRICTIONS
 
@@ -1461,6 +1572,7 @@ public interface SQLState {
 	String LANG_INVALID_COLUMN_POSITION                                 = "XCL14.S";
 	String LANG_INVALID_COMPARE_TO                                     = "XCL15.S";
 	String LANG_RESULT_SET_NOT_OPEN                                    = "XCL16.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-721
     String LANG_STREAM_RETRIEVED_ALREADY = "XCL18.S";
 	String LANG_MISSING_ROW                                            = "XCL19.S";
 	String LANG_CANT_UPGRADE_CATALOGS                                  = "XCL20.S";
@@ -1498,6 +1610,7 @@ public interface SQLState {
 	String LANG_CANT_UPGRADE_DATABASE                                 = "XCL50.S";
 
     String LANG_STATEMENT_CANCELLED_OR_TIMED_OUT                       = "XCL52.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
 
     /*
 	** Language errors that match DB2
@@ -1510,28 +1623,41 @@ public interface SQLState {
 	*/
 	String  INVALID_ROLE_SYS                                        = "4293A";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3073
+//IC see: https://issues.apache.org/jira/browse/DERBY-2207
 
 	/*
 		SQL standard 0A - feature not supported
 	*/
 	String UNSUPPORTED_PREFIX="0A";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1140
 
     String NOT_IMPLEMENTED                                          = "0A000.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1185
     String JDBC_METHOD_NOT_IMPLEMENTED                              = "0A000.S.1";
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
+//IC see: https://issues.apache.org/jira/browse/DERBY-970
     String JDBC_METHOD_NOT_SUPPORTED_BY_SERVER                      = "0A000.S.2";
+//IC see: https://issues.apache.org/jira/browse/DERBY-843
+//IC see: https://issues.apache.org/jira/browse/DERBY-1198
     String UNSUPPORTED_HOLDABILITY_PROPERTY                         = "0A000.S.3";
     String CANCEL_NOT_SUPPORTED_BY_SERVER                           = "0A000.S.4";
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
     String SECMECH_NOT_SUPPORTED                                    = "0A000.S.5";
     String DRDA_COMMAND_NOT_IMPLEMENTED                             = "0A000.C.6";
     String DATA_TYPE_NOT_SUPPORTED = "0A000.S.7";
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1393
 
 	
 
 	/*
 	** Authorization and Authentication
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
 	String AUTHORIZATION_SPEC_PREFIX="28";
 	
 	String AUTH_SET_CONNECTION_READ_ONLY_IN_ACTIVE_XACT                = "25501";
@@ -1539,6 +1665,7 @@ public interface SQLState {
 	String AUTH_DDL_WITH_READ_ONLY_CONNECTION                          = "25503";
 	String AUTH_CANNOT_SET_READ_WRITE                                  = "25505";
 	String AUTH_INVALID_USER_NAME                                      = "28502";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2735
 
 	/*
 	** Dependency manager
@@ -1555,6 +1682,7 @@ public interface SQLState {
 	String NEED_TO_REGISTER_PARAM = "07004";
     String COLUMN_NOT_FOUND = "S0022";
     //String NO_COMMIT_WHEN_AUTO = "XJ007.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
     String NO_SAVEPOINT_ROLLBACK_OR_RELEASE_WHEN_AUTO = "XJ008.S";
     String REQUIRES_CALLABLE_STATEMENT = "XJ009.S";
     String NO_SAVEPOINT_WHEN_AUTO = "XJ010.S";
@@ -1566,8 +1694,10 @@ public interface SQLState {
     String NO_SAVEPOINT_IN_TRIGGER = "XJ017.S";
     String NULL_COLUMN_NAME = "XJ018.S";
     String TYPE_MISMATCH = "XJ020.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
     String UNSUPPORTED_TYPE = "XJ021.S";
     String SET_STREAM_FAILURE = "XJ022.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-562
     String SET_STREAM_INEXACT_LENGTH_DATA = "XJ023.S";
     String NEGATIVE_STREAM_LENGTH = "XJ025.S";
     String NO_AUTO_COMMIT_ON = "XJ030.S";
@@ -1592,8 +1722,11 @@ public interface SQLState {
     String NO_SETXXX_FOR_EXEC_USING = "XJ069.S";
     String BLOB_BAD_POSITION = "XJ070.S";
     String BLOB_NONPOSITIVE_LENGTH = "XJ071.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
     String BLOB_NULL_PATTERN_OR_SEARCH_STR = "XJ072.S";
     String BLOB_ACCESSED_AFTER_COMMIT = "XJ073.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
     String INVALID_QUERYTIMEOUT_VALUE = "XJ074.S";
     String BLOB_POSITION_TOO_LARGE = "XJ076.S";
     String BLOB_UNABLE_TO_READ_PATTERN = "XJ077.S";
@@ -1606,6 +1739,7 @@ public interface SQLState {
     String COLUMN_NOT_FROM_BASE_TABLE = "XJ084.U";
     String STREAM_EOF = "XJ085.S";
     String CURSOR_NOT_POSITIONED_ON_INSERT_ROW = "XJ086.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2444
     String POS_AND_LENGTH_GREATER_THAN_LOB = "XJ087.S";
     
     
@@ -1617,6 +1751,7 @@ public interface SQLState {
     String SAVEPOINT_NOT_CREATED_BY_CONNECTION = "XJ097.S";
     String BAD_AUTO_GEN_KEY_VALUE = "XJ098.S";
     String READER_UNDER_RUN = "XJ099.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
     String REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER = "XJ100.S";
     String TABLE_NAME_CANNOT_BE_NULL = "XJ103.S";
     String SHARED_KEY_LENGTH_ERROR = "XJ104.S";
@@ -1628,6 +1763,7 @@ public interface SQLState {
     String FOREIGN_TABLE_NAME_IS_NULL = "XJ111.S";
     String SECURITY_EXCEPTION_ENCOUNTERED = "XJ112.S";    
     String UNABLE_TO_OPEN_FILE = "XJ113.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
     String CURSOR_INVALID_CURSOR_NAME = "XJ114.S";
     String UNABLE_TO_OPEN_RESULTSET_WITH_REQUESTED_HOLDABILTY = "XJ115.S";
     String TOO_MANY_COMMANDS_FOR_BATCH = "XJ116.S";
@@ -1642,6 +1778,8 @@ public interface SQLState {
     //wrapper related
     String UNABLE_TO_UNWRAP = "XJ128.S";
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-843
+//IC see: https://issues.apache.org/jira/browse/DERBY-1198
     String EXCEEDED_MAX_SECTIONS = "XJ200.S";
     String CURSOR_INVALID_NAME = "XJ202.S";
     String CURSOR_DUPLICATE_NAME = "XJ203.S";
@@ -1653,26 +1791,32 @@ public interface SQLState {
     String STORED_PROC_LOAD_MODULE_NOT_FOUND = "XJ210.S";
     String BATCH_CHAIN_BREAKING_EXCEPTION = "XJ211.S";
     String INVALID_ATTRIBUTE_SYNTAX = "XJ212.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
     String TRACELEVEL_FORMAT_INVALID = "XJ213.C";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1328
     String IO_ERROR_UPON_LOB_FREE = "XJ214.S";
     String LOB_OBJECT_INVALID = "XJ215.S";
     String LOB_OBJECT_LENGTH_UNKNOWN_YET = "XJ216.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2257
     String LOB_LOCATOR_INVALID = "XJ217.S";
     
     //XN - Network-level messages
     String NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK         = "XN001.S";
     String NET_SECKTKN_NOT_RETURNED                                 = "XN002.U";
     String NET_QUERY_PROCESSING_TERMINATED                          = "XN008.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
     String NET_ERROR_GETTING_BLOB_LENGTH                            = "XN009.S";
     String NET_NULL_PROCEDURE_NAME                                  = "XN010.S";
     String NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE                   = "XN011.S";
     String NET_WRONG_XA_VERSION                                     = "XN012.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
     String NET_INVALID_SCROLL_ORIENTATION                           = "XN013.S";
     String NET_EXCEPTION_ON_READ                                  = "XN014.S";
     String NET_INPUTSTREAM_LENGTH_TOO_SMALL                         = "XN015.S";
     String NET_EXCEPTION_ON_STREAMLEN_VERIFICATION                = "XN016.S";
     String NET_PREMATURE_EOS                                        = "XN017.S";
     String NET_READER_LENGTH_TOO_SMALL                              = "XN018.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
     String NET_XARETVAL_ERROR                                       = "XN019.S";
     String NET_MARSHALLING_UDT_ERROR                     = "XN020.S";
     String NET_UDT_COERCION_ERROR                               = "XN021.S";
@@ -1682,6 +1826,8 @@ public interface SQLState {
     
     // XML - Derby-specific XML errors not covered by
     // SQL standard.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1772
+//IC see: https://issues.apache.org/jira/browse/DERBY-1758
     String LANG_MISSING_XML_CLASSES                                 = "XML00";
     String LANG_UNEXPECTED_XML_EXCEPTION                            = "XML01";
 
@@ -1699,6 +1845,7 @@ public interface SQLState {
     String MALFORMED_URL = "XJ028.C";
     String BOOT_DATABASE_FAILED = "XJ040.C";
     String CREATE_DATABASE_FAILED = "XJ041.C";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
     String CONFLICTING_BOOT_ATTRIBUTES = "XJ048.C";
     String CONFLICTING_CREATE_ATTRIBUTES = "XJ049.C";
 	String CONFLICTING_RESTORE_ATTRIBUTES = "XJ081.C";
@@ -1708,15 +1855,21 @@ public interface SQLState {
     
     // 08004 SQL State means the server rejected the connection request
     String LOGIN_FAILED = "08004";
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
     String NET_CONNECT_AUTH_FAILED                          = "08004.C.1";
     String NET_DATABASE_NOT_FOUND                           = "08004.C.2";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1828
+//IC see: https://issues.apache.org/jira/browse/DERBY-2633
     String AUTH_DATABASE_CONNECTION_REFUSED                 = "08004.C.3"; 
     //DERBY-1828: AUTH_DATABASE_CONNECTION_REFUSED used to be "04501.C"; 
     String AUTH_SHUTDOWN_NOT_DB_OWNER                       = "08004.C.4";
     String AUTH_ENCRYPT_NOT_DB_OWNER                        = "08004.C.5";
     String AUTH_HARD_UPGRADE_NOT_DB_OWNER                   = "08004.C.6";
     //DERBY-1828: AUTH_x_NOT_DB_OWNER used to be "2850H/I/J.C";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3021
     String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE               = "08004.C.7";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3189
+//IC see: https://issues.apache.org/jira/browse/DERBY-2954
     String AUTH_REPLICATION_NOT_DB_OWNER                    = "08004.C.8";
     //DERBY-2109: new state/msg (considered sql state 28101.C not appropriate)
     String AUTH_SHUTDOWN_MISSING_PERMISSION                 = "08004.C.9";
@@ -1727,19 +1880,23 @@ public interface SQLState {
     String NET_CONNECT_SECMEC_INCOMPATIBLE_SCHEME           = "08004.C.12";
     String AUTH_EMPTY_CREDENTIALS                                  = "08004.C.13";
     String AUTH_DECRYPT_NOT_DB_OWNER                        = "08004.C.14";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5792
 
     // There can be multiple causes for 08003, which according
     // to SQL2003 spec means "connection does not exist"
     // We use a suffix to distinguish them.  Because of the suffix
     // you *must* add a severity code
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
     String NO_CURRENT_CONNECTION = "08003";
     String NOGETCONN_ON_CLOSED_POOLED_CONNECTION = "08003.C.1";
+//IC see: https://issues.apache.org/jira/browse/DERBY-841
     String LOB_METHOD_ON_CLOSED_CONNECTION = "08003.C.2";
     String PHYSICAL_CONNECTION_ALREADY_CLOSED = "08003.C.3";
 
     
     // 08006 means connection exception - connection failure
     String DRDA_CONNECTION_TERMINATED                           = "08006.C";
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
     String CONNECTION_FAILED_ON_RESET                           = "08006.C.1";
    
     // Use this version of SOCKET_EXCEPTION any time *except* when trying to
@@ -1770,15 +1927,20 @@ public interface SQLState {
     String CONNECT_PASSWORD_LENGTH_OUT_OF_RANGE                 = "08001.C.6";
     String CONNECT_USERID_ISNULL                                = "08001.C.7";
     String CONNECT_PASSWORD_ISNULL                              = "08001.C.8";
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
     String NET_DBNAME_TOO_LONG                                  = "08001.C.9";
     String NET_SECTKN_TOO_LONG                                  = "08001.C.10";
     String NET_USERID_TOO_LONG                                  = "08001.C.11";
     String NET_PASSWORD_TOO_LONG                                = "08001.C.12";
+//IC see: https://issues.apache.org/jira/browse/DERBY-4009
     String NET_EXTNAM_TOO_LONG                                  = "08001.C.13";
     String NET_SRVNAM_TOO_LONG                                  = "08001.C.14";    
     
     // database severity
+//IC see: https://issues.apache.org/jira/browse/DERBY-843
+//IC see: https://issues.apache.org/jira/browse/DERBY-1198
     String SHUTDOWN_DATABASE = "08006.D";  
+//IC see: https://issues.apache.org/jira/browse/DERBY-4428
     String DROP_DATABASE = "08006.D.1";
         
     //the following 2 exceptions are internal and never get seen by the user.
@@ -1801,14 +1963,17 @@ public interface SQLState {
     String SCROLL_SENSITIVE_NOT_SUPPORTED = "01J10";
     String UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER  = "01J12";
     String NUMBER_OF_ROWS_TOO_LARGE_FOR_INT = "01J13";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1543
 	String SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION = "01J14";
 	String PASSWORD_EXPIRES_SOON = "01J15";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5647
 	String DBO_PASSWORD_EXPIRES_SOON = "01J16";
     String AUTH_ENCRYPT_ALREADY_BOOTED = "01J17";
 
     String CURSOR_OPERATION_CONFLICT = "01001";
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 
     //following are no applicable severity
     String JAVA_EXCEPTION = "XJ001.U";
@@ -1817,9 +1982,11 @@ public interface SQLState {
     /*
      ** Messages whose SQL states are prescribed by DRDA
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-846
     String DRDA_NO_AUTOCOMMIT_UNDER_XA                              = "2D521.S.1";
     String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK              = "2D521.S.2"; 
     String DRDA_CURSOR_NOT_OPEN                                     = "24501.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-847
 
     // 58009 means connection is terminated by a DRDA-protocol error.  This can be caused by any number
     // of reasons, so this SQL State has a lot of instances. Exceptions that are 
@@ -1838,6 +2005,7 @@ public interface SQLState {
     String NET_DSS_CHAINED_WITH_SAME_ID                             = "58009.C.16";
     String NET_PREMATURE_EOS_DISCONNECT                             = "58009.C.17";
     String NET_INVALID_FDOCA_ID                                     = "58009.C.18";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1350
     String NET_SECTKN_NOT_RETURNED                                  = "58009.C.19";
     String NET_NVCM_NVCS_BOTH_NON_NULL                              = "58009.C.20";
     String NET_SQLCDTA_INVALID_FOR_RDBNAM                           = "58009.C.21";
@@ -1882,9 +2050,12 @@ public interface SQLState {
 	String DELIMITERS_ARE_NOT_MUTUALLY_EXCLUSIVE                   ="XIE0J.S";
 	String PERIOD_AS_CHAR_DELIMITER_NOT_ALLOWED                    ="XIE0K.S";
 	String TABLE_NOT_FOUND                                         ="XIE0M.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 	String IMPORTFILE_HAS_INVALID_HEXSTRING                        ="XIE0N.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 	String LOB_DATA_FILE_NOT_FOUND                                 ="XIE0P.S";
 	String LOB_DATA_FILE_NULL                                      ="XIE0Q.S";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2193
 	String UNEXPECTED_IMPORT_ERROR                       ="XIE0R.S";
 	String DATA_FILE_EXISTS		                     ="XIE0S.S";
 	String LOB_DATA_FILE_EXISTS                          ="XIE0T.S";
@@ -1894,6 +2065,7 @@ public interface SQLState {
     /*
     ** Security XK...
     */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2466
     String POLICY_NOT_RELOADED                                     ="XK000.S";
     String NO_SUCH_USER                                                  ="XK001.S";
 
@@ -1901,13 +2073,18 @@ public interface SQLState {
     ** Replication XRExx
     */
     String LOGMODULE_DOES_NOT_SUPPORT_REPLICATION                  = "XRE00";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3016
     String REPLICATION_LOG_CORRUPTED                               = "XRE01";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2921
     String REPLICATION_MASTER_SLAVE_VERSION_MISMATCH               = "XRE02";
     String REPLICATION_UNEXPECTED_EXCEPTION                        = "XRE03";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3417
     String REPLICATION_CONNECTION_EXCEPTION                        = "XRE04.C.1";
     String REPLICATION_CONNECTION_LOST                             = "XRE04.C.2";
     String REPLICATION_LOG_OUT_OF_SYNCH                            = "XRE05.C";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3064
     String REPLICATION_MASTER_TIMED_OUT                            = "XRE06";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3392
     String REPLICATION_NOT_IN_MASTER_MODE                          = "XRE07";
     String REPLICATION_SLAVE_STARTED_OK                            = "XRE08";
     String CANNOT_START_SLAVE_ALREADY_BOOTED                       = "XRE09.C";
@@ -1917,6 +2094,7 @@ public interface SQLState {
     String REPLICATION_FAILOVER_SUCCESSFUL                         = "XRE20.D";
     String REPLICATION_FAILOVER_UNSUCCESSFUL                       = "XRE21.C";
     String REPLICATION_MASTER_ALREADY_BOOTED                       = "XRE22.C";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3551
     String REPLICATION_UNLOGGED_OPERATIONS_IN_PROGRESS             = "XRE23";
     String REPLICATION_NOT_IN_SLAVE_MODE                           = "XRE40";
     String SLAVE_OPERATION_DENIED_WHILE_CONNECTED                  = "XRE41.C";

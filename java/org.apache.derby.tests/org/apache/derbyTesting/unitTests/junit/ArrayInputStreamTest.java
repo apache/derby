@@ -33,6 +33,7 @@ import org.apache.derbyTesting.junit.BaseTestSuite;
 public class ArrayInputStreamTest extends BaseTestCase {
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(ArrayInputStreamTest.class);
     }
 

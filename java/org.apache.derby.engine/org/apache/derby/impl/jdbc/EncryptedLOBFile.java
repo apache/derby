@@ -78,6 +78,7 @@ class EncryptedLOBFile extends LOBFile {
         if (len < 0)
             throw new IndexOutOfBoundsException (
                     MessageService.getTextMessage (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                         SQLState.BLOB_NONPOSITIVE_LENGTH, len));
         //starting position of the 1st block
         long startPos = pos - pos % blockSize;
@@ -113,6 +114,7 @@ class EncryptedLOBFile extends LOBFile {
      * @throws IOException
      */
     void seek (long pos) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
         long fileLength = super.length();
         if (pos > fileLength + tailSize) {
             //this should never happen
@@ -262,6 +264,7 @@ class EncryptedLOBFile extends LOBFile {
      */
     int readByte() throws IOException, StandardException {
         long fileLength = super.length();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
         if (currentPos >= fileLength + tailSize)
             throw new EOFException ();
         if (currentPos >= fileLength)
@@ -332,6 +335,7 @@ class EncryptedLOBFile extends LOBFile {
      * @throws StandardException if error occurred during decryption
      */
     void setLength(long size) throws IOException, StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2379
         long fileLength = super.length();
         if (size > fileLength + tailSize) {
             //this should never happen

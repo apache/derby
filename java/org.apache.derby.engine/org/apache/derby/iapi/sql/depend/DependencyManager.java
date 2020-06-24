@@ -33,6 +33,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 	Dependency Manager Interface
 	<p>
 	The dependency manager tracks needs that dependents have of providers. This
+//IC see: https://issues.apache.org/jira/browse/DERBY-1539
 	is a general purpose interface which is associated with a
 	DataDictinary object; infact the dependencymanager is really the
 	datadictionary keeping track of dependencies between objects that it handles

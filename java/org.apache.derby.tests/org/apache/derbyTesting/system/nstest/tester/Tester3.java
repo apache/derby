@@ -61,6 +61,7 @@ public class Tester3 extends TesterObject {
 			//Get the connection.  It will be closed at the end of the loop
 			connex = getConnection();
 			if (connex == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println("FAIL: " + getThread_id()
 						+ " could not get the database connection");
 				return; //quit
@@ -73,6 +74,7 @@ public class Tester3 extends TesterObject {
 			//Now select nstest.NUM_HIGH_STRESS_ROWS number of rows
 			try {
 				int numSelected = doSelectOperation(NsTest.NUM_HIGH_STRESS_ROWS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 				NsTest.logger.println(getThread_id()+" Tester3: Rows selected "+numSelected);
 			} catch (Exception e) {
 				NsTest.logger.println("doSelect in thread " + getThread_id()
@@ -88,6 +90,7 @@ public class Tester3 extends TesterObject {
 		}//end of for (int i=0;...)
 
 		NsTest.logger.println("Thread " + getThread_id() + " is now terminating");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6533
 
 	}//end of startTesting()
 

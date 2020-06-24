@@ -97,6 +97,7 @@ public abstract class Scan implements ScanManager, ScanInfo
     }
 
     public int fetchNextGroup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     DataValueDescriptor[][]     row_array,
     RowLocation[]               old_rowloc_array,
     RowLocation[]               new_rowloc_array)
@@ -321,6 +322,7 @@ public abstract class Scan implements ScanManager, ScanInfo
      *@see ScanController#positionAtRowLocation
      */
     public boolean positionAtRowLocation(RowLocation rl) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1067
         throws StandardException 
     {
         throw StandardException.newException(
@@ -363,6 +365,7 @@ public abstract class Scan implements ScanManager, ScanInfo
      */
     public boolean isHeldAfterCommit() throws StandardException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2462
         throw StandardException.newException(
                 SQLState.SORT_IMPROPER_SCAN_METHOD);
     }

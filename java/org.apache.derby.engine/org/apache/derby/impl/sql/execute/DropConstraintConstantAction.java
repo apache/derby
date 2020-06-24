@@ -188,6 +188,7 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 			String errorName = constraintName == null ? "PRIMARY KEY" :
 								(constraintSd.getSchemaName() + "."+ constraintName);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             throw StandardException.newException(SQLState.LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT,
 						errorName,
 						td.getQualifiedName());
@@ -252,6 +253,7 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 			** and drop the dependencies.
 			*/
 			dm.invalidateFor(conDesc, DependencyManager.DROP_CONSTRAINT, lcc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1612
 			dm.clearDependencies(lcc, conDesc);
 		}
 	}

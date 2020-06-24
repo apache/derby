@@ -43,6 +43,8 @@ public class Sed
 {
 	private	static	final	String	SQL_EXCEPTION_FILTERED_SUBSTITUTION = 
         "java.sql.SQLException:";
+//IC see: https://issues.apache.org/jira/browse/DERBY-939
+//IC see: https://issues.apache.org/jira/browse/DERBY-1616
 
     public Sed()
     {
@@ -55,6 +57,7 @@ public class Sed
         }
         File src = new File(args[0]);
         File tgt = new File(args[1]);
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
         new Sed().exec(src,tgt,null, false, false,false);
     }
 
@@ -63,9 +66,11 @@ public class Sed
 		(File srcFile, File dstFile, InputStream isSed, boolean isJCC, boolean isI18N, boolean isJDBC4)
         throws IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
     	String hostName = TestUtil.getHostName();
     	
         // Vector for storing lines to be deleted
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> deleteLines = new Vector<String>();
         deleteLines.addElement("^ij version.*$");
         deleteLines.addElement("^\\*\\*\\*\\* Test Run Started .* \\*\\*\\*\\*$");
@@ -84,9 +89,11 @@ public class Sed
         deleteLines.addElement("^(.*at .*)\\(.*:[0-9].*\\)$");
         deleteLines.addElement("^(.*at .*)\\(*.java\\)$");
         deleteLines.addElement("^(.*at .*)\\(Compiled Code\\)$");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5186
         deleteLines.addElement("^.*at java.*\\<init\\>\\(.*\\(Compiled Code\\)\\)$");
         deleteLines.addElement("^(.*at .*)\\(Interpreted Code\\)$");
         deleteLines.addElement("^(.*at .*)\\(Unknown Source\\)$");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6881
         deleteLines.addElement("^(.*at .*)\\(.*Native Method\\)$");
         deleteLines.addElement("^\\tat $"); // rare case of incomplete stack trace line
         deleteLines.addElement("optimizer estimated cost");
@@ -109,17 +116,20 @@ public class Sed
         deleteLines.addElement("^XSDB.*$");
 
 		// JUnit noise
+//IC see: https://issues.apache.org/jira/browse/DERBY-516
         deleteLines.addElement("^\\.*$");
         deleteLines.addElement("^Time: [0-9].*$");
         deleteLines.addElement("^OK \\(.*$");
 
         // Vectors for substitutions
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> searchStrings = new Vector<String>();
         searchStrings.addElement("^Transaction:\\(.*\\) *\\|"); 
         searchStrings.addElement("^Read [0-9]* of [0-9]* bytes$");
         searchStrings.addElement("Directory .*connect.wombat.seg0");
         //DERBY-4588 - filter out specific class and object id
         searchStrings.addElement("with class loader .*,");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4598
 
         //
         // Original comment:
@@ -128,6 +138,7 @@ public class Sed
         // The db2-compatibility caused name collisions and was removed with DERBY-6977.
         //
         StringBuffer constraintNameFilter = new StringBuffer(); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6977
         constraintNameFilter.append("SQL[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-");
         // Filter for uuids
         StringBuffer uuidFilter = new StringBuffer();
@@ -139,6 +150,7 @@ public class Sed
 
         // generated constraint names now end in a UUID (see DERBY-6977)
         constraintNameFilter.append(uuidFilter.toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6977
 
         searchStrings.addElement(constraintNameFilter.toString());
         searchStrings.addElement(uuidFilter.toString());
@@ -158,11 +170,13 @@ public class Sed
         timestampFilter.append( "[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9]* *" );
         searchStrings.addElement( timestampFilter.toString() );
         // Filter remove transaction id's from deadlock messages
+//IC see: https://issues.apache.org/jira/browse/DERBY-6868
         searchStrings.addElement("^  Waiting XID : \\{.*\\}");
         searchStrings.addElement("^  Granted XID : .*$");
         searchStrings.addElement("^The selected victim is XID : .*");
         // Filters for build numbers
         searchStrings.addElement("(beta - )\\(([0-9]*)\\)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
         searchStrings.addElement("CostEstimateImpl: .*");
         // Filter for xa tests for the numbers representing the db name (it can change)
         searchStrings.addElement("^Transaction ([0-9])* : \\(([0-9]*)\\,([0-9a-f]*)\\,([0-9a-f]*)\\)");
@@ -186,10 +200,13 @@ public class Sed
         // part of some JCC error messages.
         searchStrings.addElement("  DB2ConnectionCorrelator: [0-9A-Z.]*");
 		// Filter for SAX exception name diffs between jvms.
+//IC see: https://issues.apache.org/jira/browse/DERBY-563
         searchStrings.addElement("org.xml.sax.SAX.*$");
         // Filter out localhost, or hostName
         searchStrings.addElement(hostName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
 		if ( isJDBC4 )
 		{
 			// Filters for the sql exception class names which appear in
@@ -210,18 +227,22 @@ public class Sed
 			searchStrings.addElement("java.sql.SQLTransientException:");
 
 			// The JDBC4 error from the driver is a little chattier
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
 			searchStrings.addElement("No suitable driver found for [0-9A-Za-z:]*");			
 			searchStrings.addElement("No suitable driver;[0-9A-Za-z:=]*");			
 			searchStrings.addElement("SQL Exception: No suitable driver");			
 
 			// Timestamp diagnostic looks a little different under jdk16
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 			searchStrings.addElement("\\[\\.fffffffff\\]");			
 		}
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> subStrings = new Vector<String>();
         subStrings.addElement("Transaction:(XXX)|");
         subStrings.addElement("Read ... bytes");
         subStrings.addElement("Directory DBLOCATION/seg0");
+//IC see: https://issues.apache.org/jira/browse/DERBY-4598
         subStrings.addElement("with class loader XXXX, ");
         subStrings.addElement("xxxxGENERATED-IDxxxx");
         subStrings.addElement("xxxxFILTERED-UUIDxxxx");
@@ -234,6 +255,7 @@ public class Sed
         subStrings.addElement("The selected victim is XID : VVV");
         // sub build numbers
         subStrings.addElement("$1(xxXXxxFILTERED-BUILD-NUMBERxxXXxx)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6259
         subStrings.addElement("CostEstimateImpl: xxXXxxFILTERED-INFORMATIONxxXXxx");
         // sub for db name in xa tests (it can change)
         subStrings.addElement("Transaction $1 : ($2,FILTERED,FILTERED)");
@@ -255,10 +277,13 @@ public class Sed
         // ignore the 'DB2ConnectionCorrelator' thing altogether.
         subStrings.addElement("");
 		// Filter for SAX exception name diffs between jvms.
+//IC see: https://issues.apache.org/jira/browse/DERBY-563
         subStrings.addElement("xxxFILTERED-SAX-EXCEPTIONxxx'.");
         // Filter out localhost, or hostName
         subStrings.addElement("xxxFILTERED_HOSTNAMExxx");
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
 		if ( isJDBC4 )
 		{
 			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
@@ -276,10 +301,12 @@ public class Sed
 			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
 			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
 			subStrings.addElement("No suitable driver");
 			subStrings.addElement("No suitable driver");
 			subStrings.addElement("java.sql.SQLException: No suitable driver");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1253
 			subStrings.addElement(".fffffffff");
 		}
 
@@ -293,6 +320,7 @@ public class Sed
     {
         // Vector for storing lines to be deleted
         Vector<String> deleteLines = new Vector<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Vectors for substitutions
         Vector<String> searchStrings = new Vector<String>();
@@ -310,6 +338,7 @@ public class Sed
     }
 
     private void doWork(File srcFile, File dstFile, InputStream is,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Vector<String> deleteLines,  Vector<String> searchStrings,
         Vector<String> subStrings, InputStream isSed)
         throws IOException
@@ -333,6 +362,7 @@ public class Sed
             Properties sedp = new Properties();
 
             sedp.load(isSed);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6868
             for (String key : sedp.stringPropertyNames())
             {
                 if (key.equals("substitute"))
@@ -383,12 +413,14 @@ public class Sed
             // read the file using the default encoding
             inFile = new BufferedReader(new FileReader(srcFile));
         } else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-658
             inFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         }
         outFile = new PrintWriter
         ( new BufferedWriter(new FileWriter(dstFile), 10000), true );
 
         // Attempt to compile the patterns for deletes
+//IC see: https://issues.apache.org/jira/browse/DERBY-6868
         List<Pattern> deletePatterns = deleteLines.stream()
                 .map(Pattern::compile).collect(Collectors.toList());
 
@@ -461,6 +493,7 @@ public class Sed
             // Determine if this line should be deleted for delete pattern match
             if ( lineDeleted == false )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6868
                 final String s = str;
                 lineDeleted =
                     deletePatterns.stream().anyMatch(p -> p.matcher(s).find());

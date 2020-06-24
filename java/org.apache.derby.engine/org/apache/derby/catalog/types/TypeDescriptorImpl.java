@@ -137,6 +137,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		this.isNullable = isNullable;
 		this.maximumWidth = maximumWidth;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         this.scale = JDBC40Translation.UNKNOWN_SCALE;
         this.precision = JDBC40Translation.UNKNOWN_PRECISION;
 	}
@@ -168,6 +169,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	}
 
 	public TypeDescriptorImpl(
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
 			TypeDescriptorImpl source, 
 			int precision,
 			int scale,
@@ -207,6 +209,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
     /** copy an array of type descriptors */
     public  static TypeDescriptor[]    copyTypeDescriptors( TypeDescriptor[] original )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3177
         return (original == null) ? null : (TypeDescriptor[]) original.clone();
     }
     
@@ -238,6 +241,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	public int	getMaximumWidthInBytes()
 	{
 		switch (typeId.getJDBCTypeId()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-319
 
 			case Types.BIT:
 			case Types.TINYINT:
@@ -305,6 +309,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 
 			// ODBC does not define a BOOLEAN data type.
             // However, 1 seems to me like a reasonable byte length for a BOOLEAN.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4703
             case Types.BOOLEAN: return 1;
                 
 			case Types.ARRAY:
@@ -479,6 +484,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		   return false;
 	    else
 	    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2524
 			switch (typeId.getJDBCTypeId()) {
 			case Types.CHAR:
 			case Types.VARCHAR:
@@ -567,6 +573,8 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		//with. For character data types, it really represents the collation 
 		//type of the character data type. For all the other data types, it 
 		//represents the scale of that data type.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2524
+//IC see: https://issues.apache.org/jira/browse/DERBY-1478
 		switch (typeId.getJDBCTypeId()) {
 		case Types.CHAR:
 		case Types.VARCHAR:

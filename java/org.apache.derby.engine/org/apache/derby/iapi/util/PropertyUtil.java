@@ -71,6 +71,7 @@ public class PropertyUtil {
 	public	static	String	sortProperties( Properties list, String indent )
 	{
         // Get all property names, including any defaults.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6296
         Set<String> names = (list == null)
                 ? Collections.<String>emptySet()
                 : list.stringPropertyNames();
@@ -119,6 +120,7 @@ public class PropertyUtil {
      **/
     public static void copyProperties(Properties src_prop, Properties dest_prop)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6296
         for (String key : src_prop.stringPropertyNames())
         {
             dest_prop.put(key, src_prop.get(key));
@@ -166,6 +168,7 @@ public class PropertyUtil {
 		// Now, trim off any excess whitespace, if any, and then
 		// add the properties from file to the received Properties
 		// set.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6296
         for (String tmpKey : p.stringPropertyNames()) {
 		// get the value, trim off the whitespace, then store it
 		// in the received properties object.

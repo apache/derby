@@ -65,6 +65,7 @@ public abstract class GClass implements ClassBuilder {
 
 	protected void writeClassFile(String dir, boolean logMessage, Throwable t)
 		throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		if (SanityManager.DEBUG) {
 
@@ -77,10 +78,12 @@ public abstract class GClass implements ClassBuilder {
 		filename = filename + ".class";
 
 		final File classFile = new File(dir,filename);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4287
 
 		FileOutputStream fos = null;
 		try {
 			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				fos =  AccessController.doPrivileged(
 						new PrivilegedExceptionAction<FileOutputStream>() {
 							public FileOutputStream run()
@@ -96,12 +99,14 @@ public abstract class GClass implements ClassBuilder {
 			fos.flush();
 			if (logMessage) {
 		        // find the error stream
+//IC see: https://issues.apache.org/jira/browse/DERBY-5062
 		        HeaderPrintWriter errorStream = Monitor.getStream();
 				errorStream.printlnWithHeader("Wrote class "+getFullName()+" to file "+classFile.toString()+". Please provide support with the file and the following exception message: "+t);
 			}
 			fos.close();
 		} catch (IOException e) {
 			if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Unable to write .class file", e);
 		}
 		}
@@ -144,6 +149,7 @@ public abstract class GClass implements ClassBuilder {
 				else
 					cf.loadApplicationClass(typeName);
 			} catch (ClassNotFoundException cnfe) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
 				SanityManager.THROWASSERT("Class "+typeName+" not found", cnfe);
 			}
 

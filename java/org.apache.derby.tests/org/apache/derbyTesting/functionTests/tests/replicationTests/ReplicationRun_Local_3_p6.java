@@ -58,6 +58,7 @@ public class ReplicationRun_Local_3_p6 extends ReplicationRun_Local_3
     
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("ReplicationRun_Local_3_p6 Suite");
         
@@ -100,6 +101,7 @@ public class ReplicationRun_Local_3_p6 extends ReplicationRun_Local_3
         initMaster(masterServerHost,
                 replicatedDb);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5729
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
@@ -226,6 +228,7 @@ public class ReplicationRun_Local_3_p6 extends ReplicationRun_Local_3
     {
         ClientDataSourceInterface ds;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");

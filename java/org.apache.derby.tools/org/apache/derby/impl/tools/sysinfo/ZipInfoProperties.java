@@ -33,6 +33,7 @@ public class ZipInfoProperties // extends Properties
 	private final ProductVersionHolder	version;
     /**
         full path to zip (or expanded zip)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
         C:/derby/lib/tools.zip
             -or-
         D:\myWorkDir\derby\lib\ *expanded*

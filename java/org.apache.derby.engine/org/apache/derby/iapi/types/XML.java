@@ -162,6 +162,7 @@ public class XML
      */
     private XML(SQLChar val, int xmlType, boolean seqWithAttr,
             boolean materialize) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
         xmlStringValue = (val == null ? null
                                       : (SQLChar)val.cloneValue(materialize));
         setXType(xmlType);
@@ -177,6 +178,7 @@ public class XML
      * @see DataValueDescriptor#cloneValue
      */
     public DataValueDescriptor cloneValue(boolean forceMaterialization) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
         return new XML(xmlStringValue, getXType(), hasTopLevelAttr(),
                 forceMaterialization);
     }
@@ -627,6 +629,8 @@ public class XML
             // So do a serialization now and just store the result,
             // so that we don't have to re-serialize every time a
             // call is made to XMLSERIALIZE.
+//IC see: https://issues.apache.org/jira/browse/DERBY-688
+//IC see: https://issues.apache.org/jira/browse/DERBY-567
                 text = sqlxUtil.serializeToString(text);
             }
             else {
@@ -653,6 +657,7 @@ public class XML
          */ 
             throw StandardException.newException(
                 SQLState.LANG_INVALID_XML_DOCUMENT, t, t.getMessage());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1775
 
         }
 
@@ -662,6 +667,8 @@ public class XML
         if (xmlStringValue == null)
             xmlStringValue = new SQLChar();
         xmlStringValue.setValue(text);
+//IC see: https://issues.apache.org/jira/browse/DERBY-688
+//IC see: https://issues.apache.org/jira/browse/DERBY-567
         return this;
     }
 
@@ -699,6 +706,8 @@ public class XML
                     if (SanityManager.DEBUG) {
                         SanityManager.THROWASSERT(
                             "Should NOT have made it to XMLSerialize " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-688
+//IC see: https://issues.apache.org/jira/browse/DERBY-567
                             "with a non-string target type: " + targetType);
                     }
                     return null;
@@ -716,6 +725,7 @@ public class XML
             // passed collation type in determining whether we should
             // generate SQLChar vs CollatorSQLChar for instance. Keep in mind
             // that collation applies only to character string types.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5077
             try {
                 RuleBasedCollator rbs = ConnectionUtil.getCurrentLCC().getDataValueFactory().
                 getCharacterCollator(targetCollationType);
@@ -761,6 +771,8 @@ public class XML
         // we already have it as a UTF-8 string, so just use
         // that.
         result.setValue(getString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-688
+//IC see: https://issues.apache.org/jira/browse/DERBY-567
 
         // Seems wrong to trunc an XML document, as it then becomes non-
         // well-formed and thus useless.  So we throw an error (that's
@@ -786,6 +798,8 @@ public class XML
      * @exception StandardException Thrown on error
      */
     public BooleanDataValue XMLExists(SqlXmlUtil sqlxUtil)
+//IC see: https://issues.apache.org/jira/browse/DERBY-688
+//IC see: https://issues.apache.org/jira/browse/DERBY-567
         throws StandardException
     {
         if (this.isNull()) {
@@ -828,6 +842,8 @@ public class XML
          * fail but Derby will continue to run as normal. 
          */
             throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1775
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
                 SQLState.LANG_XML_QUERY_ERROR, xe,
                 "XMLEXISTS", xe.getMessage());
         }
@@ -867,6 +883,7 @@ public class XML
             // Return an XML data value whose contents are the
             // serialized version of the query results.
             int [] xType = new int[1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2739
             List itemRefs = sqlxUtil.evalXQExpression(
                 this, true, xType);
 
@@ -901,6 +918,8 @@ public class XML
          * fail but Derby will continue to run as normal. 
          */
             throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-1775
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
                 SQLState.LANG_XML_QUERY_ERROR, xe,
                 "XMLQUERY", xe.getMessage());
         }
@@ -995,6 +1014,7 @@ public class XML
              * provided as part the JVM if it is jdk 1.4 or
              * greater.
              */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
             if (!checkJAXPRequirement()) {
                 xmlReqCheck = "JAXP";
             }
@@ -1021,6 +1041,7 @@ public class XML
      */
     private static boolean checkJAXPRequirement() {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6624
             Class.forName("javax.xml.parsers.DocumentBuilderFactory");
             return true;
         } catch (Throwable t) {

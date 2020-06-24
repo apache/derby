@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.HasCorrelatedCRsVisitor
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -29,6 +30,8 @@ import org.apache.derby.iapi.sql.compile.Visitor;
  * anywhere below us.  Stop traversal as soon as we find one.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class HasCorrelatedCRsVisitor implements Visitor
 {
 	private boolean hasCorrelatedCRs;
@@ -103,6 +106,7 @@ class HasCorrelatedCRsVisitor implements Visitor
 
 	public boolean visitChildrenFirst(Visitable v)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 
@@ -127,6 +131,8 @@ class HasCorrelatedCRsVisitor implements Visitor
 	 *
 	 *	@param	value	true/false
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setHasCorrelatedCRs(boolean value)
 	{
 		hasCorrelatedCRs = value;

@@ -49,6 +49,8 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
      * 
      * @param lcc     Language Connection context
      * @param constraintId Id of the constraint (only used for
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                       deferrable constraints)
      * @param doClone If true, then rows that are retained
      * 		by the sorter will be cloned.  This is needed
@@ -62,6 +64,8 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
      */
     public UniqueWithDuplicateNullsIndexSortObserver(
             LanguageConnectionContext lcc,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
             UUID constraintId,
             boolean doClone,
             boolean deferrable,
@@ -72,6 +76,8 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
             String  tableName) {
         super(doClone, false, execRow, reuseWrappers);
         this.lcc = lcc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
         this.constraintId = constraintId;
         this.deferrable = deferrable;
         this.deferred = deferred;
@@ -105,6 +111,9 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
 
     @Override
     public boolean deferred() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
         return deferred;
     }
 
@@ -116,9 +125,12 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
     @Override
     public void rememberDuplicate(DataValueDescriptor[] row)
             throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         deferredDuplicates = DeferredConstraintsMemory.rememberDuplicate(
                 lcc,
                 deferredDuplicates,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6670
+//IC see: https://issues.apache.org/jira/browse/DERBY-6665
                 constraintId,
                 row);
     }

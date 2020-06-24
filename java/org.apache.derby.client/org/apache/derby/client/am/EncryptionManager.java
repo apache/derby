@@ -652,6 +652,7 @@ public class EncryptionManager {
             };
 
     /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Convert a byte array to a String with a hexadecimal format.
         The String may be converted back to a byte array using fromHexString.
         <BR>
@@ -670,6 +671,7 @@ public class EncryptionManager {
     */
     private String toHexString(byte[] data, int offset, int length)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         StringBuilder s = new StringBuilder(length*2);
         int end = offset+length;
 
@@ -689,6 +691,7 @@ public class EncryptionManager {
         Convert a string into a byte array in hex format.
         <BR>
         For each character (b) two bytes are generated, the first byte 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         represents the high nibble (4 bits) in hexadecimal ({@code b & 0xf0}),
         the second byte represents the low nibble ({@code b & 0x0f}).
         <BR>

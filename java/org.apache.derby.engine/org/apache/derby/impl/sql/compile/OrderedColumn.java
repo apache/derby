@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.OrderedColumn
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -36,6 +37,8 @@ public abstract class OrderedColumn extends QueryTreeNode
 	protected int	columnPosition = UNMATCHEDPOSITION;
 
     public OrderedColumn(ContextManager cm) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         super(cm);
     }
 
@@ -65,6 +68,7 @@ public abstract class OrderedColumn extends QueryTreeNode
 	 */
     boolean isNullsOrderedLow()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2887
 		return false;
 	}
 
@@ -101,6 +105,8 @@ public abstract class OrderedColumn extends QueryTreeNode
 	/**
 	 * Set the position of this column
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setColumnPosition(int columnPosition)
 	{
 		this.columnPosition = columnPosition;

@@ -242,7 +242,9 @@ public abstract class OpenConglomerate
         {
             // position on the next page.
             long current_pageno;
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
             if (pos.current_rh != null)
             {
                 current_pageno = pos.current_rh.getPageNumber();
@@ -565,6 +567,7 @@ public abstract class OpenConglomerate
         // This method is only used for locking existing rows, never for
         // insert operations.
         final boolean forInsert = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4685
 
         boolean lock_granted_with_latch_held =
             this.container.getLockingPolicy().
@@ -790,6 +793,7 @@ public abstract class OpenConglomerate
 
             // get a template.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             DataValueDescriptor[] row = 
                 runtime_mem.get_row_for_export(getRawTran());
 
@@ -876,6 +880,7 @@ public abstract class OpenConglomerate
         this.runtime_mem    = 
             (dynamic_info != null ? 
              ((OpenConglomerateScratchSpace) dynamic_info) : 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
              ((OpenConglomerateScratchSpace)
                 conglomerate.getDynamicCompiledConglomInfo()));
 

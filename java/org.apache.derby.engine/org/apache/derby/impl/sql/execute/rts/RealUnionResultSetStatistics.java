@@ -161,6 +161,7 @@ public class RealUnionResultSetStatistics
 		return getStatementExecutionPlanText(0);
 	}
   public java.util.Vector<ResultSetStatistics> getChildren(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     java.util.Vector<ResultSetStatistics> children = new java.util.Vector<ResultSetStatistics>();
     children.addElement(leftResultSetStatistics);
     children.addElement(rightResultSetStatistics);
@@ -172,6 +173,7 @@ public class RealUnionResultSetStatistics
 	 *
 	 */
   public String getNodeName(){
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
       return "Union";
   }
   
@@ -211,6 +213,7 @@ public class RealUnionResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,
            null,                           // index updates
            null,                           // lock mode

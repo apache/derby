@@ -98,10 +98,12 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3147
     SYSCONSTRAINTSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
 		super(uuidf,ef,dvf);
 		initInfo(SYSCONSTRAINTS_COLUMN_COUNT, TABLENAME_STRING, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1739
 				 indexColumnPositions, uniqueness, uuids );
 	}
 
@@ -132,6 +134,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		String					schemaID = null;
 
         boolean                 deferrable =
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             ConstraintDefinitionNode.DEFERRABLE_DEFAULT;
         boolean                 initiallyDeferred =
             ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT;
@@ -184,6 +187,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 			schemaID = constraint.getSchemaDescriptor().getUUID().toString();
 
             // constraint characteristics
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             deferrable = constraint.deferrable();
             initiallyDeferred   = constraint.initiallyDeferred();
             enforced   = constraint.enforced();
@@ -216,11 +220,13 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		row.setColumn(SYSCONSTRAINTS_SCHEMAID, new SQLChar(schemaID));
 
 		/* 6th column is STATE (char(1)) */
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         row.setColumn(SYSCONSTRAINTS_STATE,
             new SQLChar(encodeCharacteristics(deferrable, initiallyDeferred, enforced)));
 
 		/* 7th column is REFERENCED */
 		row.setColumn(SYSCONSTRAINTS_REFERENCECOUNT, new SQLInteger(referenceCount));
+//IC see: https://issues.apache.org/jira/browse/DERBY-4062
 
 		return row;
 	}
@@ -243,6 +249,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
     private String encodeCharacteristics(
             boolean deferrable, boolean initiallyDeferred, boolean enforced) {
         char c;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
         if (deferrable) {
             if (initiallyDeferred) {
@@ -322,6 +329,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		String				constraintSType;
 		String				constraintStateStr;
         boolean             deferrable =
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 ConstraintDefinitionNode.DEFERRABLE_DEFAULT;
         boolean             initiallyDeferred =
                 ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT;
@@ -497,6 +505,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		switch (constraintStateStr.charAt(0))
 		{
 			case 'E': 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                 deferrable = false;
                 initiallyDeferred = false;
                 enforced = true;
@@ -561,6 +570,8 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				constraintDesc = ddg.newUniqueConstraintDescriptor(
 										td, 
 										constraintName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                         deferrable,
                                         initiallyDeferred,
 										keyColumns,//genReferencedColumns(dd, td), //int referencedColumns[],
@@ -582,6 +593,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				constraintDesc = ddg.newForeignKeyConstraintDescriptor(
 										td, 
 										constraintName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                         deferrable,
                                         initiallyDeferred,
 										keyColumns,//genReferencedColumns(dd, td), //int referencedColumns[],
@@ -608,6 +620,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				constraintDesc = ddg.newCheckConstraintDescriptor(
 										td, 
 										constraintName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
                                         deferrable,
                                         initiallyDeferred,
 										constraintUUID,

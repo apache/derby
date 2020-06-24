@@ -131,6 +131,7 @@ public class BackToBackLoadGenerator implements LoadGenerator {
         out.println("Number of transactions:\t" + count);
         out.println("Average throughput (tx/s):\t" + tps);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4565
         for (int i = 0; i < threads.length; i++)
         {
             threads[i].getClient().printReport( out );

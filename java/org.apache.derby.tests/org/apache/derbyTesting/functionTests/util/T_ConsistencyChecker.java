@@ -254,6 +254,7 @@ public class T_ConsistencyChecker
 	{
 		sd = dd.getSchemaDescriptor(schemaName, tc, true);
 		td = dd.getTableDescriptor(tableName, sd, tc);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3012
 
 		if (td == null)
 		{
@@ -285,6 +286,7 @@ public class T_ConsistencyChecker
 
 		/* Get a row template for the base table */
 		baseRow = lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(td.getNumberOfColumns());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 
 		/* Fill the row with nulls of the correct type */
 		ColumnDescriptorList cdl = td.getColumnDescriptorList();
@@ -361,6 +363,7 @@ public class T_ConsistencyChecker
 
 		/* Get a row template */
 		indexScanTemplate = lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(baseColumns + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
 
 		/* Fill the row with nulls of the correct type */
 		for (int column = 0; column < baseColumns; column++)
@@ -437,6 +440,7 @@ public class T_ConsistencyChecker
      */
     public static String runConsistencyChecker() throws StandardException, java.sql.SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
         return countOpens() + countDependencies();
     }
 
@@ -458,6 +462,8 @@ public class T_ConsistencyChecker
         TransactionController   tc;
 
         lcc = (LanguageConnectionContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
            getContext(LanguageConnectionContext.CONTEXT_ID);
         tc = lcc.getTransactionExecute();
 
@@ -493,6 +499,7 @@ public class T_ConsistencyChecker
 
         LanguageConnectionContext lcc = (LanguageConnectionContext)
              getContext(LanguageConnectionContext.CONTEXT_ID);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         dd = lcc.getDataDictionary();
         dm = dd.getDependencyManager();
@@ -517,6 +524,7 @@ public class T_ConsistencyChecker
      */
     private  static  Context    getContext( final String contextID )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         if ( System.getSecurityManager() == null )
         {
             return ContextService.getContext( contextID );

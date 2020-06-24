@@ -65,6 +65,7 @@ public class MessageUtil
      * @return the message text with arguments plugged in
      */
     public String getTextMessage(String messageID, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         return getCompleteMessage(messageID, args);
     }
     
@@ -137,6 +138,7 @@ public class MessageUtil
             // we should compose a default message or throw an exception if
             // the message still is not found.
             return formatMessage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
                     MessageService.getBundleWithEnDefault(resourceBundleName, US), 
                     messageId, arguments, composeDefault);
         }
@@ -207,6 +209,7 @@ public class MessageUtil
         Object[] arguments, boolean composeDefault) {
 
         String message = null;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1115
         String badArgsMessage = null;
         
         if (arguments == null)
@@ -219,11 +222,13 @@ public class MessageUtil
                 
                 
                 // Ensure that the right number of arguments are passed in.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1115
                 if ( SanityManager.DEBUG )
                 {
                     int numExpected = countParams(message);
                     SanityManager.ASSERT(numExpected == arguments.length,
                         "Number of parameters expected for message id " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-842
                         messageId + " (" + numExpected +
                         ") does not match number of arguments received (" +
                         arguments.length + ")");
@@ -233,6 +238,7 @@ public class MessageUtil
                     return MessageFormat.format(message, arguments);
                 }
                 catch (IllegalArgumentException iae) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-839
                     if ( !composeDefault || SanityManager.DEBUG )
                         throw iae;
                 }
@@ -251,6 +257,7 @@ public class MessageUtil
             } 
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1115
         return composeDefaultMessage("UNKNOWN MESSAGE, id " + messageId, arguments);
     }
     
@@ -294,6 +301,7 @@ public class MessageUtil
      */
     public static String composeDefaultMessage(String message, Object[] arguments)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1115
         if (message == null)
         {
             message = "UNKNOWN";

@@ -58,6 +58,7 @@ for creating the underlying overflow container.
 The hash table will be built logically as follows (actual implementation
 may differ).  The important points are that the hash value is the standard
 java hash value on the row[key_column_numbers[0], if key_column_numbers.length is 1,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 or row[key_column_numbers[0, 1, ...]] if key_column_numbers.length &gt; 1, 
 and that duplicate detection is done by the standard java duplicate detection provided by 
 java.util.Hashtable.
@@ -118,6 +119,7 @@ to disk may be the following:
 </p>
 
 <ul>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 <li>DataValueDescriptor[] and ArrayList&lt;DataValueDescriptor&gt;</li>
 <li>or LocatedRow and ArrayList&lt;LocatedRow&gt;</li>
 </ul>
@@ -157,6 +159,7 @@ public class BackingStoreHashtable
      * The estimated number of bytes used by ArrayList(0)
      */  
     private final static int ARRAY_LIST_SIZE =
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
         ClassSize.estimateBaseFromCatalog(ArrayList.class);
     
     private DiskHashtable diskHashtable;
@@ -236,6 +239,7 @@ public class BackingStoreHashtable
         this.remove_duplicates    = remove_duplicates;
 		this.row_source			   = row_source;
 		this.skipNullKeyColumns	   = skipNullKeyColumns;
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
         this.max_inmemory_rowcnt = max_inmemory_rowcnt;
         if ( max_inmemory_rowcnt > 0)
         {
@@ -265,6 +269,7 @@ public class BackingStoreHashtable
         {
             hash_table = 
                 ((loadFactor == -1) ? 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                      new HashMap<Object,Object>(initialCapacity) :
                      new HashMap<Object,Object>(initialCapacity, loadFactor));
         }
@@ -297,6 +302,7 @@ public class BackingStoreHashtable
              */
             hash_table = 
                 (((estimated_rowcnt <= 0) || (row_source == null)) ?
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                      new HashMap<Object,Object>() :
                      (estimated_rowcnt < max_inmemory_size) ?
                          new HashMap<Object,Object>((int) estimated_rowcnt) :
@@ -318,6 +324,10 @@ public class BackingStoreHashtable
                 // it would still satisfy the max_inmemory condition.  Note
                 // that this isn't a hard limit--the hash table can grow if
                 // needed.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1007
+//IC see: https://issues.apache.org/jira/browse/DERBY-1259
+//IC see: https://issues.apache.org/jira/browse/DERBY-1260
+//IC see: https://issues.apache.org/jira/browse/DERBY-1205
                 if (hash_table == null)
                 {
                     // Check to see how much memory we think the first row
@@ -325,6 +335,7 @@ public class BackingStoreHashtable
                     // capacity of the hash table.
                     double rowUsage = getEstimatedMemUsage(row);
                     hash_table =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                         new HashMap<Object,Object>((int)(max_inmemory_size / rowUsage));
                 }
                
@@ -339,8 +350,10 @@ public class BackingStoreHashtable
         // an empty result set) so that calls to other methods on this
         // BackingStoreHashtable (ex. "size()") will have a working hash_table
         // on which to operate.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1365
         if (hash_table == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             hash_table = new HashMap<Object,Object>();
         }
     }
@@ -417,6 +430,7 @@ public class BackingStoreHashtable
         {
             if ( old_row[i] != null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                 new_row[i] = old_row[i].cloneValue(false);
             }
         }
@@ -443,6 +457,7 @@ public class BackingStoreHashtable
         {
             if ( old_row[i] != null)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                 new_row[i] = old_row[i].cloneHolder();
             }
         }
@@ -529,6 +544,7 @@ public class BackingStoreHashtable
             max_inmemory_size -= getEstimatedMemUsage( hashValue );
             if ( firstDuplicate)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
                 max_inmemory_size -= ARRAY_LIST_SIZE;
             }
         }
@@ -581,6 +597,7 @@ public class BackingStoreHashtable
             // Want to start spilling
             diskRow = makeDiskRow( columnValues, rowLocation );
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
             diskHashtable = 
                 new DiskHashtable(
                        tc,
@@ -775,6 +792,7 @@ public class BackingStoreHashtable
         hash_table = null;
         if ( diskHashtable != null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-106
             diskHashtable.close();
             diskHashtable = null;
         }
@@ -830,6 +848,7 @@ public class BackingStoreHashtable
     {
         if ( diskHashtable == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
             return Collections.enumeration(hash_table.values());
         }
         return new BackingStoreHashtableEnumeration();
@@ -1091,6 +1110,7 @@ public class BackingStoreHashtable
         
         public boolean hasMoreElements()
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
             if (memoryIterator != null) {
                 if (memoryIterator.hasNext()) {
                     return true;
@@ -1106,6 +1126,7 @@ public class BackingStoreHashtable
 
         public Object nextElement() throws NoSuchElementException
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2493
             if (memoryIterator != null) {
                 if (memoryIterator.hasNext()) {
                     return memoryIterator.next();
@@ -1125,6 +1146,7 @@ public class BackingStoreHashtable
     private static class RowList extends ArrayList<Object> {
 
         private RowList(int initialCapacity) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             super(initialCapacity);
         }
 

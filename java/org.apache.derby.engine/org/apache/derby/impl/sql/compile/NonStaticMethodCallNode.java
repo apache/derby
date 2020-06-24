@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.NonStaticMethodCallNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -57,6 +58,8 @@ class NonStaticMethodCallNode extends MethodCallNode
      * @param cm            The context manager
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     NonStaticMethodCallNode(String methodName,
                             ValueNode receiver,
                             ContextManager cm)
@@ -76,6 +79,8 @@ class NonStaticMethodCallNode extends MethodCallNode
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             this.receiver =
                 new SQLToJavaValueNode(receiver, getContextManager());
 //            System.out.println("NonStaticMethodCallNode.init() receiver = "+receiver);
@@ -99,7 +104,9 @@ class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
     JavaValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -123,6 +130,7 @@ class NonStaticMethodCallNode extends MethodCallNode
 			//	then we have a type for it. Binding can continue.
 			//
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			if (SQLValue.requiresTypeFromContext())
 			{
 				if ( SQLValue.getTypeServices() == null )
@@ -131,6 +139,7 @@ class NonStaticMethodCallNode extends MethodCallNode
 		}
 
         bindParameters(fromList, subqueryList, aggregates);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
 		/* Now we don't allow an alias static method call here (that has to
 		 * use :: sign for any static call).  If it gets here, it can't be
@@ -271,6 +280,8 @@ class NonStaticMethodCallNode extends MethodCallNode
 	 * @param depth		The depth of this node in the tree
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -371,6 +382,7 @@ class NonStaticMethodCallNode extends MethodCallNode
 		** Refer to the field holding the receiver, if there is any.
 		*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Class<?> declaringClass = method.getDeclaringClass();
 		
 		/*
@@ -446,11 +458,13 @@ class NonStaticMethodCallNode extends MethodCallNode
 	 * @exception StandardException on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
 		super.acceptChildren(v);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		if (receiver != null)
 		{
 			receiver = (JavaValueNode)receiver.accept(v);

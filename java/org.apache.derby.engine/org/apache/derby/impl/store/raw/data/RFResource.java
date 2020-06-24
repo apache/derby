@@ -75,6 +75,7 @@ class RFResource implements FileResource {
             ContextManager cm = 
                 FileContainer.getContextService().getCurrentContextManager();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             RawTransaction tran = 
                 factory.getRawStoreFactory().getXactFactory().findUserTransaction(
                         factory.getRawStoreFactory(), 
@@ -90,6 +91,7 @@ class RFResource implements FileResource {
             tran.blockBackup(true);
 
 			StorageFile directory = file.getParentDir();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
             StorageFile parentDir = directory.getParentDir();
             boolean pdExisted = parentDir.exists();
 
@@ -102,6 +104,7 @@ class RFResource implements FileResource {
                 }
 
                 directory.limitAccessToOwner();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
 
                 if (!pdExisted) {
                     parentDir.limitAccessToOwner();
@@ -152,11 +155,14 @@ class RFResource implements FileResource {
      * @see FileResource#removeJarDir
      */
     public void removeJarDir(String f) throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         if (factory.isReadOnly())
             throw StandardException.newException(SQLState.FILE_READ_ONLY);
 
         ContextManager cm =
             FileContainer.getContextService().getCurrentContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
         RawTransaction tran =
             factory.getRawStoreFactory().getXactFactory().findUserTransaction(
@@ -189,7 +195,9 @@ class RFResource implements FileResource {
 
 			
 		ContextManager cm = FileContainer.getContextService().getCurrentContextManager();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         RawTransaction tran = 
             factory.getRawStoreFactory().getXactFactory().findUserTransaction(
                         factory.getRawStoreFactory(), 
@@ -246,6 +254,7 @@ class RFResource implements FileResource {
 } // end of class RFResource
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 final class RemoveFile implements Serviceable, PrivilegedExceptionAction<Object>
 {
 	private final StorageFile fileToGo;
@@ -279,15 +288,18 @@ final class RemoveFile implements Serviceable, PrivilegedExceptionAction<Object>
      */
 	public boolean serviceImmediately()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 		return true;
 	}
 
     public Object run() throws StandardException {
         // SECURITY PERMISSION - MP1, OP5
         if (fileToGo.exists()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
             if (fileToGo.isDirectory()) {
                 if (!fileToGo.deleteAll()) {
                     throw StandardException.newException(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5886
                             SQLState.FILE_CANNOT_REMOVE_JAR_FILE, fileToGo);
                 }
             } else {

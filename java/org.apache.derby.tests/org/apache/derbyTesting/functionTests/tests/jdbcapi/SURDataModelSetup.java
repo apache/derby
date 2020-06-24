@@ -69,6 +69,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
         
         /** Create the table */
         statement.execute(model.getCreateTableStatement());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         BaseTestCase.println(model.getCreateTableStatement());
         
         /** Create secondary index */
@@ -79,8 +80,10 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
         
         /** Populate with data */
         PreparedStatement ps = con.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
             prepareStatement("insert into t1 values (?,?,?,?,?)");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1070
         for (int i=0; i<records; i++) {
             ps.setInt(1, i);
             ps.setInt(2, i);
@@ -90,6 +93,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
             ps.addBatch();
         }
         ps.executeBatch();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         ps.close();
         statement.close();
         con.commit();
@@ -104,6 +108,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
      * @param con connection to database
      */
     public static void createDataModel(SURDataModel model, Connection con) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1070
         throws SQLException
     {
         createDataModel(model, con, recordCount);
@@ -117,6 +122,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
         println("Setting up datamodel: " + model);
 
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
             Connection con = getConnection();
             con.setAutoCommit(false);
             createDataModel(model, con);
@@ -133,6 +139,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
         throws Exception
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
             Connection con = getConnection();
             con.rollback();
             con.createStatement().execute("drop table t1");
@@ -173,6 +180,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
 
         /** Array with all values */
         private final static Set values = Collections.unmodifiableSet
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             (new HashSet<SURDataModel>(Arrays.asList(
                 MODEL_WITH_NO_KEYS, 
                 MODEL_WITH_PK, 
@@ -205,6 +213,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
          */
         public String getCreateTableStatement() {
             return hasPrimaryKey() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6228
                 ? "create table t1 (id int primary key, a int, b int, c varchar(5000), d clob)"
                 : "create table t1 (id int, a int, b int, c varchar(5000), d clob)";
         }
@@ -235,6 +244,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
      * has been called.
      */
     static void printStackTrace(Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-993
         BaseJDBCTestCase.printStackTrace(t);
     }
 }

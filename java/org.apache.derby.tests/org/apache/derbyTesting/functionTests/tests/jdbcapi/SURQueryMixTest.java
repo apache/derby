@@ -73,6 +73,7 @@ public class SURQueryMixTest extends SURBaseTest
         throws SQLException
     {
         println(query);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         DatabaseMetaData dbMeta = getConnection().getMetaData();
                 
         if (dbMeta.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
@@ -89,6 +90,7 @@ public class SURQueryMixTest extends SURBaseTest
         checkRowDeleted = dbMeta.ownDeletesAreVisible(rs.getType());
         
         // Create map with rows
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Map<Integer, String> rows = createRowMap(rs);
         
         // Set of rows which are updated (contains Integer with position in RS)
@@ -138,6 +140,8 @@ public class SURQueryMixTest extends SURBaseTest
         }
         
         rs.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         s.close();
     }
     
@@ -150,6 +154,7 @@ public class SURQueryMixTest extends SURBaseTest
     private Map<Integer, String> createRowMap(final ResultSet rs)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         final Map<Integer, String> rows = new HashMap<Integer, String>();
         rs.beforeFirst();
         assertTrue("Unexpected return from isBeforeFirst()",
@@ -164,6 +169,7 @@ public class SURQueryMixTest extends SURBaseTest
             i++;
             String row = getRowString(rs);
             println(row);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             rows.put(i, row);
             sum += rs.getInt(1);
             if (rs.getInt(1) < 0) {
@@ -191,6 +197,7 @@ public class SURQueryMixTest extends SURBaseTest
      **/
     private List createRandomSample(final Map<Integer, String> rows, int k) {
         Random r = new Random();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<Integer> sampledKeys = new ArrayList<Integer>();
         int n = 0;        
         for (Integer key : rows.keySet()) {
@@ -220,6 +227,7 @@ public class SURQueryMixTest extends SURBaseTest
      * @param k number of records to be deleted
      */
     private void deleteRandomSampleOfNRecords(final ResultSet rs, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                               final Map<Integer, String> rows,
                                               final Set<Integer> deletedRows,
                                               final int k) 
@@ -233,12 +241,15 @@ public class SURQueryMixTest extends SURBaseTest
             rs.absolute(key.intValue());            
             if (rs.rowDeleted()) continue; // skip deleting row if already deleted
             if (positioned) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
                 createStatement().executeUpdate
                         ("DELETE FROM T1 WHERE CURRENT OF \"" + cursorName + 
                          "\"");
             } else {
                 rs.deleteRow();
             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
             rs.relative(0);
             println("Deleted row " + key);
             // Update the rows table
@@ -257,6 +268,7 @@ public class SURQueryMixTest extends SURBaseTest
      * @param k number of records to be updated
      */
     private void updateRandomSampleOfNRecords(final ResultSet rs, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                               final Map<Integer, String> rows,
                                               final Set<Integer> updatedRows,
                                               final int k) 
@@ -325,6 +337,8 @@ public class SURQueryMixTest extends SURBaseTest
         sb.append(cursorName);
         sb.append("\"");
         println(sb.toString());
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
+//IC see: https://issues.apache.org/jira/browse/DERBY-1701
         PreparedStatement ps = prepareStatement(sb.toString());
         
         for (int column = 1; column<=meta.getColumnCount(); column++) {
@@ -361,6 +375,7 @@ public class SURQueryMixTest extends SURBaseTest
                 String rowString = getRowString(rs);
                 assertEquals("Navigating with rs.previous(). The row is " +
                              "different compared to the value when navigating " +
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                              "forward.", rows.get(i), rowString);
                 
                 
@@ -382,6 +397,7 @@ public class SURQueryMixTest extends SURBaseTest
             assertEquals("Navigating with rs.absolute(). The row is " +
                          "different compared to the value" +
                          " when navigating forward.", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                          rows.get(i),
                          rowString);
             if (checkRowUpdated && updatedRows.contains(i)) {
@@ -419,6 +435,7 @@ public class SURQueryMixTest extends SURBaseTest
             assertEquals("Navigating with rs.relative(+). " +
                          "A tuple was different compared to the value" +
                          " when navigating forward.", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                          rows.get(relativePos),
                          getRowString(rs));
             
@@ -431,6 +448,7 @@ public class SURQueryMixTest extends SURBaseTest
             assertEquals("Navigating with rs.relative(-). " + 
                          "A tuple was different compared to the value" +
                          " when navigating forward.", 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                          rows.get(1),
                          getRowString(rs));
             
@@ -514,6 +532,7 @@ public class SURQueryMixTest extends SURBaseTest
     };
     
     private static BaseTestSuite createTestCases(final String modelName) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite();
         for (int doPos = 0; doPos<2; doPos++) {
             boolean positioned = doPos>0; // true if to use positioned updates
@@ -537,8 +556,10 @@ public class SURQueryMixTest extends SURBaseTest
      */
     public static Test suite() 
     {   
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite = new BaseTestSuite("SURQueryMixTest suite");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2021
         mainSuite.addTest(baseSuite("SURQueryMixTest:embedded"));
         mainSuite.addTest(
                 TestConfiguration.clientServerDecorator(
@@ -552,6 +573,7 @@ public class SURQueryMixTest extends SURBaseTest
      * The suite contains all testcases in this class running on different data models
      */
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite mainSuite = new BaseTestSuite(name);
       
         // Iterate over all data models and decorate the tests:
@@ -561,6 +583,7 @@ public class SURQueryMixTest extends SURBaseTest
             SURDataModelSetup.SURDataModel model =
                 (SURDataModelSetup.SURDataModel) i.next();
             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             BaseTestSuite suite = createTestCases(model.toString());
             TestSetup decorator = new SURDataModelSetup(suite, model);
             mainSuite.addTest(decorator);

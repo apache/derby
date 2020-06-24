@@ -48,6 +48,7 @@ public final class SetReservedSpaceOperation extends PageBasicOperation {
 	protected int	newValue;	// the new reserved space value
 	protected int	oldValue;	// the old reserved space value (for BI_logging)
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6163
     SetReservedSpaceOperation(BasePage page, int slot,
 									 int recordId, int newValue, int oldValue)
 	{

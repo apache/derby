@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.VerifyAggregateExpressionsVisitor
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -38,6 +39,8 @@ import org.apache.derby.iapi.sql.compile.Visitor;
  * an aggregate are grouping columns.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class VerifyAggregateExpressionsVisitor implements Visitor
 {
 	private GroupByList groupByList;
@@ -76,6 +79,7 @@ class VerifyAggregateExpressionsVisitor implements Visitor
 		
 			if (groupByList == null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-18
 				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_NON_GROUPED_SELECT_LIST, cr.getSQLColumnName());
 			}
 
@@ -147,6 +151,7 @@ class VerifyAggregateExpressionsVisitor implements Visitor
 
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 }	

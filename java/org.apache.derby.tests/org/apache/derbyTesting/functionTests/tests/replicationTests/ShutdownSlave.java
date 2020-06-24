@@ -73,6 +73,7 @@ public class ShutdownSlave extends BaseJDBCTestCase
         
         setEnv();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ShutdownSlave");
         suite.addTest(ShutdownSlave.suite(masterServerHost, masterServerPort));
         return (Test)suite;
@@ -167,6 +168,7 @@ public class ShutdownSlave extends BaseJDBCTestCase
                         String expectedState = (dbOnly)? "08004": "XJ015";
                         int expectedCode = dbOnly ? 45000 : 50000;
                         System.out.println("shutdown Got SQLException: " + errCode + " " + state + " " + msg);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2601
                         if ( (errCode == expectedCode)
                         && (state.equalsIgnoreCase(expectedState) ) )
                         {

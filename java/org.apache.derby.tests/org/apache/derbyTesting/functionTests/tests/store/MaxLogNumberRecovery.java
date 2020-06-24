@@ -97,6 +97,7 @@ public class MaxLogNumberRecovery extends MaxLogNumber {
     {
     
     AccessController.doPrivileged
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         (new java.security.PrivilegedAction<Void>(){
             
             public Void run(){

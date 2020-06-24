@@ -37,5 +37,6 @@ public interface DerbyConstants {
     String TEST_DBO = "TEST_DBO";
 
     /** Name of the automatic JUnit module. */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
     String JUNIT_MODULE_NAME = "junit";
 }

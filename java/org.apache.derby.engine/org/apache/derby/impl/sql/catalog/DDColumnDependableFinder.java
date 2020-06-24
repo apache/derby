@@ -91,6 +91,7 @@ public class DDColumnDependableFinder extends DDdependableFinder
 	 * @return	a dependable, a table descriptor with referencedColumnMap
 	 *			field set
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2138
 	Dependable findDependable(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{

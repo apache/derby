@@ -80,6 +80,7 @@ public class IndexScanTest extends JDBCPerfTestCase {
      * @return a test suite
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("IndexScanTest");
         suite.addTest(new IndexScanTest("varchar10", 5000, 4));
         suite.addTest(new IndexScanTest("varchar100", 5000, 4));

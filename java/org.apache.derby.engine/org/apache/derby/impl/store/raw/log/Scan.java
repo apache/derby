@@ -376,6 +376,7 @@ public class Scan implements StreamLogScan {
 					throw logFactory.markCorrupt(
                         StandardException.newException(
                             SQLState.LOG_RECORD_CORRUPTED, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                             checkLength,
                             recordLength,
                             inst,
@@ -465,6 +466,7 @@ public class Scan implements StreamLogScan {
 
 			// skip the checksum log records, there is no need to look at them 
 			// during backward scans. They are used only in forwardscan during recovery. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 			if(lr.isChecksum())
 			{
 				candidate = false; 
@@ -709,6 +711,7 @@ public class Scan implements StreamLogScan {
 
 				// scan is position just past the log header
 				recordStartPosition = scan.getFilePointer();
+//IC see: https://issues.apache.org/jira/browse/DERBY-298
 
                 // Verify that the header of the new log file refers
                 // to the end of the log record of the previous file
@@ -751,6 +754,7 @@ public class Scan implements StreamLogScan {
                 // Advance knownGoodLogEnd to make sure that if this
                 // log file is the last log file and empty, logging
                 // continues in this file, not the old file.
+//IC see: https://issues.apache.org/jira/browse/DERBY-298
                 knownGoodLogEnd = LogCounter.makeLogInstantAsLong
                     (currentLogFileNumber, recordStartPosition);
 
@@ -955,6 +959,7 @@ public class Scan implements StreamLogScan {
 						throw logFactory.markCorrupt
 						(StandardException.newException(
 							SQLState.LOG_RECORD_CORRUPTED, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                             checkLength,
                             recordLength,
                             currentInstant,
@@ -998,6 +1003,7 @@ public class Scan implements StreamLogScan {
 			 * specified length of the data in the log file. cheksum values
 			 * should match unless the right was incomplete before the crash.
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-96
 			if(lr.isChecksum())
 			{
 				// checksum log record should not be returned to the logger recovery redo
@@ -1200,6 +1206,7 @@ public class Scan implements StreamLogScan {
 
 	/**
 		Return the log instant at the end of the log record on the current
+//IC see: https://issues.apache.org/jira/browse/DERBY-298
 		LogFile in the form of a log instant.
         After the scan has been closed, the end of the last log record will be
         returned except when the scan ended in an empty log file.  In that

@@ -74,6 +74,7 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 
 		props.setProperty("derby.language.maxMemoryPerTable", "1");
 		return new DatabasePropertyTestSetup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
             new SystemPropertyTestSetup(
                 new CleanDatabaseTestSetup(
                     new BaseTestSuite(
@@ -113,6 +114,7 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 
 					for (int j = 0; j < 5; j++) {
 						pstmt.setInt(1 + k, i + (4 - j));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 						pstmt.setString(2 + k, Integer.toString(i));
 						pstmt.setInt(3 + k, i + j);
 						pstmt.setString(4 + k, Integer.toString(i));
@@ -128,6 +130,7 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 				pstmt.close();
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2543
 		}, props), props, true);
 	}
 
@@ -146,6 +149,8 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 		/* drop index and recreate it to be sure that it is ascending
                  * (other subtests may have changed it)
                  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3224
+//IC see: https://issues.apache.org/jira/browse/DERBY-3176
 		assertUpdateCount(update, 0, "drop index I11");
 		assertUpdateCount(update, 0, "create index I11 on T1 (c3, c1, c5)");
 

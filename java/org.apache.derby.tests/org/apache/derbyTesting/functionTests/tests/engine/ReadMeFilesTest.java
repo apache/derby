@@ -57,6 +57,7 @@ public class ReadMeFilesTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         BaseTestSuite suite = new BaseTestSuite("ReadMeFilesTest");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         //DERBY-5232 (Put a stern README file in log and seg0 directories 
         // to warn users of corrpution they will cause if they touch files 

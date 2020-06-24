@@ -109,6 +109,7 @@ class DirFile extends File implements StorageFile
      */
     public OutputStream getOutputStream( ) throws FileNotFoundException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
         return getOutputStream(false);
     }
     
@@ -129,9 +130,12 @@ class DirFile extends File implements StorageFile
     {
         boolean exists = exists();
         OutputStream result = new FileOutputStream(this, append);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
         if (!exists) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6503
             try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5363
                 limitAccessToOwner();
             } catch (FileNotFoundException fnfe) {
                 // Throw FileNotFoundException unchanged.
@@ -190,6 +194,7 @@ class DirFile extends File implements StorageFile
         ** of a warning.
         **/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         try
         {
             //create the file that us used to acquire exclusive lock if it does not exists.
@@ -375,6 +380,7 @@ class DirFile extends File implements StorageFile
         boolean rename_status = super.renameTo( (File) newName);
         int     retry_count   = 1;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5574
         while (!rename_status && (retry_count <= 5))
         {
             // retry operation, hoping a temporary I/O resource issue is 

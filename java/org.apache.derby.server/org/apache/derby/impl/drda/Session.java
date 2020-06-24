@@ -31,6 +31,7 @@ import java.util.Hashtable;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     Session stores information about the current session
     It is used so that a DRDAConnThread can work on any session.
 */
@@ -86,15 +87,18 @@ class Session
      *
      * @exception throws IOException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-3701
     Session (NetworkServerControlImpl nsctrl, int connNum, Socket clientSocket, String traceDirectory,
             boolean traceOn) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3701
         this.nsctrl = nsctrl;
         this.connNum = connNum;
         this.clientSocket = clientSocket;
         this.traceOn = traceOn;
         if (traceOn)
             dssTrace = new DssTrace(); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         dbtable = new Hashtable<String, Database>();
         initialize(traceDirectory);
     }
@@ -110,6 +114,7 @@ class Session
             sessionInput.close();
             sessionOutput.close();
             clientSocket.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5418
             setTraceOff();
             if (dbtable != null)
                 for (Enumeration e = dbtable.elements() ; e.hasMoreElements() ;) 
@@ -144,6 +149,7 @@ class Session
         
         if (dssTrace == null)
             dssTrace = new DssTrace();
+//IC see: https://issues.apache.org/jira/browse/DERBY-3701
         try {
             dssTrace.startComBufferTrace(traceFileName);
             traceOn = true;
@@ -166,6 +172,7 @@ class Session
      */
     protected void setTraceOn(String traceDirectory, boolean throwException) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (traceOn)
             return;
         initTrace(traceDirectory, throwException);    
@@ -211,6 +218,7 @@ class Session
      */
     protected void addDatabase(Database d)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         dbtable.put(d.getDatabaseName(), d);
     }
 
@@ -272,6 +280,7 @@ class Session
      * @param traceDirectory    - directory for trace files
      */
     private void initialize(String traceDirectory)
+//IC see: https://issues.apache.org/jira/browse/DERBY-3701
         throws Exception
     {
         sessionInput = clientSocket.getInputStream();

@@ -43,6 +43,7 @@ public class ReplicationTestRun_Verify extends BaseJDBCTestCase
     {
         System.out.println("*** ReplicationTestRun_Verify.suite()");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ReplicationTestRun_Verify");
         System.out.println("*** Done new BaseTestSuite()");
         

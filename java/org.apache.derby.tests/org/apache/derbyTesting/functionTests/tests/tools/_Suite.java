@@ -44,29 +44,43 @@ public class _Suite extends BaseTestCase {
     public static Test suite() {
 
         BaseTestSuite suite = new BaseTestSuite("tools");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTest(IJRunScriptTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2342
         suite.addTest(ImportExportTest.suite());
         suite.addTest(ImportExportBinaryDataTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         suite.addTest(ImportExportLobTest.suite());
         suite.addTest(ImportExportProcedureTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3863
         suite.addTest(ImportExportIJTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5368
         suite.addTest(ij2Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2609
         suite.addTest(ToolScripts.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-2903
         suite.addTest(SysinfoCPCheckTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-3142
         suite.addTest(SysinfoLocaleTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-4292
         suite.addTest(IjSecurityManagerTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5084
         suite.addTest(IjConnNameTest.suite());
         suite.addTest(RollBackWrappingWhenFailOnImportTest.suite());
         suite.addTest(ConnectWrongSubprotocolTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-5084
 
         // running a jar file implies not using a module path
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         if (!JVMInfo.isModuleAware())
         {
             suite.addTest(derbyrunjartest.suite());
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5332
         suite.addTest(ij3Test.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6661
         suite.addTest(Test_6661.suite());
         
         // SysinfoAPITest currently fails when run against jars, so is
@@ -77,6 +91,7 @@ public class _Suite extends BaseTestCase {
         //suite.addTest(SysinfoAPITest.suite());
 
         // tests that do not run with JSR169
+//IC see: https://issues.apache.org/jira/browse/DERBY-5374
         if (JDBC.vmSupportsJDBC3())  
         {
             suite.addTest(ij5Test.suite());            

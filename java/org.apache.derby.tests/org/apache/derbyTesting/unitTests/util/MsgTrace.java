@@ -57,6 +57,7 @@ public class MsgTrace implements Runnable {
 	private MsgTrace() {
 
 		output = getMonitor().getSystemStreams().stream();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		bombDelay = PropertyUtil.getSystemInt(DELAY_PARAM_NAME, 30 * 60); // 30 minutes default
 		bombDelay *= 1000;
@@ -98,6 +99,7 @@ public class MsgTrace implements Runnable {
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

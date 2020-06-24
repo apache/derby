@@ -170,6 +170,7 @@ public final class util implements java.security.PrivilegedAction<String> {
       
 		final Class c = util.class;
 		final String resource = qualifyResourceName(resourceName,true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 		if (resource == null) { return null; }
 		InputStream is = null;
 
@@ -252,6 +253,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-1216
 	  Verify the ij line arguments command arguments. Also used to detect --help.
 	  @return true if the args are invalid
 	  <UL>
@@ -273,12 +275,14 @@ public final class util implements java.security.PrivilegedAction<String> {
 				if (ix >= args.length) return true;
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3420
 			else if ((args[ix].equals("-p") || args[ix].equals("-pr") ))
 			{
 				// next arg is the file/resource name
 				ix++;
 				if (ix >= args.length) return true;
 			} else if (args[ix].equals("--help")) { return true; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-1216
 
 			//
 			//Assume the first unknown arg is a file name.
@@ -325,6 +329,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	// Loop over set methods on Datasource object, if there is a property
 	// then call the method with corresponding value. Call setCreateDatabase based on
     //parameter create. 	
+//IC see: https://issues.apache.org/jira/browse/DERBY-597
    java.lang.reflect.Method[] methods = ds.getClass().getMethods();
 	for (int i = 0; i < methods.length; i++) {
 	    java.lang.reflect.Method m = methods[i];
@@ -369,11 +374,14 @@ public final class util implements java.security.PrivilegedAction<String> {
     public static Connection getDataSourceConnection(String dsName,String user,String password,
     												String dbName,boolean firstTime) throws SQLException{
 		// Get a new proxied connection through DataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-6626
         DataSource ds;
 		try {
 			
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		    Class<?> dc = Class.forName(dsName);
             if (DataSource.class.isAssignableFrom(dc)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 ds = (DataSource) dc.getConstructor().newInstance();
             } else {
                 throw new ijException(LocalizedResource.getMessage(
@@ -418,6 +426,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	 */
     static public Connection startJBMS(String defaultDriver, String defaultURL,
 				       Properties connInfo) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
       throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException,
         NoSuchMethodException, InvocationTargetException
     {
@@ -429,6 +438,7 @@ public final class util implements java.security.PrivilegedAction<String> {
         driverName = util.getSystemProperty("driver");
         if (driverName == null) driverName = util.getSystemProperty("ij.driver");
 	if (driverName == null || driverName.length()==0) driverName = defaultDriver;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         if (driverName != null) {
 	    util.loadDriver(driverName);
 	}
@@ -444,6 +454,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	databaseURL = util.getSystemProperty("database");
 	if (databaseURL == null) databaseURL = util.getSystemProperty("ij.database");
 	if (databaseURL == null || databaseURL.length()==0) databaseURL = defaultURL;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	if (databaseURL != null) {
 	    // add protocol if might help find driver.
 		// if have full URL, load driver for it
@@ -475,6 +486,7 @@ public final class util implements java.security.PrivilegedAction<String> {
         
 	    //First connection - pass firstTime=true, dbName=null. For database name, 
 	    //value in ij.dataSource.databaseName will be used. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-597
 	    con = getDataSourceConnection(dsName,user,password,null,true);
 	    return con;
    }
@@ -543,6 +555,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	 */
     static public Connection startJBMS(String defaultDriver, String defaultURL) 
 			throws SQLException, ClassNotFoundException, InstantiationException,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                    IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		return startJBMS(defaultDriver,defaultURL,null);
 		
@@ -622,6 +635,7 @@ AppUI.out.println("SIZE="+l);
 				
 				if (sqlType == Types.DECIMAL)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     ps.setObject(c, rs.getObject(c), sqlType, rsmd.getScale(c));
 				}
 				else
@@ -671,6 +685,7 @@ AppUI.out.println("SIZE="+l);
 			{
 				util u = new util();
 				u.key = propertyName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				return java.security.AccessController.doPrivileged(u);
 			}
 			else
@@ -779,6 +794,7 @@ AppUI.out.println("SIZE="+l);
 		@exception IllegalAccessException if driver class constructor not visible.
 	 */
     static void loadDriver(String driverClass)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         throws
             ClassNotFoundException, InstantiationException,
             IllegalAccessException, NoSuchMethodException, InvocationTargetException {
@@ -818,6 +834,7 @@ AppUI.out.println("SIZE="+l);
 	 * @return the current schema of the connection, or null if error.
 	 */
 	public static String getSelectedSchema(Connection theConnection) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
 		String schema = null;
                 if (theConnection == null)
                   return null;

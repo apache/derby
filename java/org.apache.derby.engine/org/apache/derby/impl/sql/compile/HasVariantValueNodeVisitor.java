@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.HasVariantValueNodeVisitor
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -45,6 +46,8 @@ import org.apache.derby.iapi.store.access.Qualifier;
  * @see org.apache.derby.iapi.store.access.Qualifier 
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class HasVariantValueNodeVisitor implements Visitor
 {
 	private boolean hasVariant;
@@ -55,6 +58,8 @@ class HasVariantValueNodeVisitor implements Visitor
 	/**
 	 * Construct a visitor
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     HasVariantValueNodeVisitor()
 	{
 		this.variantType = Qualifier.VARIANT;
@@ -80,6 +85,8 @@ class HasVariantValueNodeVisitor implements Visitor
 	 *		variant
 	 * @param ignoreParameters should I ignore parameter nodes?
  	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     HasVariantValueNodeVisitor(int variantType, boolean ignoreParameters)
 	{
 		this.variantType = variantType;
@@ -113,6 +120,7 @@ class HasVariantValueNodeVisitor implements Visitor
 	{
 		if (node instanceof ValueNode)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-582
 			if (ignoreParameters && ((ValueNode)node).requiresTypeFromContext())
 				return node;
 				
@@ -131,6 +139,7 @@ class HasVariantValueNodeVisitor implements Visitor
 
 	public boolean visitChildrenFirst(Visitable node)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4421
 		return false;
 	}
 

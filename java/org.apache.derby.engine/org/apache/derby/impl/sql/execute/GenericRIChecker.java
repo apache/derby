@@ -60,6 +60,7 @@ public abstract class GenericRIChecker
     protected int[] identityMap;
 
     final IndexRow indexQualifierRow;
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 	/**
      * @param lcc       the language connection context
@@ -75,6 +76,7 @@ public abstract class GenericRIChecker
         this.lcc = lcc;
 		this.fkInfo = fkinfo;
 		this.tc = tc;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		scanControllers = new Hashtable<Long,ScanController>();
 		numColumns = fkInfo.colArray.length;
 		indexQualifierRow = new IndexRow(numColumns);
@@ -144,11 +146,13 @@ public abstract class GenericRIChecker
 		int				isoLevel = getRICheckIsolationLevel();
 		ScanController 	scan;
         Long            hashKey = Long.valueOf(conglomNumber);
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
 
 		/*
 		** If we haven't already opened this scan controller,
 		** we'll open it now and stick it in the hash table.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		if ((scan = scanControllers.get(hashKey)) == null)
 		{
 			setupQualifierRow(searchRow);
@@ -239,6 +243,7 @@ public abstract class GenericRIChecker
 	void close()
 		throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Enumeration<ScanController> e = scanControllers.elements();
 		while (e.hasMoreElements())
 		{

@@ -33,6 +33,7 @@ This class has 2 direct subclasses.
 <LI> org.apache.derby.iapi.store.access.xa.XAXactId : 
 this class is a specific implementation of the JTA Xid interface
 <LI> org.apache.derby.impl.store.access.GlobalXactId : 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 this class represents internal Derby transaction ids
 </UL>
 <P>
@@ -83,6 +84,7 @@ public abstract class GlobalXact {
 			for (int i = 0; i < global_id.length; i++)
 		    {
 				mask = (global_id[i] & 0xFF);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2551
                 if (mask < 16) {
                     globalhex += "0" + Integer.toHexString(mask);
                 } else {
@@ -97,6 +99,7 @@ public abstract class GlobalXact {
 			for (int i = 0; i < branch_id.length; i++)
 		    {
 				mask = (branch_id[i] & 0xFF);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2551
                 if (mask < 16) {
                     branchhex += "0" + Integer.toHexString(mask);
                 } else {

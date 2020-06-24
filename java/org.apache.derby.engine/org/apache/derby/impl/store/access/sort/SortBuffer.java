@@ -112,6 +112,7 @@ class SortBuffer
 	Arrange that the next node allocated in the tree have
 	it's aux field set to the argument.
 	**/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 	void setNextAux(int aux)
 	{
 		nextAux = aux;
@@ -130,6 +131,7 @@ class SortBuffer
 	Construct doesn't do anything, callers must call init
 	and check its return code.
 	**/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 	SortBuffer(MergeSort sort)
 	{
 		this.sort = sort;
@@ -159,6 +161,7 @@ class SortBuffer
 		return true;
 	}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 	void reset()
 	{
 		allocator.reset();
@@ -178,6 +181,7 @@ class SortBuffer
 	/**
 	Grow by a certain percent if we can
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 	void grow(int percent)
 	{
 		if (percent > 0)
@@ -415,6 +419,7 @@ class SortBuffer
 	Return the lowest key and delete it from 
 	the tree, preserving the balance of the tree.
 	**/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 	DataValueDescriptor[] removeFirst()
 	{
 		if (head.rightLink == null)

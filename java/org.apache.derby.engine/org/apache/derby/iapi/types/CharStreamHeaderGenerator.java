@@ -36,6 +36,7 @@ import java.io.ObjectOutput;
  * </ul>
  * The length is encoded like this:
  * <pre>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             out.writeByte((byte)(byteLength &gt;&gt;&gt; 8));
             out.writeByte((byte)(byteLength &gt;&gt;&gt; 0));
  * </pre>
@@ -62,6 +63,7 @@ public final class CharStreamHeaderGenerator
     /** Write the EOF marker to a byte array and return the EOF marker's length */
     public  static  int  writeEOFMarker( byte[] buffer, int offset )
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6200
         System.arraycopy( DERBY_EOF_MARKER, 0, buffer, offset, DERBY_EOF_MARKER.length );
         return DERBY_EOF_MARKER.length;
     }
@@ -158,6 +160,7 @@ public final class CharStreamHeaderGenerator
      * @return Maximum header length in bytes.
      */
     public int getMaxHeaderLength() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4661
         return 2;
     }
 }

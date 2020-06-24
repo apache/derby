@@ -72,6 +72,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
      * Create SQL CLOB value initially set to value that
      * performs collation according to collatorForCharacterDatatypes 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
 	CollatorSQLClob(Clob val, RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		super(val);
@@ -103,6 +104,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
     // Implementation of CollationElementsInterface interface
 
     public boolean hasSingleCollationElement() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2699
         return holderForCollationSensitiveInfo.hasSingleCollationElement();
     }
 
@@ -115,6 +117,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
      */
     public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4542
         if (forceMaterialization) {
             try {
                 return new CollatorSQLClob(getString(),
@@ -123,6 +126,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
             catch (StandardException se)
             {
                 if (SanityManager.DEBUG)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2581
                     SanityManager.THROWASSERT("Unexpected exception", se);
                 return null;
             }
@@ -142,6 +146,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 	 */
 	public DataValueDescriptor getNewNull()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5951
 		CollatorSQLClob result = new CollatorSQLClob((String) null,
 				holderForCollationSensitiveInfo.getCollatorForCollation());
 		return result;
@@ -157,6 +162,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 	 */
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2534
 		if (collatorForComparison != null)
 		{
 			//non-null collatorForComparison means use this collator sensitive
@@ -176,6 +182,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 	 protected int stringCompare(SQLChar char1, SQLChar char2)
 	 throws StandardException
 	 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
 		 return holderForCollationSensitiveInfo.stringCompare(char1, char2);
 	 }
 
@@ -219,6 +226,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 	 * @exception StandardException		Thrown on error
 	 */
 	public BooleanDataValue like(DataValueDescriptor pattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2334
 			DataValueDescriptor escape) throws StandardException
 	{
 		return(holderForCollationSensitiveInfo.like(pattern, escape));

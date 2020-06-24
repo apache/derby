@@ -54,6 +54,7 @@ public class DerbyVersionTest
         super(name);
     }
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         return new BaseTestSuite(
             DerbyVersionTest.class, "DerbyVersionTest tests");
     }
@@ -74,6 +75,7 @@ public class DerbyVersionTest
     }
 
     public void testAtLeast() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5475
         assertTrue(_10_4.atLeast(_10_4));
         assertTrue(_10_4.atLeast(_10_3));
         assertTrue(_10_5_2_0.atLeast(_10_5_1_1));
@@ -94,6 +96,7 @@ public class DerbyVersionTest
 
 
     public void testAtMost() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5475
         assertTrue(_10_4.atMost(_10_5));
         assertTrue(_10_8.atMost(_11_9));
 

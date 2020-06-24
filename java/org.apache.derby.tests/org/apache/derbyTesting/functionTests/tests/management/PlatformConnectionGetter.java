@@ -39,6 +39,7 @@ class PlatformConnectionGetter implements JMXConnectionGetter {
      * User name ignored, only applicable for remote connections.
      */
     public MBeanServerConnection getMBeanServerConnection(String user,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3506
             String password) throws Exception {
         
         return AccessController.doPrivileged(new PrivilegedAction<MBeanServerConnection>() {

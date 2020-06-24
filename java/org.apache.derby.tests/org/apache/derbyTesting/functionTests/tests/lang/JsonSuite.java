@@ -57,6 +57,7 @@ public class JsonSuite extends BaseTestCase
         else
         {
             suite.addTest(SimpleJsonTest.suite());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6825
             suite.addTest(SimpleJsonPermsTest.suite());
         }
 

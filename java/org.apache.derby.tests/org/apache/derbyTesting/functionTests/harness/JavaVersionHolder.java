@@ -39,14 +39,18 @@ public class JavaVersionHolder
         throws java.lang.NumberFormatException
     {
         // handle early access versions of JDK 9
+//IC see: https://issues.apache.org/jira/browse/DERBY-6854
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
         if (javaVersion.startsWith( "9" ))
         {
             javaVersion = "1.9.0";
         }
 
         // handle JDK 10
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
         if (javaVersion.equals( "10" ))
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
             javaVersion = "1.10.0";
         }
 
@@ -62,6 +66,7 @@ public class JavaVersionHolder
         majorVersion = javaVersion.substring(0, i);
         try
 	    {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
           Integer imajor = Integer.valueOf(majorVersion);
 		    major = imajor.intValue();
 		    if (j != -1)
@@ -100,6 +105,7 @@ public class JavaVersionHolder
 		        //System.out.println("minorVersion: " + minorVersion);
 		        try
 	            {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                     Integer imajor = Integer.valueOf(majorVersion);
 		            major = imajor.intValue();
 		            Integer iminor = Integer.valueOf(minorVersion);
@@ -148,6 +154,7 @@ public class JavaVersionHolder
 	 */
 	public	boolean	atLeast( int baseMajor, int baseMinor )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
 		if ( major < baseMajor ) { return false; }
 		if ( major > baseMajor ) { return true; }
 

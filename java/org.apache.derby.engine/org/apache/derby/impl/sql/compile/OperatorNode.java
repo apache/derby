@@ -34,6 +34,8 @@ import org.apache.derby.iapi.types.SqlXmlUtil;
  */
 abstract class OperatorNode extends ValueNode {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     OperatorNode(ContextManager cm) {
         super(cm);
     }

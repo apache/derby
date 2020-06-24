@@ -408,6 +408,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 */
 
 	public PackagePermissionCollection() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		permissions = new Hashtable<String,Permission>();
 		all_allowed = false;
 	}

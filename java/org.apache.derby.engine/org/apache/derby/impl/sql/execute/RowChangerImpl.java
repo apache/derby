@@ -52,6 +52,7 @@ import java.util.Vector;
 /**
   Perform row at a time DML operations of tables and maintain indexes.
   */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 class RowChangerImpl	implements	RowChanger
 {
 	boolean isOpen = false;
@@ -301,6 +302,7 @@ class RowChangerImpl	implements	RowChanger
 		int isolationLevel;
 		if (lcc == null)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 			isolationLevel = TransactionControl.READ_COMMITTED_ISOLATION_LEVEL;
 		}
 		else
@@ -313,6 +315,7 @@ class RowChangerImpl	implements	RowChanger
 		{
 			// Even though we preserve the isolation level at READ UNCOMMITTED,
 			// Store will overwrite it to READ COMMITTED for update.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6206
 			case TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL:
 				isolationLevel = 
                     TransactionController.ISOLATION_READ_UNCOMMITTED;
@@ -447,6 +450,7 @@ class RowChangerImpl	implements	RowChanger
 		}
 		else
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
             if (isc != null || getRL)
 			{
                 if (baseRowLocation == null) {
@@ -460,6 +464,9 @@ class RowChangerImpl	implements	RowChanger
 			}
 			else
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
+//IC see: https://issues.apache.org/jira/browse/DERBY-6419
                 baseCC.insert(baseRow.getRowArray());
 			}
 		}
@@ -604,6 +611,7 @@ class RowChangerImpl	implements	RowChanger
 
 
 	public int findSelectedCol(int selectedCol) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4198
 		if (selectedCol == -1) {
 			// This is not a base column
 			return -1;

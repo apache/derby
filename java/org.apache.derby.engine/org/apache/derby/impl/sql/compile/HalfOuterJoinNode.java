@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.HalfOuterJoinNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -38,6 +39,8 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class HalfOuterJoinNode extends JoinNode
 {
 	private boolean rightOuterJoin;
@@ -57,6 +60,8 @@ class HalfOuterJoinNode extends JoinNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     HalfOuterJoinNode(ResultSetNode leftResult,
                       ResultSetNode rightResult,
                       ValueNode onClause,
@@ -155,6 +160,8 @@ class HalfOuterJoinNode extends JoinNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
@@ -198,6 +205,8 @@ class HalfOuterJoinNode extends JoinNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void pushExpressions(PredicateList outerPredicateList)
 					throws StandardException
 	{
@@ -220,6 +229,7 @@ class HalfOuterJoinNode extends JoinNode
 		{
 			Predicate predicate;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             predicate = joinPredicates.elementAt(index);
 			if (! predicate.getPushable())
 			{
@@ -233,6 +243,8 @@ class HalfOuterJoinNode extends JoinNode
 		}
 
 		/* Recurse down both sides of tree */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         PredicateList noPredicates = new PredicateList(getContextManager());
 		leftFromTable.pushExpressions(getLeftPredicateList());
 		rightFromTable.pushExpressions(noPredicates);
@@ -318,6 +330,7 @@ class HalfOuterJoinNode extends JoinNode
 			anyChange =	((HalfOuterJoinNode)logicalLeftResultSet).LOJ_reorderable(numTables) || anyChange;
 		}
 		else if (!(logicalLeftResultSet instanceof FromBaseTable))
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
         {// left operand must be either a base table or another OJ
 			// In principle, we don't care about the left operand.  However, we
 			// need to re-bind the resultColumns.  If the left operand is a
@@ -333,6 +346,7 @@ class HalfOuterJoinNode extends JoinNode
 			anyChange = ((HalfOuterJoinNode)logicalRightResultSet).LOJ_reorderable(numTables) || anyChange;
 		}
 		else if (!(logicalRightResultSet instanceof FromBaseTable))
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
         {// right operand must be either a base table or another OJ
 			return anyChange;
 		}
@@ -351,6 +365,7 @@ class HalfOuterJoinNode extends JoinNode
         // the table references on row-preserving and null-producing sides.  It
         // may be possible that either operand is a complex view.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
         JBitSet RPReferencedTableMap; // Row-preserving
         JBitSet NPReferencedTableMap; // Null-producing
 
@@ -366,6 +381,7 @@ class HalfOuterJoinNode extends JoinNode
 
         // Check if logical right operand is another OJ... so we may be able
         // to push the join.
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
         if (logicalRightResultSet instanceof HalfOuterJoinNode)
 		{
             // Get the row-preserving map of the  child OJ
@@ -460,6 +476,8 @@ class HalfOuterJoinNode extends JoinNode
                 // ((HalfOuterJoinNode)logicalRightResultSet).transformed =
                 //     local_transformed;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                 FromList localFromList = new FromList(
                         getOptimizerFactory().doJoinOrderOptimization(),
                         getContextManager());
@@ -469,6 +487,7 @@ class HalfOuterJoinNode extends JoinNode
                 rightResultSet = RChild;
 
                 // rebuild the result columns and re-bind column references
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
                 ((HalfOuterJoinNode)leftResultSet).setResultColumns( null );
                  // localFromList is empty:
                 ((JoinNode)leftResultSet).bindResultColumns(localFromList);
@@ -619,7 +638,10 @@ private boolean isNullRejecting (
 	{
 		if (anyChange)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 			setResultColumns( null );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             FromList localFromList = new FromList(
                     getOptimizerFactory().doJoinOrderOptimization(),
                     getContextManager());
@@ -677,6 +699,7 @@ private boolean isNullRejecting (
         // (inner or outer), that is, the inner operand is itself a join,
         // recursively.
         JBitSet innerMap = innerRS.LOJgetReferencedTables(numTables);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4405
 
 		/* Walk predicates looking for 
 		 * a null intolerant predicate on the inner table.
@@ -688,6 +711,7 @@ private boolean isNullRejecting (
 			ValueNode left = and.getLeftOperand();
 
 			/* Skip IS NULL predicates as they are not null intolerant */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             if (left.getClass().equals(IsNullNode.class) &&
                 ((IsNullNode)left).isNullNode())
 			{
@@ -717,17 +741,22 @@ private boolean isNullRejecting (
 					if (refMap.get(bit) && innerMap.get(bit))
 					{
 						// OJ -> IJ
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
                         JoinNode ij =  new JoinNode(
 												leftResultSet,
 												rightResultSet,
 												joinClause,
 												null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6464
 												getResultColumns(),
 												null,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 												null,
 												getContextManager());
 						ij.setTableNumber(tableNumber);
 						ij.setSubqueryList(subqueryList);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                         ij.setAggregates(aggregates);
 						return ij;
 					}
@@ -884,6 +913,8 @@ private boolean isNullRejecting (
 	 *  ResultColumn should be marked such. DERBY-4631
 	 */
     @Override
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void isJoinColumnForRightOuterJoin(ResultColumn rc)
 	{
 		if (isRightOuterJoin() && usingClause != null &&  
@@ -894,6 +925,8 @@ private boolean isNullRejecting (
 	}
 
 	// return the Null-producing table references
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     JBitSet LOJgetNPReferencedTables(int numTables)
 				throws StandardException
 	{
@@ -905,9 +938,12 @@ private boolean isNullRejecting (
 
     // return the row-preserving table references
     public JBitSet LOJgetRPReferencedTables(int numTables)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4471
                 throws StandardException
     {
         if (rightOuterJoin && !transformed)
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             return rightResultSet.LOJgetReferencedTables(numTables);
         else
             return leftResultSet.LOJgetReferencedTables(numTables);

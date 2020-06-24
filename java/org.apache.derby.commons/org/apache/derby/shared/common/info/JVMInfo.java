@@ -44,11 +44,14 @@ public abstract class JVMInfo
 		<UL>
 		<LI> 1 - not used was JDK 1.1
 		<LI> 2 - not used, was for JDK 1.2 and 1.3
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         <LI> 4 - not used, was for JDK 1.4.0 or 1.4.1
         <LI> 5 - not used, was for JDK 1.4.2
         <LI> 6 - not used, was for JDK 1.5
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
         <LI> 7 - not used, was for JDK 1.6
         <LI> 8 - not used, was for JDK 1.7
+//IC see: https://issues.apache.org/jira/browse/DERBY-5948
         <LI> 9 - J2SE_18 - JDK 1.8
 		</UL>
 	*/
@@ -61,6 +64,7 @@ public abstract class JVMInfo
 
     public static int jdbcMajorVersion()
     { 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6324
         return 4; 
     }
 
@@ -88,6 +92,7 @@ public abstract class JVMInfo
 		// If we don't recognize that, or if the property is not set, assume
         // version 1.8, which is the lowest level we support.
 		//
+//IC see: https://issues.apache.org/jira/browse/DERBY-6857
         String javaVersion = "1.8";
 		try {
             javaVersion =
@@ -109,6 +114,7 @@ public abstract class JVMInfo
             try {
 
                 // Extract major and minor version out of the spec version.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6518
                 String[] ver = javaVersion.split("[.]");
                 int major = ver.length >= 1 ? Integer.parseInt(ver[0]) : 0;
                 int minor = ver.length >= 2 ? Integer.parseInt(ver[1]) : 0;
@@ -128,6 +134,7 @@ public abstract class JVMInfo
 
 		JDK_ID = id;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         _isModuleAware = (getSystemModulePath() != null);
 	}
 
@@ -153,6 +160,7 @@ public abstract class JVMInfo
      */
     private static String getSystemProperty(final String name) {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return AccessController
                 .doPrivileged(new java.security.PrivilegedAction<String>() {
                     
@@ -191,6 +199,7 @@ public abstract class JVMInfo
      */
     public static final boolean isModuleAware()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return _isModuleAware;
     }
 
@@ -212,6 +221,7 @@ public abstract class JVMInfo
      */
     public static void javaDump() {
         if (isIBMJVM()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Class<?> ibmc = null;
             try {
                 ibmc = Class.forName("com.ibm.jvm.Dump");
@@ -240,6 +250,7 @@ public abstract class JVMInfo
      * @return true if JNDI is available
      */
     public static boolean hasJNDI() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         try {
             Class.forName("javax.naming.Referenceable");
         } catch (ClassNotFoundException e) {

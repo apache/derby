@@ -74,6 +74,8 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             testPrefix + OK_POLICY;
     private final static String OK_POLICY_R =
             resourcePrefix + OK_POLICY;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
 
     private final static String POLICY_MINUS_PROPERTYPERMISSION =
             "MissingPermissionsTest1.policy";
@@ -120,6 +122,8 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         inSubProcess = Boolean.getBoolean("inSubProcess");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
 
         final BaseTestSuite suite =
                 new BaseTestSuite("SystemPrivilegesPermissionTest");
@@ -284,6 +288,7 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
         final String output = spawned.getFullServerOutput(); // ignore
         final String err    = spawned.getFullServerError();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         assertTrue
           (
            err.contains("java.security.AccessControlException") &&
@@ -377,6 +382,8 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
 
 
     public void testModifyThreadGroup() throws Throwable {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
         if (!inSubProcess) {
             // Set up run of this test in a sub process, so we can catch its
             // standard err/standard out.
@@ -386,12 +393,16 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             args.add("-Djava.security.manager");
             args.add(
                 "-Djava.security.policy=extin/MissingPermissionsTest.policy");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             args.add("-DderbyTesting.engine="
                     + getSystemProperty("derbyTesting.engine"));
             args.add("-DderbyTesting.tools="
                     + getSystemProperty("derbyTesting.tools"));
             args.add("-DderbyTesting.testing="
                     + getSystemProperty("derbyTesting.testing"));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             args.add("-DderbyTesting.shared="
                     + getSystemProperty("derbyTesting.shared"));
             args.add("-DderbyTesting.junit="
@@ -410,6 +421,7 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             args.add("-Dderby.system.debug=" +
                      getSystemProperty("derby.tests.debug"));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             String testRunnerClassName = "junit.textui.TestRunner";
             if (JVMInfo.isModuleAware())
             {
@@ -436,7 +448,9 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
 
             assertTrue(spawned.getFailMessage("subprocess run failed: "),
                     exitCode == 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             final String expectedMessageOnConsole = JVMInfo.isModuleAware() ?
               "java.security.AccessControlException: access denied " +
               "(\"java.lang.RuntimePermission\" \"modifyThreadGroup\")"
@@ -448,6 +462,7 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             final String err    = spawned.getFullServerError();
 
             assertTrue("Full error is '" + err + "'", err.contains(expectedMessageOnConsole));
+//IC see: https://issues.apache.org/jira/browse/DERBY-3547
 
             // Print sub process' output if this test specifies any such
             if (Boolean.parseBoolean(

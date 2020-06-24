@@ -39,6 +39,7 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 	}
 
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(
             SQLAuthorizationPropTest.class, "SQLAuthorizationPropTest");
 		
@@ -48,6 +49,7 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 		Properties props = new Properties();
 	    props.setProperty("derby.database.sqlAuthorization", "true");
 	    Test test = new SQLAuthorizationPropTest("grantRevokeAfterSettingSQLAuthProperty");
+//IC see: https://issues.apache.org/jira/browse/DERBY-2043
 	    suite.addTest(new DatabasePropertyTestSetup (test, props, true));
 	    
 	    // This test has to be run after SQL authorization property has been 
@@ -57,6 +59,7 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
         // This test needs to run in a new single use database as upon entry
         // the test expects SQL authorization to be off and then sets it
         // which cannot be undone.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1975
 	    return TestConfiguration.singleUseDatabaseDecorator(suite);
 	}
 	
@@ -142,6 +145,7 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
         // This should work
         testPropertyReset(setDBP, "true");
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-1975
         setDBP.close();
 	}
 	

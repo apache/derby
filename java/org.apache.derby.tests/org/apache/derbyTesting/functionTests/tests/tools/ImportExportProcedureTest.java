@@ -52,6 +52,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("ImportExportProcedureTest");
         suite.addTest(TestConfiguration.defaultSuite(ImportExportProcedureTest.class));
         return new SupportFilesSetup(suite, new String[] { 
@@ -1892,6 +1893,8 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
     */
     public void test4555ColumnIndexesParsing() throws Exception{	
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
   	CallableStatement cSt;
         Statement st = createStatement();
 
@@ -2067,6 +2070,8 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "'PET1' , null , '\"Pet Name\",\"Kind of\",\"Age\"' ,   'extinout/pet.dat' "
             + "  , null , null , null, 0, 2) ");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
         try {
             cSt.execute();
         }
@@ -2259,6 +2264,8 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
 	cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'PET', 'extinout/pet.dat', null, null, null, 0, 7) ");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4555
+//IC see: https://issues.apache.org/jira/browse/DERBY-6894
         try {
             cSt.execute();
         }
@@ -2519,6 +2526,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
         assertStatementError("38000", cSt);
        
 	//DERBY-2925: need to delete existing files first.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3068
         SupportFilesSetup.deleteFile("extinout/t1.dat");
  
         //export query is invalid (syntax error)
@@ -2622,6 +2630,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
+//IC see: https://issues.apache.org/jira/browse/DERBY-5749
             + "'extinout/t1.dat' , '\\', '\\', null) ");
         assertStatementError("XIE0J", cSt);
                 
@@ -2647,6 +2656,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
         assertUpdateCount(cSt, 0);
         
         //  DERBY-2925: need to delete existing files 
+//IC see: https://issues.apache.org/jira/browse/DERBY-3068
         SupportFilesSetup.deleteFile("extinout/t1.dat");
         rs = st.executeQuery(
             " select * from t1");
@@ -2703,6 +2713,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , '', ';', null, 0) ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6493
         assertStatementError(INVALID_DELIMITER, cSt);
         
         cSt = prepareCall(
@@ -2716,6 +2727,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , ';', ';', null, 1) ");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6493
         assertStatementError(INVALID_DELIMITER, cSt);
         
         Connection conn = getConnection();

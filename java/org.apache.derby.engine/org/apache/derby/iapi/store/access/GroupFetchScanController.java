@@ -139,6 +139,7 @@ public interface GroupFetchScanController extends GenericScanController
         throws StandardException;
 
     public int fetchNextGroup(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     DataValueDescriptor[][] row_array,
     RowLocation[]           oldrowloc_array,
     RowLocation[]           newrowloc_array)

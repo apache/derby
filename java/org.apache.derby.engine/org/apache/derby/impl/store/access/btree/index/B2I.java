@@ -258,6 +258,7 @@ public class B2I extends BTree
     base table rows which the index rows point at.
 	**/
 	long baseConglomerateId;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
 
 	/**
 	The column id (zero-based integer index) of the column which holds the row 
@@ -271,6 +272,7 @@ public class B2I extends BTree
 
     private static final int BASE_MEMORY_USAGE = 
         ClassSize.estimateBaseFromCatalog( B2I.class);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
 
     public int estimateMemoryUsage()
     {
@@ -588,9 +590,11 @@ public class B2I extends BTree
 
         // get collation ids from input collation ids, store it in the 
         // conglom state.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         collation_ids = 
             ConglomerateUtil.createCollationIds(template.length, collationIds);
         hasCollatedTypes = hasCollatedColumns(collation_ids);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
 
 		// Do the generic part of creating the b-tree.
 		super.create(
@@ -614,6 +618,7 @@ public class B2I extends BTree
                 TransactionController.MODE_TABLE,
                 rawtran.newLockingPolicy(
                     LockingPolicy.MODE_CONTAINER,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
                     TransactionController.ISOLATION_SERIALIZABLE, true), 
                 base_cc, open_btree);
 
@@ -819,6 +824,7 @@ public class B2I extends BTree
 		b2ic.init(
             xact_manager,               // current transaction   
             rawtran,                    // current raw store transaction
+//IC see: https://issues.apache.org/jira/browse/DERBY-1058
             hold,                       // holdability
             open_mode,
             lock_level,
@@ -890,6 +896,7 @@ public class B2I extends BTree
 	 * @exception  StandardException  Standard exception policy.
      **/
 	public ScanManager defragmentConglomerate(
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     TransactionManager              xact_manager,
     Transaction                     rawtran,
     boolean                         hold,
@@ -919,6 +926,7 @@ public class B2I extends BTree
         throws StandardException
     {
 		B2IController b2ic = new B2IController();
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 
 		try
 		{
@@ -1055,6 +1063,7 @@ public class B2I extends BTree
 	*/
 	public int getTypeFormatId() 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		return StoredFormatIds.ACCESS_B2I_V5_ID;
 	}
 
@@ -1069,6 +1078,7 @@ public class B2I extends BTree
      * @see java.io.Externalizable#writeExternal
      **/
 	public void writeExternal_v10_2(ObjectOutput out) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2537
         throws IOException 
     {
 		super.writeExternal(out);
@@ -1101,6 +1111,7 @@ public class B2I extends BTree
     {
         // First part of ACCESS_B2I_V4_ID format is the ACCESS_B2I_V3_ID format.
         writeExternal_v10_2(out);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID
                 || conglom_format_id == StoredFormatIds.ACCESS_B2I_V5_ID)
         {
@@ -1151,6 +1162,7 @@ public class B2I extends BTree
         
         // In memory maintain a collation id per column in the template.
         collation_ids = new int[format_ids.length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(!hasCollatedTypes);
         }
@@ -1165,6 +1177,7 @@ public class B2I extends BTree
         // below when read from disk.  For version ACCESS_B2I_V3_ID and
         // ACCESS_B2I_V4_ID, this is the default and no resetting is necessary.
         setUniqueWithDuplicateNulls(false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
 
 		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID
                 || conglom_format_id == StoredFormatIds.ACCESS_B2I_V5_ID)
@@ -1179,6 +1192,7 @@ public class B2I extends BTree
                     "length = " + collation_ids.length);
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5367
             hasCollatedTypes =
                     ConglomerateUtil.readCollationIdArray(collation_ids, in);
         }
@@ -1194,6 +1208,7 @@ public class B2I extends BTree
                     "Unexpected format id: " + conglom_format_id);
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3330
         if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V5_ID) {
             setUniqueWithDuplicateNulls(in.readBoolean());
         }

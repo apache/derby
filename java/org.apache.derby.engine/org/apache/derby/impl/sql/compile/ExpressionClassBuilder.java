@@ -180,6 +180,7 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
      * reinitialize the data structures.
 	 */
 	MethodBuilder getExecuteMethod() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5947
         if (executeMethod == null) {
             executeMethod =
                     cb.newMethodBuilder(Modifier.PROTECTED, "void", "reinit");
@@ -546,6 +547,7 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		** We don't expect a lot of order by columns, so
 		** linear search.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
         ColumnOrdering[] ordering =
                 orderingHolder.getArray(ColumnOrdering[].class);
 		int length = ordering.length;
@@ -567,6 +569,7 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	}	
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
     FormatableArrayHolder getColumnOrdering(OrderedColumnList<?>  oclist) {
 		int numCols = (oclist == null) ? 0 : oclist.size();
 
@@ -746,6 +749,7 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		constructor.pushNewStart(ClassName.CurrentDatetime);
 		constructor.pushNewComplete(0);
 		constructor.setField(cdtField);
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 
 		return cdtField;
 	}
@@ -761,6 +765,7 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	 */
 	private String newFieldName()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-176
 		return "e".concat(Integer.toString(nextFieldNum++));
 	}
 

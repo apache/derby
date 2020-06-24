@@ -95,8 +95,10 @@ public class ColumnMetaData implements ResultSetMetaData {
     // only used for result set meta data.
 
     transient int resultSetConcurrency_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     transient private Hashtable<String, Integer> columnNameToIndexCache_;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
     transient private boolean statementClosed_ = false;
 
@@ -109,6 +111,7 @@ public class ColumnMetaData implements ResultSetMetaData {
         // agent_.checkForDeferredExceptions();
         if (statementClosed_) {
             throw new SqlException(logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     new ClientMessageId (SQLState.LANG_STATEMENT_CLOSED_NO_REASON));
         }
     }
@@ -175,6 +178,7 @@ public class ColumnMetaData implements ResultSetMetaData {
         {
             checkForClosedStatement();
             checkForValidColumnIndex(column);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1355
             if( sqlxGenerated_[column - 1] == 2) {
                 return true;
             }
@@ -194,6 +198,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             //return true if the SQLTYPE is CHAR, VARCHAR, LOGVARCHAR or CLOB
             int type = types_[column - 1];
             return
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     type == ClientTypes.CHAR ||
                     type == ClientTypes.VARCHAR ||
                     type == ClientTypes.LONGVARCHAR ||
@@ -238,6 +243,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             checkForClosedStatement();
             checkForValidColumnIndex(column);
             if (nullable_[column - 1]) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 return ResultSetMetaData.columnNullable;
             } else {
                 return ResultSetMetaData.columnNoNulls;
@@ -257,6 +263,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             //return true only if the SQLType is SMALLINT, INT, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC OR DECIMAL
             int type = types_[column - 1];
             return
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     type == ClientTypes.SMALLINT ||
                     type == ClientTypes.INTEGER ||
                     type == ClientTypes.BIGINT ||
@@ -279,6 +286,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             checkForValidColumnIndex(column);
             int jdbcType = types_[column - 1];
             switch (jdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case ClientTypes.BOOLEAN:
                 return 5;
             case ClientTypes.INTEGER:
@@ -288,6 +296,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             case ClientTypes.BIGINT:
                 return 20;
             case ClientTypes.REAL:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3398
                 return 15;
             case ClientTypes.DOUBLE:
             case Types.FLOAT:
@@ -300,7 +309,10 @@ public class ColumnMetaData implements ResultSetMetaData {
         // 3. precision > scale > 0, 2 should be added to precision for sign and decimal.
         int scale = getScale(column);
         int precision = getPrecision(column);
+//IC see: https://issues.apache.org/jira/browse/DERBY-836
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return (scale == 0) ? (precision + 1) : ((scale == precision) ? (precision + 3) : (precision + 2));
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case ClientTypes.CHAR:
             case ClientTypes.VARCHAR:
             case ClientTypes.LONGVARCHAR:
@@ -313,6 +325,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             case ClientTypes.TIMESTAMP:
                 return 29;
             case ClientTypes.JAVA_OBJECT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 return JDBC40Translation.DEFAULT_COLUMN_DISPLAY_SIZE;
             case ClientTypes.BINARY:
             case ClientTypes.VARBINARY:
@@ -322,6 +335,8 @@ public class ColumnMetaData implements ResultSetMetaData {
         // range. In such cases, the size is limited to the max. int value
         // This behavior is consistent with the same in Embedded mode.
         int size = (int) (2 * sqlLength_[column - 1]);  // eg. "FF" represents just one byte
+//IC see: https://issues.apache.org/jira/browse/DERBY-2425
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if ( size < 0 )
             size = Integer.MAX_VALUE;
                 return size;
@@ -414,6 +429,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             int jdbcType = types_[column - 1];
 
             switch (jdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case ClientTypes.BOOLEAN:
                 return 1;
             case Types.NUMERIC:
@@ -445,8 +461,11 @@ public class ColumnMetaData implements ResultSetMetaData {
             case ClientTypes.TIME:
                 return 8;
             case ClientTypes.TIMESTAMP:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
+//IC see: https://issues.apache.org/jira/browse/DERBY-4614
                 return 29;
             case ClientTypes.JAVA_OBJECT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
                 return JDBC40Translation.UNKNOWN_PRECISION;
             default:
                 throw new SqlException(logWriter_, 
@@ -499,6 +518,7 @@ public class ColumnMetaData implements ResultSetMetaData {
      * @throws SQLException thrown on failure
      */
     public String getCatalogName(int column) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-852
         try
         {
             checkForClosedStatement();
@@ -538,6 +558,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             int sqlType = sqlType_[column - 1];
 
             switch (sqlType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
             case DRDAConstants.DB2_SQLTYPE_NBOOLEAN:
                 return "BOOLEAN";
@@ -558,6 +579,7 @@ public class ColumnMetaData implements ResultSetMetaData {
                 return "CLOB";
             case DRDAConstants.DB2_SQLTYPE_VARCHAR:
             case DRDAConstants.DB2_SQLTYPE_NVARCHAR:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (jdbcType == ClientTypes.VARBINARY) {
                     return "VARCHAR FOR BIT DATA";
                 } else {
@@ -582,6 +604,7 @@ public class ColumnMetaData implements ResultSetMetaData {
                 return "SBCS";
             case DRDAConstants.DB2_SQLTYPE_FLOAT:
             case DRDAConstants.DB2_SQLTYPE_NFLOAT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 if (jdbcType == ClientTypes.DOUBLE) {
                     return "DOUBLE";
                 }
@@ -624,6 +647,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             checkForValidColumnIndex(column);
             if (sqlxUpdatable_ == null) {
                 // If no extended describe, return resultSet's concurrency
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 return resultSetConcurrency_ ==
                        ResultSet.CONCUR_READ_ONLY;
             }
@@ -642,6 +666,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             checkForValidColumnIndex(column);
             if (sqlxUpdatable_ == null) {
                 // If no extended describe, return resultSet's concurrency
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 return resultSetConcurrency_ ==
                        ResultSet.CONCUR_UPDATABLE;
             }
@@ -679,6 +704,7 @@ public class ColumnMetaData implements ResultSetMetaData {
 
             int jdbcType = types_[column - 1];
             switch (jdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             case Types.BOOLEAN:
                 return "java.lang.Boolean";
             case Types.BIT:
@@ -728,6 +754,9 @@ public class ColumnMetaData implements ResultSetMetaData {
                 return sqlUDTclassName_[ column - 1 ];
             default:
                 throw new SqlException(logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                         new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
@@ -743,7 +772,9 @@ public class ColumnMetaData implements ResultSetMetaData {
     void checkForValidColumnIndex(int column) throws SqlException {
         if (column < 1 || column > columns_) {
             throw new SqlException(logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     new ClientMessageId (SQLState.LANG_INVALID_COLUMN_POSITION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     column, columns_);
         }
     }
@@ -784,7 +815,9 @@ public class ColumnMetaData implements ResultSetMetaData {
 
     boolean hasLobColumns() {
         for (int i = 0; i < columns_; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             switch (Utils.getNonNullableSqlType(sqlType_[i])) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
             case DRDAConstants.DB2_SQLTYPE_BLOB:
             case DRDAConstants.DB2_SQLTYPE_CLOB:
                 return true;
@@ -799,6 +832,7 @@ public class ColumnMetaData implements ResultSetMetaData {
     int findColumnX(String columnName) throws SqlException {
         // Create cache if it doesn't exist
         if (columnNameToIndexCache_ == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             columnNameToIndexCache_ = new Hashtable<String, Integer>();
         } else { // Check cache for mapping
             Integer index = columnNameToIndexCache_.get(columnName);
@@ -813,17 +847,20 @@ public class ColumnMetaData implements ResultSetMetaData {
                     this.sqlName_[col] != null &&
                     this.sqlName_[col].equalsIgnoreCase(columnName)) {
                 // Found it, add it to the cache
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                 columnNameToIndexCache_.put(columnName, col + 1);
                 return col + 1;
             }
         }
         throw new SqlException(logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                 new ClientMessageId (SQLState.INVALID_COLUMN_NAME), columnName);
     }
 
     // assign ordinal position as the column name if null.
     private void assignColumnName(int column) {
         if (columnNameToIndexCache_ == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             columnNameToIndexCache_ = new Hashtable<String, Integer>();
         }
         String columnName = Integer.toString(column);

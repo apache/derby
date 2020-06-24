@@ -147,6 +147,7 @@ public class PredicateTest extends BaseJDBCTestCase {
      * @return a list of all operators
      */
     private List<String> extractOperators(String stats) throws IOException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         ArrayList<String> ops = new ArrayList<String>();
         BufferedReader r = new BufferedReader(new StringReader(stats));
         String line;

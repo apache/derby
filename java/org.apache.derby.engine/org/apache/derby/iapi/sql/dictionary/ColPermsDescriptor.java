@@ -53,6 +53,7 @@ public class ColPermsDescriptor extends PermissionsDescriptor
         this.columns = columns;
         //tableUUID can be null only if the constructor with colPermsUUID
         //has been invoked.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
         if (tableUUID != null)
         	tableName = dd.getTableDescriptor(tableUUID).getName();
 	}
@@ -64,12 +65,14 @@ public class ColPermsDescriptor extends PermissionsDescriptor
                                String grantee,
                                String grantor,
                                UUID tableUUID,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
                                String type) throws StandardException
     {
         this( dd, grantee, grantor, tableUUID, type, (FormatableBitSet) null);
     }           
     
     public ColPermsDescriptor( DataDictionary dd,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
             UUID colPermsUUID) throws StandardException
     {
         super(dd,null,null);
@@ -88,6 +91,7 @@ public class ColPermsDescriptor extends PermissionsDescriptor
 
 	public String toString()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		return "colPerms: grantee=" + getGrantee() + 
         ",colPermsUUID=" + getUUID() +
 			",grantor=" + getGrantor() +
@@ -115,6 +119,7 @@ public class ColPermsDescriptor extends PermissionsDescriptor
      */
     public int hashCode()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
     	return super.keyHashCode() + tableUUID.hashCode() +
 		((type == null) ? 0 : type.hashCode());
     }
@@ -124,6 +129,7 @@ public class ColPermsDescriptor extends PermissionsDescriptor
 	 */
 	public boolean checkOwner(String authorizationId) throws StandardException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1330
 		TableDescriptor td = getDataDictionary().getTableDescriptor(tableUUID);
 		if (td.getSchemaDescriptor().getAuthorizationId().equals(authorizationId))
 			return true;
@@ -164,6 +170,7 @@ public class ColPermsDescriptor extends PermissionsDescriptor
 	 */
 	public DependableFinder getDependableFinder() 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4845
         return getDependableFinder(
                 StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID);
 	}

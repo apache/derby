@@ -253,6 +253,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory
         col = row.getColumn(SYSSEQUENCES_CURRENT_VALUE);
         if ( col.isNull() ) { currentValue = null; }
         else { currentValue = col.getLong(); }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
         col = row.getColumn(SYSSEQUENCES_START_VALUE);
         startValue = col.getLong();
@@ -290,6 +291,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory
      * @return array of SystemColumn suitable for making this catalog.
      */
     public SystemColumn[] buildColumnList()
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
     {
         return new SystemColumn[]{

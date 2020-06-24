@@ -47,6 +47,8 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         Test suite = TestConfiguration.defaultSuite(TestJDBC40Exception.class);
         return DatabasePropertyTestSetup.setLockTimeouts(suite, -1, 2);
     }
@@ -61,6 +63,7 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
     }
 
     protected void tearDown() throws Exception {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2707
         Statement s = createStatement();
         s.execute("drop table EXCEPTION_TABLE1");
         s.close();
@@ -121,6 +124,7 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
         // DERBY-3075
         if (usingDerbyNetClient()) {
         	DataSource ds = JDBCDataSource.getDataSource();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         	JDBCDataSource.setBeanProperty(ds, "portNumber", 0);
         	try {
         		ds.getConnection();

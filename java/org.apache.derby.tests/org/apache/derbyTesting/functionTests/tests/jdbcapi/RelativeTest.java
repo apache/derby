@@ -116,6 +116,8 @@ public class RelativeTest extends BaseJDBCTestCase {
 			 * Therefore, attempting to get value now will throw an exception.
 			 */
 			rs.getString("name");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3587
+//IC see: https://issues.apache.org/jira/browse/DERBY-3587
 			fail("FAIL - Attempting to read from an invalid row should have " +
 				"thrown an exception");
 		} catch (SQLException sqle) {
@@ -139,6 +141,7 @@ public class RelativeTest extends BaseJDBCTestCase {
 	 * @return test suite
 	 */
 	public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("RelativeTest");
 		suite.addTest(baseSuite("RelativeTest:embedded"));
 		suite.addTest(TestConfiguration
@@ -153,6 +156,7 @@ public class RelativeTest extends BaseJDBCTestCase {
 	 *            Name for the suite.
 	 */
 	private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
 		suite.addTestSuite(RelativeTest.class);
 		return new CleanDatabaseTestSetup(DatabasePropertyTestSetup

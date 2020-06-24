@@ -51,6 +51,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 // For performance, should we worry about the ordering of our DDM command parameters
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class NetStatementRequest extends NetPackageRequest
     implements StatementRequestInterface {
 
@@ -65,7 +66,10 @@ class NetStatementRequest extends NetPackageRequest
     // is still needed for non-promototed LOBs
     private final HashMap<Integer, Object> promototedParameters_ =
             new HashMap<Integer, Object>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-4757
     NetStatementRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
@@ -177,6 +181,7 @@ class NetStatementRequest extends NetPackageRequest
                                int fetchSize,
                                int resultSetType,
                                int numInputColumns,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                ColumnMetaData parameterMetaData,
                                Object[] inputs) throws SqlException {
         boolean sendQryrowset = checkSendQryrowset(fetchSize, resultSetType);
@@ -282,6 +287,7 @@ class NetStatementRequest extends NetPackageRequest
         boolean sendQryrowset = true;
         fetchSize = (fetchSize == 0) ?
             Configuration.defaultFetchSize : fetchSize;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
         boolean sendPrcnam = (procedureName != null) ? true : false;
         int numParameters = (parameterMetaData != null) ? parameterMetaData.columns_ : 0;
@@ -324,6 +330,7 @@ class NetStatementRequest extends NetPackageRequest
     // Write the message to execute an SQL Set Statement.
 /*
   public void writeSetGenericSQLSetInfo (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
          SetGenericSQLSetPiggybackCommand setGenericSQLSetPiggybackCommand,
          JDBCSection section) throws SqlException
   {
@@ -368,6 +375,7 @@ class NetStatementRequest extends NetPackageRequest
         // Tell the server to close forward-only result sets
         // implicitly when they are exhausted. The server will ignore
         // this parameter if the result set is scrollable.
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         if (netAgent_.netConnection_.serverSupportsQryclsimp()) {
             buildQRYCLSIMP();
         }
@@ -539,6 +547,7 @@ class NetStatementRequest extends NetPackageRequest
 
         int[][] protocolTypesAndLengths = allocateLidAndLengthsArray(parameterMetaData);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         Hashtable protocolTypeToOverrideLidMapping = null;
         ArrayList mddOverrideArray = null;
         protocolTypeToOverrideLidMapping =
@@ -575,6 +584,7 @@ class NetStatementRequest extends NetPackageRequest
     private void buildFDODSC(int numColumns,
                              int[][] protocolTypesAndLengths,
                              boolean overrideExists,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                              Hashtable overrideMap,
                              ArrayList overrideArray) throws SqlException {
         markLengthBytes(CodePoint.FDODSC);
@@ -588,6 +598,7 @@ class NetStatementRequest extends NetPackageRequest
     private void buildSQLDTA(int numColumns,
                                int[][] lidAndLengthOverrides,
                                boolean overrideExists,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                Hashtable overrideMap,
                                ArrayList overrideArray) throws SqlException {
         // mdd overrides need to be built first if any before the descriptors are built.
@@ -609,6 +620,7 @@ class NetStatementRequest extends NetPackageRequest
     private void buildSQLDTAGRP(int numVars,
                                   int[][] lidAndLengthOverrides,
                                   boolean mddRequired,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                   Hashtable overrideMap) throws SqlException {
         int n = 0;
         int offset = 0;
@@ -647,6 +659,7 @@ class NetStatementRequest extends NetPackageRequest
     }
 
     private int[][] calculateOUTOVRLidAndLengthOverrides(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             ClientResultSet resultSet,
             ColumnMetaData resultSetMetaData) {
 
@@ -664,6 +677,7 @@ class NetStatementRequest extends NetPackageRequest
  
                 case Types.CLOB:
                     lidAndLengths[i][0] = (resultSetMetaData.nullable_[i])
+//IC see: https://issues.apache.org/jira/browse/DERBY-2702
                             ? DRDAConstants.DRDA_TYPE_NCLOBLOC
                             : DRDAConstants.DRDA_TYPE_CLOBLOC;
                     lidAndLengths[i][1] = 4;
@@ -675,6 +689,7 @@ class NetStatementRequest extends NetPackageRequest
     }
 
     private void buildSQLDTARD(int numColumns, int[][] lidAndLengthOverrides)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         buildSQLCADTA(numColumns, lidAndLengthOverrides);
         writeBytes(FdocaConstants.SQLDTARD_RLO_TOSEND);
@@ -711,6 +726,7 @@ class NetStatementRequest extends NetPackageRequest
                     }
 
                     switch (protocolTypesAndLengths[i][0] | 0x01) {  // mask out null indicator
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     case DRDAConstants.DRDA_TYPE_NVARMIX:
                     case DRDAConstants.DRDA_TYPE_NLONGMIX:
                         // What to do for server that don't understand 1208 (UTF-8)
@@ -726,6 +742,7 @@ class NetStatementRequest extends NetPackageRequest
                         }
                         break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     case DRDAConstants.DRDA_TYPE_NVARCHAR:
                     case DRDAConstants.DRDA_TYPE_NLONG:
                         o = retrievePromotedParameterIfExists(i);
@@ -744,6 +761,7 @@ class NetStatementRequest extends NetPackageRequest
                     case DRDAConstants.DRDA_TYPE_NBOOLEAN:
                         writeBoolean(((Boolean) inputs[i]).booleanValue());
                         break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     case DRDAConstants.DRDA_TYPE_NINTEGER:
                         writeIntFdocaData(((Integer) inputs[i]).intValue());
                         break;
@@ -757,6 +775,7 @@ class NetStatementRequest extends NetPackageRequest
                         writeDouble(((Double) inputs[i]).doubleValue());
                         break;
                     case DRDAConstants.DRDA_TYPE_NDECIMAL:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         writeBigDecimal((BigDecimal) inputs[i],
                                 (protocolTypesAndLengths[i][1] >> 8) & 0xff, // described precision not actual
                                 protocolTypesAndLengths[i][1] & 0xff); // described scale, not actual
@@ -813,6 +832,7 @@ class NetStatementRequest extends NetPackageRequest
                     case DRDAConstants.DRDA_TYPE_NUDT:
                         writeUDT( inputs[i] );
                         break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
                     case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
                         // check for a promoted Clob
@@ -820,6 +840,7 @@ class NetStatementRequest extends NetPackageRequest
                         if (o == null) {
                             try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                 Clob c = (Clob) inputs[i];
                                 
                                 if(c instanceof ClientClob &&
@@ -845,12 +866,14 @@ class NetStatementRequest extends NetPackageRequest
                         }
                         
                         break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     case DRDAConstants.DRDA_TYPE_NLOBBYTES:
                         // check for a promoted Clob
                         o = retrievePromotedParameterIfExists(i);
                         if (o == null) {
                             try {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                 Blob b = (Blob) inputs[i];
                                 
                                 if(b instanceof ClientBlob &&
@@ -864,6 +887,7 @@ class NetStatementRequest extends NetPackageRequest
                                 }
                                 
                             } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
@@ -875,12 +899,14 @@ class NetStatementRequest extends NetPackageRequest
                                          i);
                         }
                         break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
                         // check for a promoted Clob
                         o = retrievePromotedParameterIfExists(i);
                         if (o == null) {
                             
                             final ClientClob c = (ClientClob) inputs[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
                             if (c.isString()) {
                                 setFDODTALobLength(protocolTypesAndLengths, 
@@ -900,16 +926,22 @@ class NetStatementRequest extends NetPackageRequest
                             
                         } else { // use promoted Clob
                             setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                          (ClientClob) o,
                                          protocolTypesAndLengths,
                                          i);
                         }
 
                         break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2506
                     case DRDAConstants.DRDA_TYPE_NLOBLOC:
                         //The FD:OCA data or the FDODTA contains the locator
                         //value corresponding to the LOB. write the integer
                         //value representing the locator here.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         writeIntFdocaData(((ClientBlob)inputs[i]).
                                 getLocator());
                         break;
@@ -923,6 +955,7 @@ class NetStatementRequest extends NetPackageRequest
                     default:
                         throw new SqlException(netAgent_.logWriter_, 
                             new ClientMessageId(SQLState.NET_UNRECOGNIZED_JDBC_TYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                                protocolTypesAndLengths[i][0], numVars, i);
                     }
                 }
@@ -970,6 +1003,7 @@ class NetStatementRequest extends NetPackageRequest
                     }
 
                     // the follow types are possible due to promotion to BLOB
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                     if (parameterType == ClientTypes.BLOB
                             || parameterType == ClientTypes.BINARY
                             || parameterType == ClientTypes.VARBINARY
@@ -989,7 +1023,10 @@ class NetStatementRequest extends NetPackageRequest
                                         b.getBinaryStream(),
                                         writeNullByte,
                                         index + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
@@ -1023,6 +1060,7 @@ class NetStatementRequest extends NetPackageRequest
                             writeScalarStream(chainFlag,
                                     chainedWithSameCorrelator,
                                     CodePoint.EXTDTA,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                                     (int) ((ClientBlob) b).length(),
                                     ((ClientBlob) b).getBinaryStream(),
                                     writeNullByte,
@@ -1051,6 +1089,7 @@ class NetStatementRequest extends NetPackageRequest
                                         c.getCharacterStream(),
                                         writeNullByte,
                                         index + 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             } catch (SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
@@ -1152,6 +1191,7 @@ class NetStatementRequest extends NetPackageRequest
         if (promototedParameters_.isEmpty()) {
             return null;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         return promototedParameters_.get(index);
     }
 
@@ -1171,6 +1211,7 @@ class NetStatementRequest extends NetPackageRequest
     // precision and scale (Kathey Marsden 10/11)
     // backburner: after refactoring this, later on, think about replacing case statements with table lookups
     private Hashtable computeProtocolTypesAndLengths(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             Object[] inputRow,
             ColumnMetaData parameterMetaData,
             int[][] lidAndLengths,
@@ -1203,10 +1244,12 @@ class NetStatementRequest extends NetPackageRequest
                 if (jdbcType == 0) {
                     throw new SqlException(netAgent_.logWriter_, 
                         new ClientMessageId(SQLState.NET_INVALID_JDBC_TYPE_FOR_PARAM),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         i);
                 }
 
                 switch (jdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 case Types.CHAR:
                 case Types.VARCHAR:
                     // lid: PROTOCOL_TYPE_NVARMIX, length override: 32767 (max)
@@ -1216,10 +1259,12 @@ class NetStatementRequest extends NetPackageRequest
                     // assumes UTF-8 characters at most 3 bytes long
                     // Flow the String as a VARCHAR
                     if (s == null || s.length() <= 32767 / 3) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARMIX;
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Flow the data as CLOB data if the data too large to for LONGVARCHAR
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                         byte[] ba = s.getBytes(Typdef.UTF8ENCODING);
                         ByteArrayInputStream bais = new ByteArrayInputStream(ba);
                         ClientClob c = new ClientClob(
@@ -1245,6 +1290,7 @@ class NetStatementRequest extends NetPackageRequest
                 case Types.INTEGER:
                     // lid: PROTOCOL_TYPE_NINTEGER, length override: 4
                     // dataFormat: Integer
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER;
                     lidAndLengths[i][1] = 4;
                     break;
@@ -1264,11 +1310,13 @@ class NetStatementRequest extends NetPackageRequest
                         lidAndLengths[i][1] = 2;
                         if (inputRow[i] instanceof Boolean) {
                             Boolean bool = (Boolean) inputRow[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                             inputRow[i] = Short.valueOf(
                                     bool.booleanValue() ? (short) 1 : 0);
                         }
                     }
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 case Types.SMALLINT:
                 case Types.TINYINT:
                     // lid: PROTOCOL_TYPE_NSMALL,  length override: 2
@@ -1300,6 +1348,7 @@ class NetStatementRequest extends NetPackageRequest
                     int scale;
                     int precision;
                     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3126
                     if (bigDecimal == null)
                     {
                         scale = 0;
@@ -1318,11 +1367,13 @@ class NetStatementRequest extends NetPackageRequest
                         scale = bigDecimal.scale();
                         precision = Utils.computeBigDecimalPrecision(bigDecimal);
                     }                    
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDECIMAL;
                     lidAndLengths[i][1] = (precision << 8) + // use precision above
                         (scale << 0);
                     
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 case Types.DATE:
                     // for input, output, and inout parameters
                     // lid: PROTOCOL_TYPE_NDATE, length override: 8
@@ -1359,6 +1410,7 @@ class NetStatementRequest extends NetPackageRequest
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Flow the data as CLOB data if the data too large to for LONGVARCHAR
+//IC see: https://issues.apache.org/jira/browse/DERBY-6231
                         byte[] ba = s.getBytes(Typdef.UTF8ENCODING);
                         ByteArrayInputStream bais = new ByteArrayInputStream(ba);
                         ClientClob c = new ClientClob(
@@ -1368,7 +1420,11 @@ class NetStatementRequest extends NetPackageRequest
                         // Place the new Lob in the promototedParameter_ collection for
                         // NetStatementRequest use
                         promototedParameters_.put(i, c);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                         lidAndLengths[i][1] = buildPlaceholderLength(c.length());
                     }
@@ -1377,6 +1433,7 @@ class NetStatementRequest extends NetPackageRequest
                 case Types.VARBINARY:
                     byte[] ba = (byte[]) inputRow[i];
                     if (ba == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
                         lidAndLengths[i][1] = 32767;
                     } else if (ba.length <= 32767) {
@@ -1391,10 +1448,12 @@ class NetStatementRequest extends NetPackageRequest
                         // NetStatementRequest use
                         promototedParameters_.put(i, b);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                     }
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 case Types.LONGVARBINARY:
                     ba = (byte[]) inputRow[i];
                     if (ba == null) {
@@ -1406,16 +1465,22 @@ class NetStatementRequest extends NetPackageRequest
                     } else {
                         // Promote to a BLOB. Only reach this path in the absensce of describe information.
                         ClientBlob b = new ClientBlob(ba, netAgent_, 0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
                         // inputRow[i] = b;
                         // Place the new Lob in the promototedParameter_ collection for
                         // NetStatementRequest use
                         promototedParameters_.put(i, b);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                     }
                     break;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                 case Types.JAVA_OBJECT:
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NUDT;
                     lidAndLengths[i][1] = 32767;
@@ -1432,6 +1497,7 @@ class NetStatementRequest extends NetPackageRequest
                         //Here the LID local identifier in the FDODSC
                         //FD:OCA descriptor should be initialized as
                         //to contain a BLOB locator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2506
                         lidAndLengths[i][0] = 
                                     DRDAConstants.DRDA_TYPE_NLOBLOC;
                         lidAndLengths[i][1] = 4;
@@ -1439,6 +1505,7 @@ class NetStatementRequest extends NetPackageRequest
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         try {
                             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             if( b instanceof ClientBlob &&
                                 ( (ClientBlob) b).willBeLayerBStreamed() ){
                                 
@@ -1449,7 +1516,9 @@ class NetStatementRequest extends NetPackageRequest
                                 lidAndLengths[i][1] = buildPlaceholderLength(b.length());
                                 
                             }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
                             throw new SqlException(netAgent_.logWriter_, 
                                 new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH), e);
                         }
@@ -1473,13 +1542,17 @@ class NetStatementRequest extends NetPackageRequest
                             //Here the LID local identifier in the FDODSC
                             //FD:OCA descriptor should be initialized as
                             //to contain a CLOB locator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2506
                             lidAndLengths[i][0] = 
                                     DRDAConstants.DRDA_TYPE_NCLOBLOC;
                             lidAndLengths[i][1] = 4;
                         } else if (isExternalClob) {
                             try {
                                 lobLength = c.length();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                             } catch (SQLException e) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
@@ -1496,11 +1569,13 @@ class NetStatementRequest extends NetPackageRequest
                         }
                         
                         if (c == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                         } else if (isExternalClob) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
                             lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         } else if (((ClientClob) c).isCharacterStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
                             
@@ -1513,6 +1588,7 @@ class NetStatementRequest extends NetPackageRequest
                                 lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                             }
                             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         } else if (((ClientClob) c).isUnicodeStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             
@@ -1525,6 +1601,7 @@ class NetStatementRequest extends NetPackageRequest
                                 lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                             }
                             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         } else if (((ClientClob) c).isAsciiStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCSBCS;
 
@@ -1537,6 +1614,7 @@ class NetStatementRequest extends NetPackageRequest
                                 lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                             }
                             
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
                         } else if (((ClientClob) c).isString()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             
@@ -1555,6 +1633,7 @@ class NetStatementRequest extends NetPackageRequest
                 default :
                     throw new SqlException(netAgent_.logWriter_, 
                         new ClientMessageId(SQLState.UNRECOGNIZED_JAVA_SQL_TYPE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                         jdbcType);
                 }
 
@@ -1564,6 +1643,8 @@ class NetStatementRequest extends NetPackageRequest
             }
             return overrideMap;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         catch ( SQLException se )
         {
             throw new SqlException(se);
@@ -1639,6 +1720,7 @@ class NetStatementRequest extends NetPackageRequest
     //   prcnam can not be 0 length or > 255 length, SQLException will be thrown.
     private void buildPRCNAM(String prcnam) throws SqlException {
         if (prcnam == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-848
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.NET_NULL_PROCEDURE_NAME));
         }
@@ -1647,6 +1729,7 @@ class NetStatementRequest extends NetPackageRequest
         if ((prcnamLength == 0) || (prcnamLength > 255)) {
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 prcnamLength, 255);
         }
 
@@ -1782,6 +1865,7 @@ class NetStatementRequest extends NetPackageRequest
      * non-scrollable query upon end of data (SQLSTATE 02000).
      */
     private void buildQRYCLSIMP() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         writeScalar1Byte(CodePoint.QRYCLSIMP, CodePoint.QRYCLSIMP_YES);
     }
 
@@ -1791,6 +1875,7 @@ class NetStatementRequest extends NetPackageRequest
             writeShort((short) dataLength);
         } else if (protocolTypesAndLengths[i][1] == 0x8004) {
             writeInt((int) dataLength);  // 4 bytes to encode the length
+//IC see: https://issues.apache.org/jira/browse/DERBY-1595
         } else if (protocolTypesAndLengths[i][1] == 0x8006) {
             writeLong6Bytes(dataLength); // 6 bytes to encode the length
         } else if (protocolTypesAndLengths[i][1] == 0x8008) {
@@ -1809,6 +1894,8 @@ class NetStatementRequest extends NetPackageRequest
         short v = 1;
         writeShort( v <<= 15 );
         if (extdtaPositions_ == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             extdtaPositions_ = new ArrayList<Integer>();
         }
         
@@ -1821,6 +1908,7 @@ class NetStatementRequest extends NetPackageRequest
         // as many rows as fit in the query block.
         // if the cursor is scrollable, send qryrowset if it is supported by the server
         boolean sendQryrowset = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType != ResultSet.TYPE_FORWARD_ONLY) {
             sendQryrowset = true;
         }
@@ -1829,7 +1917,9 @@ class NetStatementRequest extends NetPackageRequest
 
     private int checkFetchsize(int fetchSize, int resultSetType) {
         // if fetchSize is not set for scrollable cursors, set it to the default fetchSize
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         if (resultSetType != ResultSet.TYPE_FORWARD_ONLY && fetchSize == 0) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             fetchSize = Configuration.defaultFetchSize;
         }
         return fetchSize;
@@ -1840,6 +1930,7 @@ class NetStatementRequest extends NetPackageRequest
     }
 
     public void writeSetSpecialRegister(Section section, ArrayList sqlsttList)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
             throws SqlException {
         buildEXCSQLSET(section);
 
@@ -1871,6 +1962,7 @@ class NetStatementRequest extends NetPackageRequest
                               Lob lob,
                               int[][] protocolTypesAndLengths,
                               int i) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
         throws SqlException, SQLException{
         
         if( lob.willBeLayerBStreamed() ) {

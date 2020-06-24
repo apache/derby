@@ -82,6 +82,7 @@ public class GenericExecutionFactory
 	//
 	public boolean canSupport(Properties startParams)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2164
         return Monitor.isDesiredType(startParams,
                 EngineType.STANDALONE_DB | EngineType.STORELESS_ENGINE);
 	}
@@ -154,9 +155,11 @@ public class GenericExecutionFactory
      * @exception StandardException     Thrown on error
      */
     public ResultSetStatisticsFactory getResultSetStatisticsFactory()
+//IC see: https://issues.apache.org/jira/browse/DERBY-2661
                     throws StandardException {
         if (rssFactory == null) {
             rssFactory = (ResultSetStatisticsFactory)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                 bootServiceModule(
                                     false,
                                     this,
@@ -318,6 +321,7 @@ public class GenericExecutionFactory
 		int 						dmlType,
 		UUID						targetTableId,
 		String						targetTableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         Vector<AutoincrementCounter> aiCounters
 	) throws StandardException
 	{
@@ -373,6 +377,7 @@ private XPLAINFactoryIF xplainFactory;
                    throws StandardException {
        if (xplainFactory == null) {
            xplainFactory = (XPLAINFactoryIF)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
                bootServiceModule(
                                    false,
                                    this,
@@ -389,6 +394,7 @@ private XPLAINFactoryIF xplainFactory;
      */
     private  static  Object bootServiceModule
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
          final boolean create, final Object serviceModule,
          final String factoryInterface, final Properties properties
          )

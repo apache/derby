@@ -117,6 +117,7 @@ public class RealHashScanStatistics
 		this.indexName = indexName;
 		this.isConstraint = isConstraint;
 		this.hashtableSize = hashtableSize;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6201
 		this.hashKeyColumns = ArrayUtil.copy( hashKeyColumns );
 		this.scanQualifiers = scanQualifiers;
 		this.nextQualifiers = nextQualifiers;
@@ -160,6 +161,7 @@ public class RealHashScanStatistics
 					MessageService.getTextMessage(
 										SQLState.RTS_HASH_SCAN_RS_USING,
 										tableName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
                                         isConstraint ? "constraint" : "index",
 										indexName);
 		}
@@ -226,6 +228,7 @@ public class RealHashScanStatistics
 					"") + "\n" +
 			scanInfo +
 			subIndent + MessageService.getTextMessage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-4087
 				SQLState.RTS_START_POSITION) +
 			":\n" + StringUtil.ensureIndent(startPosition, depth + 2) + "\n" +
 			subIndent + MessageService.getTextMessage(
@@ -351,6 +354,7 @@ public class RealHashScanStatistics
               this.scanQualifiers,
               this.nextQualifiers,
               hashkey_columns,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
               this.hashtableSize
             );
         
@@ -368,6 +372,7 @@ public class RealHashScanStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
            this.numOpens,            // the number of opens
            null,                           // the number of index updates 
            lockMode,                       // lock mode

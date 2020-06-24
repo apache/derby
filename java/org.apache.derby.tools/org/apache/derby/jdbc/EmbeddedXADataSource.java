@@ -29,7 +29,9 @@ import org.apache.derby.impl.jdbc.EmbedXAConnection;
 
 /**
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
    <P>
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
     This data source is suitable for an application using embedded Derby,
     running on full Java SE 6 or higher, corresponding to JDBC 4.0 and higher.
     EmbeddedXADataSource is an XADataSource implementation.
@@ -67,6 +69,7 @@ import org.apache.derby.impl.jdbc.EmbedXAConnection;
 
  */
 public class EmbeddedXADataSource extends EmbeddedDataSource
+//IC see: https://issues.apache.org/jira/browse/DERBY-6552
                                   implements EmbeddedXADataSourceInterface
 {
 
@@ -103,7 +106,9 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
 	{
 		if (ra == null || !ra.isActive())
            ra = setupResourceAdapter(this, ra, null, null, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1137
 		return createXAConnection (ra, getUser(), getPassword(), false);
 	}
 
@@ -122,7 +127,9 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
 	{
 		if (ra == null || !ra.isActive())
            ra = setupResourceAdapter(this, ra, user, password, true);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1137
         return createXAConnection (ra, user, password, true);
 	}
 	
@@ -180,6 +187,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
          * instantiating EmbeddedXADataSource) instead of the newer one
          * (EmbeddedXADataSource40).
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         findDriver();
         return new EmbedXAConnection(this, ra, user, password, requestPassword);
     }
@@ -192,6 +200,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
     @Override
     public ResourceAdapter getResourceAdapter()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2871
         return ra;
     }
 }

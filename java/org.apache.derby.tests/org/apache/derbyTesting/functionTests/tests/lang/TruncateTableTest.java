@@ -172,6 +172,8 @@ public class TruncateTableTest extends BaseJDBCTestCase {
         // ALICE schema automatically, but for some reason that doesn't happen
         // when creating a self-referencing table. Create the schema manually
         // for now, if it doesn't already exist.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5101
+//IC see: https://issues.apache.org/jira/browse/DERBY-5139
         try {
             s.execute("CREATE SCHEMA ALICE");
         } catch (SQLException sqle) {
@@ -313,6 +315,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
         // Object used by the main thread to tell the helper thread to stop.
         // The helper thread stops once the value is set to true.
         final AtomicBoolean stop = new AtomicBoolean();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
         // Holder for anything thrown by the run() method in the helper thread.
         final Throwable[] error = new Throwable[1];
@@ -325,6 +328,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
         Thread t = new Thread() {
             public void run() {
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                     while (!stop.get()) {
                         JDBC.assertEmpty(ps.executeQuery());
                     }
@@ -346,6 +350,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
             }
         } finally {
             // We're done, so tell the helper thread to stop.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             stop.set(true);
         }
 

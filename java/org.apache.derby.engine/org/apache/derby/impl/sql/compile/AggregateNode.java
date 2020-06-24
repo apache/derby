@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.AggregateNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -44,6 +45,8 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
  * It used for all system aggregates as well as user defined aggregates.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 class AggregateNode extends UnaryOperatorNode
 {
     static final class BuiltinAggDescriptor
@@ -55,6 +58,7 @@ class AggregateNode extends UnaryOperatorNode
 
         public BuiltinAggDescriptor
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
              String aggName,
              String aggClassName,
              TypeDescriptor argType,
@@ -137,6 +141,8 @@ class AggregateNode extends UnaryOperatorNode
      * @param cm context manager
      * @throws StandardException
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
      AggregateNode(
             ValueNode operand,
             UserAggregateDefinition uadClass,
@@ -183,6 +189,7 @@ class AggregateNode extends UnaryOperatorNode
      */
     AggregateNode(
             ValueNode operand,
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Class<?> uadClass,
             boolean distinct,
             String aggregateName,
@@ -225,6 +232,8 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode replaceAggregatesWithColumnReferences(
         ResultColumnList rcl, int tableNumber) throws StandardException
 	{
@@ -239,6 +248,8 @@ class AggregateNode extends UnaryOperatorNode
 			String					generatedColName;
 			CompilerContext 		cc = getCompilerContext();
 			generatedColName ="SQLCol" + cc.getNextColumnNumber();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             generatedRC =
                 new ResultColumn(generatedColName, this, getContextManager());
 			generatedRC.markGenerated();
@@ -293,6 +304,8 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the result column
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn getGeneratedRC()
 	{
 		if (SanityManager.DEBUG)
@@ -313,6 +326,8 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the column reference
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ColumnReference getGeneratedRef()
 	{
 		if (SanityManager.DEBUG)
@@ -339,6 +354,7 @@ class AggregateNode extends UnaryOperatorNode
 	 */
     @Override
     ValueNode bindExpression(
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -352,6 +368,7 @@ class AggregateNode extends UnaryOperatorNode
         boolean noSchema = true;
         if ( userAggregateName != null )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
             noSchema = (userAggregateName.getSchemaName() == null );
             userAggregateName.bind();
         }
@@ -360,6 +377,7 @@ class AggregateNode extends UnaryOperatorNode
         // bind it now.
         if (userAggregateName != null && uad == null)
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
             String  schemaName = userAggregateName.getSchemaName();
             AliasDescriptor ad = resolveAggregate
                 (
@@ -391,6 +409,7 @@ class AggregateNode extends UnaryOperatorNode
             AliasDescriptor ad = ((UserAggregateDefinition) uad).getAliasDescriptor();
             boolean         isModernBuiltinAggregate =
                 SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME.equals( ad.getSchemaName() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
 
             if ( distinct && isModernBuiltinAggregate )
             {
@@ -400,6 +419,7 @@ class AggregateNode extends UnaryOperatorNode
             // set up dependency on the user-defined aggregate and compile a check for USAGE
             // priv if needed. no need for a dependency if this is a builtin, system-supplied
             // aggregate
+//IC see: https://issues.apache.org/jira/browse/DERBY-7041
             if ( !isModernBuiltinAggregate )
             {
                 getCompilerContext().createDependency( ad );
@@ -412,8 +432,10 @@ class AggregateNode extends UnaryOperatorNode
                 // aggregates. They are tricky. They masquerade as user-defined
                 // aggregates because they implement org.apache.derby.agg.Aggregator
                 //
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
                 if ( !isModernBuiltinAggregate )
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
                     getCompilerContext().addRequiredUsagePriv( ad );
                 }
             }
@@ -421,6 +443,7 @@ class AggregateNode extends UnaryOperatorNode
 
         // Add ourselves to the list of aggregates before we do anything else.
         aggregates.add(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
 
         CompilerContext cc = getCompilerContext();
         
@@ -428,6 +451,7 @@ class AggregateNode extends UnaryOperatorNode
 		if (operand != null)
 		{
             int previousReliability = orReliability( CompilerContext.AGGREGATE_RESTRICTION );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
             bindOperand(fromList, subqueryList, aggregates);
             cc.setReliability( previousReliability );
             
@@ -450,6 +474,8 @@ class AggregateNode extends UnaryOperatorNode
 			// Also forbid any window function inside an aggregate unless in
 			// subquery, cf. SQL 2003, section 10.9, SR 7 a).
 			SelectNode.checkNoWindowFunctions(operand, aggregateName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3634
+//IC see: https://issues.apache.org/jira/browse/DERBY-4069
 
 			/*
 			** Check the type of the operand.  Make sure that the user
@@ -519,9 +545,12 @@ class AggregateNode extends UnaryOperatorNode
         {
             ValueNode   castNode = ((UserAggregateDefinition) uad).castInputValue
                 ( operand, getContextManager() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
             if ( castNode != null )
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6075
                 operand = castNode.bindExpression( fromList, subqueryList, aggregates );
             }
         }
@@ -537,6 +566,7 @@ class AggregateNode extends UnaryOperatorNode
 	 * Resolve a user-defined aggregate.
 	 */
     static AliasDescriptor resolveAggregate
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
         ( DataDictionary dd, SchemaDescriptor sd, String rawName, boolean noSchema )
         throws StandardException
     {
@@ -549,6 +579,8 @@ class AggregateNode extends UnaryOperatorNode
         // been created yet. in that case, it doesn't have any aggregates in it.
         if ( sd.getUUID() == null ) { return null; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         java.util.List<AliasDescriptor> list = dd.getRoutineList
             ( sd.getUUID().toString(), rawName, AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR );
 
@@ -561,6 +593,7 @@ class AggregateNode extends UnaryOperatorNode
      * Construct an AliasDescriptor for a modern builtin aggregate.
      */
     private static AliasDescriptor resolveBuiltinAggregate
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
         ( DataDictionary dd, String rawName, boolean noSchema )
         throws StandardException
     {
@@ -621,6 +654,7 @@ class AggregateNode extends UnaryOperatorNode
         if ( uad == null )
         {
             Class<?> theClass = aggregateDefinitionClass;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             // get the class
             if (theClass == null)
@@ -642,6 +676,7 @@ class AggregateNode extends UnaryOperatorNode
             Object instance = null;
             try
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 instance = theClass.getConstructor().newInstance();
             }
             catch (Throwable t)
@@ -695,6 +730,8 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the class name
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String  getAggregatorClassName()
 	{
 		return aggregatorClassName.toString();
@@ -706,6 +743,8 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the class name
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String  getAggregateName()
 	{
 		return aggregateName;
@@ -721,11 +760,14 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn    getNewAggregatorResultColumn(DataDictionary dd)
 		throws StandardException
 	{
 		String	className = aggregatorClassName.toString();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2937
 		DataTypeDescriptor compType =
             DataTypeDescriptor.getSQLDataTypeDescriptor(className);
 
@@ -744,6 +786,8 @@ class AggregateNode extends UnaryOperatorNode
 		** Create a result column with this new node below
 		** it.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return new ResultColumn(aggregateName, nullNode, getContextManager());
 	}
 
@@ -758,6 +802,8 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumn    getNewExpressionResultColumn(DataDictionary dd)
 		throws StandardException
 	{
@@ -772,6 +818,8 @@ class AggregateNode extends UnaryOperatorNode
 			this.getNewNullResultExpression() :
 			operand;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
         return new ResultColumn(
             "##aggregate expression", node, getContextManager());
 	}
@@ -784,6 +832,8 @@ class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode   getNewNullResultExpression()
 		throws StandardException
 	{
@@ -791,6 +841,7 @@ class AggregateNode extends UnaryOperatorNode
 		** Create a result column with the aggrergate operand
 		** it.
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2937
 		return getNullNode(getTypeServices());
 	}
 
@@ -839,6 +890,7 @@ class AggregateNode extends UnaryOperatorNode
 
     boolean isConstant()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3231
 		return false;
 	}
 	

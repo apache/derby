@@ -100,10 +100,12 @@ class UserAggregateDefinition implements AggregateDefinition
 		try
 		{
 			CompilerContext cc = (CompilerContext)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 				QueryTreeNode.getContext(CompilerContext.CONTEXT_ID);
             ClassFactory    classFactory = cc.getClassFactory();
             TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Class<?>   derbyAggregatorInterface = classFactory.loadApplicationClass( "org.apache.derby.agg.Aggregator" );
             Class<?>   userAggregatorClass = classFactory.loadApplicationClass( _alias.getJavaClassName() );
 
@@ -126,6 +128,7 @@ class UserAggregateDefinition implements AggregateDefinition
                      );
             }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             Class<?>[] genericParameterTypes =
                 classFactory.getClassInspector().getGenericParameterTypes(
                     derbyAggregatorInterface, userAggregatorClass);
@@ -137,6 +140,7 @@ class UserAggregateDefinition implements AggregateDefinition
             AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
             DataTypeDescriptor  expectedInputType = DataTypeDescriptor.getType( aai.getForType() );
             DataTypeDescriptor  expectedReturnType = DataTypeDescriptor.getType( aai.getReturnType() );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             Class<?>       expectedInputClass = getJavaClass( classFactory, expectedInputType );
             Class<?>       expectedReturnClass = getJavaClass( classFactory, expectedReturnType );
 
@@ -152,6 +156,7 @@ class UserAggregateDefinition implements AggregateDefinition
             for ( int i = 0; i < inputBounds.length; i++ )
             {
                 vetCompatibility
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
                     ( (Class<?>) inputBounds[ i ], expectedInputClass, SQLState.LANG_UDA_WRONG_INPUT_TYPE );
             }
             if ( genericParameterTypes[ INPUT_TYPE ] != null )
@@ -206,6 +211,8 @@ class UserAggregateDefinition implements AggregateDefinition
 	 * Wrap the input operand in an implicit CAST node as necessary in order to
      * coerce it the correct type for the aggregator. Return null if no cast is necessary.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     final ValueNode castInputValue
         ( ValueNode inputValue, ContextManager cm )
         throws StandardException
@@ -218,6 +225,8 @@ class UserAggregateDefinition implements AggregateDefinition
         if ( expectedInputType.isExactTypeAndLengthMatch( actualInputType ) ) { return null; }
         else
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             return StaticMethodCallNode.makeCast(
                 inputValue, expectedInputType, cm);
         }

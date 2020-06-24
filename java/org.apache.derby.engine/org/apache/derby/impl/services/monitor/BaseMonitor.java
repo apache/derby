@@ -89,6 +89,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 abstract class BaseMonitor
 	implements ModuleFactory, BundleFinder {
 
@@ -98,6 +99,7 @@ abstract class BaseMonitor
 		Hash table of objects that implement PersistentService keyed by their getType() method.
 	*/
     private final HashMap<String,PersistentService> serviceProviders =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
             new HashMap<String,PersistentService>();
 	private static final String LINE = 
         "----------------------------------------------------------------";
@@ -124,6 +126,7 @@ abstract class BaseMonitor
 	private PrintWriter logging;
 
 	ThreadGroup daemonGroup;
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 	// class registry
 /* one byte  format identifiers never used
@@ -133,10 +136,13 @@ abstract class BaseMonitor
 //	private InstanceGetter[]	rc4;
 
 	/* Constructor  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	BaseMonitor() {
 		super();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		services = new Vector<TopService>(0, 1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 		services.add(new TopService(this));	// first element is always the free-floating service
 	}
 
@@ -155,8 +161,10 @@ abstract class BaseMonitor
 			inShutdown = true;
 		}
  
+//IC see: https://issues.apache.org/jira/browse/DERBY-4601
 		Monitor.getStream().println(LINE);
 		//Make a note of Engine shutdown in the log file
+//IC see: https://issues.apache.org/jira/browse/DERBY-4755
 		Monitor.getStream().println(
                 MessageService.getTextMessage(
                     MessageId.CONN_SHUT_DOWN_ENGINE,
@@ -178,6 +186,7 @@ abstract class BaseMonitor
 				if (position == 0)
 					break;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				ts = services.get(position);
 			}
 
@@ -198,9 +207,12 @@ abstract class BaseMonitor
 
 		}
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-4601
 		Monitor.getStream().println(LINE);
 		(services.get(0)).shutdown();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		stopContextService();
 	}
 
@@ -238,6 +250,7 @@ abstract class BaseMonitor
 		logging = log;
 
 		// false indicates the full monitor is required, not the lite.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
         if (!initialize(false)) {
             dumpTempWriter(true);
             return;
@@ -246,8 +259,10 @@ abstract class BaseMonitor
 		// if monitor is already set then the system is already
 		// booted or in the process of booting or shutting down.
 		if ( setMonitor( this ) ) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
 		MessageService.setFinder(this);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1439
 
 		if (SanityManager.DEBUG) {
 			reportOn = Boolean.valueOf(PropertyUtil.getSystemProperty("derby.monitor.verbose")).booleanValue();
@@ -276,6 +291,7 @@ abstract class BaseMonitor
 		}
 
 		Vector<Class<?>> bootImplementations = getImplementations(bootProperties, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		Vector<Class<?>> systemImplementations = null;
 		Vector<Class<?>> applicationImplementations = null;
@@ -289,6 +305,7 @@ abstract class BaseMonitor
 		}
 
         Vector<Class<?>> defaultImplementations = getDefaultImplementations();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		int implementationCount = 0;
 		if (bootImplementations != null)
@@ -307,6 +324,7 @@ abstract class BaseMonitor
 			implementationCount++;
 
         implementationSets = new ArrayList<List<Class<?>>>(implementationCount);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
 		if (bootImplementations != null)
             implementationSets.add(bootImplementations);
@@ -329,12 +347,14 @@ abstract class BaseMonitor
 				addDebugFlags(applicationProperties.getProperty(Monitor.DEBUG_TRUE), true);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-623
 			addDebugFlags(PropertyUtil.getSystemProperty(Monitor.DEBUG_FALSE), false);
 			addDebugFlags(PropertyUtil.getSystemProperty(Monitor.DEBUG_TRUE), true);
 		}
 
 		try {
 			systemStreams = (InfoStreams) Monitor.startSystemModule("org.apache.derby.shared.common.stream.InfoStreams");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
 			if (SanityManager.DEBUG) {
 				SanityManager.SET_DEBUG_STREAM(systemStreams.stream().getPrintWriter());
@@ -344,9 +364,12 @@ abstract class BaseMonitor
 
 			uuidFactory = (UUIDFactory) Monitor.startSystemModule("org.apache.derby.iapi.services.uuid.UUIDFactory");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
             timerFactory = (TimerFactory)Monitor.startSystemModule("org.apache.derby.iapi.services.timer.TimerFactory");
             
             Monitor.startSystemModule(Module.JMX);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3424
+//IC see: https://issues.apache.org/jira/browse/DERBY-1387
 
 		} catch (StandardException se) {
 
@@ -356,6 +379,8 @@ abstract class BaseMonitor
 			dumpTempWriter(true);
 
 			return;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6117
+//IC see: https://issues.apache.org/jira/browse/DERBY-6617
         } catch (AccessControlException e) {
             dumpTempWriter(true);
             throw e;
@@ -375,6 +400,7 @@ abstract class BaseMonitor
 
 		// bootup all the service providers
 		determineSupportedServiceProviders();
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 
 		// See if automatic booting of persistent services is required
 		boolean bootAll = Boolean.valueOf(PropertyUtil.getSystemProperty(Property.BOOT_ALL)).booleanValue();
@@ -415,6 +441,7 @@ abstract class BaseMonitor
 		TopService myts = null;
 		synchronized (this) {
 			for (int i = 1; i < services.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				TopService ts = services.get(i);
 				if (ts.isPotentialService(key)) {
 					myts = ts;
@@ -547,6 +574,7 @@ abstract class BaseMonitor
 
 		if (serviceModule == null)
 			return services.get(0);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		for (int i = 1; i < services.size(); i++) {
 			TopService ts = services.get(i);
@@ -600,6 +628,7 @@ abstract class BaseMonitor
 			off = fmtId - StoredFormatIds.MIN_TWO_BYTE_FORMAT_ID;
 			iga = rc2;
 			if (iga == null) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6188
 				iga = rc2 = new InstanceGetter[ RegisteredFormatIds.countTwoByteIDs() ];
 			}
 
@@ -619,6 +648,7 @@ abstract class BaseMonitor
 
 			Throwable t;
 			try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				Class<?> clazz = Class.forName(className);
                 final Constructor<?> constructor = clazz.getDeclaredConstructor();
 
@@ -637,6 +667,7 @@ abstract class BaseMonitor
 				t = iae;
 			} catch (InstantiationException ie) {
 				t = ie;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			} catch (NoSuchMethodException nsme) {
 				t = nsme;
 			} catch (InvocationTargetException ite) {
@@ -691,6 +722,7 @@ abstract class BaseMonitor
  		catch (IllegalAccessException iae) {
 			t = iae;
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
  		catch (NoSuchMethodException iae) {
 			t = iae;
 		}
@@ -701,6 +733,7 @@ abstract class BaseMonitor
 			t = le;
 		}
 		throw StandardException.newException(SQLState.REGISTERED_CLASS_INSTANCE_ERROR,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 			t, identifier, "XX" /*ci.getClassName()*/);
 	}
 
@@ -721,6 +754,7 @@ abstract class BaseMonitor
 			instance = loadInstance(localImplementations, factoryInterface, properties);
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         for (List<Class<?>> set : implementationSets) {
             instance = loadInstance(set, factoryInterface, properties);
 			if (instance != null)
@@ -731,6 +765,7 @@ abstract class BaseMonitor
 	}
 
     private Object loadInstance(List<Class<?>> implementations,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                 Class<?> factoryInterface,
                                 Properties properties) {
 
@@ -743,6 +778,7 @@ abstract class BaseMonitor
 
 			// try to create an instance
 			Object instance = newInstance((Class) implementations.get(index));
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 
 			if (BaseMonitor.canSupport(instance, properties))
 				return instance;
@@ -786,10 +822,12 @@ abstract class BaseMonitor
     private Object newInstance(Class<?> classObject) {
 
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             final Constructor<?> constructor = classObject.getDeclaredConstructor();
             final Object module = constructor.newInstance();
 
             // Get and report any warnings generated during initialization
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
             try {
                 final Method getWarn = classObject.getMethod("getWarnings");
                 final String warnings = (String)getWarn.invoke(module);
@@ -815,6 +853,7 @@ abstract class BaseMonitor
  		catch (IllegalAccessException e) {
 			report(classObject.getName() + " " + e.toString());
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
  		catch (NoSuchMethodException e) {
 			report(classObject.getName() + " " + e.toString());
 		}
@@ -851,6 +890,7 @@ abstract class BaseMonitor
 
 			// count the number of services that implement the required protocol
 			for (int i = 1; i < services.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				ts = services.get(i);
 				if (ts.isActiveService()) {
 					if (ts.getKey().getFactoryInterface().getName().equals(protocol))
@@ -863,6 +903,7 @@ abstract class BaseMonitor
 			if (count != 0) {
 				int j = 0;
 				for (int i = 1; i < services.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					ts = services.get(i);
 					if (ts.isActiveService()) {
 						if (ts.getKey().getFactoryInterface().getName().equals(protocol)) {
@@ -970,6 +1011,7 @@ abstract class BaseMonitor
 				try {
 					if (protocolOrType.equals(Monitor.SERVICE_TYPE_DIRECTORY)) {
 						if (bootAll)	// only if automatic booting is required
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 							findProviderAndStartService(name, properties, true);
 					} else {
 						bootService((PersistentService) null,
@@ -997,6 +1039,7 @@ abstract class BaseMonitor
 		throws StandardException {
 
 		return findProviderAndStartService(name, properties, false);
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 
 	}
 
@@ -1014,6 +1057,7 @@ abstract class BaseMonitor
 		throws StandardException {
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 		PersistentService provider = findProviderForCreate(name);
 		if (provider == null) {
 			throw StandardException.newException(SQLState.PROTOCOL_UNKNOWN, name);
@@ -1064,6 +1108,7 @@ abstract class BaseMonitor
 			return null;
 
 		Vector<Class<?>> implementations = actualModuleList ? new Vector<Class<?>>(moduleList.size()) : new Vector<Class<?>>(0,1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 		// Get my current JDK environment
 		int theJDKId = JVMInfo.JDK_ID;
@@ -1077,6 +1122,7 @@ nextModule:
             
             // module tagged name in the modules.properties file.
             // used as the tag  for dependent properties.
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
             String tag;
             
             // Dynamically loaded code is defined by a property of
@@ -1138,6 +1184,7 @@ nextModule:
 
 			try {
 				Class<?> possibleModule = Class.forName(className);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 				// Look for the monitors special modules, PersistentService ones.
 				if (getPersistentServiceImplementation(possibleModule))
@@ -1169,6 +1216,7 @@ nextModule:
 						offset += envModuleCount[eji];
 					}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 					implementations.add(offset, possibleModule);
 					envModuleCount[envJDKId]++;
 
@@ -1246,6 +1294,7 @@ nextModule:
 	private Vector<Class<?>> getDefaultImplementations() {
 
 		Properties moduleList = getDefaultModuleProperties();
+//IC see: https://issues.apache.org/jira/browse/DERBY-626
 
 		return getImplementations(moduleList, true);
 	} // end of getDefaultImplementations
@@ -1266,6 +1315,7 @@ nextModule:
 
         ClassLoader cl = getClass().getClassLoader();
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-798
         	Enumeration e = cl == null ?
         		ClassLoader.getSystemResources("org/apache/derby/modules.properties") :
         		cl.getResources("org/apache/derby/modules.properties");
@@ -1285,6 +1335,7 @@ nextModule:
                         for( Enumeration newKeys = otherList.keys(); newKeys.hasMoreElements() ;)
                         {
                             String key = (String) newKeys.nextElement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4815
                             if (moduleList.containsKey(key))
                                 // RESOLVE how do we localize messages before we have finished initialization?
                                 report( "Ignored duplicate property " + key + " in " + modulesPropertiesURL.toString());
@@ -1307,6 +1358,7 @@ nextModule:
             if (SanityManager.DEBUG)
                 report("Can't load implementation list: " + ioe.toString());
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-626
         if (SanityManager.DEBUG)
         {
 			if (firstList)
@@ -1343,6 +1395,7 @@ nextModule:
 	/**	
 		Get InputStream for application properties file Returns nul if it does not exist.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	abstract InputStream applicationPropertiesStream()
 	  throws IOException;
 
@@ -1420,11 +1473,13 @@ nextModule:
 	private void determineSupportedServiceProviders() {
 
 		for (Iterator<PersistentService> i = serviceProviders.values().iterator(); i.hasNext(); ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 			PersistentService provider = i.next();
 
 			// see if this provider can live in this environment
 			if (!BaseMonitor.canSupport(provider, (Properties) null)) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 				i.remove();
 				continue;
 			}
@@ -1504,6 +1559,7 @@ nextModule:
 		int colon = name.indexOf(':');
 		if (colon != -1) {
 			actualProvider = findProviderFromName(name, colon);
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 
 			// if null is returned here then its a sub-sub protocol/provider
 			// that we don't understand. Attempt to load it as an untyped name.
@@ -1583,6 +1639,7 @@ nextModule:
 
 	protected PersistentService findProviderForCreate(String name) throws StandardException {
 		// RESOLVE - hard code creating databases in directories for now.
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 		return (PersistentService) findProviderFromName(name, name.indexOf(':'));
 	}
 
@@ -1604,6 +1661,7 @@ nextModule:
 		} else {
 			serviceType = name.substring(0, colon);
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
 		return getServiceProvider(serviceType);
 	}
 
@@ -1617,6 +1675,7 @@ nextModule:
             if( ps != null)
                 return ps;
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
         return getPersistentService(subSubProtocol);
     } // end of getServiceProvider
 
@@ -1647,6 +1706,7 @@ nextModule:
                                                   e,
                                                   subSubProtocol, className);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
         return new StorageFactoryService( subSubProtocol, storageFactoryClass);
     } // end of getPersistentService
 
@@ -1659,14 +1719,17 @@ nextModule:
     private String getStorageFactoryClassName(String subSubProtocol)
     {
         String propertyName = Property.SUB_SUB_PROTOCOL_PREFIX + subSubProtocol;
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
         String className = PropertyUtil.getSystemProperty( propertyName);
         if( className != null)
             return className;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         return storageFactories.get( subSubProtocol);
     } // end of getStorageFactoryClassName
 
     private static final HashMap<String,String> storageFactories = new HashMap<String,String>();
     static {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
         storageFactories.put( PersistentService.DIRECTORY,
                                 "org.apache.derby.impl.io.DirStorageFactory");
         storageFactories.put( PersistentService.CLASSPATH,
@@ -1677,6 +1740,8 @@ nextModule:
                                 "org.apache.derby.impl.io.URLStorageFactory");
         storageFactories.put( PersistentService.HTTPS,
                                 "org.apache.derby.impl.io.URLStorageFactory");
+//IC see: https://issues.apache.org/jira/browse/DERBY-646
+//IC see: https://issues.apache.org/jira/browse/DERBY-4084
         storageFactories.put( PersistentService.INMEMORY,
                             "org.apache.derby.impl.io.VFMemoryStorageFactory");
     }
@@ -1729,6 +1794,7 @@ nextModule:
 				}
 
 				for (int i = 1; i < services.size(); i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					TopService ts2 = services.get(i);
 					if (ts2.isPotentialService(serviceKey)) {
 						// if the service already exists then  just return null
@@ -1762,6 +1828,7 @@ nextModule:
 				}
 
 				ts = new TopService(this, serviceKey, provider, serviceLocale);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 				services.add(ts);
 			}
 
@@ -1864,6 +1931,7 @@ nextModule:
 			if (ts != null) {
 				ts.shutdown();
 				synchronized (this) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5060
 					services.remove(ts);
 				}
 
@@ -1877,6 +1945,7 @@ nextModule:
 
 
 			Throwable nested = se.getCause();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 
 			// never hide ThreadDeath
 			if (nested instanceof ThreadDeath)
@@ -1912,6 +1981,7 @@ nextModule:
 	/**
 	Return the UUID factory for this system.  Returns null
 	if there isn't one.
+//IC see: https://issues.apache.org/jira/browse/DERBY-862
 	See com.ibm.db2j.system.System
 	*/
 	public UUIDFactory getUUIDFactory()	{
@@ -1925,6 +1995,7 @@ nextModule:
      * @return the system's Timer factory.
      */
     public TimerFactory getTimerFactory() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-31
         return timerFactory;
     }
 
@@ -2069,6 +2140,7 @@ nextModule:
 	public ResourceBundle getBundle(String messageId) {
 		ContextManager cm;
 		try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			cm = getContextService().getCurrentContextManager();
 		} catch (ShutdownException se) {
 			cm = null;
@@ -2093,6 +2165,7 @@ nextModule:
 
     @Override
     public final boolean isDaemonThread(Thread thread) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6631
         return thread.getThreadGroup() == daemonGroup;
     }
 
@@ -2102,6 +2175,7 @@ nextModule:
      */
     private  static  ContextService    getContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ContextService>()
@@ -2120,6 +2194,7 @@ nextModule:
      */
     private  static  void    stopContextService()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         AccessController.doPrivileged
             (
              new PrivilegedAction<Object>()
@@ -2158,7 +2233,9 @@ nextModule:
 		Returns false if the monitor cannot be initialized, true otherwise.
 	*/
 	abstract boolean initialize(boolean lite);
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
     class ProviderEnumeration implements Enumeration<PersistentService>
     {
         private Enumeration<String> serviceProvidersKeys = (serviceProviders == null) ? null :
@@ -2180,6 +2257,7 @@ nextModule:
             if( serviceProvidersKeys != null && serviceProvidersKeys.hasMoreElements())
                 return serviceProviders.get( serviceProvidersKeys.nextElement());
             getNextStorageFactory();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             PersistentService ret = storageFactoryPersistentService;
             storageFactoryPersistentService = null;
             return ret;
@@ -2217,6 +2295,7 @@ nextModule:
                 try
                 {
                     storageFactoryPersistentService
+//IC see: https://issues.apache.org/jira/browse/DERBY-927
                       = getPersistentService( getStorageFactoryClassName(PersistentService.DIRECTORY),
                                               PersistentService.DIRECTORY);
                 }

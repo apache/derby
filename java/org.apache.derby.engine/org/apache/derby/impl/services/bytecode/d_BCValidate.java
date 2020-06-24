@@ -58,6 +58,7 @@ class d_BCValidate
 
 
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-624
 			String reason = null;
 			try {
 
@@ -77,6 +78,7 @@ class d_BCValidate
 				Class[] params = NO_PARAMS;
 
 				Class<?> declaring = loadClass(declaringClass);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
 				if (debugParameterTypes != null) {
 					params = new Class[debugParameterTypes.length];
@@ -94,8 +96,10 @@ class d_BCValidate
 				// we try to fall into these categories to avoid having to grant
 				// permissions to derby jars for the function tests.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-624
 				ClassLoader myLoader = d_BCValidate.class.getClassLoader();
                 boolean sameClassLoader;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6854
                 try {
                     ClassLoader declareLoader = AccessController.doPrivileged(
                             (PrivilegedAction<ClassLoader>)
@@ -114,6 +118,7 @@ class d_BCValidate
 				String actualReturnType;
 
 				if (methodName.equals("<init>")) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 					Constructor<?> c;
 					
 					if (sameClassLoader)
@@ -205,6 +210,7 @@ class d_BCValidate
 
 	static {
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			primitives = new Hashtable<String,Class<?>>();
 			primitives.put("boolean", Boolean.TYPE);
 			primitives.put("byte", Byte.TYPE);

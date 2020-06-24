@@ -70,6 +70,7 @@ public class NetXAConnection {
             boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
         netCon = createNetConnection(logWriter, user, password,
                 dataSource, rmId, isXAConn,cpc);
         checkPlatformVersion();
@@ -99,6 +100,7 @@ public class NetXAConnection {
         netCon.netAgent_.netConnectionReply_.readLocalXARollback(netCon);
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writeTransactionStart(ClientStatement statement)
             throws SqlException {
         //KATHEY  remove below after checking that we don't need it.
@@ -125,9 +127,11 @@ public class NetXAConnection {
         return;
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writeCommit() throws SqlException {
         // this logic must be in sync with willAutoCommitGenerateFlow() logic
         int xaState = netCon.getXAState();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
         if (xaState == netCon.XA_T0_NOT_ASSOCIATED){
             netCon.xares_.callInfoArray_[
                     netCon.xares_.conn_.currXACallInfoOffset_
@@ -136,10 +140,12 @@ public class NetXAConnection {
         }
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void readCommit() throws SqlException {
         int xaState = netCon.getXAState();
         NetXACallInfo callInfo = netCon.xares_.callInfoArray_
                 [netCon.currXACallInfoOffset_];
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         if (xaState == netCon.XA_T0_NOT_ASSOCIATED) {
             readLocalXACommit_();
@@ -154,6 +160,7 @@ public class NetXAConnection {
         }        
     }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     void writeRollback() throws SqlException {
       netCon.xares_.callInfoArray_[
                 netCon.xares_.conn_.currXACallInfoOffset_
@@ -164,6 +171,7 @@ public class NetXAConnection {
     void readRollback() throws SqlException {
         NetXACallInfo callInfo = netCon.xares_.callInfoArray_
                 [netCon.currXACallInfoOffset_];
+//IC see: https://issues.apache.org/jira/browse/DERBY-1024
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         readLocalXARollback_();
 
@@ -193,6 +201,7 @@ public class NetXAConnection {
 
         supportedVersion = 8;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1192
         if (netCon.xaHostVersion_ >= supportedVersion) { 
             // supported version, return
             return;
@@ -203,6 +212,7 @@ public class NetXAConnection {
         platform = "Linux, Unix, Windows";
         throw new SqlException(netCon.agent_.logWriter_, 
             new ClientMessageId(SQLState.NET_WRONG_XA_VERSION),
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
             platform, supportedVersion, netCon.xaHostVersion_);
     }
     
@@ -226,15 +236,22 @@ public class NetXAConnection {
      *
      */
     private NetConnection createNetConnection (
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
             LogWriter logWriter,
             String user,
             String password,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             BasicClientDataSource dataSource,
             int rmId,
             boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-941
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
         return (NetConnection)ClientAutoloadedDriver.getFactory().newNetConnection
+//IC see: https://issues.apache.org/jira/browse/DERBY-1028
             (logWriter, user, password,dataSource, rmId, isXAConn,cpc);
     }
 }

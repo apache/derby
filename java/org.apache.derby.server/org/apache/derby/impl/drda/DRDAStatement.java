@@ -1648,6 +1648,7 @@ class DRDAStatement
         if (isDynamicPkgid(pkgid))
         {       
             if(pkgid.charAt(4) == 'N')
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
                 withHoldCursor = ResultSet.CLOSE_CURSORS_AT_COMMIT;
             else  
                 withHoldCursor = ResultSet.HOLD_CURSORS_OVER_COMMIT;
@@ -1669,6 +1670,7 @@ class DRDAStatement
         if (stmtPmeta != null)
             return stmtPmeta;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
         stmtPmeta = ps.getParameterMetaData();
         
         return stmtPmeta;
@@ -1684,6 +1686,7 @@ class DRDAStatement
      */
     private boolean getMoreResults(int current) throws SQLException
     {       
+//IC see: https://issues.apache.org/jira/browse/DERBY-2121
         return getPreparedStatement().getMoreResults(current);
     }
 
@@ -1722,6 +1725,7 @@ class DRDAStatement
      * @exception SQLException
      */
     boolean isRSCloseImplicit(boolean lmtblkprcOK) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-821
         return
             (currentDrdaRs.qryclsimp == CodePoint.QRYCLSIMP_YES) &&
             !isScrollable() &&

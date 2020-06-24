@@ -85,6 +85,7 @@ public class IjTestCase extends ScriptTestCase {
 			+ getName() + ".out";
 		
 		final File out = outfile;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		FileInputStream fis = AccessController.doPrivileged(
                 new PrivilegedAction<FileInputStream>() {
 			public FileInputStream run() {
@@ -106,6 +107,7 @@ public class IjTestCase extends ScriptTestCase {
 
         boolean deleted = PrivilegedFileOpsForTests.delete(outfile);
 		
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 		if (!deleted) {
 			println("Could not delete outfile for " + scriptName);
         }

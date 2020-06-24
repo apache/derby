@@ -75,11 +75,13 @@ abstract class ExportAbstract {
     private String[] getOneRowAtATime(ResultSet rs, 
                                       boolean[] isLargeBinary, 
                                       boolean[] isLargeChar) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
         throws Exception 
 	{
 
     if (rs.next()){
        int columnCount = exportResultSetForObject.getColumnCount();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
 	   ResultSetMetaData rsm=rs.getMetaData();
        String[] rowObjects = new String[columnCount];
        for (int colNum = 0; colNum < columnCount; colNum++) {
@@ -114,6 +116,7 @@ abstract class ExportAbstract {
                // TODO : handling of Nulls. 
            }
 		   else {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
                String columnValue;
                int jdbcColumnNumber = colNum + 1;
                
@@ -134,6 +137,7 @@ abstract class ExportAbstract {
     // write a Serializable as a string
     public static String stringifyObject( Object udt ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         DynamicByteArrayOutputStream dbaos = new DynamicByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream( dbaos );
         
@@ -169,6 +173,7 @@ abstract class ExportAbstract {
 						ctype == Types.FLOAT ||ctype == Types.INTEGER || ctype == Types.NUMERIC ||
 						ctype == Types.REAL ||ctype == Types.SMALLINT || ctype == Types.TINYINT)
     				isNumeric[i] = true;
+//IC see: https://issues.apache.org/jira/browse/DERBY-378
 				else 
 					isNumeric[i] = false;
 					

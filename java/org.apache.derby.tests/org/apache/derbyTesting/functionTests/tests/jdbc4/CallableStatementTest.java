@@ -86,6 +86,7 @@ public class CallableStatementTest  extends Wrapper41Test
     protected void tearDown()
         throws Exception {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2707
         cStmt.close();
         cStmt = null;
 
@@ -93,7 +94,9 @@ public class CallableStatementTest  extends Wrapper41Test
     }
    
     public void testNamedParametersAreNotSupported()
+//IC see: https://issues.apache.org/jira/browse/DERBY-1147
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         DatabaseMetaData met = getConnection().getMetaData();
         assertFalse("Named parameters are not supported, but the metadata " +
                     "says they are", met.supportsNamedParameters());
@@ -160,6 +163,7 @@ public class CallableStatementTest  extends Wrapper41Test
     
     public void testGetCharacterStreamIntOnInvalidTypeDOUBLE() 
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1147
         cStmt.setDouble(2, 3.3);
         cStmt.execute();
         try {
@@ -199,6 +203,7 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public void testGetCharacterStreamIntOnInParameterOfValidType()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getConnection());
         cStmt.setString(1, "A string");
         cStmt.execute();
@@ -223,6 +228,7 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public void testGetCharacterStreamIntVARCHAR()
         throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         cStmt = CallableStatementTestSetup.getIntToStringFunction(getConnection());
         cStmt.setInt(2, 4509);
         assertFalse("No resultsets should be returned", cStmt.execute());
@@ -254,6 +260,7 @@ public class CallableStatementTest  extends Wrapper41Test
     public void testGetCharacterStreamIntVARBINARYDirect()
         throws IOException, SQLException {
         String data = "This is the test string.";
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getConnection());
         cStmt.setString(1, data);
         assertFalse("No resultsets should be returned", cStmt.execute());
@@ -293,6 +300,7 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public void testGetCharacterStreamIntVARBINARYFromDb()
         throws IOException, SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getConnection());
         cStmt.setInt(2, CallableStatementTestSetup.STRING_BYTES_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
@@ -324,6 +332,7 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public void testGetCharacterStreamIntOnVARBINARYWithNull()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getConnection());
         cStmt.setInt(2, CallableStatementTestSetup.SQL_NULL_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
@@ -339,6 +348,7 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public void testGetCharacterStreamIntOnVARCHARWithNull()
         throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1555
         cStmt = CallableStatementTestSetup.getVarcharFromDbFunction(getConnection());
         cStmt.setInt(2, CallableStatementTestSetup.SQL_NULL_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
@@ -385,6 +395,7 @@ public class CallableStatementTest  extends Wrapper41Test
     public void testSetBlobNotImplemented()
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             cStmt.setBlob("some-parameter-name", (Blob)null);
             fail("CallableStatement.setBlob(String, Blob) " +
                  "should not be implemented");
@@ -396,6 +407,7 @@ public class CallableStatementTest  extends Wrapper41Test
     public void testSetClobNotImplemented()
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             cStmt.setClob("some-parameter-name", (Clob)null);
             fail("CallableStatement.setClob(String, Clob) " +
                  "should not be implemented");
@@ -418,6 +430,7 @@ public class CallableStatementTest  extends Wrapper41Test
     public void testSetNClobNClobNotImplemented()
         throws SQLException {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1417
             cStmt.setNClob("some-parameter-name", (NClob)null);
             fail("CallableStatement.setNClob(String, NClob) " +
                  "should not be implemented");
@@ -483,6 +496,7 @@ public class CallableStatementTest  extends Wrapper41Test
 
     /** Helper method for testIsWrapperFor*Statement test cases. */
     private void testIsWrapperForXXXStatement(Class klass) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1536
         assertTrue("The CallableStatement is not a wrapper for "
                        + klass.getName(),
                    cStmt.isWrapperFor(klass));
@@ -505,6 +519,7 @@ public class CallableStatementTest  extends Wrapper41Test
     }
 
     public void testIsWrapperForSelf() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
         assertTrue(cStmt.isWrapperFor(cStmt.getClass()));
     }
 
@@ -524,6 +539,7 @@ public class CallableStatementTest  extends Wrapper41Test
     }
 
     public void testUnwrapAsSelf() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5872
         PreparedStatement cs = cStmt.unwrap(cStmt.getClass());
         assertSame("Unwrap returned wrong object.", cStmt, cs);
     }
@@ -548,8 +564,10 @@ public class CallableStatementTest  extends Wrapper41Test
      */
 
     public void testSetCharacterStream() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
         try {
             cStmt.setCharacterStream("Some String",null,0L);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
             fail("CallableStatement.setCharacterStream() " +
                  "should not be implemented");
         }
@@ -572,6 +590,7 @@ public class CallableStatementTest  extends Wrapper41Test
     public void testSetAsciiStream() throws SQLException {
         try {
             cStmt.setAsciiStream("Some String",null,0L);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
             fail("CallableStatement.setAsciiStream() " +
                  "should not be implemented");
         }
@@ -594,6 +613,7 @@ public class CallableStatementTest  extends Wrapper41Test
     public void testSetBinaryStream() throws SQLException {
         try {
             cStmt.setBinaryStream("Some String",null,0L);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1445
             fail("CallableStatement.setBinaryStream() " +
                  "should not be implemented");
         }
@@ -608,6 +628,7 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public  void    testJDBC4_1() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Connection  conn = getConnection();
         
         vetDataTypeCount( conn );
@@ -671,6 +692,7 @@ public class CallableStatementTest  extends Wrapper41Test
         cs.registerOutParameter( param++, Types.VARCHAR );
         cs.registerOutParameter( param++, Types.VARBINARY );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         _nullOutArgs = false;
         cs.execute();
         examineJDBC4_1extensions( new Wrapper41( cs ), _nullOutArgs );
@@ -774,6 +796,7 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public  static  void    allTypesProc
         (
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
          Long[] bigintarg,
          Blob[] blobarg,
          Boolean[] booleanarg,
@@ -801,6 +824,7 @@ public class CallableStatementTest  extends Wrapper41Test
         float   floatValue = 1.0F;
         String lobValue = "abc";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         bigintarg[0] = _nullOutArgs ? null : (long) intValue;
         blobarg[0] = _nullOutArgs ? null : new HarmonySerialBlob( BINARY_VALUE );
         booleanarg[0] = _nullOutArgs ? null : Boolean.TRUE;
@@ -844,9 +868,12 @@ public class CallableStatementTest  extends Wrapper41Test
      * Return suite with all tests of the class.
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite("CallableStatementTest suite");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2023
+//IC see: https://issues.apache.org/jira/browse/DERBY-2047
         suite.addTest(baseSuite("CallableStatementTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("CallableStatementTest:client")));
@@ -857,6 +884,7 @@ public class CallableStatementTest  extends Wrapper41Test
     }
 
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite =
             new BaseTestSuite(CallableStatementTest.class, name);
 

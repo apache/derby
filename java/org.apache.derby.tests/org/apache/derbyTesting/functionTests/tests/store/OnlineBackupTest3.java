@@ -44,6 +44,7 @@ public class OnlineBackupTest3 {
 
         OnlineBackupTest3 test = new OnlineBackupTest3();
         ij.getPropertyArg(argv); 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 
         try {
             test.runTest();
@@ -105,6 +106,7 @@ public class OnlineBackupTest3 {
 
         try{
             //shutdown
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
             TestUtil.getConnection(dbName, "shutdown=true");
         }catch(SQLException se){
             if (se.getSQLState() != null && se.getSQLState().equals("08006"))
@@ -147,6 +149,7 @@ public class OnlineBackupTest3 {
     /*
      * Test install jar running in parallel to backup and vice versa. 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
     void installJarTest() throws Exception{
         logMessage("Begin Install Jar Test");
         Connection conn1 = TestUtil.getConnection(TEST_DATABASE_NAME, null);
@@ -163,6 +166,7 @@ public class OnlineBackupTest3 {
         try {
             // followng backup call should fail because jar operation is pending 
            conn2_stmt.execute(
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             "call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT('extinout/mybackup')");
         } catch (SQLException sqle) {
             //above statement should have failed. 
@@ -173,6 +177,7 @@ public class OnlineBackupTest3 {
         // operation to install  'brtestjar.jar to commit.
         
         // start a  thread to perform online backup
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
         OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         Thread backupThread = new Thread(backup, "BACKUP1");
         backupThread.start();
@@ -215,8 +220,10 @@ public class OnlineBackupTest3 {
         conn1_stmt.execute("insert into t1 values(6)");
         
         // start a  thread to perform online backup
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
         backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         backupThread = new Thread(backup, "BACKUP2");
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         backupThread.start();
         // wait for the backup to start
         backup.waitForBackupToBegin();
@@ -254,6 +261,7 @@ public class OnlineBackupTest3 {
 
         // wait for backup to finish. 
         backup.waitForBackupToEnd();
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         backupThread.join();
         logMessage("Backup-2 Completed");
         
@@ -313,6 +321,7 @@ public class OnlineBackupTest3 {
         conn.close();
 
         //shutdown the test db 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         shutdown(TEST_DATABASE_NAME);
         logMessage("End Of Install Jar Test.");
 
@@ -322,8 +331,11 @@ public class OnlineBackupTest3 {
     /*
      * Test remove jar running in parallel to backup and vice versa. 
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
     void removeJarTest() throws Exception{
         logMessage("Begin Remove Jar Test");
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
         Connection conn1 = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         conn1.setAutoCommit(false);
         Statement conn1_stmt = conn1.createStatement();
@@ -354,6 +366,7 @@ public class OnlineBackupTest3 {
             // followng backup call should fail because remove 
             // jar operation is pending 
            conn2_stmt.execute(
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             "call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT('extinout/mybackup')");
         } catch (SQLException sqle) {
             //above statement should have failed. 
@@ -369,6 +382,7 @@ public class OnlineBackupTest3 {
         // the above remove jar  to commit.
         
         // start a  thread to perform online backup
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
         OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         Thread backupThread = new Thread(backup, "BACKUP3");
         backupThread.start();
@@ -397,6 +411,7 @@ public class OnlineBackupTest3 {
         // wait for backup to finish. 
         backup.waitForBackupToEnd();
         backupThread.join();
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
 
         logMessage("Backup-3 Completed");
         
@@ -406,8 +421,10 @@ public class OnlineBackupTest3 {
         conn1_stmt.execute("insert into t1 values(12)");
         
         // start a  thread to perform online backup
+//IC see: https://issues.apache.org/jira/browse/DERBY-1042
         backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         backupThread = new Thread(backup, "BACKUP4");
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         backupThread.start();
         // wait for the backup to start
         backup.waitForBackupToBegin();
@@ -444,6 +461,7 @@ public class OnlineBackupTest3 {
         logMessage("The transaction that was blocking the backup has ended");
         // wait for backup to finish. 
         backup.waitForBackupToEnd();
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         backupThread.join();
         logMessage("Backup-4 Completed");
 
@@ -465,10 +483,14 @@ public class OnlineBackupTest3 {
         conn2.close();
         
         //shutdown the test db 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
         shutdown(TEST_DATABASE_NAME);
         // restore the database from the backup and run some checks 
         backup.restoreFromBackup();
         logMessage("Restored From the Backup");
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
+//IC see: https://issues.apache.org/jira/browse/DERBY-949
         Connection conn = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         Statement stmt = conn.createStatement();
         logMessage("No of rows in table t1: " + countRows(conn, "T1"));
@@ -485,6 +507,7 @@ public class OnlineBackupTest3 {
                            "'APP.math_routines') " ) ;
         }catch (SQLException sqle) {
             //above statement should have failed. 
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
             org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
         }
         
@@ -523,6 +546,7 @@ public class OnlineBackupTest3 {
                 conn.commit();
             } catch (SQLException sqle) {
                 org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
+//IC see: https://issues.apache.org/jira/browse/DERBY-239
                 sqle.printStackTrace(System.out);
             }
             aStatement = null;

@@ -80,6 +80,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
     {
         if ( JDBC.vmSupportsJSR169())
             // see DERBY-2233 for details
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
                         return new BaseTestSuite(
                 "empty PrepareStatementTest - client not supported on JSR169");
         else
@@ -108,6 +109,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
 
         // Rows to be inserted in table t1 for this test
         final Integer[][] t1_rows = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             {99, 5, 9},
             {2, 6, 10},
             {7, 5, 8}
@@ -200,6 +202,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
 
         // Values to be inserted
         Object[][] t2_rows = {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             {1, 2, 3L, 4.0F,
              5.0, 6.0, new BigDecimal("77.77"),
              new BigDecimal("8.100"), "column9string       ",
@@ -223,6 +226,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
             + "?, ? ,? , ?)");
         pSt.setShort(1, ((Integer )t2_rows[0][0]).shortValue());
         pSt.setInt(2, ((Integer )t2_rows[0][1]).intValue());
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         pSt.setLong(3, ((Long)t2_rows[0][2]).longValue());
         pSt.setFloat(4, ((Float )t2_rows[0][3]).floatValue());
         pSt.setDouble(5, ((Double )t2_rows[0][4]).doubleValue());
@@ -315,6 +319,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         assertUpdateCount(pSt, 2);
         pSt.close();
         pSt = prepareStatement("select * from d2558 where i = ?");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         pSt.setObject(1,3,java.sql.Types.INTEGER,0);
         try {
             // There's only 1 parameter marker, so this should fail:
@@ -534,6 +539,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         rs.next();
         // Check that the correct scale was set
         BigDecimal expected
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
             = bdFromString.setScale(scale, RoundingMode.DOWN);
         BigDecimal actual = (BigDecimal)rs.getObject(1);
         assertEquals("Actual value: " + actual
@@ -722,6 +728,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         assertUpdateCount(ps, 0);
         ps.close();
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5099
         String workString = Formatters.repeatChar("a", 150);
         ps = prepareStatement("insert into jira614 values (?)");
         ps.setString(1, workString);
@@ -748,6 +755,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         Statement stmt = createStatement();
         stmt.execute("create table jira614_a (c1 int)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5099
         ps = prepareStatement("insert into jira614_a values (?)");
         for (int row = 1; row <= 5; ++row)
         {
@@ -756,6 +764,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         }
 
         // 2: get the first statement into a splitQRYDTA state:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5099
         rs = stmt.executeQuery("select * from jira614");
         rowNum = 0;
         while (rs.next())

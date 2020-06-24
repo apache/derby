@@ -162,6 +162,7 @@ class ReplicationLogScan {
             // not be possible for currentPosition to be greater than
             // logToScan.length if not an exception was thrown by the
             // previous next() call
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
             hasInfo = false;
             return hasInfo;
         }
@@ -185,6 +186,7 @@ class ReplicationLogScan {
 
                 retrieveInt();                   // (int) trailing length
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2977
                 isLogSwitch = false;
                 hasInfo = true;
             }

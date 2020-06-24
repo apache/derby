@@ -94,6 +94,7 @@ public interface LogFactory extends Corruptable {
 		properties,
 		RawStore.LOG_SWITCH_INTERVAL and RawStore.CHECKPOINT_INTERVAL.  
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4239
 		By default, LOG_SWITCH_INTERVAL is every 1M bytes of log record
 		written.  User can change this value by setting the property to some
 		other values during boot time.   The legal range of LOG_SWITCH_INTERVAL
@@ -162,6 +163,7 @@ public interface LogFactory extends Corruptable {
 		@return the LogScan.
 		@exception StandardException Standard Derby error policy
 		*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-862
 	ScanHandle openFlushedScan(DatabaseInstant startAt, int groupsIWant)
 		 throws StandardException;
 
@@ -404,6 +406,7 @@ public interface LogFactory extends Corruptable {
      */
     public void startReplicationMasterRole(MasterFactory masterFactory)
         throws StandardException;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3051
 
     /**
      * Stop this LogFactory from passing log records to the

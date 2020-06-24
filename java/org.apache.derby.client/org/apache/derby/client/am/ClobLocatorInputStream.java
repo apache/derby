@@ -42,6 +42,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * straight-forward.
  */
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ClobLocatorInputStream extends InputStream {
     
     /**
@@ -69,8 +70,10 @@ class ClobLocatorInputStream extends InputStream {
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobLocatorInputStream(ClientConnection connection, ClientClob clob)
             throws SqlException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2622
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());
         }
@@ -91,10 +94,12 @@ class ClobLocatorInputStream extends InputStream {
      * @param pos the position inside the <code>Clob<code> from which
      *            the reading must begin.
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobLocatorInputStream(
             ClientConnection connection,
             ClientClob clob,
             long pos) throws SqlException{
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
         this(connection, clob);
         this.currentPos = pos;
     }
@@ -111,6 +116,7 @@ class ClobLocatorInputStream extends InputStream {
             return -1;
         } else {
             // convert byte in range [-128,127] to int in range [0,255]
+//IC see: https://issues.apache.org/jira/browse/DERBY-3226
             return bytes[0] & 0xff;
         }
     }
@@ -120,6 +126,7 @@ class ClobLocatorInputStream extends InputStream {
      */
     public int read(byte[] b, int off, int len) throws IOException {
         if (len == 0) return 0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
         if ((off < 0) || (len < 0) || (len > b.length - off)) {
             throw new IndexOutOfBoundsException();
         }
@@ -145,10 +152,12 @@ class ClobLocatorInputStream extends InputStream {
     private byte[] readBytes(int len) throws IOException {
         try {
             int actualLength
+//IC see: https://issues.apache.org/jira/browse/DERBY-2763
                     = (int )Math.min(len, clob.sqlLength() - currentPos + 1);
             String resultStr = connection.locatorProcedureCall().
                     clobGetSubString(clob.getLocator(),
                     currentPos, actualLength);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
             byte[] result = getBytesFromString(resultStr);
             currentPos += result.length;
             return result;
@@ -174,6 +183,7 @@ class ClobLocatorInputStream extends InputStream {
         //converted Byte array that will be returned
         //to the user
         byte[] result = new byte[str.length()];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2604
 
         //Iterate through the String to
         //Convert each character in the

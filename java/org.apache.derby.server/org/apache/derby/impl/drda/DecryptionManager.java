@@ -439,6 +439,7 @@ class DecryptionManager
         The String may be converted back to a byte array using fromHexString.
         <BR>
         For each byte (b) two characaters are generated, the first character
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         represents the high nibble (4 bits) in hexidecimal (<code>b &amp; 0xf0</code>),
         the second character represents the low nibble (<code>b &amp; 0x0f</code>).
         <BR>
@@ -471,6 +472,7 @@ class DecryptionManager
         Convert a string into a byte array in hex format.
         <BR>
         For each character (b) two bytes are generated, the first byte 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
         represents the high nibble (4 bits) in hexidecimal (<code>b &amp; 0xf0</code>),
         the second byte 
         represents the low nibble (<code>b &amp; 0x0f</code>).
@@ -486,6 +488,7 @@ class DecryptionManager
     */
     protected static byte[] toHexByte(String str, int offset, int length)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         byte[] data = new byte[(length - offset) * 2];
         int end = offset+length;
 

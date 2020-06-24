@@ -163,6 +163,7 @@ public class InPredicateTest extends BaseJDBCTestCase {
 
         Object[][] expectedRows = {
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 2147483645,
                 2.14748365E9f,
                 2.14748365E9f,

@@ -57,6 +57,7 @@ public class RealHashJoinStatistics
 								boolean oneRowRightSide,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics
@@ -78,6 +79,7 @@ public class RealHashJoinStatistics
 			oneRowRightSide,
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost,
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 			userSuppliedOptimizerOverrides,
 			leftResultSetStatistics,
 			rightResultSetStatistics

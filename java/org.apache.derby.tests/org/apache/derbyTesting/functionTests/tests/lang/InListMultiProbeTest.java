@@ -163,6 +163,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      */
     protected void tearDown() throws Exception 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3140
         foreignIdToRowsMap = null;
         super.tearDown();
     }
@@ -173,6 +174,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         BaseTestSuite suite = new BaseTestSuite("IN-list MultiProbe Suite");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         /* This is a language/optimization test so behavior will be the
          * same for embedded and client/server.  Therefore we only need
@@ -333,6 +335,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
          */
         readAllRows(createStatement());
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<QueryStrategy> strategies = new ArrayList<QueryStrategy>();
         Random ran = new Random(2);
         Connection c = getConnection();
@@ -388,6 +391,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     public void testMultipleStartStopPreds() throws Exception
     {
         Statement st = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2740
 
         // Following DDL inserts 80 rows.
         st.execute("create table ct (i int, c1 char(5), c2 char(10))");
@@ -1452,6 +1456,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      * @param cnt Size of the IN list with which to query.
      */
     private void testOneSize(List<QueryStrategy> strategies, int cnt)
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             throws SQLException
     {
         if (cnt > allIds.length)
@@ -1463,6 +1468,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             int numRows = strategy.testSize(cnt);
 
             ResultSet rs = st.executeQuery(GET_RUNTIME_STATS_QUERY);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2740
             if (!checkMultiProbeQueryPlan(rs, numRows))
             {
                 failedStrategy = strategy.getName();
@@ -1500,6 +1506,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         throws SQLException
     {
         ResultSet rs = stmt.executeQuery(SELECT_ALL);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         foreignIdToRowsMap = new TreeMap<String, List<DataRow>>();
         while (rs.next())
         {
@@ -1546,6 +1553,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      * to mean we expect an empty result set.
      */
     private void assertResultsAndQueryPlan(ResultSet rs,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2740
         String [][] expRS, Statement st) throws SQLException
     {
         int numRows = 0;
@@ -1736,6 +1744,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
          * as well.  This comparator object allows that sort to happen using
          * the JVM's own sort algorithm.
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         Comparator<String[]> rowComparator = new Comparator<String[]>()
         {
             public int compare(String[] o1, String[] o2)
@@ -1771,6 +1780,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             throws SQLException
         {
             Set<String> s = new HashSet<String>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 
             /* A Set contains no duplicate elements.  So if we, in our
              * randomness, try to insert a duplicate value, it will be
@@ -1819,6 +1829,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             throws SQLException
         {
             // This will be a list of String arrays.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             List<String[]> expected =
                     new ArrayList<String[]>(foreignIdToRowsMap.size());
 

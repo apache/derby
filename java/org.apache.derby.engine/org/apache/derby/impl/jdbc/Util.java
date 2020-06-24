@@ -47,6 +47,7 @@ import org.apache.derby.iapi.types.TypeId;
 
 	REMIND: May want to investigate putting some of this in the protocol
 	side, for the errors that any Derby JDBC driver might return.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2400
 
 	The ASSERT mechanism is a wrapper of the basic services,
 	to ensure that failed asserts at this level will behave
@@ -104,6 +105,7 @@ public abstract class Util  {
     			(message != null) && (message.equals("Connection refused : java.lang.OutOfMemoryError")))				
     		return;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
         logError( "\nERROR " +  se.getSQLState() + ": "  + se.getMessage() + "\n", se );
     }
     private static  void    logError( String errorMessage, Throwable t )
@@ -136,6 +138,7 @@ public abstract class Util  {
 			try {
 				SanityManager.ASSERT(mustBeTrue, msg);
 			} catch (Throwable t) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
                 throw conn.handleException(t);
 			}
 		}
@@ -147,6 +150,7 @@ public abstract class Util  {
      */
     public static   void checkForSupportedDataType(int dataType) throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6089
         if ( !isSupportedType( dataType ) )
         {
             throw generateCsSQLException( SQLState.DATA_TYPE_NOT_SUPPORTED, typeName( dataType ) );
@@ -189,6 +193,7 @@ public abstract class Util  {
         case Types.ARRAY:
         case Types.DATALINK:
         case Types.DISTINCT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
         case Types.NCHAR:
         case Types.NCLOB:
         case Types.NVARCHAR:
@@ -217,6 +222,7 @@ public abstract class Util  {
 
     public static SQLException generateCsSQLException(
             String error, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         return generateCsSQLException(error, null, args);
 	}
 
@@ -227,12 +233,14 @@ public abstract class Util  {
 	}
 
 	public static SQLException generateCsSQLException(StandardException se) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6253
         return ExceptionFactory.getInstance().getSQLException(
                 se.getMessage(), se.getMessageId(), (SQLException) null,
                 se.getSeverity(), se, se.getArguments());
     }
 
 	public static SQLException noCurrentConnection() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         return generateCsSQLException(SQLState.NO_CURRENT_CONNECTION);
 	}
 
@@ -248,7 +256,9 @@ public abstract class Util  {
      * @return an SQLException wrapping another SQLException
      */
     static SQLException seeNextException(String messageId, SQLException next,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
                                          Throwable cause, Object... args) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6253
         return ExceptionFactory.getInstance().getSQLException(
                 messageId, next, cause, args);
     }
@@ -259,6 +269,8 @@ public abstract class Util  {
 		msg = t.getMessage();
 		if (msg == null) msg = "";
 		name = t.getClass().getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
         SQLException next = null;
         Throwable cause = t.getCause();
         if (cause != null) {
@@ -271,9 +283,11 @@ public abstract class Util  {
             }
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         SQLException result = seeNextException(
                 SQLState.JAVA_EXCEPTION, next, t, name, msg);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6346
     	if ( result.getErrorCode() >= logSeverityLevel ) { logSQLException( result ); }
         
         return result;
@@ -281,16 +295,19 @@ public abstract class Util  {
 
 
 	public static SQLException policyNotReloaded( Throwable t ) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         return generateCsSQLException(
                 SQLState.POLICY_NOT_RELOADED, t, t.getMessage());
 	}
 
 	public static SQLException notImplemented() {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-955
 		return notImplemented( MessageService.getTextMessage(MessageId.CONN_NO_DETAILS) );
 	}
 
 	public static SQLException notImplemented(String feature) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         return generateCsSQLException(SQLState.NOT_IMPLEMENTED, feature);
 	}
 
@@ -300,10 +317,12 @@ public abstract class Util  {
 		msg = e.getMessage();
 		if (msg == null) 
 			msg = e.getClass().getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6262
         return generateCsSQLException(SQLState.SET_STREAM_FAILURE, e, msg);
 	}
 
 	static SQLException typeMisMatch(int targetSQLType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
         return generateCsSQLException(
                 SQLState.TYPE_MISMATCH, typeName(targetSQLType));
 	}
@@ -325,6 +344,7 @@ public abstract class Util  {
      * @return an {@code IOException} linked to {@code cause}
      */
     static IOException newIOException(Throwable cause) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6253
         return new IOException(cause);
     }
 
@@ -332,12 +352,15 @@ public abstract class Util  {
 		switch (jdbcType) {
 			case Types.ARRAY: return TypeId.ARRAY_NAME;
 			case Types.BIT 		:  return TypeId.BIT_NAME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 			case Types.BOOLEAN  : return TypeId.BOOLEAN_NAME;
 			case Types.DATALINK: return TypeId.DATALINK_NAME;
 			case Types.TINYINT 	:  return TypeId.TINYINT_NAME;
 			case Types.SMALLINT	:  return TypeId.SMALLINT_NAME;
 			case Types.INTEGER 	:  return TypeId.INTEGER_NAME;
             case Types.BIGINT   :  return TypeId.BIGINT_NAME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
 
 			case Types.FLOAT 	:  return TypeId.FLOAT_NAME;
 			case Types.REAL 	:  return TypeId.REAL_NAME;
@@ -363,7 +386,9 @@ public abstract class Util  {
 			case Types.OTHER		:  return "OTHER";
 			case Types.JAVA_OBJECT	:  return "Types.JAVA_OBJECT";
 			case Types.REF : return TypeId.REF_NAME;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 			case JDBC40Translation.REF_CURSOR: return TypeId.REF_CURSOR;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2438
             case Types.ROWID: return TypeId.ROWID_NAME;
 			case Types.STRUCT: return TypeId.STRUCT_NAME;
 			case StoredFormatIds.XML_TYPE_ID :  return TypeId.XML_NAME;

@@ -62,6 +62,7 @@ public	class	DDUtils
 
 
         ReferencedKeyConstraintDescriptor refCd;
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 		String[]	refColumnNames = otherConstraintInfo.getReferencedColumnNames();
 
@@ -129,6 +130,7 @@ public	class	DDUtils
 					 columnNamesMatch(refColumnNames, 
 										cd.getColumnDescriptors()))
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6576
                     if (cd.deferrable()) {
                         final int onDelete = otherConstraintInfo.
                                 getReferentialActionDeleteRule();
@@ -181,6 +183,7 @@ public	class	DDUtils
 		
 		for (int index = 0; index < columnNames.length; index++)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             String name = cdl.elementAt(index).getColumnName();
 			if (!name.equals(columnNames[index]))
 			{
@@ -237,6 +240,7 @@ public	class	DDUtils
 		//check whether the foreign key relation ships referential action
 		//is not violating the restrictions we have in the current system.
 		TableDescriptor refTd = otherConstraintInfo.getReferencedTableDescriptor(dd);
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Hashtable<String,Integer> deleteConnHashtable = new Hashtable<String,Integer>();
 		//find whether the foreign key is self referencing.
 		boolean isSelfReferencingFk = (refTd.getUUID().equals(td.getUUID()));
@@ -245,6 +249,7 @@ public	class	DDUtils
 		int currentSelfRefValue = getCurrentDeleteConnections(dd, td, -1, deleteConnHashtable, false, true);
 		validateDeleteConnection(dd, td, refTd, 
 								 refAction, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
                                  deleteConnHashtable,
                                  new Hashtable<String, Integer>(deleteConnHashtable),
 								 true, myConstraintName, false , 
@@ -276,6 +281,7 @@ public	class	DDUtils
 	 DataDictionary	dd,
 	 TableDescriptor	td,
 	 int refActionType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	 Hashtable<String,Integer> dch,
 	 boolean prevNotCascade,
 	 boolean findSelfRef
@@ -318,6 +324,7 @@ public	class	DDUtils
 					String refTableName = refTd.getSchemaName() + "." + refTd.getName();
 					//check with  the existing references.
                     Integer rAction = dch.get(refTableName);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
 					if(rAction != null) // we already looked at this table
 					{
@@ -345,6 +352,7 @@ public	class	DDUtils
 					//not specified on the current link. It is actually the 
 					//value of what happens to the table whose delete
 					// connections we are finding.
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     dch.put(refTableName, Integer.valueOf(childRefAction));
 					
 					//find the next delete conectiions on this path for non
@@ -380,6 +388,7 @@ public	class	DDUtils
 		TableDescriptor actualTd,  // the table we are adding the foriegn key.
 		TableDescriptor	refTd,
 		int refActionType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		Hashtable<String,Integer> dch,
 		Hashtable<String,Integer> ech,  //existing delete connections
 		boolean checkImmediateRefTable,
@@ -403,7 +412,9 @@ public	class	DDUtils
 
 		if(checkImmediateRefTable)
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5017
 		    String refTableName = refTd.getSchemaName() + "." + refTd.getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             rAction = dch.get(refTableName);
 			
 			// check possible invalide cases incase of self referencing foreign key
@@ -455,6 +466,7 @@ public	class	DDUtils
 				** CASCADE, otherwise we should throw error.
 				*/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 if( isSelfReferencingFk &&
                     dch.contains(Integer.valueOf(StatementType.RA_CASCADE)) &&
                     refActionType !=  StatementType.RA_CASCADE)
@@ -509,6 +521,7 @@ public	class	DDUtils
 			** of cycles , all the nodes in the cycle have same type of
 			** referential action.
 			**/
+//IC see: https://issues.apache.org/jira/browse/DERBY-6330
 			cycleString.append(refActionType);
 		}
 
@@ -567,6 +580,7 @@ public	class	DDUtils
 				//check for this is non self referencing cycles case
 				//In cases of cycle, whole cycle should have the same refAction
 				// value. Other wise we should throw an exception
+//IC see: https://issues.apache.org/jira/browse/DERBY-6330
 				cycleString.append(raDeleteRule);
 				boolean isFormingCycle = (nextRefTd.getUUID().equals(actualTd.getUUID()));
 				if(isFormingCycle)
@@ -602,6 +616,7 @@ public	class	DDUtils
 				
 
 				String nextRefTableName =  nextRefTd.getSchemaName() + "." + nextRefTd.getName();
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 rAction = ech.get(nextRefTableName);
 				if(rAction != null)
 				{
@@ -620,6 +635,7 @@ public	class	DDUtils
 
 				}else
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                     rAction = dch.get(nextRefTableName);
 					if(rAction == null)
 					{
@@ -774,6 +790,7 @@ public	class	DDUtils
 	 DataDictionary	dd,
 	 TableDescriptor td,
 	 int refActionType,
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 	 Hashtable<String,Integer> newDconnHashTable,
 	 String myConstraintName
 	 )
@@ -789,6 +806,7 @@ public	class	DDUtils
 		//are adding the foreign key and check whether we violate their existing rules.
 		String addTableName = td.getSchemaName() + "." + td.getName();;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
         for (ConstraintDescriptor cd : dd.getConstraintDescriptors(td))
         {
 			if ((cd instanceof ReferencedKeyConstraintDescriptor))
@@ -804,6 +822,7 @@ public	class	DDUtils
 				
 				//Note: More than one table can refer to the same
 				//ReferencedKeyConstraintDescriptor, so we need to find all the tables.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 				Hashtable<String,Integer> dConnHashtable = new Hashtable<String,Integer>();
 				for (int inner = 0; inner < size; inner++)
 				{
@@ -830,6 +849,7 @@ public	class	DDUtils
 						**referential action and only one SET NULL path.
 						**/
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 						for (Enumeration<String> e = dConnHashtable.keys() ; e.hasMoreElements() ;) 
 						{
 							String tName = e.nextElement();
@@ -877,6 +897,7 @@ public	class	DDUtils
 		String raRuleStringId;
 		switch (raRule){
 		case StatementType.RA_CASCADE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-5879
 			raRuleStringId = "CASCADE";
 			break;
 		case StatementType.RA_RESTRICT:

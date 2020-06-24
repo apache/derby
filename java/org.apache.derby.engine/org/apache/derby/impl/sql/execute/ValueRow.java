@@ -119,6 +119,7 @@ class ValueRow implements ExecRow
 			if (clonedCols != null && !(clonedCols.get(colCtr + 1)))
 			{
 				/* Rows are 1-based, column[] is 0-based */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                 rowClone.setColumn(colCtr + 1, column[colCtr]);
 				continue;
 			}
@@ -126,6 +127,7 @@ class ValueRow implements ExecRow
 			if (column[colCtr] != null)
 			{
 				/* Rows are 1-based, column[] is 0-based */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                 rowClone.setColumn(colCtr +1, column[colCtr].cloneValue(false));
 			}
 		}
@@ -144,6 +146,7 @@ class ValueRow implements ExecRow
 			if (column[colCtr] != null)
 			{
 				/* Rows are 1-based, column[] is 0-based */
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                 rowClone.setColumn(colCtr + 1, column[colCtr].getNewNull());
 			}
 		}
@@ -168,6 +171,7 @@ class ValueRow implements ExecRow
 	// position is 1-based
 	public final DataValueDescriptor cloneColumn(int columnPosition)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
         return column[columnPosition -1].cloneValue(false);
 	}
 
@@ -215,6 +219,7 @@ class ValueRow implements ExecRow
 		{
 			if (column[colCtr] != null)
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4520
                 columnClones[colCtr] = column[colCtr].cloneValue(false);
 			}
 		}

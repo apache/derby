@@ -181,6 +181,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 */
 	public	static	boolean	parseDebug()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-689
 		_debug = Boolean.getBoolean( DEBUG_FLAG );
 		
 		return true;
@@ -193,6 +194,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 */
 	public	static	void	println( String text )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-874
 		if ( _debug ) { alarm( text ); }
 	}
 
@@ -236,6 +238,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 */
 	protected	static	boolean	faultInDriver( String[] clientSettings )
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-499
 		String	currentClientName = clientSettings[ DRIVER_NAME ];
 		
 		try {
@@ -483,6 +486,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 			ps.execute();
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-874
 		catch (SQLException e)
 		{
 			if ( _debug ) { printStackTrace( e ); }
@@ -557,6 +561,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 		switch( jdbcType )
 		{
 		    case JDBC_BOOLEAN:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				retval = rs.getBoolean( columnName );
 				break;
 				
@@ -594,6 +599,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 				break;
 				
 		    case Types.DOUBLE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				retval = rs.getDouble( columnName );
 				break;
 				
@@ -647,6 +653,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 		{
 			retval = rs.getObject( param );
 		}
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		else if ( value instanceof Boolean ) { retval = rs.getBoolean( param ); }
 		else if ( value instanceof Byte ) { retval = rs.getByte( param ); }
 		else if ( value instanceof Short ) { retval = rs.getShort( param ); }
@@ -678,6 +685,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 		switch( jdbcType )
 		{
 		    case JDBC_BOOLEAN:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				retval = cs.getBoolean( arg );
 				break;
 				
@@ -715,6 +723,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 				break;
 				
 		    case Types.DOUBLE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 				retval = cs.getDouble( arg );
 				break;
 				

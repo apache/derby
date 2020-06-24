@@ -60,6 +60,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
      * all tests in this class
      */
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("StatementJdbc20Test");
         suite.addTest(baseSuite("StatementJdbc20Test:embedded"));
         suite.addTest(
@@ -70,6 +71,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite(name);
         
         suite.addTestSuite(StatementJdbc20Test.class);
@@ -92,6 +94,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
                 stmt.execute("create table tab1 (i int, s smallint, r real)");
                 stmt.executeUpdate("insert into tab1 values(1, 2, 3.1)");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                 stmt.execute
                     (
                      "create procedure dynamic_results() " +
@@ -100,6 +103,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
                      "dynamic result sets 2"
                      );
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
                 stmt.execute( "create table t_autogen( a int generated always as identity, b int )" );
             }
         };
@@ -196,6 +200,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
         
         // Verify that fetch size can be set larger than maxRows
         stmt.setMaxRows(10);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3573
         rs.setFetchSize(100);
         
         //Error  testing  : set wrong values ..
@@ -275,6 +280,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
      */
     public void testAddBatchClarification_jdbc4_1() throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         PreparedStatement ps = prepareStatement( "select * from sys.systables" );
         CallableStatement cs = prepareCall( "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)" );
 
@@ -303,8 +309,10 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
      */
     public void testCompletionClosure_jdbc4_1() throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4983
         if ( JDBC.vmSupportsJSR169() ) { return; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         vetClosure( false, false );
         vetClosure( false, true );
         vetClosure( true, false );
@@ -315,6 +323,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
         vetClosedSelect( closeOnCompletion, delayClosureCall );
         vetClosedCall( closeOnCompletion, delayClosureCall );
         vetClosedPS( closeOnCompletion, delayClosureCall );
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         vetClosedAutoGen( closeOnCompletion, delayClosureCall );
     }
     private void vetClosedSelect( boolean closeOnCompletion, boolean delayClosureCall ) throws Exception
@@ -400,6 +409,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
     }
     private void vetClosedAutoGen( boolean closeOnCompletion, boolean delayClosureCall ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         Statement stmt = createStatement();
         ResultSet rs;
 
@@ -468,6 +478,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
     public  void    test_clarification_jdbc4_1()    throws Exception
     {
         Connection  conn = getConnection();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
 
         PreparedStatement   ps = conn.prepareStatement( "select * from sys.syscolumns" );
         CallableStatement   cs = conn.prepareCall( "call dynamic_results()" );

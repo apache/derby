@@ -72,6 +72,7 @@ public class Changes10_9 extends UpgradeChange
     public Changes10_9(String name)
     {
         super(name);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         initPattern();
     }
 
@@ -83,6 +84,7 @@ public class Changes10_9 extends UpgradeChange
 
     private static final String[] SUPPORT_FILES_SOURCE =
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         "functionTests/tests/lang/dcl_java.jar",
         "functionTests/tests/lang/dcl_emc1.jar",
         "functionTests/tests/lang/dcl_emc2.jar",
@@ -97,9 +99,11 @@ public class Changes10_9 extends UpgradeChange
      */
     public static Test suite(int phase) {
         BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.9");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
 
         suite.addTestSuite(Changes10_9.class);
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
         return new SupportFilesSetup(
                 (Test)suite, SUPPORT_FILES_SOURCE);
     }
@@ -474,6 +478,7 @@ public class Changes10_9 extends UpgradeChange
     public void testJarStorage()  throws Exception
     {
         Statement s = createStatement();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5357
 
         switch (getPhase()) {
         case PH_CREATE: // create with old version
@@ -670,6 +675,7 @@ public class Changes10_9 extends UpgradeChange
      * where <em>h</em> id a lower case hex digit.
      */
     private void initPattern() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         List<Goal> l = new ArrayList<Goal>(100);
         // The UUID format is determined by
         // org.apache.derby.impl.services.uuid.BasicUUID#toString
@@ -700,6 +706,7 @@ public class Changes10_9 extends UpgradeChange
         l.add(new SingleChar('G'));
         l.add(new CharRange(new char[][]{{'0','9'}}, Goal.REPEAT));
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         this.pattern = l.toArray(new Goal[l.size()]);
     }
 
@@ -899,11 +906,13 @@ public class Changes10_9 extends UpgradeChange
         // serialize across a network connection: they are only meant to
         // be deserialized inside the engine.
         if (JVMInfo.isModuleAware()) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         // Helper object to obtain information about index statistics.
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
         // The expected initial number of statistics entries in TEST_TAB_2.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
         final int expected =
                 DisposableIndexStatistics.hasDerby5681Bug(getOldVersion()) ?
                     2 : 1;
@@ -947,6 +956,7 @@ public class Changes10_9 extends UpgradeChange
                     "DROP CONSTRAINT TEST_TAB_2_FK_1");
             //Dropping the foreign key constraint does not remove it's 
             // statistics row because of DERBY-5681.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
             stats.assertTableStats("TEST_TAB_2", expected);
             assertStatementError("42Y03", s,
             "CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
@@ -959,10 +969,12 @@ public class Changes10_9 extends UpgradeChange
             break;
 
         case PH_HARD_UPGRADE:
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
             stats.assertTableStats("TEST_TAB_2", expected);
             s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
             stats.assertNoStatsTable("TEST_TAB_2");
             s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
+//IC see: https://issues.apache.org/jira/browse/DERBY-3790
             stats.assertNoStatsTable("TEST_TAB_2");
             break;
 
@@ -1011,10 +1023,12 @@ public class Changes10_9 extends UpgradeChange
         // serialize across a network connection: they are only meant to
         // be deserialized inside the engine.
         if (JVMInfo.isModuleAware()) { return; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
 
         final String TBL = "ISTAT_DISPOSABLE_STATS";
         String updateStatsSQL = "call syscs_util.syscs_update_statistics(" +
                 "'APP', ?, null)";
+//IC see: https://issues.apache.org/jira/browse/DERBY-6064
         DisposableIndexStatistics dis = new DisposableIndexStatistics(
                 getOldVersion(), getConnection(), TBL);
 
@@ -1029,6 +1043,8 @@ public class Changes10_9 extends UpgradeChange
                 // causing the number of statistics entries to increase.
                 // Just after creation and before any update statistics expect
                 // all stats to exist.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                 dis.assertStatsCount(false, false);
                 break;
             }
@@ -1046,6 +1062,8 @@ public class Changes10_9 extends UpgradeChange
                 // After soft upgrade and update statistics expect the 
                 // orphaned index entry to be deleted, but the "unneeded
                 // disposable entries" are only deleted after hard upgrade.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                 dis.assertStatsCount(true, false);
                 break;
             }
@@ -1073,6 +1091,8 @@ public class Changes10_9 extends UpgradeChange
                 // Confirm that we disposed of the statistics that were added
                 // due to a bug or simply not needed by Derby.
                 try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6283
+//IC see: https://issues.apache.org/jira/browse/DERBY-5680
                     dis.assertStatsCount(true, true);
                 } finally {
                     for (int i=0; i < tables.length; i++) {

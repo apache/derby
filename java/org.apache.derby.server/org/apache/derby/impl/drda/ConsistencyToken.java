@@ -23,6 +23,7 @@ package org.apache.derby.impl.drda;
 /**
  * Class which represents an RDB Package Consistency Token.
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-212
 final class ConsistencyToken {
     /** Byte array representation of the token. */
     private final byte[] bytes;
@@ -34,6 +35,7 @@ final class ConsistencyToken {
      *
      * @param bytes byte array representing the token
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
     ConsistencyToken(byte[] bytes) {
         this.bytes = bytes;
     }
@@ -74,6 +76,7 @@ final class ConsistencyToken {
         // frequently used as keys in hash tables. Therefore, it is a good idea
         // to cache their hash codes.
         int h = hash;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1688
         if (h == 0) {
             // The hash code has not been calculated yet (or perhaps the hash
             // code actually is 0). Calculate a new one and cache it. No

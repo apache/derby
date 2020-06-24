@@ -56,6 +56,7 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
 public class LogicalCallableStatement
     extends LogicalPreparedStatement
     implements CallableStatement {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 
     /**
      * Creates a new logical callable statement.
@@ -67,6 +68,8 @@ public class LogicalCallableStatement
      */
     public LogicalCallableStatement(CallableStatement physicalCs,
                                     StatementKey stmtKey,
+//IC see: https://issues.apache.org/jira/browse/DERBY-3328
+//IC see: https://issues.apache.org/jira/browse/DERBY-3326
                                     StatementCacheInteractor cacheInteractor) {
         super(physicalCs, stmtKey, cacheInteractor);
     }
@@ -395,6 +398,7 @@ public class LogicalCallableStatement
     ////////////////////////////////////////////////////////////////////
 
     public RowId getRowId(int arg0)
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
             throws SQLException {
         return getPhysCs().getRowId(arg0);
     }

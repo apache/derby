@@ -34,6 +34,7 @@ class DRDAXid implements Xid
     private final byte[] branch_id;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     DRDAXid(int formatid, byte[] globalid, byte[] branchid)
     {
 
@@ -80,6 +81,7 @@ class DRDAXid implements Xid
     public String toString()
     {
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
        String s =  "{DRDAXid: " +
            "formatId("     + format_id   + "), " +
            "globalTransactionId(" +  convertToHexString(global_id) + ")" +

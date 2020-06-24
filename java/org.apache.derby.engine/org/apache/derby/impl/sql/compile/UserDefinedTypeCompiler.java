@@ -46,6 +46,7 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	 */
 	public boolean convertible(TypeId otherType, boolean forDataTypeFunction)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
         if ( getTypeId().getBaseTypeId().isAnsiUDT() )
         {
             if ( !otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
@@ -86,6 +87,7 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	public boolean storable(TypeId otherType, ClassFactory cf)
 	{
         if ( !otherType.isUserDefinedTypeId() ) { return false; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-4469
 
         UserDefinedTypeIdImpl thisTypeID = (UserDefinedTypeIdImpl) getTypeId().getBaseTypeId();
         UserDefinedTypeIdImpl thatTypeID = (UserDefinedTypeIdImpl) otherType.getBaseTypeId();

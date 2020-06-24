@@ -96,6 +96,7 @@ public final class DataTypeDescriptor implements Formatable
      * Runtime INTEGER type that is nullable.
      */
     public static final DataTypeDescriptor DOUBLE =
+//IC see: https://issues.apache.org/jira/browse/DERBY-5466
         new DataTypeDescriptor(TypeId.DOUBLE_ID, true);
     
     public  static  final   int MIN_VALUE_IDX = 0;
@@ -328,6 +329,7 @@ public final class DataTypeDescriptor implements Formatable
 	(
 		String	javaTypeName
 	)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
 			return DataTypeDescriptor.getSQLDataTypeDescriptor(javaTypeName, true);
@@ -383,6 +385,8 @@ public final class DataTypeDescriptor implements Formatable
 		boolean	isNullable, 
 		int 	maximumWidth
 	)
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
         throws StandardException
 	{
 		TypeId typeId = TypeId.getSQLTypeForJavaType(javaTypeName);
@@ -507,6 +511,7 @@ public final class DataTypeDescriptor implements Formatable
 
 	public DataTypeDescriptor(TypeId typeId, boolean isNullable) {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
 		this.typeId = typeId;
 		typeDescriptor = new TypeDescriptorImpl(typeId.getBaseTypeId(),
 												typeId.getMaximumPrecision(),
@@ -736,6 +741,7 @@ public final class DataTypeDescriptor implements Formatable
 		 * types are system built-in types and the other if at least 1 is
 		 * a user type. (typePrecedence is meaningless for user types.)
 		 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-776
 		if (!thisType.userType() && !otherType.userType())
 		{
 			TypeId  higherTypeId;
@@ -908,6 +914,7 @@ public final class DataTypeDescriptor implements Formatable
 
 		higherType = new DataTypeDescriptor(higherType, 
 				precision, scale, nullable, maximumWidth);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2599
 
 		//Set collation info on the DTD for dominant type if it is string type
 		//The algorithm used is explained in this method's javadoc
@@ -1009,6 +1016,7 @@ public final class DataTypeDescriptor implements Formatable
 		Get a Null for this type.
 	*/
 	public DataValueDescriptor getNull() throws StandardException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2335
 		DataValueDescriptor returnDVD = typeId.getNull();
 		//If we are dealing with default collation, then we have got the
 		//right DVD already. Just return it.
@@ -1100,6 +1108,7 @@ public final class DataTypeDescriptor implements Formatable
      */
 	public static int getCollationType(String collationName)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
 		if (collationName.equalsIgnoreCase(Property.UCS_BASIC_COLLATION))
 			return StringDataValue.COLLATION_TYPE_UCS_BASIC;
 		else if (collationName.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
@@ -1129,6 +1138,7 @@ public final class DataTypeDescriptor implements Formatable
      */
     public String getCollationName()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1748
 		if (getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
 			return Property.COLLATION_NONE;
 		else
@@ -1367,6 +1377,7 @@ public final class DataTypeDescriptor implements Formatable
     		//If both the types are string types, then we need to make sure
     		//they have the same collation set on them
     		if (compareWithTypeID.isStringTypeId() && typeId.isStringTypeId()) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2793
     			return compareCollationInfo(compareWithDTD);    			
     		} else
     			return false;//can't be compared			
@@ -1455,6 +1466,7 @@ public final class DataTypeDescriptor implements Formatable
 		//both the operands can not have the collation derivation of
 		//NONE. This is because in that case, we do not know what kind
 		//of collation to use for comparison.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2793
 		if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
 				getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
 			return false;
@@ -1533,6 +1545,8 @@ public final class DataTypeDescriptor implements Formatable
 			case StoredFormatIds.INT_TYPE_ID:
 				return 4.0;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
             case StoredFormatIds.BIGINT_TYPE_ID:
 				return 8.0;
 
@@ -1648,6 +1662,7 @@ public final class DataTypeDescriptor implements Formatable
 		}
 		
 		// To CLOB
+//IC see: https://issues.apache.org/jira/browse/DERBY-628
 		if (existingType == Types.CLOB && DataTypeDescriptor.isCharacterType(jdbcTypeId))
 			return true;
 
@@ -1658,6 +1673,7 @@ public final class DataTypeDescriptor implements Formatable
 
 		switch (jdbcType) {
 		case Types.BIT:
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		case Types.BOOLEAN:
 		case Types.TINYINT:
 		case Types.SMALLINT:
@@ -1723,6 +1739,7 @@ public final class DataTypeDescriptor implements Formatable
 		case Types.LONGVARBINARY:
 			return true;
 		default:
+//IC see: https://issues.apache.org/jira/browse/DERBY-4484
 			return false;
 		}
 	}
@@ -1736,6 +1753,7 @@ public final class DataTypeDescriptor implements Formatable
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isAsciiStreamAssignable(int jdbcType) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1527
 		return jdbcType == Types.CLOB || isCharacterType(jdbcType);
 	}
 
@@ -1787,6 +1805,7 @@ public final class DataTypeDescriptor implements Formatable
 
         // Restore typeId from the type descriptor. User-defined types and
         // built-in types have different methods for getting the type id.
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         if (typeDescriptor.isUserDefinedType()) {
             try {
                 typeId = TypeId.getUserDefinedTypeId(
@@ -1855,6 +1874,7 @@ public final class DataTypeDescriptor implements Formatable
             case Types.DECIMAL:
                 return
                 (getPrecision() <= typeId.getMaximumPrecision()) &&
+//IC see: https://issues.apache.org/jira/browse/DERBY-6956
                 (getScale() <= typeId.getMaximumScale());
             default: break;
         }
@@ -1891,6 +1911,7 @@ public final class DataTypeDescriptor implements Formatable
      * String types.
      */
     public String getSQLTypeNameWithCollation() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2668
         String name = typeId.getSQLTypeName();
         if (typeId.isStringTypeId()) {
             name = name + " (" + getCollationName() + ")";

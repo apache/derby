@@ -25,6 +25,7 @@ import java.util.Vector;
 
 import java.io.IOException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 class Attributes extends Vector<AttributeEntry> {
 	private int classFileSize;
 
@@ -35,6 +36,7 @@ class Attributes extends Vector<AttributeEntry> {
 	void put(ClassFormatOutput out) throws IOException {
 		int size = size();
 		for (int i = 0; i < size; i++) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 			elementAt(i).put(out);
 		}
 	}

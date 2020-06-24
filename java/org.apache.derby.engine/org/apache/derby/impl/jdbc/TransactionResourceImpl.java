@@ -154,6 +154,7 @@ public final class TransactionResourceImpl
 		// interface is used.  Thus, we look there first.
 		// Default to APP.
 		username = IdUtil.getUserNameFromURLProps(info);
+//IC see: https://issues.apache.org/jira/browse/DERBY-464
 
 		drdaID = info.getProperty(Attribute.DRDAID_ATTR, null);
 
@@ -240,6 +241,7 @@ public final class TransactionResourceImpl
 	 * XAResource, which uses the xa_commit or xa_rollback interface as a 
 	 * safeguard. 
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	void commit() throws StandardException
 	{
 		lcc.userCommit();
@@ -268,6 +270,7 @@ public final class TransactionResourceImpl
 	/**
 	 * Resolve: probably superfluous
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	void clearLcc()
 	{
 		lcc = null;
@@ -283,6 +286,7 @@ public final class TransactionResourceImpl
 	}
 
 	final void restoreContextStack() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 
 		if ((csf == null) || (cm == null))
 			return;
@@ -296,6 +300,7 @@ public final class TransactionResourceImpl
 	/**
 	 * clean up the error and wrap the real exception in some SQLException.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-467
 	final SQLException handleException(Throwable thrownException,
 									   boolean autoCommit,	
 									   boolean rollbackOnAutoCommit)
@@ -356,8 +361,11 @@ public final class TransactionResourceImpl
 			}
 
             InterruptStatus.restoreIntrFlagIfSeen();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
 			return wrapInSQLException(thrownException);
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 
 		} catch (Throwable t) {
 
@@ -366,6 +374,8 @@ public final class TransactionResourceImpl
 			}
 
             InterruptStatus.restoreIntrFlagIfSeen();
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
 
 			/*
 			   We'd rather throw the Throwable,
@@ -373,6 +383,8 @@ public final class TransactionResourceImpl
 			   We assume if we are in this degenerate
 			   case that it is actually a java exception
 			 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
+//IC see: https://issues.apache.org/jira/browse/DERBY-2472
 			throw wrapInSQLException(t);
 			//throw t;
 		}
@@ -391,6 +403,7 @@ public final class TransactionResourceImpl
      * @return true if this is a login failure exception
      */
     private boolean isLoginException(Throwable thrownException) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6426
        if ((thrownException instanceof StandardException) &&
            ((StandardException) thrownException).getSQLState().equals(SQLState.LOGIN_FAILED)) {
            return true;
@@ -414,6 +427,7 @@ public final class TransactionResourceImpl
 		if (thrownException instanceof SQLException) {
             // Server side JDBC can end up with a SQLException in the nested
             // stack. Return the exception with no wrapper.
+//IC see: https://issues.apache.org/jira/browse/DERBY-1440
             return (SQLException) thrownException;
 		}
 
@@ -421,6 +435,7 @@ public final class TransactionResourceImpl
 
 			StandardException se = (StandardException) thrownException;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5243
             if (SQLState.CONN_INTERRUPT.equals(se.getSQLState())) {
                 Thread.currentThread().interrupt();
             }
@@ -436,6 +451,7 @@ public final class TransactionResourceImpl
             // chain. Therefore, call wrapInSQLException() recursively to
             // convert the cause chain into a chain of SQLExceptions.
             return Util.seeNextException(se.getMessageId(),
+//IC see: https://issues.apache.org/jira/browse/DERBY-6488
                         wrapInSQLException(se.getCause()), se.getCause(),
                         se.getArguments());
         }

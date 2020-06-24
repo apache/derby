@@ -152,6 +152,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
         final PrintStream realSystemErr = System.err;
         ByteArrayOutputStream serverOutputBOS = new ByteArrayOutputStream();
         final PrintStream serverOutputOut = new PrintStream( serverOutputBOS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         setSystemOut(new PrintStream(serverOutputOut));
         setSystemErr(new PrintStream(serverOutputOut));
 
@@ -170,6 +171,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
             }
         } finally {
             // Restore the original out streams
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
             setSystemOut(realSystemOut);
             setSystemErr(realSystemErr);
         }
@@ -226,6 +228,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
     public void testStartNetworkServerLogMessageOnDualStart()
             throws Exception {
         // first force English locale
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         LocaleTestSetup.setDefaultLocale(Locale.ENGLISH);
         int doubleport = TestConfiguration.getCurrent().getPort();
         // start a network server
@@ -293,6 +296,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
             // System.out.println(logLine);
             for( int i = 0; i < expected.length; i++)
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
                 if( (! found[i]) && logLine.contains( expected[i])) {
                     found[i] = true;
                 }
@@ -305,11 +309,13 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
                 allFound = false;
             }
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6619
         br.close();
         return allFound;
     } // end of checkLog
 
     public static Test suite() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = new BaseTestSuite("DerbyNetAutoStartTest");
         suite.addTest(baseSuite("DerbyNetAutoStartTest:embedded"));
         return suite;
@@ -340,6 +346,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
         removeSystemProperty("derby.drda.startNetworkServer");
         removeSystemProperty("derby.drda.portNumber");
         // set the old locale back to the original
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         LocaleTestSetup.setDefaultLocale(oldLocale);
         oldLocale=null;
         super.tearDown();

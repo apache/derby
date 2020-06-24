@@ -133,9 +133,11 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_002_EmbedConnection()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6741
         throws Exception
     {
         try {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6741
             Connection  conn = getConnection();
             ((EmbedConnection) conn).getContextManager();
             fail( "Should have raised an AccessControlException" );
@@ -150,6 +152,7 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_003_JCECipherFactory()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6630
         throws Exception
     {
         try {
@@ -167,6 +170,7 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_004_BaseDataFileFactory()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6636
         throws Exception
     {
         try {
@@ -183,6 +187,7 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_005_EmbedConnection_getLCC()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         throws Exception
     {
         try {

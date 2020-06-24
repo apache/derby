@@ -39,11 +39,13 @@ import org.apache.derby.client.ClientConnectionPoolDataSourceInterface;
  * Java Naming and Directory Interface (JNDI).
  */
 public class ClientConnectionPoolDataSource extends ClientDataSource 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
     implements ClientConnectionPoolDataSourceInterface
 {
     private static final long serialVersionUID = -539234282156481377L;
     /** Message utility used to obtain localized messages. */
     private static final MessageUtil msgUtil =
+//IC see: https://issues.apache.org/jira/browse/DERBY-6945
             new MessageUtil(MessageUtil.CLIENT_MESSAGE_RESOURCE_NAME);
     public static final String className__ = "org.apache.derby.jdbc.ClientConnectionPoolDataSource";
 
@@ -66,6 +68,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
 
     // Attempt to establish a physical database connection that can be used as a pooled connection.
     public PooledConnection getPooledConnection() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5955
         return getPooledConnectionMinion();
     }
 
@@ -84,8 +87,11 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
      */
     public void setMaxStatements(int maxStatements) {
         // Disallow negative values.
+//IC see: https://issues.apache.org/jira/browse/DERBY-3325
+//IC see: https://issues.apache.org/jira/browse/DERBY-3329
         if (maxStatements < 0) {
             throw new IllegalArgumentException(msgUtil.getTextMessage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     MessageId.CONN_NEGATIVE_MAXSTATEMENTS, maxStatements));
         }
         this.maxStatements = maxStatements;
@@ -118,6 +124,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
         // Make sure maxStatements is zero or higher.
         if (maxStatements < 0) {
             throw new IllegalArgumentException(msgUtil.getTextMessage(
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                     MessageId.CONN_NEGATIVE_MAXSTATEMENTS, maxStatements));
         }
     }

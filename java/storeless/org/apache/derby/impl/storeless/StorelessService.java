@@ -66,6 +66,7 @@ public class StorelessService implements PersistentService {
 	}
 
     public void saveServiceProperties(String serviceName,
+//IC see: https://issues.apache.org/jira/browse/DERBY-5260
                                       Properties properties)
             throws StandardException {
 		// Auto-generated method stub

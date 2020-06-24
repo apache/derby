@@ -25,23 +25,30 @@ import java.io.IOException;
 import java.io.Writer;
 import org.apache.derby.shared.common.reference.SQLState;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ClobWriter extends Writer {
     private final ClientClob clob_;
     private long offset_;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobWriter(ClientClob clob, long offset) throws SqlException {
         clob_ = clob;
         offset_ = offset;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         if (offset_ - 1 > clob_.sqlLength()) {
             throw new SqlException(clob_.agent_.logWriter_, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5873
                 new ClientMessageId(SQLState.BLOB_INVALID_OFFSET), offset);
         }
     }
 
     public void write(int c) {
         StringBuffer sb = new StringBuffer(clob_.string_.substring(0, (int) offset_ - 1));
+//IC see: https://issues.apache.org/jira/browse/DERBY-1245
+//IC see: https://issues.apache.org/jira/browse/DERBY-1354
         sb.append((char)c);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         updateClob(sb);
     }
 
@@ -54,6 +61,7 @@ class ClobWriter extends Writer {
         }
         StringBuffer sb = new StringBuffer(clob_.string_.substring(0, (int) offset_ - 1));
         sb.append(cbuf, off, len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         updateClob(sb);
     }
 
@@ -79,6 +87,7 @@ class ClobWriter extends Writer {
     
     private void updateClob(StringBuffer sb) 
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         clob_.reInitForNonLocator(sb.toString());
         offset_ = clob_.string_.length() + 1;
     }

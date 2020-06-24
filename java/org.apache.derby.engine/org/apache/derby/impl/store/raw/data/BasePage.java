@@ -76,6 +76,7 @@ import java.io.ObjectInput;
  **/
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 abstract class BasePage implements Page, DerbyObserver, TypedFormat
 {
 
@@ -174,6 +175,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 
 		page goes thru the following transition:
 		VALID_PAGE &lt;-&gt; deallocated page -&gt; free page &lt;-&gt; VALID_PAGE
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 
 		deallocated and free page are both INVALID_PAGE as far as BasePage is concerned.
 		When a page is deallocated, it transitioned from VALID to INVALID.
@@ -331,6 +333,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
         {
 			throw StandardException.newException(
                 SQLState.DATA_CANNOT_MAKE_RECORD_HANDLE, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
                 recordHandleConstant);
         }
 
@@ -406,6 +409,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 	public RecordHandle fetchFromSlot(
     RecordHandle            rh, 
     int                     slot, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
     Object[]                row,
     FetchDescriptor         fetchDesc,
     boolean                 ignoreDelete)
@@ -467,6 +471,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 		Object[] row = new Object[fieldId + 1];
 		row[fieldId] = column;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2223
 		FetchDescriptor fetchDesc = 
 			new FetchDescriptor(fieldId + 1, fieldId);
 
@@ -1362,6 +1367,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 		// page does not copy over the remaining pieces, i.e.,the new head page
 		// still points to those pieces.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-132
 		owner.getActionSet().actionPurge(
             t, this, src_slot, num_rows, recordIds, true);
 	}
@@ -1373,6 +1379,8 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 	*/
 	public void unlatch() {
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
 			SanityManager.ASSERT(isLatched(), 
                 "unlatch() attempted on page that is not latched.");
 		}
@@ -1389,6 +1397,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 	 */
 	public final synchronized boolean isLatched() {
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 			SanityManager.ASSERT(identity != null);
 		}
 
@@ -1398,6 +1407,8 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 	/** @see Page#recordCount */
 	public final int recordCount() {
 		if (SanityManager.DEBUG) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
 			SanityManager.ASSERT(
                 isLatched(), "page not latched on call to recordCount()");
 		}
@@ -1441,6 +1452,8 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 				}
 				if (delCount != deletedCount)
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5258
+//IC see: https://issues.apache.org/jira/browse/DERBY-5248
 					SanityManager.THROWASSERT(
                         "incorrect deleted row count.  Should be: " + delCount +
                         ", instead got: " + deletedCount + 
@@ -1658,6 +1671,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 		<BR> MT - RESOLVE
 	*/
 	public final PageKey getPageId() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(identity != null);
 		}
@@ -1671,6 +1685,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 		MT - thread safe
 		@exception StandardException Standard Derby policy.
 	*/
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 	void setExclusive(BaseContainerHandle requester)
 		throws StandardException {
 
@@ -1707,10 +1722,12 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
                 // the code is wrong.  If it still does, we'd better tear down
                 // the connection just in case, so the error has session level
                 // severity;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4982
                 throw StandardException.newException(
                     SQLState.DATA_DOUBLE_LATCH_INTERNAL_ERROR, identity);
 			}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 			while (owner != null) {
 				try {
 					// Expect notify from releaseExclusive().
@@ -1778,6 +1795,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 
 			// Pre-latch the page if no one already has latched it or requested
 			// a latch. Otherwise, give up and return false.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 			if (owner == null) {
 				preLatch(requester);
 			} else {
@@ -1804,6 +1822,9 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
                 } 
                 catch (InterruptedException ie) 
                 {
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                     InterruptStatus.setInterrupted();
                 }
             }
@@ -1839,6 +1860,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 			return;
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2107
 		owner.deleteObserver(this);
 		owner = null;
 		notifyAll();
@@ -2210,6 +2232,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
             {
 				SanityManager.THROWASSERT(
                     "shiftUp failed, low must be between 0 and recordCount." + 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1248
                     "  low = " + low + ", recordCount = " + recordCount +
                     "\n page = " + this);
             }
@@ -2855,6 +2878,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 		{
             StoredRecordHeader rh;
 			str = "";
+//IC see: https://issues.apache.org/jira/browse/DERBY-5491
 
             for (int slot = FIRST_SLOT_NUMBER; slot < recordCount; slot++) {
                 rh = getHeaderAtSlot(slot);

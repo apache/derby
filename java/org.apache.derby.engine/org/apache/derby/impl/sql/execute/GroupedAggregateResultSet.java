@@ -75,6 +75,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * in the ROLLUP case.
  *
  */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
 class GroupedAggregateResultSet extends GenericAggregateResultSet
 	implements CursorResultSet {
 
@@ -150,6 +151,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-1700
     GroupedAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,
@@ -165,7 +167,9 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.isInSortedOrder = isInSortedOrder;
 		rollup = isRollup;
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 		finishedResults = new ArrayList<ExecRow>();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6292
         order = ((FormatableArrayHolder)
                     (a.getPreparedStatement().getSavedObject(orderingItem)))
                         .getArray(ColumnOrdering[].class);
@@ -209,6 +213,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "GroupedAggregateResultSet already open");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
         sortResultRow = (ExecIndexRow) getRowTemplate().getClone();
         sourceExecIndexRow = (ExecIndexRow) getRowTemplate().getClone();
 
@@ -287,6 +292,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		ExecRow 				inputRow;
 		int						inputRowCountEstimate = (int) optimizerEstimatedRowCount;
         ExecIndexRow            sortTemplateRow = getRowTemplate();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6003
 
 		tc = getTransactionController();
 
@@ -314,6 +320,8 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			sorter.insert(inputRow.getRowArray());
 		}
 		source.close();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
+//IC see: https://issues.apache.org/jira/browse/DERBY-2486
 		sorter.completedInserts();
 		sortProperties = sorter.getSortInfo().
 			getAllSortInfo(sortProperties);
@@ -358,6 +366,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6216
 		if( isXplainOnlyMode() )
 			return null;
 
@@ -399,6 +408,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			 */
 			ExecIndexRow currSortedRow =
 				    resultRows[resultRows.length-1];
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
                         ExecRow origRow = nextRow.getClone();
                         initializeVectorAggregation(nextRow);
 			int distinguisherCol = 
@@ -759,6 +769,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		for (int i = 0; i < aggregates.length; i++)
 		{
 			GenericAggregator currAggregate = aggregates[i];
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
             AggregatorInfo aInfo = aggInfoList.elementAt(i);
 			if (aInfo.isDistinct())
 			{
@@ -798,6 +809,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		for (int a = 0; a < aggregates.length; a++)
 		{
             AggregatorInfo aInfo = aggInfoList.elementAt(a);
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
 
             if (allocate) {
                 // Allocate an empty set if the aggregate is distinct.

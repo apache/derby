@@ -2,6 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ConstraintDefinitionNode
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1377
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -69,6 +70,8 @@ public class ConstraintDefinitionNode extends TableElementNode
      */
     private boolean[] characteristics;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ConstraintDefinitionNode(
                     TableName constraintName,
                     int constraintType,
@@ -101,6 +104,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	}
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
     void setCharacteristics(boolean[] cc) {
         characteristics = cc.clone();
     }
@@ -197,6 +201,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	}
 
 	/**
+//IC see: https://issues.apache.org/jira/browse/DERBY-532
         To support dropping existing constraints that may have mismatched schema names
 		we need to support ALTER TABLE S1.T DROP CONSTRAINT S2.C.
 		If a constraint name was specified this returns it, otherwise it returns null.
@@ -254,6 +259,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return	The auxiliary provider list.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ProviderList getAuxiliaryProviderList()
 	{
 		return apl;
@@ -367,6 +374,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @param properties	The optional Properties for this constraint.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setProperties(Properties properties)
 	{
 		this.properties = properties;
@@ -378,6 +387,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return The optional properties for the backing index to this constraint
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     Properties getProperties()
 	{
 		return properties;
@@ -419,6 +430,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return ResultColumnList The column list from this table constraint.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ResultColumnList getColumnList()
 	{
 		return columnList;
@@ -430,6 +443,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @param columnList	The new columnList.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setColumnList(ResultColumnList columnList)
 	{
 		this.columnList = columnList;
@@ -440,6 +455,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return The check condition from this node.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     ValueNode getCheckCondition()
 	{
 		return checkCondition;
@@ -450,6 +467,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @param checkCondition	The check condition
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     void setCheckCondition(ValueNode checkCondition)
 	{
 		this.checkCondition = checkCondition;
@@ -460,6 +479,8 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return The constraint text.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-673
+//IC see: https://issues.apache.org/jira/browse/DERBY-5973
     String getConstraintText()
 	{
 		return constraintText;
@@ -500,6 +521,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	{
 		if ( uuidFactory == null )
 		{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 			uuidFactory = getMonitor().getUUIDFactory();
 		}
 		return	uuidFactory;
@@ -549,6 +571,7 @@ public class ConstraintDefinitionNode extends TableElementNode
      */
     private  static  ModuleFactory  getMonitor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
         return AccessController.doPrivileged
             (
              new PrivilegedAction<ModuleFactory>()

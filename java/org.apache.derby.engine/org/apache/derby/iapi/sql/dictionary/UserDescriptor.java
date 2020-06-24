@@ -45,6 +45,7 @@ public final class  UserDescriptor extends TupleDescriptor
 	 * @param password  The user's password.
 	 * @param lastModified  Time that the password was last modified.
 	 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-6186
     UserDescriptor
         (
          DataDictionary dataDictionary,
@@ -67,6 +68,7 @@ public final class  UserDescriptor extends TupleDescriptor
             System.arraycopy( password, 0, _password, 0, password.length );
         }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6202
         _lastModified = DataTypeUtilities.clone( lastModified );
 	}
 

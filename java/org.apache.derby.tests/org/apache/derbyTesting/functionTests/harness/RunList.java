@@ -592,6 +592,7 @@ public class RunList
                 // if a test needs a jvm process started with more/other properties than these, 
                 // it will not run well with useprocess=false or not in the same way as with
                 // useprocess=true
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
                 String[] args = new String[7];
                 args[0] = str; // the test name
                 if ( ijdefaultResourcePackage != null )
@@ -608,6 +609,7 @@ public class RunList
                 else
                     args[4] = "";
                 args[5] = suite;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
                 args[6] = framework;
                 org.apache.derbyTesting.functionTests.harness.RunTest.main(args);
                 // Write any diff to the suite's output
@@ -638,6 +640,7 @@ public class RunList
         // directory for all test files (instead of creating each test's files in a new dir). 
         // NetworkServer will get started through RunTest if it's not running, but
         // at the end of a suite run, we need to make sure we shutdown network server
+//IC see: https://issues.apache.org/jira/browse/DERBY-1141
         if ((!useprocess) && ((framework !=null) && (framework.startsWith("DerbyNet"))))
         {
             try 
@@ -689,7 +692,9 @@ public class RunList
         {
             // Reset framework to the parent suite's framework, if any
             // because framework may have been set by previous suite
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
             testEncoding = parentProps.getProperty("derbyTesting.encoding");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1348
             upgradejarpath = parentProps.getProperty("derbyTesting.jar.path");
             framework = parentProps.getProperty("framework");
             serverJvm = parentProps.getProperty("serverJvm");
@@ -700,6 +705,7 @@ public class RunList
             // And do the same for encryption
             encryption = parentProps.getProperty("encryption");
             testEncryptionProvider = parentProps.getProperty("testEncryptionProvider");
+//IC see: https://issues.apache.org/jira/browse/DERBY-238
             testEncryptionAlgorithm = parentProps.getProperty("testEncryptionAlgorithm");
             // And do the same for jdk12test
             jdk12test = parentProps.getProperty("jdk12test");
@@ -707,7 +713,9 @@ public class RunList
 	        runwithj9 = parentProps.getProperty("runwithj9");
             runwithibmjvm = parentProps.getProperty("runwithibmjvm");
             String testJVM = jvmName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
             if (jvmName.startsWith("j9") && (!jvmName.startsWith("j9dee")))
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
             	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");            
             runwithjvm = parentProps.getProperty("runwith" + testJVM);
             excludeJCC = parentProps.getProperty("excludeJCC");
@@ -733,13 +741,16 @@ public class RunList
 		if (j9config != null)
 			if (j9config.equals("foun10")) 
 				jvmName="j9_foundation";
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
 			else if (j9config.equals("foun11"))
 				jvmName="j9_foundation11";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
 			else if (j9config.equals("dee"))
 				jvmName="j9dee15";
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
         javaVersion = System.getProperty(SPEC_VERSION);
 		    
 		//System.out.println("RunList setTopSuiteProperties javaVersion: " + javaVersion);
@@ -752,6 +763,7 @@ public class RunList
 
         String javavmVersion = javaVersion;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6998
 
         JavaVersionHolder jvh = new JavaVersionHolder(javavmVersion);
         majorVersion = jvh.getMajorVersion();
@@ -794,14 +806,18 @@ public class RunList
 		useoutput = suiteProperties.getProperty("useoutput");
 		encryption = suiteProperties.getProperty("encryption");
 		testEncryptionProvider = suiteProperties.getProperty("testEncryptionProvider");
+//IC see: https://issues.apache.org/jira/browse/DERBY-238
 		testEncryptionAlgorithm = suiteProperties.getProperty("testEncryptionAlgorithm");
 		jdk12test = suiteProperties.getProperty("jdk12test");
 		jdk12exttest = suiteProperties.getProperty("jdk12exttest");
 		runwithibmjvm = suiteProperties.getProperty("runwithibmjvm");
 		runwithj9 = suiteProperties.getProperty("runwithj9");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1214
                 derbyTestingXaSingle = suiteProperties.getProperty("derbyTesting.xa.single");
         String testJVM = jvmName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
         if (jvmName.startsWith("j9") && (!jvmName.startsWith("j9dee")))
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
         	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");
         runwithjvm = suiteProperties.getProperty("runwith" + testJVM);
 		excludeJCC = suiteProperties.getProperty("excludeJCC");
@@ -816,8 +832,11 @@ public class RunList
 		bootcp = suiteProperties.getProperty("bootcp");
 		serverJvm = suiteProperties.getProperty("serverJvm");
 		serverJvmName = suiteProperties.getProperty("serverJvmName");
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
 		hostName = suiteProperties.getProperty("hostName");
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
 		testEncoding = suiteProperties.getProperty("derbyTesting.encoding");
+//IC see: https://issues.apache.org/jira/browse/DERBY-1348
 		upgradejarpath = suiteProperties.getProperty("derbyTesting.jar.path");
 		canondir = suiteProperties.getProperty("canondir");
 		mtestdir = suiteProperties.getProperty("mtestdir");
@@ -871,6 +890,7 @@ public class RunList
         // note that at this point, the parentproperties already should have appended the
         // jvmflags from the command line and the top suite properties file
         // only need to add the lower suite properties in the mix
+//IC see: https://issues.apache.org/jira/browse/DERBY-1091
         String totaljvmflags = jvmflags;
         String subjvmflags = p.getProperty("jvmflags");
         String parentjvmflags = parentProperties.getProperty("jvmflags");
@@ -878,6 +898,7 @@ public class RunList
         if ((subjvmflags != null) && (parentjvmflags != null) && (!subjvmflags.equals(parentjvmflags)))
         {
             //DERBY-4680 Make sure ^ does not get prepended to jvmflags
+//IC see: https://issues.apache.org/jira/browse/DERBY-4860
             if (subjvmflags != null &&  subjvmflags.length() > 0)
                 totaljvmflags = subjvmflags + "^" + totaljvmflags;
         }
@@ -925,16 +946,19 @@ public class RunList
         
         // derbyTesting.encoding may be set at the top, or just
         // set for individual suites
+//IC see: https://issues.apache.org/jira/browse/DERBY-683
         if(parentProperties.getProperty("derbyTesting.encoding") != null)
 		    p.put("derbyTesting.encoding", testEncoding);
 		else
             testEncoding = p.getProperty("derbyTesting.encoding");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1348
         if(parentProperties.getProperty("derbyTesting.jar.path") != null)
 		    p.put("derbyTesting.jar.path", upgradejarpath);
 		else
             upgradejarpath = p.getProperty("derbyTesting.jar.path");
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-413
         if ( hostName != null )
             p.put("hostName", hostName);
         else
@@ -952,6 +976,7 @@ public class RunList
             testEncryptionProvider = p.getProperty("testEncryptionProvider");
 
 	// Encryption algorithm may be set at the top or just for a subsuite
+//IC see: https://issues.apache.org/jira/browse/DERBY-238
 	    if ( parentProperties.getProperty("testEncryptionAlgorithm") != null )
 		    p.put("testEncryptionAlgorithm", testEncryptionAlgorithm);
 		else
@@ -977,7 +1002,9 @@ public class RunList
 
         // runwithjvm may be set at the top or just for a subsuite
 	    String testJVM = jvmName;
+//IC see: https://issues.apache.org/jira/browse/DERBY-3972
         if (jvmName.startsWith("j9") && (!jvmName.startsWith("j9dee")))
+//IC see: https://issues.apache.org/jira/browse/DERBY-2224
         	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");
 	    if ( parentProperties.getProperty("runwith" + testJVM) != null )
 		    p.put("runwith" + testJVM, runwithjvm);
@@ -1124,6 +1151,7 @@ public class RunList
 	if (runwithibmjvm != null) 
 	{ 
 	    if (runwithibmjvm.equals("")) { needIBMjvm = null; }
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 	    else { needIBMjvm = Boolean.valueOf(runwithibmjvm); }
 	}
 	if (runwithibmjvm == null) { needIBMjvm = null; }
@@ -1223,6 +1251,7 @@ public class RunList
 
 	if (excludeJCC != null)
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
 	    Class<?> c = null;
 	    Method m = null;
 	    Object o = null;
@@ -1232,6 +1261,7 @@ public class RunList
 	    try	
 	    {
 		c = Class.forName("com.ibm.db2.jcc.DB2Driver");
+//IC see: https://issues.apache.org/jira/browse/DERBY-6856
 		o = c.getConstructor().newInstance();
 		m = c.getMethod("getMajorVersion", null);
 		i = (Integer)m.invoke(o, null);
@@ -1672,7 +1702,9 @@ public class RunList
     private static void unloadEmbeddedDriver() {
         // Attempt to unload the embedded driver and engine
         // but only if we're not having a J2ME configuration i.e. no DriverManager, so check...
+//IC see: https://issues.apache.org/jira/browse/DERBY-1499
         if (TestUtil.HAVE_DRIVER_CLASS)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1379
         try {
             DriverManager.getConnection("jdbc:derby:;shutdown=true");
         } catch (SQLException se) {

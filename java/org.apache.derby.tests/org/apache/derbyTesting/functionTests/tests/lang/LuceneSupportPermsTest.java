@@ -151,15 +151,19 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         String      luceneVersion = getSystemProperty( LUCENE_VERSION_PROPERTY );
         if ( luceneVersion != null ) { LUCENE_VERSION = luceneVersion; }
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-6590
         BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
             LuceneSupportPermsTest.class);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         Test        secureTest = new SecurityManagerSetup( suite, POLICY_FILE );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
             ( secureTest, LEGAL_USERS, "LuceneSupportPermissions" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6546
         Test        authorizedTest = TestConfiguration.sqlAuthorizationDecoratorSingleUse( authenticatedTest, DB_NAME, true );
         Test        localizedTest = new LocaleTestSetup( authorizedTest, new Locale( LANGUAGE, COUNTRY ) );
 
@@ -193,6 +197,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, LOAD_TOOL );
 
         // can't update a non-existent index
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         expectExecutionError
             ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', null )" );
 
@@ -211,6 +216,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'originalAuthor', null )" );
 
         // alice can't view an index created by ruth
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, null ) ) luceneResults order by poemID";
         expectExecutionError( aliceConnection, LACK_EXECUTE_PRIV, viewPoemsIndex );
 
@@ -229,6 +235,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              );
 
         // alice can list indexes even on tables owned by ruth
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         String  listIndexes = "select schemaName, tableName, columnName from table ( LuceneSupport.listIndexes() ) listindexes";
         assertResults
             (
@@ -251,6 +258,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement( ruthConnection, UPDATE_POEMS_INDEX );
 
         // dropping the key does NOT prevent you from re-indexing
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         goodStatement( ruthConnection, DROP_PRIMARY_KEY );
         goodStatement( ruthConnection, UPDATE_POEMS_INDEX );
 
@@ -273,6 +281,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         expectExecutionError( ruthConnection, NONEXISTENT_OBJECT, DROP_POEMS_INDEX );
 
         // verify that a primary key is necessary in order to index a table
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         dropSchema( ruthConnection );
         createSchema( ruthConnection, Types.INTEGER );
         goodStatement( ruthConnection, DROP_PRIMARY_KEY );
@@ -320,9 +329,11 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
 
         // but alice still needs select privilege on the base table columns
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, null ) ) luceneResults order by poemid";
         String[][]  viewPoemsIndexResults = new String[][]
             {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                 { "3", "3", "2", "0.22933942" },
                 { "4", "4", "3", "0.22933942" },
                 { "5", "5", "4", "0.26756266" },
@@ -389,6 +400,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         Connection  ruthConnection = openUserConnection( RUTH );
 
         createSchema( ruthConnection, Types.INTEGER );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         goodStatement( dboConnection, "grant execute on procedure syscs_util.syscs_register_tool to public" );
 
@@ -399,6 +411,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         expectExecutionError( dboConnection, DOUBLE_LOAD_ILLEGAL, LOAD_TOOL );
 
         // cannot index non-existent table or column
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'foo', 'poemText', null )" );
         expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'poems', 'fooText', null )" );
         expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'poems', 'versionStamp', null )" );
@@ -463,6 +476,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select p.originalAuthor, i.score\n" +
              "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
              "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
@@ -501,6 +515,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         String  physicalDBName = config.getPhysicalDatabaseName( dbName );
         String  dbPath = config.getDatabasePath( physicalDBName );
         File    dbDirectory = new File( dbPath );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6562
         File    luceneDirectory = new File( dbDirectory, "LUCENE" );
         File    ruthDirectory = new File( luceneDirectory, "RUTH" );
         File    poemsDirectory = new File( ruthDirectory, "POEMS" );
@@ -509,10 +524,12 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertTrue( deleteFile( poemTextIndexDirectory ) );
 
         // but that doesn't stop you from deleting the index
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         goodStatement( ruthConnection, DROP_POEMS_INDEX );
         expectCompilationError
             (
              ruthConnection, NONEXISTENT_TABLE_FUNCTION,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 100, null ) ) t"
              );
 
@@ -526,6 +543,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_006_changeAnalyzer()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -539,6 +557,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "values ( substr( getDatabaseLocale(), 1, 2 ) )",
              new String[][]
              {
@@ -550,6 +569,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         String  query =
             "select p.originalAuthor, i.score\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
@@ -571,6 +592,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement
             ( ruthConnection,
               "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
 
         assertResults
             (
@@ -591,6 +613,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select schemaName, tableName, columnName, luceneVersion, analyzer, indexDescriptorMaker\n" +
              "from table( LuceneSupport.listIndexes() ) l\n" +
              "order by schemaName, tableName, columnName\n",
@@ -599,6 +622,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
                  {
                      "RUTH", "POEMS", "ORIGINALAUTHOR", LUCENE_VERSION,
                      "org.apache.lucene.analysis.en.EnglishAnalyzer",
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                      DEFAULT_INDEX_DESCRIPTOR
                  },
                  {
@@ -622,6 +646,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_007_indexViews()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -657,7 +682,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         // vet index contents
         String  selectFromViewIndex =
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "select p.originalAuthor, i.score\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "from ruth.poems p, table ( ruth.poemView__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
@@ -667,6 +695,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              selectFromViewIndex,
              new String[][]
              {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                  { "Walt Whitman", "0.26756266" },
                  { "Lord Byron", "0.22933942" },
                  { "John Milton", "0.22933942" },
@@ -676,6 +705,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         // vet index list
         String  selectIndexes =
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             "select schemaName, tableName, columnName, indexDescriptorMaker\n" +
             "from table( LuceneSupport.listIndexes() ) l\n" +
             "order by schemaName, tableName, columnName\n";
@@ -701,6 +731,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "call LuceneSupport.updateIndex( 'ruth', 'poemView', 'poemText', '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )"
              );
         assertResults
@@ -722,6 +753,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              {
                  {
                      "RUTH", "POEMS", "POEMTEXT",
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                      DEFAULT_INDEX_DESCRIPTOR
                  },
                  {
@@ -746,6 +779,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              {
                  {
                      "RUTH", "POEMS", "POEMTEXT",
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
                      DEFAULT_INDEX_DESCRIPTOR
                  },
              },
@@ -763,7 +797,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select *\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "from table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "order by i.score desc\n",
              new String[][]
              {
@@ -787,6 +823,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_008_columnNames()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -833,6 +870,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_009_searchArgs()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -847,6 +885,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 100, null ) ) t",
              new String[][]
              {
@@ -868,6 +907,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 3, null ) ) t",
              new String[][]
              {
@@ -882,6 +922,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 4, 1.0 ) ) t",
              new String[][]
              {
@@ -897,6 +938,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 100, 0.2 ) ) t",
              new String[][]
              {
@@ -908,6 +950,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              );
         
         // try a different query parser
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'textTable', 'textCol' )" );
         goodStatement
             (
@@ -939,6 +982,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     }
     static  void    loadTestTable( Connection conn ) throws Exception
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
         conn.prepareStatement
             (
              "create table textTable( keyCol int primary key, textCol clob )"
@@ -966,6 +1010,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              "( 108, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events' ),\n" +
              "( 109, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events you want' ),\n" +
              "( 110, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events you want better cell coverage' )\n"
+//IC see: https://issues.apache.org/jira/browse/DERBY-6600
              ).execute();
     }
     static  void    unloadTestTable( Connection conn ) throws Exception
@@ -982,6 +1027,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_010_encryption()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -1024,6 +1070,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_011_fieldNames()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -1072,6 +1119,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_6602()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
         throws Exception
     {
         CD[]    columnDescriptors = new CD[]
@@ -1124,6 +1172,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              conn,
              "call lucenesupport.createindex\n" +
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "( 'TEST_DBO', 't_6602', 'textcol', '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "', ? )"
              );
         ps.setString( 1, cd.name );
@@ -1132,6 +1181,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              "select * from table( t_6602__textcol( 'abc or def', 3, null ) ) tc order by documentid",
              new String[][]
              {
@@ -1150,6 +1200,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_6596_null_args()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6596
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -1161,6 +1212,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // create index errors
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
               "call lucenesupport.createindex( null, 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
@@ -1187,6 +1239,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              },
              false
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         goodStatement( dboConnection, "call lucenesupport.updateindex( 'TEST_DBO', 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         
         // update index errors
@@ -1230,6 +1283,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      * </p>
      */
     public  void    test_6730()
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -1256,6 +1310,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              ruthConnection,
              "create view v_6730_4 ( \"poemID\", \"poemText\" ) as select poemID, poemText from ruth.poems"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
         goodStatement
             (
              ruthConnection,
@@ -1318,6 +1373,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              "  '\"poemID\"'\n" +
              ")\n"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
         goodStatement
             (
              ruthConnection,
@@ -1391,6 +1447,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              "  null\n" +
              ")\n"
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
         goodStatement
             (
              ruthConnection,
@@ -1428,6 +1485,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement( ruthConnection, "drop view v_6730_3" );
         goodStatement( ruthConnection, "drop view v_6730_2" );
         goodStatement( ruthConnection, "drop view v_6730_1" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         dropSchema( ruthConnection );
     }
     private void vet6730( Connection conn ) throws Exception
@@ -1475,6 +1533,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              expectedResults,
              false
              );
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
         assertResults
             (
              conn,
@@ -1500,6 +1559,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             { "RUTH", "V_6730_2", "poemText", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
             { "RUTH", "V_6730_3", "POEMTEXT", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
             { "RUTH", "V_6730_4", "poemText", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
+//IC see: https://issues.apache.org/jira/browse/DERBY-6730
             { "RUTH", "V_6730_5", "c l o b", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
             { "RUTH", "V_6730_6", "POEMTEXT", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
         };
@@ -1523,6 +1583,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private void    createSchema( Connection ruthConnection, int jdbcType )  throws Exception
     {
         createPoemsTable( ruthConnection, jdbcType );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         createLocaleFunction( ruthConnection );
     }
     private void    createPoemsTable( Connection conn, int jdbcType )
@@ -1586,6 +1647,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     }
 
     private void    createPoemView( Connection conn )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         goodStatement
@@ -1596,6 +1658,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     }
     
     private void    createLocaleFunction( Connection conn )
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws Exception
     {
         goodStatement
@@ -1704,6 +1767,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private void    dropSchema( Connection ruthConnection )    throws Exception
     {
         goodStatement( ruthConnection, "drop table poems" );
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         goodStatement( ruthConnection, "drop function getDatabaseLocale" );
     }
     
@@ -1715,6 +1779,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
     /** Get the database locale */
     public  static  String  getDatabaseLocale()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         throws SQLException
     {
         return ConnectionUtil.getCurrentLCC().getDatabase().getLocale().toString();
@@ -1763,6 +1828,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     /** Alternative QueryParser maker, which forces the text to be a constant string */
     public  static  LuceneIndexDescriptor constantStringIndexDescriptor()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
         return new ConstantIndexDescriptor();
     }
     
@@ -1846,7 +1912,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     {
         public  ConstantQueryParser
             (
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              Version version,
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
              String[] fieldNames,
              Analyzer analyzer
              )
@@ -1867,6 +1935,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         public  CD( String Name, String Type )
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6602
             name = Name;
             type = Type;
         }
@@ -1879,6 +1948,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         public  ConstantIndexDescriptor() { super(); }
         
         public  QueryParser getQueryParser()
+//IC see: https://issues.apache.org/jira/browse/DERBY-590
             throws SQLException
         {
             return new ConstantQueryParser

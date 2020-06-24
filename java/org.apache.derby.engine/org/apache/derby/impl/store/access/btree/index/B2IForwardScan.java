@@ -223,6 +223,7 @@ public class B2IForwardScan extends BTreeForwardScan
                     static_info.base_table_static_info,
                     /* TODO - maintain a dynamic info for this */
                     ((Conglomerate) static_info.getConglom()).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2359
                         getDynamicCompiledConglomInfo());
         }
         else

@@ -43,6 +43,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class RowLockBasicTest extends BaseJDBCTestCase {
     public RowLockBasicTest(String name) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5282
         super(name);
     }
     
@@ -138,6 +139,7 @@ public class RowLockBasicTest extends BaseJDBCTestCase {
         dropTable("a");
         commit();
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-5282
         super.tearDown();
     }
     

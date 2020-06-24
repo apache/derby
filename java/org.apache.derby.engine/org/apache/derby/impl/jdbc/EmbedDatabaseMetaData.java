@@ -91,6 +91,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
  */
 public class EmbedDatabaseMetaData extends ConnectionChild
 	implements DatabaseMetaData, java.security.PrivilegedAction<Object> {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6213
 
     private static final int ILLEGAL_UDT_TYPE = 0;
     
@@ -136,6 +137,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return a <code>Properties</code> value with the queries
      */
     private Properties getQueryDescriptions(boolean net) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
         Properties p = net ? queryDescriptions_net : queryDescriptions;
         if (p != null) {
             return p;
@@ -277,6 +279,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return database product name
      */
 	public String getDatabaseProductName() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		return EmbedConnection.getMonitor().getEngineVersion().getProductName();
 	}
 
@@ -287,7 +290,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public String getDatabaseProductVersion() {
 		ProductVersionHolder myPVH = EmbedConnection.getMonitor().getEngineVersion();
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1146
+//IC see: https://issues.apache.org/jira/browse/DERBY-1547
 		return myPVH.getVersionBuildString(true);
 	}
 
@@ -345,6 +351,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if the database uses a local file for each table
      */
 	public boolean usesLocalFilePerTable() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6662
+//IC see: https://issues.apache.org/jira/browse/DERBY-6662
         if (url.contains("memory"))
             return false;
         else
@@ -456,6 +464,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public String getSQLKeywords() {
 		return "ALIAS,BIGINT,BOOLEAN,CALL,CLASS,COPY,DB2J_DEBUG,EXECUTE,EXPLAIN,FILE,FILTER,"
+//IC see: https://issues.apache.org/jira/browse/DERBY-2258
+//IC see: https://issues.apache.org/jira/browse/DERBY-2259
+//IC see: https://issues.apache.org/jira/browse/DERBY-2260
+//IC see: https://issues.apache.org/jira/browse/DERBY-2245
 			+  "GETCURRENTCONNECTION,INDEX,INSTANCEOF,METHOD,NEW,OFF,PROPERTIES,RECOMPILE,"
 			+  "RENAME,RUNTIMESTATISTICS,STATEMENT,STATISTICS,TIMING,WAIT";
 	}
@@ -467,6 +479,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return the list
      */
 	public String getNumericFunctions() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3063
 		return "ABS,ACOS,ASIN,ATAN,ATAN2,CEILING,COS,COT,DEGREES,EXP,FLOOR,LOG,LOG10,MOD,PI,RADIANS,RAND,SIGN,SIN,SQRT,TAN";
 	}
 
@@ -497,6 +510,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
       * @return the list
      */
 	public String getTimeDateFunctions() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-471
 		return "CURDATE,CURTIME,HOUR,MINUTE,MONTH,SECOND,TIMESTAMPADD,TIMESTAMPDIFF,YEAR";
 	}
 
@@ -989,6 +1003,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public boolean supportsRefCursors()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-6000
 		return false;
 	}
     
@@ -1332,6 +1347,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length  in bytes
      */
 	public int getMaxUserNameLength() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
+//IC see: https://issues.apache.org/jira/browse/DERBY-104
+//IC see: https://issues.apache.org/jira/browse/DERBY-3146
 		return Limits.MAX_IDENTIFIER_LENGTH;
 	}
 
@@ -1481,7 +1502,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
         // Using the new JDBC 4.0 version of the query here. The query
         // was given a new name to allow the old query to
         // be used by ODBCMetaDataGenerator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		return doGetProcs(catalog, schemaPattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1093
 			procedureNamePattern, "getProcedures40");
 	}
 
@@ -1520,6 +1543,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @throws SQLException if any of the underlying jdbc methods fail
      */
     public ResultSet getFunctions(java.lang.String catalog,
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
                                   java.lang.String schemaPattern,
                                   java.lang.String functionNamePattern)
         throws SQLException
@@ -1618,8 +1642,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		// Using the new JDBC 4.0 version of the query here. The query
 		// was given a new name to allow the old query to
 		// be used by ODBCMetaDataGenerator.
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		return doGetProcCols(catalog, schemaPattern,
 			procedureNamePattern, columnNamePattern,
+//IC see: https://issues.apache.org/jira/browse/DERBY-1094
 			"getProcedureColumns40");
 	}
 
@@ -1667,6 +1693,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 										   String parameterNamePattern) 
 		throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2145
         return doGetProcCols(catalog, 
                              schemaPattern,
                              functionNamePattern, 
@@ -1774,6 +1801,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		// parameter to the metadata statement and handle it here.
 		
 		// Array for type parameters
+//IC see: https://issues.apache.org/jira/browse/DERBY-3000
+//IC see: https://issues.apache.org/jira/browse/DERBY-1790
 		final int numberOfTableTypesInDerby = 4;
 		if (types == null)  {// null means all types 
 			types = new String[] {"TABLE","VIEW","SYNONYM","SYSTEM TABLE"};
@@ -1821,6 +1850,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
 	public ResultSet getSchemas() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-876
 		return getSchemas(null, null);
 	}
 
@@ -1938,6 +1968,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		String tableNamePattern, String columnNamePattern)
 					throws SQLException {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		return doGetCols(catalog, schemaPattern, tableNamePattern,
 			columnNamePattern, "getColumns");
 	}
@@ -2107,6 +2138,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	) throws SQLException
 	{
 		return doGetBestRowId(catalogPattern, schemaPattern, table,
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 			scope, nullable, "");
 	}
 
@@ -2185,6 +2217,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				// this one's it, do the real thing and return it.
 				// we don't need to check catalog, schema, table name
 				// or scope again.
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 				ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierPrimaryKeyColumns");
 				ps.setString(1,constraintId);
 				ps.setString(2,constraintId);
@@ -2218,6 +2251,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			if (done) 
 			{
 				// this one's it, do the real thing and return it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 				ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierUniqueKeyColumns");
 				ps.setString(1,constraintId);
 				ps.setString(2,constraintId);
@@ -2248,6 +2282,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			ps.close();
 			if (done) {
 				// this one's it, do the real thing and return it.
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 				ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierUniqueIndexColumns");
 				ps.setLong(1,indexNum);
 				ps.setInt(2,nullableInIntForm);
@@ -2256,6 +2291,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 			// last try -- just return all columns of the table
 			// the not null ones if that restriction is upon us.
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 			ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierAllColumns");
 			ps.setString(1,catalogPattern);
 			ps.setString(2,schemaPattern);
@@ -2297,6 +2333,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getVersionColumns(String catalog, String schema,
 				String table) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		return doGetVersionCols(catalog, schema, table, "getVersionColumns");
 	}
 
@@ -2348,11 +2385,13 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @throws SQLException
      */
 	private boolean notInSoftUpgradeMode() 
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 		throws SQLException {
 		if ( getEmbedConnection().isClosed())
 			throw Util.noCurrentConnection();
 
 		boolean notInSoftUpgradeMode;
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
         LanguageConnectionContext lcc = getLanguageConnectionContext();
 		try {
 			notInSoftUpgradeMode =
@@ -2391,6 +2430,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getPrimaryKeys(String catalog, String schema,
 			String table) throws SQLException {
 		PreparedStatement s = getPreparedQuery("getPrimaryKeys");
+//IC see: https://issues.apache.org/jira/browse/DERBY-137
 
         if (table == null) {
             throw Util.generateCsSQLException(
@@ -2556,6 +2596,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getExportedKeys(String catalog, String schema,
 				String table) throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-573
 
         if (table == null) {
             throw Util.generateCsSQLException(
@@ -2825,6 +2866,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getIndexInfo(String catalog, String schema, String table,
 			boolean unique, boolean approximate)
 					throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-107
 		return doGetIndexInfo(catalog, schema, table, unique, approximate, "getIndexInfo");
 	}
 
@@ -2884,6 +2926,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @see Connection
      */
 	public boolean supportsResultSetType(int type) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if ((type == ResultSet.TYPE_FORWARD_ONLY) ||
 		    (type == ResultSet.TYPE_SCROLL_INSENSITIVE)) {
 			return true;
@@ -2904,8 +2947,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @see Connection
      */
 	public boolean supportsResultSetConcurrency(int type, int concurrency) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
  		if (type == ResultSet.TYPE_SCROLL_SENSITIVE) {
  			// (TYPE_SCROLL_SENSITIVE, *)
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
   			return false;
  		} else {
  			// (FORWARD_ONLY, CONCUR_UPDATABLE)
@@ -3001,6 +3046,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if inserts are visible for the result set type
      */
     public boolean othersInsertsAreVisible(int type)  {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if (type == ResultSet.TYPE_FORWARD_ONLY)
 			return true;
 		return false;
@@ -3017,6 +3065,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
     public boolean updatesAreDetected(int type) {
 		if (type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 			return true;
 		} else {
 			// For forward only resultsets, we move to before the next
@@ -3037,7 +3086,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if deletes are detected by the resultset type
      */
     public boolean deletesAreDetected(int type) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		if (type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-690
 			return true;
 		} else {
 			// For forward only resultsets, we move to before the next
@@ -3234,6 +3288,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
                 * (such as support for specifying the returned columns for
                 * the autogenerated key)
                 */
+//IC see: https://issues.apache.org/jira/browse/DERBY-66
+//IC see: https://issues.apache.org/jira/browse/DERBY-242
+//IC see: https://issues.apache.org/jira/browse/DERBY-462
 		return false;
 	}
 
@@ -3261,6 +3318,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getResultSetHoldability()
   {
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		return ResultSet.HOLD_CURSORS_OVER_COMMIT;
 	}
 
@@ -3290,6 +3348,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getDatabaseMinorVersion()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
+//IC see: https://issues.apache.org/jira/browse/DERBY-6648
 		ProductVersionHolder pvh = EmbedConnection.getMonitor().getEngineVersion();
 		if (pvh == null)
 		{
@@ -3307,6 +3367,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getJDBCMajorVersion()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         return 4;
 	}
 
@@ -3319,6 +3380,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getJDBCMinorVersion()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6324
         return JVMInfo.jdbcMinorVersion();
 	}
 
@@ -3332,6 +3394,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getSQLStateType()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-3484
 		return sqlStateSQL99;
 	}
 
@@ -3371,6 +3434,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern)
     throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-968
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
 		return getSimpleQuery("getSuperTypes");
 	}
 
@@ -3390,6 +3456,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getSuperTables(String catalog, String schemaPattern, String typeNamePattern)
     throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-968
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
 		return getSimpleQuery("getSuperTables");
 	}
 
@@ -3415,6 +3484,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
   String typeNamePattern, String attributeNamePattern)
     throws SQLException
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-968
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
         return getSimpleQuery("getAttributes");
 	}
 	
@@ -3474,6 +3546,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     public ResultSet getSchemas(String catalog, String schemaPattern)
         throws SQLException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-876
         PreparedStatement s = getPreparedQuery("getSchemas");
         s.setString(1, swapNull(catalog));
         s.setString(2, swapNull(schemaPattern));
@@ -3481,6 +3554,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     }
 
     public RowIdLifetime getRowIdLifetime() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1984
         return RowIdLifetime.ROWID_UNSUPPORTED;
     }
 
@@ -3496,6 +3570,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * {@code ResultSet}s
      */
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2789
         return true;
     }
 
@@ -3544,6 +3619,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     * not support pseudo columns.
 	*/
 	public ResultSet getPseudoColumns
+//IC see: https://issues.apache.org/jira/browse/DERBY-4869
         ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
         throws SQLException
 	{
@@ -3564,6 +3640,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @exception SQLException if a database error occurs
      */
     public ResultSet getClientCachedMetaData() throws SQLException {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
         return getSimpleQuery("METADATA", true);
     }
 
@@ -3625,14 +3702,19 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 			try
 			{
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
 				String queryText =
 					getQueryDescriptions(net).getProperty(nameKey);
 				if (queryText == null)
 				{
+//IC see: https://issues.apache.org/jira/browse/DERBY-968
+//IC see: https://issues.apache.org/jira/browse/DERBY-924
+//IC see: https://issues.apache.org/jira/browse/DERBY-925
                     throw Util.notImplemented(nameKey);
 				}
 				
                 ps = prepareSPS(nameKey, queryText, net);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 InterruptStatus.
                     restoreIntrFlagIfSeen(getLanguageConnectionContext());
 			}
@@ -3683,6 +3765,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		//with this Derby release. We also need to be writable so 
                 // that we can update SPS statements (DERBY-3546)
 		if (notInSoftUpgradeMode() && !isReadOnly())
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
 			s = getPreparedQueryUsingSystemTables(queryName, net);
 		else {
 			try {
@@ -3690,6 +3773,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				//mode or are read only, and hence need to get metadata sql from 
                                 //metadata.properties file or metadata_net.properties
 				String queryText = getQueryFromDescription(queryName, net);
+//IC see: https://issues.apache.org/jira/browse/DERBY-4741
                 s = getEmbedConnection().prepareMetaDataStatement(queryText);
                 // InterruptStatus.restoreIntrFlagIfSeen: called inside
                 // prepareMetaDataStatement while we still have context pushed.
@@ -3708,6 +3792,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @exception SQLException if a database error occurs
      */
     protected PreparedStatement getPreparedQuery(String queryName)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
         throws SQLException
     {
         return getPreparedQuery(queryName, false);
@@ -3736,6 +3821,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * @exception StandardException if an error occurs
 	 */
 	private String getQueryFromDescription(String queryName, boolean net)
+//IC see: https://issues.apache.org/jira/browse/DERBY-1124
 		throws StandardException
 	{
 		DataDictionary dd = getLanguageConnectionContext().getDataDictionary();
@@ -3752,6 +3838,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				queryName = "getTablePrivileges_10_1";
 		}
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
 		return getQueryDescriptions(net).getProperty(queryName);
 	}
 
@@ -3762,6 +3849,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	** 
 	*/
 	private PreparedStatement prepareSPS(String	spsName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
 										 String	spsText,
 										 boolean net)
 		throws StandardException, SQLException
@@ -3778,6 +3866,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		DataDictionary dd = getLanguageConnectionContext().getDataDictionary();
 		SPSDescriptor spsd = dd.getSPSDescriptor(
 										spsName, 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
 										net ? dd.getSysIBMSchemaDescriptor() :
 										dd.getSystemSchemaDescriptor());
 		lcc.commitNestedTransaction();
@@ -3797,6 +3886,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		** statement, but we have no (easy) way of turning
 		** the statement into a java.sql.PreparedStatement.
 		*/	
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
 		String queryText =
 			"EXECUTE STATEMENT " + (net ? "SYSIBM" : "SYS") +
 			".\"" + spsName + "\"";
@@ -3816,6 +3906,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	  */
 	private	LanguageConnectionContext	getLanguageConnectionContext()
 	{
+//IC see: https://issues.apache.org/jira/browse/DERBY-6751
         return AccessController.doPrivileged
             (
              new PrivilegedAction<LanguageConnectionContext>()
@@ -3838,6 +3929,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * <code>queryDescriptions_net</code>.
      */
     private void loadQueryDescriptions() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1176
         java.security.AccessController.doPrivileged(this);
     }
 

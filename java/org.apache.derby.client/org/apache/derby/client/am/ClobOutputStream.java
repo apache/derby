@@ -25,19 +25,23 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
 class ClobOutputStream extends OutputStream {
     private ClientClob clob_;
     private long offset_;
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-6125
     ClobOutputStream(ClientClob clob, long offset) throws SqlException {
         clob_ = clob;
         offset_ = offset;
         
         /*
+//IC see: https://issues.apache.org/jira/browse/DERBY-796
             offset_ starts from 1 while sqlLenth_=0
             in the case of a empty Clob hence check from
             offset_-1
          */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         if ((offset_-1) > clob_.sqlLength()) {
             throw new IndexOutOfBoundsException();
         }
@@ -61,6 +65,7 @@ class ClobOutputStream extends OutputStream {
 
         byte[] newByte = new byte[len];
         System.arraycopy(b, off, newByte, 0, len);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2540
         writeBytes(newByte);
     }
 
@@ -69,7 +74,9 @@ class ClobOutputStream extends OutputStream {
     {
         // Since this is an OutputStream returned by Clob.setAsciiStream 
         // use Ascii encoding when creating the String from bytes
+//IC see: https://issues.apache.org/jira/browse/DERBY-1519
         String str = new String(b, "ISO-8859-1");
+//IC see: https://issues.apache.org/jira/browse/DERBY-5840
         clob_.reInitForNonLocator(
                 clob_.string_.substring(0, (int) offset_ - 1).concat(str));
         offset_ += b.length;

@@ -42,6 +42,7 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     The DDMWriter is used to write DRDA protocol.   The DRDA Protocol is
     described in the DDMReader class.
     For more details, see DRDA Volume 3 (Distributed Data Management(DDM)
@@ -128,8 +129,11 @@ class DDMWriter
     // get one complete long, but we don't bother to synchronize, 
     // since this is just statistics.
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
     volatile long totalByteCount = 0;
     
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     DDMWriter (DRDAConnThread agent, DssTrace dssTrace)
     {
         // Create instances of the two ccsid managers and default to EBCDIC
@@ -137,16 +141,20 @@ class DDMWriter
         this.utf8CcsidManager = new Utf8CcsidManager();
         this.ccsidManager = this.ebcdicCcsidManager;
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         this.buffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
         this.agent = agent;
         this.prevHdrLocation = -1;
         this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
         this.previousChainByte = DssConstants.DSS_NOCHAIN;
         this.isContinuationDss = false;
+//IC see: https://issues.apache.org/jira/browse/DERBY-5
+//IC see: https://issues.apache.org/jira/browse/DERBY-5
         this.lastDSSBeforeMark = -1;
         reset(dssTrace);
         // create an encoder which inserts the charset's default replacement
         // character for characters it can't encode
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         encoder = NetworkServerControlImpl.DEFAULT_CHARSET.newEncoder()
             .onMalformedInput(CodingErrorAction.REPLACE)
             .onUnmappableCharacter(CodingErrorAction.REPLACE);
@@ -154,6 +162,7 @@ class DDMWriter
 
     // Switch the ccsidManager to the UTF-8 instance
     protected void setUtf8Ccsid() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         ccsidManager = utf8CcsidManager;
     }
     
@@ -216,6 +225,7 @@ class DDMWriter
      */
     protected void setCMDProtocol()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         isDRDAProtocol = false;
     }
 
@@ -276,6 +286,7 @@ class DDMWriter
         // continuation bit defaults to '1' for lobs, so
         // we only have to switch it if we're not writing
         // lobs.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
             byte b = (byte) (buffer.get(dssLengthLocation) | 0x80);
             buffer.put(dssLengthLocation, b);
         }
@@ -308,6 +319,7 @@ class DDMWriter
         endDss(true);
 
         // Now override default chain state.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         overrideChainByte(dssLengthLocation + 3, chainByte);
         previousChainByte = chainByte;
 
@@ -332,6 +344,9 @@ class DDMWriter
      * and setting the chain bit.
      */
     protected void endDss() {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         endDss(true);
     }
 
@@ -363,6 +378,7 @@ class DDMWriter
      */
     protected void endDdmAndDss ()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         endDdm();   // updates last DDM object
         endDss();
     }
@@ -395,6 +411,7 @@ class DDMWriter
         start = start + dssLengthLocation;
         int length = buffer.position() - start;
         byte [] temp = new byte[length];
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.position(start);
         buffer.get(temp);
         return temp;
@@ -411,6 +428,7 @@ class DDMWriter
     {
         // save the location of the beginning of the collection so
         // that we can come back and fill in the length bytes
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         final int offset = buffer.position();
         markStack[top++] = offset;
         ensureLength (4); // verify space for length bytes and code point
@@ -425,6 +443,7 @@ class DDMWriter
      */
     protected void clearDdm ()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.position(markStack[top--]);
     }
 
@@ -434,6 +453,8 @@ class DDMWriter
      */
     protected void clearBuffer()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.clear();
         top = 0;
         dssLengthLocation = 0;
@@ -469,6 +490,7 @@ class DDMWriter
             // the extended length should be written right after the length and
             // the codepoint (2+2 bytes)
             final int extendedLengthLocation = lengthLocation + 4;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
             // shift the data to the right by the number of extended
             // length bytes needed.
@@ -477,6 +499,7 @@ class DDMWriter
 
             // write the extended length (a variable number of bytes in
             // big-endian order)
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
             for (int pos = extendedLengthLocation + extendedLengthByteCount - 1;
                  pos >= extendedLengthLocation; pos--) {
                 buffer.put(pos, (byte) extendedLength);
@@ -492,6 +515,7 @@ class DDMWriter
         }
 
         // write the 2 byte length field (2 bytes before codepoint).
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putShort(lengthLocation, (short) length);
     }
 
@@ -506,6 +530,7 @@ class DDMWriter
     */
     protected int getDSSLength()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         return buffer.position() - dssLengthLocation;
     }
  
@@ -518,6 +543,7 @@ class DDMWriter
     */
     protected void truncateDSS(int value)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.position(dssLengthLocation + value);
     }
 
@@ -531,6 +557,7 @@ class DDMWriter
      */
     protected void writeByte (int value)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (SanityManager.DEBUG)
         {
             if (value > 255)
@@ -563,6 +590,7 @@ class DDMWriter
     protected void writeNetworkInt (int value)
     {
         ensureLength (4);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putInt(value);
     }
 
@@ -599,6 +627,7 @@ class DDMWriter
 
         }
         ensureLength (length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.put(buf, start, length);
     }
     /**
@@ -650,8 +679,10 @@ class DDMWriter
     void writeScalar1Byte (int codePoint, int value)
     {
         ensureLength (5);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putShort((short) 0x0005);
         buffer.putShort((short) codePoint);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.put((byte) value);
     }
 
@@ -664,7 +695,9 @@ class DDMWriter
     protected void writeScalar2Bytes (int codePoint, int value)
     {
         ensureLength (6);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putShort((short) 0x0006);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putShort((short) codePoint);
         buffer.putShort((short) value);
     }
@@ -672,11 +705,13 @@ class DDMWriter
     protected void writeScalar2Bytes ( int value)
     {
         ensureLength (2);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putShort((short) value);
     }
     
     protected void writeScalarStream (boolean chainedWithSameCorrelator,
                                       int codePoint,
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                       EXTDTAInputStream in,
                                       boolean writeNullByte) 
         throws DRDAProtocolException
@@ -701,12 +736,14 @@ class DDMWriter
             
             if( SanityManager.DEBUG ){
         
+//IC see: https://issues.apache.org/jira/browse/DERBY-2054
             if( PropertyUtil.getSystemBoolean("derby.debug.suicideOfLayerBStreaming") )
                 throw new IOException();
                 }
 
             // read as many bytes as possible directly into the backing array
             final int offset = buffer.position();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
             final int bytesRead =
                 in.read(buffer.array(), offset,
                         Math.min(spareDssLength, buffer.remaining()));
@@ -734,6 +771,7 @@ class DDMWriter
         out.flush();
         
         }catch(IOException e){
+//IC see: https://issues.apache.org/jira/browse/DERBY-2933
         agent.markCommunicationsFailure (e,"DDMWriter.writeScalarStream()",
                          "",
                          e.getMessage(),
@@ -749,10 +787,12 @@ class DDMWriter
                            int dssType)
     {
         beginDss(dssType, false);   // false => don't ensure length.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
         // always turn on continuation flags... this is helpful for lobs...
         // these bytes will get rest if dss lengths are finalized.
         buffer.putShort(dssLengthLocation, (short) 0xFFFF);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
         // Set whether or not this DSS should be chained to
         // the next one.  If it's chained, it has to be chained
@@ -761,6 +801,7 @@ class DDMWriter
             dssType |= DssConstants.GDSCHAIN_SAME_ID;
         }
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.put(dssLengthLocation + 3, (byte) dssType);
     }
 
@@ -780,9 +821,13 @@ class DDMWriter
                                    boolean writeNullByte) throws DRDAProtocolException
   {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
       ensureLength( DEFAULT_BUFFER_SIZE - buffer.position() );
       
       final int nullIndicatorSize = writeNullByte ? 1:0;
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
 
     
       // flush the existing DSS segment ,
@@ -803,9 +848,11 @@ class DDMWriter
 
     // buildStreamDss should not call ensure length.
     beginDss(chainedWithSameCorrelator, DssConstants.GDSFMT_OBJDSS);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
 
       writeLengthCodePoint(0x8004,codePoint);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
 
     // write the null byte, if necessary
     if (writeNullByte)
@@ -823,6 +870,8 @@ class DDMWriter
   // this indicates there is a dss object already in the buffer.
     protected boolean doesRequestContainData()
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return buffer.position() != 0;
     }
 
@@ -830,6 +879,7 @@ class DDMWriter
     // Writes out a scalar stream DSS segment, along with DSS continuation
     // headers if necessary.
     private void flushScalarStreamSegment ( boolean lastSegment,
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
                             OutputStream out)
         throws DRDAProtocolException
     {
@@ -841,6 +891,7 @@ class DDMWriter
                 try {
                 // Mark current DSS as continued, set its chaining state,
                 // then send the data across.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
                     markDssAsContinued(true);   // true => for lobs
                     sendBytes (out,
                            false);
@@ -854,6 +905,7 @@ class DDMWriter
 
 
             // Prepare a DSS continuation header for next DSS.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
             dssLengthLocation = buffer.position();
             buffer.putShort((short) 0xFFFF);
             isContinuationDss = true;
@@ -874,6 +926,9 @@ class DDMWriter
   void writeLengthCodePoint (int length, int codePoint)
   {
     ensureLength (4);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     buffer.putShort((short) length);
     buffer.putShort((short) codePoint);
   }
@@ -887,6 +942,7 @@ class DDMWriter
     protected void writeScalarHeader (int codePoint, int dataLength)
     {
         ensureLength (dataLength + 4);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putShort((short) (dataLength + 4));
         buffer.putShort((short) codePoint);
     }
@@ -922,6 +978,9 @@ class DDMWriter
         ensureLength (paddedLength + 4);
         buffer.putShort((short) (paddedLength + 4));
         buffer.putShort((short) codePoint);
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
+//IC see: https://issues.apache.org/jira/browse/DERBY-728
         ccsidManager.convertFromJavaString(string, buffer);
         padBytes(ccsidManager.space, fillLength);
     }
@@ -940,6 +999,7 @@ class DDMWriter
         int fillLength = paddedLength - stringLength;
         ensureLength(paddedLength);
         buffer.put(drdaString.getBytes(), 0, stringLength);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         padBytes(ccsidManager.space, fillLength);
     }
 
@@ -971,6 +1031,8 @@ class DDMWriter
     {
         ensureLength (paddedLength);
         buffer.put(buf);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         padBytes(padByte, paddedLength - buf.length);
     }
 
@@ -982,6 +1044,7 @@ class DDMWriter
      */
     protected void writeScalarBytes (int codePoint, byte[] buf)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         ensureLength(buf.length + 4);
         buffer.putShort((short) (buf.length + 4));
         buffer.putShort((short) codePoint);
@@ -1030,6 +1093,7 @@ class DDMWriter
     protected void writeLong (long v)
     {
         ensureLength (8);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putLong(v);
     }
 
@@ -1060,6 +1124,7 @@ class DDMWriter
      */
     protected void writeBoolean (boolean v)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         writeByte(v ? 1 : 0);
     }
 
@@ -1135,6 +1200,8 @@ class DDMWriter
         // maxBytesPerChar() returns a float, which can only hold 24 bits of an
         // integer. Therefore, promote the float to a double so that all bits
         // are preserved in the intermediate result.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         return (int) (s.length() * (double) encoder.maxBytesPerChar());
     }
 
@@ -1249,8 +1316,12 @@ class DDMWriter
      */
     protected void writeString(String s) throws DRDAProtocolException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         ensureLength(maxEncodedLength(s));
         CharBuffer input = CharBuffer.wrap(s);
+//IC see: https://issues.apache.org/jira/browse/DERBY-5331
+//IC see: https://issues.apache.org/jira/browse/DERBY-5331
         encoder.reset();
         CoderResult res = encoder.encode(input, buffer, true);
         if (res == CoderResult.UNDERFLOW) {
@@ -1272,6 +1343,7 @@ class DDMWriter
     {
         final int offset = buffer.position();
         final int end = offset + length;
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         Arrays.fill(buffer.array(), offset, end, val);
         buffer.position(end);
     }
@@ -1297,6 +1369,7 @@ class DDMWriter
     protected void flush(OutputStream socketOutputStream)
         throws java.io.IOException
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         final byte[] bytes = buffer.array();
         final int length = buffer.position();
         try {
@@ -1315,6 +1388,7 @@ class DDMWriter
             }
             reset(dssTrace);
         }
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
         totalByteCount += length;
     }
 
@@ -1347,6 +1421,7 @@ class DDMWriter
 
         // save length position, the length will be written at the end
         dssLengthLocation = buffer.position();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
         // Should this really only be for non-stream DSSes?
         if (ensureLen)
@@ -1386,6 +1461,7 @@ class DDMWriter
     {
         // initial position in the byte buffer
         final int offset = buffer.position();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
         // calculate the total size of the dss and the number of bytes which would
         // require continuation dss headers.    The total length already includes the
@@ -1423,6 +1499,7 @@ class DDMWriter
             // just move the current position pointer right away to where it's
             // supposed to be after we have finished the shifting.
             buffer.position(offset + shiftSize);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
             // Notes on the behavior of the Layer B segmenting loop below:
             //
@@ -1482,6 +1559,7 @@ class DDMWriter
                     dataToShift = 32765;
                 int startOfCopyData = dataByte - dataToShift + 1;
                 // perform the shift directly on the backing array
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
                 final byte[] bytes = buffer.array();
                 System.arraycopy(bytes,startOfCopyData, bytes, 
                                  startOfCopyData + shiftSize, dataToShift);
@@ -1504,6 +1582,7 @@ class DDMWriter
                 }
 
                 // insert the header's length bytes
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
                 buffer.putShort(dataByte + shiftSize - 1,
                                 (short) twoByteContDssHeader);
 
@@ -1524,6 +1603,7 @@ class DDMWriter
         }
 
         // insert the length bytes in the 6 byte dss header.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         buffer.putShort(dssLengthLocation, (short) totalSize);
     }
 
@@ -1547,6 +1627,8 @@ class DDMWriter
      */
     private int calculateExtendedLengthByteCount (long ddmSize)
     {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         if (ddmSize <= 0x7fff)
             return 0;
         // JCC does not support 2 at this time, so we always send
@@ -1595,6 +1677,7 @@ class DDMWriter
      *
      * @exception SQLException Thrown if # digits &gt; 31
      */
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
     void writeBigDecimal(BigDecimal b, int precision, int scale)
     throws SQLException
     {
@@ -1603,6 +1686,8 @@ class DDMWriter
 
         // The bytes are processed from right to left. Therefore, save starting
         // offset and use absolute positioning.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
         final int offset = buffer.position();
         // Move current position to the end of the encoded decimal.
         buffer.position(offset + encodedLength);
@@ -1611,8 +1696,11 @@ class DDMWriter
         int declaredScale = scale;
 
         // packed decimal may only be up to 31 digits.
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
         if (declaredPrecision > 31) // this is a bugcheck only !!!
         {
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
             clearDdm ();
             throw new java.sql.SQLException ("Packed decimal may only be up to 31 digits!");
         }
@@ -1626,6 +1714,7 @@ class DDMWriter
         if (bigPrecision > 31)
         {
             clearDdm ();
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             throw new SQLException ("The numeric literal \"" +
                              b.toString() +
                              "\" is not valid because its value is out of range.",
@@ -1660,6 +1749,7 @@ class DDMWriter
         int bigIndex;
 
         byte signByte = (byte) ((b.signum() >= 0) ? 12 : 13);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
         if (bigScale >= declaredScale) {
           // If target scale is less than source scale,
@@ -1668,6 +1758,7 @@ class DDMWriter
           // set start index in source big decimal to ignore excessive fraction.
           bigIndex = bigPrecision-1-(bigScale-declaredScale);
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
           if (bigIndex >= 0) {
               // process the last nybble together with the sign nybble.
               signByte |= (unscaledStr.charAt(bigIndex) - zeroBase) << 4;
@@ -1685,6 +1776,7 @@ class DDMWriter
 
           // process the sign nybble.
           buffer.put(offset + (packedIndex+1)/2, signByte);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
           for (packedIndex-=2, bigIndex-=2; bigIndex>=0; packedIndex-=2, bigIndex-=2)
               buffer.put(offset + (packedIndex+1)/2, (byte) 0);
@@ -1703,6 +1795,7 @@ class DDMWriter
 
         // process the rest.
         for (; bigIndex>=0; packedIndex-=2, bigIndex-=2) {
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
             byte bt = (byte)
                 (((unscaledStr.charAt(bigIndex)-zeroBase) << 4) | // high nybble
                   (unscaledStr.charAt(bigIndex+1)-zeroBase));     // low nybble
@@ -1724,6 +1817,8 @@ class DDMWriter
 
 
     private void sendBytes (java.io.OutputStream socketOutputStream) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
     throws java.io.IOException{
     
     sendBytes(socketOutputStream,
@@ -1734,13 +1829,17 @@ class DDMWriter
 
   private void sendBytes (java.io.OutputStream socketOutputStream,
               boolean flashStream ) 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
       throws java.io.IOException
   {
     resetChainState();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
     final byte[] bytes = buffer.array();
     final int length = buffer.position();
     try {
       socketOutputStream.write(bytes, 0, length);
+//IC see: https://issues.apache.org/jira/browse/DERBY-3435
       totalByteCount += length;
       if(flashStream)
       socketOutputStream.flush();
@@ -1749,6 +1848,7 @@ class DDMWriter
         if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
             dssTrace.writeComBufferData (bytes,
                                            0,
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
                                            length,
                                            DssTrace.TYPE_TRACE_SEND,
                                            "Reply",
@@ -1776,6 +1876,8 @@ class DDMWriter
     private int getCorrelationID() {
 
         int cId;
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         if (previousCorrId != DssConstants.CORRELATION_ID_UNKNOWN) {
             if (previousChainByte == DssConstants.DSSCHAIN_SAME_ID)
             // then we have to use the last correlation id we sent.
@@ -1815,12 +1917,15 @@ class DDMWriter
         // chain state (WITH_SAME_ID) with whatever the last
         // request dictates.
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         if (prevHdrLocation != -1) {
         // Note: == -1 => the previous DSS was already sent; this
         // should only happen in cases where the buffer filled up
         // and we had to send it (which means we were probably
         // writing EXTDTA).  In such cases, proper chaining
         // should already have been handled @ time of send.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
             overrideChainByte(prevHdrLocation + 3, currChainByte);
         }
 
@@ -1837,6 +1942,7 @@ class DDMWriter
             agent.trace("Sending data");
 
         resetChainState();
+//IC see: https://issues.apache.org/jira/browse/DERBY-706
         if (doesRequestContainData()) {
             try {
                 flush(socketOutputStream);
@@ -1860,8 +1966,10 @@ class DDMWriter
     protected int markDSSClearPoint()
     {
 
+//IC see: https://issues.apache.org/jira/browse/DERBY-5
         lastDSSBeforeMark = prevHdrLocation;
         return buffer.position();
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
     }
 
@@ -1881,6 +1989,7 @@ class DDMWriter
 
         // Logical clear.
         buffer.position(mark);
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
 
         // Because we've just cleared out the most recently-
         // written DSSes, we have to make sure the next thing
@@ -1889,6 +1998,8 @@ class DDMWriter
         // based on the chaining byte from the last remaining
         // DSS (where "remaining" means that it still exists
         // in the buffer after the clear).
+//IC see: https://issues.apache.org/jira/browse/DERBY-1302
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
         if (lastDSSBeforeMark == -1)
         // we cleared out the entire buffer; reset corr id.
             nextCorrelationID = 1;
@@ -1896,6 +2007,8 @@ class DDMWriter
         // last remaining DSS had chaining, so we set "nextCorrelationID"
         // to be 1 greater than whatever the last remaining DSS had as
         // its correlation id.
+//IC see: https://issues.apache.org/jira/browse/DERBY-2936
+//IC see: https://issues.apache.org/jira/browse/DERBY-5896
             nextCorrelationID =
                 (buffer.getShort(lastDSSBeforeMark + 4) & 0xFFFF) + 1;
         }
@@ -1906,6 +2019,7 @@ class DDMWriter
     private static int peekStream(InputStream in) throws IOException{
         
     in.mark(1);
+//IC see: https://issues.apache.org/jira/browse/DERBY-326
 
     try{
         return in.read();
