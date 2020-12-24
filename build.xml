@@ -218,7 +218,7 @@
 
 
    <!-- You can override this property in local.properties to fetch from an alternative location -->
-   <property name="junit.url" value="http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar"/> 
+   <property name="junit.url" value="https://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar"/> 
    <target name="junit_check">
        <!-- check if junit is set, if set, if junit.jar is really there, if not, error out  -->
        <fail message="junit property is set to ${junit}, but there is no junit.jar there.">
