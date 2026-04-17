@@ -126,7 +126,7 @@ class Lock implements Latch, Control {
 		count -= unlockCount;
 		if (count == 0) {
 
-			// Inform the object an unlock event occured with this qualifier
+			// Inform the object an unlock event occurred with this qualifier
 
 			ref.unlockEvent(this);
 		}

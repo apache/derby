@@ -71,7 +71,7 @@ public interface FileResource {
 	  @return the generationId for the file resource. This
 	  quantity increases when you replace the file resource.
 
-	  @exception StandardException some error occured.
+	  @exception StandardException some error occurred.
 	*/
 	public long add(String name,InputStream source)
 		throws StandardException;
@@ -82,7 +82,7 @@ public interface FileResource {
 
 	  @param name the name of the fileResource to remove.
 	  
-	  @exception StandardException some error occured.
+	  @exception StandardException some error occurred.
 	  */
 	public void remove(String name, long currentGenerationId)
 		throws StandardException;
@@ -105,7 +105,7 @@ public interface FileResource {
 	  the file resource.
 	  @return the generationId for the new 'current' version of the
 	          file resource. 
-	  @exception StandardException some error occured.
+	  @exception StandardException some error occurred.
 	*/
 	public long replace(String name, long currentGenerationId, InputStream source)
 		throws StandardException;

@@ -786,7 +786,7 @@ public class GeneratorBase extends Task {
     /**
      * Format an error for later reporting.
      * @param text description
-     * @param t execption that occured
+     * @param t exception that occurred
      * @return formatted error with stack trace
      */
     public static String formatError(String text, Throwable t) {
